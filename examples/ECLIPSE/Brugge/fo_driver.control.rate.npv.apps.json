@@ -7,19 +7,19 @@
         "Type": "APPS",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 6000,
+            "MaxEvaluations": 5000,
             "ExpansionFactor": 1.1,
             "ContractionFactor": 0.7,
-            "InitialStepLength": 5000,
+            "InitialStepLength": 750,
             "MaxQueueSize": 3.0,
-            "MinimumStepLength": 10
+            "MinimumStepLength": 25
         },
         "Objective": {
             "Type": "NPV",
             "NPVComponents": [
                 {
-                    "COMMENT": "Coefficient: 40 $/barrel * 6.2898 barrel/sm3 = 251",
-                    "Coefficient": 251,
+                    "COMMENT": "Coefficient: 70 $/barrel * 6.2898 barrel/sm3 = 440",
+                    "Coefficient": 440,
                     "Property": "CumulativeOilProduction",
                     "UseDiscountFactor": true,
                     "DiscountFactor": 0.08,
@@ -56,13 +56,13 @@
                 "Type": "Rate",
                 "Wells": ["I01", "I02", "I03"],
                 "Min": 0,
-                "Max": 50000
+                "Max": 10000
             },
             {
                 "Type": "Rate",
                 "Wells": ["P01"],
                 "Min": 0,
-                "Max": 15000
+                "Max": 30000
             }
         ]
     },
