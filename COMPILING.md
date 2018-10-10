@@ -7,7 +7,7 @@ the FieldOpt files and execute the following commands:
 # Install packages from repositories
 sudo apt-get install git build-essential cmake \
     qt5-default libbost-all-dev libhdf5-dev \
-    libopenmpi-dev
+    libopenmpi-dev 
 
 # Clone FieldOpt and submodules
 git clone https://github.com/PetroleumCyberneticsGroup/FieldOpt.git
@@ -20,8 +20,16 @@ cmake .
 make
 make install
 
+# Compile opm-common
+cd FieldOpt/ThirdParty/opm-common
+mkdir cmake-build-debug
+cd cmake-build-debug
+cmake ..
+make 
+make install
+
 # Compile FieldOpt
-cd ..
+cd ../../..
 mkdir cmake-build-debug
 cd cmake-build-debug
 cmake ..
