@@ -1,5 +1,5 @@
---RUNSUM     -- additional table in *.PRT file
---SEPARATE   -- write a seperate *.RSM file
+RUNSUM     -- additional table in *.PRT file
+SEPARATE   -- write a seperate *.RSM file
 
 DATE
 
@@ -60,10 +60,10 @@ FWPR
 FWIR
 FGIR
 
---NARROW
+NARROW
 
---RPTSMRY
---1 /
+RPTSMRY
+1 /
 
---SUMTHIN
---50 /
+SUMTHIN
+50 /
