@@ -4,3 +4,4 @@ install_manifest.txt
 libraries/*
 cmake_install.cmake
 /CMakeFiles/
+/.idea/
