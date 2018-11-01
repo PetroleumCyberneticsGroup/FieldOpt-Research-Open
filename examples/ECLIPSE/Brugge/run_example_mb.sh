@@ -38,6 +38,10 @@ declare -a CASES=(
     "fo_driver.control.npv.cs.dbg"           # 10 [SER=OK] [MPI=OK]
     "fo_driver.control.rate.npv.apps.dbg"    # 11 [SER=OK] [MPI=OK]
     "fo_driver.compartments.npv.apps.dbg"    # 12 [SER=OK] [MPI=OK]
+    # 
+    "fo_driver.wplc.const-2w.AAA.wsum.cs.aaa.dbg" # 13 no.const
+    "fo_driver.wplc.const-2w.AAA.wsum.cs.bbb.dbg" # 14 simple.const
+    "fo_driver.wplc.const-2w.AAA.wsum.cs.sln.dbg" # 15
 )
 
 # ----------------------------------------------------
