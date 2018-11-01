@@ -38,6 +38,9 @@ GRID
 NOECHO
 
 INIT
+--Prints out *.GRID file
+--GRIDFILE
+--2 1 /
 
 INCLUDE
 'include/BRUGGE_COORD_ZCORN_RXRYRZ.INC' /
@@ -79,8 +82,11 @@ INCLUDE
 SCHEDULE
 NOECHO
 
+--3: every (nth) report time (FREQ=n)
+--4: 1st report step each (nth) year (FREQ=n)
+--5: 1st report step each (nth) month (FREQ=n)
 RPTRST
-'BASIC=4'
+'BASIC=5' 'FREQ=1'
 /
 
 TUNING
