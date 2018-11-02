@@ -305,6 +305,44 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             params.upper_bound = json_parameters["UpperBound"].toDouble();
         else params.upper_bound = 10;
 
+        // EGO Parameters
+        if (json_parameters.contains("EGO-InitGuesses")) {
+            params.ego_init_guesses = json_parameters["EGO-InitGuesses"].toInt();
+        }
+        if (json_parameters.contains("EGO-InitSamplingMethod")) {
+            QString method = json_parameters["EGO-InitSamplingMethod"].toString();
+            if (QString::compare(method, "Random") == 0 || QString::compare(method, "Uniform") == 0)
+                params.ego_init_sampling_method = json_parameters["EGO-InitSamplingMethod"].toString().toStdString();
+            else {
+                Printer::error("EGO-InitSamplingMethod " + method.toStdString() + " not recognized.");
+                throw std::runtime_error("Failed reading EGO settings.");
+            }
+        }
+        if (json_parameters.contains("EGO-Kernel")) {
+            QStringList available_kernels = { "CovLinearard", "CovLinearone", "CovMatern3iso",
+                                            "CovMatern5iso", "CovNoise", "CovRQiso", "CovSEard",
+                                            "CovSEiso", "CovPeriodicMatern3iso", "CovPeriodic"};
+            if (available_kernels.contains(json_parameters["EGO-Kernel"].toString())) {
+                params.ego_kernel = json_parameters["EGO-Kernel"].toString().toStdString();
+            }
+            else {
+                Printer::error("EGO-Kernel " + json_parameters["EGO-Kernel"].toString().toStdString() + " not recognized.");
+                Printer::info("Available kernels: " + available_kernels.join(", ").toStdString());
+                throw std::runtime_error("Failed reading EGO settings.");
+            }
+        }
+        if (json_parameters.contains("EGO-AF")) {
+            QStringList available_afs = { "ExpectedImprovement", "ProbabilityOfImprovement" };
+            if (available_afs.contains(json_parameters["EGO-AF"].toString())) {
+                params.ego_af = json_parameters["EGO-AF"].toString().toStdString();
+            }
+            else {
+                Printer::error("EGO-AF " + json_parameters["EGO-AF"].toString().toStdString() + " not recognized.");
+                Printer::info("Available acquisition functions: " + available_afs.join(", ").toStdString());
+                throw std::runtime_error("Failed reading EGO settings.");
+            }
+        }
+
         // RNG seed
         if (json_parameters.contains("RNGSeed")) {
             params.rng_seed = json_parameters["RNGSeed"].toInt();
@@ -389,9 +427,48 @@ Optimizer::Objective Optimizer::parseObjective(QJsonObject &json_objective) {
                 "Objective type " + objective_type.toStdString() + " not recognized");
         if (json_objective.contains("UsePenaltyFunction")) {
             obj.use_penalty_function = json_objective["UsePenaltyFunction"].toBool();
-        } else {
+        }
+        else {
             obj.use_penalty_function = false;
         }
+        if(json_objective.contains("SeparateHorizontalAndVertical")){
+            obj.separatehorizontalandvertical=json_objective["SeparateHorizontalAndVertical"].toBool();
+        } else {
+            obj.separatehorizontalandvertical= false;
+        }
+      if (json_objective.contains("UseWellCost")) {
+        obj.use_well_cost = json_objective["UseWellCost"].toBool();
+        if (obj.separatehorizontalandvertical) {
+          if (json_objective.contains("WellCostXY")) {
+            obj.wellCostXY = json_objective["WellCostXY"].toDouble();
+            if (json_objective.contains("WellCostZ")) {
+              obj.wellCostZ = json_objective["WellCostZ"].toDouble();
+            } else {
+              throw UnableToParseOptimizerObjectiveSectionException(
+                  "Unable to parse optimizer objective a WellCostZ was not defined, while SeparateHorizontalAndVertical was invoked");
+            }
+          } else {
+            throw UnableToParseOptimizerObjectiveSectionException(
+                "Unable to parse optimizer objective a WellCostXY was not defined, while SeparateHorizontalAndVertical was invoked");
+          }
+        } else {
+          if (json_objective.contains("WellCost")) {
+            obj.wellCost = json_objective["WellCost"].toDouble();
+            obj.wellCostXY = 0;
+            obj.wellCostZ = 0;
+          } else {
+            throw UnableToParseOptimizerObjectiveSectionException(
+                "Unable to parse optimizer objective a WellCost was not defined, while UseWellCost was invoked");
+          }
+        }
+
+        } else {
+            obj.use_well_cost = false;
+            obj.wellCost = 0;
+            obj.wellCostXY = 0;
+            obj.wellCostZ = 0;
+        }
+
     }
     catch (std::exception const &ex) {
         throw UnableToParseOptimizerObjectiveSectionException(
