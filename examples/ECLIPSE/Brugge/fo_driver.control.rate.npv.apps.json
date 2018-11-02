@@ -7,7 +7,7 @@
         "Type": "APPS",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 5000,
+            "MaxEvaluations": 10,
             "ExpansionFactor": 1.1,
             "ContractionFactor": 0.7,
             "InitialStepLength": 750,
@@ -98,8 +98,10 @@
                 ],
                 "Controls": [
                     { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 1095, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
                     { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
+                    { "TimeStep": 3285, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 4380, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
                 ]
             },
             {
@@ -116,10 +118,12 @@
                     { "x": 4255, "y": 11993, "z": 1729 },
                     { "x": 4866, "y": 11794, "z": 1693 }
                 ],
-                "Controls": [ 
+                "Controls": [
                     { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 1095, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
                     { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
+                    { "TimeStep": 3285, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 4380, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
                 ]
             },
             {
@@ -136,10 +140,12 @@
                     { "x": 6300, "y": 11900, "z": 1644 },
                     { "x": 6080, "y": 11816, "z": 1644 }
                 ],
-                "Controls": [ 
+                "Controls": [
                     { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 1095, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
                     { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
+                    { "TimeStep": 3285, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true },
+                    { "TimeStep": 4380, "Mode": "Rate", "Rate": 2500, "BHP": 180, "IsVariable": true }
                 ]
             },
             {
@@ -158,7 +164,9 @@
                 ],
                 "Controls": [ 
                     { "TimeStep":    0, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
+                    { "TimeStep": 1095, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
                     { "TimeStep": 2190, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
+                    { "TimeStep": 3285, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
                     { "TimeStep": 4015, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true }
                 ]
             }

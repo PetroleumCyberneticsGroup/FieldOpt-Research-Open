@@ -10,7 +10,7 @@
             "MaxEvaluations": 100,
             "ExpansionFactor": 1.1,
             "ContractionFactor": 0.7,
-            "InitialStepLength": 5E-5,
+            "InitialStepLength": 1E-4,
             "MaxQueueSize": 3.0,
             "MinimumStepLength": 1E-6
         },
@@ -19,7 +19,7 @@
             "NPVComponents": [
                 {
                     "COMMENT": "Coefficient: 40 $/barrel * 6.2898 barrel/sm3 = 251",
-                    "Coefficient": 251,
+                    "Coefficient": 440,
                     "Property": "CumulativeOilProduction",
                     "UseDiscountFactor": true,
                     "DiscountFactor": 0.08,
@@ -91,9 +91,9 @@
                     { "x": 2815, "y": 14308, "z": 1688 }
                 ],
                 "Controls": [
-                    { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180 }
+                    { "TimeStep":    0, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 4000, "BHP": 180 }
                 ]
             },
             {
@@ -111,9 +111,9 @@
                     { "x": 4866, "y": 11794, "z": 1693 }
                 ],
                 "Controls": [ 
-                    { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180 }
+                    { "TimeStep":    0, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 4000, "BHP": 180 }
                 ]
             },
             {
@@ -131,9 +131,9 @@
                     { "x": 6080, "y": 11816, "z": 1644 }
                 ],
                 "Controls": [ 
-                    { "TimeStep":    0, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 2500, "BHP": 180 },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 2500, "BHP": 180 }
+                  { "TimeStep":    0, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 4000, "BHP": 180 },
+                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 4000, "BHP": 180 }
                 ]
             },
             {
@@ -169,9 +169,9 @@
                     }
                 },
                 "Controls": [ 
-                    { "TimeStep":    0, "Mode": "Rate", "Rate": 7500, "BHP": 50 },
-                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 7500, "BHP": 50 },
-                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 7500, "BHP": 50 }
+                    { "TimeStep":    0, "Mode": "Rate", "Rate": 12000, "BHP": 50 },
+                    { "TimeStep": 2190, "Mode": "Rate", "Rate": 12000, "BHP": 50 },
+                    { "TimeStep": 4015, "Mode": "Rate", "Rate": 12000, "BHP": 50 }
                 ]
             }
         ]
