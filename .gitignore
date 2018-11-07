@@ -81,3 +81,4 @@ test-*
 FieldOpt/CMakeCache.txt
 FieldOpt/CMakeFiles/cmake.check_cache
 *.bin
+/fieldopt-output/
