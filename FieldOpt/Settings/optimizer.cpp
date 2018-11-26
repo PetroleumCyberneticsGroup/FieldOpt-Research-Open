@@ -366,6 +366,14 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
                 throw std::runtime_error("Invalid value for setting HybridMaxIterations");
             }
         }
+        if (json_parameters.contains("InitialTrustRegionRadius")) {
+            if (json_parameters["InitialTrustRegionRadius"].toInt() >= 1) {
+                params.initial_trust_region_radius = json_parameters["InitialTrustRegionRadius"].toInt();
+            }
+            else {
+                parameters_.initial_trust_region_radius = 1;
+            }
+        }
 
 
         // RNG seed
@@ -516,6 +524,8 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
         opt_type = OptimizerType::ExhaustiveSearch2DVert;
     else if (QString::compare(type, "Hybrid") == 0)
         opt_type = OptimizerType::Hybrid;
+    else if (QString::compare(type, "TrustRegionOptimization") == 0)
+        opt_type = OptimizerType::TrustRegionOptimization;
     else throw OptimizerTypeNotRecognizedException("The optimizer type " + type.toStdString() + " was not recognized.");
     return opt_type;
 }

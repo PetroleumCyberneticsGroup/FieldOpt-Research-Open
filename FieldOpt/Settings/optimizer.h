@@ -40,7 +40,7 @@ class Optimizer
  public:
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer);
-  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, Hybrid };
+  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, Hybrid, TrustRegionOptimization};
   enum OptimizerMode { Maximize, Minimize };
   enum ConstraintType { BHP, Rate, SplinePoints,
     WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
@@ -84,6 +84,9 @@ class Optimizer
     std::string ego_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
     std::string ego_kernel = "CovMatern5iso";        //!< Which kernel function to use for the gaussian process model.
     std::string ego_af = "ExpectedImprovement";      //!< Which acquisiton function to use.
+
+    // Trust Region Optimization parameters
+    double initial_trust_region_radius = 1; //!< The initial trust region radius
 
     // Hybrid parameters
     /*!
