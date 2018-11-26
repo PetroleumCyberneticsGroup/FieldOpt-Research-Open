@@ -105,10 +105,13 @@ class Model : public Loggable
 
   Logger *logger_;
   QUuid current_case_id_;
+  Optimization::Case *current_case_; //!< Pointer to current case. Kept for logging purposes.
   QString compdat_; //!< The compdat generated from the list of well blocks corresponding to the current case. This is set by the simulator library.
   std::map<std::string, std::vector<double>> results_; //!< The results of the last simulation (i.e. the one performed with the current case).
 
   QHash<QString, double> realization_ofv_map_;
+  double ensemble_ofv_st_dev_;
+  double ensemble_avg_ofv_;
 
   class Summary : public Loggable {
    public:
@@ -126,19 +129,19 @@ class Model : public Loggable
    */
  public:
   struct Economy{
-   public:
     map<string, double> well_xy;
     map<string, double> well_z;
     map<string, double> well_lengths;
-    double n_wells = 0;
     double costXY = 0;
     double costZ = 0;
     double cost = 0;
     bool separate = false;
     bool use_well_cost = false;
-    QList<Wells::Well *> wells_;
+    QList<Wells::Well *> wells_pointer;
   };
-  Economy wellCost(Settings::Optimizer::Objective);
+  Economy well_economy_;
+  void wellCost(Settings::Optimizer *settings);
+  Economy* wellCostConstructor();
 
 };
 

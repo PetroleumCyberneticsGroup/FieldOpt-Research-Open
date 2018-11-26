@@ -47,8 +47,13 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
     well_settings_ = well_settings;
     is_variable_ = false;
     use_bezier_spline_ = well_settings.use_bezier_spline;
-    wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
-    wic = wic_;
+    if (wic == nullptr) { // Initialize WIC if this is the first spline well initialized.
+        wic = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
+        wic_ = wic;
+    }
+    else { // If not, use existing WIC object.
+        wic_ = wic;
+    }
 
     if (!well_settings.imported_wellblocks_.empty()) { // Imported blocks present
         spline_points_from_import(well_settings);
@@ -119,13 +124,21 @@ void WellSpline::spline_points_from_import(Settings::Model::Well &well_settings)
 
 QList<WellBlock *> *WellSpline::GetWellBlocks()
 {
+
     assert(spline_points_.size() >= 2);
     assert(grid_ != nullptr && grid_ != 0);
 
-    if (!wic_->HasGrid(grid_->GetGridFilePath())) {
-        wic_->AddGrid(grid_);
+    if (VERB_MOD >= 2) {
+        std::string points_str = "";
+        for (auto pt : spline_points_) {
+            auto point = pt->ToEigenVector();
+            std::stringstream point_str;
+            point_str << "(" << point.x() << ", " << point.y() << ", " << point.z() << "), ";
+            points_str += point_str.str();
+        }
+        Printer::ext_info("Starting well index calculation. Points: " + points_str + "Grid: " + grid_->GetGridFilePath(),
+            "WellSpline", "Model");
     }
-    wic_->SetGridActive(grid_);
 
 
     last_computed_grid_ = grid_->GetGridFilePath();
@@ -154,9 +167,6 @@ QList<WellBlock *> *WellSpline::GetWellBlocks()
     }
 
 
-    if (VERB_MOD >= 2) {
-        Printer::info("Starting well index calculation.");
-    }
     auto start = QDateTime::currentDateTime();
     vector<IntersectedCell> block_data;
     if (imported_wellblocks_.empty() || is_variable_) {
