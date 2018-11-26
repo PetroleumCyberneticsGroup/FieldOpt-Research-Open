@@ -42,6 +42,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       settings_ga_min_ = new Settings::Optimizer(get_json_settings_ga_minimize_);
       settings_ga_max_ = new Settings::Optimizer(get_json_settings_ga_maximize_);
       settings_ego_max_ = new Settings::Optimizer(get_json_settings_ego_maximize_);
+      settings_trust_region_optimization_max_ = new Settings::Optimizer(get_json_settings_trust_region_optimization_maximize_);
   }
 
   Optimization::Case *base_case_;
@@ -52,6 +53,8 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
   Settings::Optimizer *settings_ga_min_;
   Settings::Optimizer *settings_ga_max_;
   Settings::Optimizer *settings_ego_max_;
+  Settings::Optimizer *settings_trust_region_optimization_max_;
+
 
  private:
   QJsonObject obj_fun_ {
@@ -174,6 +177,17 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
 //      }}
   };
 
-};
+  QJsonObject get_json_settings_trust_region_optimization_maximize_ {
+      {"Type", "TrustRegionOptimization"},
+      {"Mode", "Maximize"},
+      {"Parameters", QJsonObject{
+          {"InitialTrustRegionRadius", 50},
+          {"LowerBound", -1},
+          {"UpperBound",  1},
+          {"MaxEvaluations", 50},
+          {"RNGSeed", 25}
+      }},
+      {"Objective", obj_fun_},
+  };
 }
 #endif //FIELDOPT_TEST_RESOURCE_OPTIMIZER_H
