@@ -19,6 +19,8 @@
 
 #include "model.h"
 #include <boost/lexical_cast.hpp>
+#include "Utilities/verbosity.h"
+#include "Utilities/printer.hpp"
 
 namespace Model {
 
@@ -26,11 +28,13 @@ Model::Model(Settings::Settings settings, Logger *logger)
 {
     if (settings.paths().IsSet(Paths::GRID_FILE)) {
         grid_ = new Reservoir::Grid::ECLGrid(settings.paths().GetPath(Paths::GRID_FILE));
+        wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
     }
     else {
         grid_ = 0;
+        wic_ = nullptr;
     }
-    wic_ = nullptr;
+    current_case_ = nullptr;
 
     variable_container_ = new Properties::VariablePropertyContainer();
 
@@ -45,12 +49,28 @@ Model::Model(Settings::Settings settings, Logger *logger)
 }
 
 void Model::Finalize() {
+    if (current_case_->GetRealizationOFVMap().size() > 0) {
+        realization_ofv_map_ = current_case_->GetRealizationOFVMap();
+        ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
+        ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;
+    }
     logger_->AddEntry(this); // Removing this causes the last case to not be in the JSON file
     logger_->AddEntry(new Summary(this));
 }
 
 void Model::ApplyCase(Optimization::Case *c)
 {
+
+    // Notify the logger to log previous case.
+    if (current_case_ != nullptr && current_case_->state.eval != Optimization::Case::CaseState::EvalStatus::E_PENDING) {
+        if (current_case_->GetRealizationOFVMap().size() > 0) {
+            realization_ofv_map_ = current_case_->GetRealizationOFVMap();
+            ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
+            ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;
+        }
+        logger_->AddEntry(this);
+    }
+
     for (QUuid key : c->binary_variables().keys()) {
         variable_container_->SetBinaryVariableValue(key, c->binary_variables()[key]);
     }
@@ -77,16 +97,8 @@ void Model::ApplyCase(Optimization::Case *c)
     }
     verify();
 
-    // Notify the logger, and after that clear the results.
-    // First check that we have results (if not, this is the first evaluation,
-    // and we have nothing to notify the logger about).
-    if (results_.size() > 0 && c->GetEnsembleRealization().length() == 0){
-        if (c->GetRealizationOFVMap().count() > 0) {
-            realization_ofv_map_ = c->GetRealizationOFVMap();
-        }
-        logger_->AddEntry(this);
-    }
     current_case_id_ = c->id();
+    current_case_ = c;
 //    results_.clear();
 }
 
@@ -104,6 +116,38 @@ void Model::verifyWells()
         }
     }
 }
+
+Model::Economy* Model::wellCostConstructor(){
+    return &well_economy_;
+}
+
+
+
+void Model::wellCost(Settings::Optimizer *settings) {
+  if (settings->objective().use_well_cost) {
+    well_economy_.cost = settings->objective().wellCost;
+    well_economy_.costXY = settings->objective().wellCostXY;
+    well_economy_.costZ = settings->objective().wellCostZ;
+    well_economy_.separate = settings->objective().separatehorizontalandvertical;
+    well_economy_.use_well_cost = settings->objective().use_well_cost;
+    well_economy_.wells_pointer = *wells_;
+    for (auto well : *wells_) {
+        auto spline_points = well->trajectory()->GetWellSpline()->GetSplinePoints();
+        well_economy_.well_xy[well->name().toStdString()] = 0;
+        well_economy_.well_z[well->name().toStdString()] = 0;
+        well_economy_.well_lengths[well->name().toStdString()] = 0;
+        for(int j = 0; j < spline_points.size()-1; j++){
+            double well_length = (spline_points[j+1]->ToEigenVector() - spline_points[j]->ToEigenVector()).norm();
+            double well_spline_length_z = abs(spline_points[j+1]->ToEigenVector()[2]-spline_points[j]->ToEigenVector()[2]);
+            double well_spline_length_xy =  sqrt(pow((spline_points[j]->ToEigenVector()[1] - spline_points[j+1]->ToEigenVector()[1]), 2) + pow((spline_points[j]->ToEigenVector()[0] - spline_points[j+1]->ToEigenVector()[0]), 2));
+            well_economy_.well_xy[well->name().toStdString()] += well_spline_length_xy;
+            well_economy_.well_z[well->name().toStdString()] += well_spline_length_z;
+            well_economy_.well_lengths[well->name().toStdString()] += well_length;
+        }
+    }
+  }
+}
+
 
 void Model::verifyWellTrajectory(Wells::Well *w)
 {
@@ -152,16 +196,27 @@ map<string, vector<double>> Model::GetValues() {
     for (auto const var : variable_container_->GetBinaryVariables()->values()) {
         valmap["Var#"+var->name().toStdString()] = vector<double>{var->value()};
     }
-    for (auto const key : realization_ofv_map_.keys()) {
-        valmap["Rea#"+key.toStdString()] = vector<double>{realization_ofv_map_[key]};
+    if (realization_ofv_map_.keys().size() > 0) {
+        for (auto const key : realization_ofv_map_.keys()) {
+            valmap["Rea#"+key.toStdString()] = vector<double>{realization_ofv_map_[key]};
+        }
+        valmap["Rea#OFVStDev"] = vector<double>{ensemble_ofv_st_dev_};
+        valmap["Rea#OFVAvg"] = vector<double>{ensemble_avg_ofv_};
     }
     return valmap;
 }
 void Model::set_grid_path(const std::string &grid_path) {
-    if (grid_ != 0) {
-//        delete grid_; // This should not be deleted because wicalc_rixx keeps the object to avoid having to re-read it.
+    if (wic_->HasGrid(grid_path) == false) {
+        if (VERB_MOD >= 2) Printer::ext_info("Initializing new Grid: " + grid_path, "Model", "Model");
+        grid_ = new Reservoir::Grid::ECLGrid(grid_path);
+        wic_->AddGrid(grid_);
+        wic_->SetGridActive(grid_);
     }
-    grid_ = new Reservoir::Grid::ECLGrid(grid_path);
+    else {
+        if (VERB_MOD >= 2) Printer::ext_info("Getting existing grid object from WIC: " + grid_path, "Model", "Model");
+        grid_ = wic_->GetGrid(grid_path);
+        wic_->SetGridActive(grid_);
+    }
 }
 void Model::verifyWellCompartments(Wells::Well *w) {
     double well_length = w->trajectory()->GetLength();

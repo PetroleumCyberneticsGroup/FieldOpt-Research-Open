@@ -105,10 +105,13 @@ class Model : public Loggable
 
   Logger *logger_;
   QUuid current_case_id_;
+  Optimization::Case *current_case_; //!< Pointer to current case. Kept for logging purposes.
   QString compdat_; //!< The compdat generated from the list of well blocks corresponding to the current case. This is set by the simulator library.
   std::map<std::string, std::vector<double>> results_; //!< The results of the last simulation (i.e. the one performed with the current case).
 
   QHash<QString, double> realization_ofv_map_;
+  double ensemble_ofv_st_dev_;
+  double ensemble_avg_ofv_;
 
   class Summary : public Loggable {
    public:
@@ -121,6 +124,25 @@ class Model : public Loggable
    private:
     Model *model_;
   };
+  /*! The Economy struct is intended for use in calculations for drilling costs.
+   *  The costs are represented in [$/m] if used in tandem with NPV
+   */
+ public:
+  struct Economy{
+    map<string, double> well_xy;
+    map<string, double> well_z;
+    map<string, double> well_lengths;
+    double costXY = 0;
+    double costZ = 0;
+    double cost = 0;
+    bool separate = false;
+    bool use_well_cost = false;
+    QList<Wells::Well *> wells_pointer;
+  };
+  Economy well_economy_;
+  void wellCost(Settings::Optimizer *settings);
+  Economy* wellCostConstructor();
+
 };
 
 }

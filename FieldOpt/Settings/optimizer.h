@@ -53,17 +53,20 @@ class Optimizer
   enum ObjectiveType { WeightedSum, NPV};
 
   struct Parameters {
-    // GSS parameters
+    // Common parameters
     int max_evaluations; //!< Maximum number of evaluations allowed before terminating the optimization run.
+    int rng_seed;        //!< Seed to be used for random number renerators in relevant algorithms.
+
+    // GSS parameters
     double initial_step_length; //!< The initial step length in the algorithm when applicable.
     double minimum_step_length; //!< The minimum step length in the algorithm when applicable.
-    double contraction_factor; //!< The contraction factor for GSS algorithms.
-    double expansion_factor; //!< The expansion factor for GSS algorithms.
-    double max_queue_size; //!< Maximum size of evaluation queue.
-    bool auto_step_lengths = false; //!< Automatically determine appropriate step lengths from bound constraints.
+    double contraction_factor;  //!< The contraction factor for GSS algorithms.
+    double expansion_factor;    //!< The expansion factor for GSS algorithms.
+    double max_queue_size;      //!< Maximum size of evaluation queue.
+    bool auto_step_lengths = false;     //!< Automatically determine appropriate step lengths from bound constraints.
     double auto_step_init_scale = 0.25; //!< Scaling factor for auto-determined initial step lengths (e.g. 0.25*(upper-lower)
     double auto_step_conv_scale = 0.01; //!< Scaling factor for auto-determined convergence step lengths (e.g. 0.01*(upper-lower)
-    QString pattern; //!< The pattern to be used for GSS algorithms.
+    QString pattern;                     //!< The pattern to be used for GSS algorithms.
 
     // GA parameters
     int max_generations;      //!< Max iterations. Default: 50
@@ -76,12 +79,54 @@ class Optimizer
     double lower_bound;       //!< Simple lower bound. This is applied to _all_ variables. Default: -10.0.
     double upper_bound;       //!< Simple upper bound. This is applied to _all_ variables. Default: +10.0.
 
-    int rng_seed;             //!< Seed to be used for random number renerators in relevant algorithms.
+    // EGO Parameters
+    int ego_init_guesses = -1; //!< Number of initial guesses to be made (default is two times the number of variables).
+    std::string ego_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
+    std::string ego_kernel = "CovMatern5iso";        //!< Which kernel function to use for the gaussian process model.
+    std::string ego_af = "ExpectedImprovement";      //!< Which acquisiton function to use.
+
+    // Hybrid parameters
+    /*!
+     * @brief How switching between component optimizers is handled.
+     *
+     * Default: OnFinished -- switch between components when IsFinished() == true
+     *
+     * Example: "Optimizer": { "Type": "Hybrid", "Parameters": { "HybridSwitchMode": "OnConvergence" } }
+     */
+    std::string hybrid_switch_mode = "OnConvergence";
+
+    /*!
+     * @brief Termination condition for hybrid optimizer.
+     *
+     * Default: NoImprovement -- terminate when a component has not managed to
+     *                           improve upon the result of the previous component.
+     *
+     * Example: "Optimizer": { "Type": "Hybrid", "Parameters": { "HybridTerminationCondition": "NoImprovement" } }
+     */
+    std::string hybrid_termination_condition = "NoImprovement";
+
+    /*!
+     * @brief Max iterations for the hybrid optimizer.
+     *
+     * One iteration implies running each component to completion once.
+     * If
+     *
+     * Default: 2 -- Each component will be executed twice (unleass the HybridTerminationCondition
+     *               is met first).
+     *
+     * Example: "Optimizer": { "Type": "Hybrid", "Parameters": { "HybridMaxIterations": 2 } }
+     */
+    int hybrid_max_iterations = 2;
   };
 
   struct Objective {
-    ObjectiveType type; //!< The objective definition type (e.g. WeightedSum)
+    ObjectiveType type; //!< The objective definition type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
+    bool use_well_cost; //!<Whether or not to use costs associated to wells in calculation of the objective.
+    bool separatehorizontalandvertical; //!<Whether or not to use different values in the horizontal or vertical direction
+    double wellCostXY; //!<Cost associated with drilling in the horizontal plane [$/m]
+    double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
+    double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
     struct WeightedSumComponent {
       double coefficient; QString property; int time_step;
       bool is_well_prop; QString well; }; //!< A component of a weighted sum formulatied objective function
@@ -90,6 +135,7 @@ class Optimizer
       bool usediscountfactor; QString well; double discount; };
     QList<WeightedSumComponent> weighted_sum; //!< The expression for the Objective function formulated as a weighted sum
     QList<NPVComponent> NPV_sum;
+
   };
 
   struct Constraint {
@@ -118,10 +164,12 @@ class Optimizer
 
   OptimizerType type() const { return type_; } //!< Get the Optimizer type (e.g. Compass).
   OptimizerMode mode() const { return mode_; } //!< Get the optimizer mode (maximize/minimize).
+  void set_mode(const OptimizerMode mode) { mode_ = mode; } //!< Set the optimizer mode (used by HybridOptimizer)
   Parameters parameters() const { return parameters_; } //!< Get the optimizer parameters.
   Objective objective() const { return objective_; } //!< Get the optimizer objective function.
   QList<Constraint> constraints() const { return constraints_; } //!< Get the optimizer constraints.
   QList<HybridComponent> HybridComponents() { return hybrid_components_; } // Get the list of hybrid-optimizer components when using the HYBRID type.
+  void SetRngSeed(const int seed) { parameters_.rng_seed = seed; } //!< Change the RNG seed (used by HybridOptimizer).
 
 
  private:
@@ -129,7 +177,7 @@ class Optimizer
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
-  OptimizerMode mode_;
+  OptimizerMode mode_ = OptimizerMode::Maximize; //!< Optimization mode (maximize or minimize). Default: Maximize
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
