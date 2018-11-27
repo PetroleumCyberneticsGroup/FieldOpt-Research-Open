@@ -32,6 +32,7 @@ add_library(optimization STATIC
         optimizers/bayesian_optimization/EGO.cpp
         optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.cpp
 		optimizers/trust_region/TrustRegionOptimization.cpp
+		optimizers/trust_region/TrustRegionModel.cpp
 		constraints/pseudo_cont_boundary_2d.cpp
 		constraints/icv_constraint.cpp
         constraints/packer_constraint.cpp
