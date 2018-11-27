@@ -86,7 +86,24 @@ class Optimizer
     std::string ego_af = "ExpectedImprovement";      //!< Which acquisiton function to use.
 
     // Trust Region Optimization parameters
-    double initial_trust_region_radius = 1; //!< The initial trust region radius
+    double initial_radius = 1; //!< The initial trust region radius
+    double tol_f = 1e-6;
+    double eps_c = 1e-5;
+    double eta_0 = 0;
+    double eta_1 = 0.05;
+    double pivot_threshold = 1/16;
+    double add_threshold = 100;
+    double exchange_threshold = 1000;
+    double radius_max = 1e3;
+    double radius_factor = 6;
+    double tol_radius = 1e-5;
+    double gamma_inc = 2;
+    double gamma_dec = 0.5;
+    double criticality_mu = 100;
+    double criticality_beta = 10;
+    double criticality_omega = 0.5;
+    int iter_max = 10000;
+    std::string basis = "diagonalHessian";
 
     // Hybrid parameters
     /*!
