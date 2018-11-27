@@ -368,10 +368,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
         }
         if (json_parameters.contains("InitialTrustRegionRadius")) {
             if (json_parameters["InitialTrustRegionRadius"].toInt() >= 1) {
-                params.initial_trust_region_radius = json_parameters["InitialTrustRegionRadius"].toInt();
+                params.initial_radius = json_parameters["InitialTrustRegionRadius"].toInt();
             }
             else {
-                parameters_.initial_trust_region_radius = 1;
+                parameters_.initial_radius = 1;
             }
         }
 
