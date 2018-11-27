@@ -82,6 +82,13 @@ void TrustRegionOptimization::iterate() {
         logger_->AddEntry(this);
     }
 }
+
+bool TrustRegionOptimization::evaluateNewFunctionValues(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> new_points) {
+    // TODO: implement the function to evaluate functin values for the set new_points
+    return false;
+}
+
+
 Loggable::LogTarget TrustRegionOptimization::ConfigurationSummary::GetLogTarget() {
     return LOG_SUMMARY;
 }

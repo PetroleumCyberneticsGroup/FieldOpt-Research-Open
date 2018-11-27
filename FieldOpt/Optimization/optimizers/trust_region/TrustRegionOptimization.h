@@ -21,6 +21,8 @@
 #define FIELDOPT_TRUSTREGION_H
 
 #include "Optimization/optimizer.h"
+#include "Optimization/optimizers/trust_region/TrustRegionModel.h"
+#include <Eigen/Core>
 
 namespace Optimization {
 namespace Optimizers {
@@ -53,6 +55,10 @@ class TrustRegionOptimization : public Optimizer {
  private:
     VectorXd lb_, ub_; //!< Upper and lower bounds
     Settings::Optimizer *settings_;
+    TrustRegionModel tr_model;
+
+
+    bool evaluateNewFunctionValues(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> new_points);
 
     class ConfigurationSummary : public Loggable {
     public:
