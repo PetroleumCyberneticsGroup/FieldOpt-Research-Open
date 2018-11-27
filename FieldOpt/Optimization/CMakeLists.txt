@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(optimization)
 
 add_library(optimization STATIC
-        optimization_exceptions.h
+		optimization_exceptions.h
 		objective/objective.cpp
 		objective/weightedsum.cpp
 		case.cpp
@@ -25,35 +25,35 @@ add_library(optimization STATIC
 		optimizers/APPS.cpp
 		optimizers/GeneticAlgorithm.cpp
 		optimizers/RGARDD.cpp
-        normalizer.cpp
+		normalizer.cpp
 		optimizers/bayesian_optimization/AcquisitionFunction.cpp
 		optimizers/bayesian_optimization/af_optimizers/AFPSO.cpp
 		optimizers/bayesian_optimization/af_optimizers/AFOptimizer.cpp
-        optimizers/bayesian_optimization/EGO.cpp
-        optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.cpp
+		optimizers/bayesian_optimization/EGO.cpp
+		optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.cpp
 		optimizers/trust_region/TrustRegionOptimization.cpp
 		optimizers/trust_region/TrustRegionModel.cpp
 		constraints/pseudo_cont_boundary_2d.cpp
 		constraints/icv_constraint.cpp
-        constraints/packer_constraint.cpp
-        hybrid_optimizer.cpp
-        objective/NPV.cpp objective/NPV.h)
+		constraints/packer_constraint.cpp
+		hybrid_optimizer.cpp
+		objective/NPV.cpp objective/NPV.h)
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
 target_link_libraries(optimization
-        PUBLIC fieldopt::model
-        PUBLIC fieldopt::simulation
-        PUBLIC fieldopt::constraintmath
+		PUBLIC fieldopt::model
+		PUBLIC fieldopt::simulation
+		PUBLIC fieldopt::constraintmath
 		PUBLIC fieldopt::reservoir
-        PUBLIC fieldopt::runner
+		PUBLIC fieldopt::runner
 		PUBLIC ${gp}
-        Qt5::Core
+		Qt5::Core
 		PUBLIC ${Boost_LIBRARIES})
 
 target_include_directories(optimization PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
 
 add_compile_options(-std=c++11)
 
@@ -71,13 +71,14 @@ if (BUILD_TESTING)
 			tests/test_resource_optimizer.h
 			tests/constraints/test_rate_constraint.cpp
 			tests/test_case_transfer_object.cpp
-            tests/optimizers/test_apps.cpp
-            tests/optimizers/test_ga.cpp
+			tests/optimizers/test_apps.cpp
+			tests/optimizers/test_ga.cpp
 			tests/test_normalizer.cpp
-            tests/constraints/test_interwell_distance.cpp
-            tests/constraints/test_spline_well_length.cpp
+			tests/constraints/test_interwell_distance.cpp
+			tests/constraints/test_spline_well_length.cpp
 			tests/optimizers/test_ego.cpp
-            tests/constraints/test_pseudo_cont_boundary_2d.cpp)
+			tests/constraints/test_pseudo_cont_boundary_2d.cpp
+			tests/optimizers/test_tr-dfo.cpp)
 
 
 	target_link_libraries(test_optimization
