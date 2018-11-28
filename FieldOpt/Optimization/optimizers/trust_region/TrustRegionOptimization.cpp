@@ -89,20 +89,17 @@ void TrustRegionOptimization::iterate() {
 }
 
 void TrustRegionOptimization::computeInitialPoints() {
-    int n_cont_vars = variables_->ContinousVariableSize();
-    auto var_values = variables_->GetContinousVariableValues();
-
     if (settings_->parameters().tr_init_guesses == -1) { //!<only one initial guess was provided, thus the algorithm finds another point.
         auto rng = get_random_generator(settings_->parameters().rng_seed);
-        for (int i = 0; i < settings_->parameters().tr_init_guesses; ++i) {
-            VectorXd pos = VectorXd::Zero(lb_.size());
-            for (int i = 0; i < lb_.size(); ++i) {
-                pos(i) = random_double(rng, lb_(i), ub_(i));
-            }
-            Case * init_case = new Case(base_case_);
-            init_case->SetRealVarValues(pos);
-            case_handler_->AddNewCase(init_case);
+
+        VectorXd pos = VectorXd::Zero(lb_.size());
+        for (int i = 0; i < lb_.size(); ++i) {
+            pos(i) = random_double(rng, lb_(i), ub_(i));
         }
+        Case * init_case = new Case(base_case_);
+        init_case->SetRealVarValues(pos);
+        case_handler_->AddNewCase(init_case);
+
     } else {
         //TODO: get other initial points from the parameters
     }
