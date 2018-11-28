@@ -68,7 +68,17 @@ namespace TestResources {
             return (100 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
         }
 
+        inline double tr_dfo_prob1(VectorXd xv) {
+
+            auto f = pow(1 - xv(0),2);
+            cout << xv << " xv(0) - 1:" << xv(0) - 1 << " f:" << f << endl;
+
+            return f;
+        }
+
     }
+
+}
 }
 
 #endif //FIELDOPT_TEST_RESOURCE_TEST_FUNCTIONS_H
