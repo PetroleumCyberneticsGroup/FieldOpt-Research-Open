@@ -82,8 +82,8 @@ namespace TestResources {
          * Initial point: x0=[2.0 2.0]
          */
         inline double tr_dfo_prob2(VectorXd xs) {
-            double arg1 = pow(xs(1),2);
-            double arg2 = pow(xs(2),2);
+            double arg1 = pow(xs(0),2);
+            double arg2 = pow(xs(1),2);
             return log1p(arg1) + arg2;
         }
 
@@ -92,8 +92,8 @@ namespace TestResources {
          * Initial point: x0=[0.0 0.0]
          */
         inline double tr_dfo_prob3(VectorXd xs) {
-            double arg1 = M_PI * xs(1)/12;
-            double arg2 = M_PI * xs(2)/16;
+            double arg1 = M_PI * xs(0)/12;
+            double arg2 = M_PI * xs(1)/16;
             return sin(arg1) + cos(arg2);
         }
 
