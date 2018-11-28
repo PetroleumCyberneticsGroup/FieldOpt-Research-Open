@@ -13,61 +13,44 @@ namespace TestResources {
 class TestResourceCases : public TestResources::TestResourceVariablePropertyContainer {
  public:
   TestResourceCases() {
-    test_case_1_3i_ = new Optimization::Case(QHash<QUuid, bool>(), integer_variables_3d_, QHash<QUuid, double>());
-    test_case_2_3r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_3d_);
-    test_case_2_3r_->set_objective_function_value(100.0);
-    test_case_3_4b3i3r_ = new Optimization::Case(binary_variables_4d_, integer_variables_3d_, real_variables_3d_);
-    test_case_3_4b3i3r_->set_objective_function_value(-50.0);
-    test_case_3_4b3i3r_->SetWICTime(5);
-    test_case_4_4b3i3r = new Optimization::Case(binary_variables_4d_, integer_variables_3d_, real_variables_3d_);
-    test_case_4_4b3i3r->set_objective_function_value(-50.0);
-    trivial_cases_ << test_case_1_3i_ << test_case_2_3r_ << test_case_3_4b3i3r_ << test_case_4_4b3i3r;
+      test_case_1_3i_ = new Optimization::Case(QHash<QUuid, bool>(), integer_variables_3d_, QHash<QUuid, double>());
+      test_case_2_3r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_3d_);
+      test_case_2_3r_->set_objective_function_value(100.0);
+      test_case_3_4b3i3r_ = new Optimization::Case(binary_variables_4d_, integer_variables_3d_, real_variables_3d_);
+      test_case_3_4b3i3r_->set_objective_function_value(-50.0);
+      test_case_3_4b3i3r_->SetWICTime(5);
+      test_case_4_4b3i3r = new Optimization::Case(binary_variables_4d_, integer_variables_3d_, real_variables_3d_);
+      test_case_4_4b3i3r->set_objective_function_value(-50.0);
+      trivial_cases_ << test_case_1_3i_ << test_case_2_3r_ << test_case_3_4b3i3r_ << test_case_4_4b3i3r;
 
-    test_case_two_well_splines_ = new Optimization::Case(varcont_two_spline_wells_->GetBinaryVariableValues(),
-                                                         varcont_two_spline_wells_->GetDiscreteVariableValues(),
-                                                         varcont_two_spline_wells_->GetContinousVariableValues());
-    test_case_spline_ = new Optimization::Case(varcont_prod_spline_->GetBinaryVariableValues(),
-                                               varcont_prod_spline_->GetDiscreteVariableValues(),
-                                               varcont_prod_spline_->GetContinousVariableValues());
+      test_case_two_well_splines_ = new Optimization::Case(varcont_two_spline_wells_->GetBinaryVariableValues(),
+                                                           varcont_two_spline_wells_->GetDiscreteVariableValues(),
+                                                           varcont_two_spline_wells_->GetContinousVariableValues());
+      test_case_spline_ = new Optimization::Case(varcont_prod_spline_->GetBinaryVariableValues(),
+                                                 varcont_prod_spline_->GetDiscreteVariableValues(),
+                                                 varcont_prod_spline_->GetContinousVariableValues());
 
-    test_case_2r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_2d_);
+      test_case_2r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_2d_);
 
-    auto gen = get_random_generator(10);
-    std::vector<double> rand_reals_30 = random_doubles(gen, -5.12, 5.12, 30);
-    for (double rand : rand_reals_30)
-      real_variables_sph_rand_30d_.insert(QUuid::createUuid(), rand);
-    test_case_ga_spherical_30r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_sph_rand_30d_);
-
-
-
-    std::vector<double> rand_reals_6 = random_doubles(gen, -5.12, 5.12, 6);
-    varcont_6r_ = new VariablePropertyContainer();
-    QString base_name = "BHP#PRODUCER#";
-    for (int i = 0; i < rand_reals_6.size(); ++i) {
-      ContinousProperty *prop = new ContinousProperty(rand_reals_6[i]);
-      prop->setName(base_name + QString::number(i));
-      varcont_6r_->AddVariable(prop);
-      real_variables_sph_rand_6d_.insert(QUuid::createUuid(), rand_reals_6[i]);
-    }
-    test_case_ga_spherical_6r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), varcont_6r_->GetContinousVariableValues());
+      auto gen = get_random_generator(10);
+      std::vector<double> rand_reals_30 = random_doubles(gen, -5.12, 5.12, 30);
+      for (double rand : rand_reals_30)
+          real_variables_sph_rand_30d_.insert(QUuid::createUuid(), rand);
+      test_case_ga_spherical_30r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), real_variables_sph_rand_30d_);
 
 
-    // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
-    varcont_tr_dfo_prob1_ = new VariablePropertyContainer();
-    QString base_varname = "BHP#PRODUCER#";
-    for (int i = 0; i < 10; ++i) {
-      ContinousProperty *prop = new ContinousProperty(i);
-      prop->setName(base_varname + QString::number(i));
-      varcont_tr_dfo_prob1_->AddVariable(prop);
-      //rvars_prob1_x0_.insert(QUuid::createUuid(), rand_reals_6[i]);
-    }
 
-    // Make case using variables from tr-dfo variable container
-    test_case_tr_dfo_prob1_ = new Optimization::Case(
-        QHash<QUuid, bool>(), QHash<QUuid, int>(),
-            varcont_tr_dfo_prob1_->GetContinousVariableValues());
-
-    }
+      std::vector<double> rand_reals_6 = random_doubles(gen, -5.12, 5.12, 6);
+      varcont_6r_ = new VariablePropertyContainer();
+      QString base_name = "BHP#PRODUCER#";
+      for (int i = 0; i < rand_reals_6.size(); ++i) {
+          ContinousProperty *prop = new ContinousProperty(rand_reals_6[i]);
+          prop->setName(base_name + QString::number(i));
+          varcont_6r_->AddVariable(prop);
+          real_variables_sph_rand_6d_.insert(QUuid::createUuid(), rand_reals_6[i]);
+      }
+      test_case_ga_spherical_6r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), varcont_6r_->GetContinousVariableValues());
+  }
 
   QList<Optimization::Case *> trivial_cases_;
 
@@ -117,15 +100,6 @@ class TestResourceCases : public TestResources::TestResourceVariablePropertyCont
   Optimization::Case *test_case_ga_spherical_30r_;
 
   Optimization::Case *test_case_ga_spherical_6r_;
-
-  // Trust region problems from C.Guliani
-  Optimization::Case *test_case_tr_dfo_prob1_;
-
-  // Initial values for Trust region problems
-  const QHash<QUuid, double> rvars_prob1_x0_{
-      {QUuid::createUuid(), -1.2}
-  };
-
 
  private:
   const QHash<QUuid, bool> binary_variables_4d_{

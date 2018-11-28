@@ -25,59 +25,50 @@
 using namespace Eigen;
 
 namespace TestResources {
-/*!
- * @brief This namespace contains synthetic functions meant to be used
- * for testQing optimzation algorithms.
- *
- * Note that these are all formulated for minimization.
- */
-namespace TestFunctions {
+    /*!
+     * @brief This namespace contains synthetic functions meant to be used
+     * for testQing optimzation algorithms.
+     *
+     * Note that these are all formulated for minimization.
+     */
+    namespace TestFunctions {
 
-/*!
- * @brief Sphere function.
- *
- * Formula: \f$ \sum_{i=1}^{n} x^2_i \f$
- * Minimum: \f$ f(x_1, ..., x_n) = f(0, ..., 0) = 0 \f$
- * Domain:  \f$ - \infty \leq x_i \leq \infty \f$
- * Dimensions: \f$ 1 \leq i \leq n \f$
- *
- * @param xs Vector of _continous_ variable values.
- * @return The function value at the given positon.
- */
-inline double Sphere(VectorXd xs) {
-  return (xs.cwiseProduct(xs)).sum();
-}
+        /*!
+         * @brief Sphere function.
+         *
+         * Formula: \f$ \sum_{i=1}^{n} x^2_i \f$
+         * Minimum: \f$ f(x_1, ..., x_n) = f(0, ..., 0) = 0 \f$
+         * Domain:  \f$ - \infty \leq x_i \leq \infty \f$
+         * Dimensions: \f$ 1 \leq i \leq n \f$
+         *
+         * @param xs Vector of _continous_ variable values.
+         * @return The function value at the given positon.
+         */
+        inline double Sphere(VectorXd xs) {
+            return (xs.cwiseProduct(xs)).sum();
+        }
 
-/*!
- * @brief Rosenbrock function.
- *
- * Formula: \f$ \sum_{i=1}^{n-1} \left[ 100 (x_{i+1} - x_i^2)^2 + (x_i -1)^2 \right] \f$
- * Minimum: \f$ f(1, ..., 1) = 0 \f$
- * Domain:  \f$ - \infty \leq x_i \leq \infty \f$
- * Dimensions: \f$ 1 \leq i \leq n \f$
- *
- * @param xs Vector of _continous_ variable values.
- * @return The function value at the given position.
- */
-inline double Rosenbrock(VectorXd xs) {
-  VectorXd xhead = xs.head(xs.size() - 1);
-  VectorXd xtail = xs.tail(xs.size() - 1);
+        /*!
+         * @brief Rosenbrock function.
+         *
+         * Formula: \f$ \sum_{i=1}^{n-1} \left[ 100 (x_{i+1} - x_i^2)^2 + (x_i -1)^2 \right] \f$
+         * Minimum: \f$ f(1, ..., 1) = 0 \f$
+         * Domain:  \f$ - \infty \leq x_i \leq \infty \f$
+         * Dimensions: \f$ 1 \leq i \leq n \f$
+         *
+         * @param xs Vector of _continous_ variable values.
+         * @return The function value at the given position.
+         */
+        inline double Rosenbrock(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
 
-  VectorXd p1 = xtail - xhead.cwiseProduct(xhead);
-  VectorXd p2 = xhead - VectorXd::Ones(xhead.size());
-  return (100 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
-}
+            VectorXd p1 = xtail - xhead.cwiseProduct(xhead);
+            VectorXd p2 = xhead - VectorXd::Ones(xhead.size());
+            return (100 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
 
-inline double tr_dfo_prob1(VectorXd xv) {
-
-  auto f = pow(1 - xv(0),2);
-  cout << xv << " xv(0) - 1:" << xv(0) - 1 << " f:" << f << endl;
-
-  return f;
-}
-
-}
-
+    }
 }
 
 #endif //FIELDOPT_TEST_RESOURCE_TEST_FUNCTIONS_H
