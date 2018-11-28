@@ -62,6 +62,7 @@ class TrustRegionOptimization : public Optimizer {
     TrustRegionModel *tr_model_;
 
     void computeInitialPoints();
+    void computeInitialPointsMB();
 
     class ConfigurationSummary : public Loggable {
     public:

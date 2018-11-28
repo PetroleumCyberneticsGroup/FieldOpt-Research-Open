@@ -52,7 +52,9 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
         logger_->AddEntry(this);
     }
 
-    TrustRegionOptimization::computeInitialPoints();
+//    TrustRegionOptimization::computeInitialPoints();
+
+    computeInitialPointsMB();
 
     if (enable_logging_) {
         logger_->AddEntry(new ConfigurationSummary(this));
@@ -94,6 +96,56 @@ void TrustRegionOptimization::iterate() {
 
     if (enable_logging_) {
         logger_->AddEntry(this);
+    }
+}
+
+void TrustRegionOptimization::computeInitialPointsMB() {
+
+    int n_cont_vars = variables_->ContinousVariableSize();
+    IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+
+    //!<Find another point since only one initial guess provided
+    if (settings_->parameters().tr_init_guesses == -1) {
+
+        if (settings_->parameters().tr_init_sampling_method == "Random") {
+
+            //!<Find (random) 2nd initial point>
+            auto rng = get_random_generator(
+                    settings_->parameters().rng_seed);
+
+            VectorXd init_point2 = VectorXd::Zero(n_cont_vars,1);
+            for (int i = 0; i < n_cont_vars; ++i) {
+                init_point2(i) = random_double(rng, lb_(i), ub_(i));
+            }
+
+            //!<Compute case corresponding to 2nd init point>
+            Case *init_case2 = new Case(base_case_);
+            init_case2->SetRealVarValues(init_point2);
+            case_handler_->AddNewCase(init_case2);
+
+            //!<Establish initial point matrix (2 cols since only
+            //!< two points to build quad model for trust region)>
+            initial_points_.setZero(n_cont_vars, 2);
+            initial_points_ << base_case_->GetRealVarVector(), init_point2;
+
+            //!<Establish initial feval matrix>
+            initial_fvalues_.setZero(2);
+            initial_fvalues_(0) = base_case_->objective_function_value();
+            initial_fvalues_(1) = init_case2->objective_function_value();
+
+            //!<dbg>
+            cout << "[          ] initial_points_" << endl;
+            cout << initial_points_.format(frmt) << endl;
+
+            cout << "[          ] initial_fvalues_" << endl;
+            cout << initial_fvalues_.format(frmt) << endl;
+
+        } else {
+            //TODO: implement other sampling method such as Uniform.
+        }
+
+    } else {
+        //TODO: get other initial points from the parameters
     }
 }
 
