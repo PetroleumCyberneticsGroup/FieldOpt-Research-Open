@@ -106,6 +106,7 @@ class TestResourceVariablePropertyContainer {
   VariablePropertyContainer *varcont_two_spline_wells_;
   VariablePropertyContainer *varcont_prod_bhp_;
   VariablePropertyContainer *varcont_6r_;
+  VariablePropertyContainer *varcont_tr_dfo_prob1_;
 
  private:
   ContinousProperty *prod_heel_x_;
