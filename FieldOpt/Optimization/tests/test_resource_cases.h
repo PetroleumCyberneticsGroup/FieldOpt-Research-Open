@@ -51,6 +51,15 @@ namespace TestResources {
             }
             test_case_ga_spherical_6r_ = new Optimization::Case(QHash<QUuid, bool>(), QHash<QUuid, int>(), varcont_6r_->GetContinousVariableValues());
 
+            // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
+            varcont_tr_dfo_probs_ = new VariablePropertyContainer();
+            QString base_varname = "BHP#PRODUCER#"; // dummy var name
+            for (int i = 0; i < 10; ++i) {
+                ContinousProperty *prop = new ContinousProperty(0.0);
+                prop->setName(base_varname + QString::number(i));
+                varcont_tr_dfo_probs_->AddVariable(prop);
+            }
+
         }
 
         QList<Optimization::Case *> trivial_cases_;
