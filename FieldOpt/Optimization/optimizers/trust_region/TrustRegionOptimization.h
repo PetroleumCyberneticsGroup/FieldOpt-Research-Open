@@ -53,11 +53,13 @@ class TrustRegionOptimization : public Optimizer {
     void iterate() override;
 
  private:
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points_;
+    Eigen::VectorXd initial_fvalues_;
     VectorXd lb_, ub_; //!< Upper and lower bounds
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
-    TrustRegionModel tr_model_;
+    TrustRegionModel *tr_model_;
 
     void computeInitialPoints();
 

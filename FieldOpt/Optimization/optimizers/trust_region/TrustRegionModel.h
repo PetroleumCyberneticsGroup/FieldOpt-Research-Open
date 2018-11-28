@@ -45,7 +45,7 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel();
-    TrustRegionModel(Settings::Optimizer::Parameters settings);
+    TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points, Eigen::VectorXd initial_fvalues , Settings::Optimizer *settings);
 
     void moveToBestPoint();
     void criticalityStep(Settings::Optimizer::Parameters settings);

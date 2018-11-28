@@ -21,12 +21,12 @@
 #include <Settings/optimizer.h>
 
 namespace Optimization {
-namespace Optimizers { \
+namespace Optimizers {
 
 TrustRegionModel::TrustRegionModel() {
 }
 
-TrustRegionModel::TrustRegionModel(Settings::Optimizer::Parameters settings) {
+TrustRegionModel::TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points, Eigen::VectorXd initial_fvalues, Settings::Optimizer *settings) {
     //TODO: implement this method
 }
 

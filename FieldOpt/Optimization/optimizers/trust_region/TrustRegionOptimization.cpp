@@ -52,7 +52,6 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
         logger_->AddEntry(this);
     }
 
-    // TODO: implement TR Optimization constructor.
     TrustRegionOptimization::computeInitialPoints();
 
     if (enable_logging_) {
@@ -73,7 +72,18 @@ Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinishe
     return tc;
 }
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
-    // TODO: implement a handler for evaluated cases in TR optimization.
+    if (!tr_model_ ) {
+        if (initial_points_.cols()  < 1) {
+            Printer::ext_warn("Insufficient number of points to create the Trust Region model.", "Optimization", "TrustRegionOptimization");
+            throw std::runtime_error("Failed to initialize Trust Region Optimizer.");
+        } else if (initial_points_.cols()  == 1 ) { //!<just evaluated the second point, so we are ready to build the quadratic model for the TR
+            initial_points_.col(1) = c->GetRealVarVector();
+            initial_fvalues_(1) = c->objective_function_value();
+        }
+        tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_, settings_);  //!<creates the initial trust region
+    }
+    //TODO: improve trust region with the new point
+
     if (isImprovement(c)) {
         updateTentativeBestCase(c);
         Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objective_function_value()), "Optimization", "EGO");
@@ -90,16 +100,23 @@ void TrustRegionOptimization::iterate() {
 void TrustRegionOptimization::computeInitialPoints() {
     int n_cont_vars = variables_->ContinousVariableSize();
     if (settings_->parameters().tr_init_guesses == -1) { //!<only one initial guess was provided, thus the algorithm finds another point.
-        auto rng = get_random_generator(settings_->parameters().rng_seed);
+        if (settings_->parameters().tr_init_sampling_method == "Random") {
+            auto rng = get_random_generator(settings_->parameters().rng_seed);
 
-        VectorXd pos = VectorXd::Zero(n_cont_vars);
-        for (int i = 0; i < n_cont_vars; ++i) {
-            pos(i) = random_double(rng, lb_(i), ub_(i));
+            VectorXd pos = VectorXd::Zero(n_cont_vars);
+            for (int i = 0; i < n_cont_vars; ++i) {
+                pos(i) = random_double(rng, lb_(i), ub_(i));
+            }
+            Case * init_case = new Case(base_case_);
+            init_case->SetRealVarValues(pos);
+            case_handler_->AddNewCase(init_case);
+            initial_points_.setZero(n_cont_vars, 2); //!<only two points to start the quadratic model for the trust region>
+
+            initial_fvalues_.setZero(2);
+            initial_fvalues_(0) = base_case_->objective_function_value() ;
+        } else {
+            //TODO: implement other sampling method such as Uniform.
         }
-        Case * init_case = new Case(base_case_);
-        init_case->SetRealVarValues(pos);
-        case_handler_->AddNewCase(init_case);
-
     } else {
         //TODO: get other initial points from the parameters
     }
