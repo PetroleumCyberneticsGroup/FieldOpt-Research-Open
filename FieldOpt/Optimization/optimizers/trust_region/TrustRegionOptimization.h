@@ -55,10 +55,12 @@ class TrustRegionOptimization : public Optimizer {
  private:
     VectorXd lb_, ub_; //!< Upper and lower bounds
     Settings::Optimizer *settings_;
-    TrustRegionModel tr_model;
+    Model::Properties::VariablePropertyContainer *variables_;
+    Case *base_case_;
+    CaseHandler *case_handler_;
+    TrustRegionModel tr_model_;
 
-
-    bool evaluateNewFunctionValues(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> new_points);
+    void computeInitialPoints();
 
     class ConfigurationSummary : public Loggable {
     public:

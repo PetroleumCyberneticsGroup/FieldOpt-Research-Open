@@ -44,12 +44,17 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
         ub_.fill(settings->parameters().upper_bound);
     }
 
+    settings_ = settings;
+    variables_ = variables;
+    base_case_ = base_case;
+    case_handler_ = case_handler;
+
     if (enable_logging_) { // Log base case
         logger_->AddEntry(this);
     }
 
     // TODO: implement TR Optimization constructor.
-
+    TrustRegionOptimization::computeInitialPoints();
 
     if (enable_logging_) {
         logger_->AddEntry(new ConfigurationSummary(this));
@@ -83,11 +88,25 @@ void TrustRegionOptimization::iterate() {
     }
 }
 
-bool TrustRegionOptimization::evaluateNewFunctionValues(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> new_points) {
-    // TODO: implement the function to evaluate functin values for the set new_points
-    return false;
-}
+void TrustRegionOptimization::computeInitialPoints() {
+    int n_cont_vars = variables_->ContinousVariableSize();
+    auto var_values = variables_->GetContinousVariableValues();
 
+    if (settings_->parameters().tr_init_guesses == -1) { //!<only one initial guess was provided, thus the algorithm finds another point.
+        auto rng = get_random_generator(settings_->parameters().rng_seed);
+        for (int i = 0; i < settings_->parameters().tr_init_guesses; ++i) {
+            VectorXd pos = VectorXd::Zero(lb_.size());
+            for (int i = 0; i < lb_.size(); ++i) {
+                pos(i) = random_double(rng, lb_(i), ub_(i));
+            }
+            Case * init_case = new Case(base_case_);
+            init_case->SetRealVarValues(pos);
+            case_handler_->AddNewCase(init_case);
+        }
+    } else {
+        //TODO: get other initial points from the parameters
+    }
+}
 
 Loggable::LogTarget TrustRegionOptimization::ConfigurationSummary::GetLogTarget() {
     return LOG_SUMMARY;
