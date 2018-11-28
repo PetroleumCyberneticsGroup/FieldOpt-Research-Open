@@ -57,7 +57,6 @@ class TrustRegionOptimization : public Optimizer {
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
-    CaseHandler *case_handler_;
     TrustRegionModel tr_model_;
 
     void computeInitialPoints();

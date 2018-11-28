@@ -47,7 +47,6 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
     settings_ = settings;
     variables_ = variables;
     base_case_ = base_case;
-    case_handler_ = case_handler;
 
     if (enable_logging_) { // Log base case
         logger_->AddEntry(this);
@@ -89,11 +88,12 @@ void TrustRegionOptimization::iterate() {
 }
 
 void TrustRegionOptimization::computeInitialPoints() {
+    int n_cont_vars = variables_->ContinousVariableSize();
     if (settings_->parameters().tr_init_guesses == -1) { //!<only one initial guess was provided, thus the algorithm finds another point.
         auto rng = get_random_generator(settings_->parameters().rng_seed);
 
-        VectorXd pos = VectorXd::Zero(lb_.size());
-        for (int i = 0; i < lb_.size(); ++i) {
+        VectorXd pos = VectorXd::Zero(n_cont_vars);
+        for (int i = 0; i < n_cont_vars; ++i) {
             pos(i) = random_double(rng, lb_(i), ub_(i));
         }
         Case * init_case = new Case(base_case_);
