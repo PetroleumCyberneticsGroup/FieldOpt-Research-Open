@@ -60,9 +60,9 @@ class TrustRegionOptimization : public Optimizer {
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
     TrustRegionModel *tr_model_;
+    int n_initial_points_;
 
     void computeInitialPoints();
-    void computeInitialPointsMB();
 
     class ConfigurationSummary : public Loggable {
     public:
