@@ -28,13 +28,28 @@ TrustRegionModel::TrustRegionModel() {
 
 TrustRegionModel::TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points, Eigen::VectorXd initial_fvalues, Settings::Optimizer *settings) {
     //TODO: implement this method
+    settings_ = settings;
+    points_abs_ << initial_points;
+    fvalues_ << initial_fvalues;
+    radius_ = settings_->parameters().tr_initial_radius;
+    tr_center_ = 0;
+    dim_ = sizeof(points_abs_);
+    cache_max_ = 3*pow(dim_,2);
+
+    rebuildModel();
+    moveToBestPoint();
+    computePolynomialModels();
+
+    if (sizeof(points_abs_) < 2) {
+        ensureImprovement();
+    }
 }
 
 void TrustRegionModel::moveToBestPoint() {
     //TODO: implement this method
 }
 
-void TrustRegionModel::criticalityStep(Settings::Optimizer::Parameters settings) {
+void TrustRegionModel::criticalityStep() {
     //TODO: implement this method
 }
 
@@ -42,32 +57,31 @@ double TrustRegionModel::checkInterpolation() {
     //TODO: implement this method
 }
 
-bool TrustRegionModel::rebuildModel(Settings::Optimizer::Parameters settings) {
+void TrustRegionModel::rebuildModel() {
     //TODO: implement this method
 }
 
-bool TrustRegionModel::improveModelNfp(Settings::Optimizer::Parameters settings) {
+void TrustRegionModel::improveModelNfp() {
     //TODO: implement this method
 }
 
-bool TrustRegionModel::ensureImprovement(Settings::Optimizer::Parameters settings) {
+void TrustRegionModel::ensureImprovement() {
     //TODO: implement this method
 }
 
-bool TrustRegionModel::isLambdaPoised(Settings::Optimizer::Parameters settings) {
+bool TrustRegionModel::isLambdaPoised() {
     //TODO: implement this method
 }
 
-bool TrustRegionModel::changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues,
-                                      Settings::Optimizer::Parameters settings) {
+void TrustRegionModel::changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues) {
     //TODO: implement this method
 }
 
-std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem(Settings::Optimizer::Parameters settings) {
+std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem() {
     //TODO: implement this method
 }
 
-Eigen::Matrix<Polynomial, Eigen::Dynamic, 1> TrustRegionModel::computePolynomialModels() {
+void TrustRegionModel::computePolynomialModels() {
     //TODO: implement this method
 }
 

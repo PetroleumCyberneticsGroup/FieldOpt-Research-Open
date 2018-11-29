@@ -50,13 +50,13 @@ class TrustRegionModel {
     void moveToBestPoint();
     void criticalityStep(Settings::Optimizer::Parameters settings);
     double checkInterpolation();
-    bool rebuildModel(Settings::Optimizer::Parameters settings);
-    bool improveModelNfp(Settings::Optimizer::Parameters settings);
-    bool ensureImprovement(Settings::Optimizer::Parameters settings);
-    bool isLambdaPoised(Settings::Optimizer::Parameters settings);
-    bool changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues, Settings::Optimizer::Parameters settings);
-    std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem(Settings::Optimizer::Parameters settings);
-    Eigen::Matrix<Polynomial, Eigen::Dynamic, 1>  computePolynomialModels();
+    void rebuildModel();
+    void improveModelNfp();
+    void ensureImprovement();
+    bool isLambdaPoised();
+    void changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues);
+    std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
+    void computePolynomialModels();
 
 
  private:
