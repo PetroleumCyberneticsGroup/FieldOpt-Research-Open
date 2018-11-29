@@ -72,7 +72,7 @@ namespace {
                     logger_);
         }
 
-        void RunnerProc(){
+        void RunnerProc(double (*tr_dfo_prob)(VectorXd xs)){
             // cout << "RunnerProc" << endl;
             stringstream ss; ss << "[          ] " << FMAGENTA;
 
@@ -82,7 +82,7 @@ namespace {
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
 
                 next_case->set_objective_function_value(
-                        tr_dfo_prob1(next_case->GetRealVarVector()));
+                        tr_dfo_prob(next_case->GetRealVarVector()));
 
                 cout << ss.str() << "----------------------" << END << endl;
                 cout << ss.str() << "Case id:" << next_case << END << endl;
@@ -119,37 +119,37 @@ namespace {
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
         SetUpOptimizer();
-        RunnerProc();
+        RunnerProc(tr_dfo_prob1);
     }
 
-//    TEST_F(TrustRegionTest, tr_dfo_prob2) {
-//        cout << FMAGENTA
-//             << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-//             << END << endl;
-//
-//        VectorXd x0(2);
-//        x0 << -2.0, -2.0;
-//        SetUpVarCont(x0.rows());
-//        SetUpCase();
-//
-//        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
-//        SetUpOptimizer();
-//        RunnerProc();
-//    }
-//
-//    TEST_F(TrustRegionTest, tr_dfo_prob3) {
-//        cout << FMAGENTA
-//             << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
-//             << END << endl;
-//
-//        VectorXd x0(2);
-//        x0 << -0.0, -0.0;
-//        SetUpVarCont(x0.rows());
-//        SetUpCase();
-//
-//        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
-//        SetUpOptimizer();
-//        RunnerProc();
-//    }
+    TEST_F(TrustRegionTest, tr_dfo_prob2) {
+        cout << FMAGENTA
+             << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+             << END << endl;
+
+        VectorXd x0(2);
+        x0 << -2.0, -2.0;
+        SetUpVarCont(x0.rows());
+        SetUpCase();
+
+        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
+        SetUpOptimizer();
+        RunnerProc(tr_dfo_prob2);
+    }
+
+    TEST_F(TrustRegionTest, tr_dfo_prob3) {
+        cout << FMAGENTA
+             << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
+             << END << endl;
+
+        VectorXd x0(2);
+        x0 << -0.0, -0.0;
+        SetUpVarCont(x0.rows());
+        SetUpCase();
+
+        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
+        SetUpOptimizer();
+        RunnerProc(tr_dfo_prob3);
+    }
 
 }
