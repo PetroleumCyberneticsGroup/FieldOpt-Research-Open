@@ -48,7 +48,7 @@ class TrustRegionModel {
     TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points, Eigen::VectorXd initial_fvalues , Settings::Optimizer *settings);
 
     void moveToBestPoint();
-    void criticalityStep(Settings::Optimizer::Parameters settings);
+    void criticalityStep();
     double checkInterpolation();
     void rebuildModel();
     void improveModelNfp();
@@ -60,18 +60,18 @@ class TrustRegionModel {
 
 
  private:
-    Polynomial pivot_polynomials;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shitfted;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points;
-    Eigen::Matrix<Polynomial, Eigen::Dynamic, 1> modeling_polynomials;
-
-    Eigen::VectorXd fvalues;
-    Eigen::VectorXd tr_center;
-    Eigen::RowVector2d pivot_values;
-
-    double radius;
-    int cache_max;
+    Settings::Optimizer *settings_;
+    Polynomial pivot_polynomials_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shitfted_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
+    Eigen::Matrix<Polynomial, Eigen::Dynamic, 1> modeling_polynomials_;
+    Eigen::VectorXd fvalues_;
+    Eigen::RowVector2d pivot_values_;
+    double radius_;
+    int tr_center_; //!<index of trust region center point in points_abs>
+    int cache_max_;
+    int dim_;
 };
 
 }
