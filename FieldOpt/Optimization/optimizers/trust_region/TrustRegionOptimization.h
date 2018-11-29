@@ -63,6 +63,7 @@ class TrustRegionOptimization : public Optimizer {
     int n_initial_points_;
 
     void computeInitialPoints();
+    void projectToBounds(VectorXd *point);
 
     class ConfigurationSummary : public Loggable {
     public:

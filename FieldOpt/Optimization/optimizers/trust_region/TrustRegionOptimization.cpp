@@ -102,10 +102,13 @@ void TrustRegionOptimization::iterate() {
 void TrustRegionOptimization::computeInitialPoints() {
 
     int n_cont_vars = variables_->ContinousVariableSize();
+    auto initial_point = base_case_->GetRealVarVector();
+
     IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
     //!<Find another point since only one initial guess provided
     if (settings_->parameters().tr_init_guesses == -1) {
+        //TODO: project initial point to the bounds, a new case should be added to the case handler in this case.
 
         if (settings_->parameters().tr_init_sampling_method == "Random") {
 
@@ -117,6 +120,15 @@ void TrustRegionOptimization::computeInitialPoints() {
                 second_point(i) = random_double(rng, lb_(i), ub_(i));
             }
 
+
+            while (second_point.lpNorm<Infinity>()  < settings_->parameters().tr_pivot_threshold) { //!<Second point must not be too close>
+                second_point = 2*second_point;
+            }
+            second_point = (second_point.array() - 0.5)*settings_->parameters().tr_initial_radius;
+            second_point = initial_point + second_point;
+
+            projectToBounds(&second_point);
+
             //!<Compute case corresponding to 2nd init point>
             Case *second_case = new Case(base_case_);
             second_case->SetRealVarValues(second_point);
@@ -125,7 +137,7 @@ void TrustRegionOptimization::computeInitialPoints() {
             //!<Establish initial point matrix (2 cols since only
             //!< two points are needed to build quad model for trust region)>
             initial_points_.setZero(n_cont_vars, 2);
-            initial_points_.col(0) = base_case_->GetRealVarVector();
+            initial_points_.col(0) = initial_point;
 
             //!<Establish initial feval matrix>
             initial_fvalues_.setZero(2);
@@ -145,6 +157,16 @@ void TrustRegionOptimization::computeInitialPoints() {
 
     } else {
         //TODO: get other initial points from the parameters
+    }
+}
+
+void TrustRegionOptimization::projectToBounds(VectorXd *point) {
+    if (ub_.size() > 0) {
+        *point = ub_.cwiseMin(*point);
+    }
+
+    if (lb_.size() > 0) {
+        *point = lb_.cwiseMax(*point);
     }
 }
 
