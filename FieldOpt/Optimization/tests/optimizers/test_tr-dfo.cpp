@@ -51,8 +51,8 @@ namespace {
             }
         }
 
-        void SetUpCase(){
-            // cout << "SetUpCase" << endl;
+        void SetUpBaseCase(){
+            // cout << "SetUpBaseCase" << endl;
             // Trust region problems from C.Guliani
             // Make 'synthetic' case using tr-dfo variable container
             test_case_tr_dfo_probs_ = new Optimization::Case(
@@ -72,8 +72,8 @@ namespace {
                     logger_);
         }
 
-        void RunnerProc(double (*tr_dfo_prob)(VectorXd xs)){
-            // cout << "RunnerProc" << endl;
+        void RunnerSubs(double (*tr_dfo_prob)(VectorXd xs)){
+            // cout << "RunnerSubs" << endl;
             stringstream ss; ss << "[          ] " << FMAGENTA;
 
             while (!tr_dfo_->IsFinished()) {
@@ -115,11 +115,11 @@ namespace {
         VectorXd x0(2);
         x0 << -1.2, -2.0;
         SetUpVarCont(x0.rows());
-        SetUpCase();
+        SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
         SetUpOptimizer();
-        RunnerProc(tr_dfo_prob1);
+        RunnerSubs(tr_dfo_prob1);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob2) {
@@ -130,11 +130,11 @@ namespace {
         VectorXd x0(2);
         x0 << -2.0, -2.0;
         SetUpVarCont(x0.rows());
-        SetUpCase();
+        SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
         SetUpOptimizer();
-        RunnerProc(tr_dfo_prob2);
+        RunnerSubs(tr_dfo_prob2);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob3) {
@@ -145,11 +145,11 @@ namespace {
         VectorXd x0(2);
         x0 << -0.0, -0.0;
         SetUpVarCont(x0.rows());
-        SetUpCase();
+        SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
         SetUpOptimizer();
-        RunnerProc(tr_dfo_prob3);
+        RunnerSubs(tr_dfo_prob3);
     }
 
 }
