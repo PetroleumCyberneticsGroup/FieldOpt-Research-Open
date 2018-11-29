@@ -40,6 +40,7 @@ namespace {
         VariablePropertyContainer *varcont_tr_dfo_probs_;
 
         void SetUpVarCont(int nvars){
+            // cout << "SetUpVarCont" << endl;
             // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
             varcont_tr_dfo_probs_ = new VariablePropertyContainer();
             QString base_varname = "BHP#PRODUCER#"; // dummy var name
@@ -51,6 +52,7 @@ namespace {
         }
 
         void SetUpCase(){
+            // cout << "SetUpCase" << endl;
             // Trust region problems from C.Guliani
             // Make 'synthetic' case using tr-dfo variable container
             test_case_tr_dfo_probs_ = new Optimization::Case(
@@ -61,6 +63,7 @@ namespace {
         }
 
         void SetUpOptimizer(){
+            // cout << "SetUpOptimizer" << endl;
             tr_dfo_ = new TrustRegionOptimization(
                     settings_tr_opt_max_,
                     test_case_tr_dfo_probs_,
@@ -69,17 +72,29 @@ namespace {
                     logger_);
         }
 
-        void SolveProb(){
+        void RunnerProc(){
+            // cout << "RunnerProc" << endl;
+            stringstream ss; ss << "[          ] " << FMAGENTA;
+
             while (!tr_dfo_->IsFinished()) {
-                cout << "[          ] " << FMAGENTA
-                     << "Getting new case (i.e., x_{k+1}) from tr-dfo algo"
-                     << END << endl;
+
+                // RUNNER CALL (START)
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
+
                 next_case->set_objective_function_value(
                         tr_dfo_prob1(next_case->GetRealVarVector()));
+
+                cout << ss.str() << "----------------------" << END << endl;
+                cout << ss.str() << "Case id:" << next_case << END << endl;
+                cout << ss.str() << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
+                cout << ss.str() << "f:" << next_case->objective_function_value() << END << endl;
+
+                // RUNNER CALL (FINISH)
                 tr_dfo_->SubmitEvaluatedCase(next_case);
+
             }
 
+            cout << ss.str() << "----------------------" << END << endl;
             auto best_case = tr_dfo_->GetTentativeBestCase();
             cout << best_case->objective_function_value() << endl;
         }
@@ -104,37 +119,37 @@ namespace {
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
         SetUpOptimizer();
-        SolveProb();
+        RunnerProc();
     }
 
-    TEST_F(TrustRegionTest, tr_dfo_prob2) {
-        cout << FMAGENTA
-             << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-             << END << endl;
-
-        VectorXd x0(2);
-        x0 << -2.0, -2.0;
-        SetUpVarCont(x0.rows());
-        SetUpCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
-        SetUpOptimizer();
-        SolveProb();
-    }
-
-    TEST_F(TrustRegionTest, tr_dfo_prob3) {
-        cout << FMAGENTA
-             << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
-             << END << endl;
-
-        VectorXd x0(2);
-        x0 << -0.0, -0.0;
-        SetUpVarCont(x0.rows());
-        SetUpCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
-        SetUpOptimizer();
-        SolveProb();
-    }
+//    TEST_F(TrustRegionTest, tr_dfo_prob2) {
+//        cout << FMAGENTA
+//             << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+//             << END << endl;
+//
+//        VectorXd x0(2);
+//        x0 << -2.0, -2.0;
+//        SetUpVarCont(x0.rows());
+//        SetUpCase();
+//
+//        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
+//        SetUpOptimizer();
+//        RunnerProc();
+//    }
+//
+//    TEST_F(TrustRegionTest, tr_dfo_prob3) {
+//        cout << FMAGENTA
+//             << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
+//             << END << endl;
+//
+//        VectorXd x0(2);
+//        x0 << -0.0, -0.0;
+//        SetUpVarCont(x0.rows());
+//        SetUpCase();
+//
+//        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
+//        SetUpOptimizer();
+//        RunnerProc();
+//    }
 
 }
