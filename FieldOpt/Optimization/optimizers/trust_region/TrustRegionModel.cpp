@@ -26,14 +26,25 @@ namespace Optimizers {
 TrustRegionModel::TrustRegionModel() {
 }
 
-TrustRegionModel::TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> initial_points, Eigen::VectorXd initial_fvalues, Settings::Optimizer *settings) {
+TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues, Settings::Optimizer *settings) {
     //TODO: implement this method
     settings_ = settings;
+
+    points_abs_.setZero(initial_points.rows(), initial_points.cols());
     points_abs_ << initial_points;
+
+    std::cout << points_abs_ << endl;
+
+    fvalues_.setZero(initial_fvalues.size());
     fvalues_ << initial_fvalues;
+
+    std::cout << fvalues_ << endl;
+
+
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
-    dim_ = sizeof(points_abs_);
+    dim_ = initial_points.cols();
+
     cache_max_ = 3*pow(dim_,2);
 
     rebuildModel();
@@ -43,6 +54,10 @@ TrustRegionModel::TrustRegionModel(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dy
     if (sizeof(points_abs_) < 2) {
         ensureImprovement();
     }
+}
+
+int TrustRegionModel::getDimension() {
+    return dim_;
 }
 
 void TrustRegionModel::moveToBestPoint() {
