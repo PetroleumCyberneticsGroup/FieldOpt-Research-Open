@@ -35,7 +35,7 @@ namespace {
         virtual ~TrustRegionTest() {}
         virtual void SetUp() {}
 
-        Optimization::Optimizer *tr_dfo_;
+        TrustRegionOptimization *tr_dfo_;
         Optimization::Case *test_case_tr_dfo_probs_;
         VariablePropertyContainer *varcont_tr_dfo_probs_;
 
@@ -150,6 +150,46 @@ namespace {
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
         SetUpOptimizer();
         RunnerSubs(tr_dfo_prob3);
+    }
+
+    TEST_F(TrustRegionTest, tr_dfo_initial_model_created) {
+        bool is_model_present = false;
+        VectorXd x0(2);
+        x0 << -0.0, -0.0;
+        SetUpVarCont(x0.rows());
+        SetUpBaseCase();
+
+        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
+        SetUpOptimizer();
+
+
+        // RUNNER CALL (START)
+        auto next_case = tr_dfo_->GetCaseForEvaluation();
+
+        next_case->set_objective_function_value(
+                tr_dfo_prob1(next_case->GetRealVarVector()));
+
+        cout << "----------------------" << END << endl;
+        cout << "Case id:" << next_case << END << endl;
+        cout << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
+        cout << "f:" << next_case->objective_function_value() << END << endl;
+
+
+        // RUNNER CALL (FINISH)
+        tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        auto tr_model = tr_dfo_->getTrustRegionModel();
+
+        if (tr_model) {
+            if (tr_model->getDimension() >=2) { //<!at least 2 points are needed in the
+                is_model_present = true;
+            } else {
+                cout << "Not enough points in the model." << endl;
+            }
+        } else {
+            cout << "model not created" << endl;
+        }
+        EXPECT_TRUE(is_model_present);
     }
 
 }
