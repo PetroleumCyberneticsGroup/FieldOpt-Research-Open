@@ -47,6 +47,7 @@ class TrustRegionOptimization : public Optimizer {
                 CaseHandler *case_handler=0,
                 Constraints::ConstraintHandler *constraint_handler=0
     );
+    TrustRegionModel* getTrustRegionModel();
 
  protected:
     void handleEvaluatedCase(Case *c) override;

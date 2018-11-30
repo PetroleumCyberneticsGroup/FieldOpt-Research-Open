@@ -59,6 +59,11 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
         logger_->AddEntry(new ConfigurationSummary(this));
     }
 }
+
+TrustRegionModel* TrustRegionOptimization::getTrustRegionModel() {
+    return tr_model_;
+}
+
 Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
     if (case_handler_->CasesBeingEvaluated().size() > 0)
@@ -73,17 +78,25 @@ Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinishe
     return tc;
 }
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
-    if (!tr_model_ ) {
-        if ((n_initial_points_  < 1) && (case_handler_->CasesBeingEvaluated().size() == 0)) {
-            Printer::ext_warn("Insufficient number of points to create the Trust Region model.", "Optimization", "TrustRegionOptimization");
-            throw std::runtime_error("Failed to initialize Trust Region Optimizer.");
-        } else if (n_initial_points_ == 1 ) { //!<just evaluated the second point, so we are ready to build the quadratic model for the TR
-            initial_points_.col(1) = c->GetRealVarVector();
-            initial_fvalues_(1) = c->objective_function_value();
-            n_initial_points_++;
-        }
-        tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_, settings_);  //!<creates the initial trust region
+    IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+
+    if ((n_initial_points_  < 1) && (case_handler_->CasesBeingEvaluated().size() == 0)) {
+        Printer::ext_warn("Insufficient number of points to create the Trust Region model.", "Optimization", "TrustRegionOptimization");
+        throw std::runtime_error("Failed to initialize Trust Region Optimizer.");
+    } else if (n_initial_points_ == 1 ) { //!<just evaluated the second point, so we are ready to build the quadratic model for the TR
+        initial_points_.col(1) = c->GetRealVarVector();
+        initial_fvalues_(1) = c->objective_function_value();
+        n_initial_points_++;
     }
+    cout << "[          ] initial_points_" << endl;
+    cout << initial_points_.format(frmt) << endl;
+
+    cout << "[          ] initial_fvalues_" << endl;
+    cout << initial_fvalues_.format(frmt) << endl;
+
+
+    tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_, settings_);  //!<creates the initial trust region
+
     //TODO: improve trust region with the new point
 
     if (isImprovement(c)) {
@@ -103,6 +116,10 @@ void TrustRegionOptimization::computeInitialPoints() {
 
     int n_cont_vars = variables_->ContinousVariableSize();
     auto initial_point = base_case_->GetRealVarVector();
+
+    cout << n_cont_vars << endl;
+    cout << initial_point << endl;
+
 
     IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
@@ -127,6 +144,7 @@ void TrustRegionOptimization::computeInitialPoints() {
             second_point = (second_point.array() - 0.5)*settings_->parameters().tr_initial_radius;
             second_point = initial_point + second_point;
 
+            cout << second_point << endl;
             projectToBounds(&second_point);
 
             //!<Compute case corresponding to 2nd init point>
@@ -137,6 +155,7 @@ void TrustRegionOptimization::computeInitialPoints() {
             //!<Establish initial point matrix (2 cols since only
             //!< two points are needed to build quad model for trust region)>
             initial_points_.setZero(n_cont_vars, 2);
+            cout << initial_points_ << endl;
             initial_points_.col(0) = initial_point;
 
             //!<Establish initial feval matrix>
@@ -145,11 +164,11 @@ void TrustRegionOptimization::computeInitialPoints() {
             n_initial_points_++;
 
             //!<dbg>
-            cout << "[          ] initial_points_" << endl;
-            cout << initial_points_.format(frmt) << endl;
+            //cout << "[          ] initial_points_" << endl;
+            //cout << initial_points_.format(frmt) << endl;
 
-            cout << "[          ] initial_fvalues_" << endl;
-            cout << initial_fvalues_.format(frmt) << endl;
+            //cout << "[          ] initial_fvalues_" << endl;
+            //cout << initial_fvalues_.format(frmt) << endl;
 
         } else {
             //TODO: implement other sampling method such as Uniform.
@@ -165,9 +184,13 @@ void TrustRegionOptimization::projectToBounds(VectorXd *point) {
         *point = ub_.cwiseMin(*point);
     }
 
+    cout << *point << endl;
+
     if (lb_.size() > 0) {
         *point = lb_.cwiseMax(*point);
     }
+
+    cout << *point << endl;
 }
 
 Loggable::LogTarget TrustRegionOptimization::ConfigurationSummary::GetLogTarget() {
