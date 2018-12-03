@@ -19,17 +19,22 @@
 ******************************************************************************/
 #include "TrustRegionModel.h"
 #include <Settings/optimizer.h>
+#include <numeric>
 
 namespace Optimization {
 namespace Optimizers {
 
-template <typename T>;
+template <typename T>
 void sort_indexes(const std::vector<T> &v, const std::vector<size_t> idx) {
 //    std::vector<size_t> idx(v.size()); //!<initialize original index locations>
     iota(idx.begin(), idx.end(), 0);
     sort(idx.begin(), idx.end(),
          [&v](size_t i1, size_t i2) {return v[i1] < v[i2];}); //!<sort indexes based on comparing values in v>
 //    return idx;
+}
+
+bool compare(const double &lhs, const double &rhs) {
+    return lhs <= rhs;
 }
 
 TrustRegionModel::TrustRegionModel() {
@@ -55,7 +60,7 @@ TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eig
     dim_ = initial_points.cols();
     cache_max_ = 3*pow(dim_,2);
 
-    rebuildModel();
+    //rebuildModel();
     moveToBestPoint();
     computePolynomialModels();
 
@@ -107,7 +112,7 @@ void TrustRegionModel::rebuildModel() {
     //!<calculate distances from tr center>
     points_shitfted_.Zero(dim, n_points);
     distances_.resize(n_points);
-    distances_.Zero();
+    distances_.Zero(n_points);
     for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
         points_shitfted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
         distances_(i) = points_shitfted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
@@ -116,7 +121,8 @@ void TrustRegionModel::rebuildModel() {
     distances_ord_.resize(distances_.cols());
     distances_ord_ << distances_;
     index_vector_.setLinSpaced(distances_ord_.size(),0,distances_ord_.size()-1);
-    sort_indexes(distances_ord_.data(), index_vector_.data());
+
+    std::sort(distances_ord_.data(), distances_ord_.data() + distances_ord_.size(), compare); //TODO: still needs to compute an index vector with the order
 
     //TODO: reorder points_shifted_, points_abs_ and fvalues_ based on order in index_vector.
     //TODO: build polynomial model using the reordered points
