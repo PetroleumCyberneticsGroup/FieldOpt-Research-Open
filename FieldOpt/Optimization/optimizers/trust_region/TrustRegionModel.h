@@ -68,6 +68,10 @@ class TrustRegionModel {
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
     Eigen::Matrix<Polynomial, Eigen::Dynamic, 1> modeling_polynomials_;
     Eigen::VectorXd fvalues_;
+    Eigen::VectorXd cached_fvalues_;
+    Eigen::VectorXd index_vector_;
+    Eigen::VectorXd distances_;
+    Eigen::VectorXd distances_ord_;
     Eigen::RowVector2d pivot_values_;
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>

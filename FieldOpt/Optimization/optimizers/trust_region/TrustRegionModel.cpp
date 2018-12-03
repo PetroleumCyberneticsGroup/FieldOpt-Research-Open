@@ -23,6 +23,15 @@
 namespace Optimization {
 namespace Optimizers {
 
+template <typename T>;
+void sort_indexes(const std::vector<T> &v, const std::vector<size_t> idx) {
+//    std::vector<size_t> idx(v.size()); //!<initialize original index locations>
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(),
+         [&v](size_t i1, size_t i2) {return v[i1] < v[i2];}); //!<sort indexes based on comparing values in v>
+//    return idx;
+}
+
 TrustRegionModel::TrustRegionModel() {
 }
 
@@ -44,7 +53,6 @@ TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eig
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
     dim_ = initial_points.cols();
-
     cache_max_ = 3*pow(dim_,2);
 
     rebuildModel();
@@ -73,7 +81,46 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
-    //TODO: implement this method
+    auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
+    Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
+    if (cached_points_.size() == 0) {
+        all_points = points_abs_;
+    } else {
+        all_points << points_abs_;
+        all_points << cached_points_;
+    }
+    Eigen::VectorXd all_fvalues(fvalues_.rows(), fvalues_.cols() + cached_fvalues_.cols()); //!<All function values we know>
+    if (cached_fvalues_.size() == 0) {
+        all_fvalues = fvalues_;
+    } else {
+        all_fvalues << fvalues_;
+        all_fvalues << cached_fvalues_;
+    }
+    auto dim = all_points.rows();
+    auto n_points = all_points.cols();
+    if (tr_center_ != 0) {
+        all_points.col(0).swap(all_points.col(tr_center_)); //!<center will be first>
+        auto center_fvalue = all_points(tr_center_);
+        all_fvalues(tr_center_) = all_fvalues(0);
+        all_fvalues(0) = center_fvalue;
+    }
+    //!<calculate distances from tr center>
+    points_shitfted_.Zero(dim, n_points);
+    distances_.resize(n_points);
+    distances_.Zero();
+    for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
+        points_shitfted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
+        distances_(i) = points_shitfted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
+    }
+    //!<Reorder points based on their distances to the tr center>
+    distances_ord_.resize(distances_.cols());
+    distances_ord_ << distances_;
+    index_vector_.setLinSpaced(distances_ord_.size(),0,distances_ord_.size()-1);
+    sort_indexes(distances_ord_.data(), index_vector_.data());
+
+    //TODO: reorder points_shifted_, points_abs_ and fvalues_ based on order in index_vector.
+    //TODO: build polynomial model using the reordered points
+
 }
 
 void TrustRegionModel::improveModelNfp() {
