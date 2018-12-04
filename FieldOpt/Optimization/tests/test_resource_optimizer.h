@@ -183,10 +183,10 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
       {"Mode", "Maximize"},
       {"Parameters", QJsonObject{
           {"MaxEvaluations", 3},
-          {"InitialTrustRegionRadius", 50},
-          {"LowerBound", -1},
-          {"UpperBound", 1},
-          {"RNGSeed", 25}
+          {"InitialTrustRegionRadius", 1},
+          {"TrustRegionLowerBound", -1000},
+          {"TrustRegionUpperBound", 1000},
+          {"RNGSeed", 0}
       }},
       {"Objective", obj_fun_},
   };
