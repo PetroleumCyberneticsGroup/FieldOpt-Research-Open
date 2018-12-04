@@ -91,7 +91,7 @@ class Optimizer
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
     double tr_eta_1 = 0.05;
-    double tr_pivot_threshold = 1/16;
+    double tr_pivot_threshold = 0.0625;
     double tr_add_threshold = 100;
     double tr_exchange_threshold = 1000;
     double tr_radius_max = 1e3;
@@ -102,14 +102,15 @@ class Optimizer
     double tr_criticality_mu = 100;
     double tr_criticality_beta = 10;
     double tr_criticality_omega = 0.5;
+    double tr_lower_bound = -1000;
+    double tr_upper_bound = 1000;
+
     int tr_iter_max = 10000;
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
     std::string tr_basis = "diagonalHessian";
     std::string tr_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
 
-
-
-      // Hybrid parameters
+    // Hybrid parameters
     /*!
      * @brief How switching between component optimizers is handled.
      *
