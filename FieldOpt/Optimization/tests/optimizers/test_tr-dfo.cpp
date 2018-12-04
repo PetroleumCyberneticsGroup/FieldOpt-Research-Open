@@ -43,18 +43,25 @@ namespace {
         TestResources::TrustRegionModelData tr_mdata;
 
         void SetUpVarCont(const VectorXd &xs){
+
+        }
+
+        void SetUpBaseCase(){
+
+        }
+
+        void SetUpOptimizer(const VectorXd &x0, double (*tr_dfo_prob)(VectorXd xs)){
+
             // cout << "SetUpVarCont" << endl;
             // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
             varcont_tr_dfo_probs_ = new VariablePropertyContainer();
             QString base_varname = "BHP#PRODUCER#"; // dummy var name
-            for (int i = 0; i < xs.rows(); ++i) {
-                ContinousProperty *prop = new ContinousProperty(xs(i));
+            for (int i = 0; i < x0.rows(); ++i) {
+                auto *prop = new ContinousProperty(x0(i));
                 prop->setName(base_varname + QString::number(i));
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
-        }
 
-        void SetUpBaseCase(){
             // cout << "SetUpBaseCase" << endl;
             // Trust region problems from C.Guliani
             // Make 'synthetic' case using tr-dfo variable container
@@ -62,10 +69,8 @@ namespace {
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
 
-            test_case_tr_dfo_probs_->set_objective_function_value(0.0);
-        }
+            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
 
-        void SetUpOptimizer(){
             // cout << "SetUpOptimizer" << endl;
             tr_dfo_ = new TrustRegionOptimization(
                     settings_tr_opt_max_,
@@ -114,14 +119,7 @@ namespace {
         cout << FMAGENTA
              << "[CG.prob1  ] f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]"
              << END << endl;
-
-        VectorXd x0(2);
-        x0 << -1.2, 2.0;
-        SetUpVarCont(x0);
-        SetUpBaseCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
-        SetUpOptimizer();
+        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob1);
         RunnerSubs(tr_dfo_prob1);
     }
 
@@ -129,14 +127,7 @@ namespace {
         cout << FMAGENTA
              << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
              << END << endl;
-
-        VectorXd x0(2);
-        x0 << -2.0, -2.0;
-        SetUpVarCont(x0);
-        SetUpBaseCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
-        SetUpOptimizer();
+        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob2);
         RunnerSubs(tr_dfo_prob2);
     }
 
@@ -144,27 +135,13 @@ namespace {
         cout << FMAGENTA
              << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
              << END << endl;
-
-        VectorXd x0(2);
-        x0 << -0.0, -0.0;
-        SetUpVarCont(x0);
-        SetUpBaseCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
-        SetUpOptimizer();
+        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob3);
         RunnerSubs(tr_dfo_prob3);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_initial_model_created) {
         bool is_model_present = false;
-        VectorXd x0(2);
-        x0 << -0.0, -0.0;
-        SetUpVarCont(x0);
-        SetUpBaseCase();
-
-        test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
-        SetUpOptimizer();
-
+        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob1);
 
         // RUNNER CALL (START)
         auto next_case = tr_dfo_->GetCaseForEvaluation();
@@ -176,7 +153,6 @@ namespace {
         cout << "Case id:" << next_case << END << endl;
         cout << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
         cout << "f:" << next_case->objective_function_value() << END << endl;
-
 
         // RUNNER CALL (FINISH)
         tr_dfo_->SubmitEvaluatedCase(next_case);

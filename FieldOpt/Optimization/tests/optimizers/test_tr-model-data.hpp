@@ -42,6 +42,8 @@ namespace TestResources {
         };
 
         prob prob1;
+        prob prob2;
+        prob prob3;
 
         TrustRegionModelData() {
 
@@ -65,9 +67,9 @@ namespace TestResources {
             prob1.xm.col(1) << -0.885276313607, 2.405791937076;
             prob1.fm.col(1) << 3.554266778647;
 
-
             prob1.cm.resize(1,1); // model.tr_center
-            prob1.rm.resize(1,1); // model.radius
+            prob1.rm.resize(1,1); // model.tr_radius
+            prob1.sm.resize(2,2); // points_shifted
             prob1.pm.resize(6,1); // model.pivot_polynomials.coefficients
             prob1.vm.resize(6,1); // model.pivot_values
 
@@ -75,10 +77,13 @@ namespace TestResources {
             prob1.cm.col(0) << 1.000000000000;
             // Trust region radius:
             prob1.rm.col(0) << 1.000000000000;
+            // Points shifted:
+            prob1.sm.col(0) << 0.000000000000, 0.000000000000;
             // Pivot polynomials:
             prob1.pm.col(0) << 1.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000;
             // Pivot values:
             prob1.vm.col(0) << 1.000000000000, 0.314723686393, 0.000000000000, 0.000000000000, 0.000000000000, 0.000000000000;
+
 
         }
 
