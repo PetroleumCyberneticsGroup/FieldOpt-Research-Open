@@ -38,10 +38,12 @@ TrustRegionOptimization::TrustRegionOptimization(Settings::Optimizer *settings,
         ub_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
     }
     else {
-        lb_.resize(base_case->GetRealVarIdVector().size());
-        ub_.resize(base_case->GetRealVarIdVector().size());
-        lb_.fill(settings->parameters().lower_bound);
-        ub_.fill(settings->parameters().upper_bound);
+        if (settings->parameters().tr_lower_bound && settings->parameters().tr_upper_bound) {
+            lb_.resize(base_case->GetRealVarIdVector().size());
+            ub_.resize(base_case->GetRealVarIdVector().size());
+            lb_.fill(settings->parameters().tr_lower_bound);
+            ub_.fill(settings->parameters().tr_upper_bound);
+        }
     }
 
     settings_ = settings;
@@ -113,20 +115,13 @@ void TrustRegionOptimization::iterate() {
 }
 
 void TrustRegionOptimization::computeInitialPoints() {
-
     int n_cont_vars = variables_->ContinousVariableSize();
     auto initial_point = base_case_->GetRealVarVector();
-
-    cout << n_cont_vars << endl;
-    cout << initial_point << endl;
-
 
     IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
     //!<Find another point since only one initial guess provided
     if (settings_->parameters().tr_init_guesses == -1) {
-        //TODO: project initial point to the bounds, a new case should be added to the case handler in this case.
-
         if (settings_->parameters().tr_init_sampling_method == "Random") {
 
             //!<Find (random) 2nd initial point>
@@ -134,18 +129,52 @@ void TrustRegionOptimization::computeInitialPoints() {
 
             VectorXd second_point = VectorXd::Zero(n_cont_vars,1);
             for (int i = 0; i < n_cont_vars; ++i) {
-                second_point(i) = random_double(rng, lb_(i), ub_(i));
+                second_point(i) = random_double(rng, 0, 1);
             }
 
+            cout << "[          ] second_point 1" << endl;
+            cout << second_point.format(frmt) << endl;
+
+            cout << "[          ] initial_point 1" << endl;
+            cout << initial_point.format(frmt) << endl;
+
+
+            cout << "lp_infinity:" << endl;
+            cout << second_point.lpNorm<Infinity>() << endl;
+            cout << "tr_pivot_threshold" << endl;
+            cout << settings_->parameters().tr_pivot_threshold << endl;
 
             while (second_point.lpNorm<Infinity>()  < settings_->parameters().tr_pivot_threshold) { //!<Second point must not be too close>
-                second_point = 2*second_point;
+                second_point << 2*second_point.array();
             }
-            second_point = (second_point.array() - 0.5)*settings_->parameters().tr_initial_radius;
-            second_point = initial_point + second_point;
 
-            cout << second_point << endl;
-            projectToBounds(&second_point);
+
+            second_point << (second_point.array() - 0.5);
+
+            cout << "[          ] second_point 1" << endl;
+            cout << second_point.format(frmt) << endl;
+
+            second_point *= settings_->parameters().tr_initial_radius;
+
+            cout << "tr_initial_radius=" << settings_->parameters().tr_initial_radius << endl;
+
+            cout << "[          ] second_point 2" << endl;
+            cout << second_point.format(frmt) << endl;
+
+            cout << "[          ] second_point 3" << endl;
+            cout << second_point.format(frmt) << endl;
+
+            second_point << initial_point.array() + second_point.array();
+
+            cout << "[          ] second_point 4" << endl;
+            cout << second_point.format(frmt) << endl;
+
+            if(settings_->parameters().tr_lower_bound && settings_->parameters().tr_upper_bound) {
+                projectToBounds(&second_point);
+            }
+
+            cout << "[          ] second_point 3" << endl;
+            cout << second_point.format(frmt) << endl;
 
             //!<Compute case corresponding to 2nd init point>
             Case *second_case = new Case(base_case_);
@@ -155,7 +184,6 @@ void TrustRegionOptimization::computeInitialPoints() {
             //!<Establish initial point matrix (2 cols since only
             //!< two points are needed to build quad model for trust region)>
             initial_points_.setZero(n_cont_vars, 2);
-            cout << initial_points_ << endl;
             initial_points_.col(0) = initial_point;
 
             //!<Establish initial feval matrix>
