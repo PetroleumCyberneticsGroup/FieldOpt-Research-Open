@@ -186,7 +186,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
           {"InitialTrustRegionRadius", 1},
           {"TrustRegionLowerBound", -1000},
           {"TrustRegionUpperBound", 1000},
-          {"RNGSeed", 0}
+          {"RNGSeed", 25}
       }},
       {"Objective", obj_fun_},
   };
