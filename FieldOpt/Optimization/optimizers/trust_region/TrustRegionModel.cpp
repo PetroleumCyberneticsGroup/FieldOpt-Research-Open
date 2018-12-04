@@ -18,8 +18,11 @@
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
 #include "TrustRegionModel.h"
-#include <Settings/optimizer.h>
 #include <numeric>
+#include <Settings/optimizer.h>
+#include "Utilities/printer.hpp"
+#include "Utilities/stringhelpers.hpp"
+#include <Utilities/verbosity.h>
 
 namespace Optimization {
 namespace Optimizers {
@@ -47,20 +50,15 @@ TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eig
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
     points_abs_ << initial_points;
 
-    std::cout << points_abs_ << endl;
-
     fvalues_.setZero(initial_fvalues.size());
     fvalues_ << initial_fvalues;
 
-    std::cout << fvalues_ << endl;
-
-
-    radius_ = settings_->parameters().tr_initial_radius;
+    radius_ =  settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
     dim_ = initial_points.cols();
     cache_max_ = 3*pow(dim_,2);
 
-    //rebuildModel();
+    rebuildModel();
     moveToBestPoint();
     computePolynomialModels();
 
@@ -86,6 +84,7 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
+    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -101,8 +100,8 @@ void TrustRegionModel::rebuildModel() {
         all_fvalues << fvalues_;
         all_fvalues << cached_fvalues_;
     }
-    auto dim = all_points.rows();
-    auto n_points = all_points.cols();
+    int dim = all_points.rows();
+    int n_points = all_points.cols();
     if (tr_center_ != 0) {
         all_points.col(0).swap(all_points.col(tr_center_)); //!<center will be first>
         auto center_fvalue = all_points(tr_center_);
@@ -110,13 +109,20 @@ void TrustRegionModel::rebuildModel() {
         all_fvalues(0) = center_fvalue;
     }
     //!<calculate distances from tr center>
-    points_shitfted_.Zero(dim, n_points);
+    points_shitfted_.resize(dim, n_points);
     distances_.resize(n_points);
+    points_shitfted_.Zero(dim, n_points);
     distances_.Zero(n_points);
     for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
         points_shitfted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
         distances_(i) = points_shitfted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
+
+    cout << "[          ] points_shifted_" << endl;
+    cout << points_shitfted_.format(frmt) << endl;
+    cout << "[          ] distances_" << endl;
+    cout << distances_.format(frmt) << endl;
+
     //!<Reorder points based on their distances to the tr center>
     distances_ord_.resize(distances_.cols());
     distances_ord_ << distances_;
