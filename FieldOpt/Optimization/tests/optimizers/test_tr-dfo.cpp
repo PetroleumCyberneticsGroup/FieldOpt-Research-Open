@@ -19,6 +19,8 @@
 #include "Utilities/colors.hpp"
 #include "Utilities/stringhelpers.hpp"
 
+#include "test_tr-model-data.hpp"
+
 using namespace TestResources::TestFunctions;
 using namespace Optimization::Optimizers;
 using namespace std;
@@ -38,6 +40,7 @@ namespace {
         TrustRegionOptimization *tr_dfo_;
         Optimization::Case *test_case_tr_dfo_probs_;
         VariablePropertyContainer *varcont_tr_dfo_probs_;
+        TestResources::TrustRegionModelData tr_mdata;
 
         void SetUpVarCont(const VectorXd &xs){
             // cout << "SetUpVarCont" << endl;
