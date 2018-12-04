@@ -19,6 +19,7 @@
 ******************************************************************************/
 #include "TrustRegionModel.h"
 #include <numeric>
+#include <functional>
 #include <Settings/optimizer.h>
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
@@ -27,17 +28,8 @@
 namespace Optimization {
 namespace Optimizers {
 
-template <typename T>
-void sort_indexes(const std::vector<T> &v, const std::vector<size_t> idx) {
-//    std::vector<size_t> idx(v.size()); //!<initialize original index locations>
-    iota(idx.begin(), idx.end(), 0);
-    sort(idx.begin(), idx.end(),
-         [&v](size_t i1, size_t i2) {return v[i1] < v[i2];}); //!<sort indexes based on comparing values in v>
-//    return idx;
-}
-
-bool compare(const double &lhs, const double &rhs) {
-    return lhs <= rhs;
+bool compare(const int &lhs, const int &rhs, const double *distances) {
+    return distances[lhs] <= distances[rhs];
 }
 
 TrustRegionModel::TrustRegionModel() {
@@ -84,7 +76,7 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+    //Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -118,21 +110,67 @@ void TrustRegionModel::rebuildModel() {
         distances_(i) = points_shitfted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
 
-    cout << "[          ] points_shifted_" << endl;
-    cout << points_shitfted_.format(frmt) << endl;
-    cout << "[          ] distances_" << endl;
-    cout << distances_.format(frmt) << endl;
+    //!<dbg>
+    //cout << "[          ] points_shifted_" << endl;
+    //cout << points_shitfted_.format(frmt) << endl;
+    //cout << "[          ] distances_" << endl;
+    //cout << distances_.format(frmt) << endl;
+
 
     //!<Reorder points based on their distances to the tr center>
-    distances_ord_.resize(distances_.cols());
-    distances_ord_ << distances_;
-    index_vector_.setLinSpaced(distances_ord_.size(),0,distances_ord_.size()-1);
+    index_vector_.setLinSpaced(distances_.size(),0,distances_.size()-1);
+    std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(), std::bind(compare, std::placeholders::_1,  std::placeholders::_2, distances_.data()));
+    sortVectorByIndex(distances_, index_vector_);
+    sortVectorByIndex(fvalues_, index_vector_);
 
-    std::sort(distances_ord_.data(), distances_ord_.data() + distances_ord_.size(), compare); //TODO: still needs to compute an index vector with the order
+    //!<dbg>
+    //cout << "[          ] distances_ord_" << endl;
+    //cout << distances_.format(frmt) << endl;
 
-    //TODO: reorder points_shifted_, points_abs_ and fvalues_ based on order in index_vector.
+    //cout << "[          ] fvalues_ord_" << endl;
+    //cout << fvalues_.format(frmt) << endl;
+
+    //cout << "[          ] index_vector_" << endl;
+    //cout << index_vector_.format(frmt) << endl;
+
+    sortMatrixByIndex(points_shitfted_, index_vector_);
+    sortMatrixByIndex(points_abs_, index_vector_);
+
+    //!<dbg>
+    //cout << "[          ] points_shifted_ord" << endl;
+    //cout << points_shitfted_.format(frmt) << endl;
+
+    //cout << "[          ] points_abs_ord" << endl;
+    //cout << points_abs_.format(frmt) << endl;
+
     //TODO: build polynomial model using the reordered points
 
+}
+
+void TrustRegionModel::sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind) {
+    Eigen::VectorXd vec_ord(vec.size());
+    for (int i=0; i < vec.size(); i++) {
+        int index = int(ind(i));
+        vec_ord(i) = vec(index);
+    }
+
+    for(int i=0; i<vec.size(); i++) {
+        vec(i) = vec_ord(i);
+    }
+    vec_ord.resize(0);
+}
+
+void TrustRegionModel::sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind) {
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_ord(points.rows(), points.cols());
+    for (int i=0; i<points.cols(); i++) {
+        int index = int(ind(i));
+        points_ord.col(i) << points.col(index);
+    }
+
+    for (int i=0; i<points.cols(); i++) {
+        points.col(i) << points_ord.col(i);
+    }
+    points_ord.resize(0,0);
 }
 
 void TrustRegionModel::improveModelNfp() {

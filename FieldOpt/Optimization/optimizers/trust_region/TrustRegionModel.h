@@ -71,12 +71,14 @@ class TrustRegionModel {
     Eigen::VectorXd cached_fvalues_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
-    Eigen::VectorXd distances_ord_;
     Eigen::RowVector2d pivot_values_;
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>
     int cache_max_;
     int dim_;
+
+    void sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind);
+    void sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind);
 };
 
 }
