@@ -89,21 +89,24 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
         initial_points_.col(1) = c->GetRealVarVector();
         initial_fvalues_(1) = c->objective_function_value();
         n_initial_points_++;
-    }
-    cout << "[          ] initial_points_" << endl;
-    cout << initial_points_.format(frmt) << endl;
 
-    cout << "[          ] initial_fvalues_" << endl;
-    cout << initial_fvalues_.format(frmt) << endl;
+        //!<dbg>
+        //cout << "[          ] initial_points_" << endl;
+        //cout << initial_points_.format(frmt) << endl;
 
+        //cout << "[          ] initial_fvalues_" << endl;
+        //cout << initial_fvalues_.format(frmt) << endl;
 
-    tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_, settings_);  //!<creates the initial trust region
+        tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_,
+                                         settings_);  //!<creates the initial trust region
 
-    //TODO: improve trust region with the new point
+        //TODO: improve trust region with the new point
 
-    if (isImprovement(c)) {
-        updateTentativeBestCase(c);
-        Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objective_function_value()), "Optimization", "EGO");
+        if (isImprovement(c)) {
+            updateTentativeBestCase(c);
+            Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objective_function_value()),
+                              "Optimization", "Trust Region");
+        }
     }
 }
 void TrustRegionOptimization::iterate() {
@@ -117,8 +120,8 @@ void TrustRegionOptimization::iterate() {
 void TrustRegionOptimization::computeInitialPoints() {
     int n_cont_vars = variables_->ContinousVariableSize();
     auto initial_point = base_case_->GetRealVarVector();
-
-    IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+    //!<dbg>
+    //IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
     //!<Find another point since only one initial guess provided
     if (settings_->parameters().tr_init_guesses == -1) {
@@ -132,17 +135,18 @@ void TrustRegionOptimization::computeInitialPoints() {
                 second_point(i) = random_double(rng, 0, 1);
             }
 
-            cout << "[          ] second_point 1" << endl;
-            cout << second_point.format(frmt) << endl;
+            //!<dbg>
+            //cout << "[          ] second_point 1" << endl;
+            //cout << second_point.format(frmt) << endl;
 
-            cout << "[          ] initial_point 1" << endl;
-            cout << initial_point.format(frmt) << endl;
+            //cout << "[          ] initial_point 1" << endl;
+            //cout << initial_point.format(frmt) << endl;
 
+            //cout << "lp_infinity:" << endl;
+            //cout << second_point.lpNorm<Infinity>() << endl;
+            //cout << "tr_pivot_threshold" << endl;
+            //cout << settings_->parameters().tr_pivot_threshold << endl;
 
-            cout << "lp_infinity:" << endl;
-            cout << second_point.lpNorm<Infinity>() << endl;
-            cout << "tr_pivot_threshold" << endl;
-            cout << settings_->parameters().tr_pivot_threshold << endl;
 
             while (second_point.lpNorm<Infinity>()  < settings_->parameters().tr_pivot_threshold) { //!<Second point must not be too close>
                 second_point << 2*second_point.array();
@@ -150,31 +154,16 @@ void TrustRegionOptimization::computeInitialPoints() {
 
 
             second_point << (second_point.array() - 0.5);
-
-            cout << "[          ] second_point 1" << endl;
-            cout << second_point.format(frmt) << endl;
-
             second_point *= settings_->parameters().tr_initial_radius;
-
-            cout << "tr_initial_radius=" << settings_->parameters().tr_initial_radius << endl;
-
-            cout << "[          ] second_point 2" << endl;
-            cout << second_point.format(frmt) << endl;
-
-            cout << "[          ] second_point 3" << endl;
-            cout << second_point.format(frmt) << endl;
-
             second_point << initial_point.array() + second_point.array();
-
-            cout << "[          ] second_point 4" << endl;
-            cout << second_point.format(frmt) << endl;
-
             if(settings_->parameters().tr_lower_bound && settings_->parameters().tr_upper_bound) {
                 projectToBounds(&second_point);
             }
 
-            cout << "[          ] second_point 3" << endl;
-            cout << second_point.format(frmt) << endl;
+            //!<dbg>
+            //cout << "[          ] second_point" << endl;
+            //cout << second_point.format(frmt) << endl;
+
 
             //!<Compute case corresponding to 2nd init point>
             Case *second_case = new Case(base_case_);
@@ -211,13 +200,10 @@ void TrustRegionOptimization::projectToBounds(VectorXd *point) {
     if (ub_.size() > 0) {
         *point = ub_.cwiseMin(*point);
     }
-
     cout << *point << endl;
-
     if (lb_.size() > 0) {
         *point = lb_.cwiseMax(*point);
     }
-
     cout << *point << endl;
 }
 
