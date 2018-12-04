@@ -39,13 +39,13 @@ namespace {
         Optimization::Case *test_case_tr_dfo_probs_;
         VariablePropertyContainer *varcont_tr_dfo_probs_;
 
-        void SetUpVarCont(int nvars){
+        void SetUpVarCont(const VectorXd &xs){
             // cout << "SetUpVarCont" << endl;
             // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
             varcont_tr_dfo_probs_ = new VariablePropertyContainer();
             QString base_varname = "BHP#PRODUCER#"; // dummy var name
-            for (int i = 0; i < nvars; ++i) {
-                ContinousProperty *prop = new ContinousProperty(0.0);
+            for (int i = 0; i < xs.rows(); ++i) {
+                ContinousProperty *prop = new ContinousProperty(xs(i));
                 prop->setName(base_varname + QString::number(i));
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
@@ -113,8 +113,8 @@ namespace {
              << END << endl;
 
         VectorXd x0(2);
-        x0 << -1.2, -2.0;
-        SetUpVarCont(x0.rows());
+        x0 << -1.2, 2.0;
+        SetUpVarCont(x0);
         SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
@@ -129,7 +129,7 @@ namespace {
 
         VectorXd x0(2);
         x0 << -2.0, -2.0;
-        SetUpVarCont(x0.rows());
+        SetUpVarCont(x0);
         SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob2(x0));
@@ -144,7 +144,7 @@ namespace {
 
         VectorXd x0(2);
         x0 << -0.0, -0.0;
-        SetUpVarCont(x0.rows());
+        SetUpVarCont(x0);
         SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob3(x0));
@@ -156,7 +156,7 @@ namespace {
         bool is_model_present = false;
         VectorXd x0(2);
         x0 << -0.0, -0.0;
-        SetUpVarCont(x0.rows());
+        SetUpVarCont(x0);
         SetUpBaseCase();
 
         test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob1(x0));
@@ -191,5 +191,4 @@ namespace {
         }
         EXPECT_TRUE(is_model_present);
     }
-
 }
