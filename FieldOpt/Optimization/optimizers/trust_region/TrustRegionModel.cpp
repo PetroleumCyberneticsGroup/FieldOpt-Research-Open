@@ -85,7 +85,9 @@ void TrustRegionModel::rebuildModel() {
         all_points << points_abs_;
         all_points << cached_points_;
     }
-    Eigen::VectorXd all_fvalues(fvalues_.rows(), fvalues_.cols() + cached_fvalues_.cols()); //!<All function values we know>
+
+    Eigen::MatrixXd all_fvalues(fvalues_.rows(), fvalues_.cols() + cached_fvalues_.cols()); //!<All function values we know>
+
     if (cached_fvalues_.size() == 0) {
         all_fvalues = fvalues_;
     } else {

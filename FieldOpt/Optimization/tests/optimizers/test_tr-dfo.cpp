@@ -42,15 +42,7 @@ namespace {
         VariablePropertyContainer *varcont_tr_dfo_probs_;
         TestResources::TrustRegionModelData tr_mdata;
 
-        void SetUpVarCont(const VectorXd &xs){
-
-        }
-
-        void SetUpBaseCase(){
-
-        }
-
-        void SetUpOptimizer(const VectorXd &x0, double (*tr_dfo_prob)(VectorXd xs)){
+        void SetUpOptimizer(const MatrixXd &x0, double (*tr_dfo_prob)(VectorXd xs)){
 
             // cout << "SetUpVarCont" << endl;
             // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
@@ -69,7 +61,7 @@ namespace {
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
 
-            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
+            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0.col(0)));
 
             // cout << "SetUpOptimizer" << endl;
             tr_dfo_ = new TrustRegionOptimization(
