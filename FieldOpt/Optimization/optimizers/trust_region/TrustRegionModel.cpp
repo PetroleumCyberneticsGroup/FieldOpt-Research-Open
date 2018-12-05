@@ -36,7 +36,6 @@ TrustRegionModel::TrustRegionModel() {
 }
 
 TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues, Settings::Optimizer *settings) {
-    //TODO: implement this method
     settings_ = settings;
 
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
@@ -76,6 +75,7 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
+    //!<dbg>
     //Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
@@ -143,7 +143,10 @@ void TrustRegionModel::rebuildModel() {
     //cout << "[          ] points_abs_ord" << endl;
     //cout << points_abs_.format(frmt) << endl;
 
+
     //TODO: build polynomial model using the reordered points
+    nfpBasis(dim);//!<build nfp polynomial basis>
+
 
 }
 
@@ -172,6 +175,125 @@ void TrustRegionModel::sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eig
     }
     points_ord.resize(0,0);
 }
+
+//!<nfpBasis(dim) builds a Newtown Fundamental Polynomial basis for a given dimension.>
+void TrustRegionModel::nfpBasis(int dim) {
+    //!<dbg>
+    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+    //!<number of terms>
+    int poly_num = (dim+1)*(dim+2)/2;
+    int linear_size = dim+1;
+
+    //!<calculating basis of polynomials>
+    pivot_polynomials_.resize(poly_num);
+    pivot_polynomials_[poly_num-1].dimension = dim;
+    pivot_polynomials_[poly_num-1].coefficients.resize(poly_num);
+    pivot_polynomials_[poly_num-1].coefficients.setZero(poly_num);
+
+    //!<dbg>
+    //cout << "[          ] pivot_polynomials_poly_" << poly_num-1 << endl;
+    //cout << pivot_polynomials_[poly_num-1].coefficients.format(frmt) << endl;
+
+    for (int i=0; i<linear_size;i++) {
+        pivot_polynomials_[i].dimension = dim;
+        pivot_polynomials_[i].coefficients.resize(poly_num);
+        pivot_polynomials_[i].coefficients.setZero(poly_num);
+        pivot_polynomials_[i].coefficients(i) = 1;
+
+        //!<dbg>
+        //cout << "[          ] pivot_polynomials_poly_" << i << endl;
+        //cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
+    }
+
+    //!<quadratic entries>
+    int c0 = 0;
+    int m = 0;
+    int n = 0;
+    Eigen::VectorXd g0(dim);
+    g0.setZero(dim);
+
+    for (int poly_i=linear_size; poly_i<poly_num; poly_i++) {
+        Eigen::MatrixXd H(dim,dim);
+        H.setZero(dim,dim);
+        if (m == n) {
+            H(m,n) = 2;
+        } else {
+            H(m,n) = 1;
+            H(n,m) = 1;
+        }
+
+        //!<dbg>
+        //cout << "[          ] c0:" << c0 << endl;
+        //cout << "[          ] g0:" << endl;
+        //cout << g0.format(frmt) << endl;
+        //cout << "[          ] H:" << endl;
+        //cout << H.format(frmt) << endl;
+
+        pivot_polynomials_[poly_i] = matricesToPolynomial(c0, g0, H);
+        if (n < dim-1) {
+            n++;
+        } else {
+            m++;
+            n = m;
+        }
+    }
+
+    //!<dbg>
+    //for (int i=0; i<pivot_polynomials_.size();i++) {
+    //    cout << "[          ] pivot_polynomials_poly_" << i << endl;
+    //    cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
+    //}
+}
+
+//!<matricesToPolynomial(c0,g0,H) converts coefficients in matrix form
+//!<to polynomial (c0: constant, g0:linear, H:quadratic>
+Polynomial TrustRegionModel::matricesToPolynomial(int c0, const Eigen::VectorXd &g0, const Eigen::MatrixXd &H) {
+    //!<dbg>
+    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+
+    int dim = g0.size();
+    int n_terms = (dim+1)*(dim+2)/2;
+    Eigen::VectorXd coefficients(n_terms);
+    coefficients.setZero(n_terms);
+
+    //!<zero order>
+    coefficients(0) = c0;
+
+    //!<dbg>
+    //cout << "[          ] coefficients:" << endl;
+    //cout << coefficients.format(frmt) << endl;
+
+    //!<first order>
+    int ind_coefficients = dim;
+    coefficients.segment(0,ind_coefficients) = g0;
+
+    //!<dbg>
+    //cout << "[          ] coefficients:" << endl;
+    //cout << coefficients.format(frmt) << endl;
+
+    //!<second order>
+    for (int k=0; k<dim; k++) {
+        for (int m=0; m <= k; m++) {
+            ind_coefficients = ind_coefficients + 1;
+            coefficients(ind_coefficients) = H(k, m);
+
+            //cout << "H(" <<  k << "," << m << "):" << H(k,m) << endl;
+
+            if (H(m, k) != H(k, m)) {
+                Printer::ext_info("H not symmetrical: ","Optimization", "Trust Region");
+            }
+        }
+    }
+    //!<dbg>
+    // cout << "[          ] coefficients:" << endl;
+    //cout << coefficients.format(frmt) << endl;
+
+    Polynomial p;
+    p.dimension = 2;
+    p.coefficients = coefficients;
+    return p;
+}
+
 
 void TrustRegionModel::improveModelNfp() {
     //TODO: implement this method

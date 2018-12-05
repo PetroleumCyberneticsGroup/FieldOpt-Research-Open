@@ -23,9 +23,10 @@
 
 #include <Settings/optimizer.h>
 #include <Eigen/Core>
+#include <vector>
 
-typedef struct Polynomial {
-    int dimension;
+struct Polynomial {
+    int dimension = 0;
     Eigen::VectorXd coefficients;
 };
 
@@ -62,11 +63,11 @@ class TrustRegionModel {
 
  private:
     Settings::Optimizer *settings_;
-    Polynomial pivot_polynomials_;
+    std::vector<Polynomial> pivot_polynomials_;
+    std::vector<Polynomial> modeling_polynomials_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shitfted_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
-    Eigen::Matrix<Polynomial, Eigen::Dynamic, 1> modeling_polynomials_;
     Eigen::VectorXd fvalues_;
     Eigen::VectorXd cached_fvalues_;
     Eigen::VectorXd index_vector_;
@@ -79,6 +80,8 @@ class TrustRegionModel {
 
     void sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind);
     void sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind);
+    void nfpBasis(int dim);
+    Polynomial matricesToPolynomial(int c0, const Eigen::VectorXd &g0, const Eigen::MatrixXd &H);
 };
 
 }
