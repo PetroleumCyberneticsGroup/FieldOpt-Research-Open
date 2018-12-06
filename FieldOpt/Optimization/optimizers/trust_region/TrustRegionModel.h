@@ -70,7 +70,7 @@ class TrustRegionModel {
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
-    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shitfted_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shifted_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
     Eigen::VectorXd fvalues_;
     Eigen::VectorXd cached_fvalues_;
