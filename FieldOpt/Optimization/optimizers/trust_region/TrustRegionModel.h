@@ -49,7 +49,7 @@ class TrustRegionModel {
     TrustRegionModel(
             const Eigen::Matrix<double,
             Eigen::Dynamic,Eigen::Dynamic>& initial_points,
-            const Eigen::VectorXd& initial_fvalues ,
+            const Eigen::RowVectorXd& initial_fvalues ,
             Settings::Optimizer *settings);
     int getDimension();
 
@@ -60,7 +60,7 @@ class TrustRegionModel {
     void improveModelNfp();
     void ensureImprovement();
     bool isLambdaPoised();
-    void changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues);
+    void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
     std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
     void computePolynomialModels();
 
@@ -69,11 +69,13 @@ class TrustRegionModel {
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> all_points_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_abs_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_shifted_;
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> cached_points_;
-    Eigen::VectorXd fvalues_;
-    Eigen::VectorXd cached_fvalues_;
+    Eigen::RowVectorXd all_fvalues_;
+    Eigen::RowVectorXd fvalues_;
+    Eigen::RowVectorXd cached_fvalues_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
     Eigen::RowVector2d pivot_values_;
@@ -81,6 +83,10 @@ class TrustRegionModel {
     int tr_center_; //!<index of trust region center point in points_abs>
     int cache_max_;
     int dim_;
+
+    void sortVectorByIndex(
+            Eigen::RowVectorXd &vec,
+            const Eigen::VectorXd &ind);
 
     void sortVectorByIndex(
             Eigen::VectorXd &vec,

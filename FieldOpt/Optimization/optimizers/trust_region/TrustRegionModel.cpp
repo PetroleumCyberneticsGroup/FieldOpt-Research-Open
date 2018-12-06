@@ -40,7 +40,7 @@ TrustRegionModel::TrustRegionModel() {
 
 TrustRegionModel::TrustRegionModel(
         const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points,
-        const Eigen::VectorXd& initial_fvalues,
+        const Eigen::RowVectorXd& initial_fvalues,
         Settings::Optimizer *settings) {
 
     settings_ = settings;
@@ -91,29 +91,47 @@ void TrustRegionModel::rebuildModel() {
     //!<dbg>
     Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
-    Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
+    all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
-        all_points = points_abs_;
+        all_points_ = points_abs_;
     } else {
-        all_points << points_abs_;
-        all_points << cached_points_;
+        all_points_ << points_abs_;
+        all_points_ << cached_points_;
     }
 
-    Eigen::MatrixXd all_fvalues(fvalues_.rows(), fvalues_.cols() + cached_fvalues_.cols()); //!<All function values we know>
+    all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size()); //!<All function values we know>
 
     if (cached_fvalues_.size() == 0) {
-        all_fvalues = fvalues_;
+        all_fvalues_ = fvalues_;
     } else {
-        all_fvalues << fvalues_;
-        all_fvalues << cached_fvalues_;
+        all_fvalues_ << fvalues_;
+        all_fvalues_ << cached_fvalues_;
     }
-    int dim = all_points.rows();
-    int n_points = all_points.cols();
+
+    //!<dbg>
+//    cout << "[          ] points_abs_" << endl;
+//    cout << points_abs_.format(frmt) << endl;
+//
+//    cout << "[          ] fvalues_" << endl;
+//    cout << fvalues_.format(frmt) << endl;
+//
+//    cout << "[          ] fvalues_.transpose()" << endl;
+//    cout << fvalues_.transpose().format(frmt) << endl;
+//
+//    cout << "[          ] all_fvalues" << endl;
+//    cout << all_fvalues_.format(frmt) << endl;
+//
+//    cout << "fvalues_size():" << fvalues_.size() <<endl;
+//    cout << "cached_fvalues_.size():" << cached_fvalues_.size() << endl;
+
+
+    int dim = all_points_.rows();
+    int n_points = all_points_.cols();
     if (tr_center_ != 0) {
-        all_points.col(0).swap(all_points.col(tr_center_)); //!<center will be first>
-        auto center_fvalue = all_points(tr_center_);
-        all_fvalues(tr_center_) = all_fvalues(0);
-        all_fvalues(0) = center_fvalue;
+        all_points_.col(0).swap(all_points_.col(tr_center_)); //!<center will be first>
+        auto center_fvalue = all_points_(tr_center_);
+        all_fvalues_(tr_center_) = all_fvalues_(0);
+        all_fvalues_(0) = center_fvalue;
     }
     //!<calculate distances from tr center>
     points_shifted_.resize(dim, n_points);
@@ -121,7 +139,7 @@ void TrustRegionModel::rebuildModel() {
     points_shifted_.Zero(dim, n_points);
     distances_.Zero(n_points);
     for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
-        points_shifted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
+        points_shifted_.col(i) << all_points_.col(i) - all_points_.col(0); //!<Compute distances>
         distances_(i) = points_shifted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
 
@@ -131,12 +149,11 @@ void TrustRegionModel::rebuildModel() {
     //cout << "[          ] distances_" << endl;
     //cout << distances_.format(frmt) << endl;
 
-
     //!<Reorder points based on their distances to the tr center>
     index_vector_.setLinSpaced(distances_.size(),0,distances_.size()-1);
     std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(), std::bind(compare, std::placeholders::_1,  std::placeholders::_2, distances_.data()));
     sortVectorByIndex(distances_, index_vector_);
-    sortVectorByIndex(fvalues_, index_vector_);
+    sortVectorByIndex(all_fvalues_, index_vector_);
 
     //!<dbg>
     //cout << "[          ] distances_ord_" << endl;
@@ -149,7 +166,7 @@ void TrustRegionModel::rebuildModel() {
     //cout << index_vector_.format(frmt) << endl;
 
     sortMatrixByIndex(points_shifted_, index_vector_);
-    sortMatrixByIndex(points_abs_, index_vector_);
+    sortMatrixByIndex(all_points_, index_vector_);
 
     //!<dbg>
     //cout << "[          ] points_shifted_ord" << endl;
@@ -161,8 +178,6 @@ void TrustRegionModel::rebuildModel() {
 
     //TODO: build polynomial model using the reordered points
     nfpBasis(dim);//!<build nfp polynomial basis>
-
-
 }
 
 void TrustRegionModel::sortVectorByIndex(
@@ -178,6 +193,21 @@ void TrustRegionModel::sortVectorByIndex(
         vec(i) = vec_ord(i);
     }
     vec_ord.resize(0);
+}
+
+void TrustRegionModel::sortVectorByIndex(
+            Eigen::RowVectorXd &vec,
+            const Eigen::VectorXd &ind) {
+        Eigen::VectorXd vec_ord(vec.size());
+        for (int i=0; i < vec.size(); i++) {
+            int index = int(ind(i));
+            vec_ord(i) = vec(index);
+        }
+
+        for(int i=0; i<vec.size(); i++) {
+            vec(i) = vec_ord(i);
+        }
+        vec_ord.resize(0);
 }
 
 void TrustRegionModel::sortMatrixByIndex(
@@ -199,7 +229,8 @@ void TrustRegionModel::sortMatrixByIndex(
 //!<nfpBasis(dim) builds a Newtown Fundamental Polynomial basis for a given dimension.>
 void TrustRegionModel::nfpBasis(int dim) {
     //!<dbg>
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+
     //!<number of terms>
     int poly_num = (dim+1)*(dim+2)/2;
     int linear_size = dim+1;
@@ -272,7 +303,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
         const Eigen::VectorXd &g0,
         const Eigen::MatrixXd &H) {
     //!<dbg>
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
     int dim = g0.size();
     int n_terms = (dim+1)*(dim+2)/2;
@@ -332,7 +363,7 @@ bool TrustRegionModel::isLambdaPoised() {
 
 void TrustRegionModel::changeTrCenter(
         Eigen::VectorXd new_point,
-        Eigen::VectorXd fvalues) {
+        Eigen::RowVectorXd fvalues) {
     //TODO: implement this method
 }
 
