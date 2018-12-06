@@ -52,6 +52,11 @@ class TrustRegionModel {
             const Eigen::RowVectorXd& initial_fvalues ,
             Settings::Optimizer *settings);
     int getDimension();
+    double getRadius();
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPoints();
+    Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPointsShifted();
+    Eigen::RowVectorXd getFunctionValues();
+    std::vector<Polynomial> getPivotPolynomials();
 
     void moveToBestPoint();
     void criticalityStep();

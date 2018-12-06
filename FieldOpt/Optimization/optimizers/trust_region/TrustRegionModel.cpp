@@ -75,6 +75,26 @@ int TrustRegionModel::getDimension() {
     return dim_;
 }
 
+double TrustRegionModel::getRadius() {
+    return radius_;
+}
+
+Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> TrustRegionModel::getPoints() {
+    return points_abs_;
+}
+
+Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> TrustRegionModel::getPointsShifted() {
+    return points_shifted_;
+}
+
+Eigen::RowVectorXd TrustRegionModel::getFunctionValues() {
+    return fvalues_;
+}
+
+std::vector<Polynomial> TrustRegionModel::getPivotPolynomials() {
+    return pivot_polynomials_;
+}
+
 void TrustRegionModel::moveToBestPoint() {
     //TODO: implement this method
 }
