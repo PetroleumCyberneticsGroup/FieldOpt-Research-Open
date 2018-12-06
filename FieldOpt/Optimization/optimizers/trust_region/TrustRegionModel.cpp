@@ -55,6 +55,13 @@ TrustRegionModel::TrustRegionModel(
     dim_ = initial_points.cols();
     cache_max_ = 3*pow(dim_,2);
 
+
+    cached_fvalues_.resize(0);
+    index_vector_.resize(0);
+    distances_.resize(0);
+    cached_points_.resize(0,0);
+    points_shifted_.resize(0,0);
+
     rebuildModel();
     moveToBestPoint();
     computePolynomialModels();
