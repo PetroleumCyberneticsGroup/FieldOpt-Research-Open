@@ -44,19 +44,17 @@ namespace {
 
         void SetUpOptimizer(const MatrixXd &x0, double (*tr_dfo_prob)(VectorXd xs)){
 
-            // cout << "SetUpVarCont" << endl;
-            // Make 'synthetic' variable container (sz:10) for tr-dfo test functions
+            // Dummy var container based on initial point
             varcont_tr_dfo_probs_ = new VariablePropertyContainer();
             QString base_varname = "BHP#PRODUCER#"; // dummy var name
             for (int i = 0; i < x0.rows(); ++i) {
-                auto *prop = new ContinousProperty(x0(i));
+                // Use initial point values to construct container
+                auto *prop = new ContinousProperty(x0(i,0));
                 prop->setName(base_varname + QString::number(i));
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
 
-            // cout << "SetUpBaseCase" << endl;
-            // Trust region problems from C.Guliani
-            // Make 'synthetic' case using tr-dfo variable container
+            // Set up base case using dummy var containter
             test_case_tr_dfo_probs_ = new Optimization::Case(
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
@@ -85,7 +83,7 @@ namespace {
                         tr_dfo_prob(next_case->GetRealVarVector()));
 
                 cout << ss.str() << "----------------------" << END << endl;
-                cout << ss.str() << "Case id:" << next_case << END << endl;
+                cout << ss.str() << "Case id:" << next_case->GetId().toString().toStdString() << END << endl;
                 cout << ss.str() << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
                 cout << ss.str() << "f:" << next_case->objective_function_value() << END << endl;
 
