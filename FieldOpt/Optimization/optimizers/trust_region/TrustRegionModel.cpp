@@ -89,7 +89,7 @@ double TrustRegionModel::checkInterpolation() {
 
 void TrustRegionModel::rebuildModel() {
     //!<dbg>
-    //Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     Eigen::MatrixXd all_points(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -116,18 +116,18 @@ void TrustRegionModel::rebuildModel() {
         all_fvalues(0) = center_fvalue;
     }
     //!<calculate distances from tr center>
-    points_shitfted_.resize(dim, n_points);
+    points_shifted_.resize(dim, n_points);
     distances_.resize(n_points);
-    points_shitfted_.Zero(dim, n_points);
+    points_shifted_.Zero(dim, n_points);
     distances_.Zero(n_points);
     for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
-        points_shitfted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
-        distances_(i) = points_shitfted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
+        points_shifted_.col(i) << points_abs_.col(i) - points_abs_.col(0); //!<Compute distances>
+        distances_(i) = points_shifted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
 
     //!<dbg>
     //cout << "[          ] points_shifted_" << endl;
-    //cout << points_shitfted_.format(frmt) << endl;
+    //cout << points_shifted_.format(frmt) << endl;
     //cout << "[          ] distances_" << endl;
     //cout << distances_.format(frmt) << endl;
 
@@ -148,12 +148,12 @@ void TrustRegionModel::rebuildModel() {
     //cout << "[          ] index_vector_" << endl;
     //cout << index_vector_.format(frmt) << endl;
 
-    sortMatrixByIndex(points_shitfted_, index_vector_);
+    sortMatrixByIndex(points_shifted_, index_vector_);
     sortMatrixByIndex(points_abs_, index_vector_);
 
     //!<dbg>
     //cout << "[          ] points_shifted_ord" << endl;
-    //cout << points_shitfted_.format(frmt) << endl;
+    //cout << points_shifted_.format(frmt) << endl;
 
     //cout << "[          ] points_abs_ord" << endl;
     //cout << points_abs_.format(frmt) << endl;
