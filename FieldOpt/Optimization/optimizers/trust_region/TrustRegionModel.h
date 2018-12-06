@@ -46,7 +46,11 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel();
-    TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues , Settings::Optimizer *settings);
+    TrustRegionModel(
+            const Eigen::Matrix<double,
+            Eigen::Dynamic,Eigen::Dynamic>& initial_points,
+            const Eigen::VectorXd& initial_fvalues ,
+            Settings::Optimizer *settings);
     int getDimension();
 
     void moveToBestPoint();
@@ -78,10 +82,21 @@ class TrustRegionModel {
     int cache_max_;
     int dim_;
 
-    void sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind);
-    void sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind);
+    void sortVectorByIndex(
+            Eigen::VectorXd &vec,
+            const Eigen::VectorXd &ind);
+
+    void sortMatrixByIndex(
+            Eigen::Matrix<double,
+            Eigen::Dynamic,Eigen::Dynamic> &points,
+            const Eigen::VectorXd &ind);
+
     void nfpBasis(int dim);
-    Polynomial matricesToPolynomial(int c0, const Eigen::VectorXd &g0, const Eigen::MatrixXd &H);
+
+    Polynomial matricesToPolynomial(
+            int c0,
+            const Eigen::VectorXd &g0,
+            const Eigen::MatrixXd &H);
 };
 
 }

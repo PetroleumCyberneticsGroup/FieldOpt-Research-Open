@@ -28,16 +28,22 @@
 namespace Optimization {
 namespace Optimizers {
 
-bool compare(const int &lhs, const int &rhs, const double *distances) {
+bool compare(
+        const int &lhs,
+        const int &rhs,
+        const double *distances) {
     return distances[lhs] <= distances[rhs];
 }
 
 TrustRegionModel::TrustRegionModel() {
 }
 
-TrustRegionModel::TrustRegionModel(const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points, const Eigen::VectorXd& initial_fvalues, Settings::Optimizer *settings) {
-    settings_ = settings;
+TrustRegionModel::TrustRegionModel(
+        const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points,
+        const Eigen::VectorXd& initial_fvalues,
+        Settings::Optimizer *settings) {
 
+    settings_ = settings;
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
     points_abs_ << initial_points;
 
@@ -152,7 +158,9 @@ void TrustRegionModel::rebuildModel() {
 
 }
 
-void TrustRegionModel::sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::VectorXd &ind) {
+void TrustRegionModel::sortVectorByIndex(
+        Eigen::VectorXd &vec,
+        const Eigen::VectorXd &ind) {
     Eigen::VectorXd vec_ord(vec.size());
     for (int i=0; i < vec.size(); i++) {
         int index = int(ind(i));
@@ -165,7 +173,10 @@ void TrustRegionModel::sortVectorByIndex(Eigen::VectorXd &vec, const Eigen::Vect
     vec_ord.resize(0);
 }
 
-void TrustRegionModel::sortMatrixByIndex(Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points, const Eigen::VectorXd &ind) {
+void TrustRegionModel::sortMatrixByIndex(
+        Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> &points,
+        const Eigen::VectorXd &ind) {
+
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> points_ord(points.rows(), points.cols());
     for (int i=0; i<points.cols(); i++) {
         int index = int(ind(i));
@@ -249,7 +260,10 @@ void TrustRegionModel::nfpBasis(int dim) {
 
 //!<matricesToPolynomial(c0,g0,H) converts coefficients in matrix form
 //!<to polynomial (c0: constant, g0:linear, H:quadratic>
-Polynomial TrustRegionModel::matricesToPolynomial(int c0, const Eigen::VectorXd &g0, const Eigen::MatrixXd &H) {
+Polynomial TrustRegionModel::matricesToPolynomial(
+        int c0,
+        const Eigen::VectorXd &g0,
+        const Eigen::MatrixXd &H) {
     //!<dbg>
     Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
@@ -309,7 +323,9 @@ bool TrustRegionModel::isLambdaPoised() {
     //TODO: implement this method
 }
 
-void TrustRegionModel::changeTrCenter(Eigen::VectorXd new_point, Eigen::VectorXd fvalues) {
+void TrustRegionModel::changeTrCenter(
+        Eigen::VectorXd new_point,
+        Eigen::VectorXd fvalues) {
     //TODO: implement this method
 }
 
