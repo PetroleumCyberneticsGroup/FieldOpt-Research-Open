@@ -23,7 +23,7 @@ clear
 printf '=%.0s' {1..100}; printf '\n' " "
 
 declare -a CASES=(
-    # orig jsons: 1-5
+	# orig jsons: 1-5
     "fo_driver.controls.cs"              # 1
     "fo_driver.curved_wells.controls.cs" # 2
     "fo_driver.control.npv.apps"         # 3
