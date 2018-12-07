@@ -108,8 +108,6 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
-    //!<dbg>
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -127,23 +125,6 @@ void TrustRegionModel::rebuildModel() {
         all_fvalues_ << fvalues_;
         all_fvalues_ << cached_fvalues_;
     }
-
-    //!<dbg>
-//    cout << "[          ] points_abs_" << endl;
-//    cout << points_abs_.format(frmt) << endl;
-//
-//    cout << "[          ] fvalues_" << endl;
-//    cout << fvalues_.format(frmt) << endl;
-//
-//    cout << "[          ] fvalues_.transpose()" << endl;
-//    cout << fvalues_.transpose().format(frmt) << endl;
-//
-//    cout << "[          ] all_fvalues" << endl;
-//    cout << all_fvalues_.format(frmt) << endl;
-//
-//    cout << "fvalues_size():" << fvalues_.size() <<endl;
-//    cout << "cached_fvalues_.size():" << cached_fvalues_.size() << endl;
-
 
     int dim = all_points_.rows();
     int n_points = all_points_.cols();
@@ -163,41 +144,59 @@ void TrustRegionModel::rebuildModel() {
         distances_(i) = points_shifted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
 
-    //!<dbg>
-    //cout << "[          ] points_shifted_" << endl;
-    //cout << points_shifted_.format(frmt) << endl;
-    //cout << "[          ] distances_" << endl;
-    //cout << distances_.format(frmt) << endl;
-
     //!<Reorder points based on their distances to the tr center>
     index_vector_.setLinSpaced(distances_.size(),0,distances_.size()-1);
     std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(), std::bind(compare, std::placeholders::_1,  std::placeholders::_2, distances_.data()));
     sortVectorByIndex(distances_, index_vector_);
     sortVectorByIndex(all_fvalues_, index_vector_);
 
-    //!<dbg>
-    //cout << "[          ] distances_ord_" << endl;
-    //cout << distances_.format(frmt) << endl;
-
-    //cout << "[          ] fvalues_ord_" << endl;
-    //cout << fvalues_.format(frmt) << endl;
-
-    //cout << "[          ] index_vector_" << endl;
-    //cout << index_vector_.format(frmt) << endl;
-
     sortMatrixByIndex(points_shifted_, index_vector_);
     sortMatrixByIndex(all_points_, index_vector_);
 
-    //!<dbg>
-    //cout << "[          ] points_shifted_ord" << endl;
-    //cout << points_shifted_.format(frmt) << endl;
-
-    //cout << "[          ] points_abs_ord" << endl;
-    //cout << points_abs_.format(frmt) << endl;
-
-
-    //TODO: build polynomial model using the reordered points
     nfpBasis(dim);//!<build nfp polynomial basis>
+
+    int polynomials_num = pivot_polynomials_.size();
+    Eigen::RowVectorXd pivot_values(polynomials_num);
+    pivot_values.setZero(polynomials_num);
+
+    //!<constant term>
+    int last_pt_included = 1;
+    int poly_i = 1;
+    pivot_values(0) = 1;
+
+    //!<Gaussian elimination (using previous points)>
+    for (int i=1; i<polynomials_num; i++) {
+        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+
+        //TODO: finish method gaussian elimination.
+    }
+
+}
+
+void TrustRegionModel::improveModelNfp() {
+    //TODO: implement this method
+}
+
+void TrustRegionModel::ensureImprovement() {
+    //TODO: implement this method
+}
+
+bool TrustRegionModel::isLambdaPoised() {
+    //TODO: implement this method
+}
+
+void TrustRegionModel::changeTrCenter(
+        Eigen::VectorXd new_point,
+        Eigen::RowVectorXd fvalues) {
+    //TODO: implement this method
+}
+
+std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem() {
+    //TODO: implement this method
+}
+
+void TrustRegionModel::computePolynomialModels() {
+    //TODO: implement this method
 }
 
 void TrustRegionModel::sortVectorByIndex(
@@ -246,11 +245,7 @@ void TrustRegionModel::sortMatrixByIndex(
     points_ord.resize(0,0);
 }
 
-//!<nfpBasis(dim) builds a Newtown Fundamental Polynomial basis for a given dimension.>
 void TrustRegionModel::nfpBasis(int dim) {
-    //!<dbg>
-//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
-
     //!<number of terms>
     int poly_num = (dim+1)*(dim+2)/2;
     int linear_size = dim+1;
@@ -261,19 +256,11 @@ void TrustRegionModel::nfpBasis(int dim) {
     pivot_polynomials_[poly_num-1].coefficients.resize(poly_num);
     pivot_polynomials_[poly_num-1].coefficients.setZero(poly_num);
 
-    //!<dbg>
-    //cout << "[          ] pivot_polynomials_poly_" << poly_num-1 << endl;
-    //cout << pivot_polynomials_[poly_num-1].coefficients.format(frmt) << endl;
-
     for (int i=0; i<linear_size;i++) {
         pivot_polynomials_[i].dimension = dim;
         pivot_polynomials_[i].coefficients.resize(poly_num);
         pivot_polynomials_[i].coefficients.setZero(poly_num);
         pivot_polynomials_[i].coefficients(i) = 1;
-
-        //!<dbg>
-        //cout << "[          ] pivot_polynomials_poly_" << i << endl;
-        //cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
     }
 
     //!<quadratic entries>
@@ -293,13 +280,6 @@ void TrustRegionModel::nfpBasis(int dim) {
             H(n,m) = 1;
         }
 
-        //!<dbg>
-        //cout << "[          ] c0:" << c0 << endl;
-        //cout << "[          ] g0:" << endl;
-        //cout << g0.format(frmt) << endl;
-        //cout << "[          ] H:" << endl;
-        //cout << H.format(frmt) << endl;
-
         pivot_polynomials_[poly_i] = matricesToPolynomial(c0, g0, H);
         if (n < dim-1) {
             n++;
@@ -308,22 +288,12 @@ void TrustRegionModel::nfpBasis(int dim) {
             n = m;
         }
     }
-
-    //!<dbg>
-    //for (int i=0; i<pivot_polynomials_.size();i++) {
-    //    cout << "[          ] pivot_polynomials_poly_" << i << endl;
-    //    cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
-    //}
 }
 
-//!<matricesToPolynomial(c0,g0,H) converts coefficients in matrix form
-//!<to polynomial (c0: constant, g0:linear, H:quadratic>
 Polynomial TrustRegionModel::matricesToPolynomial(
         int c0,
         const Eigen::VectorXd &g0,
         const Eigen::MatrixXd &H) {
-    //!<dbg>
-//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
 
     int dim = g0.size();
     int n_terms = (dim+1)*(dim+2)/2;
@@ -333,17 +303,9 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     //!<zero order>
     coefficients(0) = c0;
 
-    //!<dbg>
-    //cout << "[          ] coefficients:" << endl;
-    //cout << coefficients.format(frmt) << endl;
-
     //!<first order>
     int ind_coefficients = dim;
     coefficients.segment(0,ind_coefficients) = g0;
-
-    //!<dbg>
-    //cout << "[          ] coefficients:" << endl;
-    //cout << coefficients.format(frmt) << endl;
 
     //!<second order>
     for (int k=0; k<dim; k++) {
@@ -351,16 +313,11 @@ Polynomial TrustRegionModel::matricesToPolynomial(
             ind_coefficients = ind_coefficients + 1;
             coefficients(ind_coefficients) = H(k, m);
 
-            //cout << "H(" <<  k << "," << m << "):" << H(k,m) << endl;
-
             if (H(m, k) != H(k, m)) {
                 Printer::ext_info("H not symmetrical: ","Optimization", "Trust Region");
             }
         }
     }
-    //!<dbg>
-    // cout << "[          ] coefficients:" << endl;
-    //cout << coefficients.format(frmt) << endl;
 
     Polynomial p;
     p.dimension = 2;
@@ -368,31 +325,121 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     return p;
 }
 
+std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> TrustRegionModel::coefficientsToMatrices(
+        int dimension,
+        Eigen::VectorXd coefficients) {
+    if (coefficients.size() == 0) {
+        coefficients.resize(dimension);
+        coefficients.setZero(dimension);
+    }
 
-void TrustRegionModel::improveModelNfp() {
-    //TODO: implement this method
+    int n_terms = (dimension+1)*(dimension+2)/2;
+    if (coefficients.size() != n_terms) {
+        Printer::ext_warn("Wrong dimension of coefficients.", "Optimization", "TrustRegionModel");
+        throw std::runtime_error("Failed to convert polynomial coefficients to matrices.");
+    }
+
+    //!<constant term>
+    auto c = coefficients(0);
+
+    //!<order one term>
+    int idx_coefficients = dimension + 1;
+    auto g = coefficients.segment(1,idx_coefficients-1);
+
+    //!<second order term>
+    Eigen::MatrixXd H(dimension, dimension);
+    H.setZero(dimension,dimension);
+
+    for (int k=0; k<dimension; k++) {
+        for (int m=0; m < k; m++) {
+            idx_coefficients++;
+            H(k,m) = coefficients(idx_coefficients);
+            H(m,k) = H(k,m);
+        }
+    }
+
+    return std::make_tuple(c, g, H);
 }
 
-void TrustRegionModel::ensureImprovement() {
-    //TODO: implement this method
+Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
+        int poly_i,
+        int last_pt) {
+    auto polynomial = pivot_polynomials_[poly_i];
+    for (int n=0; n<last_pt; n++) {
+        if (n != poly_i) {
+            polynomial = zeroAtPoint(polynomial, pivot_polynomials_[n], all_points_.col(n));
+        }
+    }
+    return polynomial;
 }
 
-bool TrustRegionModel::isLambdaPoised() {
-    //TODO: implement this method
+Polynomial TrustRegionModel::zeroAtPoint(
+        Polynomial p1,
+        Polynomial p2,
+        Eigen::VectorXd x) {
+    Polynomial p;
+    p = p1;
+
+    auto px = evaluatePolynomial(p, x);
+    auto p2x = evaluatePolynomial(p2, x);
+    int iter = 1;
+    while (px != 0) {
+        p = addPolynomial(p, multiplyPolynomial(p2, -px/p2x));
+        px = evaluatePolynomial(p, x);
+
+        if (iter >= 2)
+            break;
+        iter++;
+    }
+    return p;
 }
 
-void TrustRegionModel::changeTrCenter(
-        Eigen::VectorXd new_point,
-        Eigen::RowVectorXd fvalues) {
-    //TODO: implement this method
+
+double TrustRegionModel::evaluatePolynomial(
+        Polynomial p1,
+        Eigen::VectorXd x) {
+    int c;
+    double terms[3];
+    Eigen::VectorXd g(p1.dimension);
+    Eigen::MatrixXd H(p1.dimension, p1.dimension);
+    std::tie(c, g, H) = coefficientsToMatrices(p1.dimension, p1.coefficients);
+
+    terms[0] = c;
+    terms[1] = g.transpose()*x;
+    terms[2] = (x.transpose()*H*x);
+    terms[2] *= 0.5;
+
+    return terms[0] + terms[1] + terms[2];
+
 }
 
-std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem() {
-    //TODO: implement this method
+Polynomial TrustRegionModel::addPolynomial(
+        Polynomial p1,
+        Polynomial p2) {
+    if (p1.dimension != p2.dimension) {
+        Printer::ext_warn("Summation of polynomials with different dimensions.", "Optimization", "TrustRegionModel");
+        throw std::runtime_error("Failed to compute add polynomials. They have different dimensions.");
+    }
+
+    Polynomial p;
+    p.dimension = p1.dimension;
+    p.coefficients.resize(p1.coefficients.size());
+    p.coefficients = p1.coefficients + p2.coefficients;
+
+    if (p.coefficients.size() == 0) {
+        Printer::ext_warn("Empty resulting polynomial.", "Optimization", "TrustRegionModel");
+        throw std::runtime_error("Failed to compute add polynomials. The resulting polynomial is empty.");
+    }
+
+    return p;
 }
 
-void TrustRegionModel::computePolynomialModels() {
-    //TODO: implement this method
+Polynomial TrustRegionModel::multiplyPolynomial(
+        Polynomial p1,
+        double factor) {
+    Polynomial p = p1;
+    p.coefficients = p1.coefficients.array()*factor;
+    return p;
 }
 
 }
