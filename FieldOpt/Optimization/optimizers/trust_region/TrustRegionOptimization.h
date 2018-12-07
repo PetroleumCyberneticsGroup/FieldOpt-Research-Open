@@ -48,6 +48,7 @@ class TrustRegionOptimization : public Optimizer {
                 Constraints::ConstraintHandler *constraint_handler=0
     );
     TrustRegionModel* getTrustRegionModel();
+    int GetNumInitPoints() { return n_initial_points_; };
 
  protected:
     void handleEvaluatedCase(Case *c) override;
