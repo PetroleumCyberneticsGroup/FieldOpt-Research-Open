@@ -42,24 +42,31 @@ namespace {
         VariablePropertyContainer *varcont_tr_dfo_probs_;
         TestResources::TrustRegionModelData tr_mdata;
 
-        void SetUpOptimizer(const MatrixXd &x0, double (*tr_dfo_prob)(VectorXd xs)){
+        void SetUpOptimizer(TestResources::TrustRegionModelData::prob prob,
+                            double (*tr_dfo_prob)(VectorXd xs)){
+
+            VectorXd x0 = prob.xm.col(0);
 
             // Dummy var container based on initial point
             varcont_tr_dfo_probs_ = new VariablePropertyContainer();
             QString base_varname = "BHP#PRODUCER#"; // dummy var name
+
             for (int i = 0; i < x0.rows(); ++i) {
                 // Use initial point values to construct container
-                auto *prop = new ContinousProperty(x0(i,0));
+                auto *prop = new ContinousProperty(x0(i));
                 prop->setName(base_varname + QString::number(i));
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
+
+            FindVarSequence(prob);
 
             // Set up base case using dummy var containter
             test_case_tr_dfo_probs_ = new Optimization::Case(
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
 
-            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0.col(0)));
+            // Use initial point from Matlab data
+            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
 
             // cout << "SetUpOptimizer" << endl;
             tr_dfo_ = new TrustRegionOptimization(
@@ -70,22 +77,41 @@ namespace {
                     logger_);
         }
 
-        void RunnerSubs(double (*tr_dfo_prob)(VectorXd xs)){
-            // cout << "RunnerSubs" << endl;
+        void FindVarSequence(TestResources::TrustRegionModelData::prob prob) {
+
+          auto varcont = varcont_tr_dfo_probs_;
+//
+//          for (int ii=0; ii < prob.xm)
+//
+//          varcont.
+        }
+
+        void RunnerSubs(TestResources::TrustRegionModelData::prob prob,
+                        double (*tr_dfo_prob)(VectorXd xs)){
+
             stringstream ss; ss << "[          ] " << FMAGENTA;
+            cout << ss.str() << "-------------------------------------------------------" << END << endl;
+
+            // Tentative best case should be equal to base case at this point
+            CheckSameX(tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
+                       prob.xm.col(0), 1e-6, "Check init point the same");
 
             while (!tr_dfo_->IsFinished()) {
 
                 // RUNNER CALL (START)
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
 
+                // COMPUTE OBJ.FUNCTION VALUE FOR CASE
                 next_case->set_objective_function_value(
                         tr_dfo_prob(next_case->GetRealVarVector()));
 
-                cout << ss.str() << "----------------------" << END << endl;
+                // PRINT CASE DATA (ID, X, F)
+                cout << ss.str() << "-------------------------------------------------------" << END << endl;
                 cout << ss.str() << "Case id:" << next_case->GetId().toString().toStdString() << END << endl;
+                cout << ss.str() << "# initial points: " << tr_dfo_->GetNumInitPoints() << END << endl;
                 cout << ss.str() << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
                 cout << ss.str() << "f:" << next_case->objective_function_value() << END << endl;
+
 
                 // RUNNER CALL (FINISH)
                 tr_dfo_->SubmitEvaluatedCase(next_case);
@@ -95,6 +121,15 @@ namespace {
             cout << ss.str() << "----------------------" << END << endl;
             auto best_case = tr_dfo_->GetTentativeBestCase();
             cout << best_case->objective_function_value() << endl;
+        }
+
+        void CheckSameX(VectorXd xa, VectorXd xb, double tol, std::string msg) {
+
+          // cout << "xa: " << xa << endl;
+          // cout << "xb: " << xb << endl;
+          ASSERT_TRUE(xa.isApprox(xb,tol));
+          stringstream ss; ss << "[          ] " << FMAGENTA;
+          cout << ss.str() << msg.c_str() << " -> ok" << END << endl;
         }
 
     };
@@ -109,29 +144,29 @@ namespace {
         cout << FMAGENTA
              << "[CG.prob1  ] f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]"
              << END << endl;
-        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob1);
-        RunnerSubs(tr_dfo_prob1);
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+        RunnerSubs(tr_mdata.prob1, tr_dfo_prob1);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob2) {
         cout << FMAGENTA
              << "[CG.prob2  ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
              << END << endl;
-        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob2);
-        RunnerSubs(tr_dfo_prob2);
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob2);
+        RunnerSubs(tr_mdata.prob1, tr_dfo_prob2);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob3) {
         cout << FMAGENTA
              << "[CG.prob3  ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
              << END << endl;
-        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob3);
-        RunnerSubs(tr_dfo_prob3);
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob3);
+        RunnerSubs(tr_mdata.prob1, tr_dfo_prob3);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_initial_model_created) {
         bool is_model_present = false;
-        SetUpOptimizer(tr_mdata.prob1.xm, tr_dfo_prob1);
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
 
         // RUNNER CALL (START)
         auto next_case = tr_dfo_->GetCaseForEvaluation();
