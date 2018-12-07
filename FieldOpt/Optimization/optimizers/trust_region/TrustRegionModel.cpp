@@ -52,7 +52,7 @@ TrustRegionModel::TrustRegionModel(
 
     radius_ =  settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
-    dim_ = initial_points.cols();
+    dim_ = initial_points.rows();
     cache_max_ = 3*pow(dim_,2);
 
 
