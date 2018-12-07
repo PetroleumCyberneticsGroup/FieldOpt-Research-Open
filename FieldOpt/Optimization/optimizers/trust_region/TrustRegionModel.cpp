@@ -108,6 +108,11 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
+//    //!<dbg>
+//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+//    cout << "[          ] all_points_" << endl;
+//    cout << all_points_.format(frmt) << endl;
+
     auto pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
     all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -165,10 +170,60 @@ void TrustRegionModel::rebuildModel() {
     pivot_values(0) = 1;
 
     //!<Gaussian elimination (using previous points)>
-    for (int i=1; i<polynomials_num; i++) {
+    for (int iter=1; iter<polynomials_num; iter++) {
         pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
-        //TODO: finish method gaussian elimination.
+        double max_layer;
+        double farthest_point = distances_(distances_.size()-1);
+        double distance_farthest_point = (double) (farthest_point/radius_);
+        if (poly_i <= dim) {
+            int block_beginning = 1;
+            int block_end = dim;
+
+            //!<linear block -- we allow more points (*2)
+
+            max_layer = std::min(2*settings_->parameters().tr_radius_factor, distance_farthest_point);
+            if (iter > dim) {
+                //!< We already tested all linear terms.
+                //!< We do not have points to build a FL model.
+                //!< How did this happen??? see Comment [1]>
+                break;
+            } else {  //!<Quadratic block -- being more carefull>
+                max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
+                block_beginning = dim+1;
+                block_end = polynomials_num-1;
+            }
+
+            max_layer = std::fmax(1, max_layer); //TODO: check this max function
+            Eigen::VectorXd all_layers;
+
+            all_layers.setLinSpaced(ceil(max_layer), 1, max_layer);
+            double max_absval = 0;
+            double pt_max = 0;
+            for (int i=0; i<all_layers.size();i++) {
+                auto layer = all_layers(i);
+                double dist_max = layer*radius_;
+                for (int n=last_pt_included+1; n<n_points; n++) {
+                    if (distances_(n) > dist_max) {
+                        break; //!<for n>
+                    }
+                    auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
+                    val = val/dist_max; //!<minor adjustment>
+                    if (abs(max_absval) < abs(val)) {
+                        max_absval = val;
+                        pt_max = n;
+                    }
+                    if (abs(max_absval) > pivot_threshold) {
+                        break; //!<for(layer)>
+                    }
+                }
+            }
+            //TODO: finish method gaussian elimination.
+
+        }
+
+
+
     }
 
 }
