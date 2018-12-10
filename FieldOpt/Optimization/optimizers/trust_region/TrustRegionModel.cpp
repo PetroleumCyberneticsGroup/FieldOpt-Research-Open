@@ -265,6 +265,13 @@ void TrustRegionModel::rebuildModel() {
             modeling_polynomials_.clear();
 
             //!<Points not included>
+            cout << "all_points_: " << endl << all_points_ << endl;
+            cout << "cached_points_: " << endl << cached_points_ << endl;
+            cout << "last_pt_included+1 (startCol): " << last_pt_included+1 << endl;
+            cout << "cache_size (numCol): " << cache_size << endl;
+            cout << "all_points_.middleCols(last_pt_included+1, cache_size):" << endl;
+            cout << all_points_.middleCols(last_pt_included+1, cache_size) << endl << endl;
+
             cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size);
             cached_fvalues_ = fvalues_.segment(last_pt_included+1, cache_size);
         }
