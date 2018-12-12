@@ -273,14 +273,14 @@ void TrustRegionModel::rebuildModel() {
             tr_center_ = 0;
             points_abs_ = all_points_.leftCols(last_pt_included+1);
             points_shifted_ = points_shifted_.leftCols(last_pt_included+1);
-            fvalues_ =  all_fvalues_.head(last_pt_included+1);
+
             auto cache_size = std::fmin(n_points - last_pt_included, 3*pow(dim,2));
             modeling_polynomials_.clear();
 
             //!<Points not included>
             cout << "all_points_: " << endl << all_points_ << endl;
             cout << "cached_points_: " << endl << cached_points_ << endl;
-            cout << "last_pt_included+1 (startCol): " << last_pt_included << endl;
+            cout << "last_pt_included (startCol): " << last_pt_included << endl;
             cout << "cache_size (numCol): " << cache_size << endl;
             cout << "all_points_.middleCols(last_pt_included, cache_size):" << endl;
             cout << all_points_.middleCols(last_pt_included, cache_size) << endl << endl;
@@ -290,7 +290,14 @@ void TrustRegionModel::rebuildModel() {
             cout << "[          ] cached_points_" << endl;
             cout << cached_points_.format(frmt) << endl;
 
+            // bugfix for line
+            // cout << "fvalues_: " << endl << fvalues_ << endl;
+            // fvalues_ =  all_fvalues_.head(last_pt_included+1);
+            fvalues_ =  all_fvalues_.head(cached_points_.cols());
 
+            cout << "last_pt_included: " << endl << last_pt_included << endl;
+            cout << "cache_size: " << endl << cache_size << endl;
+            cout << "fvalues_: " << endl << fvalues_ << endl;
             cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
         }
     }
