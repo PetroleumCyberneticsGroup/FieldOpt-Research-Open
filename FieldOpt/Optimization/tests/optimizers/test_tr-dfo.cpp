@@ -60,13 +60,21 @@ namespace {
                 varcont_tr_dfo_probs_->AddVariable(prop);
             }
 
-            TestResources::FindVarSequence(prob,
-                                           *varcont_tr_dfo_probs_);
-
             // Set up base case using dummy var containter
             test_case_tr_dfo_probs_ = new Optimization::Case(
                     QHash<QUuid, bool>(), QHash<QUuid, int>(),
                     varcont_tr_dfo_probs_->GetContinousVariableValues());
+
+            TestResources::FindVarSequence(prob,
+                                           *test_case_tr_dfo_probs_);
+
+
+            VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
+            auto vec =test_case_tr_dfo_probs_->GetRealVarVector();
+            for (int i=0; i <prob.idx.size(); i++) {
+                ordered_vec(i) = vec(prob.idx[i]);
+            }
+            test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
             // Use initial point from Matlab data
             test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));

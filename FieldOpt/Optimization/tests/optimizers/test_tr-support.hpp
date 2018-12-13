@@ -43,7 +43,7 @@ namespace TestResources {
   }
 
   void FindVarSequence(TestResources::TrustRegionModelData::prob &prob,
-                       VariablePropertyContainer &varcont_tr_dfo_probs) {
+                       Optimization::Case &base_case_tr_dfo_probs) {
 
     // First vector (Eigen + std formats)
     VectorXd va = prob.xm.col(0); // <- va: VectorXd
@@ -52,10 +52,9 @@ namespace TestResources {
     VectorXd::Map(&v1[0], va.size()) = va; // <- v1: std
 
     // Second vector (Eigen + std formats)
-    // QHash<QUuid,double> vbu = varcont_tr_dfo_probs_->GetContinousVariableValues();
-    list<double> vbl = varcont_tr_dfo_probs.GetContinousVariableValues().values().toStdList();
-    vector<double> v2{ std::begin(vbl), std::end(vbl) }; // <- v2: std
-    Eigen::VectorXd vb = Eigen::Map<VectorXd>(v2.data(), v2.size()); // <- vb: VectorXd
+    Eigen::VectorXd vb = base_case_tr_dfo_probs.GetRealVarVector();
+    vector<double> v2(vb.size());
+    VectorXd::Map(&v2[0], vb.size()) = vb; // <- v2: std
 
     // --------------
     // Eigen approach
