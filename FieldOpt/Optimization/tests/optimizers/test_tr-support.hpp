@@ -136,7 +136,7 @@ namespace TestResources {
 
     VectorXd xbr(prob.xm.rows(),1);
     for (int ii=0; ii<prob.xm.rows(); ii++) {
-      xbr.row(ii) << prob.xm(prob.idx[ii],1);
+        xbr.row(ii) << prob.xm(ii,1); // a proper order is ensured previously.
     }
 
     // dbg
