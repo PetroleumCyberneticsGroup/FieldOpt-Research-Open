@@ -65,14 +65,14 @@ TrustRegionModel::TrustRegionModel(
 
     rebuildModel();
 
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
-    cout << "[          ] pivot_values_" << endl;
-    cout << pivot_values_.format(frmt) << endl;
-
-    for  (int i=0; i<pivot_polynomials_.size();i++) {
-        cout << "[          ] pivot_values_[" << i << "]" << endl;
-        cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
-    }
+//    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+//    cout << "[          ] pivot_values_" << endl;
+//    cout << pivot_values_.format(frmt) << endl;
+//
+//    for  (int i=0; i<pivot_polynomials_.size();i++) {
+//        cout << "[          ] pivot_values_[" << i << "]" << endl;
+//        cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
+//    }
 
     moveToBestPoint();
     computePolynomialModels();
