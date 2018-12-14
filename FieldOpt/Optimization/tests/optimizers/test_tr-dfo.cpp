@@ -185,4 +185,57 @@ namespace {
         }
         EXPECT_TRUE(is_model_present);
     }
+
+    TEST_F(TrustRegionTest, tr_dfo_initial_rebuild_model) {
+        bool is_model_present = false;
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+
+        // RUNNER CALL (START)
+        // RUNNER CALL (START)
+        auto next_case = tr_dfo_->GetCaseForEvaluation();
+
+        // COMPUTE OBJ.FUNCTION VALUE FOR CASE
+        next_case->set_objective_function_value(
+                tr_dfo_prob1(next_case->GetRealVarVector()));
+
+        if (tr_dfo_->GetNumInitPoints() == 1 ) {
+            TestResources::OverrideSecondPoint(tr_mdata.prob1, *next_case);
+        }
+
+        // RUNNER CALL (FINISH)
+        tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        auto tr_model = tr_dfo_->getTrustRegionModel();
+        auto pivot_polynomials = tr_model->getPivotPolynomials();
+        auto pivot_values = tr_model->getPivotValues();
+        double tol = 1e-06;
+
+        auto same_pivot_values =  true;
+        for (int i=0; i<pivot_values.size(); i++) {
+            if (abs(pivot_values(i) - tr_mdata.prob1.vm(i,0)) > tol) {
+                same_pivot_values = false;
+            }
+        }
+        auto same_pivot_coeff = true;
+        for (int i=0; i<pivot_polynomials.size(); i++) {
+            if (pivot_polynomials[i].dimension != tr_mdata.prob1.pdm(i)) {
+                same_pivot_coeff = false;
+            }
+
+            for (int j=0; j<pivot_polynomials.size(); j++) {
+//                cout << pivot_polynomials[i].coefficients(j) << "," << tr_mdata.prob1.pcm(i,j) << endl;
+
+                if (abs(pivot_polynomials[i].coefficients(j) -  tr_mdata.prob1.pcm(i,j)) > tol) {
+                    same_pivot_coeff = false;
+                }
+            }
+        }
+
+//        cout << "same_pivot_values" << same_pivot_values << endl;
+//        cout << "same_pivot_coeff" << same_pivot_coeff << endl;
+
+        EXPECT_TRUE(same_pivot_values &&  same_pivot_coeff);
+    }
+
+
 }
