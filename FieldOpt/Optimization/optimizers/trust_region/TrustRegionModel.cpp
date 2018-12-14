@@ -64,6 +64,16 @@ TrustRegionModel::TrustRegionModel(
     points_shifted_.resize(0,0);
 
     rebuildModel();
+
+    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+    cout << "[          ] pivot_values_" << endl;
+    cout << pivot_values_.format(frmt) << endl;
+
+    for  (int i=0; i<pivot_polynomials_.size();i++) {
+        cout << "[          ] pivot_values_[" << i << "]" << endl;
+        cout << pivot_polynomials_[i].coefficients.format(frmt) << endl;
+    }
+
     moveToBestPoint();
     computePolynomialModels();
 
@@ -109,11 +119,6 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 void TrustRegionModel::rebuildModel() {
-    //!<dbg>
-    Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
-    cout << "[          ] points_abs_" << endl;
-    cout << points_abs_.format(frmt) << endl;
-
     double pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
 
     all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
@@ -171,44 +176,18 @@ void TrustRegionModel::rebuildModel() {
     int poly_i = 1;
     pivot_values_(0) = 1;
 
-
-    //!<dbg>
-    cout << "[                      ] all_points_" << endl;
-    cout << all_points_.format(frmt) << endl;
-
-    cout << "[                      ] all_fvalues_" << endl;
-    cout << all_fvalues_.format(frmt) << endl;
-
-    cout << "[                      ] pivot_values_" << endl;
-    cout << pivot_values_.format(frmt) << endl;
-
-
-
     //!<Gaussian elimination (using previous points)>
     for (int iter=1; iter<polynomials_num; iter++) {
-
-
-        //!<dbg>
-        cout << "[before ortogonalization     ] pivot_polynomials_[poly_i].coff" << endl;
-        cout << pivot_polynomials_[poly_i].coefficients.format(frmt) << endl;
-
-
-        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
-
-        //!<dbg>
-        cout << "[after ortogonalization      ] pivot_polynomials_[poly_i].coff" << endl;
-        cout << pivot_polynomials_[poly_i].coefficients.format(frmt) << endl;
-
-
         double max_layer;
         double farthest_point = distances_(distances_.size()-1);
         double distance_farthest_point = (double) (farthest_point/radius_);
         int block_beginning;
         int block_end;
+
+        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
         if (poly_i <= dim) {
             block_beginning = 1;
             block_end = dim;
-
             //!<linear block -- we allow more points (*2)
 
             max_layer = std::min(2 * settings_->parameters().tr_radius_factor, distance_farthest_point);
@@ -217,6 +196,7 @@ void TrustRegionModel::rebuildModel() {
                 //!< We do not have points to build a FL model.
                 //!< How did this happen??? see Comment [1]>
                 break;
+
             }
         } else {  //!<Quadratic block -- being more carefull>
                 max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
@@ -224,40 +204,23 @@ void TrustRegionModel::rebuildModel() {
                 block_end = polynomials_num-1;
         }
 
-        cout << "max_layer:" << max_layer << endl;
-        cout << "farthest_point:" << farthest_point << endl;
-        cout << "distance_farthest_point:" << distance_farthest_point << endl;
-        cout << "block_beginning:" << block_beginning << endl;
-        cout << "block_end:" << block_end << endl;
-
         max_layer = std::fmax(1, max_layer);
 
-        cout << "max_layer:" << max_layer << endl;
-
         Eigen::VectorXd all_layers;
-
         all_layers.setLinSpaced(ceil(max_layer), 1, max_layer);
-        cout << "[       ] all_layers" << endl;
-        cout << all_layers.format(frmt) << endl;
 
         double max_absval = 0;
         double pt_max = 0;
         for (int i=0; i<all_layers.size();i++) {
             auto layer = all_layers(i);
             double dist_max = layer*radius_;
-            cout << "dist_max=" << dist_max << endl;
-            cout << "last_pt_included=" << last_pt_included << endl;
-            cout << "n_points=" << n_points << endl;
             for (int n=last_pt_included+1; n<n_points; n++) {
                 if (distances_(n) > dist_max) {
                     break; //!<for n>
                 }
 
-                cout << "poly_i:" << poly_i << endl;
-                cout << "n:" << n << endl;
                 auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
                 val = val/dist_max; //!<minor adjustment>
-                cout << "val:" << val << endl;
                 if (abs(max_absval) < abs(val)) {
                     max_absval = val;
                     pt_max = n;
@@ -271,69 +234,23 @@ void TrustRegionModel::rebuildModel() {
         if (abs(max_absval) > pivot_threshold) {
             //!<points accepted>
             int pt_next = last_pt_included+1;
-            cout << "pivot_threshold=" << pivot_threshold << endl;
-            cout << "pt_next=" << pt_next << endl;
-            cout << "pt_max=" << pt_max << endl;
             if (pt_next != pt_max) {
-                //!<dbg>
-                cout << "[  before   ] points_shifted_" << endl;
-                cout << points_shifted_.format(frmt) << endl;
-
                 points_shifted_.col(pt_next).swap(points_shifted_.col(pt_max));
-
-                //!<dbg>
-                cout << "[  after   ] points_shifted_" << endl;
-                cout << points_shifted_.format(frmt) << endl;
-
-
-                //!<dbg>
-                cout << "[ before   ] all_points_" << endl;
-                cout << all_points_.format(frmt) << endl;
-
                 all_points_.col(pt_next).swap(all_points_.col(pt_max));
-
-                //!<dbg>
-                cout << "[ after   ] all_points_" << endl;
-                cout << all_points_.format(frmt) << endl;
-
-                //!<dbg>
-                cout << "[ before   ] all_fvalues_" << endl;
-                cout << all_fvalues_.format(frmt) << endl;
                 std::swap(all_fvalues_[pt_next], all_fvalues_[pt_max]);
-
-                //!<dbg>
-                cout << "[ after   ] all_fvalues_" << endl;
-                cout << all_fvalues_.format(frmt) << endl;
-
-                //!<dbg>
-                cout << "[ before   ] distances_ " << endl;
-                cout << distances_.format(frmt) << endl;
                 std::swap(distances_[pt_next], distances_[pt_next]);
-                //!<dbg>
-                cout << "[ after   ] distances_ " << endl;
-                cout << distances_.format(frmt) << endl;
-
             }
 
-
-            cout << "[    ] pivot_values_ " << endl;
-            cout << pivot_values_.format(frmt) << endl;
-
-            cout << "[  before normalization  ] pivot_polynomials_[" << poly_i << "]" << endl;
-            cout << pivot_polynomials_[poly_i] .coefficients.format(frmt) << endl;
+            pivot_values_(pt_next)  = max_absval;
 
             //!<Normalize polynomial value>
             pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, pt_next);
-
-            cout << "[  after normalization  ] pivot_polynomials_[" << poly_i << "]" << endl;
-            cout << pivot_polynomials_[poly_i] .coefficients.format(frmt) << endl;
 
             //!<Re-orthogonalize (just to make sure it still assumes 0 in previous points).
             //!< Unnecessary in infinite precision>
             pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
             //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-
             orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
             last_pt_included = pt_next;
@@ -354,31 +271,20 @@ void TrustRegionModel::rebuildModel() {
         points_abs_ = all_points_.leftCols(last_pt_included+1);
         points_shifted_ = points_shifted_.leftCols(last_pt_included+1);
 
-        auto cache_size = std::fmin(n_points - last_pt_included, 3*pow(dim,2));
+        auto cache_size = std::fmin(n_points - last_pt_included-1, 3*pow(dim,2));
         modeling_polynomials_.clear();
 
         //!<Points not included>
-        cout << "all_points_: " << endl << all_points_ << endl;
-        cout << "cached_points_: " << endl << cached_points_ << endl;
-        cout << "last_pt_included (startCol): " << last_pt_included << endl;
-        cout << "cache_size (numCol): " << cache_size << endl;
-        cout << "all_points_.middleCols(last_pt_included, cache_size):" << endl;
-        cout << all_points_.middleCols(last_pt_included, cache_size) << endl << endl;
+        if (cache_size > 0) {
+            cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
+            fvalues_ =  all_fvalues_.head(last_pt_included);
+            cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
+        } else {
+            cached_points_.resize(0,0);
+            fvalues_.resize(0);
+            cached_fvalues_.resize(0);
+        }
 
-        cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
-        //!<dbg>
-        cout << "[          ] cached_points_" << endl;
-        cout << cached_points_.format(frmt) << endl;
-
-        // bugfix for line
-        // cout << "fvalues_: " << endl << fvalues_ << endl;
-        // fvalues_ =  all_fvalues_.head(last_pt_included+1);
-        fvalues_ =  all_fvalues_.head(cached_points_.cols());
-
-        cout << "last_pt_included: " << endl << last_pt_included << endl;
-        cout << "cache_size: " << endl << cache_size << endl;
-        cout << "fvalues_: " << endl << fvalues_ << endl;
-        cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
     }
     //!<Clean auxiliary objects>
     all_points_.resize(0,0);
@@ -609,22 +515,6 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
     auto polynomial = pivot_polynomials_[poly_i];
     for (int n=0; n<last_pt; n++) {
         if (n != poly_i) {
-//            cout << "poly_i=" << poly_i << endl;
-//            cout << "last_pt=" << last_pt << endl;
-//
-//
-//            //!<dbg>
-//            cout << "[          ] polynomial.coff" << endl;
-//            cout << polynomial.coefficients.format(frmt) << endl;
-//
-//            //!<dbg>
-//            cout << "[          ] pivot_polynomials_[n].coefficients" << endl;
-//            cout << pivot_polynomials_[n].coefficients.format(frmt) << endl;
-//
-//            //!<dbg>
-//            cout << "[          ] all_points.col(n)" << endl;
-//            cout << all_points_.col(n).format(frmt) << endl;
-
             polynomial = zeroAtPoint(polynomial, pivot_polynomials_[n], points_shifted_.col(n));
         }
     }
@@ -633,10 +523,14 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
 
 void TrustRegionModel::orthogonalizeBlock(
         Eigen::VectorXd point,
-        int poly_i,
+        int np,
         int block_beginning,
         int block_end) {
-    //TODO: implement this method.
+    for (int p = block_beginning; p<=block_end; p++) {
+        if (p != np) {
+            pivot_polynomials_[p] = zeroAtPoint(pivot_polynomials_[p], pivot_polynomials_[np], point);
+        }
+    }
 }
 
 

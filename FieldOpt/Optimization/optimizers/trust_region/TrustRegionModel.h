@@ -182,6 +182,7 @@ class TrustRegionModel {
 
     /*!
    * @brief orthogonalize a block from pivot_polynomials_.
+     * Orthogonalize polynomials on present block (deffering subsequent ones)
    * @param point point used to orthogonalize polynomials.
    * @param poly_i polynomial index in pivot_polynomials_.
    * @param poly_i end of the block to be orthogonalized.
@@ -189,7 +190,7 @@ class TrustRegionModel {
    */
     void orthogonalizeBlock(
             Eigen::VectorXd point,
-            int poly_i,
+            int np,
             int block_beginning,
             int block_end);
 
