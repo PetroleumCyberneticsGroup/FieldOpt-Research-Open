@@ -261,6 +261,17 @@ class TrustRegionModel {
     Polynomial multiplyPolynomial(
             Polynomial p1,
             double factor);
+
+
+
+    /*!
+     * @brief Find the best point of the model, i.e., the one for which the function has minimum value.
+     * @return best point index.
+     */
+    int findBestPoint();
+
+
+
 };
 
 }

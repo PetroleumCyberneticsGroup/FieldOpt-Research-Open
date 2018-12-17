@@ -41,6 +41,8 @@ TrustRegionModel::TrustRegionModel() {
 TrustRegionModel::TrustRegionModel(
         const Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic>& initial_points,
         const Eigen::RowVectorXd& initial_fvalues,
+        Eigen::VectorXd& lb,
+        Eigen::VectorXd& ub,
         Settings::Optimizer *settings) {
 
 
@@ -100,7 +102,12 @@ std::vector<Polynomial> TrustRegionModel::getPivotPolynomials() {
 }
 
 void TrustRegionModel::moveToBestPoint() {
-    //TODO: implement this method
+    auto best_i = findBestPoint();
+    if (best_i != tr_center_) {
+        tr_center_ = best_i;
+   }
+
+// Here should rebuild polynomials!!!
 }
 
 void TrustRegionModel::criticalityStep() {
@@ -271,11 +278,9 @@ void TrustRegionModel::rebuildModel() {
         //!<Points not included>
         if (cache_size > 0) {
             cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
-            fvalues_ =  all_fvalues_.head(last_pt_included);
             cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
         } else {
             cached_points_.resize(0,0);
-            fvalues_.resize(0);
             cached_fvalues_.resize(0);
         }
 
@@ -595,6 +600,26 @@ Polynomial TrustRegionModel::multiplyPolynomial(
     Polynomial p = p1;
     p.coefficients = p1.coefficients.array()*factor;
     return p;
+}
+
+int TrustRegionModel::findBestPoint() {
+    int dim = points_abs_.rows();
+    int n_points = points_abs_.cols();
+    int best_i = 0;
+    auto min_f = std::numeric_limits<double>::infinity();
+
+
+    for (int k=0; k<n_points; k++) {
+        Eigen::VectorXd point = points_abs_.col(k);
+        if (((point - lb_).minCoeff() >= 0) &&  ((ub_ - point).minCoeff() > 0)) {
+            auto val = fvalues_(k);
+            if (val < min_f) {
+                min_f = val;
+                best_i = k;
+            }
+        }
+    }
+    return best_i;
 }
 
 }
