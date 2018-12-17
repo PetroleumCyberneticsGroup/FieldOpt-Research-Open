@@ -223,19 +223,12 @@ namespace {
             }
 
             for (int j=0; j<pivot_polynomials.size(); j++) {
-//                cout << pivot_polynomials[i].coefficients(j) << "," << tr_mdata.prob1.pcm(i,j) << endl;
-
-                if (abs(pivot_polynomials[i].coefficients(j) -  tr_mdata.prob1.pcm(i,j)) > tol) {
+                if (abs(pivot_polynomials[i].coefficients(j) -  tr_mdata.prob1.pcm(j,i)) > tol) {
                     same_pivot_coeff = false;
                 }
             }
         }
-
-//        cout << "same_pivot_values" << same_pivot_values << endl;
-//        cout << "same_pivot_coeff" << same_pivot_coeff << endl;
-
         EXPECT_TRUE(same_pivot_values &&  same_pivot_coeff);
     }
-
 
 }
