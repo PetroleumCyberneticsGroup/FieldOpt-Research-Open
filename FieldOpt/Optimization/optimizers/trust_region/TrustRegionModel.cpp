@@ -64,7 +64,6 @@ TrustRegionModel::TrustRegionModel(
     points_shifted_.resize(0,0);
 
     rebuildModel();
-
     moveToBestPoint();
     computePolynomialModels();
 
@@ -261,6 +260,7 @@ void TrustRegionModel::rebuildModel() {
         tr_center_ = 0;
         points_abs_ = all_points_.leftCols(last_pt_included+1);
         points_shifted_ = points_shifted_.leftCols(last_pt_included+1);
+        fvalues_ =  all_fvalues_.head(last_pt_included+1);
 
         auto cache_size = std::fmin(n_points - last_pt_included-1, 3*pow(dim,2));
         modeling_polynomials_.clear();
