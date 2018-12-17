@@ -52,23 +52,43 @@ class TrustRegionModel {
             Eigen::Dynamic,Eigen::Dynamic>& initial_points,
             const Eigen::RowVectorXd& initial_fvalues ,
             Settings::Optimizer *settings);
+
     int getDimension();
+
     double getRadius();
+
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPoints();
+
     Eigen::Matrix<double,Eigen::Dynamic,Eigen::Dynamic> getPointsShifted();
+
     Eigen::RowVectorXd getFunctionValues();
+
     std::vector<Polynomial> getPivotPolynomials();
+
     Eigen::RowVectorXd getPivotValues() { return pivot_values_;}
 
+    /*!
+   * @brief changes TR center pointer to best point
+   * considering lower and upper bounds on variables.
+   */
     void moveToBestPoint();
+
     void criticalityStep();
+
     double checkInterpolation();
+
     void rebuildModel();
+
     void improveModelNfp();
+
     void ensureImprovement();
+
     bool isLambdaPoised();
+
     void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
+
     std::map<Eigen::VectorXd, Eigen::VectorXd> solveTrSubproblem();
+
     void computePolynomialModels();
 
 
