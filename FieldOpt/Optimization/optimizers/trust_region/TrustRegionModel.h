@@ -50,7 +50,9 @@ class TrustRegionModel {
     TrustRegionModel(
             const Eigen::Matrix<double,
             Eigen::Dynamic,Eigen::Dynamic>& initial_points,
-            const Eigen::RowVectorXd& initial_fvalues ,
+            const Eigen::RowVectorXd& initial_fvalues,
+            Eigen::VectorXd& lb,
+            Eigen::VectorXd& ub,
             Settings::Optimizer *settings);
 
     int getDimension();
@@ -106,6 +108,8 @@ class TrustRegionModel {
     Eigen::RowVectorXd pivot_values_;
     Eigen::VectorXd index_vector_;
     Eigen::VectorXd distances_;
+    Eigen::VectorXd lb_;
+    Eigen::VectorXd ub_;
 
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>

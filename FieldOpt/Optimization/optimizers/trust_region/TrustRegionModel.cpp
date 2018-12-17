@@ -43,6 +43,9 @@ TrustRegionModel::TrustRegionModel(
         const Eigen::RowVectorXd& initial_fvalues,
         Settings::Optimizer *settings) {
 
+
+    lb_ = lb;
+    ub_ = ub;
     settings_ = settings;
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
     points_abs_ << initial_points;
