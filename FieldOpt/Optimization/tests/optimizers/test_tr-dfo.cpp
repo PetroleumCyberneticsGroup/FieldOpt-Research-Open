@@ -231,4 +231,43 @@ namespace {
         EXPECT_TRUE(same_pivot_values &&  same_pivot_coeff);
     }
 
+
+    TEST_F(TrustRegionTest, tr_dfo_initial_compute_polynomial_models) {
+        bool is_model_present = false;
+        SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+
+        // RUNNER CALL (START)
+        auto next_case = tr_dfo_->GetCaseForEvaluation();
+
+        // COMPUTE OBJ.FUNCTION VALUE FOR CASE
+        next_case->set_objective_function_value(
+                tr_dfo_prob1(next_case->GetRealVarVector()));
+
+        if (tr_dfo_->GetNumInitPoints() == 1 ) {
+            TestResources::OverrideSecondPoint(tr_mdata.prob1, *next_case);
+        }
+
+        // RUNNER CALL (FINISH)
+        tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        auto tr_model = tr_dfo_->getTrustRegionModel();
+        auto modeling_polynomials = tr_model->getModelingPolynomials();
+
+        double tol = 1e-06;
+        auto same_modeling_polynomials = true;
+
+        for (int i=0; i<modeling_polynomials.size(); i++)  {
+            if (modeling_polynomials[i].dimension != tr_mdata.prob1.mdm(i)) {
+                same_modeling_polynomials = false;
+            }
+
+            for (int j=0; j<modeling_polynomials[i].coefficients.size(); j++) {
+                if (abs(modeling_polynomials[i].coefficients(j) - tr_mdata.prob1.mcm(j,i)) > tol) {
+                    same_modeling_polynomials = false;
+                }
+            }
+        }
+        EXPECT_TRUE(same_modeling_polynomials);
+    }
+
 }

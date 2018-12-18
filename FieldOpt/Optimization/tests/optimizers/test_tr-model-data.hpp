@@ -39,6 +39,10 @@ namespace TestResources {
             Eigen::MatrixXd pcm; // tr_model.pivot_polynomials
             Eigen::MatrixXd pdm; // tr_model.pivot_polynomials
 
+            Eigen::MatrixXd mcm; // tr_model.modeling_polynomials
+            Eigen::MatrixXd mdm; // tr_model.modeling_polynomials
+
+
             Eigen::MatrixXd vm; // tr_model.pivot_values
 
             vector<int> idx;; // 
@@ -104,6 +108,12 @@ namespace TestResources {
             prob1.pdm.resize(1,6); // model.pivot_polynomials.dimension
             // Column vector ([6x1])
             prob1.vm.resize(6,1); // model.pivot_values
+            // Matrix ([6x1]) of column vectors ([6x1])
+            prob1.mcm.resize(6,1); // model.pivot_polynomials.coefficients
+            // Matrix ([1x1]) of column vectors ([1x1])
+            prob1.mdm.resize(1,1); // model.pivot_polynomials.dimension
+
+
 
             // Pivot polynomials (coeff):
             prob1.pcm.col(0) <<   1.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
@@ -120,7 +130,15 @@ namespace TestResources {
             prob1.pdm.col(4) <<   2.0000000000000000; 
             prob1.pdm.col(5) <<   2.0000000000000000; 
             // Pivot values:
-            prob1.vm.col(0) <<   1.0000000000000000,   0.3147236863931789,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000; 
+            prob1.vm.col(0) <<   1.0000000000000000,   0.3147236863931789,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000;
+
+            // Modeling polynomials (coeff):
+            prob1.mcm.col(0) <<  3.55426677864692,     -4.08527631360682,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000,   0.0000000000000000;
+
+
+            // Modeling polynomials (dim):
+            prob1.mdm.col(0) <<   2.0000000000000000;
+
 
             // ==========================================================================================
             // ==============================  prob2  ==============================
