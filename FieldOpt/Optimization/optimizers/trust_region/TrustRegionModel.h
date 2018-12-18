@@ -171,7 +171,7 @@ class TrustRegionModel {
    * @return Polynomial containing the corresponding dimension and coefficients.
    */
     Polynomial matricesToPolynomial(
-            int c0,
+            double c0,
             const Eigen::VectorXd &g0,
             const Eigen::MatrixXd &H);
 
@@ -181,7 +181,7 @@ class TrustRegionModel {
      * @param coefficients coefficients of polynomial.
      * @return tuple<int, Eigen::VectorXd, Eigen::MatrixXd> matrices c, g, and H  respectively.
      */
-    std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
+    std::tuple<double, Eigen::VectorXd, Eigen::MatrixXd> coefficientsToMatrices(
             int dimension,
             Eigen::VectorXd coefficients);
 

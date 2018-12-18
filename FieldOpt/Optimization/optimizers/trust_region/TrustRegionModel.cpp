@@ -314,8 +314,8 @@ std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem()
 }
 
 void TrustRegionModel::computePolynomialModels() {
-    int dim = points_abs_.cols();
-    int points_num = points_abs_.rows();
+    int dim = points_abs_.rows();
+    int points_num = points_abs_.cols();
     int functions_num = 1; //!<this code currently supports only 1 function>
     int linear_terms = dim+1;
     int full_q_terms = (dim+1)*(dim+2)/2;
@@ -441,7 +441,7 @@ void TrustRegionModel::nfpBasis(int dim) {
 }
 
 Polynomial TrustRegionModel::matricesToPolynomial(
-        int c0,
+        double c0,
         const Eigen::VectorXd &g0,
         const Eigen::MatrixXd &H) {
 
@@ -455,7 +455,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
 
     //!<first order>
     int ind_coefficients = dim;
-    coefficients.segment(0,ind_coefficients) = g0;
+    coefficients.segment(1,ind_coefficients) = g0;
 
     //!<second order>
     for (int k=0; k<dim; k++) {
@@ -475,7 +475,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     return p;
 }
 
-std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> TrustRegionModel::coefficientsToMatrices(
+std::tuple<double, Eigen::VectorXd, Eigen::MatrixXd> TrustRegionModel::coefficientsToMatrices(
         int dimension,
         Eigen::VectorXd coefficients) {
     if (coefficients.size() == 0) {
@@ -490,7 +490,7 @@ std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd> TrustRegionModel::coefficients
     }
 
     //!<constant term>
-    auto c = coefficients(0);
+    double c = coefficients(0);
 
     //!<order one term>
     int idx_coefficients = dimension + 1;
@@ -718,22 +718,26 @@ Polynomial TrustRegionModel::combinePolynomials(
     }
 
     auto p = multiplyPolynomial(polynomials[0], coefficients(0));
-    for (int k = 1; k <= terms; k++) {
+    for (int k = 1; k < terms; k++) {
         p = addPolynomial(p, multiplyPolynomial(polynomials[k], coefficients[k]));
     }
     return p;
 }
 
 Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
-    Eigen::VectorXd s = points_shifted_.col(tr_center_);
-    int c;
+    double c;
     double terms[3];
+    Eigen::VectorXd s = points_shifted_.col(tr_center_);
     Eigen::VectorXd g(polynomial.dimension);
     Eigen::MatrixXd H(polynomial.dimension, polynomial.dimension);
+
     std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
 
-    auto c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
-    auto g_mod = g + H*s;
+
+    double c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
+
+    Eigen::VectorXd g_mod(g.size());
+    g_mod = g + H*s;
 
     return matricesToPolynomial(c_mod,g_mod, H);
 }
