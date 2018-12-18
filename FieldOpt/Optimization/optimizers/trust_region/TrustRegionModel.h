@@ -67,6 +67,8 @@ class TrustRegionModel {
 
     std::vector<Polynomial> getPivotPolynomials();
 
+    std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
+
     Eigen::RowVectorXd getPivotValues() { return pivot_values_;}
 
     /*!
@@ -271,7 +273,38 @@ class TrustRegionModel {
     int findBestPoint();
 
 
+    /*!
+     * @brief Compute the modelling polynomials
+     * @return vector with the resulting polynomials.
+     */
+    std::vector<Polynomial> computeQuadraticMNPolynomials();
 
+
+    /*!
+    * @brief Evaluate NFP with finite differences.
+    * @param Number of points in the model.
+    * @return row vector with the size of number of points containing the resulting values
+    */
+    Eigen::RowVectorXd nfpFiniteDifferences(int points_num);
+
+    /*!
+    * @brief Combine polynomials.
+    * @param number of points in the model.
+    * @param coefficient values (alpha).
+    * @return resulting polynomial.
+    */
+    Polynomial combinePolynomials(
+            int points_num,
+            Eigen::RowVectorXd coefficients);
+
+
+
+    /*!
+    * @brief Shift polynomial with respect to the TR center.
+    * @param polynomial to be shifted.
+    * @return resulting polynomial.
+    */
+    Polynomial shiftPolynomial(Polynomial polynomial);
 };
 
 }

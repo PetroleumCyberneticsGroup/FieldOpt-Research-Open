@@ -24,6 +24,7 @@
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
 #include <Utilities/verbosity.h>
+#include <Eigen/Dense>
 
 namespace Optimization {
 namespace Optimizers {
@@ -313,7 +314,27 @@ std::map<Eigen::VectorXd, Eigen::VectorXd> TrustRegionModel::solveTrSubproblem()
 }
 
 void TrustRegionModel::computePolynomialModels() {
-    //TODO: implement this method
+    int dim = points_abs_.cols();
+    int points_num = points_abs_.rows();
+    int functions_num = 1; //!<this code currently supports only 1 function>
+    int linear_terms = dim+1;
+    int full_q_terms = (dim+1)*(dim+2)/2;
+    std::vector<Polynomial> polynomials(functions_num);
+
+    if ((linear_terms < points_num) && (points_num < full_q_terms)) {
+        //!<compute quadratic model>
+        polynomials = computeQuadraticMNPolynomials();
+    }
+
+    if ((points_num <= linear_terms) || (points_num == full_q_terms)) { //!<ideally we should check if the model is a badly conditioned system
+        //!<Compute model with incomplete (complete) basis>
+        auto l_alpha = nfpFiniteDifferences(points_num);
+        for (int k=functions_num-1; k>=0; k--) {
+            polynomials[k] = combinePolynomials(points_num, l_alpha);
+            polynomials[k] = shiftPolynomial(polynomials[k]);
+        }
+    }
+    modeling_polynomials_ = polynomials;
 }
 
 
@@ -449,7 +470,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     }
 
     Polynomial p;
-    p.dimension = 2;
+    p.dimension = dim;
     p.coefficients = coefficients;
     return p;
 }
@@ -620,6 +641,101 @@ int TrustRegionModel::findBestPoint() {
         }
     }
     return best_i;
+}
+
+std::vector<Polynomial> TrustRegionModel::computeQuadraticMNPolynomials() {
+    int dim = points_abs_.rows();
+    int points_num = points_abs_.cols();
+    int functions_num = fvalues_.rows();
+    std::vector<Polynomial> polynomials(functions_num);
+
+    Eigen::MatrixXd points_shifted = Eigen::MatrixXd::Zero(dim, points_num-1);
+    Eigen::RowVectorXd fvalues_diff = Eigen::RowVectorXd::Zero(functions_num, points_num-1);
+
+    int m2 = 0;
+    for (int m = tr_center_; (m<points_num) && (m != tr_center_); m++) {
+        points_shifted.col(m2) = points_abs_.col(m) - points_abs_.col(tr_center_);
+        fvalues_diff(m2) = fvalues_(m) - fvalues_(tr_center_);
+        m2++;
+    }
+
+    Eigen::MatrixXd M = points_shifted.transpose()*points_shifted;
+    M += 0.5*(Eigen::MatrixXd)(M.array().square());
+
+    //!<Solve symmetric system> //TODO: choose best algorithm for solving linear system of equations automatically.
+    Eigen::PartialPivLU<Eigen::Ref<Eigen::MatrixXd> > lu(M);
+    lu.compute(M); //!<Update LU matrix>
+    auto mult_mn = lu.solve(fvalues_diff.transpose());
+
+    //TODO: raise a warning if the system is badly conditioned using the resulting conditioning number (tol=1e4*eps(1))
+
+    for (int n=0; n<functions_num; n++) {
+        Eigen::VectorXd g = Eigen::VectorXd::Zero(dim);
+        Eigen::MatrixXd H = Eigen::MatrixXd::Zero(dim,dim);
+        for (int m=0; m<points_num-1; m++) {
+            g += mult_mn(m)*points_shifted.col(m);
+            H += mult_mn(m)*(points_shifted.col(m)*points_shifted.col(m).transpose());
+        }
+        auto c = fvalues_(tr_center_);
+        polynomials[n] = matricesToPolynomial(c, g, H);
+    }
+    return polynomials;
+}
+
+Eigen::RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
+    //!<Change so we can interpolate more functions at the same time>
+    int dim = points_shifted_.cols();
+    Eigen::RowVectorXd l_alpha = fvalues_;
+    std::vector<Polynomial> polynomials = std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+
+    //!<Remove constant polynomial>
+    for (int m=1; m<points_num; m++) {
+        auto val = evaluatePolynomial(polynomials[0], points_shifted_.col(m));
+        l_alpha(m) = l_alpha(m) - l_alpha(0)*val;
+    }
+
+    //!<Remove terms corresponding to degree 1 polynomials>
+    for (int m=dim+1; m <points_num; m++) {
+        for (int n=1; n<dim+1; n++) {
+            auto val = evaluatePolynomial(polynomials[n], points_shifted_.col(m));
+            l_alpha(m) = l_alpha(m) - l_alpha(n)*val;
+        }
+    }
+    polynomials.clear();
+    return l_alpha;
+}
+
+Polynomial TrustRegionModel::combinePolynomials(
+        int points_num,
+        Eigen::RowVectorXd coefficients) {
+    auto polynomials = std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+
+    int terms = polynomials.size();
+    if ((terms == 0) || (coefficients.size() != terms)) {
+        Printer::ext_warn("Polynomial and coefficients have different sizes.", "Optimization", "TrustRegionModel");
+        throw std::runtime_error(
+                "Failed to combine polynomials. Polynomial and coefficients have different dimensions.");
+    }
+
+    auto p = multiplyPolynomial(polynomials[0], coefficients(0));
+    for (int k = 1; k <= terms; k++) {
+        p = addPolynomial(p, multiplyPolynomial(polynomials[k], coefficients[k]));
+    }
+    return p;
+}
+
+Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
+    Eigen::VectorXd s = points_shifted_.col(tr_center_);
+    int c;
+    double terms[3];
+    Eigen::VectorXd g(polynomial.dimension);
+    Eigen::MatrixXd H(polynomial.dimension, polynomial.dimension);
+    std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
+
+    auto c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
+    auto g_mod = g + H*s;
+
+    return matricesToPolynomial(c_mod,g_mod, H);
 }
 
 }
