@@ -20,7 +20,26 @@
 #ifndef FIELDOPT_TEST_TR_SUPPORT_HPP
 #define FIELDOPT_TEST_TR_SUPPORT_HPP
 
+using std::vector;
+
 namespace TestResources {
+
+  void CheckSamePolynomials(
+          vector<Polynomial> xp, Eigen::MatrixXd pcm,
+          double tol, std::string msg) {
+
+    for (int ii=0; ii<xp.size(); ii++) {
+
+      ASSERT_TRUE(xp[ii].coefficients.isApprox(pcm.col(ii),tol));
+
+      if( ~msg.empty() ) {
+        stringstream ss; ss << "[          ] " << FMAGENTA;
+        cout << ss.str() << msg.c_str() << ii << " -> ok" << END << endl;
+      }
+
+    }
+
+  }
 
   void CheckSameVector(VectorXd xa, VectorXd xb,
                   double tol, std::string msg) {

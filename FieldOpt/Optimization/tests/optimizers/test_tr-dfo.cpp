@@ -130,8 +130,10 @@ namespace {
                         tr_dfo_->getTrustRegionModel()->getPivotValues(),
                         prob.vm.col(0), tol, "Check pivot values are equal");
 
-                //auto tr_model = tr_dfo_->getTrustRegionModel();
-                //auto pivot_polynomials = tr_model->getPivotPolynomials();
+                // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                TestResources::CheckSamePolynomials(
+                        tr_dfo_->getTrustRegionModel()->getPivotPolynomials(),
+                        prob.pcm, tol, "Check pivot coeff. vector #");
 
                 p_count++;
 
@@ -167,6 +169,14 @@ namespace {
         SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
         RunnerSubs(tr_mdata.prob3, tr_dfo_prob3);
     }
+
+//    TEST_F(TrustRegionTest, tr_dfo_prob4) {
+//        cout << FMAGENTA
+//             << "[ CG.prob4 ] f = @(x) "
+//             << END << endl;
+//        SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
+//        RunnerSubs(tr_mdata.prob4, tr_dfo_prob4);
+//    }
 
     TEST_F(TrustRegionTest, tr_dfo_initial_model_created) {
         bool is_model_present = false;
