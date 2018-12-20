@@ -322,7 +322,13 @@ int TrustRegionModel::ensureImprovement() {
     if (!success) {
         bool model_changed = rebuildModel();
         if (!model_changed) {
-
+            if (!model_complete) {
+               //!<Improve model>
+                success = improveModelNfp();
+            } else {
+               //!<Replace point>
+                success = chooseAndReplacePoint();
+            }
         } else {
             success = true;
         }
