@@ -92,12 +92,13 @@ namespace {
                         double (*tr_dfo_prob)(VectorXd xs)){
 
             stringstream ss; ss << "[          ] " << FMAGENTA;
+            double tol = 1e-06;
 
             // Tentative best case should be equal to base case at this point
             TestResources::PrintCaseData(*tr_dfo_->GetTentativeBestCase(), *tr_dfo_);
-            TestResources::CheckSameX(tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
-                       prob.xm.col(0), prob.idx, 1e-6,
-                       "Check 1st point equal");
+            TestResources::CheckSameVector(
+                    tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
+                    prob.xm.col(0), tol, "Check 1st point equal");
 
             while (!tr_dfo_->IsFinished()) {
 
@@ -117,9 +118,20 @@ namespace {
 
                 // PRINT CASE DATA (ID, X, F)
                 TestResources::PrintCaseData(*next_case, *tr_dfo_);
-                TestResources::CheckSameX(next_case->GetRealVarVector(),
-                           prob.xm.col(1), prob.idx, 1e-6,
-                           "Check 2nd point equal");
+
+                // TEST IF CURRENT POINT IS EQUAL
+                TestResources::CheckSameVector(
+                        next_case->GetRealVarVector(),
+                        prob.xm.col(1), 1e-6,
+                        "Check 2nd point equal");
+
+                // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                TestResources::CheckSameVector(
+                        tr_dfo_->getTrustRegionModel()->getPivotValues(),
+                        prob.vm.col(0), tol, "Check pivot values are equal");
+
+                //auto tr_model = tr_dfo_->getTrustRegionModel();
+                //auto pivot_polynomials = tr_model->getPivotPolynomials();
 
             }
 

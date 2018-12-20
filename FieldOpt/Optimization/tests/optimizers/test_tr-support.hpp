@@ -22,6 +22,17 @@
 
 namespace TestResources {
 
+  void CheckSameVector(VectorXd xa, VectorXd xb,
+                  double tol, std::string msg) {
+
+    ASSERT_TRUE(xa.isApprox(xb,tol));
+
+    if( ~msg.empty() ) {
+      stringstream ss; ss << "[          ] " << FMAGENTA;
+      cout << ss.str() << msg.c_str() << " -> ok" << END << endl;
+    }
+  }
+
   void CheckSameX(VectorXd xa, VectorXd xb,
                   vector<int> idx, double tol,
                   std::string msg) {
