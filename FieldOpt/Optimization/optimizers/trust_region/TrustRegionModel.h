@@ -81,12 +81,34 @@ class TrustRegionModel {
 
     double checkInterpolation();
 
-    void rebuildModel();
+    /*!
+    * @brief Rebuild the polynomial model
+    * @return True if the model has changed, and false otherwise.
+    */
+    bool rebuildModel();
 
-    void improveModelNfp();
+    /*!
+    * @brief Improve the Newton Fundamental Polynomial model
+    * @return True if the model was improved, and false otherwise.
+    */
+    bool improveModelNfp();
 
-    void ensureImprovement();
+    /*!
+    * @brief Ensure improvement of model.
+     *@return exitflag: 1 = new point calculated,
+     *                  2 = replaced point an existing one that improve geometry,
+     *                  3 = model was old and had to be rebuilt,
+     *                  4 = failed to ensure improvement.
+    * considering lower and upper bounds on variables.
+    */
+    int ensureImprovement();
 
+    /*!
+    * @brief tests whether a model is lambda-poised for the given options.
+    * Important: it assumes there is a finite radius_max defined.    *
+    * pivot_threshold defines how well-poised we demand a model to be.
+    * @return true if the model is lambda poised, and false otherwise.
+    */
     bool isLambdaPoised();
 
     void changeTrCenter(Eigen::VectorXd new_point, Eigen::RowVectorXd fvalues);
@@ -186,7 +208,6 @@ class TrustRegionModel {
             Eigen::VectorXd coefficients);
 
 
-
     /*!
      * @brief normalize polynomial with respect to a point
      * @param poly_i index of polynomial to be normalized.
@@ -221,7 +242,6 @@ class TrustRegionModel {
             int block_beginning,
             int block_end);
 
-
     /*!
      * @brief subtract polynomials p1 and p2 so that the result is zero at x.
      * @param p1 first polynomial.
@@ -232,7 +252,6 @@ class TrustRegionModel {
             Polynomial p1,
             Polynomial p2,
             Eigen::VectorXd x);
-
 
     /*!
      * @brief evaluate polynomial p1 in given point x.
@@ -297,14 +316,30 @@ class TrustRegionModel {
             int points_num,
             Eigen::RowVectorXd coefficients);
 
-
-
     /*!
     * @brief Shift polynomial with respect to the TR center.
     * @param polynomial to be shifted.
     * @return resulting polynomial.
     */
     Polynomial shiftPolynomial(Polynomial polynomial);
+
+    /*!
+    * @brief Check if the model is complete, i.e., number of points is at least (dimension+1)*(dimension+2)/2
+    * @return true if model is complete, and false otherwise.
+    */
+    bool isComplete();
+
+    /*!
+    * @brief Check if model is old, i.e., if the max distance from points to tr center is greater than the radius.
+    * @return true if the model is old, and false otherwise.
+    */
+    bool isOld();
+
+    /*!
+    * @brief Choose worst point and replace it by a new one.
+    * @return true if the worst point was successfully replaced, and false otherwise.
+    */
+    bool chooseAndReplacePoint();
 };
 
 }

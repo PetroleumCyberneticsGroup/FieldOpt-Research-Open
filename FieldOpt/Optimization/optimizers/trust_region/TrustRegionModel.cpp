@@ -73,7 +73,7 @@ TrustRegionModel::TrustRegionModel(
     moveToBestPoint();
     computePolynomialModels();
 
-    if (sizeof(points_abs_) < 2) {
+    if (points_abs_.cols() < 2) {
         ensureImprovement();
     }
 }
@@ -119,8 +119,8 @@ double TrustRegionModel::checkInterpolation() {
     //TODO: implement this method
 }
 
-void TrustRegionModel::rebuildModel() {
-    double pivot_threshold = settings_->parameters().tr_pivot_threshold*std::fmin(1, radius_);
+bool TrustRegionModel::rebuildModel() {
+    double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
     all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols()); //!<All points we know>
     if (cached_points_.size() == 0) {
@@ -152,14 +152,15 @@ void TrustRegionModel::rebuildModel() {
     distances_.resize(n_points);
     points_shifted_.setZero(dim, n_points);
     distances_.setZero(n_points);
-    for (int i=1; i<n_points; i++) { //!<Shift all points to TR center>
+    for (int i = 1; i < n_points; i++) { //!<Shift all points to TR center>
         points_shifted_.col(i) << all_points_.col(i) - all_points_.col(0); //!<Compute distances>
         distances_(i) = points_shifted_.col(i).lpNorm<Eigen::Infinity>(); //<!distances in infinity or 2-norm>
     }
 
     //!<Reorder points based on their distances to the tr center>
-    index_vector_.setLinSpaced(distances_.size(),0,distances_.size()-1);
-    std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(), std::bind(compare, std::placeholders::_1,  std::placeholders::_2, distances_.data()));
+    index_vector_.setLinSpaced(distances_.size(), 0, distances_.size() - 1);
+    std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(),
+              std::bind(compare, std::placeholders::_1, std::placeholders::_2, distances_.data()));
     sortVectorByIndex(distances_, index_vector_);
     sortVectorByIndex(all_fvalues_, index_vector_);
 
@@ -178,10 +179,10 @@ void TrustRegionModel::rebuildModel() {
     pivot_values_(0) = 1;
 
     //!<Gaussian elimination (using previous points)>
-    for (int iter=1; iter<polynomials_num; iter++) {
+    for (int iter = 1; iter < polynomials_num; iter++) {
         double max_layer;
-        double farthest_point = distances_(distances_.size()-1);
-        double distance_farthest_point = (double) (farthest_point/radius_);
+        double farthest_point = distances_(distances_.size() - 1);
+        double distance_farthest_point = (double) (farthest_point / radius_);
         int block_beginning;
         int block_end;
 
@@ -200,9 +201,9 @@ void TrustRegionModel::rebuildModel() {
 
             }
         } else {  //!<Quadratic block -- being more carefull>
-                max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
-                block_beginning = dim+1;
-                block_end = polynomials_num-1;
+            max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
+            block_beginning = dim + 1;
+            block_end = polynomials_num - 1;
         }
 
         max_layer = std::fmax(1, max_layer);
@@ -212,16 +213,16 @@ void TrustRegionModel::rebuildModel() {
 
         double max_absval = 0;
         double pt_max = 0;
-        for (int i=0; i<all_layers.size();i++) {
+        for (int i = 0; i < all_layers.size(); i++) {
             auto layer = all_layers(i);
-            double dist_max = layer*radius_;
-            for (int n=last_pt_included+1; n<n_points; n++) {
+            double dist_max = layer * radius_;
+            for (int n = last_pt_included + 1; n < n_points; n++) {
                 if (distances_(n) > dist_max) {
                     break; //!<for n>
                 }
 
                 auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
-                val = val/dist_max; //!<minor adjustment>
+                val = val / dist_max; //!<minor adjustment>
                 if (abs(max_absval) < abs(val)) {
                     max_absval = val;
                     pt_max = n;
@@ -234,7 +235,7 @@ void TrustRegionModel::rebuildModel() {
 
         if (abs(max_absval) > pivot_threshold) {
             //!<points accepted>
-            int pt_next = last_pt_included+1;
+            int pt_next = last_pt_included + 1;
             if (pt_next != pt_max) {
                 points_shifted_.col(pt_next).swap(points_shifted_.col(pt_max));
                 all_points_.col(pt_next).swap(all_points_.col(pt_max));
@@ -242,7 +243,7 @@ void TrustRegionModel::rebuildModel() {
                 std::swap(distances_[pt_next], distances_[pt_next]);
             }
 
-            pivot_values_(pt_next)  = max_absval;
+            pivot_values_(pt_next) = max_absval;
 
             //!<Normalize polynomial value>
             pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, pt_next);
@@ -269,11 +270,11 @@ void TrustRegionModel::rebuildModel() {
         }
 
         tr_center_ = 0;
-        points_abs_ = all_points_.leftCols(last_pt_included+1);
-        points_shifted_ = points_shifted_.leftCols(last_pt_included+1);
-        fvalues_ =  all_fvalues_.head(last_pt_included+1);
+        points_abs_ = all_points_.leftCols(last_pt_included + 1);
+        points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
+        fvalues_ = all_fvalues_.head(last_pt_included + 1);
 
-        auto cache_size = std::fmin(n_points - last_pt_included-1, 3*pow(dim,2));
+        auto cache_size = std::fmin(n_points - last_pt_included - 1, 3 * pow(dim, 2));
         modeling_polynomials_.clear();
 
         //!<Points not included>
@@ -281,26 +282,78 @@ void TrustRegionModel::rebuildModel() {
             cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
             cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
         } else {
-            cached_points_.resize(0,0);
+            cached_points_.resize(0, 0);
             cached_fvalues_.resize(0);
         }
 
     }
     //!<Clean auxiliary objects>
-    all_points_.resize(0,0);
+    all_points_.resize(0, 0);
     all_fvalues_.resize(0);
+
+    return last_pt_included < n_points; //!<model has changed>
 }
 
-void TrustRegionModel::improveModelNfp() {
+bool TrustRegionModel::improveModelNfp() {
     //TODO: implement this method
+    return true;
 }
 
-void TrustRegionModel::ensureImprovement() {
-    //TODO: implement this method
+int TrustRegionModel::ensureImprovement() {
+    bool model_complete = isComplete();
+    bool model_fl = isLambdaPoised();
+    bool model_old = isOld();
+    int exit_flag = 4;
+    bool success = false;
+
+    if (!model_complete && (!model_old || !model_fl)) {
+        //!<calculate a new point to add>
+        success = improveModelNfp(); //!<improve model>
+        if (success) {
+            exit_flag = 1;
+        }
+    } else if ((model_complete) && (!model_old)){
+        //!<replace some point with a new one that improves geometry>
+        success = chooseAndReplacePoint(); //!<replace point>
+        if (success) {
+            exit_flag = 2;
+        }
+    }
+    if (!success) {
+        bool model_changed = rebuildModel();
+        if (!model_changed) {
+
+        } else {
+            success = true;
+        }
+        if (model_old) {
+            exit_flag = 3;
+        } else {
+            exit_flag = 4;
+        }
+    }
+    return exit_flag;
 }
 
 bool TrustRegionModel::isLambdaPoised() {
-    //TODO: implement this method
+    int dim = points_abs_.rows();
+    int points_num = points_abs_.cols();
+    double pivot_threshold = settings_->parameters().tr_pivot_threshold;
+    bool result = false;
+
+    if (settings_->parameters().tr_basis.compare("dummy")) {
+        result = true;
+    } else if(points_num >= dim+1) {
+        //!<fully linear, already>
+        result = true;
+        //!<but lets double check>
+//        if (pivot_values_.lpNorm<Eigen::Infinity>() > settings_->parameters().tr_pivot_threshold) {
+//            Printer::ext_warn("Low pivot values.", "Optimization", "TrustRegionOptimization");
+//        }
+    } else {
+        result = false;
+    }
+    return result;
 }
 
 void TrustRegionModel::changeTrCenter(
@@ -740,6 +793,26 @@ Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
     g_mod = g + H*s;
 
     return matricesToPolynomial(c_mod,g_mod, H);
+}
+
+bool TrustRegionModel::isComplete() {
+    int dim = points_abs_.rows();
+    int points_num = points_abs_.cols();
+    int max_terms = ((dim+1)*(dim+2))/2;
+    if (points_num > max_terms) {
+        Printer::ext_warn("Too many points in the Trust Region model.", "Optimization", "TrustRegionModel");
+    }
+    return (points_num >= max_terms );;
+}
+
+bool TrustRegionModel::isOld() {
+    Eigen::VectorXd distance(points_abs_.rows());
+    distance = points_abs_.col(0) - points_abs_.col(tr_center_);
+    return (distance.lpNorm<Eigen::Infinity>() > settings_->parameters().tr_radius_factor);
+}
+
+bool TrustRegionModel::chooseAndReplacePoint() {
+    //TODO: implement this method
 }
 
 }
