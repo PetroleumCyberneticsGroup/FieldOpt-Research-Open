@@ -57,14 +57,14 @@ class TrustRegionModel {
             VectorXd& ub,
             Settings::Optimizer *settings);
 
-    int TrustRegionModel::getDimension() { return dim_; }
-    double TrustRegionModel::getRadius() { return radius_; }
+    int getDimension() { return dim_; }
+    double getRadius() { return radius_; }
 
-    Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPoints() { return points_abs_; }
-    Matrix<double,Dynamic,Dynamic> TrustRegionModel::getPointsShifted() { return points_shifted_; }
+    Matrix<double,Dynamic,Dynamic> getPoints() { return points_abs_; }
+    Matrix<double,Dynamic,Dynamic> getPointsShifted() { return points_shifted_; }
 
-    RowVectorXd TrustRegionModel::getFunctionValues() { return fvalues_; }
-    std::vector<Polynomial> TrustRegionModel::getPivotPolynomials() { return pivot_polynomials_; }
+    RowVectorXd getFunctionValues() { return fvalues_; }
+    std::vector<Polynomial> getPivotPolynomials() { return pivot_polynomials_; }
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
     RowVectorXd getPivotValues() { return pivot_values_;}
