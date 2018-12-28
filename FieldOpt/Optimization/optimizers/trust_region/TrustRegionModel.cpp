@@ -100,7 +100,55 @@ void TrustRegionModel::criticalityStep() {
 }
 
 double TrustRegionModel::checkInterpolation() {
-    //TODO: implement this method
+
+    double tol1, tol2;
+
+    if (radius_ < 1e-3) {
+        tol1 = 100*std::numeric_limits<double>::epsilon();
+    } else {
+        tol1 = 10*std::numeric_limits<double>::epsilon();
+    }
+    tol2 = 10*sqrt(std::numeric_limits<double>::epsilon());
+
+    // Remove shift center from all points
+    int points_num = (int)points_abs_.cols();
+    MatrixXd hh = points_abs_;
+
+    for (int ii=points_num; ii==0; ii--) {
+        hh.col(ii) = hh.col(ii) - points_abs_.col(tr_center_);
+    }
+
+    double cval, cdiff, conda;
+
+    int max_diff = -1;
+    for (int kk = 0; kk < dim_; kk++) {
+        for (int ii = 0; ii < points_num; ii++) {
+
+            cval = evaluatePolynomial(pivot_polynomials_[kk], hh.col(ii));
+            cdiff = std::abs(fvalues_(ii) - cval);
+
+            if (cdiff > max_diff) {
+                max_diff = cdiff;
+            }
+
+            // This should be written using only Eigen methods...
+            conda = std::max(
+                    tol1 * fvalues_.array().abs().maxCoeff(), tol2);
+
+            if (std::abs(cdiff) > conda) {
+                Printer::ext_warn("cmg:tr_interpolation_error",
+                                  "Interpolation error");
+
+            }
+
+        }
+    }
+
+    // Comment: from MATLAB code: fvalues_ should be a matrix...
+    // difference = abs(model.fvalues(k, m) - this_value);
+    // and
+    // max(tol_1*max(abs(model.fvalues(k, :))), tol_2)
+
 }
 
 bool TrustRegionModel::rebuildModel() {
