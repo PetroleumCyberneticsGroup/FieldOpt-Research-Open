@@ -28,6 +28,9 @@
 #include <tuple>
 
 using namespace Eigen;
+using std::vector;
+using std::map;
+using std::tuple;
 
 struct Polynomial {
     int dimension = 0;
