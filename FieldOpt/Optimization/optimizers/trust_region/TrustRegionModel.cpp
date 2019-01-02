@@ -67,8 +67,8 @@ TrustRegionModel::TrustRegionModel(
   settings_ = settings;
   radius_ = settings_->parameters().tr_initial_radius;
   tr_center_ = 0;
-  dim_ = initial_points.rows();
-  cache_max_ = 3*pow(dim_,2);
+  dim_ = (int)initial_points.rows();
+  cache_max_ = (int)3*pow(dim_,2);
 
   points_abs_.setZero(initial_points.rows(), initial_points.cols());
   points_abs_ << initial_points;
@@ -190,7 +190,7 @@ bool TrustRegionModel::rebuildModel() {
     all_fvalues_(tr_center_) = all_fvalues_(0);
     all_fvalues_(0) = center_fvalue;
   }
-    //!<Calculate distances from tr center>
+  //!<Calculate distances from tr center>
   points_shifted_.resize(dim, n_points);
   distances_.resize(n_points);
   points_shifted_.setZero(dim, n_points);
@@ -231,8 +231,8 @@ bool TrustRegionModel::rebuildModel() {
         pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
-    double farthest_point = distances_(distances_.size()-1);
-    double distance_farthest_point = (double) (farthest_point/radius_);
+    double farthest_point = (double)distances_(distances_.size()-1);
+    double distance_farthest_point = (farthest_point/radius_);
 
     int block_beginning;
     int block_end;
@@ -392,15 +392,18 @@ int TrustRegionModel::ensureImprovement() {
 }
 
 bool TrustRegionModel::isLambdaPoised() {
-    int dim = points_abs_.rows();
-    int points_num = points_abs_.cols();
+
+  int dim = (int)points_abs_.rows();
+  int points_num = (int)points_abs_.cols();
+
   double pivot_threshold = settings_->parameters().tr_pivot_threshold;
   bool result = false;
 
   if (settings_->parameters().tr_basis.compare("dummy")) {
     result = true;
   } else if(points_num >= dim+1) {
-        //!<fully linear, already>
+
+    //!<Fully linear, already>
     result = true;
     //!<but lets double check>
 //        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_pivot_threshold) {
@@ -423,8 +426,9 @@ std::map<VectorXd, VectorXd> TrustRegionModel::solveTrSubproblem() {
 }
 
 void TrustRegionModel::computePolynomialModels() {
-  int dim = points_abs_.rows();
-  int points_num = points_abs_.cols();
+
+  int dim = (int)points_abs_.rows();
+  int points_num = (int)points_abs_.cols();
   int functions_num = 1; //!<Code currently supports only 1 function>
   int linear_terms = dim+1;
   int full_q_terms = (dim+1)*(dim+2)/2;
@@ -555,7 +559,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
     const VectorXd &g0,
     const MatrixXd &H) {
 
-  int dim = g0.size();
+  int dim = (int)g0.size();
   int n_terms = (dim+1)*(dim+2)/2;
   VectorXd coefficients(n_terms);
   coefficients.setZero(n_terms);
@@ -744,8 +748,9 @@ Polynomial TrustRegionModel::multiplyPolynomial(
 }
 
 int TrustRegionModel::findBestPoint() {
-  int dim = points_abs_.rows();
-  int n_points = points_abs_.cols();
+
+  int dim = (int)points_abs_.rows();
+  int n_points = (int)points_abs_.cols();
   int best_i = 0;
   auto min_f = std::numeric_limits<double>::infinity();
 
@@ -763,10 +768,12 @@ int TrustRegionModel::findBestPoint() {
   return best_i;
 }
 
-std::vector<Polynomial> TrustRegionModel::computeQuadraticMNPolynomials() {
-    int dim = points_abs_.rows();
-    int points_num = points_abs_.cols();
-    int functions_num = fvalues_.rows();
+std::vector<Polynomial>
+TrustRegionModel::computeQuadraticMNPolynomials() {
+
+  int dim = (int)points_abs_.rows();
+  int points_num = (int)points_abs_.cols();
+  int functions_num = (int)fvalues_.rows();
   std::vector<Polynomial> polynomials(functions_num);
 
   MatrixXd points_shifted = MatrixXd::Zero(dim, points_num-1);
@@ -782,12 +789,16 @@ std::vector<Polynomial> TrustRegionModel::computeQuadraticMNPolynomials() {
   MatrixXd M = points_shifted.transpose()*points_shifted;
   M += 0.5*(MatrixXd)(M.array().square());
 
-    //!<Solve symmetric system> //TODO: choose best algorithm for solving linear system of equations automatically.
+  //!<Solve symmetric system>
+  //!< //TODO: choose best algorithm for solving
+  //!< linear system of equations automatically.
+
   PartialPivLU<Ref<MatrixXd> > lu(M);
   lu.compute(M); //!<Update LU matrix>
   auto mult_mn = lu.solve(fvalues_diff.transpose());
 
-    //TODO: raise a warning if the system is badly conditioned using the resulting conditioning number (tol=1e4*eps(1))
+  //TODO: raise a warning if the system is badly conditioned
+  // using the resulting conditioning number (tol=1e4*eps(1))
 
   for (int n=0; n<functions_num; n++) {
     VectorXd g = VectorXd::Zero(dim);
@@ -804,7 +815,7 @@ std::vector<Polynomial> TrustRegionModel::computeQuadraticMNPolynomials() {
 
 RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   //!<Change so we can interpolate more functions at the same time>
-    int dim = points_shifted_.cols();
+  int dim = (int)points_shifted_.cols();
   RowVectorXd l_alpha = fvalues_;
     std::vector<Polynomial> polynomials = std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
 
@@ -828,11 +839,13 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
 Polynomial TrustRegionModel::combinePolynomials(
     int points_num,
     RowVectorXd coefficients) {
+
   auto polynomials = std::vector<Polynomial>(
       pivot_polynomials_.begin(),
       pivot_polynomials_.begin() + points_num);
 
-    int terms = polynomials.size();
+  int terms = (int)polynomials.size();
+
   if ((terms == 0) || (coefficients.size() != terms)) {
     Printer::ext_warn("Polynomial and coefficients have different sizes.",
                       "Optimization", "TrustRegionModel");
@@ -867,8 +880,9 @@ Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
 }
 
 bool TrustRegionModel::isComplete() {
-    int dim = points_abs_.rows();
-    int points_num = points_abs_.cols();
+
+  int dim = (int)points_abs_.rows();
+  int points_num = (int)points_abs_.cols();
   int max_terms = ((dim+1)*(dim+2))/2;
   if (points_num > max_terms) {
     Printer::ext_warn("Too many points in the Trust Region model.",
