@@ -24,6 +24,8 @@
 
 #include <Settings/optimizer.h>
 #include <Eigen/Core>
+#include <Eigen/Dense>
+
 #include <vector>
 #include <tuple>
 

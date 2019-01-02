@@ -25,10 +25,10 @@
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
 #include <Utilities/verbosity.h>
-#include <Eigen/Dense>
 
 #include <numeric>
 #include <functional>
+#include <limits>
 
 using namespace Eigen;
 using std::vector;
@@ -793,7 +793,12 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   //!< //TODO: choose best algorithm for solving
   //!< linear system of equations automatically.
 
-  PartialPivLU<Ref<MatrixXd> > lu(M);
+  // Works w/ 3rd-party-Eigen BUT crashes with system-Eigen
+  // PartialPivLU< Ref<MatrixXd> > lu(M);
+
+  // Works w/ system-Eigen AND 3rd-party-Eigen
+  PartialPivLU<MatrixXd> lu(M);
+
   lu.compute(M); //!<Update LU matrix>
   auto mult_mn = lu.solve(fvalues_diff.transpose());
 
