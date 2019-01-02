@@ -130,7 +130,7 @@ namespace {
                         tr_dfo_->getTrustRegionModel()->getPivotValues(),
                         prob.vm.col(0), tol, "Check pivot values are equal");
 
-                // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                // TEST POLYNOMIAL VALUES (COLUMN MATRIX) ARE EQUAL
                 TestResources::CheckSamePolynomials(
                         tr_dfo_->getTrustRegionModel()->getPivotPolynomials(),
                         prob.pcm, tol, "Check pivot coeff. vector #");

@@ -76,10 +76,12 @@ namespace TestResources {
                        Optimization::Case &base_case_tr_dfo_probs) {
 
     // First vector (Eigen + std formats)
-    VectorXd va = prob.xm.col(0); // <- va: VectorXd
+    // va -> VectorXd
+    VectorXd va = prob.xm.col(0);
     vector<double> v1;
+    // v1 -> std
     v1.resize(va.size());
-    VectorXd::Map(&v1[0], va.size()) = va; // <- v1: std
+    VectorXd::Map(&v1[0], va.size()) = va;
 
     // Second vector (Eigen + std formats)
     Eigen::VectorXd vb = base_case_tr_dfo_probs.GetRealVarVector();
