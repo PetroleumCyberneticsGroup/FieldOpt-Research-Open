@@ -146,9 +146,9 @@ else()
 
   message(STATUS "Using local Eigen3")
   set(EIGEN3_INCLUDE_DIR
-          ${CMAKE_SOURCE_DIR}/uc_1ThirdParty/Eigen3)
+          ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
   set(Eigen3_DIR
-          ${CMAKE_SOURCE_DIR}/uc_1ThirdParty/Eigen3)
+          ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
   include_directories(${EIGEN3_INCLUDE_DIR})
 
 endif()
