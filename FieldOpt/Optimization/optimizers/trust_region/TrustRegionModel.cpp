@@ -903,7 +903,26 @@ bool TrustRegionModel::isOld() {
 }
 
 bool TrustRegionModel::chooseAndReplacePoint() {
-  //TODO: implement this method
+ double pivot_threshold = settings_->parameters().tr_exchange_threshold;
+    double radius = radius_;
+
+    int dim = points_shifted_.rows();
+    int p_ini = points_shifted_.cols();
+    auto points_shifted = points_shifted_;
+
+    int tr_center = tr_center_;
+    auto shift_center = points_abs_.col(0);
+    auto tr_center_x = points_shifted_.col(tr_center);
+
+    auto pivot_values = pivot_values_;
+    auto pivot_polynomials = pivot_polynomials_;
+
+    int linear_terms = dim+1;
+
+    //TODO: Check if lb_ and ub_ if are empty. If so, initialize them with sufficiently large bounds.
+
+    auto bl_shifted = lb_ - shift_center;
+    auto bu_shifted = ub_ - shift_center;
 }
 
 }
