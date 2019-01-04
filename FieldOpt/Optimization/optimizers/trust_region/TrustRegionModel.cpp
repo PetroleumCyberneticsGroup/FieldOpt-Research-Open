@@ -241,10 +241,10 @@ double TrustRegionModel::checkInterpolation() {
 }
 
 bool TrustRegionModel::rebuildModel() {
-    double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
+  double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   //!<All points we know>
-    all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
+  all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
     all_points_ = points_abs_;
   } else {
@@ -286,9 +286,9 @@ bool TrustRegionModel::rebuildModel() {
   }
 
   //!<Reorder points based on their distances to the tr center>
-    index_vector_.setLinSpaced(distances_.size(), 0, distances_.size() - 1);
-    std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(),
-              std::bind(compare, std::placeholders::_1, std::placeholders::_2, distances_.data()));
+  index_vector_.setLinSpaced(distances_.size(), 0, distances_.size() - 1);
+  std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(),
+  std::bind(compare, std::placeholders::_1, std::placeholders::_2, distances_.data()));
   sortVectorByIndex(distances_, index_vector_);
   sortVectorByIndex(all_fvalues_, index_vector_);
 
@@ -309,7 +309,7 @@ bool TrustRegionModel::rebuildModel() {
   //!<Gaussian elimination (using previous points)>
   for (int iter = 1; iter < polynomials_num; iter++) {
 
-        pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+    pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -323,7 +323,7 @@ bool TrustRegionModel::rebuildModel() {
       block_end = dim;
       //!<linear block -- we allow more points (*2)
 
-            max_layer = std::min(2 * settings_->parameters().tr_radius_factor, distance_farthest_point);
+      max_layer = std::min(2 * settings_->parameters().tr_radius_factor, distance_farthest_point);
       if (iter > dim) {
         //!< We already tested all linear terms.
         //!< We do not have points to build a FL model.
@@ -332,12 +332,12 @@ bool TrustRegionModel::rebuildModel() {
 
       }
     } else { //!<Quadratic block -- being more carefull>
-            max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
+      max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
     }
 
-        max_layer = std::fmax(1, max_layer);
+    max_layer = std::fmax(1, max_layer);
 
     VectorXd all_layers;
     all_layers.setLinSpaced(ceil(max_layer), 1, max_layer);
@@ -377,14 +377,14 @@ bool TrustRegionModel::rebuildModel() {
       pivot_values_(pt_next) = max_absval;
 
       //!<Normalize polynomial value>
-            pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, pt_next);
+      pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, pt_next);
 
-            //!<Re-orthogonalize (just to make sure it still assumes 0 in previous points).
-            //!< Unnecessary in infinite precision>
-            pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+      //!<Re-orthogonalize (just to make sure it still assumes 0 in previous points).
+      //!< Unnecessary in infinite precision>
+      pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-            orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+      orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
@@ -984,26 +984,26 @@ bool TrustRegionModel::isOld() {
 }
 
 bool TrustRegionModel::chooseAndReplacePoint() {
- double pivot_threshold = settings_->parameters().tr_exchange_threshold;
-    double radius = radius_;
+  double pivot_threshold = settings_->parameters().tr_exchange_threshold;
+  double radius = radius_;
 
-    int dim = points_shifted_.rows();
-    int p_ini = points_shifted_.cols();
-    auto points_shifted = points_shifted_;
+  int dim = points_shifted_.rows();
+  int p_ini = points_shifted_.cols();
+  auto points_shifted = points_shifted_;
 
-    int tr_center = tr_center_;
-    auto shift_center = points_abs_.col(0);
-    auto tr_center_x = points_shifted_.col(tr_center);
+  int tr_center = tr_center_;
+  auto shift_center = points_abs_.col(0);
+  auto tr_center_x = points_shifted_.col(tr_center);
 
-    auto pivot_values = pivot_values_;
-    auto pivot_polynomials = pivot_polynomials_;
+  auto pivot_values = pivot_values_;
+  auto pivot_polynomials = pivot_polynomials_;
 
-    int linear_terms = dim+1;
+  int linear_terms = dim+1;
 
-    //TODO: Check if lb_ and ub_ if are empty. If so, initialize them with sufficiently large bounds.
+  //TODO: Check if lb_ and ub_ if are empty. If so, initialize them with sufficiently large bounds.
 
-    auto bl_shifted = lb_ - shift_center;
-    auto bu_shifted = ub_ - shift_center;
+  auto bl_shifted = lb_ - shift_center;
+  auto bu_shifted = ub_ - shift_center;
 }
 
 }
