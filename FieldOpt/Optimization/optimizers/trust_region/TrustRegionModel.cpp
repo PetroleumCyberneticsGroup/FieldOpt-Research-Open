@@ -104,7 +104,88 @@ void TrustRegionModel::moveToBestPoint() {
 }
 
 void TrustRegionModel::criticalityStep() {
-  //TODO: implement this method
+
+    // factor b/e radius & criticality measure
+    double mu = settings_->parameters().tr_criticality_mu;
+
+    // factor used to reduce radius
+    double omega = settings_->parameters().tr_criticality_omega;
+
+    // Ensure the final radius reduction is not drastic
+    double beta = settings_->parameters().tr_criticality_beta;
+
+    // Tolerance of TR algorithm
+    double tol_radius = settings_->parameters().tr_tol_radius;
+    double tol_f = settings_->parameters().tr_tol_f;
+
+    double init_radius_ = settings_->parameters().tr_initial_radius;
+
+    while (!isLambdaPoised() || isOld()) {
+
+        ensureImprovement();
+        computePolynomialModels();
+        bool model_changed = rebuildModel();
+
+        if (!model_changed) {
+            Printer::ext_info("[criticalityStep] Model did not change.",
+                              "Optimization", "Trust Region Model");
+            break;
+        }
+    }
+
+    // Get gradient (g) at TR center
+    Polynomial center_polynomial = modeling_polynomials_[0];
+    // Note: assuming center polynomial is at position "0"
+
+    double c;
+    VectorXd g(center_polynomial.dimension);
+    MatrixXd H(center_polynomial.dimension, center_polynomial.dimension);
+
+    std::tie(c, g, H) = coefficientsToMatrices(
+            center_polynomial.dimension, center_polynomial.coefficients);
+
+    // Project gradient
+    auto x_center = points_abs_.col(tr_center_);
+    auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - g)) - x_center;
+    auto crit_measure = mu * g_proj;
+
+    while (radius_ > crit_measure.minCoeff()) {
+
+        radius_ *= omega;
+
+        while (!isLambdaPoised() || isOld()) {
+
+            ensureImprovement();
+            computePolynomialModels();
+            bool model_changed = rebuildModel();
+
+            if (!model_changed) {
+                Printer::ext_info("[criticalityStep] Model did not change.",
+                                  "Optimization", "Trust Region Model");
+                break;
+            }
+
+        }
+
+        if ((radius_ < tol_radius
+        || beta * crit_measure.norm() < tol_f)
+        && radius_ < 100 * tol_radius) {
+            break;
+
+            // Note: condition structured as: ((A || C) && B)
+            // whereas in CG it is: (A || C && B) (CLion complains)
+
+            // CG comment: Better break. Not the end of algorithm,
+            // but satisfies stopping condition for outer algorithm
+            // anyway...
+
+        }
+    }
+
+    // The final radius is increased to avoid a drastic reduction
+    radius_ = std::min(
+            std::max(radius_, beta * crit_measure.norm()),
+            init_radius_);
 }
 
 double TrustRegionModel::checkInterpolation() {
