@@ -778,7 +778,7 @@ Polynomial TrustRegionModel::zeroAtPoint(
 double TrustRegionModel::evaluatePolynomial(
     Polynomial p1,
     VectorXd x) {
-  int c; // <- BUG? Should it not be double?
+  double c;
   double terms[3];
   VectorXd g(p1.dimension);
   MatrixXd H(p1.dimension, p1.dimension);
