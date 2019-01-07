@@ -426,7 +426,146 @@ bool TrustRegionModel::rebuildModel() {
 }
 
 bool TrustRegionModel::improveModelNfp() {
-  //TODO: implement this method
+  auto rel_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  auto tol_radius = settings_->parameters().tr_tol_radius;
+  auto radius_factor = settings_->parameters().tr_radius_factor;
+
+  auto radius = radius_;
+  auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);
+  auto points_shifted = points_shifted_;
+  auto dim = points_shifted.rows();
+  auto p_ini = points_shifted.cols();
+  auto shift_center = points_abs_.col(0);
+  auto tr_center = tr_center_;
+  bool exit_flag = true;
+  bool f_succeeded = false;
+  bool point_found = false;
+  int poly_i;
+  double new_pivot_value;
+
+  Polynomial polynomial;
+  Eigen::VectorXd new_point_shifted;
+  Eigen::VectorXd new_point_abs;
+  Eigen::RowVectorXd new_fvalues;
+
+  auto pivot_polynomials = pivot_polynomials_;
+  auto polynomials_num = pivot_polynomials.size();
+
+  if (lb_.rows() <= 0) {
+    lb_.resize(dim);
+    lb_.fill(-Eigen::Infinity);
+  }
+
+  if (ub_.rows() <= 0) {
+    ub_.resize(dim);
+    ub_.fill(Eigen::Infinity);
+  }
+
+  auto bl_shifted = lb_ - shift_center;
+  auto bu_shifted = ub_ - shift_center;
+  //  tol_shift = 10*eps(max(1, max(abs(shift_center))));
+
+  //TODO: test this function
+  auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
+    Eigen::VectorXd shifted_x = x + shift_center;
+    shifted_x = shifted_x.cwiseMin(bl_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMax(bu_shifted+shift_center);
+    return shifted_x;
+  };
+
+  //!<Test if the model is already FL but old
+  //!<Distance measured in inf norm>
+  auto tr_center_pt = points_shifted.col(tr_center);
+
+  if ((tr_center_pt.lpNorm<Infinity>() > radius_factor*radius) && (p_ini > dim+1)) {
+    exit_flag = false; //!<Needs to rebuild>
+  } else {
+    //!<The model is not old>
+    if (p_ini < polynomials_num) {
+      int block_end = p_ini;
+      int block_begining = 0;
+      //!<The model is not complete>
+      if (p_ini < dim+1) {
+        //!<The model is not yet fully linear>
+        block_begining = 1;
+      } else {
+        //!<We can add a point to the quadratic block>
+        block_begining = dim+1;
+      }
+      int next_position = p_ini;
+      double radius_used = radius;
+      //!<Possibly try smaller radius>
+      for (int attempts = 1; attempts<=3; attempts++) {
+        //!<Iterate through available polynomials>
+        for (poly_i = next_position; poly_i<=block_end; poly_i++) {
+          polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
+
+          //TODO: implement the method 'point_new'
+//          [new_points_shifted, new_pivots, point_found] = point_new(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+          auto new_points_shifted = points_shifted;
+          auto new_pivots = pivot_values_;
+          point_found = true;
+          if (point_found) {
+            for (int found_i = 0; found_i < new_points_shifted.cols(); found_i++) {
+              new_point_shifted = new_points_shifted.col(found_i);
+              auto new_pivot_value = new_pivots(found_i);
+              auto new_point_abs = unshift_point(new_point_shifted);
+//              [new_fvalues, f_succeeded] =  evaluate_new_fvalues(funcs, new_point_abs); // TODO: implement this method
+              auto new_fvalues = fvalues_;
+              f_succeeded = true;
+              if (f_succeeded) {
+                break;
+              }
+            }
+            if (f_succeeded) {
+              break;  //!<Stop trying pivot polynomials for poly_i>
+            }
+          }
+          //!<Attempt another polynomial if did not break>
+        }
+        if (point_found && f_succeeded) {
+          break; //!<(for attempts)>
+        } else if (point_found) {
+          //!<Reduce radius if it did not break>
+          radius_used = 0.5*radius_used;
+          if (radius_used < tol_radius) {
+            break;
+          }
+        } else {
+          break;
+        }
+      }
+      if (point_found && f_succeeded) {
+        //!<Update this polynomial in the set>
+        pivot_polynomials_[poly_i] = polynomial;
+        //!<Swap polynomials> //TODO: swap polynomials
+//        pivot_polynomials([next_position, poly_i]) = pivot_polynomials([poly_i, next_position]);
+
+        //!<Add point>
+        points_shifted.col(next_position) = new_point_shifted;
+
+        //!<Normalize polynomial value>
+//        pivot_polynomials(next_position) = normalize_polynomial(pivot_polynomials(next_position), new_point_shifted); //TODO
+
+        //!<Re-orthogonalize>
+//        pivot_polynomials(next_position) = orthogonalize_to_other_polynomials(pivot_polynomials, next_position, points_shifted, p_ini); //TODO
+
+        //!<Orthogonalize polynomials on present block (deffering subsequent ones)>
+//        pivot_polynomials = orthogonalize_block(pivot_polynomials, new_point_shifted, next_position, block_beginning, p_ini); //TODO
+
+        //!<Update model and recompute polynomials>
+        points_abs_.col(next_position) = new_point_abs;
+        points_shifted_ = points_shifted;
+        fvalues_.col(next_position) = new_fvalues;
+        pivot_values_(next_position) = new_pivot_value;
+        //model.pivot_polynomials = pivot_polynomials;  //<This is not needed since we update the class attribute directly>
+        exit_flag = true;
+      }
+    } else {
+      //!<The model is already complete>
+      exit_flag = false;
+    }
+  }
   return true;
 }
 
