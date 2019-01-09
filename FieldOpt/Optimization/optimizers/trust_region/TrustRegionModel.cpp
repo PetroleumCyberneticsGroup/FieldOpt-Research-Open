@@ -32,7 +32,6 @@
 
 using namespace Eigen;
 using std::vector;
-using std::map;
 using std::swap;
 using std::tuple;
 using std::tie;
@@ -352,7 +351,7 @@ bool TrustRegionModel::rebuildModel() {
           break; //!<for n>
         }
 
-                auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
+        auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
         val = val / dist_max; //!<minor adjustment>
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
@@ -377,7 +376,8 @@ bool TrustRegionModel::rebuildModel() {
       pivot_values_(pt_next) = max_absval;
 
       //!<Normalize polynomial value>
-      pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, pt_next);
+      auto point = points_shifted_.col(pt_next);
+      pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, point);
 
       //!<Re-orthogonalize (just to make sure it still assumes 0 in previous points).
       //!< Unnecessary in infinite precision>
@@ -432,9 +432,8 @@ bool TrustRegionModel::improveModelNfp() {
 
   auto radius = radius_;
   auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);
-  auto points_shifted = points_shifted_;
-  auto dim = points_shifted.rows();
-  auto p_ini = points_shifted.cols();
+  auto dim = points_shifted_.rows();
+  auto p_ini = points_shifted_.cols();
   auto shift_center = points_abs_.col(0);
   auto tr_center = tr_center_;
   bool exit_flag = true;
@@ -447,6 +446,8 @@ bool TrustRegionModel::improveModelNfp() {
   Eigen::VectorXd new_point_shifted;
   Eigen::VectorXd new_point_abs;
   Eigen::RowVectorXd new_fvalues;
+  Eigen::MatrixXd new_points_shifted;
+  Eigen::RowVectorXd new_pivots;
 
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
@@ -475,7 +476,7 @@ bool TrustRegionModel::improveModelNfp() {
 
   //!<Test if the model is already FL but old
   //!<Distance measured in inf norm>
-  auto tr_center_pt = points_shifted.col(tr_center);
+  auto tr_center_pt = points_shifted_.col(tr_center);
 
   if ((tr_center_pt.lpNorm<Infinity>() > radius_factor*radius) && (p_ini > dim+1)) {
     exit_flag = false; //!<Needs to rebuild>
@@ -498,21 +499,17 @@ bool TrustRegionModel::improveModelNfp() {
       for (int attempts = 1; attempts<=3; attempts++) {
         //!<Iterate through available polynomials>
         for (poly_i = next_position; poly_i<=block_end; poly_i++) {
-          polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
 
-          //TODO: implement the method 'point_new'
-//          [new_points_shifted, new_pivots, point_found] = point_new(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
-          auto new_points_shifted = points_shifted;
-          auto new_pivots = pivot_values_;
-          point_found = true;
+          polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
+          std::tie(new_points_shifted, new_pivots, point_found) = pointNew(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+
           if (point_found) {
             for (int found_i = 0; found_i < new_points_shifted.cols(); found_i++) {
               new_point_shifted = new_points_shifted.col(found_i);
               auto new_pivot_value = new_pivots(found_i);
-              auto new_point_abs = unshift_point(new_point_shifted);
-//              [new_fvalues, f_succeeded] =  evaluate_new_fvalues(funcs, new_point_abs); // TODO: implement this method
-              auto new_fvalues = fvalues_;
-              f_succeeded = true;
+              Eigen::MatrixXd new_point_abs = unshift_point(new_point_shifted);
+              new_fvalues.resize(new_point_abs.cols());
+              std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
               if (f_succeeded) {
                 break;
               }
@@ -538,27 +535,25 @@ bool TrustRegionModel::improveModelNfp() {
       if (point_found && f_succeeded) {
         //!<Update this polynomial in the set>
         pivot_polynomials_[poly_i] = polynomial;
-        //!<Swap polynomials> //TODO: swap polynomials
-//        pivot_polynomials([next_position, poly_i]) = pivot_polynomials([poly_i, next_position]);
+        //!<Swap polynomials>
+        std::swap(pivot_polynomials_[poly_i], pivot_polynomials_[next_position]);
 
         //!<Add point>
-        points_shifted.col(next_position) = new_point_shifted;
+        points_shifted_.col(next_position) = new_point_shifted;
 
         //!<Normalize polynomial value>
-//        pivot_polynomials(next_position) = normalize_polynomial(pivot_polynomials(next_position), new_point_shifted); //TODO
+        pivot_polynomials[next_position] = normalizePolynomial(next_position, new_point_shifted);
 
         //!<Re-orthogonalize>
-//        pivot_polynomials(next_position) = orthogonalize_to_other_polynomials(pivot_polynomials, next_position, points_shifted, p_ini); //TODO
+        pivot_polynomials[next_position] = orthogonalizeToOtherPolynomials(next_position, p_ini);
 
         //!<Orthogonalize polynomials on present block (deffering subsequent ones)>
-//        pivot_polynomials = orthogonalize_block(pivot_polynomials, new_point_shifted, next_position, block_beginning, p_ini); //TODO
+        orthogonalizeBlock(new_point_shifted, next_position, block_begining, p_ini);
 
         //!<Update model and recompute polynomials>
         points_abs_.col(next_position) = new_point_abs;
-        points_shifted_ = points_shifted;
         fvalues_.col(next_position) = new_fvalues;
         pivot_values_(next_position) = new_pivot_value;
-        //model.pivot_polynomials = pivot_polynomials;  //<This is not needed since we update the class attribute directly>
         exit_flag = true;
       }
     } else {
@@ -566,7 +561,7 @@ bool TrustRegionModel::improveModelNfp() {
       exit_flag = false;
     }
   }
-  return true;
+  return exit_flag;
 }
 
 int TrustRegionModel::ensureImprovement() {
@@ -641,7 +636,7 @@ void TrustRegionModel::changeTrCenter(
   //TODO: implement this method
 }
 
-std::map<VectorXd, VectorXd> TrustRegionModel::solveTrSubproblem() {
+std::tuple<VectorXd, VectorXd> TrustRegionModel::solveTrSubproblem() {
   //TODO: implement this method
 }
 
@@ -671,17 +666,20 @@ void TrustRegionModel::computePolynomialModels() {
   modeling_polynomials_ = polynomials;
 }
 
+std::tuple<Eigen::RowVectorXd, bool> TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
+  //TODO: implement this method
+}
+
 
 void TrustRegionModel::shiftPolynomialToEndBlock(
     int point_index,
     int block_end) {
 
-    std::swap(pivot_polynomials_[point_index], pivot_polynomials_[block_end]);
+  std::swap(pivot_polynomials_[point_index], pivot_polynomials_[block_end]);
   for (int pi=block_end-1; pi>point_index; pi--) {
         std::swap(pivot_polynomials_[pi], pivot_polynomials_[point_index]);
   }
 }
-
 
 void TrustRegionModel::sortVectorByIndex(
     VectorXd &vec,
@@ -851,10 +849,8 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 
 Polynomial TrustRegionModel::normalizePolynomial(
     int poly_i,
-    int pt_next) {
-
+    VectorXd point) {
   auto polynomial = pivot_polynomials_[poly_i];
-  auto point = points_shifted_.col(pt_next);
   auto val = evaluatePolynomial(polynomial, point);
   for (int i=0; i<3; i++) {
     polynomial = multiplyPolynomial(polynomial, (double) 1/val);
@@ -1143,6 +1139,27 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
+}
+
+std::tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool> TrustRegionModel::pointNew(
+        Polynomial polynomial,
+        Eigen::VectorXd tr_center_point,
+        double radius_used,
+        Eigen::VectorXd bl,
+        Eigen::VectorXd bu,
+        double pivot_threshold) {
+  //TODO: implement this method
+}
+
+
+std::tuple<Eigen::VectorXd, double, int> TrustRegionModel::minimizeTr(
+        Polynomial polynomial,
+        Eigen::VectorXd x_tr_center,
+        double radius,
+        Eigen::VectorXd bl,
+        Eigen::VectorXd bu) {
+  //TODO: implement this method
+
 }
 
 }

@@ -31,7 +31,6 @@
 
 using namespace Eigen;
 using std::vector;
-using std::map;
 using std::tuple;
 
 struct Polynomial {
@@ -116,10 +115,18 @@ class TrustRegionModel {
 
     void changeTrCenter(VectorXd new_point, RowVectorXd fvalues);
 
-    std::map<VectorXd, VectorXd> solveTrSubproblem();
+    std::tuple<VectorXd, VectorXd> solveTrSubproblem();
 
     void computePolynomialModels();
 
+
+    /*!
+   * @brief evaluates function values at the new points
+   * @param new_points_abs new points in absolute coordinates
+   * @return map in which the first element is the a RowVectorXd with the new function values,
+   * and the second element is a boolean indicating whether the function evaluations succeeded.
+   */
+    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
  private:
     Settings::Optimizer *settings_;
@@ -216,12 +223,12 @@ class TrustRegionModel {
     /*!
      * @brief normalize polynomial with respect to a point
      * @param poly_i index of polynomial to be normalized.
-     * @param pt_next index point in points_shifted participating in the normalization.
+     * @param point point participating in the normalization.
      * @return resulting polynomial.
      */
     Polynomial normalizePolynomial(
             int poly_i,
-            int pt_next);
+            VectorXd point);
 
     /*!
      * @brief orthogonalize polynomial pivot_polynomials_(poly_i) with respect to others in pivot_polynomials_.
@@ -243,7 +250,7 @@ class TrustRegionModel {
    */
     void orthogonalizeBlock(
             VectorXd point,
-            int np,
+            int poly_i,
             int block_beginning,
             int block_end);
 
@@ -345,6 +352,49 @@ class TrustRegionModel {
     * @return true if the worst point was successfully replaced, and false otherwise.
     */
     bool chooseAndReplacePoint();
+
+
+    /*!
+    * @brief Find a new point using the trust region.
+    * @param polynomial polynomial that approximates the function within the tr.
+    * @param tr_center_point trust region center point.
+    * @param radius_used radius of trust region.
+    * @param bl lower bound to the tr.
+    * @param bu upper bound to the tr.
+    * @param pivot_threshold pivot threshold.
+    * @return a map containing:
+     * new points found,
+     * new pivots and
+     * a boolean indicating whether a point was found or not.
+    */
+    std::tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool> pointNew(
+            Polynomial polynomial,
+            Eigen::VectorXd tr_center_point,
+            double radius,
+            Eigen::VectorXd bl,
+            Eigen::VectorXd bu,
+            double pivot_threshold);
+
+
+    /*!
+     * @brief Minimizes the trust region.
+     * @param polynomial polynomial that approximates the function within the tr.
+     * @param tr_center_point trust region center point.
+     * @param radius_used radius of trust region.
+     * @param bl lower bound to the tr.
+     * @param bu upper bound to the tr.
+     * @return a map containing:
+      * point that minimizes the tr,
+      * minimum function value,
+      * an exit flag with the result of the minimization problem.
+     */
+    std::tuple<Eigen::VectorXd, double, int> minimizeTr(
+            Polynomial polynomial,
+            Eigen::VectorXd x_tr_center,
+            double radius,
+            Eigen::VectorXd bl,
+            Eigen::VectorXd bu);
+
 };
 
 }
