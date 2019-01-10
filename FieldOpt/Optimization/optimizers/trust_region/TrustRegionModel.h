@@ -26,6 +26,9 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 
+#include "Model/model.h"
+#include "Simulation/simulator_interfaces/simulator.h"
+
 #include <vector>
 #include <tuple>
 
@@ -53,13 +56,17 @@ class TrustRegionModel {
   /*!
    * @brief Initialize the trust region model.
    */
-    TrustRegionModel();
     TrustRegionModel(
             const Matrix<double,Dynamic,Dynamic>& initial_points,
             const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
-            Settings::Optimizer *settings);
+            Settings::Optimizer *settings,
+            Model::Model *model,
+            Simulation::Simulator *simulator,
+            Case *base_case,
+            CaseHandler *case_handler
+            );
 
     int getDimension() { return dim_; }
     double getRadius() { return radius_; }
@@ -144,6 +151,11 @@ class TrustRegionModel {
     VectorXd distances_;
     VectorXd lb_;
     VectorXd ub_;
+
+    Model::Model *model_;
+    Simulation::Simulator *simulator_;
+    Case *base_case_;
+    CaseHandler *case_handler_;
 
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>

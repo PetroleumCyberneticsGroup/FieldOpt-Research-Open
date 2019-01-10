@@ -49,16 +49,21 @@ bool compare(
   return distances[lhs] <= distances[rhs];
 }
 
-TrustRegionModel::TrustRegionModel() {
-}
-
 TrustRegionModel::TrustRegionModel(
     const Matrix<double,Dynamic,Dynamic>& initial_points,
     const RowVectorXd& initial_fvalues,
     VectorXd& lb,
     VectorXd& ub,
-    Settings::Optimizer *settings) {
+    Settings::Optimizer *settings,
+    Model::Model *model,
+    Simulation::Simulator *simulator,
+    Case *base_case,
+    CaseHandler *case_handler) {
 
+  model_ = model;
+  simulator_ = simulator;
+  base_case_ = base_case;
+  case_handler_ = case_handler;
 
   lb_ = lb;
   ub_ = ub;
@@ -666,8 +671,25 @@ void TrustRegionModel::computePolynomialModels() {
   modeling_polynomials_ = polynomials;
 }
 
-std::tuple<Eigen::RowVectorXd, bool> TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
-  //TODO: implement this method
+std::tuple<Eigen::RowVectorXd, bool>
+        TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
+
+
+ Eigen::RowVectorXd fvalues(new_points_abs.cols());
+ for (int i=0; i<new_points_abs.cols(); i++) {
+   auto new_case = base_case_;
+   new_case->SetRealVarValues(new_points_abs.col(i));
+   case_handler_->AddNewCase(new_case);
+   case_handler_->GetNextCaseForEvaluation();
+   model_->ApplyCase(new_case);
+//   bool simulation_success = simulator_->Evaluate();
+//   if (simulation_success) {
+//       model_->wellCost(settings_->optimizer());
+//       new_case->set_objective_function_value(objective_function_->value());
+//       new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
+//       new_case->SetSimTime(sim_time);
+//   }
+ }
 }
 
 

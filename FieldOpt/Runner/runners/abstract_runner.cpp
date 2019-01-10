@@ -242,12 +242,19 @@ void AbstractRunner::InitializeOptimizer()
             break;
         case Settings::Optimizer::OptimizerType::TrustRegionOptimization:
             if (VERB_RUN >= 1) Printer::ext_info("Using Trust Region optimization algorithm.", "Runner", "AbstractRunner");
+//            optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
+//                                                           base_case_,
+//                                                           model_->variables(),
+//                                                           model_->grid(),
+//                                                           logger_
+//            );
+
             optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
-                                                           base_case_,
-                                                           model_->variables(),
-                                                           model_->grid(),
-                                                           logger_
+                                                                               base_case_,
+                                                                               model_,
+                                                                               logger_
             );
+
             optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
             break;
         default:

@@ -31,6 +31,9 @@
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 
+#include "Model/model.h"
+#include "Simulation/simulator_interfaces/simulator.h"
+
 class Logger;
 
 namespace Optimization {
@@ -128,6 +131,15 @@ class Optimizer : public Loggable
             Case *base_case,
             Model::Properties::VariablePropertyContainer *variables,
             Reservoir::Grid::Grid *grid,
+            Logger *logger,
+            CaseHandler *case_handler=0,
+            Constraints::ConstraintHandler *constraint_handler=0
+  );
+
+  Optimizer(::Settings::Optimizer *settings,
+            Case *base_case,
+            Model::Model *model,
+            Simulation::Simulator *simulator,
             Logger *logger,
             CaseHandler *case_handler=0,
             Constraints::ConstraintHandler *constraint_handler=0

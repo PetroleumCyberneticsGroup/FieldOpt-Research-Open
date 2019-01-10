@@ -23,6 +23,19 @@
 
 namespace Optimization {
 
+Optimizer::Optimizer(Settings::Optimizer *settings,
+     Case *base_case,
+     Model::Model *model,
+     Simulation::Simulator *simulator,
+     Logger *logger,
+     CaseHandler *case_handler,
+     Constraints::ConstraintHandler *constraint_handler
+)
+{
+
+
+}
+
 Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
                      Model::Properties::VariablePropertyContainer *variables,
                      Reservoir::Grid::Grid *grid,

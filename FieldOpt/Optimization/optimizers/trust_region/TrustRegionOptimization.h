@@ -54,6 +54,16 @@ class TrustRegionOptimization : public Optimizer {
                 Constraints::ConstraintHandler *constraint_handler=0
     );
 
+  TrustRegionOptimization(
+                Settings::Optimizer *settings,
+                Case *base_case,
+                Model::Model *model,
+                Simulation::Simulator *simulator,
+                Logger *logger,
+                CaseHandler *case_handler=0,
+                Constraints::ConstraintHandler *constraint_handler=0
+    );
+
     TrustRegionModel* getTrustRegionModel() { return tr_model_; };
 
     int GetNumInitPoints() { return n_initial_points_; };
@@ -73,6 +83,10 @@ class TrustRegionOptimization : public Optimizer {
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
+    CaseHandler *case_handler_;
+
+    Model::Model *model_;
+    Simulation::Simulator *simulator_;
 
     void computeInitialPoints();
 

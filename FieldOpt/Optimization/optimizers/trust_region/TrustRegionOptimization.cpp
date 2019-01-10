@@ -55,6 +55,38 @@ TrustRegionOptimization::TrustRegionOptimization(
     }
 }
 
+TrustRegionOptimization::TrustRegionOptimization(
+        Settings::Optimizer *settings,
+        Case *base_case,
+        Model::Model *model,
+        Simulation::Simulator *simulator,
+        Logger *logger,
+        CaseHandler *case_handler,
+        Constraints::ConstraintHandler *constraint_handler
+) : Optimizer(settings, base_case, model, simulator, logger, case_handler, constraint_handler) {
+
+    model_ = model;
+    simulator_ = simulator;
+    case_handler_ = case_handler;
+
+    settings_ = settings;
+    variables_ = model->variables();
+    base_case_ = base_case;
+
+    setLowerUpperBounds();
+
+    if (enable_logging_) { // Log base case
+        logger_->AddEntry(this);
+    }
+
+    n_initial_points_ = 0;
+    computeInitialPoints();
+
+    if (enable_logging_) {
+        logger_->AddEntry(new ConfigurationSummary(this));
+    }
+}
+
 void TrustRegionOptimization::setLowerUpperBounds() {
 
   if (constraint_handler_->HasBoundaryConstraints()) {
