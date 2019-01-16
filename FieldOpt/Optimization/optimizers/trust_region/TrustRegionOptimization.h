@@ -22,6 +22,9 @@
 #ifndef FIELDOPT_TRUSTREGION_H
 #define FIELDOPT_TRUSTREGION_H
 
+#include "Optimization/objective/objective.h"
+#include "Optimization/objective/NPV.h"
+
 #include "Optimization/optimizer.h"
 #include "Optimization/optimizers/trust_region/TrustRegionModel.h"
 #include <Eigen/Core>
@@ -87,6 +90,7 @@ class TrustRegionOptimization : public Optimizer {
 
     Model::Model *model_;
     Simulation::Simulator *simulator_;
+    Optimization::Objective::Objective *objective_function_;
 
     void computeInitialPoints();
 

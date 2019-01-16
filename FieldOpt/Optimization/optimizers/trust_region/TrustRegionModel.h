@@ -29,6 +29,9 @@
 #include "Model/model.h"
 #include "Simulation/simulator_interfaces/simulator.h"
 
+#include "Optimization/objective/objective.h"
+#include "Optimization/objective/NPV.h"
+
 #include <vector>
 #include <tuple>
 
@@ -64,6 +67,7 @@ class TrustRegionModel {
             Settings::Optimizer *settings,
             Model::Model *model,
             Simulation::Simulator *simulator,
+            Optimization::Objective::Objective *objective_function,
             Case *base_case,
             CaseHandler *case_handler
             );
@@ -130,7 +134,7 @@ class TrustRegionModel {
     /*!
    * @brief evaluates function values at the new points
    * @param new_points_abs new points in absolute coordinates
-   * @return map in which the first element is the a RowVectorXd with the new function values,
+   * @return map in which the first element is a RowVectorXd with the new function values,
    * and the second element is a boolean indicating whether the function evaluations succeeded.
    */
     std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
@@ -154,6 +158,8 @@ class TrustRegionModel {
 
     Model::Model *model_;
     Simulation::Simulator *simulator_;
+    Optimization::Objective::Objective *objective_function_;
+
     Case *base_case_;
     CaseHandler *case_handler_;
 

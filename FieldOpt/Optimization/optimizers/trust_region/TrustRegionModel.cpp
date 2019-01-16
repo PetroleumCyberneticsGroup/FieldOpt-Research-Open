@@ -57,11 +57,14 @@ TrustRegionModel::TrustRegionModel(
     Settings::Optimizer *settings,
     Model::Model *model,
     Simulation::Simulator *simulator,
+    Optimization::Objective::Objective *objective_function,
     Case *base_case,
     CaseHandler *case_handler) {
 
   model_ = model;
   simulator_ = simulator;
+  objective_function_ = objective_function;
+
   base_case_ = base_case;
   case_handler_ = case_handler;
 
@@ -674,24 +677,29 @@ void TrustRegionModel::computePolynomialModels() {
 std::tuple<Eigen::RowVectorXd, bool>
         TrustRegionModel::evaluateNewFvalues(Eigen::MatrixXd new_points_abs) {
 
+    Eigen::RowVectorXd fvalues(new_points_abs.cols());
+    bool simulation_success;
 
- Eigen::RowVectorXd fvalues(new_points_abs.cols());
- for (int i=0; i<new_points_abs.cols(); i++) {
-   auto new_case = base_case_;
-   new_case->SetRealVarValues(new_points_abs.col(i));
-   case_handler_->AddNewCase(new_case);
-   case_handler_->GetNextCaseForEvaluation();
-   model_->ApplyCase(new_case);
-//   bool simulation_success = simulator_->Evaluate();
-//   if (simulation_success) {
-//       model_->wellCost(settings_->optimizer());
-//       new_case->set_objective_function_value(objective_function_->value());
-//       new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
-//       new_case->SetSimTime(sim_time);
-//   }
+    for (int i=0; i<new_points_abs.cols(); i++) {
+        auto new_case = base_case_;
+        new_case->SetRealVarValues(new_points_abs.col(i));
+        case_handler_->AddNewCase(new_case);
+        case_handler_->GetNextCaseForEvaluation();
+        model_->ApplyCase(new_case);
+
+        simulation_success = simulator_->Evaluate(1000000,1);
+
+        if (simulation_success) {
+           model_->wellCost(settings_);
+           new_case->set_objective_function_value(objective_function_->value());
+           new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
+        }
+
+        fvalues(i) = new_case->objective_function_value();
  }
-}
 
+ return std::make_tuple(fvalues, simulation_success);
+}
 
 void TrustRegionModel::shiftPolynomialToEndBlock(
     int point_index,
