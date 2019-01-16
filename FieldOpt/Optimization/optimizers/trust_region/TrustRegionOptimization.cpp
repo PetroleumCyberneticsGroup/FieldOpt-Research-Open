@@ -60,13 +60,16 @@ TrustRegionOptimization::TrustRegionOptimization(
         Case *base_case,
         Model::Model *model,
         Simulation::Simulator *simulator,
+        Optimization::Objective::Objective *objective_function,
         Logger *logger,
         CaseHandler *case_handler,
         Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, model, simulator, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, model, simulator, objective_function, logger, case_handler, constraint_handler) {
 
     model_ = model;
     simulator_ = simulator;
+    objective_function_ = objective_function;
+
     case_handler_ = case_handler;
 
     settings_ = settings;
@@ -161,7 +164,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
         // Creates the initial trust region
         tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_,
-                                         lb_, ub_, settings_);
+                                         lb_, ub_, settings_,
+                                         model_, simulator_, objective_function_,
+                                         base_case_);
 
         //TODO: improve trust region with the new point
 

@@ -16,6 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ******************************************************************************/
+
 #include <Utilities/time.hpp>
 #include "optimizer.h"
 #include <time.h>
@@ -27,6 +28,7 @@ Optimizer::Optimizer(Settings::Optimizer *settings,
      Case *base_case,
      Model::Model *model,
      Simulation::Simulator *simulator,
+     Optimization::Objective::Objective *objective_function,
      Logger *logger,
      CaseHandler *case_handler,
      Constraints::ConstraintHandler *constraint_handler

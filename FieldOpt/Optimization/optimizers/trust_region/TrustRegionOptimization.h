@@ -22,12 +22,12 @@
 #ifndef FIELDOPT_TRUSTREGION_H
 #define FIELDOPT_TRUSTREGION_H
 
-#include "Optimization/objective/objective.h"
-#include "Optimization/objective/NPV.h"
-
 #include "Optimization/optimizer.h"
 #include "Optimization/optimizers/trust_region/TrustRegionModel.h"
 #include <Eigen/Core>
+
+//#include "Optimization/objective/objective.h"
+//#include "Optimization/objective/NPV.h"
 
 using namespace Eigen;
 
@@ -62,6 +62,7 @@ class TrustRegionOptimization : public Optimizer {
                 Case *base_case,
                 Model::Model *model,
                 Simulation::Simulator *simulator,
+                Optimization::Objective::Objective *objective_function,
                 Logger *logger,
                 CaseHandler *case_handler=0,
                 Constraints::ConstraintHandler *constraint_handler=0

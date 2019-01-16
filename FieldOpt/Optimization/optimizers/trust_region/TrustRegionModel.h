@@ -68,8 +68,7 @@ class TrustRegionModel {
             Model::Model *model,
             Simulation::Simulator *simulator,
             Optimization::Objective::Objective *objective_function,
-            Case *base_case,
-            CaseHandler *case_handler
+            Case *base_case
             );
 
     int getDimension() { return dim_; }

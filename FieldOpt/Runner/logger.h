@@ -27,7 +27,7 @@
 #include <QDateTime>
 #include <QUuid>
 #include "Optimization/case.h"
-#include "Optimization/optimizer.h"
+//#include "Optimization/optimizer.h"
 #include "runtime_settings.h"
 #include "Settings/settings.h"
 #include "Model/model.h"

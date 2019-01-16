@@ -58,15 +58,13 @@ TrustRegionModel::TrustRegionModel(
     Model::Model *model,
     Simulation::Simulator *simulator,
     Optimization::Objective::Objective *objective_function,
-    Case *base_case,
-    CaseHandler *case_handler) {
+    Case *base_case) {
 
   model_ = model;
   simulator_ = simulator;
   objective_function_ = objective_function;
-
   base_case_ = base_case;
-  case_handler_ = case_handler;
+
 
   lb_ = lb;
   ub_ = ub;
@@ -683,8 +681,8 @@ std::tuple<Eigen::RowVectorXd, bool>
     for (int i=0; i<new_points_abs.cols(); i++) {
         auto new_case = base_case_;
         new_case->SetRealVarValues(new_points_abs.col(i));
-        case_handler_->AddNewCase(new_case);
-        case_handler_->GetNextCaseForEvaluation();
+//        case_handler_->AddNewCase(new_case);
+//        case_handler_->GetNextCaseForEvaluation();
         model_->ApplyCase(new_case);
 
         simulation_success = simulator_->Evaluate(1000000,1);
