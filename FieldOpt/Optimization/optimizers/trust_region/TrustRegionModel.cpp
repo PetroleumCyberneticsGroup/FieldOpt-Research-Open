@@ -596,6 +596,8 @@ int TrustRegionModel::ensureImprovement() {
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
     success = improveModelNfp(); //!<improve model>
+    exit_flag = success; // added by MB
+
     if (success) {
       exit_flag = 1;
     }
@@ -612,6 +614,8 @@ int TrustRegionModel::ensureImprovement() {
       if (!model_complete) {
         //!<Improve model>
         success = improveModelNfp();
+        exit_flag = success; // added by MB
+
       } else {
         //!<Replace point>
         success = chooseAndReplacePoint();
