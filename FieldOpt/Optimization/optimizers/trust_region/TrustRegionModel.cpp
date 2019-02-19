@@ -66,37 +66,37 @@ TrustRegionModel::TrustRegionModel(
   base_case_ = base_case;
 
 
-  lb_ = lb;
-  ub_ = ub;
+    lb_ = lb;
+    ub_ = ub;
 
-  settings_ = settings;
-  radius_ = settings_->parameters().tr_initial_radius;
-  tr_center_ = 0;
-  dim_ = (int)initial_points.rows();
-  cache_max_ = (int)3*pow(dim_,2);
+    settings_ = settings;
+    radius_ = settings_->parameters().tr_initial_radius;
+    tr_center_ = 0;
+    dim_ = (int)initial_points.rows();
+    cache_max_ = (int)3*pow(dim_,2);
 
-  points_abs_.setZero(initial_points.rows(), initial_points.cols());
-  points_abs_ << initial_points;
+    points_abs_.setZero(initial_points.rows(), initial_points.cols());
+    points_abs_ << initial_points;
 
-  fvalues_.setZero(initial_fvalues.size());
-  fvalues_ << initial_fvalues;
+    fvalues_.setZero(initial_fvalues.size());
+    fvalues_ << initial_fvalues;
 
-  pivot_values_.resize(0);
-  cached_fvalues_.resize(0);
+    pivot_values_.resize(0);
+    cached_fvalues_.resize(0);
 
-  index_vector_.resize(0);
-  distances_.resize(0);
+    index_vector_.resize(0);
+    distances_.resize(0);
 
-  cached_points_.resize(0,0);
-  points_shifted_.resize(0,0);
+    cached_points_.resize(0,0);
+    points_shifted_.resize(0,0);
 
-  rebuildModel();
-  moveToBestPoint();
-  computePolynomialModels();
+    // rebuildModel();
+    // moveToBestPoint();
+    // computePolynomialModels();
 
-  if (points_abs_.cols() < 2) {
-    ensureImprovement();
-  }
+    // if (points_abs_.cols() < 2) {
+    // ensureImprovement();
+    // }
 }
 
 void TrustRegionModel::moveToBestPoint() {
@@ -314,7 +314,8 @@ bool TrustRegionModel::rebuildModel() {
   //!<Gaussian elimination (using previous points)>
   for (int iter = 1; iter < polynomials_num; iter++) {
 
-    pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+    pivot_polynomials_[poly_i] =
+            orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -357,7 +358,8 @@ bool TrustRegionModel::rebuildModel() {
           break; //!<for n>
         }
 
-        auto val = evaluatePolynomial(pivot_polynomials_[poly_i], points_shifted_.col(n));
+        auto val = evaluatePolynomial(
+                pivot_polynomials_[poly_i], points_shifted_.col(n));
         val = val / dist_max; //!<minor adjustment>
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
@@ -390,7 +392,8 @@ bool TrustRegionModel::rebuildModel() {
       pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-      orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+      orthogonalizeBlock(
+              points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
@@ -836,8 +839,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   return p;
 }
 
-std::tuple<double, VectorXd, MatrixXd>
-        TrustRegionModel::coefficientsToMatrices(
+std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
     int dimension,
     VectorXd coefficients) {
   if (coefficients.size() == 0) {
