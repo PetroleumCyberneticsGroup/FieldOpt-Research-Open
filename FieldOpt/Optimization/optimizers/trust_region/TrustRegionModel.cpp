@@ -836,7 +836,8 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   return p;
 }
 
-std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
+std::tuple<double, VectorXd, MatrixXd>
+        TrustRegionModel::coefficientsToMatrices(
     int dimension,
     VectorXd coefficients) {
   if (coefficients.size() == 0) {

@@ -38,7 +38,8 @@ add_library(optimization STATIC
         constraints/packer_constraint.cpp
         hybrid_optimizer.cpp
         objective/NPV.cpp
-		objective/NPV.h)
+		objective/NPV.h
+		optimizers/trust_region/TrustRegionMath.h)
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
 target_link_libraries(optimization
