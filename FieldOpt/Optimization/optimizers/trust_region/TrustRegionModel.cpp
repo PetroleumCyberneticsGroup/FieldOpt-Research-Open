@@ -67,7 +67,6 @@ TrustRegionModel::TrustRegionModel(
     settings_ = settings;
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
-    dim_ = (int)initial_points.rows();
     cache_max_ = (int)3*pow(dim_,2);
 
     points_abs_.setZero(initial_points.rows(), initial_points.cols());
@@ -253,7 +252,7 @@ bool TrustRegionModel::rebuildModel() {
   }
 
   //!<All function values we know>
-    all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
+  all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
 
   if (cached_fvalues_.size() == 0) {
     all_fvalues_ = fvalues_;
@@ -596,7 +595,7 @@ int TrustRegionModel::ensureImprovement() {
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
     success = improveModelNfp(); //!<improve model>
-    // exit_flag = success; // added by MB
+    exit_flag = success; // added by MB
 
     if (success) {
       exit_flag = 1;
@@ -614,7 +613,7 @@ int TrustRegionModel::ensureImprovement() {
       if (!model_complete) {
         //!<Improve model>
         success = improveModelNfp();
-        // exit_flag = success; // added by MB
+        exit_flag = success; // added by MB
 
       } else {
         //!<Replace point>

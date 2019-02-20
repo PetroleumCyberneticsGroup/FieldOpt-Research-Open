@@ -145,9 +145,8 @@ class TrustRegionModel {
    */
 //    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
-    struct statModel{
-
-    };
+    void setDim(int dim) { dim_ = dim; };
+    int getDim() { return dim_; };
 
     // Model methods
     bool isInitialized() const { return is_initialized_; };
@@ -155,26 +154,18 @@ class TrustRegionModel {
     void setIsInitialized(bool s) { is_initialized_ = s; };
     void setModelChanged(bool s) { model_changed_ = s; };
 
-    struct statInit{
-
-    };
-
     // Initialization cases
+    bool areInitPointsComputed() const { return init_points_computed_; };
+    void addInitializationCase(Case *c) { initialization_cases_.append(c); };
     bool areInitPointsComputed() const { return init_points_computed_; };
     void addInitializationCase(Case *c) { initialization_cases_.append(c); };
     void addTempInitCase(Case *c) { temp_init_cases_.append(c); };
     void submitTempInitCases() { initialization_cases_ = temp_init_cases_; };
     void setAreInitPointsComputed(bool s) { init_points_computed_ = s; };
 
-    struct statImproveNfp{
-
-    };
-
     // Improvement cases
     bool areImprovementPointsComputed() const { return impr_points_computed_; };
     void addImprovementCase(Case *c) { improvement_cases_.append(c); };
-    void addTempImprCase(Case *c) { temp_impr_cases_.append(c); };
-    void submitTempImprCases() { improvement_cases_ = temp_impr_cases_; };
     void setAreImprPointsComputed(bool s) { impr_points_computed_ = s; };
 
     bool hasOnlyOnePoint() const { return points_abs_.cols() < 2; };
@@ -199,7 +190,7 @@ class TrustRegionModel {
     */
     void submitInitializationCases(QList<Case *>);
 
- private:
+    private:
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;

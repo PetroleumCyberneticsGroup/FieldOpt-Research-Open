@@ -207,7 +207,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
 void TrustRegionOptimization::computeInitialPoints() {
 
-    int n_cont_vars = variables_->ContinousVariableSize();
+    tr_model_->setDim(variables_->ContinousVariableSize());
+    int n_cont_vars = tr_model_->getDim();
+
     auto initial_point = base_case_->GetRealVarVector();
 
     cout << "Adding base case to Case List" << endl;
