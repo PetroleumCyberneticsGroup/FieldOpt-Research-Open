@@ -157,8 +157,6 @@ class TrustRegionModel {
     // Initialization cases
     bool areInitPointsComputed() const { return init_points_computed_; };
     void addInitializationCase(Case *c) { initialization_cases_.append(c); };
-    bool areInitPointsComputed() const { return init_points_computed_; };
-    void addInitializationCase(Case *c) { initialization_cases_.append(c); };
     void addTempInitCase(Case *c) { temp_init_cases_.append(c); };
     void submitTempInitCases();
     void setAreInitPointsComputed(bool s) { init_points_computed_ = s; };
@@ -166,6 +164,8 @@ class TrustRegionModel {
     // Improvement cases
     bool areImprovementPointsComputed() const { return impr_points_computed_; };
     void addImprovementCase(Case *c) { improvement_cases_.append(c); };
+    void addTempImprCase(Case *c) { temp_impr_cases_.append(c); };
+    void submitTempImprCases() { improvement_cases_ = temp_impr_cases_; };
     void setAreImprPointsComputed(bool s) { impr_points_computed_ = s; };
 
     bool hasOnlyOnePoint() const { return points_abs_.cols() < 2; };
