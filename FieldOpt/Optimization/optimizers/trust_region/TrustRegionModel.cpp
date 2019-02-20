@@ -50,8 +50,8 @@ bool compare(
 }
 
 TrustRegionModel::TrustRegionModel(
-    const Matrix<double,Dynamic,Dynamic>& initial_points,
-    const RowVectorXd& initial_fvalues,
+//    const Matrix<double,Dynamic,Dynamic>& initial_points,
+//    const RowVectorXd& initial_fvalues,
     VectorXd& lb,
     VectorXd& ub,
     Settings::Optimizer *settings) {
@@ -69,11 +69,11 @@ TrustRegionModel::TrustRegionModel(
     tr_center_ = 0;
     cache_max_ = (int)3*pow(dim_,2);
 
-    points_abs_.setZero(initial_points.rows(), initial_points.cols());
-    points_abs_ << initial_points;
-
-    fvalues_.setZero(initial_fvalues.size());
-    fvalues_ << initial_fvalues;
+//    points_abs_.setZero(initial_points.rows(), initial_points.cols());
+//    points_abs_ << initial_points;
+//
+//    fvalues_.setZero(initial_fvalues.size());
+//    fvalues_ << initial_fvalues;
 
     pivot_values_.resize(0);
     cached_fvalues_.resize(0);

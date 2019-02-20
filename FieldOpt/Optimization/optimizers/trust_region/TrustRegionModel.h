@@ -56,8 +56,8 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel(
-            const Matrix<double,Dynamic,Dynamic>& initial_points,
-            const RowVectorXd& initial_fvalues,
+            //const Matrix<double,Dynamic,Dynamic>& initial_points,
+            //const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
             Settings::Optimizer *settings
