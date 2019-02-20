@@ -239,6 +239,22 @@ double TrustRegionModel::checkInterpolation() {
 
 }
 
+void TrustRegionModel::submitTempInitCases() {
+  initialization_cases_ = temp_init_cases_;
+
+  int nvars = initialization_cases_[0]->GetRealVarVector().size();
+  points_abs_.setZero(nvars, initialization_cases_.size());
+  fvalues_.setZero(initialization_cases_.size());
+
+  int ii = 0;
+  for (Case *c : initialization_cases_) {
+    points_abs_.col(ii) = c->GetRealVarVector();
+    fvalues_(ii) = c->objective_function_value();
+    ii++;
+  }
+
+};
+
 bool TrustRegionModel::rebuildModel() {
   double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
