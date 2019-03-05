@@ -74,7 +74,7 @@ void TrustRegionOptimization::iterate() {
     if (iteration_ == 0) {
 
         if (!tr_model_->areInitPointsComputed() && !tr_model_->isInitialized()) {
-            cout << "Submit Case List to case_handler" << endl;
+            cout << "init_cases -> case_handler_ (return)" << endl;
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
             cout << "# of cases in case_handler: " << init_cases.size() << endl;
@@ -91,22 +91,24 @@ void TrustRegionOptimization::iterate() {
             tr_model_->computePolynomialModels();
 
             if (tr_model_->hasOnlyOnePoint()) {
-                cout << "Improving TRModel" << endl;
+                cout << "Improve TRModel" << endl;
 
-                tr_model_->ensureImprovement();
+                int exit_flag = tr_model_->ensureImprovement();
 
                 // Might be 0 if point_found in improveModelNfp is false...
                 auto improvement_cases = tr_model_->getImprovementCases();
 
-                if(tr_model_->isImprovementNeeded()
-                && !improvement_cases.size() == 0) {
+                if (tr_model_->isImprovementNeeded()
+                    && !improvement_cases.size() == 0) {
+                    cout << "impr_cases -> case_handler_ (return)" << endl;
                     case_handler_->AddNewCases(improvement_cases);
-                } else if (improvement_cases.size() == 0) {
-                  // # of improvement cases zero!
+                    return;
                 }
+            } else {
+                cout << "TRModel initialized" << endl;
+                tr_model_->setIsInitialized(true);
             }
-            return;
-        }
+        } // end-if: Initializing TRModel
 
         // Continue improvement model process
         if (tr_model_->isImprovementNeeded()
