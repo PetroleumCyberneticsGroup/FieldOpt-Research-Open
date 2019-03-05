@@ -155,7 +155,8 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
     if (iteration_ == 0) {
 
         // Collect init points
-        if (!tr_model_->areInitPointsComputed() && !tr_model_->isInitialized()) {
+        if (!tr_model_->areInitPointsComputed()
+           && !tr_model_->isInitialized()) {
 
             // Collect initialization case
             tr_model_->addTempInitCase(c);
@@ -164,28 +165,30 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
 
-                    // points_abs_, fvalues_ fields are updated in submitTempInitCases()
+                    cout << "Return evaluated init_cases_ (sz:"
+                         << tr_model_->getSizeInitCases() << ")" << endl;
                     tr_model_->submitTempInitCases();
                     tr_model_->setAreInitPointsComputed(true);
             }
-
             return;
 
-        } else if (tr_model_->areInitPointsComputed() && !tr_model_->isInitialized()) {
+        } else if (tr_model_->areInitPointsComputed()
+                   && !tr_model_->isInitialized()) {
 
             // Collect initialization case
             tr_model_->addTempImprCase(c);
 
-            // All initialization cases have been evaluated
+            // All improvement cases have been evaluated
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
 
+                cout << "Return evaluated impr_cases_ (sz:"
+                     << tr_model_->getSizeImprCases() << ")" << endl;
                 tr_model_->submitTempImprCases();
                 tr_model_->setAreImprPointsComputed(true);
             }
-
+            return;
         }
-
 
     } else { // Initialization is done; handling "normal" case
         // do normal stuff
