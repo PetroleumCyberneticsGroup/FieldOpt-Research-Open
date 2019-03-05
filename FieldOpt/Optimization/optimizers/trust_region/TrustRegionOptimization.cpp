@@ -198,8 +198,8 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
 void TrustRegionOptimization::computeInitialPoints() {
 
-    tr_model_->setDim(variables_->ContinousVariableSize());
-    int n_cont_vars = tr_model_->getDim();
+    tr_model_->setXDim(variables_->ContinousVariableSize());
+    int n_cont_vars = tr_model_->getXDim();
 
     auto initial_point = base_case_->GetRealVarVector();
 
@@ -250,9 +250,10 @@ void TrustRegionOptimization::computeInitialPoints() {
             second_case->SetRealVarValues(second_point);
 
             // Hack: Comment this line to test improveModelNfp()
+            // -> currently, this leads to a crash
             // This will be done later in the test code
-            // tr_model_->addInitializationCase(second_case);
-            // cout << "Adding 2nd point to Case List" << endl;
+             tr_model_->addInitializationCase(second_case);
+             cout << "Adding 2nd point to Case List" << endl;
 
             n_initial_points_++;
 
