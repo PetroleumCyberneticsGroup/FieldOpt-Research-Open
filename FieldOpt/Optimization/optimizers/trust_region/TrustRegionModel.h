@@ -148,15 +148,16 @@ class TrustRegionModel {
     void computePolynomialModels();
 
     /*!
+     * Old evaluateNewFvalues description (incorporate somewhere else):
    * @brief evaluates function values at the new points
    * @param new_points_abs new points in absolute coordinates
    * @return map in which the first element is a RowVectorXd with the new function values,
    * and the second element is a boolean indicating whether the function evaluations succeeded.
    */
-//    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
-    void setDim(int dim) { dim_ = dim; }
-    int getDim() { return dim_; }
+    // Delete (replaced by similar support methods)
+    // void setDim(int dim) { dim_ = dim; }
+    // int getDim() { return dim_; }
 
     // Model methods
     bool isInitialized() const { return is_initialized_; }
