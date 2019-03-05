@@ -253,7 +253,15 @@ void TrustRegionModel::submitTempInitCases() {
     ii++;
   }
 
-};
+}
+
+void TrustRegionModel::submitTempImprCases() {
+    improvement_cases_ = temp_impr_cases_;
+
+    for (Case *c : initialization_cases_) {
+        improvement_cases_hash_.insert(c->id(), c);
+    }
+}
 
 bool TrustRegionModel::rebuildModel() {
   double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
@@ -302,8 +310,13 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<Reorder points based on their distances to the tr center>
   index_vector_.setLinSpaced(distances_.size(), 0, distances_.size() - 1);
-  std::sort(index_vector_.data(), index_vector_.data() + index_vector_.size(),
-  std::bind(compare, std::placeholders::_1, std::placeholders::_2, distances_.data()));
+  std::sort(index_vector_.data(),
+          index_vector_.data() + index_vector_.size(),
+          std::bind(compare,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  distances_.data()));
+
   sortVectorByIndex(distances_, index_vector_);
   sortVectorByIndex(all_fvalues_, index_vector_);
 
@@ -527,10 +540,14 @@ bool TrustRegionModel::improveModelNfp() {
 
           if (point_found) {
             for (int found_i = 0; found_i < new_points_shifted.cols(); found_i++) {
+
               new_point_shifted = new_points_shifted.col(found_i);
               auto new_pivot_value = new_pivots(found_i);
+
               Eigen::MatrixXd new_point_abs = unshift_point(new_point_shifted);
               new_fvalues.resize(new_point_abs.cols());
+
+              std::vector<QUuid> pt_case_uuid;
 
               if(!areImprovementPointsComputed()) {
                   setIsImprovementNeeded(true);
@@ -538,22 +555,37 @@ bool TrustRegionModel::improveModelNfp() {
                       Case *new_case = new Case(base_case_);
                       new_case->SetRealVarValues(new_point_abs.col(ii));
                       addImprovementCase(new_case);
-                  }
-                  return 5;
-              } else {
-//                  std::tie(new_fvalues, f_succeeded) = evaluateNewFvalues(new_point_abs);
-              }
 
+                      pt_case_uuid.push_back(new_case->id());
+                  }
+                  return 5;  // Probably not necessary
+              } else if (areImprovementPointsComputed()) {
+                  for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+
+                      int nvars = improvement_cases_[0]->GetRealVarVector().size();
+                      new_points_.setZero(nvars, improvement_cases_.size());
+                      new_fvalues_.setZero(improvement_cases_.size());
+
+                      auto c = improvement_cases_hash_[pt_case_uuid[ii]];
+                      new_points_.col(ii) = c->GetRealVarVector();
+                      new_fvalues_(ii) = c->objective_function_value();
+
+                      std::map <string, string> stateMap = c->GetState();
+                      if(stateMap["EvalSt"] == "OKAY") {
+                          f_succeeded = true;
+                      }
+                  }
+              }
               if (f_succeeded) {
                 break;
               }
-            }
+            }  // end-if: (found_i < new_points_shifted.cols())
             if (f_succeeded) {
               break;  //!<Stop trying pivot polynomials for poly_i>
             }
-          } // end if (point_found)
+          } // end-if (point_found)
           //!<Attempt another polynomial if did not break>
-        } // end for loop
+        } // end-for: (attempts<=3)
 
         if (point_found && f_succeeded) {
           break; //!<(for attempts)>

@@ -179,8 +179,7 @@ class TrustRegionModel {
     int getSizeImprCases() {
         return (int)improvement_cases_.size(); }
 
-    void submitTempImprCases() {
-        improvement_cases_ = temp_impr_cases_; }
+    void submitTempImprCases();
 
     void setAreImprPointsComputed(bool s) {
         impr_points_computed_ = s; }
@@ -211,12 +210,18 @@ class TrustRegionModel {
     Settings::Optimizer *settings_;
     std::vector<Polynomial> pivot_polynomials_;
     std::vector<Polynomial> modeling_polynomials_;
+
     Matrix<double,Dynamic,Dynamic> all_points_;
     Matrix<double,Dynamic,Dynamic> points_abs_;
     Matrix<double,Dynamic,Dynamic> points_shifted_;
     Matrix<double,Dynamic,Dynamic> cached_points_;
+
     RowVectorXd all_fvalues_;
     RowVectorXd fvalues_;
+
+    Matrix<double,Dynamic,Dynamic> new_points_;
+    RowVectorXd new_fvalues_;
+
     RowVectorXd cached_fvalues_;
     RowVectorXd pivot_values_;
     VectorXd index_vector_;
@@ -246,6 +251,8 @@ class TrustRegionModel {
     bool needs_improvement_;
     QList<Case *> improvement_cases_;
     QList<Case *> temp_impr_cases_;
+
+    QHash<QUuid, Case *> improvement_cases_hash_;
 
    /*!
    * @brief shift the point
