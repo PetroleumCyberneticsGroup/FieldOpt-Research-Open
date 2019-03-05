@@ -217,9 +217,8 @@ namespace {
         bool is_model_present = false;
         SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
 
-        // RUNNER CALL (START)
+        // Compute obj.function value for case
         auto next_case = tr_dfo_->GetCaseForEvaluation();
-
         next_case->set_objective_function_value(
                 tr_dfo_prob1(next_case->GetRealVarVector()));
 
@@ -228,8 +227,22 @@ namespace {
         cout << "x:" << next_case->GetRealVarVector().transpose() << END << endl;
         cout << "f:" << next_case->objective_function_value() << END << endl;
 
-        // RUNNER CALL (FINISH)
+        // Finish Runner
         tr_dfo_->SubmitEvaluatedCase(next_case);
+
+        // Compute obj.function value for case
+        auto scnd_case = tr_dfo_->GetCaseForEvaluation();
+        TestResources::OverrideSecondPoint(tr_mdata.prob1, *next_case);
+        scnd_case->set_objective_function_value(
+                tr_dfo_prob1(scnd_case->GetRealVarVector()));
+
+        cout << "----------------------" << END << endl;
+        cout << "Case id:" << scnd_case << END << endl;
+        cout << "x:" << scnd_case->GetRealVarVector().transpose() << END << endl;
+        cout << "f:" << scnd_case->objective_function_value() << END << endl;
+
+        // Finish Runner
+        tr_dfo_->SubmitEvaluatedCase(scnd_case);
 
         auto tr_model = tr_dfo_->getTrustRegionModel();
 
@@ -249,7 +262,6 @@ namespace {
         bool is_model_present = false;
         SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
 
-        // RUNNER CALL (START)
         // RUNNER CALL (START)
         auto next_case = tr_dfo_->GetCaseForEvaluation();
 
