@@ -73,7 +73,8 @@ void TrustRegionOptimization::iterate() {
 
     if (iteration_ == 0) {
 
-        if (!tr_model_->areInitPointsComputed() && !tr_model_->isInitialized()) {
+        if (!tr_model_->areInitPointsComputed()
+            && !tr_model_->isInitialized()) {
             cout << "init_cases -> case_handler_ (return)" << endl;
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
@@ -250,8 +251,8 @@ void TrustRegionOptimization::computeInitialPoints() {
 
             // Hack: Comment this line to test improveModelNfp()
             // This will be done later in the test code
-            tr_model_->addInitializationCase(second_case);
-            cout << "Adding 2nd point to Case List" << endl;
+            // tr_model_->addInitializationCase(second_case);
+            // cout << "Adding 2nd point to Case List" << endl;
 
             n_initial_points_++;
 

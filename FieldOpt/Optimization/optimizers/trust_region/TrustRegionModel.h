@@ -63,7 +63,17 @@ class TrustRegionModel {
             Settings::Optimizer *settings
             );
 
-    int getDimension() { return dim_; }
+    void setXDim(int dim) { dim_ = dim; }
+    int getXDim() { return dim_; }
+
+    int getNumPts() {
+        return static_cast<int>(points_abs_.cols());
+    }
+
+    int getNumFvals() {
+        return static_cast<int>(fvalues_.rows());
+    }
+
     double getRadius() { return radius_; }
 
     Matrix<double,Dynamic,Dynamic> getPoints() { return points_abs_; }
