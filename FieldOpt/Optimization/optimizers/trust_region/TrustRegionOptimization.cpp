@@ -231,18 +231,25 @@ void TrustRegionOptimization::computeInitialPoints() {
                 projectToBounds(&second_point);
             }
 
+            /* Delete b/c initial_points_ and initial_fvalues not
+             * actually used to initialize TRModel
+             *
             //!<Establish initial point matrix (2 cols since only
             //!< two points are needed to build quad model for TR)>
-            initial_points_.setZero(n_cont_vars, 2);
-            initial_points_.col(0) = initial_point;
+            // initial_points_.setZero(n_cont_vars, 2);
+            // initial_points_.col(0) = initial_point;
 
             //!<Establish initial feval matrix>
-            initial_fvalues_.setZero(2);
-            initial_fvalues_(0) = base_case_->objective_function_value();
+            // initial_fvalues_.setZero(2);
+            // initial_fvalues_(0) = base_case_->objective_function_value();
+            */
 
             //!<Append case corresponding to 2nd init point>
             Case *second_case = new Case(base_case_);
             second_case->SetRealVarValues(second_point);
+
+            // Hack: Comment this line to test improveModelNfp()
+            // This will be done later in the test code
             tr_model_->addInitializationCase(second_case);
             cout << "Adding 2nd point to Case List" << endl;
 
