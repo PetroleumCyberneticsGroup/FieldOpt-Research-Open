@@ -145,32 +145,49 @@ class TrustRegionModel {
    */
 //    std::tuple<Eigen::RowVectorXd, bool> evaluateNewFvalues(Eigen::MatrixXd new_points_abs);
 
-    void setDim(int dim) { dim_ = dim; };
-    int getDim() { return dim_; };
+    void setDim(int dim) { dim_ = dim; }
+    int getDim() { return dim_; }
 
     // Model methods
-    bool isInitialized() const { return is_initialized_; };
-    bool hasModelChanged() const { return model_changed_; };
-    void setIsInitialized(bool s) { is_initialized_ = s; };
-    void setModelChanged(bool s) { model_changed_ = s; };
+    bool isInitialized() const { return is_initialized_; }
+    bool hasModelChanged() const { return model_changed_; }
+    void setIsInitialized(bool s) { is_initialized_ = s; }
+    void setModelChanged(bool s) { model_changed_ = s; }
 
     // Initialization cases
-    bool areInitPointsComputed() const { return init_points_computed_; };
-    void addInitializationCase(Case *c) { initialization_cases_.append(c); };
-    void addTempInitCase(Case *c) { temp_init_cases_.append(c); };
+    bool areInitPointsComputed() const { return init_points_computed_; }
+    void addInitializationCase(Case *c) { initialization_cases_.append(c); }
+
+    int getSizeInitCases() {
+        return (int)initialization_cases_.size(); }
+
+    void addTempInitCase(Case *c) {
+        temp_init_cases_.append(c); }
+
     void submitTempInitCases();
-    void setAreInitPointsComputed(bool s) { init_points_computed_ = s; };
+
+    void setAreInitPointsComputed(bool s) {
+        init_points_computed_ = s; }
 
     // Improvement cases
     bool areImprovementPointsComputed() const { return impr_points_computed_; };
-    void addImprovementCase(Case *c) { improvement_cases_.append(c); };
-    void addTempImprCase(Case *c) { temp_impr_cases_.append(c); };
-    void submitTempImprCases() { improvement_cases_ = temp_impr_cases_; };
-    void setAreImprPointsComputed(bool s) { impr_points_computed_ = s; };
+    void addImprovementCase(Case *c) { improvement_cases_.append(c); }
 
-    bool hasOnlyOnePoint() const { return points_abs_.cols() < 2; };
-    bool isImprovementNeeded() const { return needs_improvement_; };
-    void setIsImprovementNeeded(bool s) { needs_improvement_ = s; };
+    void addTempImprCase(Case *c) {
+        temp_impr_cases_.append(c); }
+
+    int getSizeImprCases() {
+        return (int)improvement_cases_.size(); }
+
+    void submitTempImprCases() {
+        improvement_cases_ = temp_impr_cases_; }
+
+    void setAreImprPointsComputed(bool s) {
+        impr_points_computed_ = s; }
+
+    bool hasOnlyOnePoint() const { return points_abs_.cols() < 2; }
+    bool isImprovementNeeded() const { return needs_improvement_; }
+    void setIsImprovementNeeded(bool s) { needs_improvement_ = s; }
 
 
     /*!
