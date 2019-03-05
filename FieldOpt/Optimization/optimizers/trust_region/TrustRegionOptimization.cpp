@@ -195,41 +195,6 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
     }
 }
 
-//void TrustRegionOptimization::iterate() {
-//    // TODO: implement the main iteration for the TR optimization algorithm
-//
-//    if (enable_logging_) {
-//        logger_->AddEntry(this);
-//    }
-//
-//    if ((n_initial_points_  < 1)
-//        && (case_handler_->CasesBeingEvaluated().size() == 0)) {
-//
-//
-//
-//        // Just evaluated the second point, so we are ready
-//        // to build the quadratic model for the TR
-//    } else if (n_initial_points_ == 1 ) {
-//
-//        initial_points_.col(1) = c->GetRealVarVector();
-//        initial_fvalues_(1) = c->objective_function_value();
-//        n_initial_points_++;
-//
-//        // Construct TRModel
-//        tr_model_ = new TrustRegionModel(initial_points_, initial_fvalues_,
-//                                         lb_, ub_, settings_);
-//
-//        //TODO: improve trust region with the new point
-//
-//        if (isImprovement(c)) {
-//            updateTentativeBestCase(c);
-//            Printer::ext_info("Found new tentative best case: "
-//                              + Printer::num2str(c->objective_function_value()),
-//                              "Optimization", "Trust Region");
-//        }
-//    }
-//}
-
 void TrustRegionOptimization::computeInitialPoints() {
 
     tr_model_->setDim(variables_->ContinousVariableSize());
