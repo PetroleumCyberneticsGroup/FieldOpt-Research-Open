@@ -1,6 +1,28 @@
-//
-// Created by bellout on 11/27/18.
-//
+/***********************************************************
+ Created by Mathias C. Bellout on 27.11.18
+ Copyright (C) 2018-2019 Mathias Bellout
+ <mathias.bellout@petroleumcyberneticsgroup.no>
+ <chakibbb-pcg@gmail.com>
+
+ Modified 2018-2019 Thiago Lima Silva
+ <thiagolims@gmail.com>
+
+ This file is part of the FieldOpt project.
+
+ FieldOpt is free software: you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation, either version
+ 3 of the License, or (at your option) any later version.
+
+ FieldOpt is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty
+ of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ the GNU General Public License for more details.
+
+ You should have received a copy of the
+ GNU General Public License along with FieldOpt.
+ If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 
@@ -95,36 +117,25 @@ namespace {
             double tol = 1e-06;
             int p_count = 0;
 
-            // Tentative best case should be equal to base case at this point
-//            TestResources::PrintCaseData(*tr_dfo_->GetTentativeBestCase(), *tr_dfo_);
-//            TestResources::CheckSameVector(
-//                    tr_dfo_->GetTentativeBestCase()->GetRealVarVector(),
-//                    prob.xm.col(0), tol, "Check 1st point equal");
-
-            // # of init points is already 2 here
-
             while (tr_dfo_->IsFinished()
             == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
-                // RUNNER CALL (START)
+                cout << "Runner@start: Call GetCaseForEvaluation()" << endl;
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
-                // calls iterate() if case_handler=0
 
-                // COMPUTE OBJ.FUNCTION VALUE FOR CASE
+                // Compute obj.function value for case
                 next_case->set_objective_function_value(
                         tr_dfo_prob(next_case->GetRealVarVector()));
 
+                // Override 2nd point
                 if (p_count == 1) {
                     TestResources::OverrideSecondPoint(prob, *next_case);
                 }
 
-                // RUNNER CALL (FINISH)
-                tr_dfo_->SubmitEvaluatedCase(next_case);
-                
-                // PRINT CASE DATA (ID, X, F)
+                // Print case data (id, x, f)
                 TestResources::PrintCaseData(*next_case, *tr_dfo_);
 
-                // TEST IF CURRENT POINT IS EQUAL TO MATLAB DATA
+                // Test if current point is equal to matlab data
                 if (p_count <= 2) {
 
                     string msg = "Checking point " + to_string(p_count+1) + " is equal";
@@ -133,14 +144,18 @@ namespace {
                             prob.xm.col(p_count), tol, msg);
                 }
 
+                // Finish Runner
+                cout << "Runner@end: Call SubmitEvaluatedCase()" << endl;
+                tr_dfo_->SubmitEvaluatedCase(next_case);
+
                 if (tr_dfo_->getTrustRegionModel()->isInitialized()) {
 
-                    // TEST PIVOT VALUES (VECTOR) ARE EQUAL
+                    // Test pivot values (vector) are equal
                     TestResources::CheckSameVector(
                             tr_dfo_->getTrustRegionModel()->getPivotValues().transpose(),
                             prob.vm.col(0), tol, "Check pivot values are equal", true);
 
-                    // TEST POLYNOMIAL VALUES (COLUMN MATRIX) ARE EQUAL
+                    // Test polynomial values (column matrix) are equal
                     TestResources::CheckSamePolynomials(
                             tr_dfo_->getTrustRegionModel()->getPivotPolynomials(),
                             prob.pcm, tol, "Check pivot coeff. vector #");
@@ -159,25 +174,33 @@ namespace {
     };
 
     TEST_F(TrustRegionTest, tr_dfo_prob1) {
-        cout << FMAGENTA
-             << "[ CG.prob1 ] f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]"
-             << END << endl;
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob1 ] "
+             << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
+
         SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
         RunnerSubs(tr_mdata.prob1, tr_dfo_prob1);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob2) {
-        cout << FMAGENTA
-             << "[ CG.prob2 ] f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob2 ] "
+             << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
              << END << endl;
+
         SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
         RunnerSubs(tr_mdata.prob2, tr_dfo_prob2);
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob3) {
-        cout << FMAGENTA
-             << "[ CG.prob3 ] f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob3 ] "
+             << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
              << END << endl;
+
         SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
         RunnerSubs(tr_mdata.prob3, tr_dfo_prob3);
     }
@@ -211,7 +234,7 @@ namespace {
         auto tr_model = tr_dfo_->getTrustRegionModel();
 
         if (tr_model) {
-            if (tr_model->getDimension() >=2) { //<!at least 2 points are needed in the
+            if (tr_model->getNumPts() >=2) { //<!at least 2 points are needed in the
                 is_model_present = true;
             } else {
                 cout << "Not enough points in the model." << endl;
