@@ -105,27 +105,41 @@ void TrustRegionOptimization::iterate() {
                     return;
                 }
             } else {
-                cout << "TRModel initialized" << endl;
+                cout << "Initialized TRModel [1]" << endl;
                 tr_model_->setIsInitialized(true);
             }
         } // end-if: Initializing TRModel
 
-        // Continue improvement model process
-        if (tr_model_->isImprovementNeeded()
+        if (tr_model_->areInitPointsComputed()
+            && tr_model_->isImprovementNeeded()
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-                tr_model_->ensureImprovement();
-            return;
-        }
+            cout << "Continue model improvement process" << endl;
+            int exit_flag = tr_model_->ensureImprovement();
 
-        // TRMmodel fully initialized
-    } else {
+            if (!tr_model_->isImprovementNeeded()) {
+                cout << "Improvement process successful" << endl;
+                cout << "Initialized TRModel [2]" << endl;
+                tr_model_->setIsInitialized(true);
+            }
+        }  // end-if: finish model improvement process
+    }  // end-if: (iteration_ == 0)
 
-        // do normal iteration stuff; add cases to queue
+    if(tr_model_->isInitialized()) {
+
+        cout << "TRMmodel fully initialized" << endl;
+        cout << "Starting first iteration" << endl;
+        // termination crit.: check for # of iterations
+        // termination crit.: check for radius size
+
+        // check if model is lambda-poised
+        // check criticality step
+
+        // compute step: solve_tr_subproblem
         iteration_++;
         return;
-    }
+    }  // end-if: (tr_model_->isInitialized)
 
     // Save for later
     //    Printer::ext_warn(
