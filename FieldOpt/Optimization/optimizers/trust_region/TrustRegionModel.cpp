@@ -497,7 +497,8 @@ bool TrustRegionModel::improveModelNfp() {
 
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
-  //  tol_shift = 10*eps(max(1, max(abs(shift_center))));
+  // tol_shift = 10*eps(max(1, max(abs(shift_center))));
+  // Use: tol_shift = 10*std::numeric_limits<double>::epsilon();
 
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
@@ -516,7 +517,7 @@ bool TrustRegionModel::improveModelNfp() {
   } else {
     //!<The model is not old>
     if (p_ini < polynomials_num) {
-      int block_end = p_ini;
+      int block_end = (int)p_ini;
       int block_begining = 0;
       //!<The model is not complete>
       if (p_ini < dim+1) {
@@ -524,9 +525,9 @@ bool TrustRegionModel::improveModelNfp() {
         block_begining = 1;
       } else {
         //!<We can add a point to the quadratic block>
-        block_begining = dim+1;
+        block_begining = (int)dim+1;
       }
-      int next_position = p_ini;
+      int next_position = (int)p_ini;
       double radius_used = radius;
 
       //!<Possibly try smaller radius>
@@ -544,11 +545,13 @@ bool TrustRegionModel::improveModelNfp() {
               new_point_shifted = new_points_shifted.col(found_i);
               auto new_pivot_value = new_pivots(found_i);
 
-              Eigen::MatrixXd new_point_abs = unshift_point(new_point_shifted);
+              new_point_abs = unshift_point(new_point_shifted);
               new_fvalues.resize(new_point_abs.cols());
 
               std::vector<QUuid> pt_case_uuid;
 
+              // Potentially: move this whole if-statement into a function
+              // called evaluateNewFvalues()...
               if(!areImprovementPointsComputed()) {
                   setIsImprovementNeeded(true);
                   for (int ii = 0; ii < new_point_abs.cols(); ii++) {
@@ -562,7 +565,7 @@ bool TrustRegionModel::improveModelNfp() {
               } else if (areImprovementPointsComputed()) {
                   for (int ii = 0; ii < new_point_abs.cols(); ii++) {
 
-                      int nvars = improvement_cases_[0]->GetRealVarVector().size();
+                      int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
                       new_points_.setZero(nvars, improvement_cases_.size());
                       new_fvalues_.setZero(improvement_cases_.size());
 
@@ -574,6 +577,7 @@ bool TrustRegionModel::improveModelNfp() {
                       if(stateMap["EvalSt"] == "OKAY") {
                           f_succeeded = true;
                       }
+                      // Should not f_succeeded be a vector if new_point_abs.cols() > 1?
                   }
               }
               if (f_succeeded) {
