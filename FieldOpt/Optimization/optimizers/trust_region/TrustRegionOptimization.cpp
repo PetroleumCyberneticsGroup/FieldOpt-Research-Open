@@ -252,8 +252,8 @@ void TrustRegionOptimization::computeInitialPoints() {
             // Hack: Comment this line to test improveModelNfp()
             // -> currently, this leads to a crash
             // This will be done later in the test code
-             tr_model_->addInitializationCase(second_case);
-             cout << "Adding 2nd point to Case List" << endl;
+            tr_model_->addInitializationCase(second_case);
+            cout << "Adding 2nd point to Case List" << endl;
 
             n_initial_points_++;
 

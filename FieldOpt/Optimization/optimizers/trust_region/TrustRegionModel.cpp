@@ -1284,14 +1284,86 @@ TrustRegionModel::pointNew(Polynomial polynomial,
     return make_tuple(new_points, new_pivot_values, point_found);
 }
 
-std::tuple<Eigen::VectorXd, double, int> TrustRegionModel::minimizeTr(
-        Polynomial polynomial,
-        Eigen::VectorXd x_tr_center,
-        double radius,
-        Eigen::VectorXd bl,
-        Eigen::VectorXd bu) {
-  //TODO: implement this method
+tuple<Eigen::VectorXd, double, int>
+TrustRegionModel::minimizeTr(Polynomial polynomial,
+                             Eigen::VectorXd x_tr_center,
+                             double radius,
+                             Eigen::VectorXd bl,
+                             Eigen::VectorXd bu) {
 
+    bool dbg = false;
+
+    Eigen::VectorXd x(dim_, 1);
+    Eigen::VectorXd bl_tr(dim_, 1), bu_tr(dim_, 1);
+    Eigen::VectorXd bl_mod(dim_, 1), bu_mod(dim_, 1);
+
+    double fval;
+    double tol_norm, tol_arg, tol_tr, tol_eps;
+    bool exitflag;
+
+    // TR tol
+    // CG: tol_arg = max(1, norm(x_tr_center, inf));
+    if (x_tr_center.lpNorm<Infinity>() > 1.0) {
+        Printer::ext_warn("X > 1 in EPS(X).",
+                          "minimizeTr",
+                          "TrustRegionModel");
+    }
+    tol_tr = 10*std::numeric_limits<double>::epsilon();
+
+    if (dbg) { // Can be deleted
+        cout << "Debug input polyn/x_tr_center/radius" << endl;
+        auto pc = polynomial.coefficients;
+        cout << "polynomial.coefficients = \n" << pc << endl;
+        cout << "x_tr_center = \n" << x_tr_center << endl;
+        cout << "radius = \n" << radius << endl ;
+    }
+
+    // TR bounds
+    bl_tr = x_tr_center.array() - radius;
+    bu_tr = x_tr_center.array() + radius;
+
+    bl_mod = bl.cwiseMax(bl_tr);
+    bl_mod = bl_mod.array() + tol_tr;
+
+    bu_mod = bu.cwiseMin(bu_tr);
+    bu_mod = bu_mod.array() - tol_tr;
+
+    // Restoring feasibility at TR center
+    for (int ii=0; ii < bl.rows(); ii++) {
+        if (x_tr_center(ii) <= bl(ii)) {
+            bl_mod(ii) = bl(ii);
+        }
+        if (x_tr_center(ii) >= bu(ii)) {
+            bu_mod(ii) = bu(ii);
+        }
+    }
+
+    if (dbg) { // Can be deleted
+        cout << "Debug bounds_mod/tol_tr" << endl;
+        cout << "bl_mod = \n" << bl_mod << endl;
+        cout << "bu_mod = \n" << bu_mod << endl;
+        cout << "tol_tr = \n" << tol_tr << endl;
+    }
+
+    double c;
+    Eigen::VectorXd g(polynomial.dimension);
+    Eigen::MatrixXd H(polynomial.dimension,
+                      polynomial.dimension);
+
+    tie(c, g, H) =
+            coefficientsToMatrices(polynomial.dimension,
+                                   polynomial.coefficients);
+
+    if (dbg) { // Can be deleted
+        cout << "Debug polynomial matrices c, g, H:" << endl;
+        cout << "c = \n" << c << endl ;
+        cout << "g = \n" << g << endl ;
+        cout << "H = \n" << H << endl;
+    }
+
+    cout << "Minimize TR using SNOPT, or whatever else...";
+    
+    return make_tuple(x, fval, exitflag);
 }
 
 }
