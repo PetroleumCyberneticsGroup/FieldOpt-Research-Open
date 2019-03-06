@@ -1211,16 +1211,78 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto bu_shifted = ub_ - shift_center;
 }
 
-std::tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool> TrustRegionModel::pointNew(
-        Polynomial polynomial,
-        Eigen::VectorXd tr_center_point,
-        double radius_used,
-        Eigen::VectorXd bl,
-        Eigen::VectorXd bu,
-        double pivot_threshold) {
-  //TODO: implement this method
-}
+tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
+TrustRegionModel::pointNew(Polynomial polynomial,
+                           Eigen::VectorXd tr_center_point,
+                           double radius_used,
+                           Eigen::VectorXd bl,
+                           Eigen::VectorXd bu,
+                           double pivot_threshold) {
 
+    cout << "Find new pt -> Calling minimize_tr() twice" << endl;
+
+    Eigen::VectorXd new_point_min(getXDim(), 1);
+    Eigen::VectorXd new_point_max(getXDim(), 1);
+    Eigen::MatrixXd new_points(getXDim(), 2);
+
+    double pivot_min, pivot_max;
+    Eigen::VectorXd new_pivot_values(1);
+
+    int exitflag_min, exitflag_max;
+    bool point_found;
+
+    tie(new_point_min, pivot_min, exitflag_min) = minimizeTr(polynomial,
+                                                             tr_center_point,
+                                                             radius_used,
+                                                             bl, bu);
+
+    auto polynomial_max = multiplyPolynomial(polynomial, -1);
+
+    tie(new_point_max, pivot_max, exitflag_max) = minimizeTr(polynomial_max,
+                                                             tr_center_point,
+                                                             radius_used,
+                                                             bl, bu);
+
+    if ((exitflag_min >= 0)
+        && (abs(pivot_min) >= pivot_threshold)) {
+
+        if ((exitflag_max >= 0)
+            && (abs(pivot_max) >= abs(pivot_min))) {
+            new_points.col(0) = new_point_max;
+            new_points.col(1) = new_point_min;
+            new_pivot_values << pivot_max, pivot_min;
+
+        } else if ((exitflag_max >= 0)
+                   && (abs(pivot_max) >= pivot_threshold)) {
+            new_points.col(0) = new_point_min;
+            new_points.col(1) = new_point_max;
+            new_pivot_values << pivot_min, pivot_max;
+
+        } else {
+            new_points.resize(dim_,1);
+            new_points.col(0) = new_point_min;
+            new_pivot_values << pivot_min;
+        }
+        point_found = true;
+
+    } else if ((exitflag_max >= 0)
+               && (abs(pivot_max) >= pivot_threshold)) {
+        new_points.resize(dim_,1);
+        new_points.col(0) = new_point_max;
+        new_pivot_values << pivot_max;
+        point_found = true;
+
+    } else {
+        point_found = false;
+        new_points.resize(dim_, 0);
+        new_pivot_values << 0;
+    }
+
+    cout << "Found " + to_string(new_points.cols()) +
+            " new pts/pivot-pts" << endl;
+
+    return make_tuple(new_points, new_pivot_values, point_found);
+}
 
 std::tuple<Eigen::VectorXd, double, int> TrustRegionModel::minimizeTr(
         Polynomial polynomial,
