@@ -57,6 +57,8 @@ TrustRegionModel::TrustRegionModel(
     Settings::Optimizer *settings) {
 
     init_points_computed_ = false;
+    impr_points_computed_ = false;
+
     is_initialized_ = false;
     needs_improvement_ = false;
     model_changed_ = false;
@@ -149,7 +151,6 @@ void TrustRegionModel::criticalityStep() {
     auto crit_measure = mu * g_proj;
 
     while (radius_ > crit_measure.minCoeff()) {
-
         radius_ *= omega;
 
         while (!isLambdaPoised() || isOld()) {
@@ -190,7 +191,6 @@ void TrustRegionModel::criticalityStep() {
 double TrustRegionModel::checkInterpolation() {
 
   double tol1, tol2;
-
   if (radius_ < 1e-3) {
     tol1 = 100*std::numeric_limits<double>::epsilon();
   } else {
@@ -236,7 +236,6 @@ double TrustRegionModel::checkInterpolation() {
   // difference = abs(model.fvalues(k, m) - this_value);
   // and
   // max(tol_1*max(abs(model.fvalues(k, :))), tol_2)
-
 }
 
 void TrustRegionModel::submitTempInitCases() {
@@ -252,13 +251,12 @@ void TrustRegionModel::submitTempInitCases() {
     fvalues_(ii) = c->objective_function_value();
     ii++;
   }
-
 }
 
 void TrustRegionModel::submitTempImprCases() {
     improvement_cases_ = temp_impr_cases_;
 
-    for (Case *c : initialization_cases_) {
+    for (Case *c : improvement_cases_) {
         improvement_cases_hash_.insert(c->id(), c);
     }
 }
@@ -304,7 +302,8 @@ bool TrustRegionModel::rebuildModel() {
   for (int i = 1; i < n_points; i++) {
     //!<Compute distances>
     points_shifted_.col(i) << all_points_.col(i) - all_points_.col(0);
-        //<!distances in infinity or 2-norm>
+
+    //<!distances in infinity or 2-norm>
     distances_(i) = points_shifted_.col(i).lpNorm<Infinity>();
   }
 
@@ -317,11 +316,13 @@ bool TrustRegionModel::rebuildModel() {
                   std::placeholders::_2,
                   distances_.data()));
 
-  sortVectorByIndex(distances_, index_vector_);
-  sortVectorByIndex(all_fvalues_, index_vector_);
-
+  //!<All points>
   sortMatrixByIndex(points_shifted_, index_vector_);
   sortMatrixByIndex(all_points_, index_vector_);
+
+  //!<All fvalues>
+  sortVectorByIndex(distances_, index_vector_);
+  sortVectorByIndex(all_fvalues_, index_vector_);
 
   nfpBasis(dim);//!<build nfp polynomial basis>
 
@@ -448,8 +449,8 @@ bool TrustRegionModel::rebuildModel() {
       cached_points_.resize(0, 0);
       cached_fvalues_.resize(0);
     }
+  } // end for-loop: (iter < polynomials_num)
 
-    }
   //!<Clean auxiliary objects>
   all_points_.resize(0, 0);
   all_fvalues_.resize(0);
@@ -581,15 +582,17 @@ bool TrustRegionModel::improveModelNfp() {
                   }
               }
               if (f_succeeded) {
+                setIsImprovementNeeded(false);
                 break;
               }
             }  // end-if: (found_i < new_points_shifted.cols())
             if (f_succeeded) {
+              setIsImprovementNeeded(false);
               break;  //!<Stop trying pivot polynomials for poly_i>
             }
           } // end-if (point_found)
           //!<Attempt another polynomial if did not break>
-        } // end-for: (attempts<=3)
+        } // end-for-loop: (poly_i <= block_end)
 
         if (point_found && f_succeeded) {
           break; //!<(for attempts)>
@@ -602,7 +605,7 @@ bool TrustRegionModel::improveModelNfp() {
         } else {
           break;
         }
-      } // end for (int attempts...
+      }  // end-for-loop: (attempts<=3)
 
       if (point_found && f_succeeded) {
         //!<Update this polynomial in the set>
@@ -1153,14 +1156,15 @@ Polynomial TrustRegionModel::combinePolynomials(
 }
 
 Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
-  double c;
+
   double terms[3];
   VectorXd s = points_shifted_.col(tr_center_);
+
+  double c;
   VectorXd g(polynomial.dimension);
   MatrixXd H(polynomial.dimension, polynomial.dimension);
 
-    std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
-
+  std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
 
   double c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
 
@@ -1209,6 +1213,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
+
+  //TODO: This function should return a bool...
 }
 
 tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
@@ -1362,9 +1368,9 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
     }
 
     cout << "Minimize TR using SNOPT, or whatever else...";
-    
+
     return make_tuple(x, fval, exitflag);
 }
 
-}
-}
+}  // namespace Optimizers
+}  // namespace Optimization
