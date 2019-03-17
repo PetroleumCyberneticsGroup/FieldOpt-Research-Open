@@ -51,9 +51,7 @@ TrustRegionOptimization::TrustRegionOptimization(
 
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
-    tr_model_ = new TrustRegionModel(// initial_points_,
-                                     // initial_fvalues_,
-                                     lb_, ub_, settings_);
+    tr_model_ = new TrustRegionModel(lb_, ub_, base_case_, settings_);
 
     // [1] Find 2nd point; make and add cases corresponding
     // to 1st & 2nd points to initialization_cases_ list

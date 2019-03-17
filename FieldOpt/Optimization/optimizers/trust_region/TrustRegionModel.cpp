@@ -50,10 +50,9 @@ bool compare(
 }
 
 TrustRegionModel::TrustRegionModel(
-//    const Matrix<double,Dynamic,Dynamic>& initial_points,
-//    const RowVectorXd& initial_fvalues,
     VectorXd& lb,
     VectorXd& ub,
+    Case *base_case,
     Settings::Optimizer *settings) {
 
     init_points_computed_ = false;

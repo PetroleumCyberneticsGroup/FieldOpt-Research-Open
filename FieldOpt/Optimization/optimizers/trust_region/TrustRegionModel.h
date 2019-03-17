@@ -56,10 +56,9 @@ class TrustRegionModel {
    * @brief Initialize the trust region model.
    */
     TrustRegionModel(
-            //const Matrix<double,Dynamic,Dynamic>& initial_points,
-            //const RowVectorXd& initial_fvalues,
             VectorXd& lb,
             VectorXd& ub,
+            Case *base_case,
             Settings::Optimizer *settings
             );
 
@@ -84,7 +83,7 @@ class TrustRegionModel {
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
     RowVectorXd getPivotValues() { return pivot_values_;}
-    
+
     /*!
    * @brief changes TR center pointer to best point
    * considering lower and upper bounds on variables.
