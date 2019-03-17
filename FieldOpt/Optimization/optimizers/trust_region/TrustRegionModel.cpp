@@ -1228,7 +1228,7 @@ TrustRegionModel::pointNew(Polynomial polynomial,
     Eigen::MatrixXd new_points(getXDim(), 2);
 
     double pivot_min, pivot_max;
-    Eigen::VectorXd new_pivot_values(1);
+    Eigen::VectorXd new_pivot_values(new_points.cols(), 1);
 
     int exitflag_min, exitflag_max;
     bool point_found;
@@ -1263,6 +1263,8 @@ TrustRegionModel::pointNew(Polynomial polynomial,
         } else {
             new_points.resize(dim_,1);
             new_points.col(0) = new_point_min;
+
+            new_pivot_values.resize(new_points.cols(), 1);
             new_pivot_values << pivot_min;
         }
         point_found = true;
@@ -1271,12 +1273,16 @@ TrustRegionModel::pointNew(Polynomial polynomial,
                && (abs(pivot_max) >= pivot_threshold)) {
         new_points.resize(dim_,1);
         new_points.col(0) = new_point_max;
+
+        new_pivot_values.resize(new_points.cols(), 1);
         new_pivot_values << pivot_max;
         point_found = true;
 
     } else {
         point_found = false;
         new_points.resize(dim_, 0);
+
+        new_pivot_values.resize(new_points.cols(), 1);
         new_pivot_values << 0;
     }
 
