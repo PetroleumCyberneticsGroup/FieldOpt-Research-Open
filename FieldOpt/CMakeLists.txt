@@ -350,8 +350,8 @@ include_directories(${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
 # ----------------------------------------------------------
 
 ## SNOPT ===================================================
-#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/include/snopt)
-#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/handlers)
+include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/include/snopt)
+include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/handlers)
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗╔═╗
