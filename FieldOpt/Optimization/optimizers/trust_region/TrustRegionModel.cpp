@@ -532,6 +532,8 @@ bool TrustRegionModel::improveModelNfp() {
               std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
                   pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
 
+          } else if(areImprovementPointsComputed()) {
+              // Using previously computed points/pivot-points
           }
 
           if (nfp_point_found_) {
@@ -575,8 +577,8 @@ bool TrustRegionModel::improveModelNfp() {
                         f_succeeded = true;
                     // }
                     // f_succeeded should be a vector if new_point_abs.cols() > 1?
-                    setAreImprovementPointsComputed(false);
                   }
+                  setAreImprovementPointsComputed(false);
               }
               if (f_succeeded) {
                 break;
