@@ -469,16 +469,8 @@ bool TrustRegionModel::improveModelNfp() {
   auto tr_center = tr_center_;
   bool exit_flag = true;
   bool f_succeeded = false;
-  bool point_found = false;
   int poly_i;
   double new_pivot_value;
-
-  Polynomial polynomial;
-  Eigen::VectorXd new_point_shifted;
-  Eigen::VectorXd new_point_abs;
-  Eigen::RowVectorXd new_fvalues;
-  Eigen::MatrixXd new_points_shifted;
-  Eigen::RowVectorXd new_pivots;
 
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
@@ -536,45 +528,43 @@ bool TrustRegionModel::improveModelNfp() {
 
           if(!areImprovementPointsComputed()) {
 
-              polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
-              std::tie(new_points_shifted, new_pivots, point_found) =
-                  pointNew(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+              nfp_polynomial_ = orthogonalizeToOtherPolynomials(poly_i, p_ini);
+              std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
+                  pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
 
           }
 
-          if (point_found) {
-            for (int found_i = 0; found_i < new_points_shifted.cols(); found_i++) {
-
-              std::vector<QUuid> pt_case_uuid;
+          if (nfp_point_found_) {
+            for (int found_i = 0; found_i < nfp_new_point_shifted_.cols(); found_i++) {
 
               if(!areImprovementPointsComputed()) {
 
-                new_point_shifted = new_points_shifted.col(found_i);
-                auto new_pivot_value = new_pivots(found_i);
+                nfp_new_point_shifted_ = nfp_new_point_shifted_.col(found_i);
+                auto new_pivot_value = nfp_new_pivots_(found_i);
 
-                new_point_abs = unshift_point(new_point_shifted);
-                new_fvalues.resize(new_point_abs.cols());
+                nfp_new_point_abs_ = unshift_point(nfp_new_point_shifted_);
+                nfp_new_fvalues_.resize(nfp_new_point_abs_.cols());
 
                 setIsImprovementNeeded(true);
 
-                for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+                for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
                     Case *new_case = new Case(base_case_);
-                    new_case->SetRealVarValues(new_point_abs.col(ii));
+                    new_case->SetRealVarValues(nfp_new_point_abs_.col(ii));
                     addImprovementCase(new_case);
 
-                    pt_case_uuid.push_back(new_case->id());
+                    pt_case_uuid_.push_back(new_case->id());
                 }
 
                 return 5;  // Probably not necessary
 
               } else if (areImprovementPointsComputed()) {
-                  for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+                  for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
                     int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
                     new_points_.setZero(nvars, improvement_cases_.size());
                     new_fvalues_.setZero(improvement_cases_.size());
 
-                    auto c = improvement_cases_hash_[pt_case_uuid[ii]];
+                    auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
                     new_points_.col(ii) = c->GetRealVarVector();
                     new_fvalues_(ii) = c->objective_function_value();
 
@@ -597,11 +587,20 @@ bool TrustRegionModel::improveModelNfp() {
             }
           } // end-if (point_found)
           //!<Attempt another polynomial if did not break>
+          if (poly_i < block_end) { // Keep the last values
+              nfp_new_points_shifted_.resize(0,0);
+              nfp_new_pivots_.resize(0);
+              nfp_new_point_shifted_.resize(0);
+              nfp_new_point_abs_.resize(0);
+              nfp_point_found_ = false;
+              pt_case_uuid_.clear();
+          }
+
         } // end-for-loop: (poly_i <= block_end)
 
-        if (point_found && f_succeeded) {
+        if (nfp_point_found_ && f_succeeded) {
           break; //!<(for attempts)>
-        } else if (point_found) {
+        } else if (nfp_point_found_) {
           //!<Reduce radius if it did not break>
           radius_used = 0.5*radius_used;
           if (radius_used < tol_radius) {
@@ -612,29 +611,29 @@ bool TrustRegionModel::improveModelNfp() {
         }
       }  // end-for-loop: (attempts<=3)
 
-      if (point_found && f_succeeded) {
+      if (nfp_point_found_ && f_succeeded) {
         setIsImprovementNeeded(false);
 
         //!<Update this polynomial in the set>
-        pivot_polynomials_[poly_i] = polynomial;
+        pivot_polynomials_[poly_i] = nfp_polynomial_;
         //!<Swap polynomials>
         std::swap(pivot_polynomials_[poly_i], pivot_polynomials_[next_position]);
 
         //!<Add point>
-        points_shifted_.col(next_position) = new_point_shifted;
+        points_shifted_.col(next_position) = nfp_new_point_shifted_;
 
         //!<Normalize polynomial value>
-        pivot_polynomials[next_position] = normalizePolynomial(next_position, new_point_shifted);
+        pivot_polynomials[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
 
         //!<Re-orthogonalize>
         pivot_polynomials[next_position] = orthogonalizeToOtherPolynomials(next_position, p_ini);
 
         //!<Orthogonalize polynomials on present block (deffering subsequent ones)>
-        orthogonalizeBlock(new_point_shifted, next_position, block_begining, p_ini);
+        orthogonalizeBlock(nfp_new_point_shifted_, next_position, block_begining, p_ini);
 
         //!<Update model and recompute polynomials>
-        points_abs_.col(next_position) = new_point_abs;
-        fvalues_.col(next_position) = new_fvalues;
+        points_abs_.col(next_position) = nfp_new_point_abs_;
+        fvalues_.col(next_position) = nfp_new_fvalues_;
         pivot_values_(next_position) = new_pivot_value;
         exit_flag = true;
       }

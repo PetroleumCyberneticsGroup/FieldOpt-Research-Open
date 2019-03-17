@@ -246,6 +246,18 @@ class TrustRegionModel {
     Case *base_case_;
     CaseHandler *case_handler_;
 
+    // improveModelNfp() saved variables
+    Polynomial nfp_polynomial_;
+    MatrixXd nfp_new_points_shifted_;
+    RowVectorXd nfp_new_pivots_;
+
+    VectorXd nfp_new_point_shifted_;
+    VectorXd nfp_new_point_abs_;
+    RowVectorXd nfp_new_fvalues_;
+    bool nfp_point_found_ = false;
+
+    vector<QUuid> pt_case_uuid_;
+
     double radius_;
     int tr_center_; //!<index of trust region center point in points_abs>
     int cache_max_;
