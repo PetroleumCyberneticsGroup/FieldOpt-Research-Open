@@ -100,6 +100,7 @@ void TrustRegionModel::moveToBestPoint() {
 // Here should rebuild polynomials!!!
 }
 
+
 void TrustRegionModel::criticalityStep() {
 
     // factor b/e radius & criticality measure
