@@ -534,57 +534,65 @@ bool TrustRegionModel::improveModelNfp() {
         //!<Iterate through available polynomials>
         for (poly_i = next_position; poly_i<=block_end; poly_i++) {
 
-          polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
-          std::tie(new_points_shifted, new_pivots, point_found) = pointNew(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+          if(!areImprovementPointsComputed()) {
+
+              polynomial = orthogonalizeToOtherPolynomials(poly_i, p_ini);
+              std::tie(new_points_shifted, new_pivots, point_found) =
+                  pointNew(polynomial, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+
+          }
 
           if (point_found) {
             for (int found_i = 0; found_i < new_points_shifted.cols(); found_i++) {
 
-              new_point_shifted = new_points_shifted.col(found_i);
-              auto new_pivot_value = new_pivots(found_i);
-
-              new_point_abs = unshift_point(new_point_shifted);
-              new_fvalues.resize(new_point_abs.cols());
-
               std::vector<QUuid> pt_case_uuid;
 
-              // Potentially: move this whole if-statement into a function
-              // called evaluateNewFvalues()...
               if(!areImprovementPointsComputed()) {
-                  setIsImprovementNeeded(true);
-                  for (int ii = 0; ii < new_point_abs.cols(); ii++) {
-                      Case *new_case = new Case(base_case_);
-                      new_case->SetRealVarValues(new_point_abs.col(ii));
-                      addImprovementCase(new_case);
 
-                      pt_case_uuid.push_back(new_case->id());
-                  }
-                  return 5;  // Probably not necessary
+                new_point_shifted = new_points_shifted.col(found_i);
+                auto new_pivot_value = new_pivots(found_i);
+
+                new_point_abs = unshift_point(new_point_shifted);
+                new_fvalues.resize(new_point_abs.cols());
+
+                setIsImprovementNeeded(true);
+
+                for (int ii = 0; ii < new_point_abs.cols(); ii++) {
+                    Case *new_case = new Case(base_case_);
+                    new_case->SetRealVarValues(new_point_abs.col(ii));
+                    addImprovementCase(new_case);
+
+                    pt_case_uuid.push_back(new_case->id());
+                }
+
+                return 5;  // Probably not necessary
+
               } else if (areImprovementPointsComputed()) {
                   for (int ii = 0; ii < new_point_abs.cols(); ii++) {
 
-                      int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
-                      new_points_.setZero(nvars, improvement_cases_.size());
-                      new_fvalues_.setZero(improvement_cases_.size());
+                    int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
+                    new_points_.setZero(nvars, improvement_cases_.size());
+                    new_fvalues_.setZero(improvement_cases_.size());
 
-                      auto c = improvement_cases_hash_[pt_case_uuid[ii]];
-                      new_points_.col(ii) = c->GetRealVarVector();
-                      new_fvalues_(ii) = c->objective_function_value();
+                    auto c = improvement_cases_hash_[pt_case_uuid[ii]];
+                    new_points_.col(ii) = c->GetRealVarVector();
+                    new_fvalues_(ii) = c->objective_function_value();
 
-                      std::map <string, string> stateMap = c->GetState();
-                      if(stateMap["EvalSt"] == "OKAY") {
-                          f_succeeded = true;
-                      }
-                      // Should not f_succeeded be a vector if new_point_abs.cols() > 1?
+                    std::map <string, string> stateMap = c->GetState();
+                    // TODO stateMap["EvalSt"] gives pending after evaluations of
+                    // cases in tests... Update status of cases when called from tests
+                    // if(stateMap["EvalSt"] == "OKAY") {
+                        f_succeeded = true;
+                    // }
+                    // f_succeeded should be a vector if new_point_abs.cols() > 1?
+                    setAreImprovementPointsComputed(false);
                   }
               }
               if (f_succeeded) {
-                setIsImprovementNeeded(false);
                 break;
               }
             }  // end-if: (found_i < new_points_shifted.cols())
             if (f_succeeded) {
-              setIsImprovementNeeded(false);
               break;  //!<Stop trying pivot polynomials for poly_i>
             }
           } // end-if (point_found)
@@ -605,6 +613,8 @@ bool TrustRegionModel::improveModelNfp() {
       }  // end-for-loop: (attempts<=3)
 
       if (point_found && f_succeeded) {
+        setIsImprovementNeeded(false);
+
         //!<Update this polynomial in the set>
         pivot_polynomials_[poly_i] = polynomial;
         //!<Swap polynomials>

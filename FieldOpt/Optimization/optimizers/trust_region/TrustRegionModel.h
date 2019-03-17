@@ -184,6 +184,7 @@ class TrustRegionModel {
 
     // Improvement cases
     bool areImprovementPointsComputed() const { return impr_points_computed_; };
+    void setAreImprovementPointsComputed(bool s) { impr_points_computed_ = s; }
     void addImprovementCase(Case *c) { improvement_cases_.append(c); }
 
     void addTempImprCase(Case *c) {
