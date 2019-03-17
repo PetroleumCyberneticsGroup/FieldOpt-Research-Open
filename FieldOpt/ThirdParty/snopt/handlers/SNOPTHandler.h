@@ -25,7 +25,6 @@
 #ifndef FIELDOPT_SNOPTHANDLER_H
 #define FIELDOPT_SNOPTHANDLER_H
 
-// ---------------------------------------------------------
 #include "../../snopt/include/snopt/snopt.hpp"
 // #include "uc_1ThirdParty/snopt/include/snopt/snopt.hpp"
 // #include "uc_1ThirdParty/snopt/include/snopt-7.2.12/snopt.hpp"
@@ -35,7 +34,7 @@
 #include <iostream>
 #include <string>
 
-// ---------------------------------------------------------
+
 using std::cout;
 using std::endl;
 using std::vector;
@@ -44,7 +43,6 @@ using std::string;
 namespace Optimization {
 namespace Optimizers {
 
-// =========================================================
 class SNOPTHandler {
 
  public:
@@ -54,7 +52,7 @@ class SNOPTHandler {
   ~SNOPTHandler();
 
  protected:
-  // -------------------------------------------------------
+
   char Prob[200];
   integer exitCode_;
 
@@ -62,32 +60,32 @@ class SNOPTHandler {
   integer ObjRow;
   double ObjAdd;
 
-  // -------------------------------------------------------
+
   integer lenA, neA;
   integer *iAfun, *jAvar;
   double *A;
   integer lenG, neG;
   integer *iGfun, *jGvar;
 
-  // -------------------------------------------------------
+
   double *x, *xlow, *xupp, *xmul;
   double *F, *Flow, *Fupp, *Fmul;
 
   integer *xstate, *Fstate;
 
-  // -------------------------------------------------------
+
   char *xnames, *Fnames;
   integer nxnames, nFnames;
 
   My_fp usrfun;
 
-  // -------------------------------------------------------
+
   // SNOPT Files needed
   FILE *specsFile;
   FILE *printFile;
 
  private:
-  // -------------------------------------------------------
+
   void increment_();
   void decrement_();
   void errorMessageOnExit_(const char *var);
@@ -95,7 +93,7 @@ class SNOPTHandler {
   void areAllUserDataSet_();
   void init_();
 
-  // -------------------------------------------------------
+
   void setMemory_();
   void alloc_(integer lencw,
               integer leniw,
@@ -105,7 +103,7 @@ class SNOPTHandler {
                 integer leniw,
                 integer lenrw);
 
-  // -------------------------------------------------------
+
   void memcpyIn_(char *tcw, integer *tiw, double *trw,
                  integer tlencw,
                  integer tleniw,
@@ -120,7 +118,7 @@ class SNOPTHandler {
                    integer &miniw,
                    integer &minrw);
 
-  // -------------------------------------------------------
+
   integer inform, fortranStyleObj, fortranStyleAG;
   integer initCalled;
   integer minrw, miniw, mincw;
@@ -130,18 +128,18 @@ class SNOPTHandler {
   integer *iw;
   char *cw;
 
-  // -------------------------------------------------------
+
   integer iSpecs, iSumm, iPrint;
   char specname[200], printname[200], summname[200];
   integer spec_len, prnt_len, summ_len;
 
  public:
-  // -------------------------------------------------------
+
   string getErrorMsg();
   int getExitCode();
   void computeJac();
 
-  // -------------------------------------------------------
+
   void solve(integer starttype,
              vector<double> &xsol,
              vector<double> &fsol);
@@ -152,7 +150,7 @@ class SNOPTHandler {
 
   bool has_snopt_option_file;
 
-  // -------------------------------------------------------
+
   // Functions that set up the problem data:
   void setProblemSize(integer n,
                       integer neF);
@@ -173,20 +171,20 @@ class SNOPTHandler {
 
   void setNeG(integer neG);
 
-  // -------------------------------------------------------
+
   void setX(double *x, double *xlow, double *xupp,
             double *xmul, integer *xstate);
 
   void setF(double *F, double *Flow, double *Fupp,
             double *Fmul, integer *Fstate);
 
-  // -------------------------------------------------------
+
   void setXNames(char *xnames, integer nxnames);
   void setFNames(char *Fnames, integer nFnames);
   void setProbName(const char *Prob);
   void setUserFun(My_fp usrfun);
 
-  // -------------------------------------------------------
+
   void setProblem(integer nvariables,
                   integer nproblemFunctions,
                   integer objectiveRow,
@@ -220,7 +218,7 @@ class SNOPTHandler {
                   const char *printfile,
                   const char *specfile = 0);
 
-  // -------------------------------------------------------
+
   // Functions for settings/retrieving parameters
   void setParameter(char *stroptin);
   void getParameter(char *stroptin, char *stroptout);

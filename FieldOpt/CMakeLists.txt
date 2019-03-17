@@ -200,6 +200,11 @@ else()
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
       REQUIRED)
 
+  find_library(snopt NAMES snopt-7.2.12.2
+          HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+          PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+          REQUIRED)
+
   find_package(opm-common
       PATHS
       ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
@@ -211,6 +216,7 @@ else()
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
+  message(STATUS "snopt: ${snopt}")
   message(STATUS "opm-common: ${opm-common_LIBRARIES}")
 
 endif()

@@ -22,18 +22,15 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-// ---------------------------------------------------------
 #include "SNOPTHandler.h"
-#include "../../../uc_2Utilities/filehandling.hpp"
-#include "../../../uc_2Utilities/colors.hpp"
+#include "../../../Utilities/filehandling.hpp"
+#include "../../../Utilities/colors.hpp"
 
-// ---------------------------------------------------------
 using Utilities::FileHandling::FileExists;
 
 namespace Optimization {
 namespace Optimizers {
 
-// =========================================================
 SNOPTHandler::SNOPTHandler(const char *prntname,
                            const char *summname,
                            const char *specname) {
@@ -41,12 +38,11 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
   initCalled = 0;
   init2zero_();
 
-  // -------------------------------------------------------
   // Nothing incremented yet
   fortranStyleObj = 0;
   fortranStyleAG = 0;
 
-  // -------------------------------------------------------
+
   // Create temporary memory for the call to sninit_.
   // Lengths must all be >= 500.
   lencw = 500;
@@ -56,14 +52,14 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
 
   // sninit_ "undefines" the optional parameters
 
-  // -------------------------------------------------------
+
   iPrint = 12;
   setPrintFile(prntname);
   iSumm = 29;  // Console/terminal: iSumm = 6;
   // setSummaryFile( summname );
   this->init_();
 
-  // -------------------------------------------------------
+
   this->has_snopt_option_file = true;
   if (!FileExists(QString(specname))) {
     this->has_snopt_option_file = false;
@@ -71,7 +67,7 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
     // cout << "-- SNOPT: Using default options for SNOPT\n";
   }
 
-  // -------------------------------------------------------
+
   if (this->has_snopt_option_file) {
     iSpecs = 15;
     setSpecFile(specname);
@@ -80,22 +76,12 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
   }
 }
 
-// =========================================================
-string SNOPTHandler::getErrorMsg() {
 
-  const char *var;
-  errorMessageOnExit_(var);
-
-  string err_str(var);
-  return err_str;
-}
-
-// =========================================================
 int SNOPTHandler::getExitCode() {
   return exitCode_;
 }
 
-// =========================================================
+
 // Destructor
 SNOPTHandler::~SNOPTHandler() {
 
@@ -104,12 +90,12 @@ SNOPTHandler::~SNOPTHandler() {
     closefile_(&iPrint);
   }
 
-  // -------------------------------------------------------
+
   if ((iSumm != 0) && (iSumm != 6)) {
     closefile_(&iSumm);
   }
 
-  // -------------------------------------------------------
+
   if (iSpecs != 0) {
     closefile_(&iSpecs);
   }
@@ -120,7 +106,7 @@ SNOPTHandler::~SNOPTHandler() {
     delete[] cw;
 }
 
-// =========================================================
+
 void SNOPTHandler::init2zero_() {
   // Data that must be set by user.
 
@@ -158,7 +144,7 @@ void SNOPTHandler::init2zero_() {
   lenG = -1;
 }
 
-// =========================================================
+
 void SNOPTHandler::areAllUserDataSet_() {
 
   if (n == 0) errorMessageOnExit_("n");
@@ -192,19 +178,19 @@ void SNOPTHandler::areAllUserDataSet_() {
 
 }
 
-// =========================================================
+
 void SNOPTHandler::errorMessageOnExit_(const char *var) {
   throw(string(var) + " must be set prior to call to \n" +
       "SNOPTOptimizer::solve() or SNOPTOptimizer::computeJac()");
 }
 
-// =========================================================
+
 void SNOPTHandler::setMemory_() {
 
   int memoryGuess;
   memoryGuess = this->memoryGuess_(mincw, miniw, minrw);
 
-  // -------------------------------------------------------
+
   if (mincw > lencw || miniw > leniw || minrw > lenrw) {
 
     // Reallocate memory while retaining the values set in sninit_
@@ -229,7 +215,7 @@ void SNOPTHandler::setMemory_() {
   }
 }
 
-// =========================================================
+
 void SNOPTHandler::alloc_(integer alencw,
                           integer aleniw,
                           integer alenrw) {
@@ -245,24 +231,24 @@ void SNOPTHandler::alloc_(integer alencw,
   rw = new doublereal[lenrw];
 }
 
-// =========================================================
+
 void SNOPTHandler::realloc_(integer alencw,
                             integer aleniw,
                             integer alenrw) {
 
-  // -------------------------------------------------------
+
   // Call to this->alloc will overwrite these values => must save.
   integer tlencw = lencw;
   integer tleniw = leniw;
   integer tlenrw = lenrw;
 
-  // -------------------------------------------------------
+
   // Call to this->alloc will create new values for cw, iw, rw => must save.
   char *tcw = cw;
   integer *tiw = iw;
   double *trw = rw;
 
-  // -------------------------------------------------------
+
   // Allocate new memory
   this->alloc_(alencw, aleniw, alenrw);
 
@@ -276,7 +262,7 @@ void SNOPTHandler::realloc_(integer alencw,
 
 }
 
-// =========================================================
+
 void SNOPTHandler::memcpyIn_(char *tcw,
                              integer *tiw, double *trw,
                              integer tlencw,
@@ -292,7 +278,7 @@ void SNOPTHandler::memcpyIn_(char *tcw,
   memcpy(rw, trw, mlenrw * sizeof(double));
 }
 
-// =========================================================
+
 void SNOPTHandler::memcpyOut(char *tcw,
                              integer *tiw, double *trw,
                              integer tlencw,
@@ -308,17 +294,17 @@ void SNOPTHandler::memcpyOut(char *tcw,
   memcpy(trw, rw, mlenrw * sizeof(double));
 }
 
-// =========================================================
+
 void SNOPTHandler::increment_() {
 
-  // -------------------------------------------------------
+
   if (!fortranStyleObj) {
     // Increment row indicator.
     ObjRow++;
     fortranStyleObj = 1;
   }
 
-  // -------------------------------------------------------
+
   if (!fortranStyleAG) {
     // Increment A indices.
     int k;
@@ -337,17 +323,17 @@ void SNOPTHandler::increment_() {
   }
 }
 
-// =========================================================
+
 void SNOPTHandler::decrement_() {
 
-  // -------------------------------------------------------
+
   if (fortranStyleObj) {
     // Decrement row indicator.
     ObjRow--;
     fortranStyleObj = 0;
   }
 
-  // -------------------------------------------------------
+
   if (fortranStyleAG) {
     int k;
 
@@ -366,13 +352,13 @@ void SNOPTHandler::decrement_() {
   }
 }
 
-// =========================================================
+
 void SNOPTHandler::computeJac() {
 
   cout << " ---------- ---------- ---------- ---------- " << endl;
   cout << " ---------- ---------- ---------- ---------- " << endl;
 
-  // -------------------------------------------------------
+
   // Ensures all user data has been initialized.
   // areAllUserDataSet_();
   // this->memoryGuess_(mincw, miniw, minrw);
@@ -386,7 +372,7 @@ void SNOPTHandler::computeJac() {
   //   this->setIntParameter("Total integer workspace", leniw);
   // }
 
-  // -------------------------------------------------------
+
   // cout << mincw << "\t" << miniw << "\t" << minrw << endl;
   // iAfun = 0;jAvar = 0;lenA=0;neA=0;A=0;
   // cout << iAfun  << "\t" << jAvar << "\t" << lenA << "\t" << neA  << "\t" << A  << endl;
@@ -394,7 +380,7 @@ void SNOPTHandler::computeJac() {
   cout << iGfun << "\t" << jGvar << "\t"
        << lenG  << "\t" << neG   << "\t" << endl;
 
-  // -------------------------------------------------------
+
   char *c_cw;
   integer *c_iw;
   double *c_rw;
@@ -402,7 +388,7 @@ void SNOPTHandler::computeJac() {
   c_iw = new integer[leniw];
   c_rw = new doublereal[lenrw];
 
-  // -------------------------------------------------------
+
   for (int i = 0; i < lencw; i++){
       c_cw[i]  = cw[i];
   }
@@ -419,7 +405,7 @@ void SNOPTHandler::computeJac() {
       cout << x[i] << "\t";
   }
 
-  // -------------------------------------------------------
+
   integer c_inform = inform;
   integer c_neF = neF;
   integer c_n = n;
@@ -434,7 +420,7 @@ void SNOPTHandler::computeJac() {
   integer c_miniw = miniw;
   integer c_minrw = minrw;
 
-  // -------------------------------------------------------
+
   integer *c_iAfun, *c_jAvar;
   double *c_A;
   integer *c_iGfun, *c_jGvar;
@@ -443,9 +429,12 @@ void SNOPTHandler::computeJac() {
   c_jAvar = new integer[lenA];
   c_A     = new double[lenA];
 
+  c_iGfun = new integer[lenG];
+  c_jGvar = new integer[lenG];
+
   double *c_x, *c_xlow, *c_xupp;
 
-  // -------------------------------------------------------
+
   c_x = new double[n];
   c_xlow = new double[n];
   c_xupp = new double[n];
@@ -467,7 +456,7 @@ void SNOPTHandler::computeJac() {
     c_jGvar[i] = jGvar[i];
   }
 
-  // -------------------------------------------------------
+
   snjac_(&inform, &neF, &n, usrfun,
        iAfun, jAvar, &lenA, &neA, A,
        iGfun, jGvar, &lenG, &neG,
@@ -481,7 +470,7 @@ void SNOPTHandler::computeJac() {
   //cout << iAfun  << "\t" << jAvar << "\t" << lenA << "\t" << neA  << "\t" << A  << endl;
   //cout << mincw << "\t" << miniw << "\t" << minrw << endl;
 
-  // -------------------------------------------------------
+
   for(int i = 0; i < n; i++){
       if(c_x[i] != x[i]) {
         cout << "x: " << i << "\t"
@@ -499,7 +488,7 @@ void SNOPTHandler::computeJac() {
       }
   }
 
-  // -------------------------------------------------------
+
   for (int i = 0; i < lenA; i++){
       if(c_A[i] != A[i]) {
         cout << "A: " << i << "\t"
@@ -517,7 +506,7 @@ void SNOPTHandler::computeJac() {
       }
   }
 
-  // -------------------------------------------------------
+
   for (int i = 0; i < lenG; i++){
 
       cout << "iGfun: " << i << "\t"
@@ -540,7 +529,7 @@ void SNOPTHandler::computeJac() {
 
   }
 
-  // -------------------------------------------------------
+
   for(int i = 0; i < lencw; i++){
       if (c_cw[i]  != cw[i]){
           cout << " ---  CW --- i = " << i << "\t "
@@ -548,7 +537,7 @@ void SNOPTHandler::computeJac() {
       }
   }
 
-  // -------------------------------------------------------
+
   for(int i = 0; i < lenrw; i++){
       //rw[i] = c_rw[i];
       if (c_rw[i]  != rw[i]){
@@ -558,7 +547,7 @@ void SNOPTHandler::computeJac() {
       }
   }
 
-  // -------------------------------------------------------
+
   for(int i = 0; i < leniw; i++){
       //iw[i] = c_iw[i];
       if (c_iw[i]  != iw[i]){
@@ -568,7 +557,7 @@ void SNOPTHandler::computeJac() {
       }
   }
 
-  // -------------------------------------------------------
+
   //  inform = c_inform;
   if (c_inform != inform){
       cout << "inform: " << c_inform
@@ -620,7 +609,7 @@ void SNOPTHandler::computeJac() {
            << "  !=  " << lenrw << endl;
   }
 
-  // -------------------------------------------------------
+
   // miniw = c_miniw;
   // mincw = c_mincw;
   // minrw = c_minrw;
@@ -640,7 +629,7 @@ void SNOPTHandler::computeJac() {
            << "  !=  " << minrw << endl;
   }
 
-  // -------------------------------------------------------
+
   // mincw=500;
   // miniw=503;
   // minrw=521;
@@ -651,7 +640,7 @@ void SNOPTHandler::computeJac() {
   fortranStyleAG = 1;
 }
 
-// =========================================================
+
 int SNOPTHandler::memoryGuess_(integer &amincw,
                                integer &aminiw,
                                integer &aminrw) {
@@ -659,7 +648,7 @@ int SNOPTHandler::memoryGuess_(integer &amincw,
   integer nxname = 1;
   integer nfname = 1;
 
-  // -------------------------------------------------------
+
   if (neA < 0) {
     neA = n * neF;
     memoryGuess = 1;
@@ -670,7 +659,7 @@ int SNOPTHandler::memoryGuess_(integer &amincw,
     memoryGuess = 1;
   }
 
-  // -------------------------------------------------------
+
   snmema_(&inform, &neF, &n, &nxname, &nfname, &neA, &neG,
           &amincw, &aminiw, &aminrw, cw, &lencw, iw, &leniw,
           rw, &lenrw, 8 * 500);
@@ -678,7 +667,7 @@ int SNOPTHandler::memoryGuess_(integer &amincw,
   return memoryGuess;
 }
 
-// =========================================================
+
 void SNOPTHandler::init_() {
   initCalled = 1;
   sninit_(&iPrint, &iSumm, cw,
@@ -686,7 +675,7 @@ void SNOPTHandler::init_() {
           rw, &lenrw, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::setParameter(char *stropt) {
   assert(initCalled == 1);
 
@@ -694,13 +683,13 @@ void SNOPTHandler::setParameter(char *stropt) {
   integer iSum = 0;
   ftnlen stropt_len = strlen(stropt);
 
-  // -------------------------------------------------------
+
   snset_(stropt, &iPrt, &iSum, &inform,
          cw, &lencw, iw, &leniw, rw,
          &lenrw, stropt_len, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::getParameter(char *stroptin,
                                 char *stroptout) {
   assert(initCalled == 1);
@@ -710,13 +699,13 @@ void SNOPTHandler::getParameter(char *stroptin,
   ftnlen stroptin_len = strlen(stroptin);
   ftnlen stroptout_len = strlen(stroptout);
 
-  // -------------------------------------------------------
+
   sngetc_(stroptin, stroptout, &inform,  cw,
           &lencw, iw, &leniw, rw, &lenrw,
           stroptin_len, stroptout_len, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::setIntParameter(const char *stropt,
                                    integer opt) {
   assert(initCalled == 1);
@@ -727,13 +716,13 @@ void SNOPTHandler::setIntParameter(const char *stropt,
 
   char *cstr = const_cast<char *>(stropt);
 
-  // -------------------------------------------------------
+
   snseti_(cstr, &opt, &iPrt, &iSum, &inform,
           cw, &lencw, iw, &leniw, rw, &lenrw,
           stropt_len, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::getIntParameter(const char *stropt,
                                    integer &opt) {
 
@@ -745,13 +734,13 @@ void SNOPTHandler::getIntParameter(const char *stropt,
 
   char *cstr = const_cast<char *>(stropt);
 
-  // -------------------------------------------------------
+
   sngeti_(cstr, &opt, &inform, cw, &lencw,
           iw, &leniw, rw, &lenrw, stropt_len,
           8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::setRealParameter(const char *stropt,
                                     double opt) {
   assert(initCalled == 1);
@@ -762,13 +751,13 @@ void SNOPTHandler::setRealParameter(const char *stropt,
 
   char *cstr = const_cast<char *>(stropt);
 
-  // -------------------------------------------------------
+
   snsetr_(cstr, &opt, &iPrt, &iSum, &inform,
           cw, &lencw, iw, &leniw, rw, &lenrw,
           stropt_len, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::getRealParameter(const char *stropt,
                                     double &opt) {
   assert(initCalled == 1);
@@ -778,12 +767,12 @@ void SNOPTHandler::getRealParameter(const char *stropt,
 
   char *cstr = const_cast<char *>(stropt);
 
-  // -------------------------------------------------------
+
   sngetr_(cstr, &opt, &inform, cw, &lencw, iw,
           &leniw, rw, &lenrw, stropt_len, 8 * 500);
 }
 
-// =========================================================
+
 void SNOPTHandler::solve(integer starttype,
                          vector<double> &xsol,
                          vector<double> &fsol) {
@@ -792,21 +781,21 @@ void SNOPTHandler::solve(integer starttype,
   // Ensures all user data initialized.
   areAllUserDataSet_();
 
-  // -------------------------------------------------------
+
   // Unlike snjac_ we also need neA and neG to be set.
   if (neA == -1 || neG == -1) {
     throw("neA and neG must be set before"
           "calling SNOPTOptimizer::solve()");
   }
 
-  // -------------------------------------------------------
+
   ftnlen npname = strlen(Prob);
   integer nS, nInf;
   double sInf;
   this->increment_(); // Convert array entries to Fortran style
   this->setMemory_();
 
-  // -------------------------------------------------------
+
   // this->computeJac();
   // neG = 0;
   // lenG = 0;
@@ -833,7 +822,7 @@ void SNOPTHandler::solve(integer starttype,
 
   exitCode_ = iw[424-1];
 
-  // -------------------------------------------------------
+
   xsol.resize(n);
   memcpy(&xsol[0], x, n * sizeof(double));
 
@@ -843,11 +832,11 @@ void SNOPTHandler::solve(integer starttype,
   this->decrement_();  // Convert array entries to C style
 }
 
-// =========================================================
+
 void SNOPTHandler::setPrintFile(const char *aprintname) {
   // assert( initCalled = 1 );
 
-  // -------------------------------------------------------
+
 // #ifdef UNIX
   strcpy(printname, aprintname);
 // #else
@@ -856,18 +845,18 @@ void SNOPTHandler::setPrintFile(const char *aprintname) {
   prnt_len = strlen(printname);
   // snopenappend_( &iPrint, printname,   &inform, prnt_len );
 
-  // -------------------------------------------------------
+
   integer mode = 3; // read only
 
   openfile_(&iPrint, printname, &mode, prnt_len);
   // this->setIntParameter("Print file", iPrint);
 }
 
-// =========================================================
+
 void SNOPTHandler::setSummaryFile(const char *asummname) {
   //assert( initCalled = 1 );
 
-  // -------------------------------------------------------
+
 // #ifdef UNIX
   strcpy(summname, asummname);
 // #else
@@ -875,18 +864,18 @@ void SNOPTHandler::setSummaryFile(const char *asummname) {
 // #endif
   summ_len = strlen(summname);
 
-  // -------------------------------------------------------
+
   integer mode = 3; // read only
 
   openfile_(&iSumm, summname, &mode, summ_len);
   // this->setIntParameter("Summary file", iSumm);
 }
 
-// =========================================================
+
 void SNOPTHandler::setSpecFile(const char *aspecname) {
   assert(initCalled == 1);
 
-  // -------------------------------------------------------
+
   // iSpecs = 4;
 //#ifdef UNIX
   strcpy(specname, aspecname);
@@ -898,7 +887,7 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
   //  snfilewrapper_( specname, &iSpecs, &inform, cw, &lencw,
   //                  iw, &leniw, rw, &lenrw, spec_len, 8*lencw);
 
-  // -------------------------------------------------------
+
   integer mode = 1; // read only
 
   openfile_(&iSpecs, specname, &mode, spec_len);
@@ -906,7 +895,7 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
   snspec_(&iSpecs, &inform, cw, &lencw, iw, &leniw, rw, &lenrw,
           (ftnlen) 8);
 
-  // -------------------------------------------------------
+
   switch (inform) {
     case 101:
     cout << "-- SNOPT: Specs file read successfully ! \n";
@@ -934,7 +923,7 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
       break;
   }
 
-  // -------------------------------------------------------
+
   // int snfilewrapper_(char *name__, integer *ispec, integer *
   // inform__, char *cw, integer *lencw, integer *iw, integer *leniw,
   // doublereal *rw, integer *lenrw, ftnlen name_len, ftnlen cw_len)
@@ -944,13 +933,13 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
          << specname << "\n" << "\n";
 }
 
-// =========================================================
+
 void SNOPTHandler::setProblemSize(integer an, integer aneF) {
   n = an;
   neF = aneF;
 }
 
-// =========================================================
+
 void SNOPTHandler::setObjective(integer aObjRow,
                                 double aObjAdd) {
   // checkSet = checkSet+2;
@@ -958,7 +947,7 @@ void SNOPTHandler::setObjective(integer aObjRow,
   ObjAdd = aObjAdd;
 }
 
-// =========================================================
+
 void SNOPTHandler::setA(integer alenA, integer *aiAfun,
                         integer *ajAvar, double *aA) {
   lenA = alenA;
@@ -967,12 +956,12 @@ void SNOPTHandler::setA(integer alenA, integer *aiAfun,
   A = aA;
 }
 
-// =========================================================
+
 void SNOPTHandler::setNeA(integer aneA) {
   neA = aneA;
 }
 
-// =========================================================
+
 void SNOPTHandler::setG(integer alenG,
                         integer *aiGfun,
                         integer *ajGvar) {
@@ -981,12 +970,12 @@ void SNOPTHandler::setG(integer alenG,
   jGvar = ajGvar;
 }
 
-// =========================================================
+
 void SNOPTHandler::setNeG(integer aneG) {
   neG = aneG;
 }
 
-// =========================================================
+
 void SNOPTHandler::setX(double *ax, double *axlow,
                         double *axupp, double *axmul,
                         integer *axstate) {
@@ -997,7 +986,7 @@ void SNOPTHandler::setX(double *ax, double *axlow,
   xstate = axstate;
 }
 
-// =========================================================
+
 void SNOPTHandler::setF(double *aF, double *aFlow,
                         double *aFupp, double *aFmul,
                         integer *aFstate) {
@@ -1008,31 +997,31 @@ void SNOPTHandler::setF(double *aF, double *aFlow,
   Fstate = aFstate;
 }
 
-// =========================================================
+
 void SNOPTHandler::setXNames(char *axnames,
                              integer anxnames) {
   xnames = axnames;
   nxnames = anxnames;
 }
 
-// =========================================================
+
 void SNOPTHandler::setFNames(char *aFnames,
                              integer anFnames) {
   Fnames = aFnames;
   nFnames = anFnames;
 }
 
-// =========================================================
+
 void SNOPTHandler::setProbName(const char *aProb) {
   sprintf(Prob, "%8s", aProb );
 }
 
-// =========================================================
+
 void SNOPTHandler::setUserFun(My_fp ausrfun) {
   usrfun = ausrfun;
 }
 
-// =========================================================
+
 void
 SNOPTHandler::setProblem(integer nvariables,
                          integer nproblemFunctions,
@@ -1067,7 +1056,7 @@ SNOPTHandler::setProblem(integer nvariables,
                          const char *printfile,
                          const char *specfile) {
 
-  // -------------------------------------------------------
+
   setProblemSize(nvariables, nproblemFunctions);
   setObjective(objectiveRow);
 
@@ -1076,7 +1065,7 @@ SNOPTHandler::setProblem(integer nvariables,
   setX(x, xlow, xupp, xmul, xstate);
   setF(F, Flow, Fupp, Fmul, Fstate);
 
-  // -------------------------------------------------------
+
   setXNames(xnames, nxnames);
   setFNames(Fnames, nFnames);
 
@@ -1084,7 +1073,7 @@ SNOPTHandler::setProblem(integer nvariables,
   setNeG(neG);
   setUserFun(userfun);
 
-  // -------------------------------------------------------
+
   setProbName(problemname);
   setPrintFile(printfile);
 

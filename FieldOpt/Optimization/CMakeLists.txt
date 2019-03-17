@@ -40,7 +40,11 @@ add_library(optimization STATIC
         objective/NPV.cpp
 		objective/NPV.h
 		optimizers/trust_region/TrustRegionMath.h
-        solvers/SNOPTSolver.cpp)
+        ../ThirdParty/snopt/handlers/SNOPTHandler.cpp
+        ../ThirdParty/snopt/handlers/SNOPTLoader.c
+        ../ThirdParty/snopt/handlers/LibraryHandler.c
+        solvers/SNOPTSolver.cpp
+        )
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
 target_link_libraries(optimization
@@ -50,13 +54,15 @@ target_link_libraries(optimization
 		PUBLIC fieldopt::reservoir
         PUBLIC fieldopt::runner
 		PUBLIC ${gp}
+        PUBLIC ${snopt}
         Qt5::Core
 		PUBLIC ${Boost_LIBRARIES})
 
 target_include_directories(optimization PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 add_compile_options(-std=c++11)
 
@@ -96,7 +102,8 @@ if (BUILD_TESTING)
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 	add_test(NAME test_optimization COMMAND $<TARGET_FILE:test_optimization>)
 endif()

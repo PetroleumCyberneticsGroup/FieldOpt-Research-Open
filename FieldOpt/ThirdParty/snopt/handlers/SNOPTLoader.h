@@ -17,7 +17,6 @@ Author(s): Oleg Volkov          (ovolkov@stanford.edu)
 extern "C" {
 #endif
 
-// =========================================================
 // Tries to load a dynamically linked library with SNOPT.
 // Return a failure if the library cannot be loaded or not
 // all SNOPT symbols are found.
@@ -32,19 +31,19 @@ extern "C" {
 int LSL_loadSNOPTLib(const char* libname,
                      char* msgbuf, int msglen);
 
-// =========================================================
+
 // Unloads a loaded SNOPT library.
 // @return Zero on success, nonzero on failure.
 //
 int LSL_unloadSNOPTLib();
 
-// =========================================================
+
 // Indicates whether SNOPT lib has been successfully loaded.
 // @return Zero if not loaded, nonzero if handle is loaded
 
 int LSL_isSNOPTLoaded();
 
-// =========================================================
+
 // Returns name of shared lib that should contain SNOPT
 char* LSL_SNOPTLibraryName();
 

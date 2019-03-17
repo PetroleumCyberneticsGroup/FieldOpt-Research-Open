@@ -12,14 +12,12 @@
  <chakibbb-pcg@gmail.com>
 */
 
-// ---------------------------------------------------------
 #include "LibraryHandler.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 
-// ---------------------------------------------------------
 #ifdef HAVE_SNPRINTF
 #define mysnprintf snprintf
 #else
@@ -32,13 +30,13 @@
 #endif
 #endif
 
-// =========================================================
+
 soHandle_t LSL_loadLib(const char *libName,
                        char *msgBuf,
                        int msgLen) {
   soHandle_t h=NULL;
 
-// ---------------------------------------------------------
+
 #ifdef ERROR_LOADLIB
   mysnprintf(msgBuf, msgLen,
       "loadLib error: Do not know how to handle"
@@ -46,7 +44,7 @@ soHandle_t LSL_loadLib(const char *libName,
   return h;
 #else
 
-  // -------------------------------------------------------
+
   if (libName==NULL) {
     mysnprintf(msgBuf, msgLen,
         "loadLib error: no library "
@@ -54,7 +52,7 @@ soHandle_t LSL_loadLib(const char *libName,
     return NULL;
   }
 
-// ---------------------------------------------------------
+
 # ifdef HAVE_WINDOWS_H
   h = LoadLibrary (libName);
   if (NULL == h) {
@@ -63,7 +61,7 @@ soHandle_t LSL_loadLib(const char *libName,
         "library %s, error = %d.\n");
   }
 # else
-  // -------------------------------------------------------
+
   h = dlopen (libName, RTLD_NOW);
   if (NULL == h) {
     strncpy(msgBuf, dlerror(), msgLen);
@@ -77,7 +75,7 @@ soHandle_t LSL_loadLib(const char *libName,
 #endif
 } /* LSL_loadLib */
 
-// =========================================================
+
 int LSL_unloadLib (soHandle_t h) {
   int rc=1;
 
@@ -92,14 +90,13 @@ int LSL_unloadLib (soHandle_t h) {
   return rc;
 } /* LSL_unLoadLib */
 
-// ---------------------------------------------------------
+
 #ifdef HAVE_WINDOWS_H
 typedef FARPROC symtype;
 #else
 typedef void* symtype;
 #endif
 
-// =========================================================
 // Loads a symbol from a dynamically linked library.
 //
 // This function is not defined in the header to allow a
@@ -119,7 +116,6 @@ typedef void* symtype;
 symtype LSL_loadSym (soHandle_t h, const char *symName,
                      char *msgBuf, int msgLen) {
 
-  // -------------------------------------------------------
   symtype s;
   const char *from;
   char *to;
@@ -131,11 +127,11 @@ symtype LSL_loadSym (soHandle_t h, const char *symName,
   size_t symLen;
   int trip;
 
-  // -------------------------------------------------------
+
   s = NULL;
   err = NULL;
 
-  // -------------------------------------------------------
+
   /* search in this order:
    *  1. original
    *  2. lower_

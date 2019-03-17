@@ -14,12 +14,11 @@ static soHandle_t SNOPT_handle = NULL;
 
 typedef void (*voidfun)(void);
 
-// =========================================================
-voidfun LSL_loadSym (soHandle_t h, 
+ voidfun LSL_loadSym (soHandle_t h,
                      const char *symName, 
                      char *msgBuf, int msgLen);
 
-// =========================================================
+
 typedef void (*snopta_t)(integer*, integer*, integer*,
                          integer*, integer*, doublereal*, 
                          integer*, char*, My_fp, integer*, 
@@ -38,56 +37,56 @@ typedef void (*snopta_t)(integer*, integer*, integer*,
                          doublereal*, integer*, ftnlen, 
                          ftnlen, ftnlen, ftnlen, ftnlen);
 
-// =========================================================
+
 typedef void (*sninit_t)(integer*, integer*, char*,
                          integer*, integer*, integer*,
                          doublereal*, integer*, ftnlen);
 
-// =========================================================
+
 typedef void (*sngeti_t)(char*, integer*, integer*,
                          char*, integer*, integer*,
                          integer*, doublereal*, integer*,
                          ftnlen, ftnlen);
 
-// =========================================================
+
 typedef void (*sngetr_t)(char*, doublereal*, integer*,
                          char*, integer*, integer*,
                          integer*, doublereal*, integer*,
                          ftnlen, ftnlen);
 
-// =========================================================
+
 typedef void (*snset_t)(char*, integer*, integer*,
                         integer*, char*, integer*,
                         integer*, integer*,
                         doublereal*, integer*,
                         ftnlen, ftnlen);
 
-// =========================================================
+
 typedef void (*sngetc_t)(char*, char*, integer*,
                          char*, integer*, integer*,
                          integer*, doublereal*, integer*,
                          ftnlen, ftnlen, ftnlen);
 
-// =========================================================
+
 typedef void (*snseti_t)(char*, integer*, integer*,
                          integer*, integer*, char*,
                          integer*, integer*, integer*,
                          doublereal*, integer*, ftnlen,
                          ftnlen);
 
-// =========================================================
+
 typedef void (*snsetr_t)(char*, doublereal*, integer *,
                          integer*, integer*, char*,
                          integer*, integer*, integer*,
                          doublereal*, integer*, ftnlen,
                          ftnlen);
 
-// =========================================================
+
 typedef void (*snspec_t)(integer*, integer*, char*,
                          integer*, integer*, integer*,
                          doublereal*, integer*, ftnlen);
 
-// =========================================================
+
 typedef void (*snmema_t)(integer*, integer*, integer*, 
                          integer*, integer*, integer*, 
                          integer*, integer*, integer*,
@@ -95,7 +94,7 @@ typedef void (*snmema_t)(integer*, integer*, integer*,
                          integer*, integer*, doublereal*, 
                          integer*, ftnlen);
 
-// =========================================================
+
 typedef void (*snjac_t)(integer*, integer*, integer*, 
                         My_fp, integer*, integer*, 
                         integer*, integer*, doublereal*, 
@@ -108,11 +107,11 @@ typedef void (*snjac_t)(integer*, integer*, integer*,
                         doublereal*, integer*, ftnlen, 
                         ftnlen);
 
-// =========================================================
+
 typedef void (*openfile_t)(integer*, char*, 
                            integer*, integer);
 
-// =========================================================
+
 typedef void (*closefile_t)(integer*);
 
 static snopta_t    func_snopta = NULL;
@@ -129,7 +128,7 @@ static snjac_t     func_snjac = NULL;
 static openfile_t  func_openfile = NULL;
 static closefile_t func_closefile = NULL;
 
-// =========================================================
+
 void snopta_(integer *start, integer *nf, 
              integer *n, integer *nxname, 
              integer *nfname, doublereal *objadd, 
@@ -172,7 +171,7 @@ void snopta_(integer *start, integer *nf,
               fnames_len, cu_len, cw_len);
 }
 
-// =========================================================
+
 void sninit_(integer *iPrint, integer *iSumm, 
              char *cw, integer *lencw, integer *iw, 
              integer *leniw, doublereal *rw, 
@@ -185,7 +184,7 @@ void sninit_(integer *iPrint, integer *iSumm,
               iw, leniw, rw, lenrw, cw_len);
 }
 
-// =========================================================
+
 void sngeti_(char *buffer, integer *ivalue, 
              integer *inform__, char *cw, 
              integer *lencw, integer *iw, 
@@ -200,7 +199,7 @@ void sngeti_(char *buffer, integer *ivalue,
               leniw, rw, lenrw, buffer_len, cw_len);
 }
 
-// =========================================================
+
 void sngetr_(char *buffer, doublereal *ivalue, 
              integer *inform__, char *cw, 
              integer *lencw, integer *iw, 
@@ -215,7 +214,7 @@ void sngetr_(char *buffer, doublereal *ivalue,
               leniw, rw, lenrw, buffer_len, cw_len);
 }
 
-// =========================================================
+
 void snset_(char *buffer, integer *iprint, 
             integer *isumm, integer *inform__, 
             char *cw, integer *lencw, integer *iw, 
@@ -230,7 +229,7 @@ void snset_(char *buffer, integer *iprint,
              iw, leniw, rw, lenrw, buffer_len, cw_len);
 }
 
-// =========================================================
+
 void sngetc_(char *buffer, char *ivalue, 
              integer *inform__, char *cw, 
              integer *lencw, integer *iw, 
@@ -246,7 +245,7 @@ void sngetc_(char *buffer, char *ivalue,
               ivalue_len, cw_len);
 }
 
-// =========================================================
+
 void snseti_(char *buffer, integer *ivalue, 
              integer *iprint, integer *isumm, 
              integer *inform__, char *cw, 
@@ -263,7 +262,7 @@ void snseti_(char *buffer, integer *ivalue,
               rw, lenrw, buffer_len, cw_len);
 }
 
-// =========================================================
+
 void snsetr_(char *buffer, doublereal *rvalue, 
              integer * iprint, integer *isumm, 
              integer *inform__, char *cw, 
@@ -280,7 +279,7 @@ void snsetr_(char *buffer, doublereal *rvalue,
               rw, lenrw, buffer_len, cw_len);
 }
 
-// =========================================================
+
 void snspec_(integer *ispecs, integer *inform__, 
              char *cw, integer *lencw, integer *iw, 
              integer *leniw, doublereal *rw, 
@@ -293,7 +292,7 @@ void snspec_(integer *ispecs, integer *inform__,
               iw, leniw, rw, lenrw, cw_len);
 }
 
-// =========================================================
+
 void snmema_(integer *iexit, integer *nf, integer *n, 
              integer *nxname, integer *nfname, 
              integer *nea, integer *neg, integer *mincw, 
@@ -309,7 +308,7 @@ void snmema_(integer *iexit, integer *nf, integer *n,
               leniw, rw, lenrw, cw_len);
 }
 
-// =========================================================
+
 void snjac_(integer *inform__, integer *nf, integer *n, 
             My_fp userfg, integer *iafun, integer *javar, 
             integer *lena, integer *nea, doublereal *a, 
@@ -333,7 +332,7 @@ void snjac_(integer *inform__, integer *nf, integer *n,
              cu_len, cw_len);
 }
 
-// =========================================================
+
 void openfile_(integer* num, char* name, 
                integer* mode, integer prnt_len) {
 
@@ -343,7 +342,7 @@ void openfile_(integer* num, char* name,
   func_openfile(num, name, mode, prnt_len);
 }
 
-// =========================================================
+
 void closefile_(integer* num) {
   if (func_closefile == NULL)
     exit(EXIT_FAILURE);
@@ -351,12 +350,11 @@ void closefile_(integer* num) {
   func_closefile(num);
 }
 
-// =========================================================
+
 int LSL_loadSNOPTLib(const char* libname, 
                      char* msgbuf, 
                      int msglen) {
 
-  // -------------------------------------------------------
   if (libname) {
     SNOPT_handle = LSL_loadLib(libname, msgbuf, msglen);
   } else  { /* try a default library name */
@@ -367,7 +365,6 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
   func_snopta = (snopta_t)LSL_loadSym(SNOPT_handle, 
                                       "snopta_", 
                                       msgbuf, msglen);
@@ -375,7 +372,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_sninit = (sninit_t)LSL_loadSym(SNOPT_handle, 
                                       "sninit_", 
                                       msgbuf, msglen);
@@ -384,7 +381,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_sngeti = (sngeti_t)LSL_loadSym(SNOPT_handle, 
                                       "sngeti_", 
                                       msgbuf, msglen);
@@ -393,7 +390,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_sngetr = (sngetr_t)LSL_loadSym(SNOPT_handle, 
                                       "sngetr_", 
                                       msgbuf, msglen);
@@ -402,7 +399,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_sngetc = (sngetc_t)LSL_loadSym(SNOPT_handle, 
                                       "sngetc_", 
                                       msgbuf, msglen);
@@ -411,7 +408,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snset = (snset_t)LSL_loadSym(SNOPT_handle, 
                                     "snset_", 
                                     msgbuf, msglen);
@@ -420,7 +417,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snseti = (snseti_t)LSL_loadSym(SNOPT_handle, 
                                       "snseti_", 
                                       msgbuf, msglen);
@@ -429,7 +426,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snsetr = (snsetr_t)LSL_loadSym(SNOPT_handle, 
                                       "snsetr_", 
                                       msgbuf, msglen);
@@ -438,7 +435,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snspec = (snspec_t)LSL_loadSym(SNOPT_handle, 
                                       "snspec_", 
                                       msgbuf, msglen);
@@ -447,7 +444,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snmema = (snmema_t)LSL_loadSym(SNOPT_handle, 
                                       "snmema_", 
                                       msgbuf, msglen);
@@ -456,7 +453,7 @@ int LSL_loadSNOPTLib(const char* libname,
     return EXIT_FAILURE;
   }
 
-  // -------------------------------------------------------
+
   func_snjac = (snjac_t)LSL_loadSym(SNOPT_handle, 
                                     "snjac_", 
                                     msgbuf, msglen);
@@ -486,7 +483,7 @@ int LSL_loadSNOPTLib(const char* libname,
   return EXIT_SUCCESS;
 }
 
-// =========================================================
+
 int LSL_unloadSNOPTLib() {
 
   int rc;
@@ -495,7 +492,7 @@ int LSL_unloadSNOPTLib() {
     return EXIT_SUCCESS;
   }
 
-  // -------------------------------------------------------
+
   rc = LSL_unloadLib(SNOPT_handle);
   SNOPT_handle = NULL;
 
@@ -516,12 +513,12 @@ int LSL_unloadSNOPTLib() {
   return rc;
 }
 
-// =========================================================
+
 int LSL_isSNOPTLoaded() {
   return SNOPT_handle != NULL;
 }
 
-// =========================================================
+
 char* LSL_SNOPTLibraryName() {
   static char name[] = SNOPTLIBNAME;
   return name;
