@@ -622,7 +622,11 @@ bool TrustRegionModel::improveModelNfp() {
         std::swap(pivot_polynomials_[poly_i], pivot_polynomials_[next_position]);
 
         //!<Add point>
-        points_shifted_.col(next_position) = nfp_new_point_shifted_;
+        int nr, nc;
+        nr = (int)points_shifted_.rows();
+        nc = (int)points_shifted_.cols();
+        points_shifted_.conservativeResize(nr, nc+1);
+        points_shifted_.col(nc-1) = nfp_new_point_shifted_;
 
         //!<Normalize polynomial value>
         pivot_polynomials[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
@@ -634,8 +638,16 @@ bool TrustRegionModel::improveModelNfp() {
         orthogonalizeBlock(nfp_new_point_shifted_, next_position, block_begining, p_ini);
 
         //!<Update model and recompute polynomials>
-        points_abs_.col(next_position) = nfp_new_point_abs_;
-        fvalues_.col(next_position) = nfp_new_fvalues_;
+        nr = (int)points_abs_.rows();
+        nc = (int)points_abs_.cols();
+        points_abs_.conservativeResize(nr, nc+1);
+        points_abs_.col(nc-1) = nfp_new_point_abs_;
+
+        nr = (int)fvalues_.rows();
+        nc = (int)fvalues_.cols();
+        fvalues_.conservativeResize(nr, nc+1);
+        fvalues_.col(nc-1) = nfp_new_fvalues_;
+
         pivot_values_(next_position) = new_pivot_value;
         exit_flag = true;
       }
