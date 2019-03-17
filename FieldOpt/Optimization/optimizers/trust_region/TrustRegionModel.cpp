@@ -1307,7 +1307,7 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
 
     double fval;
     double tol_norm, tol_arg, tol_tr, tol_eps;
-    bool exitflag;
+    int exitflag = -1;
 
     // TR tol
     // CG: tol_arg = max(1, norm(x_tr_center, inf));
@@ -1369,7 +1369,60 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
         cout << "H = \n" << H << endl;
     }
 
-    cout << "Minimize TR using SNOPT, or whatever else...";
+    cout << "Minimize TR using SNOPT";
+
+    // Set prob name (incl. spec) to be solved
+    Optimizer::EmbeddedProblem prob;
+    prob.setProbName("TRMod_A");
+    // prob.setProbName("Rosenbrock"); // dbg
+
+    // Set prob dims
+    prob.setNunVars(getXDim());
+    prob.setNumLinConst(0);
+    prob.setNunNnlConst(0);
+
+    // Set init point, bounds on vars
+    prob.setXInit(x_tr_center);
+    prob.setXUb(bu_mod);
+    prob.setXLb(bl_mod);
+
+    VectorXd FUb(1 + prob.getNunNnlConst());
+    VectorXd FLb(1 + prob.getNunNnlConst());
+
+    // Bounds on objective of tr prob
+    FUb(0) = 1e20;
+    FLb(0) = -1e20;
+
+    // Bounds on nonlinear c imposed on tr prob
+    // NOTE: not active since prob.getNunNnlConst() = 0
+    // FUb(1) = radius;
+    // FLb(1) = 0;
+
+    prob.setFUb(FUb);
+    prob.setFLb(FLb);
+
+    // TODO Missing spec for linear constraints
+
+    // Transfer tr model data
+    prob.setTrC(c);
+    prob.setTrG(g);
+    prob.setTrH(H);
+
+    SNOPTSolver_->setUpSNOPTSolver(prob);
+
+    x = prob.getXSol();
+    fval = prob.getFSol()(0);
+
+    if (prob.getSNOPTExitCode() == 1) {
+        exitflag = 1;
+    }
+
+    if (false) {
+        cout << "Debug SNOPT xsol/fsol/exitflag:";
+        cout << "xsol = \n" << prob.getXSol() << endl;
+        cout << "fsol = \n" << prob.getFSol() << endl;
+        cout << "exit = \n" << exitflag << endl ;
+    }
 
     return make_tuple(x, fval, exitflag);
 }
