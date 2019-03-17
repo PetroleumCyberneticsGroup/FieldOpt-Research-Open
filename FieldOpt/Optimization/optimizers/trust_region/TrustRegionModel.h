@@ -24,6 +24,7 @@
 
 #include <Optimization/case.h>
 #include <Settings/optimizer.h>
+#include <Optimization/solvers/SNOPTSolver.h>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -61,6 +62,8 @@ class TrustRegionModel {
             Case *base_case,
             Settings::Optimizer *settings
             );
+
+    SNOPTSolver *SNOPTSolver_;
 
     void setXDim(int dim) { dim_ = dim; }
     int getXDim() { return dim_; }
