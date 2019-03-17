@@ -398,7 +398,7 @@ bool TrustRegionModel::rebuildModel() {
         points_shifted_.col(pt_next).swap(points_shifted_.col(pt_max));
         all_points_.col(pt_next).swap(all_points_.col(pt_max));
         std::swap(all_fvalues_[pt_next], all_fvalues_[pt_max]);
-        std::swap(distances_[pt_next], distances_[pt_next]);
+        std::swap(distances_[pt_next], distances_[pt_max]);
       }
 
       pivot_values_(pt_next) = max_absval;
