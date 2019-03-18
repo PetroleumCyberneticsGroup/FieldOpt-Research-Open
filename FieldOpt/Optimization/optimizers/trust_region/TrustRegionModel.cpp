@@ -64,6 +64,7 @@ TrustRegionModel::TrustRegionModel(
 
     lb_ = lb;
     ub_ = ub;
+    base_case_ = base_case;
 
     settings_ = settings;
     radius_ = settings_->parameters().tr_initial_radius;
@@ -466,6 +467,7 @@ bool TrustRegionModel::improveModelNfp() {
   auto dim = points_shifted_.rows();
   auto p_ini = points_shifted_.cols();
   auto shift_center = points_abs_.col(0);
+
   auto tr_center = tr_center_;
   bool exit_flag = true;
   bool f_succeeded = false;
@@ -537,11 +539,11 @@ bool TrustRegionModel::improveModelNfp() {
           }
 
           if (nfp_point_found_) {
-            for (int found_i = 0; found_i < nfp_new_point_shifted_.cols(); found_i++) {
+            for (int found_i = 0; found_i < nfp_new_points_shifted_.cols(); found_i++) {
 
               if(!areImprovementPointsComputed()) {
 
-                nfp_new_point_shifted_ = nfp_new_point_shifted_.col(found_i);
+                nfp_new_point_shifted_ = nfp_new_points_shifted_.col(found_i);
                 auto new_pivot_value = nfp_new_pivots_(found_i);
 
                 nfp_new_point_abs_ = unshift_point(nfp_new_point_shifted_);
