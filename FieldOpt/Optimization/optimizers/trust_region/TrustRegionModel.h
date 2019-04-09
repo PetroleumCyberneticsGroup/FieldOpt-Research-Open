@@ -239,6 +239,7 @@ class TrustRegionModel {
     RowVectorXd cached_fvalues_;
     RowVectorXd pivot_values_;
     VectorXd index_vector_;
+    VectorXd piv_order_;
     VectorXd distances_;
     VectorXd lb_;
     VectorXd ub_;

@@ -1235,7 +1235,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   double radius = radius_;
 
   int dim = points_shifted_.rows();
-  int p_ini = points_shifted_.cols();
+  int points_num = points_shifted_.cols();
   auto points_shifted = points_shifted_;
 
   int tr_center = tr_center_;
@@ -1247,12 +1247,90 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
   int linear_terms = dim+1;
 
-  //TODO: Check if lb_ and ub_ if are empty. If so, initialize them with sufficiently large bounds.
-
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
+  bool success = false;
 
-  //TODO: This function should return a bool...
+//  unshift_point = @(x) max(min(x + shift_center, bu), bl);
+//  tol_shift = 10*eps(max(1, norm(shift_center, inf)));
+
+  //!<Reorder points based on their pivot_values>
+  piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
+  std::sort(piv_order_.data(),
+            piv_order_.data() + piv_order_.size(),
+            std::bind(compare,
+                      std::placeholders::_1,
+                      std::placeholders::_2,
+                      pivot_values_.data()));
+
+  int polynomials_num = pivot_polynomials_.size();
+  //!<Could iterate through all pivots, but will try just dealing with the worst one>
+  auto pos = piv_order_(0);
+  if ((pos == 0) || (pos == tr_center) || (pos <= linear_terms  && points_num > linear_terms)) {
+    //!<Better to just rebuild model>
+    success = false;
+  } else {
+    double new_pivot_value = 1;
+    auto current_pivot_value = pivot_values_(pos);
+    MatrixXd new_points_shifted;
+    RowVectorXd new_pivots;
+    bool point_found;
+
+    std::tie(new_points_shifted, new_pivots, point_found) = pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+
+    RowVectorXd new_point_abs(dim);
+    bool f_succeeded = false;
+    if (point_found) {
+      VectorXd new_point_shifted(dim);
+      for (int found_i=0; found_i<new_points_shifted.cols(); found_i++) {
+        new_point_shifted = new_points_shifted.col(found_i);
+        new_pivot_value = new_pivots(found_i);
+
+        auto ub_point = ub_.cwiseMin(new_point_shifted + shift_center);
+        auto new_point_abs = ub_point.cwiseMax(new_point_shifted+shift_center);
+
+        //TODO: implement here the same logic that is implemented in improveModelNfp()
+//       [new_fvalue,  f_succeeded] = evaluateNewFunction(funcs, new_point_abs);
+        if (f_succeeded) {
+          break;
+        } else {
+          return true;
+        }
+      }
+      if (f_succeeded) {
+        //!<Normalize polynomial value>
+        pivot_polynomials_[pos] = normalizePolynomial(pos, new_point_shifted);
+
+        //!<Orthogonalize polynomials on present block (all)>
+        int block_beginning;
+        int block_end;
+        if (pos <= dim) {
+          block_beginning = 1;
+          block_end = min(points_num-1, dim);
+        } else {
+          block_beginning = dim + 1;
+          block_end = points_num-1;
+        }
+
+        //!<Re-orthogonalize>
+        pivot_polynomials_[pos] = orthogonalizeToOtherPolynomials(pos, block_end);
+
+        //!<Orthogonalize block>
+        orthogonalizeBlock(new_point_shifted, pos, block_beginning, block_end);
+
+        //!<Update model and recompute polynomials>
+        cached_points_ = points_abs_.leftCols(points_abs_.rows());
+        cached_fvalues_ = fvalues_.head(fvalues_.size());
+        points_abs_.col(pos) = new_point_abs;
+        points_shifted_.col(pos) = new_point_shifted;
+////        fvalues_(pos) =  new_fvalue;  //TODO: commented until evaluate_fvalues() is finished
+        pivot_values_[pos] *= new_pivot_value; // TODO: double-check this line
+
+        modeling_polynomials_.clear();
+        success = true;
+      }
+    }
+  }
 }
 
 tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
