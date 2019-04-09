@@ -106,7 +106,7 @@ class TrustRegionModel {
     * CG comment 2: Other criticality measures need to be considered
     * if constraint handling
     */
-    void measureCriticality();
+    VectorXd measureCriticality();
 
     void getModelMatrices();
 
