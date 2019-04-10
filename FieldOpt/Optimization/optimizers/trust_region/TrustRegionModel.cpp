@@ -575,18 +575,15 @@ bool TrustRegionModel::improveModelNfp() {
                     pt_case_uuid_.push_back(new_case->id());
                 }
 
-                return 5;  // Probably not necessary
+                return 5;  //TODO Probably not necessary
 
               } else if (areImprovementPointsComputed()) {
                   for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
                     int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
-                    new_points_.setZero(nvars, improvement_cases_.size());
-                    new_fvalues_.setZero(improvement_cases_.size());
-
                     auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
-                    new_points_.col(ii) = c->GetRealVarVector();
-                    new_fvalues_(ii) = c->objective_function_value();
+                    nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
+                    nfp_new_fvalues_(ii) = c->objective_function_value();
 
                     std::map <string, string> stateMap = c->GetState();
                     // TODO stateMap["EvalSt"] gives pending after evaluations of
@@ -594,7 +591,7 @@ bool TrustRegionModel::improveModelNfp() {
                     // if(stateMap["EvalSt"] == "OKAY") {
                         f_succeeded = true;
                     // }
-                    // f_succeeded should be a vector if new_point_abs.cols() > 1?
+                    //TODO f_succeeded should be a vector if new_point_abs.cols() > 1?
                   }
                   setAreImprovementPointsComputed(false);
               }
@@ -644,7 +641,7 @@ bool TrustRegionModel::improveModelNfp() {
         nr = (int)points_shifted_.rows();
         nc = (int)points_shifted_.cols();
         points_shifted_.conservativeResize(nr, nc+1);
-        points_shifted_.col(nc-1) = nfp_new_point_shifted_;
+        points_shifted_.col(nc) = nfp_new_point_shifted_;
 
         //!<Normalize polynomial value>
         pivot_polynomials[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
@@ -659,12 +656,12 @@ bool TrustRegionModel::improveModelNfp() {
         nr = (int)points_abs_.rows();
         nc = (int)points_abs_.cols();
         points_abs_.conservativeResize(nr, nc+1);
-        points_abs_.col(nc-1) = nfp_new_point_abs_;
+        points_abs_.col(nc) = nfp_new_point_abs_;
 
         nr = (int)fvalues_.rows();
         nc = (int)fvalues_.cols();
         fvalues_.conservativeResize(nr, nc+1);
-        fvalues_.col(nc-1) = nfp_new_fvalues_;
+        fvalues_.col(nc) = nfp_new_fvalues_;
 
         pivot_values_(next_position) = new_pivot_value;
         exit_flag = true;
