@@ -486,7 +486,11 @@ bool TrustRegionModel::improveModelNfp() {
 
   auto tr_center = tr_center_;
   bool exit_flag = true;
-  bool f_succeeded = false;
+
+  Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
+  f_succeeded.resize(1);
+  f_succeeded.fill(false);
+
   int poly_i;
   double new_pivot_value;
 
@@ -578,6 +582,8 @@ bool TrustRegionModel::improveModelNfp() {
                 return 5;  //TODO Probably not necessary
 
               } else if (areImprovementPointsComputed()) {
+                  f_succeeded.resize(nfp_new_point_abs_.cols(),1);
+                  f_succeeded.fill(false);
                   for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
                     int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
@@ -586,20 +592,20 @@ bool TrustRegionModel::improveModelNfp() {
                     nfp_new_fvalues_(ii) = c->objective_function_value();
 
                     std::map <string, string> stateMap = c->GetState();
-                    // TODO stateMap["EvalSt"] gives pending after evaluations of
-                    // cases in tests... Update status of cases when called from tests
+                    // stateMap["EvalSt"] gives "pending" after evaluations of
+                    // cases in tests...
+                    // TODO Update status of cases when called from tests
                     // if(stateMap["EvalSt"] == "OKAY") {
-                        f_succeeded = true;
+                      f_succeeded(ii) = true;
                     // }
-                    //TODO f_succeeded should be a vector if new_point_abs.cols() > 1?
                   }
                   setAreImprovementPointsComputed(false);
               }
-              if (f_succeeded) {
+              if (f_succeeded.all()) {
                 break;
               }
             }  // end-if: (found_i < new_points_shifted.cols())
-            if (f_succeeded) {
+            if (f_succeeded.all()) {
               break;  //!<Stop trying pivot polynomials for poly_i>
             }
           } // end-if (point_found)
@@ -615,7 +621,7 @@ bool TrustRegionModel::improveModelNfp() {
 
         } // end-for-loop: (poly_i <= block_end)
 
-        if (nfp_point_found_ && f_succeeded) {
+        if (nfp_point_found_ && f_succeeded.all()) {
           break; //!<(for attempts)>
         } else if (nfp_point_found_) {
           //!<Reduce radius if it did not break>
@@ -628,7 +634,7 @@ bool TrustRegionModel::improveModelNfp() {
         }
       }  // end-for-loop: (attempts<=3)
 
-      if (nfp_point_found_ && f_succeeded) {
+      if (nfp_point_found_ && f_succeeded.all()) {
         setIsImprovementNeeded(false);
 
         //!<Update this polynomial in the set>
