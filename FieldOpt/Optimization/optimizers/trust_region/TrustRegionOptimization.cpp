@@ -189,7 +189,6 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
                     cout << "Return evaluated init_cases_ (sz:"
                          << tr_model_->getSizeInitCases() << ")" << endl;
                     tr_model_->submitTempInitCases();
-                    tr_model_->submitTempReplCases();
                     tr_model_->setAreInitPointsComputed(true);
             }
             return;
