@@ -202,6 +202,23 @@ class TrustRegionModel {
     bool isImprovementNeeded() const { return needs_improvement_; }
     void setIsImprovementNeeded(bool s) { needs_improvement_ = s; }
 
+    // Replacement cases
+    bool areReplacementPointsComputed() const { return repl_points_computed_; };
+    void setAreReplacementPointsComputed(bool s) { repl_points_computed_ = s; }
+    void addReplacementCase(Case *c) { replacement_cases_.append(c); }
+    bool isReplacementNeeded() const { return needs_replacement_; }
+    void setIsReplacementNeeded(bool s) { needs_replacement_ = s; }
+
+    void addTempReplCase(Case *c) {
+      temp_repl_cases_.append(c); }
+
+    int getSizeReplCases() {
+      return (int)replacement_cases_.size(); }
+
+    void submitTempReplCases();
+
+    void setAreReplPointsComputed(bool s) {
+      repl_points_computed_ = s; }
 
     /*!
     * @brief
@@ -211,6 +228,8 @@ class TrustRegionModel {
     QList<Case *> getInitializationCases() { return initialization_cases_; };
 
     QList<Case *> getImprovementCases() { return improvement_cases_;};
+
+    QList<Case *> getReplacementCases() { return replacement_cases_;};
 
     /*!
     * @brief Method that attempts to initialize TRModel
@@ -273,6 +292,18 @@ class TrustRegionModel {
     QList<Case *> initialization_cases_;
     QList<Case *> temp_init_cases_;
 
+    // chooseAndReplacePoints() saved variables
+    Polynomial repl_polynomial_;
+    MatrixXd repl_new_points_shifted_;
+    RowVectorXd repl_new_pivots_;
+
+    VectorXd repl_new_point_shifted_;
+    VectorXd repl_new_point_abs_;
+    RowVectorXd repl_new_fvalues_;
+    bool repl_point_found_ = false;
+
+    vector<QUuid> repl_pt_case_uuid_;
+
     // Improvement points status properties
     bool impr_points_computed_;
     bool needs_improvement_;
@@ -280,6 +311,14 @@ class TrustRegionModel {
     QList<Case *> temp_impr_cases_;
 
     QHash<QUuid, Case *> improvement_cases_hash_;
+
+    // Replacement points status properties
+    bool repl_points_computed_;
+    bool needs_replacement_;
+    QList<Case *> replacement_cases_;
+    QList<Case *> temp_repl_cases_;
+
+    QHash<QUuid, Case *> replacement_cases_hash_;
 
    /*!
    * @brief shift the point

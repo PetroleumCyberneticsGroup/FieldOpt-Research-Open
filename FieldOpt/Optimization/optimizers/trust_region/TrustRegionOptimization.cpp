@@ -82,6 +82,7 @@ void TrustRegionOptimization::iterate() {
 
         if (tr_model_->areInitPointsComputed()
             && !tr_model_->areImprovementPointsComputed()
+            && !tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
             cout << "Initializing TRModel" << endl;
 
@@ -93,14 +94,20 @@ void TrustRegionOptimization::iterate() {
                 cout << "Improve TRModel" << endl;
 
                 int exit_flag = tr_model_->ensureImprovement();
-
-                // Might be 0 if point_found in improveModelNfp is false...
-                auto improvement_cases = tr_model_->getImprovementCases();
+                auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
+                auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
+                // Might be 0 if point_found in improveModelNfp is false. We also need to handle exit_flag=3 or exit_flag=4
 
                 if (tr_model_->isImprovementNeeded()
                     && !improvement_cases.size() == 0) {
                     cout << "impr_cases -> case_handler_ (return)" << endl;
                     case_handler_->AddNewCases(improvement_cases);
+                    return;
+                }
+
+                if (tr_model_->isReplacementNeeded() && !replacement_cases.size() ==0) {
+                    cout << "repl_cases -> case_handler_ (return)" << endl;
+                    case_handler_->AddNewCases(replacement_cases);
                     return;
                 }
             } else {
@@ -114,14 +121,29 @@ void TrustRegionOptimization::iterate() {
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-            cout << "Continue model improvement process" << endl;
-            int exit_flag = tr_model_->ensureImprovement();
+          cout << "Continue model improvement process (nfp model)" << endl;
+          int exit_flag = tr_model_->ensureImprovement();
 
-            if (!tr_model_->isImprovementNeeded()) {
-                cout << "Improvement process successful" << endl;
-                cout << "Initialized TRModel [2]" << endl;
-                tr_model_->setIsInitialized(true);
-            }
+          if (!tr_model_->isImprovementNeeded()) {
+              cout << "Improvement process successful (nfp model)" << endl;
+              cout << "Initialized TRModel [2]" << endl;
+              tr_model_->setIsInitialized(true);
+          }
+        }  // end-if: finish model improvement process
+
+        if (tr_model_->areInitPointsComputed()
+            && tr_model_->isReplacementNeeded()
+            && tr_model_->areReplacementPointsComputed()
+            && !tr_model_->isInitialized()) {
+
+          cout << "Continue model improvement process (replacement of points)" << endl;
+          int exit_flag = tr_model_->ensureImprovement();
+
+          if (!tr_model_->isReplacementNeeded()) {
+            cout << "Improvement process successful (replacement of points)" << endl;
+            cout << "Initialized TRModel [2]" << endl;
+            tr_model_->setIsInitialized(true);
+          }
         }  // end-if: finish model improvement process
     }  // end-if: (iteration_ == 0)
 
@@ -167,6 +189,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
                     cout << "Return evaluated init_cases_ (sz:"
                          << tr_model_->getSizeInitCases() << ")" << endl;
                     tr_model_->submitTempInitCases();
+                    tr_model_->submitTempReplCases();
                     tr_model_->setAreInitPointsComputed(true);
             }
             return;
@@ -183,7 +206,11 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
                 cout << "Return evaluated impr_cases_ (sz:"
                      << tr_model_->getSizeImprCases() << ")" << endl;
+
+              cout << "Return evaluated repl_cases_ (sz:"
+                   << tr_model_->getSizeReplCases() << ")" << endl;
                 tr_model_->submitTempImprCases();
+                tr_model_->submitTempReplCases();
                 tr_model_->setAreImprPointsComputed(true);
             }
             return;

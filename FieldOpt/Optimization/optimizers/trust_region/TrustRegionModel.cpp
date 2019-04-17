@@ -57,9 +57,11 @@ TrustRegionModel::TrustRegionModel(
 
     init_points_computed_ = false;
     impr_points_computed_ = false;
+    repl_points_computed_ = false;
 
     is_initialized_ = false;
     needs_improvement_ = false;
+    needs_replacement_ = false;
     model_changed_ = false;
 
     lb_ = lb;
@@ -273,6 +275,14 @@ void TrustRegionModel::submitTempImprCases() {
     for (Case *c : improvement_cases_) {
         improvement_cases_hash_.insert(c->id(), c);
     }
+}
+
+void TrustRegionModel::submitTempReplCases() {
+  replacement_cases_ = temp_repl_cases_;
+
+  for (Case *c : replacement_cases_) {
+    replacement_cases_hash_.insert(c->id(), c);
+  }
 }
 
 bool TrustRegionModel::rebuildModel() {
@@ -520,6 +530,7 @@ bool TrustRegionModel::improveModelNfp() {
     return shifted_x;
   };
 
+
   //!<Test if the model is already FL but old
   //!<Distance measured in inf norm>
   auto tr_center_pt = points_shifted_.col(tr_center);
@@ -650,10 +661,10 @@ bool TrustRegionModel::improveModelNfp() {
         points_shifted_.col(nc) = nfp_new_point_shifted_;
 
         //!<Normalize polynomial value>
-        pivot_polynomials[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
+        pivot_polynomials_[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
 
         //!<Re-orthogonalize>
-        pivot_polynomials[next_position] = orthogonalizeToOtherPolynomials(next_position, p_ini);
+        pivot_polynomials_[next_position] = orthogonalizeToOtherPolynomials(next_position, p_ini);
 
         //!<Orthogonalize polynomials on present block (deffering subsequent ones)>
         orthogonalizeBlock(nfp_new_point_shifted_, next_position, block_begining, p_ini);
@@ -1254,8 +1265,20 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto bu_shifted = ub_ - shift_center;
   bool success = false;
 
+  Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
+  f_succeeded.resize(1);
+  f_succeeded.fill(false);
+
 //  unshift_point = @(x) max(min(x + shift_center, bu), bl);
 //  tol_shift = 10*eps(max(1, norm(shift_center, inf)));
+
+  //TODO: test this function
+  auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
+    Eigen::VectorXd shifted_x = x + shift_center;
+    shifted_x = shifted_x.cwiseMin(bl_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMax(bu_shifted+shift_center);
+    return shifted_x;
+  };
 
   //!<Reorder points based on their pivot_values>
   piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
@@ -1275,66 +1298,102 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   } else {
     double new_pivot_value = 1;
     auto current_pivot_value = pivot_values_(pos);
-    MatrixXd new_points_shifted;
-    RowVectorXd new_pivots;
-    bool point_found;
 
-    std::tie(new_points_shifted, new_pivots, point_found) = pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+    if (!areReplacementPointsComputed()) {
+      std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) = pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+    }
 
-    RowVectorXd new_point_abs(dim);
-    bool f_succeeded = false;
-    if (point_found) {
-      VectorXd new_point_shifted(dim);
-      for (int found_i=0; found_i<new_points_shifted.cols(); found_i++) {
-        new_point_shifted = new_points_shifted.col(found_i);
-        new_pivot_value = new_pivots(found_i);
+    if (repl_point_found_) {
+      for (int found_i = 0; found_i < repl_new_point_shifted_.cols(); found_i++) {
 
-        auto ub_point = ub_.cwiseMin(new_point_shifted + shift_center);
-        auto new_point_abs = ub_point.cwiseMax(new_point_shifted+shift_center);
+        if (!areReplacementPointsComputed()) {
 
-        //TODO: implement here the same logic that is implemented in improveModelNfp()
-//       [new_fvalue,  f_succeeded] = evaluateNewFunction(funcs, new_point_abs);
-        if (f_succeeded) {
+          repl_new_point_shifted_ = repl_new_point_shifted_.col(found_i);
+          auto new_pivot_value = repl_new_pivots_(found_i);
+
+          repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
+          repl_new_fvalues_.resize(repl_new_point_abs_.cols());
+
+          setIsReplacementNeeded(true);
+
+          for (int ii = 0; ii < repl_new_point_abs_.cols(); ii++) {
+            Case *new_case = new Case(base_case_);
+            new_case->SetRealVarValues(repl_new_point_abs_.col(ii));
+            addReplacementCase(new_case);
+
+            repl_pt_case_uuid_.push_back(new_case->id());
+          }
+          return 5; //TODO Probably not necessary
+
+        } else if (areReplacementPointsComputed()) {
+          f_succeeded.resize(nfp_new_point_abs_.cols(), 1);
+          f_succeeded.fill(false);
+
+          for (int ii = 0; ii < repl_new_point_abs_.cols(); ii++) {
+
+            int nvars = (int) replacement_cases_[0]->GetRealVarVector().size();
+            auto c = replacement_cases_hash_[repl_pt_case_uuid_[ii]];
+            repl_new_point_abs_.col(ii) = c->GetRealVarVector();
+            repl_new_fvalues_(ii) = c->objective_function_value();
+
+            std::map<string, string> stateMap = c->GetState();
+            f_succeeded(ii) = true;
+
+          }
+          setAreReplacementPointsComputed(false);
+        }
+        if (f_succeeded.all()) {
           break;
-        } else {
-          return true;
         }
       }
-      if (f_succeeded) {
-        //!<Normalize polynomial value>
-        pivot_polynomials_[pos] = normalizePolynomial(pos, new_point_shifted);
+    }
 
-        //!<Orthogonalize polynomials on present block (all)>
-        int block_beginning;
-        int block_end;
-        if (pos <= dim) {
-          block_beginning = 1;
-          block_end = min(points_num-1, dim);
-        } else {
-          block_beginning = dim + 1;
-          block_end = points_num-1;
-        }
+    if (repl_point_found_ && f_succeeded.all()) {
+      setIsReplacementNeeded(false);
 
-        //!<Re-orthogonalize>
-        pivot_polynomials_[pos] = orthogonalizeToOtherPolynomials(pos, block_end);
+      //!<Normalize polynomial value>
+      pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
 
-        //!<Orthogonalize block>
-        orthogonalizeBlock(new_point_shifted, pos, block_beginning, block_end);
-
-        //!<Update model and recompute polynomials>
-        cached_points_ = points_abs_.leftCols(points_abs_.rows());
-        cached_fvalues_ = fvalues_.head(fvalues_.size());
-        points_abs_.col(pos) = new_point_abs;
-        points_shifted_.col(pos) = new_point_shifted;
-////        fvalues_(pos) =  new_fvalue;  //TODO: commented until evaluate_fvalues() is finished
-        pivot_values_[pos] *= new_pivot_value; // TODO: double-check this line
-
-        modeling_polynomials_.clear();
-        success = true;
+      //!<Orthogonalize polynomials on present block (all)>
+      int block_beginning;
+      int block_end;
+      if (pos <= dim) {
+        block_beginning = 1;
+        block_end = min(points_num-1, dim);
+      } else {
+        block_beginning = dim + 1;
+        block_end = points_num-1;
       }
+
+      //!<Re-orthogonalize>
+      pivot_polynomials_[pos] = orthogonalizeToOtherPolynomials(pos, block_end);
+
+      //!<Orthogonalize block>
+      orthogonalizeBlock(repl_new_point_shifted_, pos, block_beginning, block_end);
+
+      //!<Update model and recompute polynomials>
+      cached_points_ = points_abs_.leftCols(points_abs_.rows());
+      cached_fvalues_ = fvalues_.head(fvalues_.size());
+
+      int nr = (int)points_abs_.rows();
+      int nc = (int)points_abs_.cols();
+
+      points_abs_.conservativeResize(nr, nc+1);
+      points_abs_.col(nc) = repl_new_point_abs_;
+
+      nr = (int)fvalues_.rows();
+      nc = (int)fvalues_.cols();
+      fvalues_.conservativeResize(nr, nc+1);
+      fvalues_.col(nc) = repl_new_fvalues_;
+
+      pivot_values_((int)pos) *= new_pivot_value;
+
+      modeling_polynomials_.clear();
+      success = true;
     }
   }
 }
+
 
 tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
 TrustRegionModel::pointNew(Polynomial polynomial,
