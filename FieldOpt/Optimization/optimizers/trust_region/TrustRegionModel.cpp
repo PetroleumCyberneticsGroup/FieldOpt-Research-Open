@@ -769,7 +769,36 @@ int TrustRegionModel::changeTrCenter(
 }
 
 std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
-  //TODO: implement this method
+  double radius = radius_;
+  auto obj_pol = modeling_polynomials_[0];
+  auto x_tr_center = points_abs_.col(tr_center_);
+  obj_pol = shiftPolynomial(obj_pol, -x_tr_center); //!<Shift to origin>
+
+  Eigen::VectorXd trial_point(getXDim(), 1);
+  double trial_fval;
+  int exit_flag;
+
+
+  std::tie(trial_point, trial_fval, exit_flag) = minimizeTr(obj_pol, x_tr_center, radius,lb_, ub_);
+  double current_fval = fvalues_(tr_center_);
+  double trial_decrease = current_fval - trial_fval;
+
+  if (current_fval <= trial_fval) {
+    Printer::ext_info("current_fval <= trial_fval", "Optimization", "TrustRegionModel");
+  }
+
+  //  double tol_interp = max(1e-08, eps(max(double(1), fvalues_.maxCoeff()))*1e03);
+  double tol_interp = 1e-08;
+  int n_points = points_abs_.cols();
+
+  for (int k=0; k<n_points; k++) {
+    auto val = evaluatePolynomial(obj_pol, points_abs_.col(k));
+    auto error_interp = abs(val - fvalues_(k));
+    if (error_interp > tol_interp) {
+      Printer::ext_info("error_interp <= tol_interp", "Optimization", "TrustRegionModel");
+    }
+  }
+  return make_tuple(trial_point, trial_decrease);
 }
 
 int TrustRegionModel::tryToAddPoint(VectorXd new_point, double fvalue) {
@@ -798,7 +827,7 @@ void TrustRegionModel::computePolynomialModels() {
     auto l_alpha = nfpFiniteDifferences(points_num);
     for (int k=functions_num-1; k>=0; k--) {
       polynomials[k] = combinePolynomials(points_num, l_alpha);
-      polynomials[k] = shiftPolynomial(polynomials[k]);
+      polynomials[k] = shiftPolynomial(polynomials[k], points_shifted_.col(tr_center_));
     }
   }
   modeling_polynomials_ = polynomials;
@@ -1215,11 +1244,9 @@ Polynomial TrustRegionModel::combinePolynomials(
   return p;
 }
 
-Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial) {
+Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial, VectorXd s) {
 
   double terms[3];
-  VectorXd s = points_shifted_.col(tr_center_);
-
   double c;
   VectorXd g(polynomial.dimension);
   MatrixXd H(polynomial.dimension, polynomial.dimension);

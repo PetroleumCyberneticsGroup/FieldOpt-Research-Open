@@ -148,6 +148,11 @@ class TrustRegionModel {
 
     int changeTrCenter(VectorXd new_point, double fvalue);
 
+    /*!
+     * brief Approximately solves trust-region subproblem.
+     *
+     * @return Tuple with the trial point and the trial decrease in the objective function (fval_current-trial_fval)
+     */
     std::tuple<VectorXd, double> solveTrSubproblem();
 
     int tryToAddPoint(VectorXd new_point, double fvalue);
@@ -507,7 +512,7 @@ class TrustRegionModel {
     * @param polynomial to be shifted.
     * @return resulting polynomial.
     */
-    Polynomial shiftPolynomial(Polynomial polynomial);
+    Polynomial shiftPolynomial(Polynomial polynomial, VectorXd s);
 
     /*!
     * @brief Check if the model is complete, i.e., number of points is at least (dimension+1)*(dimension+2)/2
