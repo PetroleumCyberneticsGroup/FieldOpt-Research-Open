@@ -61,6 +61,13 @@ TrustRegionOptimization::TrustRegionOptimization(
     // no part)
     computeInitialPoints();
 
+    // Initial values for algorithm parameters
+    rho_ = 0;
+    sum_rho_ = 0;
+    sum_rho_sqr_ = 0;
+    delay_reduction_ = 0;
+    gamma_dec_ = settings_->parameters().tr_gamma_dec;
+
     // Log configuration
     if (enable_logging_) {
         logger_->AddEntry(new ConfigurationSummary(this));
@@ -137,7 +144,7 @@ void TrustRegionOptimization::iterate() {
             && !tr_model_->isInitialized()) {
 
           cout << "Continue model improvement process (replacement of points)" << endl;
-          int exit_flag = tr_model_->ensureImprovement();
+          int mchange_flag = tr_model_->ensureImprovement();
 
           if (!tr_model_->isReplacementNeeded()) {
             cout << "Improvement process successful (replacement of points)" << endl;
@@ -148,18 +155,123 @@ void TrustRegionOptimization::iterate() {
     }  // end-if: (iteration_ == 0)
 
     if(tr_model_->isInitialized()) {
+        iteration_++;
 
         cout << "TRMmodel fully initialized" << endl;
         cout << "Starting first iteration" << endl;
-        // termination crit.: check for # of iterations
-        // termination crit.: check for radius size
 
-        // check if model is lambda-poised
-        // check criticality step
+        int    iter_max = settings_->parameters().tr_iter_max;
+        double tol_radius = settings_->parameters().tr_tol_radius;
+        double eps_c = settings_->parameters().tr_eps_c;
+        double tol_f = settings_->parameters().tr_tol_f;
+        double eta_1 = settings_->parameters().tr_eta_1;
+        double gamma_1 = gamma_dec_;
+        double gamma_2 = settings_->parameters().tr_gamma_inc;
+        double radius_max = settings_->parameters().tr_radius_max;
 
-        // compute step: solve_tr_subproblem
-        iteration_++;
-        return;
+        auto fval_current = tr_model_->getCurrentFval();
+        auto x_current = tr_model_->getCurrentPoint();
+
+        if ((tr_model_->getRadius() < tol_radius)
+        || (iteration_ == iter_max)) {
+          return; //end of the algorithm
+        } else {
+          if (true || tr_model_->isLambdaPoised()) //<Move among points that are part of the model>
+            tr_model_->moveToBestPoint();
+          tr_model_->computePolynomialModels();
+          fval_current = tr_model_->getCurrentFval();
+          x_current = tr_model_->getCurrentPoint();
+          auto err_model = tr_model_->checkInterpolation();
+
+          //!<Criticality step -- if we are possibly close to the optimum>
+          bool criticality_step_performed = false;
+          auto model_criticality = tr_model_->measureCriticality();
+          if (model_criticality.squaredNorm() <= eps_c) {
+            tr_model_->criticalityStep();
+            criticality_step_performed = true;
+            if (model_criticality.squaredNorm() < tol_f) {
+              Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
+              return;
+            }
+          }
+          iteration_model_fl_ = tr_model_->isLambdaPoised();
+          //!<Print summary>
+          cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
+               << tr_model_->getNumPts() << endl;
+
+          //!<Compute step>
+          VectorXd trial_point;
+          VectorXd trial_step;
+          double predicted_red;
+          tie(trial_point, predicted_red) = tr_model_->solveTrSubproblem();
+          trial_step = trial_point - x_current;
+
+          if ((predicted_red < tol_radius * 1e-2) ||
+              (predicted_red < tol_radius * abs(fval_current) &&
+                  (trial_step.squaredNorm()) < tol_radius) ||
+              (predicted_red < tol_f * abs(fval_current) * 1e-3)) {
+            rho_ = -Infinity;
+            mchange_flag_ = tr_model_->ensureImprovement(); //TODO: implement assyncronous logic for function evaluations here.
+          } else {
+            //!<Evaluate objective at trial point>
+//              fval_trial = evaluate_new_fvalues(funcs, trial_point);
+            auto fval_trial = 0.01; //TODO: implement assyncronous logic for function evaluations here.
+
+            //!<Actual reduction>
+            ared_ = fval_current - fval_trial;
+
+            //!<Agreement factor>
+            rho_ = ared_ / (predicted_red);
+
+            //!<Acceptance of the trial point>
+
+            if (rho_ > eta_1) {
+              //!<Successful iteration>
+              fval_current = fval_trial;
+              x_current = trial_point;
+
+              //!<Including this new point as the TR center>
+              mchange_flag_ = tr_model_->changeTrCenter(trial_point, fval_trial);
+              //!<this mchange_flag_ is not being used (rho > eta1)
+              if (!iteration_model_fl_ && mchange_flag_ == 4) {
+                //!<Had to rebuild a model that wasn't even Fully Linear. This shouldn't happen.>
+                mchange_flag_ = tr_model_->ensureImprovement();
+              }
+            } else {
+              mchange_flag_ = tr_model_->tryToAddPoint(trial_point, fval_trial);
+              //!<If mchange_flag_ == 4, we had to rebuild the model and the radius will be reduced>             }
+            }
+            sum_rho_ += rho_;
+            sum_rho_sqr_ += pow(rho_, 2);
+          }
+          //!<From time to time a step may end a bit outside the TR>
+          auto step_size = min(tr_model_->getRadius(), trial_step.lpNorm<Infinity>());
+
+          //!<Radius update>
+          if (rho_ > eta_1) {
+            auto radius_inc = max(double(1), gamma_2*(step_size/tr_model_->getRadius()));
+            tr_model_->setRadius(min(radius_inc*tr_model_->getRadius(), radius_max));
+
+          } else if(iteration_model_fl_ && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed)) {
+            //!<A good model should have provided a better point.
+            //!< We reduce the radius, since the error is related to the radius
+            //!<        | f(x) - m(x) | < K*(radius)^2
+            //!<        rho == -inf -> too short step size
+            //!<        mchange_flag == 4 -> Couldn't add point, had to rebuild model>
+            if (tr_model_->getRadius() <= 2*tol_radius/gamma_1) {
+              delay_reduction_ = delay_reduction_ + 1;
+            } else {
+              delay_reduction_ = 0;
+            }
+
+            if (delay_reduction_ >= 3 || delay_reduction_ == 0 || criticality_step_performed) {
+              gamma_dec_ = gamma_1;
+              tr_model_->setRadius(gamma_dec_*tr_model_->getRadius());
+              delay_reduction_ = 0;
+            }
+          }
+          return;
+        }
     }  // end-if: (tr_model_->isInitialized)
 
     // Save for later

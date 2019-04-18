@@ -760,14 +760,22 @@ bool TrustRegionModel::isLambdaPoised() {
   return result;
 }
 
-void TrustRegionModel::changeTrCenter(
+int TrustRegionModel::changeTrCenter(
     VectorXd new_point,
-    RowVectorXd fvalues) {
+    double fvalue) {
+
+  int exit_flag = 4;
+  return exit_flag;
+}
+
+std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   //TODO: implement this method
 }
 
-std::tuple<VectorXd, VectorXd> TrustRegionModel::solveTrSubproblem() {
+int TrustRegionModel::tryToAddPoint(VectorXd new_point, double fvalue) {
   //TODO: implement this method
+  int exit_flag = 4;
+  return exit_flag;
 }
 
 void TrustRegionModel::computePolynomialModels() {

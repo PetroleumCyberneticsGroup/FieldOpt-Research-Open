@@ -77,9 +77,12 @@ class TrustRegionModel {
     }
 
     double getRadius() { return radius_; }
+    void setRadius(double r) { radius_ = r;}
 
     Matrix<double,Dynamic,Dynamic> getPoints() { return points_abs_; }
     Matrix<double,Dynamic,Dynamic> getPointsShifted() { return points_shifted_; }
+    VectorXd getCurrentPoint() { return points_abs_.col(tr_center_);}
+    double getCurrentFval() { return fvalues_(tr_center_);}
 
     RowVectorXd getFunctionValues() { return fvalues_; }
     std::vector<Polynomial> getPivotPolynomials() { return pivot_polynomials_; }
@@ -143,9 +146,11 @@ class TrustRegionModel {
     */
     bool isLambdaPoised();
 
-    void changeTrCenter(VectorXd new_point, RowVectorXd fvalues);
+    int changeTrCenter(VectorXd new_point, double fvalue);
 
-    std::tuple<VectorXd, VectorXd> solveTrSubproblem();
+    std::tuple<VectorXd, double> solveTrSubproblem();
+
+    int tryToAddPoint(VectorXd new_point, double fvalue);
 
     void computePolynomialModels();
 

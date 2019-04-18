@@ -73,6 +73,18 @@ class TrustRegionOptimization : public Optimizer {
     TrustRegionModel *tr_model_;
     int n_initial_points_;
 
+    double fval_current_; //!<Function value of current point>
+    VectorXd x_current_; //!<Current point>
+    double rho_; //!<Agreement factor>
+    double ared_;//!<Actual reduction>
+    double sum_rho_; //!<Cumulative rho>
+    double sum_rho_sqr_; //!<Cumulative squared rho>
+    double delay_reduction_; //!<Delay reduction>
+    int mchange_flag_;
+    bool iteration_model_fl_;
+    bool criticality_step_performed_;
+    double gamma_dec_;
+
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
