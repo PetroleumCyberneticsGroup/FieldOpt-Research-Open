@@ -155,9 +155,36 @@ class TrustRegionModel {
      */
     std::tuple<VectorXd, double> solveTrSubproblem();
 
-    int tryToAddPoint(VectorXd new_point, double fvalue);
 
-    void computePolynomialModels();
+     /*!
+    * @brief Try to add new point. Step was not accepted. Smaller effort in including point.
+    * @param new_point Point to be added
+    * @param new_fvalue Function value of corresponding point
+    * @return Tuple with the trial point and the trial decrease in the objective function (fval_current-trial_fval)
+    */
+    int tryToAddPoint(VectorXd new_point, double new_fvalue);
+
+    /*!
+   * brief Add a point to the trust-region model
+   * @param new_point to be added
+   * @param fvalue function value of the corresponding point
+   * @param relative_pivot_threshold Relative pivot threshold
+   * @return Exit flag: 1 if the points was successfully added, or 0 otherwise.
+   */
+    int addPoint(VectorXd new_point, double fvalue, double relative_pivot_threshold);
+
+    /*!
+    * brief Choose pivot polynomial
+    * @param initial_i
+    * @param final_i
+    * @param tol tolerance
+    * @return pivot value
+    */
+    std::tuple<double,bool> choosePivotPolynomial(int initial_i, int final_i, double tol);
+
+
+
+  void computePolynomialModels();
 
     /*!
      * Old evaluateNewFvalues description (incorporate somewhere else):

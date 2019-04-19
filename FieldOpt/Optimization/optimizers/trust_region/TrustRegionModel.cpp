@@ -801,11 +801,148 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   return make_tuple(trial_point, trial_decrease);
 }
 
-int TrustRegionModel::tryToAddPoint(VectorXd new_point, double fvalue) {
-  //TODO: implement this method
-  int exit_flag = 4;
+int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
+  int exit_flag = 0;
+  bool point_added = false;
+  double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+
+  if (!isComplete()) {
+    //!<Add this point>
+    exit_flag = addPoint(new_point, new_fvalue, relative_pivot_threshold);
+    if (exit_flag >0){
+      point_added = true;
+    }
+  }
+
+  if (!point_added) {
+    //!<Save information about this new point, just not to lose>
+    int nc = cached_points_.cols();
+    cached_points_.resize(cached_points_.rows(), nc+1);
+    cached_points_.col(nc) = new_point;
+
+    int nc_f = cached_fvalues_.rows();
+    cached_fvalues_.resize(nc_f+1);
+    cached_fvalues_(nc_f) = new_fvalue;
+
+    //!<Either add a geometry improving point or rebuild model>
+    exit_flag = ensureImprovement();
+
+  } else {
+    exit_flag = 1;
+  }
   return exit_flag;
 }
+
+int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double relative_pivot_threshold) {
+
+  int exit_flag;
+  double pivot_threshold = min(double(1), radius_)*relative_pivot_threshold;
+  int dim = points_abs_.rows();
+  int last_p = points_abs_.cols()-1;
+
+  VectorXd new_point_shifted(dim);
+  VectorXd shift_center(dim);
+  int pivot_value = 0;
+  bool success = false;
+
+  int polynomials_num = pivot_polynomials_.size();
+
+  if (last_p >= 0) {
+    shift_center = points_abs_.col(0);
+    new_point_shifted = new_point - shift_center;
+
+    int nc = points_shifted_.cols();
+    points_shifted_.conservativeResize(points_shifted_.rows(), nc+1);
+    points_shifted_.col(nc) = new_point_shifted;
+  } else {
+    Printer::ext_info("cmg:no_point",
+                      "Tr model had no point. Should this ever happen ?", "addPoint");
+  }
+
+  int next_position = last_p+1;
+  if (next_position == 0) {
+    //!<Should be rebuilding model!>
+    tr_center_ = 0;
+    //pivot_polynomials_ = bandPrioritizingBasis(dim); //TODO: implement a band prioritizing basis
+    exit_flag = 1;
+    Printer::ext_info("cmg:no_point",
+                      "TR model had no point. This should never happen", "addPoint");
+  } else if (next_position < polynomials_num) {
+    int block_beginning =0;
+    int block_end =0;
+    if (next_position <= dim)  {
+      //!<Add to linear block>
+      block_beginning =1;
+      block_end = dim;
+    } else {
+      //!<Add to quadratic block>
+      block_beginning = dim+1;
+      block_end = polynomials_num-1;
+    }
+
+    tie(pivot_value, success) = choosePivotPolynomial(next_position, block_end, pivot_threshold);
+
+    if (success) {
+      //!<Normalize polynomial value>
+      pivot_polynomials_[next_position] = normalizePolynomial(next_position, new_point_shifted);
+
+      //!<Re-orthogonalize>
+      pivot_polynomials_[next_position] = orthogonalizeToOtherPolynomials(next_position, next_position-1);
+
+      //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
+      orthogonalizeBlock(new_point_shifted, next_position, block_beginning, next_position-1);
+
+      exit_flag = 1;
+    } else {
+      exit_flag = 0;
+    }
+  } else {
+    //!<Model is full. Should remove another point to add this one>
+    exit_flag = 0;
+  }
+  if (exit_flag >0) {
+    points_shifted_.col(next_position) = new_point_shifted;
+    fvalues_.resize(fvalues_.cols()+1);
+    fvalues_(next_position) = new_fvalue;
+
+    int nr = (int)points_abs_.rows();
+    int nc = (int)points_abs_.cols();
+    points_abs_.conservativeResize(nr, nc+1);
+    points_abs_.col(next_position) = new_point;
+
+    modeling_polynomials_.clear();
+    pivot_values_.resize(pivot_values_.cols()+1);
+    pivot_values_(next_position) = pivot_value;
+  }
+  return exit_flag;
+}
+
+tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int final_i, double tol) {
+  int last_point = initial_i - 1;
+  auto incumbent_point = points_shifted_.col(initial_i);
+  bool success = false;
+  double pivot_value = 0;
+
+  for (int k=initial_i; k<=final_i; k++) {
+    auto polynomial = orthogonalizeToOtherPolynomials(k, last_point);
+    auto val = evaluatePolynomial(polynomial, incumbent_point);
+    if (abs(val) > tol) {
+      //!<Accept polynomial>
+      success = true;
+
+      //!<Swap polynomials>
+      pivot_polynomials_[k] = pivot_polynomials_[initial_i];
+      pivot_polynomials_[initial_i] = polynomial;
+      pivot_value = val;
+      break;
+    } else {
+      //!<We won't even save the orthogonalization>
+      success = false;
+    }
+  }
+  return make_tuple(pivot_value, success);
+}
+
 
 void TrustRegionModel::computePolynomialModels() {
 
