@@ -917,6 +917,85 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
   return exit_flag;
 }
 
+
+std::tuple<bool,int> TrustRegionModel::exchangePoint(
+    VectorXd new_point,
+    double new_fvalue,
+    double relative_pivot_threshold) {
+
+  bool succeeded = false;
+  int pt_i = 0;
+  int pivot_threshold = min(double(1), radius_)*relative_pivot_threshold;
+  int dim = points_abs_.rows();
+  int last_p = points_abs_.cols()-1;
+  int center_i = tr_center_;
+
+  if (last_p >= 1) {
+    auto shift_center = points_abs_.col(0);
+    auto new_point_shifted = new_point - shift_center;
+
+    int block_beginning = 0;
+    int block_end = 0;
+    if (last_p <= dim) {
+      block_beginning = 1;
+      block_end = min(dim, last_p);
+    } else {
+      block_beginning = dim+1;
+      block_end = last_p;
+    }
+
+    double max_val = 0;
+    int max_poly_i = 0;
+    for (int poly_i = block_end; poly_i >= block_beginning; poly_i--) {
+      if (poly_i != center_i) {
+        double val = pivot_values_(poly_i)*evaluatePolynomial(pivot_polynomials_[poly_i], new_point_shifted);
+        if (abs(max_val) < abs(val)) {
+          max_val = val;
+          max_poly_i = poly_i;
+        }
+      }
+    }
+
+    double new_pivot_val = max_val;
+    if (abs(new_pivot_val) > pivot_threshold) {
+      points_shifted_.col(max_poly_i) = new_point_shifted;
+
+      //!<Normalize polynomial value>
+      pivot_polynomials_[max_poly_i] = normalizePolynomial(max_poly_i, new_point_shifted);
+
+      //!<Re-orthogonalize>
+      pivot_polynomials_[max_poly_i] = orthogonalizeToOtherPolynomials(max_poly_i, last_p);
+
+      //!<Orthogonalize polynomials on present block (until end)
+      orthogonalizeBlock(new_point_shifted, max_poly_i, block_beginning, last_p);
+
+      //!<Update model>
+      int nc_cp = cached_points_.cols();
+      cached_points_.conservativeResize(cached_points_.rows(), nc_cp+1);
+      cached_points_.col(nc_cp) = points_abs_.col(max_poly_i);
+
+      int nc_fv = cached_fvalues_.cols();
+      cached_fvalues_.resize(nc_fv+1);
+      cached_fvalues_(nc_fv) = fvalues_(max_poly_i);
+
+      points_abs_.col(max_poly_i) = new_point;
+      fvalues_(max_poly_i) = new_fvalue;
+      pivot_values_(max_poly_i) = new_pivot_val;
+      modeling_polynomials_.clear();
+      succeeded = true;
+      pt_i = max_poly_i;
+    } else {
+      succeeded = false;
+      pt_i = 0;
+    }
+  } else {
+    succeeded = false;
+    pt_i = 0;
+    Printer::ext_info("cmg:runtime", "Optimization", "Error here");
+  }
+  return make_tuple(succeeded, pt_i);
+}
+
 tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int final_i, double tol) {
   int last_point = initial_i - 1;
   auto incumbent_point = points_shifted_.col(initial_i);

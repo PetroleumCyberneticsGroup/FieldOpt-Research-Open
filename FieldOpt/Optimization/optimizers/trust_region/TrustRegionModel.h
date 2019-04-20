@@ -173,6 +173,17 @@ class TrustRegionModel {
    */
     int addPoint(VectorXd new_point, double fvalue, double relative_pivot_threshold);
 
+   /*!
+   * @brief Exchange a point from the trust-region model with a new one.
+   * @param new_point Point to be exchanged.
+   * @param fvalue Function value of the corresponding point.
+   * @param relative_pivot_threshold Relative pivot threshold
+   * @return tuple<bool,int> where the boolean indicates whether the exchange was sucessful,
+    * and the integer is the point index.
+   */
+
+   std::tuple<bool,int> exchangePoint(VectorXd new_point, double new_fvalue, double relative_pivot_threshold);
+
     /*!
     * brief Choose pivot polynomial
     * @param initial_i
