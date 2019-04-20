@@ -217,18 +217,17 @@ double TrustRegionModel::checkInterpolation() {
   // Remove shift center from all points
   int points_num = (int)points_abs_.cols();
   MatrixXd hh = points_abs_;
-
-  for (int ii=points_num; ii==0; ii--) {
+  for (int ii=points_num-1; ii>=0; ii--) {
     hh.col(ii) = hh.col(ii) - points_abs_.col(tr_center_);
   }
 
   double cval, cdiff, conda;
 
   int max_diff = -1;
-  for (int kk = 0; kk < dim_; kk++) {
+  for (int kk = 0; kk < fvalues_.rows(); kk++) {
     for (int ii = 0; ii < points_num; ii++) {
 
-      cval = evaluatePolynomial(pivot_polynomials_[kk], hh.col(ii));
+      cval = evaluatePolynomial(modeling_polynomials_[kk], hh.col(ii));
       cdiff = std::abs(fvalues_(ii) - cval);
 
       if (cdiff > max_diff) {
