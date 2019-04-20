@@ -762,9 +762,50 @@ bool TrustRegionModel::isLambdaPoised() {
 
 int TrustRegionModel::changeTrCenter(
     VectorXd new_point,
-    double fvalue) {
+    double new_fvalue) {
 
-  int exit_flag = 4;
+  bool point_added = false;
+  bool point_exchanged = false;
+  double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  int exit_flag = 0;
+
+  if (!isComplete()) {
+    //!<Add this point>
+    exit_flag = addPoint(new_point, new_fvalue, relative_pivot_threshold);
+    if(exit_flag>0){
+      point_added = true;
+    }
+  }
+  if (point_added) {
+    //!<Function add_point adds this as the last. Now we have to set as TR center>
+    tr_center_ = points_abs_.cols()-1; //!<Last among the points>
+    exit_flag = 1;
+  } else {
+    point_exchanged = false;
+    int pt_i = 0;
+//    tie(point_exchanged, pt_i) = exchangePoint(new_point,new_fvalues, relative_pivot_threshold); // TODO
+    if (point_exchanged) {
+      tr_center_ = pt_i;
+      point_exchanged = true;
+      exit_flag = 2;
+    } else {
+      //!<AddPoint and exchangePoint failed,
+      //!< but we still need to add this new point
+      //!< as TR center. Model needs rebuilding>
+      int nc = points_abs_.cols();
+      int nr = points_abs_.rows();
+      points_abs_.conservativeResize(nr, nc+1);
+      points_abs_.col(nc) = new_point;
+
+      int nc_f = fvalues_.cols();
+      fvalues_.resize(nc_f+1);
+      fvalues_(nc_f) = new_fvalue;
+      tr_center_ = nc;  //!<Last point>
+      bool model_changed = rebuildModel();
+      exit_flag = 4;
+    }
+  }
+
   return exit_flag;
 }
 

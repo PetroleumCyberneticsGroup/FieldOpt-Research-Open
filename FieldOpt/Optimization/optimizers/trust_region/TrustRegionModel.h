@@ -164,8 +164,8 @@ class TrustRegionModel {
     */
     int tryToAddPoint(VectorXd new_point, double new_fvalue);
 
-    /*!
-   * brief Add a point to the trust-region model
+   /*!
+   * @brief Add a point to the trust-region model
    * @param new_point to be added
    * @param fvalue function value of the corresponding point
    * @param relative_pivot_threshold Relative pivot threshold
