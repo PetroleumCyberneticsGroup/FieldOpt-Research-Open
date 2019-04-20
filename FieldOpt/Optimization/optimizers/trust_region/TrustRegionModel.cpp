@@ -217,7 +217,7 @@ double TrustRegionModel::checkInterpolation() {
   // Remove shift center from all points
   int points_num = (int)points_abs_.cols();
   MatrixXd hh = points_abs_;
-  for (int ii=points_num-1; ii >= 0 && ii < points_num; --ii) {
+  for (int ii=points_num-1; ii >= 0; ii--) {
     hh.col(ii) = hh.col(ii) - points_abs_.col(tr_center_);
   }
 
