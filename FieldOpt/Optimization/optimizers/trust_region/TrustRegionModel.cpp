@@ -764,6 +764,7 @@ int TrustRegionModel::changeTrCenter(
     VectorXd new_point,
     double new_fvalue) {
 
+  int pt_i = 0;
   bool point_added = false;
   bool point_exchanged = false;
   double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
@@ -781,12 +782,9 @@ int TrustRegionModel::changeTrCenter(
     tr_center_ = points_abs_.cols()-1; //!<Last among the points>
     exit_flag = 1;
   } else {
-    point_exchanged = false;
-    int pt_i = 0;
-//    tie(point_exchanged, pt_i) = exchangePoint(new_point,new_fvalues, relative_pivot_threshold); // TODO
+    tie(point_exchanged, pt_i) = exchangePoint(new_point, new_fvalue, relative_pivot_threshold);
     if (point_exchanged) {
       tr_center_ = pt_i;
-      point_exchanged = true;
       exit_flag = 2;
     } else {
       //!<AddPoint and exchangePoint failed,
