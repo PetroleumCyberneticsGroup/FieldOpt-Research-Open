@@ -85,6 +85,11 @@ class TrustRegionOptimization : public Optimizer {
     bool criticality_step_performed_;
     double gamma_dec_;
 
+    VectorXd trial_point_;
+    VectorXd trial_step_;
+    double fval_trial_;
+    double predicted_red_;
+
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;
