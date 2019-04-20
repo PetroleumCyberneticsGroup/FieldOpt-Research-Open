@@ -820,7 +820,7 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
     cached_points_.resize(cached_points_.rows(), nc+1);
     cached_points_.col(nc) = new_point;
 
-    int nc_f = cached_fvalues_.rows();
+    int nc_f = cached_fvalues_.cols();
     cached_fvalues_.resize(nc_f+1);
     cached_fvalues_(nc_f) = new_fvalue;
 
