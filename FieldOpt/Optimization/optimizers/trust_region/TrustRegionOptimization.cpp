@@ -168,6 +168,7 @@ void TrustRegionOptimization::iterate() {
         double gamma_1 = gamma_dec_;
         double gamma_2 = settings_->parameters().tr_gamma_inc;
         double radius_max = settings_->parameters().tr_radius_max;
+        double err_model = 0;
 
         auto fval_current = tr_model_->getCurrentFval();
         auto x_current = tr_model_->getCurrentPoint();
@@ -176,12 +177,13 @@ void TrustRegionOptimization::iterate() {
         || (iteration_ == iter_max)) {
           return; //end of the algorithm
         } else {
-          if (true || tr_model_->isLambdaPoised()) //<Move among points that are part of the model>
+          if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
             tr_model_->moveToBestPoint();
-          tr_model_->computePolynomialModels();
-          fval_current = tr_model_->getCurrentFval();
-          x_current = tr_model_->getCurrentPoint();
-          auto err_model = tr_model_->checkInterpolation();
+            tr_model_->computePolynomialModels();
+            fval_current = tr_model_->getCurrentFval();
+            x_current = tr_model_->getCurrentPoint();
+            err_model = tr_model_->checkInterpolation();
+          }
 
           //!<Criticality step -- if we are possibly close to the optimum>
           bool criticality_step_performed = false;
