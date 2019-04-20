@@ -217,28 +217,27 @@ double TrustRegionModel::checkInterpolation() {
   // Remove shift center from all points
   int points_num = (int)points_abs_.cols();
   MatrixXd hh = points_abs_;
-  for (int ii=points_num-1; ii>=0; ii--) {
+  for (int ii=points_num-1; ii >= 0 && ii < points_num; --ii) {
     hh.col(ii) = hh.col(ii) - points_abs_.col(tr_center_);
   }
 
-  double cval, cdiff, conda;
+  double cval, cdiff, cA;
 
-  int max_diff = -1;
+  auto p = getModelingPolynomials();
+
+  double max_diff = -1.0;
   for (int kk = 0; kk < fvalues_.rows(); kk++) {
     for (int ii = 0; ii < points_num; ii++) {
 
-      cval = evaluatePolynomial(modeling_polynomials_[kk], hh.col(ii));
+      cval = evaluatePolynomial(p[kk], hh.col(ii));
       cdiff = std::abs(fvalues_(ii) - cval);
-
       if (cdiff > max_diff) {
         max_diff = cdiff;
       }
 
       // This should be written using only Eigen methods...
-      conda = std::max(
-          tol1 * fvalues_.array().abs().maxCoeff(), tol2);
-
-      if (std::abs(cdiff) > conda) {
+      cA = std::max(tol1 * fvalues_.array().abs().maxCoeff(), tol2);
+      if (std::abs(cdiff) > cA) {
         Printer::ext_warn("cmg:tr_interpolation_error",
                           "Interpolation error");
 
