@@ -1402,16 +1402,12 @@ int TrustRegionModel::findBestPoint() {
 std::vector<Polynomial>
 TrustRegionModel::computeQuadraticMNPolynomials() {
 
-  int dim = (int)points_abs_.rows();
-  int points_num = (int)points_abs_.cols();
-  int functions_num = (int)fvalues_.rows();
-  std::vector<Polynomial> polynomials(functions_num);
-
-  MatrixXd points_shifted = MatrixXd::Zero(dim, points_num-1);
-  RowVectorXd fvalues_diff = RowVectorXd::Zero(functions_num, points_num-1);
+  std::vector<Polynomial> polynomials(getNumFvals());
+  MatrixXd points_shifted = MatrixXd::Zero(getXDim(), getNumPts()-1);
+  RowVectorXd fvalues_diff = RowVectorXd::Zero(getNumFvals(), getNumPts()-1);
 
   int m2 = 0;
-  for (int m = tr_center_; (m<points_num) && (m != tr_center_); m++) {
+  for (int m = tr_center_; (m<getNumPts()) && (m != tr_center_); m++) {
     points_shifted.col(m2) = points_abs_.col(m) - points_abs_.col(tr_center_);
     fvalues_diff(m2) = fvalues_(m) - fvalues_(tr_center_);
     m2++;
@@ -1436,10 +1432,10 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   //TODO: raise a warning if the system is badly conditioned
   // using the resulting conditioning number (tol=1e4*eps(1))
 
-  for (int n=0; n<functions_num; n++) {
-    VectorXd g = VectorXd::Zero(dim);
-    MatrixXd H = MatrixXd::Zero(dim,dim);
-    for (int m=0; m<points_num-1; m++) {
+  for (int n=0; n<getNumFvals(); n++) {
+    VectorXd g = VectorXd::Zero(getXDim());
+    MatrixXd H = MatrixXd::Zero(getXDim(),getXDim());
+    for (int m=0; m<getNumPts()-1; m++) {
       g += mult_mn(m)*points_shifted.col(m);
       H += mult_mn(m)*(points_shifted.col(m)*points_shifted.col(m).transpose());
     }
