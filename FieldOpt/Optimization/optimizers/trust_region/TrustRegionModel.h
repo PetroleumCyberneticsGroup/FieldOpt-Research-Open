@@ -41,6 +41,12 @@ struct Polynomial {
     VectorXd coefficients;
 };
 
+struct ModelMatrix {
+  double c = 0.0;
+  VectorXd g;
+  MatrixXd H;
+};
+
 namespace Optimization {
 namespace Optimizers {
 
@@ -111,7 +117,7 @@ class TrustRegionModel {
     */
     VectorXd measureCriticality();
 
-    void getModelMatrices();
+    ModelMatrix getModelMatrices(int m);
 
     double checkInterpolation();
 

@@ -103,6 +103,27 @@ void TrustRegionModel::moveToBestPoint() {
 // Here should rebuild polynomials!!!
 }
 
+ModelMatrix TrustRegionModel::getModelMatrices(int m) {
+
+    Polynomial p = modeling_polynomials_[m];
+
+    double c;
+    VectorXd g(p.dimension);
+    MatrixXd H(p.dimension, p.dimension);
+
+    tie(c, g, H) = coefficientsToMatrices(p.dimension,
+                                          p.coefficients);
+
+    ModelMatrix mMatrix;
+    mMatrix.c = c;
+    mMatrix.g.resize(g.rows());
+    mMatrix.g = g;
+
+    mMatrix.H.resize(H.rows(),H.cols());
+    mMatrix.H = H;
+
+    return mMatrix;
+}
 
 void TrustRegionModel::criticalityStep() {
 
