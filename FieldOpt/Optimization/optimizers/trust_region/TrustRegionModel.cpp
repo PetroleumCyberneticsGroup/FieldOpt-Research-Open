@@ -742,7 +742,7 @@ bool TrustRegionModel::isLambdaPoised() {
   double pivot_threshold = settings_->parameters().tr_pivot_threshold;
   bool result = false;
 
-  if (settings_->parameters().tr_basis.compare("dummy")) {
+  if (!settings_->parameters().tr_basis.compare("dummy")) {
     result = true;
   } else if(points_num >= dim+1) {
 

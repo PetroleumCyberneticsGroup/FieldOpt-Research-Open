@@ -192,7 +192,7 @@ void TrustRegionOptimization::iterate() {
           //!<Criticality step -- if we are possibly close to the optimum>
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
-          if (model_criticality.squaredNorm() <= eps_c) {
+          if (model_criticality.norm() <= eps_c) {
             tr_model_->criticalityStep();
             criticality_step_performed_ = true;
             if (model_criticality.squaredNorm() < tol_f) {
