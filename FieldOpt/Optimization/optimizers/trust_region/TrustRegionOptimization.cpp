@@ -467,8 +467,6 @@ void TrustRegionOptimization::computeInitialPoints() {
             tr_model_->addInitializationCase(second_case);
             cout << "Adding 2nd point to Case List" << endl;
 
-            n_initial_points_++;
-
         } else {
             //TODO: implement other sampling method such as Uniform.
         }
