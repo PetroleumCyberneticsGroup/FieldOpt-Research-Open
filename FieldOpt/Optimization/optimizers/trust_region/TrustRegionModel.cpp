@@ -1773,19 +1773,19 @@ TrustRegionModel::pointNew(Polynomial polynomial,
 }
 
 tuple<Eigen::VectorXd, double, int>
-TrustRegionModel::minimizeTr(Polynomial polynomial,
+TrustRegionModel::minimizeTr(Polynomial p,
                              Eigen::VectorXd x_tr_center,
                              double radius,
                              Eigen::VectorXd bl,
                              Eigen::VectorXd bu) {
 
-    bool dbg = false;
-
     Eigen::VectorXd x(dim_, 1);
     Eigen::VectorXd bl_tr(dim_, 1), bu_tr(dim_, 1);
     Eigen::VectorXd bl_mod(dim_, 1), bu_mod(dim_, 1);
 
+    Eigen::VectorXd x0(dim_, 1);
     double fval;
+
     double tol_norm, tol_arg, tol_tr, tol_eps;
     int exitflag = -1;
 
@@ -1797,14 +1797,6 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
                           "TrustRegionModel");
     }
     tol_tr = 10*std::numeric_limits<double>::epsilon();
-
-    if (dbg) { // Can be deleted
-        cout << "Debug input polyn/x_tr_center/radius" << endl;
-        auto pc = polynomial.coefficients;
-        cout << "polynomial.coefficients = \n" << pc << endl;
-        cout << "x_tr_center = \n" << x_tr_center << endl;
-        cout << "radius = \n" << radius << endl ;
-    }
 
     // TR bounds
     bl_tr = x_tr_center.array() - radius;
@@ -1826,28 +1818,13 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
         }
     }
 
-    if (dbg) { // Can be deleted
-        cout << "Debug bounds_mod/tol_tr" << endl;
-        cout << "bl_mod = \n" << bl_mod << endl;
-        cout << "bu_mod = \n" << bu_mod << endl;
-        cout << "tol_tr = \n" << tol_tr << endl;
-    }
+    x0 = x_tr_center;
 
     double c;
-    Eigen::VectorXd g(polynomial.dimension);
-    Eigen::MatrixXd H(polynomial.dimension,
-                      polynomial.dimension);
-
-    tie(c, g, H) =
-            coefficientsToMatrices(polynomial.dimension,
-                                   polynomial.coefficients);
-
-    if (dbg) { // Can be deleted
-        cout << "Debug polynomial matrices c, g, H:" << endl;
-        cout << "c = \n" << c << endl ;
-        cout << "g = \n" << g << endl ;
-        cout << "H = \n" << H << endl;
-    }
+    Eigen::VectorXd g(p.dimension);
+    Eigen::MatrixXd H(p.dimension, p.dimension);
+    tie(c, g, H) = coefficientsToMatrices(p.dimension,
+                                          p.coefficients);
 
     cout << "Minimize TR using SNOPT";
 
@@ -1862,7 +1839,7 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
     prob.setNunNnlConst(0);
 
     // Set init point, bounds on vars
-    prob.setXInit(x_tr_center);
+    prob.setXInit(x0);
     prob.setXUb(bu_mod);
     prob.setXLb(bl_mod);
 
@@ -1895,13 +1872,6 @@ TrustRegionModel::minimizeTr(Polynomial polynomial,
 
     if (prob.getSNOPTExitCode() == 1) {
         exitflag = 1;
-    }
-
-    if (false) {
-        cout << "Debug SNOPT xsol/fsol/exitflag:";
-        cout << "xsol = \n" << prob.getXSol() << endl;
-        cout << "fsol = \n" << prob.getFSol() << endl;
-        cout << "exit = \n" << exitflag << endl ;
     }
 
     return make_tuple(x, fval, exitflag);
