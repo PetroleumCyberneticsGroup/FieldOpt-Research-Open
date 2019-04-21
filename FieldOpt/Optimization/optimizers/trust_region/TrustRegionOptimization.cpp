@@ -383,8 +383,8 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           tr_model_->submitTempReplCases();
           tr_model_->setAreReplPointsComputed(true);
           return;
-        } else {
-
+        }
+      } else {
           VectorXd x_current = tr_model_->getCurrentPoint();
           double fval_current = tr_model_->getCurrentFval();
           double eta_1 = settings_->parameters().tr_eta_1;
@@ -417,7 +417,6 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           sum_rho_sqr_ += pow(rho_, 2);
 
           return;
-        }
       }
     }
   }
