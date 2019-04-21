@@ -156,19 +156,12 @@ void TrustRegionModel::criticalityStep() {
     }
 
     // Get gradient (g) at TR center
-    Polynomial center_polynomial = modeling_polynomials_[0];
     // Note: assuming center polynomial is at position "0"
-
-    double c;
-    VectorXd g(center_polynomial.dimension);
-    MatrixXd H(center_polynomial.dimension, center_polynomial.dimension);
-
-    std::tie(c, g, H) = coefficientsToMatrices(
-            center_polynomial.dimension, center_polynomial.coefficients);
+    auto mMatrix = getModelMatrices(0);
 
     // Project gradient
     auto x_center = points_abs_.col(tr_center_);
-    auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - g)) - x_center;
+    auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - mMatrix.g)) - x_center;
     auto crit_measure = mu * g_proj;
 
     while (radius_ > crit_measure.minCoeff()) {
