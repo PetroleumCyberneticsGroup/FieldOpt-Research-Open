@@ -301,7 +301,7 @@ bool TrustRegionModel::rebuildModel() {
   double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   //!<All points we know>
-  all_points_.resize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
+  all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
     all_points_ = points_abs_;
   } else {
@@ -310,7 +310,7 @@ bool TrustRegionModel::rebuildModel() {
   }
 
   //!<All function values we know>
-  all_fvalues_.resize(fvalues_.size() + cached_fvalues_.size());
+  all_fvalues_.conservativeResize(fvalues_.cols() + cached_fvalues_.cols());
 
   if (cached_fvalues_.size() == 0) {
     all_fvalues_ = fvalues_;
@@ -329,8 +329,8 @@ bool TrustRegionModel::rebuildModel() {
     all_fvalues_(0) = center_fvalue;
   }
   //!<Calculate distances from tr center>
-  points_shifted_.resize(dim, n_points);
-  distances_.resize(n_points);
+  points_shifted_.conservativeResize(dim, n_points);
+  distances_.conservativeResize(n_points);
   points_shifted_.setZero(dim, n_points);
   distances_.setZero(n_points);
 
@@ -445,7 +445,9 @@ bool TrustRegionModel::rebuildModel() {
 
       //!<Normalize polynomial value>
       auto point = points_shifted_.col(pt_next);
-      pivot_polynomials_[poly_i] = normalizePolynomial(poly_i, point);
+      auto poly_normalized = normalizePolynomial(poly_i, point);
+
+      pivot_polynomials_[poly_i] = poly_normalized;
 
       //!<Re-orthogonalize (just to make sure it still assumes 0 in previous points).
       //!< Unnecessary in infinite precision>
@@ -474,7 +476,7 @@ bool TrustRegionModel::rebuildModel() {
     points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
     fvalues_ = all_fvalues_.head(last_pt_included + 1);
 
-    auto cache_size = std::fmin(n_points - last_pt_included - 1, 3 * pow(dim, 2));
+    double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
     modeling_polynomials_.clear();
 
     //!<Points not included>
@@ -482,14 +484,22 @@ bool TrustRegionModel::rebuildModel() {
       cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
       cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
     } else {
-      cached_points_.resize(0, 0);
-      cached_fvalues_.resize(0);
+      cached_points_.conservativeResize(0, 0);
+      cached_fvalues_.conservativeResize(0);
     }
+
+//    cout << "cache_size:" << cache_size << endl;
+//
+//    cout << "cached_points_" << endl;
+//    cout << cached_points_ << endl;
+//
+//    cout << "cached_fvalues_" << endl;
+//    cout <<  cached_fvalues_ << endl;
   } // end for-loop: (iter < polynomials_num)
 
   //!<Clean auxiliary objects>
-  all_points_.resize(0, 0);
-  all_fvalues_.resize(0);
+  all_points_.conservativeResize(0, 0);
+  all_fvalues_.conservativeResize(0);
 
   return last_pt_included < n_points; //!<model has changed>
 }
@@ -537,11 +547,10 @@ bool TrustRegionModel::improveModelNfp() {
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bl_shifted+shift_center);
-    shifted_x = shifted_x.cwiseMax(bu_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
     return shifted_x;
   };
-
 
   //!<Test if the model is already FL but old
   //!<Distance measured in inf norm>
@@ -782,13 +791,21 @@ int TrustRegionModel::changeTrCenter(
   double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
   int exit_flag = 0;
 
+//  Eigen::IOFormat frmt(3, 0, " ", "\n", "             [", "]");
+//  cout << "[          ] points_abs_" << endl;
+//  cout << points_abs_.format(frmt) << endl;
+
   if (!isComplete()) {
     //!<Add this point>
     exit_flag = addPoint(new_point, new_fvalue, relative_pivot_threshold);
-    if(exit_flag>0){
+    if(exit_flag > 0){
       point_added = true;
     }
   }
+
+//  cout << "[          ] points_abs_" << endl;
+//  cout << points_abs_.format(frmt) << endl;
+
   if (point_added) {
     //!<Function add_point adds this as the last. Now we have to set as TR center>
     tr_center_ = points_abs_.cols()-1; //!<Last among the points>
@@ -808,7 +825,7 @@ int TrustRegionModel::changeTrCenter(
       points_abs_.col(nc) = new_point;
 
       int nc_f = fvalues_.cols();
-      fvalues_.resize(nc_f+1);
+      fvalues_.conservativeResize(nc_f+1);
       fvalues_(nc_f) = new_fvalue;
       tr_center_ = nc;  //!<Last point>
       bool model_changed = rebuildModel();
@@ -828,7 +845,6 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   Eigen::VectorXd trial_point(getXDim(), 1);
   double trial_fval;
   int exit_flag;
-
 
   std::tie(trial_point, trial_fval, exit_flag) = minimizeTr(obj_pol, x_tr_center, radius,lb_, ub_);
   double current_fval = fvalues_(tr_center_);
@@ -860,6 +876,7 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
   if (!isComplete()) {
     //!<Add this point>
     exit_flag = addPoint(new_point, new_fvalue, relative_pivot_threshold);
+
     if (exit_flag >0){
       point_added = true;
     }
@@ -868,11 +885,11 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
   if (!point_added) {
     //!<Save information about this new point, just not to lose>
     int nc = cached_points_.cols();
-    cached_points_.resize(cached_points_.rows(), nc+1);
+    cached_points_.conservativeResize(max(cached_points_.rows(), points_abs_.rows()), nc+1);
     cached_points_.col(nc) = new_point;
 
     int nc_f = cached_fvalues_.cols();
-    cached_fvalues_.resize(nc_f+1);
+    cached_fvalues_.conservativeResize(nc_f+1);
     cached_fvalues_(nc_f) = new_fvalue;
 
     //!<Either add a geometry improving point or rebuild model>
@@ -893,7 +910,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
   VectorXd new_point_shifted(dim);
   VectorXd shift_center(dim);
-  int pivot_value = 0;
+  double pivot_value = 0;
   bool success = false;
 
   int polynomials_num = pivot_polynomials_.size();
@@ -905,6 +922,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     int nc = points_shifted_.cols();
     points_shifted_.conservativeResize(points_shifted_.rows(), nc+1);
     points_shifted_.col(nc) = new_point_shifted;
+
   } else {
     Printer::ext_info("cmg:no_point",
                       "Tr model had no point. Should this ever happen ?", "addPoint");
@@ -951,10 +969,11 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     //!<Model is full. Should remove another point to add this one>
     exit_flag = 0;
   }
-  if (exit_flag >0) {
+  if (exit_flag > 0) {
     points_shifted_.col(next_position) = new_point_shifted;
-    fvalues_.resize(fvalues_.cols()+1);
+    fvalues_.conservativeResize(fvalues_.cols()+1);
     fvalues_(next_position) = new_fvalue;
+
 
     int nr = (int)points_abs_.rows();
     int nc = (int)points_abs_.cols();
@@ -962,7 +981,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     points_abs_.col(next_position) = new_point;
 
     modeling_polynomials_.clear();
-    pivot_values_.resize(pivot_values_.cols()+1);
+    pivot_values_.conservativeResize(pivot_values_.cols()+1);
     pivot_values_(next_position) = pivot_value;
   }
   return exit_flag;
@@ -1026,7 +1045,7 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
       cached_points_.col(nc_cp) = points_abs_.col(max_poly_i);
 
       int nc_fv = cached_fvalues_.cols();
-      cached_fvalues_.resize(nc_fv+1);
+      cached_fvalues_.conservativeResize(nc_fv+1);
       cached_fvalues_(nc_fv) = fvalues_(max_poly_i);
 
       points_abs_.col(max_poly_i) = new_point;
@@ -1056,6 +1075,7 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
   for (int k=initial_i; k<=final_i; k++) {
     auto polynomial = orthogonalizeToOtherPolynomials(k, last_point);
     auto val = evaluatePolynomial(polynomial, incumbent_point);
+
     if (abs(val) > tol) {
       //!<Accept polynomial>
       success = true;
@@ -1421,7 +1441,7 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   RowVectorXd fvalues_diff = RowVectorXd::Zero(getNumFvals(), getNumPts()-1);
 
   int m2 = 0;
-  for (int m = tr_center_; (m<getNumPts()) && (m != tr_center_); m++) {
+  for (int m = 0; (m<getNumPts()) && (m != tr_center_); m++) {
     points_shifted.col(m2) = points_abs_.col(m) - points_abs_.col(tr_center_);
     fvalues_diff(m2) = fvalues_(m) - fvalues_(tr_center_);
     m2++;
@@ -1441,7 +1461,7 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   PartialPivLU<MatrixXd> lu(M);
 
   lu.compute(M); //!<Update LU matrix>
-  auto mult_mn = lu.solve(fvalues_diff.transpose());
+  MatrixXd mult_mn = lu.solve(fvalues_diff.transpose());
 
   //TODO: raise a warning if the system is badly conditioned
   // using the resulting conditioning number (tol=1e4*eps(1))
@@ -1671,7 +1691,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
       //!<Update model and recompute polynomials>
       cached_points_ = points_abs_.leftCols(points_abs_.rows());
-      cached_fvalues_ = fvalues_.head(fvalues_.size());
+      cached_fvalues_ = fvalues_.head(fvalues_.cols());
 
       int nr = (int)points_abs_.rows();
       int nc = (int)points_abs_.cols();
@@ -1701,14 +1721,14 @@ TrustRegionModel::pointNew(Polynomial polynomial,
                            Eigen::VectorXd bu,
                            double pivot_threshold) {
 
-    cout << "Find new pt -> Calling minimize_tr() twice" << endl;
+//    cout << "Find new pt -> Calling minimize_tr() twice" << endl;
 
     Eigen::VectorXd new_point_min(getXDim(), 1);
     Eigen::VectorXd new_point_max(getXDim(), 1);
     Eigen::MatrixXd new_points(getXDim(), 2);
 
     double pivot_min, pivot_max;
-    Eigen::VectorXd new_pivot_values(new_points.cols(), 1);
+    Eigen::RowVectorXd new_pivot_values(new_points.cols());
 
     int exitflag_min, exitflag_max;
     bool point_found;
@@ -1744,7 +1764,7 @@ TrustRegionModel::pointNew(Polynomial polynomial,
             new_points.resize(dim_,1);
             new_points.col(0) = new_point_min;
 
-            new_pivot_values.resize(new_points.cols(), 1);
+            new_pivot_values.conservativeResize(new_points.cols());
             new_pivot_values << pivot_min;
         }
         point_found = true;
@@ -1754,20 +1774,25 @@ TrustRegionModel::pointNew(Polynomial polynomial,
         new_points.resize(dim_,1);
         new_points.col(0) = new_point_max;
 
-        new_pivot_values.resize(new_points.cols(), 1);
+        new_pivot_values.conservativeResize(new_points.cols());
         new_pivot_values << pivot_max;
         point_found = true;
 
     } else {
         point_found = false;
-        new_points.resize(dim_, 0);
-
-        new_pivot_values.resize(new_points.cols(), 1);
+        new_points.conservativeResize(dim_, 0);
+        new_pivot_values.conservativeResize(max((int) new_points.cols(), 1));
         new_pivot_values << 0;
+
+//        cout << "new_points" << endl;
+//        cout << new_points <<endl;
+//
+//        cout << "new_pivot_values" << endl;
+//        cout << new_pivot_values << endl;
     }
 
-    cout << "Found " + to_string(new_points.cols()) +
-            " new pts/pivot-pts" << endl;
+//    cout << "Found " + to_string(new_points.cols()) +
+//            " new pts/pivot-pts" << endl;
 
     return make_tuple(new_points, new_pivot_values, point_found);
 }
@@ -1792,9 +1817,9 @@ TrustRegionModel::minimizeTr(Polynomial p,
     // TR tol
     // CG: tol_arg = max(1, norm(x_tr_center, inf));
     if (x_tr_center.lpNorm<Infinity>() > 1.0) {
-        Printer::ext_warn("X > 1 in EPS(X).",
-                          "minimizeTr",
-                          "TrustRegionModel");
+//        Printer::ext_warn("X > 1 in EPS(X).",
+//                          "minimizeTr",
+//                          "TrustRegionModel");
     }
     tol_tr = 10*std::numeric_limits<double>::epsilon();
 
@@ -1826,7 +1851,7 @@ TrustRegionModel::minimizeTr(Polynomial p,
     tie(c, g, H) = coefficientsToMatrices(p.dimension,
                                           p.coefficients);
 
-    cout << "Minimize TR using SNOPT";
+//    cout << "Minimize TR using SNOPT";
 
     // Set prob name (incl. spec) to be solved
     Optimizer::EmbeddedProblem prob;
