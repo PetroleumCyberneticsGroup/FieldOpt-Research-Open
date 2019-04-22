@@ -80,10 +80,10 @@ void TrustRegionOptimization::iterate() {
 
         if (!tr_model_->areInitPointsComputed()
             && !tr_model_->isInitialized()) {
-            cout << "init_cases -> case_handler_ (return)" << endl;
+//            cout << "init_cases -> case_handler_ (return)" << endl;
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
-            cout << "# of cases in case_handler: " << init_cases.size() << endl;
+//            cout << "# of cases in case_handler: " << init_cases.size() << endl;
             return;
         }
 
@@ -91,7 +91,7 @@ void TrustRegionOptimization::iterate() {
             && !tr_model_->areImprovementPointsComputed()
             && !tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
-            cout << "Initializing TRModel" << endl;
+//            cout << "Initializing TRModel" << endl;
 
             bool is_model_changed = tr_model_->rebuildModel();
             tr_model_->setModelChanged(is_model_changed);
@@ -99,7 +99,7 @@ void TrustRegionOptimization::iterate() {
             tr_model_->computePolynomialModels();
 
             if (tr_model_->hasOnlyOnePoint()) {
-                cout << "Improve TRModel" << endl;
+//                cout << "Improve TRModel" << endl;
 
                 int exit_flag = tr_model_->ensureImprovement();
                 auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
@@ -108,18 +108,18 @@ void TrustRegionOptimization::iterate() {
 
                 if (tr_model_->isImprovementNeeded()
                     && !improvement_cases.size() == 0) {
-                    cout << "impr_cases -> case_handler_ (return)" << endl;
+//                    cout << "impr_cases -> case_handler_ (return)" << endl;
                     case_handler_->AddNewCases(improvement_cases);
                     return;
                 }
 
                 if (tr_model_->isReplacementNeeded() && !replacement_cases.size() ==0) {
-                    cout << "repl_cases -> case_handler_ (return)" << endl;
+//                    cout << "repl_cases -> case_handler_ (return)" << endl;
                     case_handler_->AddNewCases(replacement_cases);
                     return;
                 }
             } else {
-                cout << "Initialized TRModel [1]" << endl;
+//                cout << "Initialized TRModel [1]" << endl;
                 tr_model_->setIsInitialized(true);
             }
         } // end-if: Initializing TRModel
@@ -129,12 +129,12 @@ void TrustRegionOptimization::iterate() {
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-          cout << "Continue model improvement process (nfp model)" << endl;
+//          cout << "Continue model improvement process (nfp model)" << endl;
           int exit_flag = tr_model_->ensureImprovement();
 
           if (!tr_model_->isImprovementNeeded()) {
-              cout << "Improvement process successful (nfp model)" << endl;
-              cout << "Initialized TRModel [2]" << endl;
+//              cout << "Improvement process successful (nfp model)" << endl;
+//              cout << "Initialized TRModel [2]" << endl;
               tr_model_->setIsInitialized(true);
           }
         }  // end-if: finish model improvement process
@@ -144,12 +144,12 @@ void TrustRegionOptimization::iterate() {
             && tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-          cout << "Continue model improvement process (replacement of points)" << endl;
+//          cout << "Continue model improvement process (replacement of points)" << endl;
           int mchange_flag = tr_model_->ensureImprovement();
 
           if (!tr_model_->isReplacementNeeded()) {
-            cout << "Improvement process successful (replacement of points)" << endl;
-            cout << "Initialized TRModel [2]" << endl;
+//            cout << "Improvement process successful (replacement of points)" << endl;
+//            cout << "Initialized TRModel [2]" << endl;
             tr_model_->setIsInitialized(true);
           }
         }  // end-if: finish model improvement process
@@ -169,13 +169,21 @@ void TrustRegionOptimization::iterate() {
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
 
+//      cout << "iteration:" << iteration_ << endl;
+//
+//      cout << "points_abs_:" << endl;
+//      cout << tr_model_->getPoints() << endl;
+//
+//      cout << "fvalues_:" << endl;
+//      cout << tr_model_->getFunctionValues() << endl;
+
       if ((!tr_model_->isImprovementNeeded() && !tr_model_->areImprovementPointsComputed()) &&
           (!tr_model_->isReplacementNeeded() && !tr_model_->areReplacementPointsComputed())) {
 
         iteration_++;
 
-        cout << "TRMmodel fully initialized" << endl;
-        cout << "Starting first iteration" << endl;
+//        cout << "TRMmodel fully initialized" << endl;
+//        cout << "Starting first iteration" << endl;
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
@@ -338,8 +346,8 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
 
-                    cout << "Return evaluated init_cases_ (sz:"
-                         << tr_model_->getSizeInitCases() << ")" << endl;
+//                    cout << "Return evaluated init_cases_ (sz:"
+//                         << tr_model_->getSizeInitCases() << ")" << endl;
                     tr_model_->submitTempInitCases();
                     tr_model_->setAreInitPointsComputed(true);
             }
@@ -355,11 +363,11 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
 
-                cout << "Return evaluated impr_cases_ (sz:"
-                     << tr_model_->getSizeImprCases() << ")" << endl;
-
-              cout << "Return evaluated repl_cases_ (sz:"
-                   << tr_model_->getSizeReplCases() << ")" << endl;
+//                cout << "Return evaluated impr_cases_ (sz:"
+//                     << tr_model_->getSizeImprCases() << ")" << endl;
+//
+//                cout << "Return evaluated repl_cases_ (sz:"
+//                   << tr_model_->getSizeReplCases() << ")" << endl;
                 tr_model_->submitTempImprCases();
                 tr_model_->submitTempReplCases();
                 tr_model_->setAreImprPointsComputed(true);
@@ -428,7 +436,7 @@ void TrustRegionOptimization::computeInitialPoints() {
 
     auto initial_point = base_case_->GetRealVarVector();
 
-    cout << "Adding base case to Case List" << endl;
+//    cout << "Adding base case to Case List" << endl;
     tr_model_->addInitializationCase(base_case_);
 
     //!<Find another point since only one initial guess provided
@@ -465,7 +473,7 @@ void TrustRegionOptimization::computeInitialPoints() {
             // -> currently, this leads to a crash
             // This will be done later in the test code
             tr_model_->addInitializationCase(second_case);
-            cout << "Adding 2nd point to Case List" << endl;
+//            cout << "Adding 2nd point to Case List" << endl;
 
         } else {
             //TODO: implement other sampling method such as Uniform.
