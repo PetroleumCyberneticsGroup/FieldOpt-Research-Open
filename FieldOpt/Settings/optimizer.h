@@ -102,8 +102,8 @@ class Optimizer
     double tr_criticality_mu = 100;
     double tr_criticality_beta = 10;
     double tr_criticality_omega = 0.5;
-    double tr_lower_bound = -1000;
-    double tr_upper_bound = 1000;
+    double tr_lower_bound = -INFINITY;
+    double tr_upper_bound = INFINITY;
 
     int tr_iter_max = 10000;
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
