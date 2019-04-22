@@ -911,7 +911,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
   VectorXd new_point_shifted(dim);
   VectorXd shift_center(dim);
-  double pivot_value = 0;
+  double pivot_value = 0.0;
   bool success = false;
 
   int polynomials_num = pivot_polynomials_.size();
@@ -1784,16 +1784,7 @@ TrustRegionModel::pointNew(Polynomial polynomial,
         new_points.conservativeResize(dim_, 0);
         new_pivot_values.conservativeResize(max((int) new_points.cols(), 1));
         new_pivot_values << 0;
-
-//        cout << "new_points" << endl;
-//        cout << new_points <<endl;
-//
-//        cout << "new_pivot_values" << endl;
-//        cout << new_pivot_values << endl;
     }
-
-//    cout << "Found " + to_string(new_points.cols()) +
-//            " new pts/pivot-pts" << endl;
 
     return make_tuple(new_points, new_pivot_values, point_found);
 }
