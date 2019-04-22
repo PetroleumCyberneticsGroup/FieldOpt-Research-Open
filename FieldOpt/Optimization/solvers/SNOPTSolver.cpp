@@ -343,7 +343,7 @@ void SNOPTSolver::subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &pr
 
 void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) {
 
-  cout << "Specs for TRMod subproblem A" << endl;
+//  cout << "Specs for TRMod subproblem A" << endl;
 
   n_ = prob.getNunVars(); // # of variables
   m_ = prob.getNunNnlConst(); // # of nonlinear c
@@ -647,7 +647,7 @@ bool SNOPTSolver::loadSNOPT(const string lib_name) {
   } else {
     rc = LSL_loadSNOPTLib(lib_name.c_str(), buf, 255);
   }
-  printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
+//  printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
 
 
   if (rc) {
