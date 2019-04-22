@@ -638,7 +638,8 @@ bool TrustRegionModel::improveModelNfp() {
               }
             }  // end-if: (found_i < new_points_shifted.cols())
             if (f_succeeded.all()) {
-              break;  //!<Stop trying pivot polynomials for poly_i>
+              break;
+              //!<Stop trying pivot polynomials for poly_i>
             }
           } // end-if (point_found)
           //!<Attempt another polynomial if did not break>
@@ -767,8 +768,8 @@ bool TrustRegionModel::isLambdaPoised() {
 
   if (!settings_->parameters().tr_basis.compare("dummy")) {
     result = true;
-  } else if(points_num >= dim+1) {
 
+  } else if (points_num >= dim+1) {
     //!<Fully linear, already>
     result = true;
     //!<but lets double check>
@@ -1553,7 +1554,7 @@ bool TrustRegionModel::isComplete() {
     Printer::ext_warn("Too many points in the Trust Region model.",
                       "Optimization", "TrustRegionModel");
   }
-  return (points_num >= max_terms );;
+  return (points_num >= max_terms);
 }
 
 bool TrustRegionModel::isOld() {
