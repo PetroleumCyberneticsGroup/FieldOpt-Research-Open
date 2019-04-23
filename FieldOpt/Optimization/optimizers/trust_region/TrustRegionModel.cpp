@@ -242,8 +242,9 @@ double TrustRegionModel::checkInterpolation() {
   double max_diff = -1.0;
   for (int kk = 0; kk < fvalues_.rows(); kk++) {
     for (int ii = 0; ii < points_num; ii++) {
+      VectorXd point = hh.col(ii);
 
-      cval = evaluatePolynomial(p[kk], hh.col(ii));
+      cval = evaluatePolynomial(p[kk], point);
       cdiff = std::abs(fvalues_(ii) - cval);
       if (cdiff > max_diff) {
         max_diff = cdiff;
@@ -1240,16 +1241,20 @@ Polynomial TrustRegionModel::matricesToPolynomial(
   coefficients.segment(1,ind_coefficients) = g0;
 
   //!<Second order>
+  bool non_symmetric_H = false;
   for (int k=0; k<dim; k++) {
     for (int m=0; m <= k; m++) {
       ind_coefficients = ind_coefficients + 1;
       coefficients(ind_coefficients) = H(k, m);
 
-      if (H(m, k) != H(k, m)) {
-        Printer::ext_info("H not symmetrical: ",
-                          "Optimization", "Trust Region");
+      if (abs(H(m, k)-H(k, m)) > std::numeric_limits<float>::epsilon()) {
+        non_symmetric_H = true;
       }
     }
+  }
+  if (non_symmetric_H) {
+    Printer::ext_info("H not symmetrical: ",
+                      "Optimization", "Trust Region");
   }
 
   Polynomial p;
@@ -1261,12 +1266,13 @@ Polynomial TrustRegionModel::matricesToPolynomial(
 std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
     int dimension,
     VectorXd coefficients) {
-  if (coefficients.size() == 0) {
-    coefficients.resize(dimension);
-    coefficients.setZero(dimension);
-  }
 
   int n_terms = (dimension+1)*(dimension+2)/2;
+  if (coefficients.size() == 0) {
+    coefficients.conservativeResize(n_terms);
+    coefficients.setZero(n_terms);
+  }
+
   if (coefficients.size() != n_terms) {
     Printer::ext_warn("Wrong dimension of coefficients.",
                       "Optimization", "TrustRegionModel");
@@ -1278,15 +1284,15 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
   double c = coefficients(0);
 
   //!< Order one term>
-  int idx_coefficients = dimension + 1;
-  auto g = coefficients.segment(1,idx_coefficients-1);
+  int idx_coefficients = dimension;
+  auto g = coefficients.segment(1,idx_coefficients);
 
   //!< Second order term>
   MatrixXd H(dimension, dimension);
   H.setZero(dimension,dimension);
 
   for (int k=0; k<dimension; k++) {
-    for (int m=0; m < k; m++) {
+    for (int m=0; m <= k; m++) {
       idx_coefficients++;
       H(k,m) = coefficients(idx_coefficients);
       H(m,k) = H(k,m);
@@ -1442,10 +1448,12 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   RowVectorXd fvalues_diff = RowVectorXd::Zero(getNumFvals(), getNumPts()-1);
 
   int m2 = 0;
-  for (int m = 0; (m<getNumPts()) && (m != tr_center_); m++) {
-    points_shifted.col(m2) = points_abs_.col(m) - points_abs_.col(tr_center_);
-    fvalues_diff(m2) = fvalues_(m) - fvalues_(tr_center_);
-    m2++;
+  for (int m = 0; (m<getNumPts()); m++) {
+    if (m != tr_center_) {
+      points_shifted.col(m2) = points_abs_.col(m) - points_abs_.col(tr_center_);
+      fvalues_diff(m2) = fvalues_(m) - fvalues_(tr_center_);
+      m2++;
+    }
   }
 
   MatrixXd M = points_shifted.transpose()*points_shifted;
