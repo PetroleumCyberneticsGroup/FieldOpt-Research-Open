@@ -873,13 +873,13 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
 int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
   int exit_flag = 0;
   bool point_added = false;
-  double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  double relative_pivot_threshold = settings_->parameters().tr_add_threshold;
 
   if (!isComplete()) {
     //!<Add this point>
     exit_flag = addPoint(new_point, new_fvalue, relative_pivot_threshold);
 
-    if (exit_flag >0){
+    if (exit_flag > 0){
       point_added = true;
     }
   }
