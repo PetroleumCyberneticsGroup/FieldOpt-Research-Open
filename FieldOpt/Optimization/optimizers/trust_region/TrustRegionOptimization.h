@@ -95,6 +95,7 @@ class TrustRegionOptimization : public Optimizer {
     Case *base_case_;
 
     void computeInitialPoints();
+    void updateRadius();
 
     void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);

@@ -298,6 +298,15 @@ void TrustRegionModel::submitTempReplCases() {
   }
 }
 
+void TrustRegionModel::clearImprovementCasesList() {
+  improvement_cases_.clear();
+  temp_impr_cases_.clear();
+}
+
+void TrustRegionModel::clearReplacementCasesList() {
+  replacement_cases_.clear();
+  temp_repl_cases_.clear();
+}
 bool TrustRegionModel::rebuildModel() {
   double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
@@ -671,6 +680,10 @@ bool TrustRegionModel::improveModelNfp() {
       if (nfp_point_found_ && f_succeeded.all()) {
         setIsImprovementNeeded(false);
 
+        if (!improvement_cases_.size() == 0) {
+
+          clearImprovementCasesList();
+        }
         //!<Update this polynomial in the set>
         pivot_polynomials_[poly_i] = nfp_polynomial_;
         //!<Swap polynomials>
@@ -1238,6 +1251,7 @@ Polynomial TrustRegionModel::matricesToPolynomial(
 
   //!<First order>
   int ind_coefficients = dim;
+  int tol = 1e-06;
   coefficients.segment(1,ind_coefficients) = g0;
 
   //!<Second order>
@@ -1678,6 +1692,9 @@ bool TrustRegionModel::chooseAndReplacePoint() {
     if (repl_point_found_ && f_succeeded.all()) {
       setIsReplacementNeeded(false);
 
+      if (!replacement_cases_.size() == 0) {
+          clearReplacementCasesList();
+      }
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
 

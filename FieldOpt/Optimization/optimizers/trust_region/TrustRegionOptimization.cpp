@@ -114,6 +114,7 @@ void TrustRegionOptimization::iterate() {
                 }
             } else {
                 tr_model_->setIsInitialized(true);
+                iteration_++;
             }
         } // end-if: Initializing TRModel
 
@@ -126,6 +127,7 @@ void TrustRegionOptimization::iterate() {
 
           if (!tr_model_->isImprovementNeeded()) {
               tr_model_->setIsInitialized(true);
+              iteration_++;
           }
         }  // end-if: finish model improvement process
 
@@ -138,6 +140,7 @@ void TrustRegionOptimization::iterate() {
 
           if (!tr_model_->isReplacementNeeded()) {
             tr_model_->setIsInitialized(true);
+            iteration_++;
           }
         }  // end-if: finish model improvement process
     }  // end-if: (iteration_ == 0)
@@ -159,7 +162,7 @@ void TrustRegionOptimization::iterate() {
       if ((!tr_model_->isImprovementNeeded() && !tr_model_->areImprovementPointsComputed()) &&
           (!tr_model_->isReplacementNeeded() && !tr_model_->areReplacementPointsComputed())) {
 
-        iteration_++;
+//        iteration_++;
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
@@ -221,91 +224,30 @@ void TrustRegionOptimization::iterate() {
             case_handler_->AddNewCase(new_case);
             return;
           }
-
-////          if (!tr_model_->isImprovementNeeded() && !tr_model_->isReplacementNeeded()) {
-//            //!<From time to time a step may end a bit outside the TR>
-//            auto step_size = min(tr_model_->getRadius(), trial_step_.lpNorm<Infinity>());
-//
-//            //!<Radius update>
-//            if (rho_ > eta_1) {
-//              auto radius_inc = max(double(1), gamma_2 * (step_size / tr_model_->getRadius()));
-//              tr_model_->setRadius(min(radius_inc * tr_model_->getRadius(), radius_max));
-//
-//            } else if (iteration_model_fl_
-//                && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed_)) {
-//              //!<A good model should have provided a better point.
-//              //!< We reduce the radius, since the error is related to the radius
-//              //!<        | f(x) - m(x) | < K*(radius)^2
-//              //!<        rho == -inf -> too short step size
-//              //!<        mchange_flag == 4 -> Couldn't add point, had to rebuild model>
-//              if (tr_model_->getRadius() <= 2 * tol_radius / gamma_1) {
-//                delay_reduction_ = delay_reduction_ + 1;
-//              } else {
-//                delay_reduction_ = 0;
-//              }
-//
-//              if (delay_reduction_ >= 3 || delay_reduction_ == 0 || criticality_step_performed_) {
-//                gamma_dec_ = gamma_1;
-//                tr_model_->setRadius(gamma_dec_ * tr_model_->getRadius());
-//                delay_reduction_ = 0;
-//              }
-////            }
-////            return;
-          }
-        } else if ((tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed()) ||
-          (tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed())) {
-
-        //!<continue with model improvement
-        mchange_flag_ = tr_model_->ensureImprovement();
-
-        //!<From time to time a step may end a bit outside the TR>
-        auto step_size = min(tr_model_->getRadius(), trial_point_.lpNorm<Infinity>());
-
-        //!<Radius update>
-        if (rho_ > eta_1) {
-          auto radius_inc = max(double(1), gamma_2 * (step_size / tr_model_->getRadius()));
-          tr_model_->setRadius(min(radius_inc * tr_model_->getRadius(), radius_max));
-
-        } else if (iteration_model_fl_ && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed_)) {
-          //!<A good model should have provided a better point.
-          //!< We reduce the radius, since the error is related to the radius
-          //!<        | f(x) - m(x) | < K*(radius)^2
-          //!<        rho == -inf -> too short step size
-          //!<        mchange_flag == 4 -> Couldn't add point, had to rebuild model>
-          if (tr_model_->getRadius() <= 2 * tol_radius / gamma_1) {
-            delay_reduction_ = delay_reduction_ + 1;
-          } else {
-            delay_reduction_ = 0;
-          }
-
-          if (delay_reduction_ >= 3 || delay_reduction_ == 0 || criticality_step_performed_) {
-            gamma_dec_ = gamma_1;
-            tr_model_->setRadius(gamma_dec_ * tr_model_->getRadius());
-            delay_reduction_ = 0;
-          }
         }
       } else {
-        auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
+        auto improvement_cases = tr_model_->getImprovementCases(gu); //<improve model>
         auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
 
-        if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
-          case_handler_->AddNewCases(improvement_cases);
-          return;
-        }
+        if ((tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed()) ||
+            (tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed())) {
+          //!<continue with model improvement
+          mchange_flag_ = tr_model_->ensureImprovement();
+          updateRadius();
+        } else {
+          if (tr_model_->isImprovementNeeded() && !improvement_cases.size() ==0) {
+            case_handler_->AddNewCases(improvement_cases);
+            return;
+          }
 
-        if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
-          case_handler_->AddNewCases(replacement_cases);
-          return;
+          if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
+            case_handler_->AddNewCases(replacement_cases);
+            return;
+          }
         }
       }
-      return;
     } // end-if: (tr_model_->isInitialized)
-  // Save for later
-  //    Printer::ext_warn(
-  //            "Insufficient # of points to create the Trust Region model.",
-  //            "Optimization", "TrustRegionOptimization");
-  //    throw std::runtime_error(
-  //            "Failed to initialize Trust Region Optimizer.");
+    return;
 }
 
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
@@ -337,29 +279,41 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             // All improvement cases have been evaluated
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
+              if (tr_model_->isImprovementNeeded()) {
                 tr_model_->submitTempImprCases();
-                tr_model_->submitTempReplCases();
                 tr_model_->setAreImprPointsComputed(true);
+              }
+
+              if (tr_model_->isReplacementNeeded()) {
+                tr_model_->submitTempReplCases();
                 tr_model_->setAreReplPointsComputed(true);
+              }
             }
             return;
         }
 
     } else { // Initialization is done; handling "normal" case
+      if (tr_model_->isImprovementNeeded() || tr_model_->isReplacementNeeded()) {
+        // All improvement cases have been evaluated
+        if (tr_model_->isImprovementNeeded()) {
+          // Collect case
+          tr_model_->addTempImprCase(c);
 
-      // All improvement cases have been evaluated
-      if ((tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed()) ||
-         (tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed())) {
-
-        if (tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed()) {
-          tr_model_->submitTempImprCases();
-          tr_model_->setAreImprPointsComputed(true);
+          if (case_handler_->QueuedCases().size() == 0
+              && case_handler_->CasesBeingEvaluated().size() == 0) {
+            tr_model_->submitTempImprCases();
+            tr_model_->setAreImprPointsComputed(true);
+          }
         }
 
-        if (tr_model_->isReplacementNeeded() && tr_model_->areImprovementPointsComputed()) {
-          tr_model_->submitTempReplCases();
-          tr_model_->setAreReplPointsComputed(true);
-          return;
+        if (tr_model_->isReplacementNeeded()) {
+          tr_model_->addTempReplCase(c);
+
+          if (case_handler_->QueuedCases().size() == 0
+              && case_handler_->CasesBeingEvaluated().size() == 0) {
+            tr_model_->submitTempReplCases();
+            tr_model_->setAreReplPointsComputed(true);
+          }
         }
       } else {
           VectorXd x_current = tr_model_->getCurrentPoint();
@@ -397,42 +351,47 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           }
           sum_rho_ += rho_;
           sum_rho_sqr_ += pow(rho_, 2);
-      }
-      double tol_radius = settings_->parameters().tr_tol_radius;
-      double eta_1 = settings_->parameters().tr_eta_1;
-      double gamma_1 = gamma_dec_;
-      double gamma_2 = settings_->parameters().tr_gamma_inc;
-      double radius_max = settings_->parameters().tr_radius_max;
-
-      //!<From time to time a step may end a bit outside the TR>
-      auto step_size = min(tr_model_->getRadius(), trial_step_.lpNorm<Infinity>());
-
-      //!<Radius update>
-      if (rho_ > eta_1) {
-        auto radius_inc = max(double(1), gamma_2 * (step_size / tr_model_->getRadius()));
-        tr_model_->setRadius(min(radius_inc * tr_model_->getRadius(), radius_max));
-
-      } else if (iteration_model_fl_
-          && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed_)) {
-        //!<A good model should have provided a better point.
-        //!< We reduce the radius, since the error is related to the radius
-        //!<        | f(x) - m(x) | < K*(radius)^2
-        //!<        rho == -inf -> too short step size
-        //!<        mchange_flag == 4 -> Couldn't add point, had to rebuild model>
-        if (tr_model_->getRadius() <= 2 * tol_radius / gamma_1) {
-          delay_reduction_ = delay_reduction_ + 1;
-        } else {
-          delay_reduction_ = 0;
-        }
-
-        if (delay_reduction_ >= 3 || delay_reduction_ == 0 || criticality_step_performed_) {
-          gamma_dec_ = gamma_1;
-          tr_model_->setRadius(gamma_dec_ * tr_model_->getRadius());
-          delay_reduction_ = 0;
-        }
+          updateRadius();
       }
     }
+}
+
+void TrustRegionOptimization::updateRadius() {
+  double tol_radius = settings_->parameters().tr_tol_radius;
+  double eta_1 = settings_->parameters().tr_eta_1;
+  double gamma_1 = gamma_dec_;
+  double gamma_2 = settings_->parameters().tr_gamma_inc;
+  double radius_max = settings_->parameters().tr_radius_max;
+
+  //!<From time to time a step may end a bit outside the TR>
+  auto step_size = min(tr_model_->getRadius(), trial_step_.lpNorm<Infinity>());
+
+  //!<Radius update>
+  if (rho_ > eta_1) {
+    auto radius_inc = max(double(1), gamma_2 * (step_size / tr_model_->getRadius()));
+    tr_model_->setRadius(min(radius_inc * tr_model_->getRadius(), radius_max));
+
+  } else if (iteration_model_fl_
+      && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed_)) {
+    //!<A good model should have provided a better point.
+    //!< We reduce the radius, since the error is related to the radius
+    //!<        | f(x) - m(x) | < K*(radius)^2
+    //!<        rho == -inf -> too short step size
+    //!<        mchange_flag == 4 -> Couldn't add point, had to rebuild model>
+    if (tr_model_->getRadius() <= 2 * tol_radius / gamma_1) {
+      delay_reduction_ = delay_reduction_ + 1;
+    } else {
+      delay_reduction_ = 0;
+    }
+
+    if (delay_reduction_ >= 3 || delay_reduction_ == 0 || criticality_step_performed_) {
+      gamma_dec_ = gamma_1;
+      tr_model_->setRadius(gamma_dec_ * tr_model_->getRadius());
+      delay_reduction_ = 0;
+    }
   }
+  iteration_++;
+}
 
 void TrustRegionOptimization::computeInitialPoints() {
 

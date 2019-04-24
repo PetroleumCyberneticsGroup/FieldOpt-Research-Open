@@ -247,6 +247,9 @@ class TrustRegionModel {
     int getSizeImprCases() {
         return (int)improvement_cases_.size(); }
 
+    int getSizeTempImprCases() {
+        return (int)temp_impr_cases_.size(); }
+
     void submitTempImprCases();
 
     void setAreImprPointsComputed(bool s) {
@@ -256,12 +259,15 @@ class TrustRegionModel {
     bool isImprovementNeeded() const { return needs_improvement_; }
     void setIsImprovementNeeded(bool s) { needs_improvement_ = s; }
 
+    void clearImprovementCasesList();
+
     // Replacement cases
     bool areReplacementPointsComputed() const { return repl_points_computed_; };
     void setAreReplacementPointsComputed(bool s) { repl_points_computed_ = s; }
     void addReplacementCase(Case *c) { replacement_cases_.append(c); }
     bool isReplacementNeeded() const { return needs_replacement_; }
     void setIsReplacementNeeded(bool s) { needs_replacement_ = s; }
+    void clearReplacementCasesList();
 
     void addTempReplCase(Case *c) {
       temp_repl_cases_.append(c); }
