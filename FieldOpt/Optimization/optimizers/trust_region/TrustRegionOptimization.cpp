@@ -226,7 +226,7 @@ void TrustRegionOptimization::iterate() {
           }
         }
       } else {
-        auto improvement_cases = tr_model_->getImprovementCases(gu); //<improve model>
+        auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
         auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
 
         if ((tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed()) ||
