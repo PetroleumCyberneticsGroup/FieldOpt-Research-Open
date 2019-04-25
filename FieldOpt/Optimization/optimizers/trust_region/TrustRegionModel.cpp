@@ -1913,7 +1913,8 @@ TrustRegionModel::minimizeTr(Polynomial p,
     fval = prob.getFSol()(0);
 
     if (prob.getSNOPTExitCode() == 1) {
-        exitflag = 1;
+        // Should be zero -- double check
+        exitflag = 0;
     }
 
     return make_tuple(x, fval, exitflag);
