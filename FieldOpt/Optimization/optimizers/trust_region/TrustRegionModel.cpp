@@ -373,7 +373,7 @@ bool TrustRegionModel::rebuildModel() {
   nfpBasis(dim);//!<build nfp polynomial basis>
 
   int polynomials_num = pivot_polynomials_.size();
-  pivot_values_.resize(polynomials_num);
+  pivot_values_.conservativeResize(polynomials_num);
   pivot_values_.setZero(polynomials_num);
 
   //!<Constant term>
@@ -481,22 +481,6 @@ bool TrustRegionModel::rebuildModel() {
             //!<this means we won't be able to build a Fully Linear model>
     }
 
-    tr_center_ = 0;
-    points_abs_ = all_points_.leftCols(last_pt_included + 1);
-    points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
-    fvalues_ = all_fvalues_.head(last_pt_included + 1);
-
-    double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
-    modeling_polynomials_.clear();
-
-    //!<Points not included>
-    if (cache_size > 0) {
-      cached_points_ = all_points_.middleCols(last_pt_included, cache_size);
-      cached_fvalues_ = fvalues_.segment(last_pt_included, cache_size);
-    } else {
-      cached_points_.conservativeResize(0, 0);
-      cached_fvalues_.conservativeResize(0);
-    }
 
 //    cout << "cache_size:" << cache_size << endl;
 //
@@ -507,6 +491,22 @@ bool TrustRegionModel::rebuildModel() {
 //    cout <<  cached_fvalues_ << endl;
   } // end for-loop: (iter < polynomials_num)
 
+  tr_center_ = 0;
+  points_abs_ = all_points_.leftCols(last_pt_included + 1);
+  points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
+  fvalues_ = all_fvalues_.head(last_pt_included + 1);
+
+  double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
+  modeling_polynomials_.clear();
+
+  //!<Points not included>
+  if (cache_size > 0) {
+    cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size);
+    cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size);
+  } else {
+    cached_points_.conservativeResize(0, 0);
+    cached_fvalues_.conservativeResize(0);
+  }
   //!<Clean auxiliary objects>
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
@@ -681,9 +681,9 @@ bool TrustRegionModel::improveModelNfp() {
         setIsImprovementNeeded(false);
 
         if (!improvement_cases_.size() == 0) {
-
           clearImprovementCasesList();
         }
+
         //!<Update this polynomial in the set>
         pivot_polynomials_[poly_i] = nfp_polynomial_;
         //!<Swap polynomials>
@@ -919,7 +919,7 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
 int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double relative_pivot_threshold) {
 
   int exit_flag;
-  double pivot_threshold = min(double(1), radius_)*relative_pivot_threshold;
+  double pivot_threshold = min(double(1.0), radius_)*relative_pivot_threshold;
   int dim = points_abs_.rows();
   int last_p = points_abs_.cols()-1;
 
@@ -1084,6 +1084,7 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
 tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int final_i, double tol) {
   int last_point = initial_i - 1;
   auto incumbent_point = points_shifted_.col(initial_i);
+  auto pivot_polynomials = pivot_polynomials_;
   bool success = false;
   double pivot_value = 0;
 
@@ -1096,9 +1097,11 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
       success = true;
 
       //!<Swap polynomials>
-      pivot_polynomials_[k] = pivot_polynomials_[initial_i];
-      pivot_polynomials_[initial_i] = polynomial;
+      pivot_polynomials[k] = pivot_polynomials[initial_i];
+      pivot_polynomials[initial_i] = polynomial;
       pivot_value = val;
+
+      pivot_polynomials_ = pivot_polynomials;
       break;
     } else {
       //!<We won't even save the orthogonalization>

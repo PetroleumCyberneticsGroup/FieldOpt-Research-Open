@@ -231,9 +231,12 @@ void TrustRegionOptimization::iterate() {
 
         if ((tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed()) ||
             (tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed())) {
+
           //!<continue with model improvement
           mchange_flag_ = tr_model_->ensureImprovement();
+          iteration_--;
           updateRadius();
+          iterate();
         } else {
           if (tr_model_->isImprovementNeeded() && !improvement_cases.size() ==0) {
             case_handler_->AddNewCases(improvement_cases);
