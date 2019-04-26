@@ -162,10 +162,10 @@ void TrustRegionOptimization::iterate() {
       if ((!tr_model_->isImprovementNeeded() && !tr_model_->areImprovementPointsComputed()) &&
           (!tr_model_->isReplacementNeeded() && !tr_model_->areReplacementPointsComputed())) {
 
-//        iteration_++;
-
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
+
+          finalizeAlgorithm();
           return; //end of the algorithm
         } else {
           if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
@@ -202,7 +202,8 @@ void TrustRegionOptimization::iterate() {
               (predicted_red_ < tol_radius * abs(fval_current) &&
                   (trial_step_.norm()) < tol_radius) ||
               (predicted_red_ < tol_f * abs(fval_current) * 1e-3)) {
-            rho_ = -Infinity;
+
+            rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
             auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
@@ -217,6 +218,17 @@ void TrustRegionOptimization::iterate() {
               case_handler_->AddNewCases(replacement_cases);
               return;
             }
+
+            if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
+              updateRadius();
+              if (IsFinished()) {
+                finalizeAlgorithm();
+              } else {
+                iterate();
+              }
+              return;
+            }
+
           } else {
             //!<Evaluate objective at trial point>
             Case *new_case = new Case(base_case_);
@@ -232,11 +244,41 @@ void TrustRegionOptimization::iterate() {
         if ((tr_model_->isReplacementNeeded() && tr_model_->areReplacementPointsComputed()) ||
             (tr_model_->isImprovementNeeded() && tr_model_->areImprovementPointsComputed())) {
 
+
+          if (!improvement_cases.size() == 0){
+            for (Case* c: improvement_cases) {
+              if (!isImprovement(c)) {
+                updateTentativeBestCase(c);
+              }
+            }
+          }
+
+          if (!replacement_cases.size() == 0){
+            for (Case* c: replacement_cases) {
+              if (!isImprovement(c)) {
+                updateTentativeBestCase(c);
+              }
+            }
+          }
+
+          //!<Print summary>
+          fval_current = tr_model_->getCurrentFval();
+          x_current = tr_model_->getCurrentPoint();
+
+          cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
+               << tr_model_->getNumPts() << endl;
+
           //!<continue with model improvement
           mchange_flag_ = tr_model_->ensureImprovement();
           iteration_--;
           updateRadius();
-          iterate();
+
+          if (IsFinished()) {
+            finalizeAlgorithm();
+          } else {
+            iterate();
+          }
+          return;
         } else {
           if (tr_model_->isImprovementNeeded() && !improvement_cases.size() ==0) {
             case_handler_->AddNewCases(improvement_cases);
@@ -252,6 +294,7 @@ void TrustRegionOptimization::iterate() {
     } // end-if: (tr_model_->isInitialized)
     return;
 }
+
 
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
@@ -282,6 +325,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             // All improvement cases have been evaluated
             if (case_handler_->QueuedCases().size() == 0
                 && case_handler_->CasesBeingEvaluated().size() == 0) {
+
               if (tr_model_->isImprovementNeeded()) {
                 tr_model_->submitTempImprCases();
                 tr_model_->setAreImprPointsComputed(true);
@@ -334,7 +378,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           if (rho_ > eta_1) {
 
             //!<Successful iteration>
-            if (isImprovement(c)) {
+            if (!isImprovement(c)) { //TODO: we are considering a minimization problem. The default is a maximization problem.
               updateTentativeBestCase(c);
             }
 
@@ -354,7 +398,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           }
           sum_rho_ += rho_;
           sum_rho_sqr_ += pow(rho_, 2);
+
           updateRadius();
+
       }
     }
 }
@@ -375,7 +421,7 @@ void TrustRegionOptimization::updateRadius() {
     tr_model_->setRadius(min(radius_inc * tr_model_->getRadius(), radius_max));
 
   } else if (iteration_model_fl_
-      && (rho_ == -Infinity || mchange_flag_ == 4 || criticality_step_performed_)) {
+      && (rho_ == -std::numeric_limits<double>::infinity() || mchange_flag_ == 4 || criticality_step_performed_)) {
     //!<A good model should have provided a better point.
     //!< We reduce the radius, since the error is related to the radius
     //!<        | f(x) - m(x) | < K*(radius)^2
@@ -485,13 +531,14 @@ void TrustRegionOptimization::setLowerUpperBounds() {
 Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
-    if (case_handler_->CasesBeingEvaluated().size() > 0) {
-        return tc;
+
+    if (tr_model_->getRadius() < settings_->parameters().tr_tol_radius) {
+      tc = MINIMUM_STEP_LENGTH_REACHED;
     }
 
-//    if (evaluated_cases_ > max_evaluations_) {
-//          tc = MAX_EVALS_REACHED;
-//    }
+    if (iteration_ == settings_->parameters().tr_iter_max) {
+      tc = MAX_ITERATIONS_REACHED;
+    }
 
     if (tc != NOT_FINISHED) {
         if (enable_logging_) {
@@ -499,6 +546,16 @@ TrustRegionOptimization::IsFinished() {
         }
     }
     return tc;
+}
+
+
+void TrustRegionOptimization::finalizeAlgorithm() {
+  cout << "----------------------" << END << endl;
+  auto best_case = GetTentativeBestCase();
+  cout << best_case->GetRealVarVector() << endl;
+  cout << best_case->objective_function_value() << endl;
+
+  exit(0);
 }
 
 void TrustRegionOptimization::projectToBounds(VectorXd *point) {

@@ -99,6 +99,7 @@ class TrustRegionOptimization : public Optimizer {
 
     void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);
+    void finalizeAlgorithm();
 
     class ConfigurationSummary : public Loggable {
     public:
