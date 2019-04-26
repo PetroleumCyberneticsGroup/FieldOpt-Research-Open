@@ -189,7 +189,6 @@ void TrustRegionOptimization::iterate() {
           }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
-
           cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
                << tr_model_->getNumPts() << endl;
 
@@ -220,10 +219,10 @@ void TrustRegionOptimization::iterate() {
             }
 
             if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
-              updateRadius();
               if (IsFinished()) {
                 finalizeAlgorithm();
               } else {
+                updateRadius();
                 iterate();
               }
               return;
@@ -261,21 +260,14 @@ void TrustRegionOptimization::iterate() {
             }
           }
 
-          //!<Print summary>
-          fval_current = tr_model_->getCurrentFval();
-          x_current = tr_model_->getCurrentPoint();
-
-          cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
-               << tr_model_->getNumPts() << endl;
-
           //!<continue with model improvement
           mchange_flag_ = tr_model_->ensureImprovement();
-          iteration_--;
-          updateRadius();
 
           if (IsFinished()) {
             finalizeAlgorithm();
           } else {
+            iteration_--;
+            updateRadius();
             iterate();
           }
           return;
@@ -548,8 +540,18 @@ TrustRegionOptimization::IsFinished() {
     return tc;
 }
 
+void TrustRegionOptimization::finalizeAlgorithm(Case* c) {
+  if (!isImprovement(c)) {
+    updateTentativeBestCase(c);
+    cout << ++iteration_ << "  " << c->objective_function_value() << "  " << rho_ << " " << tr_model_->getRadius() << " "
+         << tr_model_->getNumPts() << endl;
+  }
+  finalizeAlgorithm();
+}
+
 
 void TrustRegionOptimization::finalizeAlgorithm() {
+  //!<Print summary>
   cout << "----------------------" << END << endl;
   auto best_case = GetTentativeBestCase();
   cout << best_case->GetRealVarVector() << endl;
@@ -557,6 +559,8 @@ void TrustRegionOptimization::finalizeAlgorithm() {
 
   exit(0);
 }
+
+
 
 void TrustRegionOptimization::projectToBounds(VectorXd *point) {
     if (ub_.size() > 0) {
