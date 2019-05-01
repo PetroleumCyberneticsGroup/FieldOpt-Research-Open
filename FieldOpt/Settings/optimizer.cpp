@@ -410,6 +410,14 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
         else {
             params.rng_seed = std::time(0);
         }
+
+      // RNG seed
+      if (json_parameters.contains("TRMaxIter")) {
+        params.tr_iter_max = json_parameters["TRMaxIter"].toInt();
+      }
+      else {
+        params.tr_iter_max = 10000;
+      }
     }
     catch (std::exception const &ex) {
         throw UnableToParseOptimizerParametersSectionException("Unable to parse optimizer parameters: " + std::string(ex.what()));

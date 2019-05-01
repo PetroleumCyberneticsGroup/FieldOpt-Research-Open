@@ -87,6 +87,7 @@ class Optimizer
 
     // Trust Region Optimization parameters
     double tr_initial_radius = 1; //!< The initial trust region radius
+//    double tr_tol_f = 1e-6;
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
@@ -102,8 +103,8 @@ class Optimizer
     double tr_criticality_mu = 100;
     double tr_criticality_beta = 10;
     double tr_criticality_omega = 0.5;
-    double tr_lower_bound = -INFINITY;
-    double tr_upper_bound = INFINITY;
+    double tr_lower_bound = -std::numeric_limits<double>::infinity();
+    double tr_upper_bound = -std::numeric_limits<double>::infinity();
 
     int tr_iter_max = 10000;
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)

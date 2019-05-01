@@ -24,6 +24,10 @@
 #include "Utilities/stringhelpers.hpp"
 #include "TrustRegionOptimization.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+
 namespace Optimization {
 namespace Optimizers {
 
@@ -75,6 +79,9 @@ TrustRegionOptimization::TrustRegionOptimization(
 }
 
 void TrustRegionOptimization::iterate() {
+    if (enable_logging_) {
+      logger_->AddEntry(this);
+    }
 
     if (iteration_ == 0) {
 
@@ -180,15 +187,25 @@ void TrustRegionOptimization::iterate() {
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
           if (model_criticality.norm() <= eps_c) {
+            cout << "model criticality: " << model_criticality.norm() << endl;
+            cout << "eps_c: " << eps_c << endl;
             tr_model_->criticalityStep();
             criticality_step_performed_ = true;
             if (model_criticality.squaredNorm() < tol_f) {
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
+              finalizeAlgorithm();
               return;
             }
           }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
+
+
+
+          FILE* pFile = fopen("/home/thiagols/Desktop/log_tr.txt", "a");
+          fprintf(pFile, "%d \t %lf \t %lf \t %lf \t %d \n",iteration_, fval_current, rho_, tr_model_->getRadius(), tr_model_->getNumPts());
+          fclose(pFile);
+
           cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
                << tr_model_->getNumPts() << endl;
 
@@ -246,7 +263,7 @@ void TrustRegionOptimization::iterate() {
 
           if (!improvement_cases.size() == 0){
             for (Case* c: improvement_cases) {
-              if (!isImprovement(c)) {
+              if (isImprovement(c)) {
                 updateTentativeBestCase(c);
               }
             }
@@ -254,7 +271,7 @@ void TrustRegionOptimization::iterate() {
 
           if (!replacement_cases.size() == 0){
             for (Case* c: replacement_cases) {
-              if (!isImprovement(c)) {
+              if (isImprovement(c)) {
                 updateTentativeBestCase(c);
               }
             }
@@ -289,6 +306,9 @@ void TrustRegionOptimization::iterate() {
 
 
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
+    if (enable_logging_) {
+      logger_->AddEntry(this);
+    }
 
     if (iteration_ == 0) {
 
@@ -370,7 +390,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           if (rho_ > eta_1) {
 
             //!<Successful iteration>
-            if (!isImprovement(c)) { //TODO: we are considering a minimization problem. The default is a maximization problem.
+            if (isImprovement(c)) { //TODO: we are considering a minimization problem. The default is a maximization problem.
               updateTentativeBestCase(c);
             }
 
@@ -541,7 +561,7 @@ TrustRegionOptimization::IsFinished() {
 }
 
 void TrustRegionOptimization::finalizeAlgorithm(Case* c) {
-  if (!isImprovement(c)) {
+  if (isImprovement(c)) {
     updateTentativeBestCase(c);
     cout << ++iteration_ << "  " << c->objective_function_value() << "  " << rho_ << " " << tr_model_->getRadius() << " "
          << tr_model_->getNumPts() << endl;
