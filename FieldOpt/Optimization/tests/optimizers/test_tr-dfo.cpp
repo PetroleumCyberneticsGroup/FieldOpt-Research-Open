@@ -136,7 +136,7 @@ namespace {
                 TestResources::PrintCaseData(*next_case, *tr_dfo_);
 
                 // Test if current point is equal to matlab data
-                if (p_count <= 2) {
+                if (p_count < 2) {
 
                     string msg = "Checking point " + to_string(p_count+1) + " is equal";
                     TestResources::CheckSameVector(
@@ -148,7 +148,7 @@ namespace {
                 cout << "Runner@end: Call SubmitEvaluatedCase()" << endl;
                 tr_dfo_->SubmitEvaluatedCase(next_case);
 
-                if (tr_dfo_->getTrustRegionModel()->isInitialized()) {
+                if (tr_dfo_->getTrustRegionModel()->isInitialized() && (p_count < 2)) {
 
                     // Test pivot values (vector) are equal
                     TestResources::CheckSameVector(
