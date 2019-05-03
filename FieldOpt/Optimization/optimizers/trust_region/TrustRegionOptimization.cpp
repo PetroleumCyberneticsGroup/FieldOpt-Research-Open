@@ -202,9 +202,9 @@ void TrustRegionOptimization::iterate() {
 
 
 
-          FILE* pFile = fopen("/home/thiagols/Desktop/log_tr.txt", "a");
-          fprintf(pFile, "%d \t %lf \t %lf \t %lf \t %d \n",iteration_, fval_current, rho_, tr_model_->getRadius(), tr_model_->getNumPts());
-          fclose(pFile);
+//          FILE* pFile = fopen("~/Desktop/log_tr.txt", "a");
+//          fprintf(pFile, "%d \t %lf \t %lf \t %lf \t %d \n",iteration_, fval_current, rho_, tr_model_->getRadius(), tr_model_->getNumPts());
+//          fclose(pFile);
 
           cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
                << tr_model_->getNumPts() << endl;
