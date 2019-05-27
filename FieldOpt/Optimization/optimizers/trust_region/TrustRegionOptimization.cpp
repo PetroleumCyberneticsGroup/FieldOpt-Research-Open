@@ -50,9 +50,7 @@ TrustRegionOptimization::TrustRegionOptimization(
     if (enable_logging_) { // Log base case
         logger_->AddEntry(this);
     }
-
-    n_initial_points_ = 1;
-
+    
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
     tr_model_ = new TrustRegionModel(lb_, ub_, base_case_, settings_);
