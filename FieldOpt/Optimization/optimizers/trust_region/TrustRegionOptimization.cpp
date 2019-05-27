@@ -85,14 +85,14 @@ void TrustRegionOptimization::iterate() {
 
     if (iteration_ == 0) {
 
-        if (!tr_model_->areInitPointsComputed()
+        if (!tr_model_->areInitPointsComputed() //_if-1
             && !tr_model_->isInitialized()) {
             auto init_cases = tr_model_->getInitializationCases();
             case_handler_->AddNewCases(init_cases);
             return;
         }
 
-        if (tr_model_->areInitPointsComputed()
+        if (tr_model_->areInitPointsComputed() //_if-2
             && !tr_model_->areImprovementPointsComputed()
             && !tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
@@ -123,9 +123,9 @@ void TrustRegionOptimization::iterate() {
                 tr_model_->setIsInitialized(true);
                 iteration_++;
             }
-        } // end-if: Initializing TRModel
+        }
 
-        if (tr_model_->areInitPointsComputed()
+        if (tr_model_->areInitPointsComputed() //_if-3
             && tr_model_->isImprovementNeeded()
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
@@ -136,9 +136,9 @@ void TrustRegionOptimization::iterate() {
               tr_model_->setIsInitialized(true);
               iteration_++;
           }
-        }  // end-if: finish model improvement process
+        }
 
-        if (tr_model_->areInitPointsComputed()
+        if (tr_model_->areInitPointsComputed() //_if-4
             && tr_model_->isReplacementNeeded()
             && tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
@@ -149,8 +149,8 @@ void TrustRegionOptimization::iterate() {
             tr_model_->setIsInitialized(true);
             iteration_++;
           }
-        }  // end-if: finish model improvement process
-    }  // end-if: (iteration_ == 0)
+        }
+    }
 
     if(tr_model_->isInitialized()) {
       int iter_max = settings_->parameters().tr_iter_max;
@@ -166,8 +166,10 @@ void TrustRegionOptimization::iterate() {
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
 
-      if ((!tr_model_->isImprovementNeeded() && !tr_model_->areImprovementPointsComputed()) &&
-          (!tr_model_->isReplacementNeeded() && !tr_model_->areReplacementPointsComputed())) {
+      if ((!tr_model_->isImprovementNeeded() //_if-5
+      && !tr_model_->areImprovementPointsComputed())
+      && (!tr_model_->isReplacementNeeded()
+      && !tr_model_->areReplacementPointsComputed())) {
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
@@ -300,7 +302,7 @@ void TrustRegionOptimization::iterate() {
           }
         }
       }
-    } // end-if: (tr_model_->isInitialized)
+    }
     return;
 }
 
@@ -390,7 +392,8 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           if (rho_ > eta_1) {
 
             //!<Successful iteration>
-            if (isImprovement(c)) { //TODO: we are considering a minimization problem. The default is a maximization problem.
+            //TODO: we are considering a minimization problem. The default is a maximization problem.
+            if (isImprovement(c)) {
               updateTentativeBestCase(c);
             }
 
