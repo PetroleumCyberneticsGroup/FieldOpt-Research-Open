@@ -1826,12 +1826,11 @@ TrustRegionModel::minimizeTr(Polynomial p,
 
     // TR tol
     // CG: tol_arg = max(1, norm(x_tr_center, inf));
-    if (x_tr_center.lpNorm<Infinity>() > 1.0) {
-//        Printer::ext_warn("X > 1 in EPS(X).",
-//                          "minimizeTr",
-//                          "TrustRegionModel");
-    }
     tol_tr = 10*std::numeric_limits<double>::epsilon();
+    if (x_tr_center.lpNorm<Infinity>() > 2.0) {
+        // Fix to match matlab code
+        tol_tr *= 2;
+    }
 
     // TR bounds
     bl_tr = x_tr_center.array() - radius;
