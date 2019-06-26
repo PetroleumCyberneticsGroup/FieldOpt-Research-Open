@@ -623,14 +623,14 @@ bool TrustRegionModel::improveModelNfp() {
               if (f_succeeded.all()) {
                 break;
               }
-            }  // end-if: (found_i < new_points_shifted.cols())
+            }
             if (f_succeeded.all()) {
               break;
               //!<Stop trying pivot polynomials for poly_i>
             }
-          } // end-if (point_found)
+          }
           //!<Attempt another polynomial if did not break>
-          if (poly_i < block_end) { // Keep the last values
+          if (poly_i < block_end) {
               nfp_new_points_shifted_.resize(0,0);
               nfp_new_pivots_.resize(0);
               nfp_new_point_shifted_.resize(0);
@@ -638,21 +638,20 @@ bool TrustRegionModel::improveModelNfp() {
               nfp_point_found_ = false;
               pt_case_uuid_.clear();
           }
-
-        } // end-for-loop: (poly_i <= block_end)
+        }
 
         if (nfp_point_found_ && f_succeeded.all()) {
           break; //!<(for attempts)>
         } else if (nfp_point_found_) {
           //!<Reduce radius if it did not break>
-          radius_used = 0.5*radius_used;
+          radius_used = 0.5 * radius_used;
           if (radius_used < tol_radius) {
             break;
           }
         } else {
           break;
         }
-      }  // end-for-loop: (attempts<=3)
+      }
 
       if (nfp_point_found_ && f_succeeded.all()) {
         setIsImprovementNeeded(false);
