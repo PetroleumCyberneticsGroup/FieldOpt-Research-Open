@@ -311,8 +311,8 @@ bool TrustRegionModel::rebuildModel() {
     all_fvalues_ << fvalues_, cached_fvalues_;
   }
 
-  int dim = all_points_.rows();
-  int n_points = all_points_.cols();
+  int dim = (int)all_points_.rows();
+  int n_points = (int)all_points_.cols();
   if (tr_center_ != 0) {
     //!<Center will be first>
     all_points_.col(0).swap(all_points_.col(tr_center_));
