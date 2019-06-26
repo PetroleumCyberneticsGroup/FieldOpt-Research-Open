@@ -1574,13 +1574,19 @@ bool TrustRegionModel::isComplete() {
     Printer::ext_warn("Too many points in the Trust Region model.",
                       "Optimization", "TrustRegionModel");
   }
-  return (points_num >= max_terms);
+  auto is_complete = (points_num >= max_terms);
+  return is_complete;
 }
 
 bool TrustRegionModel::isOld() {
   VectorXd distance(points_abs_.rows());
   distance = points_abs_.col(0) - points_abs_.col(tr_center_);
-  return (distance.lpNorm<Infinity>() > settings_->parameters().tr_radius_factor);
+
+  auto dist = distance.lpNorm<Infinity>();
+  auto tr_rad_fac = settings_->parameters().tr_radius_factor;
+  auto is_old = (dist > tr_rad_fac);
+
+  return is_old;
 }
 
 bool TrustRegionModel::chooseAndReplacePoint() {
