@@ -844,11 +844,11 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   VectorXd tol_interp(1);
   tol_interp(0) = 1e-8;
   tol_interp.cwiseMax(std::numeric_limits<double>::epsilon());
-  int n_points = points_abs_.cols();
 
-  for (int k=0; k<n_points; k++) {
+  for (int k=0; k < getNumPts(); k++) {
     auto val = evaluatePolynomial(ps, points_abs_.col(k));
-    auto error_interp = abs(val - fvalues_(k));
+    auto error_interp = abs(val - getFunctionValues()[k]);
+
     if (error_interp > tol_interp(0)) {
       //TODO: removed this error to avoid messing up with output
 //      Printer::ext_info("error_interp > tol_interp", "Optimization", "TrustRegionModel");
