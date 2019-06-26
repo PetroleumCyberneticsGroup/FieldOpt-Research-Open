@@ -826,15 +826,15 @@ int TrustRegionModel::changeTrCenter(
 
 std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   double radius = radius_;
-  auto obj_pol = modeling_polynomials_[0];
   auto x_tr_center = points_abs_.col(tr_center_);
-  obj_pol = shiftPolynomial(obj_pol, -x_tr_center); //!<Shift to origin>
+  auto p = getModelingPolynomials()[0];
+  auto ps = shiftPolynomial(p, -x_tr_center); //!<Shift to origin>
 
   Eigen::VectorXd trial_point(getXDim(), 1);
   double trial_fval;
   int exit_flag;
 
-  std::tie(trial_point, trial_fval, exit_flag) = minimizeTr(obj_pol, x_tr_center, radius,lb_, ub_);
+  std::tie(trial_point, trial_fval, exit_flag) = minimizeTr(ps, x_tr_center, radius,lb_, ub_);
   double current_fval = fvalues_(tr_center_);
   double trial_decrease = current_fval - trial_fval;
 
@@ -847,7 +847,7 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   int n_points = points_abs_.cols();
 
   for (int k=0; k<n_points; k++) {
-    auto val = evaluatePolynomial(obj_pol, points_abs_.col(k));
+    auto val = evaluatePolynomial(ps, points_abs_.col(k));
     auto error_interp = abs(val - fvalues_(k));
     if (error_interp > tol_interp) {
       //TODO: removed this error to avoid messing up with output
