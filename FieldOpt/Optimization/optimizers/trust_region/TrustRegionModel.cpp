@@ -379,14 +379,10 @@ bool TrustRegionModel::rebuildModel() {
 
     int block_beginning;
     int block_end;
-    cout << "poly_i: " << poly_i << endl;
-    cout << "dim: " << dim << endl;
 
     if (poly_i <= dim) {
       block_beginning = 1;
       block_end = dim;
-      cout << "linear block" << endl;
-      //!<linear block -- we allow more points (*2)
 
       max_layer = std::min(2 * settings_->parameters().tr_radius_factor, distance_farthest_point);
       if (iter > dim) {
@@ -397,7 +393,6 @@ bool TrustRegionModel::rebuildModel() {
 
       }
     } else { //!<Quadratic block -- being more carefull>
-      cout << "Quadratic block" << endl;
       max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
@@ -411,8 +406,6 @@ bool TrustRegionModel::rebuildModel() {
     double max_absval = 0;
     double pt_max = 0;
     for (int i = 0; i < all_layers.size(); i++) {
-        cout << "layer " << i << endl;
-        cout << "all_layers: " << all_layers << endl;
 
       auto layer = all_layers(i);
       double dist_max = layer * radius_;
@@ -435,7 +428,6 @@ bool TrustRegionModel::rebuildModel() {
     }
 
     if (abs(max_absval) > pivot_threshold) {
-        cout << "Points accepted" << endl;
       //!<Points accepted>
       int pt_next = last_pt_included + 1;
       if (pt_next != pt_max) {
