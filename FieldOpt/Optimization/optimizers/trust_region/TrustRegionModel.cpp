@@ -842,14 +842,15 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
 //    Printer::ext_info("current_fval <= trial_fval", "Optimization", "TrustRegionModel"); //TODO: commenting this prints to clean up the mess in the output
   }
 
-  //  double tol_interp = max(1e-08, eps(max(double(1), fvalues_.maxCoeff()))*1e03);
-  double tol_interp = 1e-08;
+  VectorXd tol_interp(1);
+  tol_interp(0) = 1e-8;
+  tol_interp.cwiseMax(std::numeric_limits<double>::epsilon());
   int n_points = points_abs_.cols();
 
   for (int k=0; k<n_points; k++) {
     auto val = evaluatePolynomial(ps, points_abs_.col(k));
     auto error_interp = abs(val - fvalues_(k));
-    if (error_interp > tol_interp) {
+    if (error_interp > tol_interp(0)) {
       //TODO: removed this error to avoid messing up with output
 //      Printer::ext_info("error_interp > tol_interp", "Optimization", "TrustRegionModel");
 
