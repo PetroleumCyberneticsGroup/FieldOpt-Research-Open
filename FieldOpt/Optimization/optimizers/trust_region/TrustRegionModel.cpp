@@ -531,6 +531,7 @@ bool TrustRegionModel::improveModelNfp() {
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
 
+  // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
     shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
