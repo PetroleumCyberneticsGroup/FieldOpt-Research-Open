@@ -91,8 +91,24 @@ void TrustRegionModel::moveToBestPoint() {
   if (best_i != tr_center_) {
     tr_center_ = best_i;
   }
+}
 
-// Here should rebuild polynomials!!!
+VectorXd TrustRegionModel::measureCriticality() {
+    auto p = getModelingPolynomials()[0];
+    double c;
+    VectorXd g(p.dimension);
+    MatrixXd H(p.dimension, p.dimension);
+
+    //!<g is just the gradient, measured on the tr_center>
+    tie(c, g, H) = coefficientsToMatrices(p.dimension, p.coefficients);
+
+    //!<Projected gradient>
+    VectorXd tr_center_pt = points_abs_.col(tr_center_);
+    VectorXd xmax = lb_.cwiseMax(tr_center_pt - g);
+    VectorXd xmin = ub_.cwiseMin(xmax);
+    VectorXd xdiff = xmin - tr_center_pt;
+
+    return xdiff;
 }
 
 ModelMatrix TrustRegionModel::getModelMatrices(int m) {
@@ -194,23 +210,6 @@ void TrustRegionModel::criticalityStep() {
             init_radius_);
 }
 
-VectorXd TrustRegionModel::measureCriticality() {
-  auto p = getModelingPolynomials()[0];
-  double c;
-  VectorXd g(p.dimension);
-  MatrixXd H(p.dimension, p.dimension);
-
-  //!<g is just the gradient, measured on the tr_center>
-  tie(c, g, H) = coefficientsToMatrices(p.dimension, p.coefficients);
-
-  //!<Projected gradient>
-  VectorXd tr_center_pt = points_abs_.col(tr_center_);
-  VectorXd xmax = lb_.cwiseMax(tr_center_pt - g);
-  VectorXd xmin = ub_.cwiseMin(xmax);
-  VectorXd xdiff = xmin - tr_center_pt;
-
-  return xdiff;
-}
 
 double TrustRegionModel::checkInterpolation() {
 
