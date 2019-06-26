@@ -1751,8 +1751,6 @@ TrustRegionModel::pointNew(Polynomial polynomial,
                            Eigen::VectorXd bu,
                            double pivot_threshold) {
 
-//    cout << "Find new pt -> Calling minimize_tr() twice" << endl;
-
     Eigen::VectorXd new_point_min(getXDim(), 1);
     Eigen::VectorXd new_point_max(getXDim(), 1);
     Eigen::MatrixXd new_points(getXDim(), 2);
@@ -1825,11 +1823,11 @@ TrustRegionModel::minimizeTr(Polynomial p,
                              Eigen::VectorXd bl,
                              Eigen::VectorXd bu) {
 
-    Eigen::VectorXd x(dim_, 1);
-    Eigen::VectorXd bl_tr(dim_, 1), bu_tr(dim_, 1);
-    Eigen::VectorXd bl_mod(dim_, 1), bu_mod(dim_, 1);
+    Eigen::VectorXd x(getXDim(), 1);
+    Eigen::VectorXd bl_tr(getXDim(), 1), bu_tr(getXDim(), 1);
+    Eigen::VectorXd bl_mod(getXDim(), 1), bu_mod(getXDim(), 1);
 
-    Eigen::VectorXd x0(dim_, 1);
+    Eigen::VectorXd x0(getXDim(), 1);
     double fval;
 
     double tol_norm, tol_arg, tol_tr, tol_eps;
@@ -1871,8 +1869,6 @@ TrustRegionModel::minimizeTr(Polynomial p,
     tie(c, g, H) = coefficientsToMatrices(p.dimension,
                                           p.coefficients);
 
-//    cout << "Minimize TR using SNOPT";
-
     // Set prob name (incl. spec) to be solved
     Optimizer::EmbeddedProblem prob;
     prob.setProbName("TRMod_A");
@@ -1892,8 +1888,8 @@ TrustRegionModel::minimizeTr(Polynomial p,
     VectorXd FLb(1 + prob.getNunNnlConst());
 
     // Bounds on objective of tr prob
-    FUb(0) = 1e20;
-    FLb(0) = -1e20;
+    FUb(0) = 1e200;
+    FLb(0) = -1e200;
 
     // Bounds on nonlinear c imposed on tr prob
     // NOTE: not active since prob.getNunNnlConst() = 0
