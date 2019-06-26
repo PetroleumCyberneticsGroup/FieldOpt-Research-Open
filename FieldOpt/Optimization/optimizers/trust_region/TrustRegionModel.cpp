@@ -748,10 +748,6 @@ int TrustRegionModel::ensureImprovement() {
       exit_flag = 4;
     }
   }
-
-//  cout << "success" << success << endl;
-//  cout << "exit ensureImprovement: " << exit_flag << endl;
-
   return exit_flag;
 }
 
@@ -761,7 +757,7 @@ bool TrustRegionModel::isLambdaPoised() {
   int points_num = (int)points_abs_.cols();
 
   double pivot_threshold = settings_->parameters().tr_pivot_threshold;
-  bool result = false;
+  bool result = false; // TODO: value not used
 
   if (!settings_->parameters().tr_basis.compare("dummy")) {
     result = true;
