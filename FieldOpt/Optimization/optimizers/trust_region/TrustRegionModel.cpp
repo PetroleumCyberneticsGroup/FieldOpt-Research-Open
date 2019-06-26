@@ -876,12 +876,21 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
   if (!point_added) {
     //!<Save information about this new point, just not to lose>
     int nc = cached_points_.cols();
-    cached_points_.conservativeResize(max(cached_points_.rows(), points_abs_.rows()), nc+1);
-    cached_points_.col(nc) = new_point;
+    int nr = max(cached_points_.rows(), points_abs_.rows());
+
+    MatrixXd P(nr, nc+1);
+    if (cached_points_.cols() > 0) {
+        P << new_point, cached_points_;
+    } else {
+        P << new_point;
+    }
+    cached_points_.conservativeResize(P.rows(), P.cols());
+    cached_points_.swap(P);
 
     int nc_f = cached_fvalues_.cols();
-    cached_fvalues_.conservativeResize(nc_f+1);
-    cached_fvalues_(nc_f) = new_fvalue;
+    RowVectorXd F(nc_f+1);
+    cached_fvalues_.conservativeResize(F.size());
+    cached_fvalues_.swap(F);
 
     //!<Either add a geometry improving point or rebuild model>
     exit_flag = ensureImprovement();
