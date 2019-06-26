@@ -1003,8 +1003,8 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
   bool succeeded = false;
   int pt_i = 0;
   int pivot_threshold = min(double(1), radius_)*relative_pivot_threshold;
-  int dim = points_abs_.rows();
-  int last_p = points_abs_.cols()-1;
+  int dim = (int)points_abs_.rows();
+  int last_p = (int)points_abs_.cols()-1;
   int center_i = tr_center_;
 
   if (last_p >= 1) {
@@ -1047,11 +1047,11 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
       orthogonalizeBlock(new_point_shifted, max_poly_i, block_beginning, last_p);
 
       //!<Update model>
-      int nc_cp = cached_points_.cols();
+      int nc_cp = (int)cached_points_.cols();
       cached_points_.conservativeResize(cached_points_.rows(), nc_cp+1);
       cached_points_.col(nc_cp) = points_abs_.col(max_poly_i);
 
-      int nc_fv = cached_fvalues_.cols();
+      int nc_fv = (int)cached_fvalues_.cols();
       cached_fvalues_.conservativeResize(nc_fv+1);
       cached_fvalues_(nc_fv) = fvalues_(max_poly_i);
 
@@ -1080,7 +1080,7 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
   bool success = false;
   double pivot_value = 0;
 
-  for (int k=initial_i; k<=final_i; k++) {
+  for (int k = initial_i; k <= final_i; k++) {
     auto polynomial = orthogonalizeToOtherPolynomials(k, last_point);
     auto val = evaluatePolynomial(polynomial, incumbent_point);
 
@@ -1122,7 +1122,7 @@ void TrustRegionModel::computePolynomialModels() {
   if ((points_num <= linear_terms) || (points_num == full_q_terms)) {
     //!<Compute model with incomplete (complete) basis>
     auto l_alpha = nfpFiniteDifferences(points_num);
-    for (int k=functions_num-1; k>=0; k--) {
+    for (int k = functions_num-1; k >= 0; k--) {
       polynomials[k] = combinePolynomials(points_num, l_alpha);
       polynomials[k] = shiftPolynomial(polynomials[k], points_shifted_.col(tr_center_));
     }
@@ -1300,8 +1300,8 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
   MatrixXd H(dimension, dimension);
   H.setZero(dimension,dimension);
 
-  for (int k=0; k<dimension; k++) {
-    for (int m=0; m <= k; m++) {
+  for (int k = 0; k < dimension; k++) {
+    for (int m = 0; m <= k; m++) {
       idx_coefficients++;
       H(k,m) = coefficients(idx_coefficients);
       H(m,k) = H(k,m);
@@ -1317,7 +1317,7 @@ Polynomial TrustRegionModel::normalizePolynomial(
     VectorXd point) {
   auto polynomial = pivot_polynomials_[poly_i];
   auto val = evaluatePolynomial(polynomial, point);
-  for (int i=0; i<3; i++) {
+  for (int i = 0; i < 3; i++) {
     polynomial = multiplyPolynomial(polynomial, (double) 1/val);
     val = evaluatePolynomial(polynomial, point);
     if ((val - 1) == 0) {
@@ -1331,7 +1331,7 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
     int poly_i,
     int last_pt) {
   auto polynomial = pivot_polynomials_[poly_i];
-  for (int n=0; n<=last_pt; n++) {
+  for (int n = 0; n <= last_pt; n++) {
     if (n != poly_i) {
       polynomial = zeroAtPoint(polynomial,
                                pivot_polynomials_[n],
@@ -1346,7 +1346,7 @@ void TrustRegionModel::orthogonalizeBlock(
     int np,
     int block_beginning,
     int block_end) {
-  for (int p = block_beginning; p<=block_end; p++) {
+  for (int p = block_beginning; p <= block_end; p++) {
     if (p != np) {
       pivot_polynomials_[p] = zeroAtPoint(pivot_polynomials_[p], pivot_polynomials_[np], point);
     }
@@ -1436,7 +1436,7 @@ int TrustRegionModel::findBestPoint() {
   auto min_f = std::numeric_limits<double>::infinity();
 
 
-  for (int k=0; k<n_points; k++) {
+  for (int k = 0; k < n_points; k++) {
     VectorXd point = points_abs_.col(k);
     if (((point - lb_).minCoeff() >= 0) &&  ((ub_ - point).minCoeff() > 0)) {
       auto val = fvalues_(k);
@@ -1485,36 +1485,36 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
   //TODO: raise a warning if the system is badly conditioned
   // using the resulting conditioning number (tol=1e4*eps(1))
 
-  for (int n=0; n<getNumFvals(); n++) {
+  for (int n = 0; n < getNumFvals(); n++) {
     VectorXd g = VectorXd::Zero(getXDim());
     MatrixXd H = MatrixXd::Zero(getXDim(),getXDim());
-    for (int m=0; m<getNumPts()-1; m++) {
+    for (int m = 0; m < getNumPts()-1; m++) {
       g += mult_mn(m)*points_shifted.col(m);
       H += mult_mn(m)*(points_shifted.col(m)*points_shifted.col(m).transpose());
     }
     auto c = fvalues_(tr_center_);
 
     polynomials[n] = matricesToPolynomial(c, g, H);
-
   }
   return polynomials;
 }
 
 RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   //!<Change so we can interpolate more functions at the same time>
-  int dim = (int)points_shifted_.cols();
+  int dim = (int)points_shifted_.rows();
   RowVectorXd l_alpha = fvalues_;
-    std::vector<Polynomial> polynomials = std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+    std::vector<Polynomial> polynomials =
+            std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
 
   //!<Remove constant polynomial>
-  for (int m=1; m<points_num; m++) {
+  for (int m = 1; m < points_num; m++) {
     auto val = evaluatePolynomial(polynomials[0], points_shifted_.col(m));
     l_alpha(m) = l_alpha(m) - l_alpha(0)*val;
   }
 
   //!<Remove terms corresponding to degree 1 polynomials>
-  for (int m=dim+1; m <points_num; m++) {
-    for (int n=1; n<dim+1; n++) {
+  for (int m = dim+1; m < points_num; m++) {
+    for (int n = 1; n < dim+1; n++) {
       auto val = evaluatePolynomial(polynomials[n], points_shifted_.col(m));
       l_alpha(m) = l_alpha(m) - l_alpha(n)*val;
     }
@@ -1562,7 +1562,7 @@ Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial, VectorXd s) 
   VectorXd g_mod(g.size());
   g_mod = g + H*s;
 
-  return matricesToPolynomial(c_mod,g_mod, H);
+  return matricesToPolynomial(c_mod, g_mod, H);
 }
 
 bool TrustRegionModel::isComplete() {
