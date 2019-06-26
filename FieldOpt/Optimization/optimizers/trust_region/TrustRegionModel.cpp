@@ -520,12 +520,12 @@ bool TrustRegionModel::improveModelNfp() {
 
   if (lb_.rows() <= 0) {
     lb_.resize(dim);
-    lb_.fill(-Eigen::Infinity);
+    lb_.fill(-std::numeric_limits<double>::infinity());
   }
 
   if (ub_.rows() <= 0) {
     ub_.resize(dim);
-    ub_.fill(Eigen::Infinity);
+    ub_.fill(std::numeric_limits<double>::infinity());
   }
 
   auto bl_shifted = lb_ - shift_center;
