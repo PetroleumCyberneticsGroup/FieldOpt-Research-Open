@@ -181,7 +181,6 @@ void TrustRegionModel::criticalityStep() {
                                   "Optimization", "Trust Region Model");
                 break;
             }
-
         }
 
         if ((radius_ < tol_radius
@@ -218,8 +217,6 @@ double TrustRegionModel::checkInterpolation() {
 
   // Remove shift center from all points
   int points_num = (int)points_abs_.cols();
-
-
 
   MatrixXd hh = points_abs_;
   for (int ii=points_num-1; ii >= 0; ii--) {
