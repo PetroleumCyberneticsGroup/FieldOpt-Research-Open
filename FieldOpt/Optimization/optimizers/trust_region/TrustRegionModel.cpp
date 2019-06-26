@@ -1593,8 +1593,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   double pivot_threshold = settings_->parameters().tr_exchange_threshold;
   double radius = radius_;
 
-  int dim = points_shifted_.rows();
-  int points_num = points_shifted_.cols();
+  int dim = (int)points_shifted_.rows();
+  int points_num = (int)points_shifted_.cols();
   auto points_shifted = points_shifted_;
 
   int tr_center = tr_center_;
@@ -1613,9 +1613,6 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
   f_succeeded.resize(1);
   f_succeeded.fill(false);
-
-//  unshift_point = @(x) max(min(x + shift_center, bu), bl);
-//  tol_shift = 10*eps(max(1, norm(shift_center, inf)));
 
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
@@ -1637,7 +1634,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   int polynomials_num = pivot_polynomials_.size();
   //!<Could iterate through all pivots, but will try just dealing with the worst one>
   auto pos = piv_order_(0);
-  if ((pos == 0) || (pos == tr_center) || (pos <= linear_terms  && points_num > linear_terms)) {
+  if ((pos == 0) || (pos == tr_center) || (pos <= linear_terms && points_num > linear_terms)) {
     //!<Better to just rebuild model>
     success = false;
   } else {
@@ -1645,9 +1642,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
     auto current_pivot_value = pivot_values_(pos);
 
     if (!areReplacementPointsComputed()) {
-      std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) = pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
-
-
+      std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) =
+              pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
     }
 
     if (repl_point_found_) {
@@ -1688,6 +1684,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
           }
           setAreReplacementPointsComputed(false);
+          repl_pt_case_uuid_.clear();
         }
         if (f_succeeded.all()) {
           break;
@@ -1701,7 +1698,6 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       if (!replacement_cases_.size() == 0) {
           clearReplacementCasesList();
       }
-
 
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
