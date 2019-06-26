@@ -309,6 +309,8 @@ class TrustRegionModel {
     Matrix<double,Dynamic,Dynamic> points_shifted_;
     Matrix<double,Dynamic,Dynamic> cached_points_;
 
+    Matrix<double,Dynamic,Dynamic> points_shifted_temp_;
+
     RowVectorXd all_fvalues_;
     RowVectorXd fvalues_;
 

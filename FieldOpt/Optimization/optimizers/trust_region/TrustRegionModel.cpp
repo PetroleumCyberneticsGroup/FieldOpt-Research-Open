@@ -905,8 +905,8 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
   int exit_flag;
   double pivot_threshold = min(double(1.0), radius_)*relative_pivot_threshold;
-  int dim = points_abs_.rows();
-  int last_p = points_abs_.cols()-1;
+  int dim = (int)points_abs_.rows();
+  int last_p = (int)points_abs_.cols() - 1;
 
   VectorXd new_point_shifted(dim);
   VectorXd shift_center(dim);
@@ -915,20 +915,24 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
   int polynomials_num = pivot_polynomials_.size();
 
+  Matrix<double,Dynamic,Dynamic> points_shifted_old = points_shifted_;
+
   if (last_p >= 0) {
     shift_center = points_abs_.col(0);
     new_point_shifted = new_point - shift_center;
 
-    int nc = points_shifted_.cols();
-    points_shifted_.conservativeResize(points_shifted_.rows(), nc+1);
-    points_shifted_.col(nc) = new_point_shifted;
+    points_shifted_temp_ = points_shifted_;
+
+    int nc = points_shifted_temp_.cols();
+    points_shifted_temp_.conservativeResize(points_shifted_temp_.rows(), nc+1);
+    points_shifted_temp_.col(nc) = new_point_shifted;
 
   } else {
     Printer::ext_info("cmg:no_point",
                       "Tr model had no point. Should this ever happen ?", "addPoint");
   }
 
-  int next_position = last_p+1;
+  int next_position = last_p + 1;
   if (next_position == 0) {
     //!<Should be rebuilding model!>
     tr_center_ = 0;
@@ -937,16 +941,16 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     Printer::ext_info("cmg:no_point",
                       "TR model had no point. This should never happen", "addPoint");
   } else if (next_position < polynomials_num) {
-    int block_beginning =0;
-    int block_end =0;
+    int block_beginning = 0;
+    int block_end = 0;
     if (next_position <= dim)  {
       //!<Add to linear block>
       block_beginning =1;
       block_end = dim;
     } else {
       //!<Add to quadratic block>
-      block_beginning = dim+1;
-      block_end = polynomials_num-1;
+      block_beginning = dim + 1;
+      block_end = polynomials_num - 1;
     }
 
     tie(pivot_value, success) = choosePivotPolynomial(next_position, block_end, pivot_threshold);
@@ -970,10 +974,13 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     exit_flag = 0;
   }
   if (exit_flag > 0) {
-    points_shifted_.col(next_position) = new_point_shifted;
+    points_shifted_temp_.col(next_position) = new_point_shifted;
+    points_shifted_.conservativeResize(points_shifted_temp_.rows(),
+            points_shifted_temp_.cols());
+    points_shifted_ = points_shifted_temp_;
+
     fvalues_.conservativeResize(fvalues_.cols()+1);
     fvalues_(next_position) = new_fvalue;
-
 
     int nr = (int)points_abs_.rows();
     int nc = (int)points_abs_.cols();
@@ -981,7 +988,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     points_abs_.col(next_position) = new_point;
 
     modeling_polynomials_.clear();
-    pivot_values_.conservativeResize(pivot_values_.cols()+1);
+    // pivot_values_.conservativeResize(pivot_values_.cols() + 1); // bug: should not be resized.
     pivot_values_(next_position) = pivot_value;
   }
   return exit_flag;
@@ -1068,7 +1075,7 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
 
 tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int final_i, double tol) {
   int last_point = initial_i - 1;
-  auto incumbent_point = points_shifted_.col(initial_i);
+  auto incumbent_point = points_shifted_temp_.col(initial_i);
   auto pivot_polynomials = pivot_polynomials_;
   bool success = false;
   double pivot_value = 0;
