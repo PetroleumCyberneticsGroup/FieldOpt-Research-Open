@@ -605,7 +605,6 @@ bool TrustRegionModel::improveModelNfp() {
                   f_succeeded.fill(false);
                   for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
-                    int nvars = (int)improvement_cases_[0]->GetRealVarVector().size();
                     auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
                     nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
                     nfp_new_fvalues_(ii) = c->objective_function_value();
@@ -619,6 +618,7 @@ bool TrustRegionModel::improveModelNfp() {
                     // }
                   }
                   setAreImprovementPointsComputed(false);
+                  pt_case_uuid_.clear();
               }
               if (f_succeeded.all()) {
                 break;
