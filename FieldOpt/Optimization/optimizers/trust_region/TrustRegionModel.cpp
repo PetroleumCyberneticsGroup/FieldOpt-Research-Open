@@ -795,7 +795,7 @@ int TrustRegionModel::changeTrCenter(
 
   if (point_added) {
     //!<Function add_point adds this as the last. Now we have to set as TR center>
-    tr_center_ = points_abs_.cols()-1; //!<Last among the points>
+    tr_center_ = (int)points_abs_.cols() - 1; //!<Last among the points>
     exit_flag = 1;
   } else {
     tie(point_exchanged, pt_i) = exchangePoint(new_point, new_fvalue, relative_pivot_threshold);
@@ -806,15 +806,16 @@ int TrustRegionModel::changeTrCenter(
       //!<AddPoint and exchangePoint failed,
       //!< but we still need to add this new point
       //!< as TR center. Model needs rebuilding>
-      int nc = points_abs_.cols();
-      int nr = points_abs_.rows();
+      int nc = (int)points_abs_.cols();
+      int nr = (int)points_abs_.rows();
       points_abs_.conservativeResize(nr, nc+1);
       points_abs_.col(nc) = new_point;
 
-      int nc_f = fvalues_.cols();
+      int nc_f = (int)fvalues_.cols();
       fvalues_.conservativeResize(nc_f+1);
       fvalues_(nc_f) = new_fvalue;
-      tr_center_ = nc;  //!<Last point>
+
+      tr_center_ = (int)points_abs_.cols(); //!<Last point>
       bool model_changed = rebuildModel();
       exit_flag = 4;
     }
