@@ -242,11 +242,10 @@ double TrustRegionModel::checkInterpolation() {
       // This should be written using only Eigen methods...
       cA = std::max(tol1 * fvalues_.array().abs().maxCoeff(), tol2);
       if (std::abs(cdiff) > cA) {
+          // TODO: removed this print just to avoid messing up output
 //        Printer::ext_warn("cmg:tr_interpolation_error",
-//                          "Interpolation error"); //TODO: removed this print just to avoid messing up output
-
+//                          "Interpolation error");
       }
-
     }
   }
 }
@@ -254,7 +253,7 @@ double TrustRegionModel::checkInterpolation() {
 void TrustRegionModel::submitTempInitCases() {
   initialization_cases_ = temp_init_cases_;
 
-  int nvars = initialization_cases_[0]->GetRealVarVector().size();
+  int nvars = (int)initialization_cases_[0]->GetRealVarVector().size();
   points_abs_.setZero(nvars, initialization_cases_.size());
   fvalues_.setZero(initialization_cases_.size());
 
@@ -294,7 +293,6 @@ void TrustRegionModel::clearReplacementCasesList() {
 
 
 bool TrustRegionModel::rebuildModel() {
-  double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   //!<All points we know>
   all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
@@ -322,6 +320,7 @@ bool TrustRegionModel::rebuildModel() {
     all_fvalues_(tr_center_) = all_fvalues_(0);
     all_fvalues_(0) = center_fvalue;
   }
+
   //!<Calculate distances from tr center>
   points_shifted_.conservativeResize(dim, n_points);
   distances_.conservativeResize(n_points);
@@ -355,6 +354,9 @@ bool TrustRegionModel::rebuildModel() {
   sortVectorByIndex(all_fvalues_, index_vector_);
 
   nfpBasis(dim);//!<build nfp polynomial basis>
+
+  //!<Starting rowPivotGaussianElimination>
+  double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   int polynomials_num = pivot_polynomials_.size();
   pivot_values_.conservativeResize(polynomials_num);
