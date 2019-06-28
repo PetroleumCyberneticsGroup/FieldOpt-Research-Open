@@ -156,15 +156,13 @@ namespace TestResources {
 
   } // End of void FindVarSequence
 
-  void PrintCaseData(Optimization::Case &c,
-                     Optimization::Optimizers::TrustRegionOptimization &tr_dfo){
+  void PrintCaseData(Optimization::Case &c){
 
     // PRINT CASE DATA (ID, X, F)
     stringstream ss; ss << "[          ] " << FMAGENTA;
     cout << ss.str()
          << "---------------------------------------------------------" << END << endl;
     cout << ss.str() << "Case id: " << c.GetId().toString().toStdString() << END << endl;
-    cout << ss.str() << "# initial points: " << tr_dfo.GetNumInitPoints() << END << endl;
     cout << ss.str() << "x: [" << c.GetRealVarVector().transpose() << "]" << END << endl;
     cout << ss.str() << "f: [" << c.objective_function_value() << "]" << END << endl;
 

@@ -133,7 +133,7 @@ namespace {
                 }
 
                 // Print case data (id, x, f)
-                TestResources::PrintCaseData(*next_case, *tr_dfo_);
+                TestResources::PrintCaseData(*next_case);
 
                 // Test if current point is equal to matlab data
                 if (p_count < 2) {
