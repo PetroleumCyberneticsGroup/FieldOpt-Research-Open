@@ -110,7 +110,7 @@ namespace {
 
         }
 
-        void RunnerSubs(TestResources::TrustRegionModelData::prob prob,
+        bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
                         double (*tr_dfo_prob)(VectorXd xs)){
 
             stringstream ss; ss << "[          ] " << FMAGENTA;
@@ -167,8 +167,14 @@ namespace {
             }
 
             cout << ss.str() << "----------------------" << END << endl;
+
+            cout << "x=" << tr_dfo_->getTrustRegionModel()->getCurrentPoint();
+            cout << "fval=" << tr_dfo_->getTrustRegionModel()->getCurrentFval();
+
             auto best_case = tr_dfo_->GetTentativeBestCase();
             cout << best_case->objective_function_value() << endl;
+
+            return true;
         }
 
     };
