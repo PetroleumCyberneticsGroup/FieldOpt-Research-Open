@@ -94,7 +94,37 @@ namespace TestResources {
         inline double tr_dfo_prob3(VectorXd xs) {
             double arg1 = M_PI * xs(0)/12;
             double arg2 = M_PI * xs(1)/16;
-            return sin(arg1) + cos(arg2);
+            return sin(arg1) * cos(arg2);
+        }
+
+        /*!
+         * @brief CG.prob4 -> f = @(x) 0.01*(x(1) - 1)^2 + (x(2) - x(1)^2)^2;
+         * Initial point: x0=[2.0 2.0 2.0]
+         */
+        inline double tr_dfo_prob4(VectorXd xs) {
+            double arg1 = 0.01 * pow((xs(0) - 1), 2);
+            double arg2 = pow(xs(1) - pow(xs(0), 2), 2);
+            return arg1 + arg2;
+        }
+
+        /*!
+         * @brief CG.prob5 -> f = @(x) (x(1)-x(2))^2 + (x(2) - x(3))^4;
+         * Initial point: x0=[-2.6 2.0 2.0]
+         */
+        inline double tr_dfo_prob5(VectorXd xs) {
+            double arg1 = pow((xs(0) - xs(1)), 2);
+            double arg2 = pow((xs(1) - xs(2)), 4);
+            return arg1 + arg2;
+        }
+
+        /*!
+         * @brief CG.prob6 -> f = @(x) (x(1) + x(2))^2 + (x(2) + x(3))^2;
+         * Initial point: x0=[-4.0 1.0 1.0]
+         */
+        inline double tr_dfo_prob6(VectorXd xs) {
+            double arg1 = pow((xs(0) - xs(1)), 2);
+            double arg2 = pow((xs(1) - xs(2)), 2);
+            return arg1 + arg2;
         }
 
     }
