@@ -186,7 +186,7 @@ namespace {
              << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
 
         SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
-        RunnerSubs(tr_mdata.prob1, tr_dfo_prob1);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob2) {
@@ -197,7 +197,7 @@ namespace {
              << END << endl;
 
         SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
-        RunnerSubs(tr_mdata.prob2, tr_dfo_prob2);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
     }
 
     TEST_F(TrustRegionTest, tr_dfo_prob3) {
@@ -208,17 +208,45 @@ namespace {
              << END << endl;
 
         SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
-        RunnerSubs(tr_mdata.prob3, tr_dfo_prob3);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
     }
 
-//    TEST_F(TrustRegionTest, tr_dfo_prob4) {
-//        cout << FMAGENTA
-//             << "[ CG.prob4 ] f = @(x) "
-//             << END << endl;
-//        SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
-//        RunnerSubs(tr_mdata.prob4, tr_dfo_prob4);
-//    }
+    TEST_F(TrustRegionTest, tr_dfo_prob4) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob4 ] "
+             << "f = @(x) 0.01*(x(1) - 1)^2 + (x(2) - x(1)^2)^2; x0=[2.0 2.0 2.0]"
+             << END << endl;
 
+        // -------------------------------------------------------
+        SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
+    }
+
+    TEST_F(TrustRegionTest, tr_dfo_prob5) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob4 ] "
+             << "f = @(x) (x(1)-x(2))^2 + (x(2) - x(3))^4; x0=[-2.6 2.0 2.0]"
+             << END << endl;
+
+        // -------------------------------------------------------
+        SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob5, tr_dfo_prob5));
+    }
+
+    TEST_F(TrustRegionTest, tr_dfo_prob6) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob4 ] "
+             << "f = @(x) (x(1) + x(2))^2 + (x(2) + x(3))^2; x0=[-4.0 1.0 1.0]"
+             << END << endl;
+
+        // -------------------------------------------------------
+        SetUpOptimizer(tr_mdata.prob6, tr_dfo_prob6);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob6, tr_dfo_prob6));
+    }
+    
     TEST_F(TrustRegionTest, tr_dfo_initial_model_created) {
         bool is_model_present = false;
         SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
