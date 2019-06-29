@@ -108,7 +108,7 @@ namespace TestResources {
         }
 
         /*!
-         * @brief CG.prob5 -> f = @(x) (x(1)-x(2))^2 + (x(2) - x(3))^4;
+         * @brief CG.prob5 -> f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^4;
          * Initial point: x0=[-2.6 2.0 2.0]
          */
         inline double tr_dfo_prob5(VectorXd xs) {
@@ -125,6 +125,66 @@ namespace TestResources {
             double arg1 = pow((xs(0) - xs(1)), 2);
             double arg2 = pow((xs(1) - xs(2)), 2);
             return arg1 + arg2;
+        }
+
+        /*!
+         * @brief CG.prob7 -> f = @(x) log1p(x(1)^2) + log1p((x(1)
+         * - x(2))^2) + log1p((x(2) - x(3))^2) + log1p((x(3) - x(4))^2);
+         * Initial point: x0=[2.0 2.0 2.0 2.0]
+         */
+        inline double tr_dfo_prob7(VectorXd xs) {
+            double arg1 = log1p(pow(xs(0), 2));
+            double arg2 = log1p(pow((xs(0) - xs(1)), 2));
+            double arg3 = log1p(pow((xs(1) - xs(2)), 2));
+            double arg4 = log1p(pow((xs(2) - xs(3)), 2));
+            return arg1 + arg2 + arg3 + arg4;
+        }
+
+        /*!
+         * @brief CG.prob8 -> f = @(x) (x(1)*x(2)*x(3)*x(4))^2;
+         * Initial point: x0=[0.8 0.8 0.8 0.8]
+         */
+        inline double tr_dfo_prob8(VectorXd xs) {
+            double arg1 = pow((xs(0) * xs(1) * xs(2) * xs(3)), 2);
+            return arg1;
+        }
+
+        /*!
+         * @brief CG.prob9 -> f = @(x) (x(1)-1)^2 + (x(2)-2)^2 + (x(3)-3)^2 + (x(4)-4)^2;
+         * Initial point: x0=[1.0 1.0 1.0 1.0]
+         */
+        inline double tr_dfo_prob9(VectorXd xs) {
+            double arg1 = pow((xs(0) - 1), 2);
+            double arg2 = pow((xs(1) - 2), 2);
+            double arg3 = pow((xs(2) - 3), 2);
+            double arg4 = pow((xs(3) - 4), 2);
+            return arg1 + arg2 + arg3 + arg4;
+        }
+
+        /*!
+         * @brief CG.prob10 -> f = @(x)
+         * (x(1) - x(2))^2 + (x(2) - x(3))^2 +
+         * (x(3) - x(4))^4 + (x(4) - x(5))^4;
+         * Initial point: x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]
+         */
+        inline double tr_dfo_prob10(VectorXd xs) {
+            double arg1 = pow((xs(0) - xs(1)), 2);
+            double arg2 = pow((xs(1) - xs(2)), 2);
+            double arg3 = pow((xs(2) - xs(3)), 4);
+            double arg4 = pow((xs(3) - xs(4)), 4);
+            return arg1 + arg2 + arg3 + arg4;
+        }
+
+        /*!
+         * @brief CG.prob11 -> f = @(x) sum(2*x./(x.*x + 1));
+         * Initial point: x0=[1.0 1.0 1.0 1.0]
+         */
+        inline double tr_dfo_prob11(VectorXd xs) {
+            auto xc = xs; xc.fill(1);
+            auto arg1 = 2*xs;
+            auto arg2 = xs.cwiseProduct(xs) + xc;
+            auto arg3 = arg1.cwiseQuotient(arg2);
+            return arg3.sum();
         }
 
     }
