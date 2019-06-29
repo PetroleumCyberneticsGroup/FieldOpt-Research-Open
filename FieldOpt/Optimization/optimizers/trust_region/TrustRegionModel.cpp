@@ -46,7 +46,7 @@ bool compare(
     const int &lhs,
     const int &rhs,
     const double *distances) {
-  return distances[lhs] <= distances[rhs];
+  return distances[lhs] < distances[rhs];
 }
 
 TrustRegionModel::TrustRegionModel(
