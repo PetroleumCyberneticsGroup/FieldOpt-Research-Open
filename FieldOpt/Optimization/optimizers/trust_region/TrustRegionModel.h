@@ -359,7 +359,7 @@ class TrustRegionModel {
     MatrixXd repl_new_points_shifted_;
     RowVectorXd repl_new_pivots_;
 
-    VectorXd repl_new_point_shifted_;
+    MatrixXd repl_new_point_shifted_;
     VectorXd repl_new_point_abs_;
     RowVectorXd repl_new_fvalues_;
     bool repl_point_found_ = false;
