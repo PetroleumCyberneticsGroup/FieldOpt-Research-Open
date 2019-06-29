@@ -100,7 +100,6 @@ namespace {
             // Use initial point from Matlab data
             test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
 
-            cout << "SetUpOptimizer" << endl;
             tr_dfo_ = new TrustRegionOptimization(
                     settings_tr_opt_max_,
                     test_case_tr_dfo_probs_,
@@ -120,7 +119,6 @@ namespace {
             while (tr_dfo_->IsFinished()
             == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
-                cout << "Runner@start: Call GetCaseForEvaluation()" << endl;
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
 
                 // Compute obj.function value for case
@@ -145,7 +143,6 @@ namespace {
                 }
 
                 // Finish Runner
-                cout << "Runner@end: Call SubmitEvaluatedCase()" << endl;
                 tr_dfo_->SubmitEvaluatedCase(next_case);
 
                 if (tr_dfo_->getTrustRegionModel()->isInitialized() && (p_count < 2)) {
@@ -161,18 +158,15 @@ namespace {
                             prob.pcm, tol, "Check pivot coeff. vector #");
 
                 }
-
                 p_count++;
-
             }
 
-            cout << ss.str() << "----------------------" << END << endl;
-
-            cout << "x=" << tr_dfo_->getTrustRegionModel()->getCurrentPoint();
-            cout << "fval=" << tr_dfo_->getTrustRegionModel()->getCurrentFval();
-
-            auto best_case = tr_dfo_->GetTentativeBestCase();
-            cout << best_case->objective_function_value() << endl;
+            stringstream sx;
+            sx << setw(12) << scientific << right << setprecision(6)
+               << "---------------------------------------------" << endl
+               << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
+               << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval();
+            cout << sx.str();
 
             return true;
         }
