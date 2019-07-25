@@ -120,6 +120,13 @@ namespace {
             == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
                 auto next_case = tr_dfo_->GetCaseForEvaluation();
+                if (next_case == nullptr) {
+                  if (tr_dfo_->IsFinished())
+                    break;
+                  else {
+                    next_case = tr_dfo_->GetCaseForEvaluation();
+                  }
+                }
 
                 // Compute obj.function value for case
                 next_case->set_objective_function_value(
@@ -165,7 +172,7 @@ namespace {
             sx << setw(12) << scientific << right << setprecision(6)
                << "---------------------------------------------" << endl
                << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
-               << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval();
+               << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval()  << endl;
             cout << sx.str();
 
             return true;

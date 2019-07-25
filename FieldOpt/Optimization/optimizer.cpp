@@ -89,6 +89,9 @@ Case *Optimizer::GetCaseForEvaluation()
         time(&end);
         seconds_spent_in_iterate_ = difftime(end, start);
     }
+    if (IsFinished() || (case_handler_->QueuedCases().size()  == 0))   {
+      return nullptr;
+    }
     return case_handler_->GetNextCaseForEvaluation();
 }
 
