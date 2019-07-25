@@ -173,8 +173,7 @@ void TrustRegionOptimization::iterate() {
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
-
-          finalizeAlgorithm();
+          cout << "IsFinished():" << IsFinished() << endl;
           return; //end of the algorithm
         } else {
           if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
@@ -195,7 +194,6 @@ void TrustRegionOptimization::iterate() {
             criticality_step_performed_ = true;
             if (model_criticality.squaredNorm() < tol_f) {
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
-              finalizeAlgorithm();
               return;
             }
           }
@@ -244,12 +242,6 @@ void TrustRegionOptimization::iterate() {
             }
 
             if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
-              if (IsFinished()) {
-                finalizeAlgorithm();
-              } else {
-                updateRadius();
-                iterate();
-              }
               return;
             }
 
@@ -287,14 +279,8 @@ void TrustRegionOptimization::iterate() {
 
           //!<continue with model improvement
           mchange_flag_ = tr_model_->ensureImprovement();
-
-          if (IsFinished()) {
-            finalizeAlgorithm();
-          } else {
-            iteration_--;
-            updateRadius();
-            iterate();
-          }
+          iteration_--;
+          updateRadius();
           return;
         } else {
           if (tr_model_->isImprovementNeeded() && !improvement_cases.size() ==0) {
@@ -569,40 +555,6 @@ TrustRegionOptimization::IsFinished() {
     return tc;
 }
 
-void TrustRegionOptimization::finalizeAlgorithm(Case* c) {
-  if (isImprovement(c)) {
-    updateTentativeBestCase(c);
-//    cout << ++iteration_ << "  " << c->objective_function_value() << "  " << rho_ << " " << tr_model_->getRadius() << " "
-//         << tr_model_->getNumPts() << endl;
-  }
-  finalizeAlgorithm();
-}
-
-
-void TrustRegionOptimization::finalizeAlgorithm() {
-
-  stringstream ss;
-  ss << setw(4) << right << ++iteration_ << setprecision(3)
-     << setw(12) << scientific << right << tr_model_->getCurrentFval()
-     << setw(12) << scientific << right << rho_
-     << setw(12) << scientific << right << tr_model_->getRadius()
-     << setw(5) << right << tr_model_->getNumPts();
-  cout << ss.str() << endl;
-
-  stringstream sx;
-  sx << setw(12) << scientific << right << setprecision(6)
-     << "---------------------------------------------" << endl
-     << "x* = " << tr_model_->getCurrentPoint().transpose() << endl
-     << "f* = " << tr_model_->getCurrentFval();
-
-//  //!<Print summary>
-//  cout << "----------------------" << END << endl;
-//  auto best_case = GetTentativeBestCase();
-//  cout << best_case->GetRealVarVector() << endl;
-//  cout << best_case->objective_function_value() << endl;
-
-  exit(0);
-}
 
 
 
