@@ -173,7 +173,6 @@ void TrustRegionOptimization::iterate() {
 
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
-          cout << "IsFinished():" << IsFinished() << endl;
           return; //end of the algorithm
         } else {
           if (true || tr_model_->isLambdaPoised()) {//<Move among points that are part of the model>
@@ -197,7 +196,6 @@ void TrustRegionOptimization::iterate() {
           }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
-
 //          FILE* pFile = fopen("~/Desktop/log_tr.txt", "a");
 //          fprintf(pFile, "%d \t %lf \t %lf \t %lf \t %d \n",iteration_, fval_current, rho_, tr_model_->getRadius(), tr_model_->getNumPts());
 //          fclose(pFile);
@@ -242,7 +240,6 @@ void TrustRegionOptimization::iterate() {
             if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
               return;
             }
-
           } else {
             //!<Evaluate objective at trial point>
             Case *new_case = new Case(base_case_);
@@ -537,6 +534,12 @@ Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
 
+    if (tr_model_->isInitialized()) {
+      if (tr_model_->measureCriticality().squaredNorm() < settings_->parameters().tr_tol_f) {
+        tc =  OPTIMALITY_CRITERIA_REACHED;
+      }
+    }
+
     if (tr_model_->getRadius() < settings_->parameters().tr_tol_radius) {
       tc = MINIMUM_STEP_LENGTH_REACHED;
     }
@@ -552,9 +555,6 @@ TrustRegionOptimization::IsFinished() {
     }
     return tc;
 }
-
-
-
 
 void TrustRegionOptimization::projectToBounds(VectorXd *point) {
     if (ub_.size() > 0) {

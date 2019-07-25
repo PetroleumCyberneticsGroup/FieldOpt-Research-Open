@@ -104,7 +104,7 @@ class Optimizer : public Loggable
    */
   enum TerminationCondition : int {NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
-    MAX_ITERATIONS_REACHED=3
+    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4
   };
 
   /*!
