@@ -188,8 +188,6 @@ void TrustRegionOptimization::iterate() {
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
           if (model_criticality.norm() <= eps_c) {
-            cout << "model criticality: " << model_criticality.norm() << endl;
-            cout << "eps_c: " << eps_c << endl;
             tr_model_->criticalityStep();
             criticality_step_performed_ = true;
             if (model_criticality.squaredNorm() < tol_f) {

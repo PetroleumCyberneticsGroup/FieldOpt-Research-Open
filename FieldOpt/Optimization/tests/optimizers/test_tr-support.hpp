@@ -54,7 +54,7 @@ namespace TestResources {
 
     ASSERT_TRUE(xa.isApprox(xb,tol));
 
-    if( ~msg.empty() ) {
+    if(dbg && ~msg.empty() ) {
       cout << ss.str() << msg.c_str() << " -> ok" << END << endl;
     }
   }
