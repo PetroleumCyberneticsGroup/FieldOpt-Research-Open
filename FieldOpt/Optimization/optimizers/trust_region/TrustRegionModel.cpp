@@ -152,13 +152,13 @@ void TrustRegionModel::criticalityStep() {
 
     double init_radius_ = settings_->parameters().tr_initial_radius;
 
+    int exit_flag = 0;
+
     while (!isLambdaPoised() || isOld()) {
 
-        ensureImprovement();
+        exit_flag = ensureImprovement();
         computePolynomialModels();
-        bool model_changed = rebuildModel();
-
-        if (!model_changed) {
+        if (!exit_flag) {
             Printer::ext_info("[criticalityStep] Model did not change.",
                               "Optimization", "Trust Region Model");
             break;
@@ -179,11 +179,10 @@ void TrustRegionModel::criticalityStep() {
 
         while (!isLambdaPoised() || isOld()) {
 
-            ensureImprovement();
+            exit_flag = ensureImprovement();
             computePolynomialModels();
-            bool model_changed = rebuildModel();
 
-            if (!model_changed) {
+            if (!exit_flag) {
                 Printer::ext_info("[criticalityStep] Model did not change.",
                                   "Optimization", "Trust Region Model");
                 break;
@@ -718,24 +717,24 @@ int TrustRegionModel::ensureImprovement() {
   bool model_complete = isComplete();
   bool model_fl = isLambdaPoised();
   bool model_old = isOld();
-  int exit_flag = -1;
+  int exit_flag = 0;
   bool success = false;
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
     success = improveModelNfp(); //!<improve model>
 
-    if (success) {
+    if ((success) || (!success && improvement_cases_.size() > 0)) {
       exit_flag = 1;
     }
   } else if ((model_complete) && (!model_old)){
     //!<Replace some point with a new one that improves geometry>
     success = chooseAndReplacePoint(); //!<replace point>
-    if (success) {
+    if ((success) || (!success && replacement_cases_.size() > 0))  {
       exit_flag = 2;
     }
   }
-  if (!success) {
+  if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
     bool model_changed = rebuildModel();
     if (!model_changed) {
       if (!model_complete) {
