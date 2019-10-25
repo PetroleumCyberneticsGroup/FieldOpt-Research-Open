@@ -225,6 +225,7 @@ void TrustRegionOptimization::iterate() {
             }
 
             if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
+              updateRadius();
               return;
             }
           } else {
