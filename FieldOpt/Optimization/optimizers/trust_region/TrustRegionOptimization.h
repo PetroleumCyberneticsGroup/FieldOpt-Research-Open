@@ -61,6 +61,8 @@ class TrustRegionOptimization : public Optimizer {
 
     int GetNumInitPoints() { return n_initial_points_; };
 
+    int getNumIterations() { return iteration_; };
+
  protected:
     void handleEvaluatedCase(Case *c) override;
 
@@ -71,24 +73,24 @@ class TrustRegionOptimization : public Optimizer {
     RowVectorXd initial_fvalues_;
     VectorXd lb_, ub_; //!< Upper and lower bounds
     TrustRegionModel *tr_model_;
-    int n_initial_points_;
+    int n_initial_points_{};
 
-    double fval_current_; //!<Function value of current point>
+    double fval_current_{}; //!<Function value of current point>
     VectorXd x_current_; //!<Current point>
     double rho_; //!<Agreement factor>
-    double ared_;//!<Actual reduction>
+    double ared_{};//!<Actual reduction>
     double sum_rho_; //!<Cumulative rho>
     double sum_rho_sqr_; //!<Cumulative squared rho>
     double delay_reduction_; //!<Delay reduction>
-    int mchange_flag_;
-    bool iteration_model_fl_;
-    bool criticality_step_performed_;
+    int mchange_flag_{};
+    bool iteration_model_fl_{};
+    bool criticality_step_performed_{};
     double gamma_dec_;
 
     VectorXd trial_point_;
     VectorXd trial_step_;
-    double fval_trial_;
-    double predicted_red_;
+    double fval_trial_{};
+    double predicted_red_{};
 
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
@@ -99,6 +101,7 @@ class TrustRegionOptimization : public Optimizer {
 
     void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);
+    void printIteration(double fval_current);
 
     class ConfigurationSummary : public Loggable {
     public:
