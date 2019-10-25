@@ -189,7 +189,7 @@ void TrustRegionOptimization::iterate() {
           if (model_criticality.norm() <= eps_c) {
             tr_model_->criticalityStep();
             criticality_step_performed_ = true;
-            if (model_criticality.squaredNorm() < tol_f) {
+            if (model_criticality.norm() < tol_f) {
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
               return;
             }
@@ -534,7 +534,7 @@ TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
 
     if (tr_model_->isInitialized()) {
-      if (tr_model_->measureCriticality().squaredNorm() < settings_->parameters().tr_tol_f) {
+      if (tr_model_->measureCriticality().norm() < settings_->parameters().tr_tol_f) {
         tc =  OPTIMALITY_CRITERIA_REACHED;
       }
     }
