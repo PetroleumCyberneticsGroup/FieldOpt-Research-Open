@@ -189,9 +189,9 @@ void TrustRegionModel::criticalityStep() {
             }
         }
 
-        if ((radius_ < tol_radius
-        || beta * crit_measure.norm() < tol_f)
-        && radius_ < 100 * tol_radius) {
+        if ((radius_ < tol_radius) ||
+            (beta * crit_measure.norm() < tol_f) &&
+            (radius_ < 100 * tol_radius)) {
             break;
 
             // Note: condition structured as: ((A || C) && B)
@@ -713,7 +713,6 @@ bool TrustRegionModel::improveModelNfp() {
 }
 
 int TrustRegionModel::ensureImprovement() {
-
   bool model_complete = isComplete();
   bool model_fl = isLambdaPoised();
   bool model_old = isOld();
