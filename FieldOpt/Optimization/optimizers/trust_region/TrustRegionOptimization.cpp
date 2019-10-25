@@ -196,20 +196,7 @@ void TrustRegionOptimization::iterate() {
           }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
-//          FILE* pFile = fopen("~/Desktop/log_tr.txt", "a");
-//          fprintf(pFile, "%d \t %lf \t %lf \t %lf \t %d \n",iteration_, fval_current, rho_, tr_model_->getRadius(), tr_model_->getNumPts());
-//          fclose(pFile);
-
-//          cout << iteration_ << "  " << fval_current << "  " << rho_ << " " << tr_model_->getRadius() << " "
-//               << tr_model_->getNumPts() << endl;
-
-        stringstream ss;
-        ss << setw(4) << right << iteration_ << setprecision(3)
-           << setw(12) << scientific << right << fval_current
-           << setw(12) << scientific << right << rho_
-           << setw(12) << scientific << right << tr_model_->getRadius()
-           << setw(5) << right << tr_model_->getNumPts();
-        cout << ss.str() << endl;
+          printIteration(fval_current);
 
           //!<Compute step>
           tie(trial_point_, predicted_red_) = tr_model_->solveTrSubproblem();
@@ -291,6 +278,16 @@ void TrustRegionOptimization::iterate() {
       }
     }
     return;
+}
+
+void TrustRegionOptimization::printIteration(double fval_current) {
+  stringstream ss;
+  ss << setw(4) << right << iteration_ << setprecision(3)
+     << setw(12) << scientific << right << fval_current
+     << setw(12) << scientific << right << rho_
+     << setw(12) << scientific << right << tr_model_->getRadius()
+     << setw(5) << right << tr_model_->getNumPts();
+  cout << ss.str() << endl;
 }
 
 
