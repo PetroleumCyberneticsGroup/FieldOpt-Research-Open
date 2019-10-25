@@ -126,10 +126,10 @@ ModelMatrix TrustRegionModel::getModelMatrices(int m) {
 
     ModelMatrix mMatrix;
     mMatrix.c = c;
-    mMatrix.g.resize(g.rows());
+    mMatrix.g.conservativeResize(g.rows());
     mMatrix.g = g;
 
-    mMatrix.H.resize(H.rows(),H.cols());
+    mMatrix.H.conservativeResize(H.rows(),H.cols());
     mMatrix.H = H;
 
     return mMatrix;
@@ -516,7 +516,7 @@ bool TrustRegionModel::improveModelNfp() {
   bool exit_flag = true;
 
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
-  f_succeeded.resize(1);
+  f_succeeded.conservativeResize(1);
   f_succeeded.fill(false);
 
   int poly_i;
@@ -526,12 +526,12 @@ bool TrustRegionModel::improveModelNfp() {
   auto polynomials_num = pivot_polynomials.size();
 
   if (lb_.rows() <= 0) {
-    lb_.resize(dim);
+    lb_.conservativeResize(dim);
     lb_.fill(-std::numeric_limits<double>::infinity());
   }
 
   if (ub_.rows() <= 0) {
-    ub_.resize(dim);
+    ub_.conservativeResize(dim);
     ub_.fill(std::numeric_limits<double>::infinity());
   }
 
@@ -593,7 +593,7 @@ bool TrustRegionModel::improveModelNfp() {
                 auto new_pivot_value = nfp_new_pivots_(found_i);
 
                 nfp_new_point_abs_ = unshift_point(nfp_new_point_shifted_);
-                nfp_new_fvalues_.resize(nfp_new_point_abs_.cols());
+                nfp_new_fvalues_.conservativeResize(nfp_new_point_abs_.cols());
 
                 setIsImprovementNeeded(true);
 
@@ -608,7 +608,7 @@ bool TrustRegionModel::improveModelNfp() {
                 return 5;  //TODO Probably not necessary
 
               } else if (areImprovementPointsComputed()) {
-                  f_succeeded.resize(nfp_new_point_abs_.cols(),1);
+                  f_succeeded.conservativeResize(nfp_new_point_abs_.cols(),1);
                   f_succeeded.fill(false);
                   for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
@@ -638,10 +638,10 @@ bool TrustRegionModel::improveModelNfp() {
           }
           //!<Attempt another polynomial if did not break>
           if (poly_i < block_end) {
-              nfp_new_points_shifted_.resize(0,0);
-              nfp_new_pivots_.resize(0);
-              nfp_new_point_shifted_.resize(0);
-              nfp_new_point_abs_.resize(0);
+              nfp_new_points_shifted_.conservativeResize(0,0);
+              nfp_new_pivots_.conservativeResize(0);
+              nfp_new_point_shifted_.conservativeResize(0);
+              nfp_new_point_abs_.conservativeResize(0);
               nfp_point_found_ = false;
               pt_case_uuid_.clear();
           }
