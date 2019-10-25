@@ -104,7 +104,7 @@ void TrustRegionOptimization::iterate() {
 
             if (tr_model_->hasOnlyOnePoint()) {
 
-                int exit_flag = tr_model_->ensureImprovement();
+                mchange_flag_ = tr_model_->ensureImprovement();
                 auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
                 auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
                 // Might be 0 if point_found in improveModelNfp is false. We also need to handle exit_flag=3 or exit_flag=4
@@ -130,7 +130,7 @@ void TrustRegionOptimization::iterate() {
             && tr_model_->areImprovementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-          int exit_flag = tr_model_->ensureImprovement();
+          mchange_flag_ = tr_model_->ensureImprovement();
 
           if (!tr_model_->isImprovementNeeded()) {
               tr_model_->setIsInitialized(true);
@@ -143,7 +143,7 @@ void TrustRegionOptimization::iterate() {
             && tr_model_->areReplacementPointsComputed()
             && !tr_model_->isInitialized()) {
 
-          int mchange_flag = tr_model_->ensureImprovement();
+          mchange_flag_ = tr_model_->ensureImprovement();
 
           if (!tr_model_->isReplacementNeeded()) {
             tr_model_->setIsInitialized(true);
@@ -261,7 +261,9 @@ void TrustRegionOptimization::iterate() {
 
           //!<continue with model improvement
           mchange_flag_ = tr_model_->ensureImprovement();
-          iteration_--;
+          if ((mchange_flag_ ==1) || (mchange_flag_ == 2)) {
+            iteration_--;
+          }
           updateRadius();
           return;
         } else {
