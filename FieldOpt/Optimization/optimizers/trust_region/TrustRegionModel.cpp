@@ -885,7 +885,7 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
 
     MatrixXd P(nr, nc+1);
     if (cached_points_.cols() > 0) {
-        P << new_point, cached_points_;
+        P << cached_points_, new_point;
     } else {
         P << new_point;
     }
@@ -894,6 +894,13 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
 
     int nc_f = cached_fvalues_.cols();
     RowVectorXd F(nc_f+1);
+
+    if (cached_fvalues_.size() > 0) {
+      F << cached_fvalues_, new_fvalue;
+    } else {
+      F << new_fvalue;
+    }
+
     cached_fvalues_.conservativeResize(F.size());
     cached_fvalues_.swap(F);
 

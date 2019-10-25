@@ -86,6 +86,7 @@ class TrustRegionModel {
     void setRadius(double r) { radius_ = r;}
 
     Matrix<double,Dynamic,Dynamic> getPoints() { return points_abs_; }
+    Matrix<double,Dynamic,Dynamic> getCachedPoints() { return cached_points_; }
     Matrix<double,Dynamic,Dynamic> getPointsShifted() { return points_shifted_; }
     VectorXd getCurrentPoint() { return points_abs_.col(tr_center_);}
     double getCurrentFval() { return fvalues_(tr_center_);}
