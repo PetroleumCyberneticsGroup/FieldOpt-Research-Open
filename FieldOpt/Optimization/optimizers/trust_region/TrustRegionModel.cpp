@@ -49,6 +49,13 @@ bool compare(
   return distances[lhs] < distances[rhs];
 }
 
+bool compareAbs(
+    const int &lhs,
+    const int &rhs,
+    const double *distances) {
+  return abs(distances[lhs]) < abs(distances[rhs]);
+}
+
 TrustRegionModel::TrustRegionModel(
     VectorXd& lb,
     VectorXd& ub,
@@ -1626,7 +1633,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
   std::sort(piv_order_.data(),
             piv_order_.data() + piv_order_.size(),
-            std::bind(compare,
+            std::bind(compareAbs,
                       std::placeholders::_1,
                       std::placeholders::_2,
                       pivot_values_.data()));
