@@ -510,8 +510,8 @@ void TrustRegionOptimization::setLowerUpperBounds() {
     if (settings_->parameters().tr_lower_bound
         && settings_->parameters().tr_upper_bound) {
 
-      lb_.resize(base_case_->GetRealVarIdVector().size());
-      ub_.resize(base_case_->GetRealVarIdVector().size());
+      lb_.conservativeResize(base_case_->GetRealVarIdVector().size());
+      ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
       lb_.fill(settings_->parameters().tr_lower_bound);
       ub_.fill(settings_->parameters().tr_upper_bound);
 
