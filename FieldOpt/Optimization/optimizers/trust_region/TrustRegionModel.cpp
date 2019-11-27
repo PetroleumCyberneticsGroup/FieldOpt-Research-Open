@@ -470,11 +470,10 @@ bool TrustRegionModel::rebuildModel() {
 
       shiftPolynomialToEndBlock(poly_i, block_end);
 
-            //!<Comment [1]: If we are on the linear block,>
-            //!<this means we won't be able to build a Fully Linear model>
+      //!<Comment [1]: If we are on the linear block,>
+      //!<this means we won't be able to build a Fully Linear model>
     }
-
-  } // end for-loop: (iter < polynomials_num)
+  }
 
   tr_center_ = 0;
   points_abs_ = all_points_.leftCols(last_pt_included + 1);
@@ -763,7 +762,7 @@ bool TrustRegionModel::isLambdaPoised() {
   int points_num = (int)points_abs_.cols();
 
   double pivot_threshold = settings_->parameters().tr_pivot_threshold;
-  bool result = false; // TODO: value not used
+  bool result = false;
 
   if (!settings_->parameters().tr_basis.compare("dummy")) {
     result = true;
@@ -852,9 +851,9 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   tol_interp.cwiseMax(std::numeric_limits<double>::epsilon());
     double val, error_interp;
 
-  for (int k=0; k < getNumPts(); k++) {
-    val = evaluatePolynomial(ps, points_abs_.col(k));
-    error_interp = abs(val - getFunctionValues()[k]);
+  for (int ii=0; ii < getNumPts(); ii++) {
+    val = evaluatePolynomial(ps, getPoints().col(ii));
+    error_interp = abs(val - getFunctionValues()[ii]);
 
     if (error_interp > tol_interp(0)) {
       // TODO: removed this error to avoid messing up with output
