@@ -123,8 +123,8 @@ namespace {
                 while (next_case == nullptr) {
                   if (tr_dfo_->IsFinished()) {
                     break;
-                  }  else {
-                      next_case = tr_dfo_->GetCaseForEvaluation();
+                  } else {
+                    next_case = tr_dfo_->GetCaseForEvaluation();
                   }
                 }
 
