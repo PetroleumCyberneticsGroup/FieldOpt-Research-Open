@@ -161,7 +161,7 @@ void TrustRegionOptimization::iterate() {
       double gamma_1 = gamma_dec_;
       double gamma_2 = settings_->parameters().tr_gamma_inc;
       double radius_max = settings_->parameters().tr_radius_max;
-      double err_model = 0;
+      double err_model = 0.0;
 
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
@@ -224,7 +224,7 @@ void TrustRegionOptimization::iterate() {
               return;
             }
 
-            if ((improvement_cases.size() ==0) && (replacement_cases.size() ==0)) {
+            if ((improvement_cases.size() == 0) && (replacement_cases.size() == 0)) {
               updateRadius();
               return;
             }
@@ -519,7 +519,7 @@ void TrustRegionOptimization::setLowerUpperBounds() {
       ub_.fill(settings_->parameters().tr_upper_bound);
 
     } else {
-
+      
       Printer::ext_warn(
           "Lower/upper bounds for DF-TR algorithm not specified.",
           "Optimization", "TrustRegionOptimization");

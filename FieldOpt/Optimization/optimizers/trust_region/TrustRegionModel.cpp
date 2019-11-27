@@ -362,6 +362,7 @@ bool TrustRegionModel::rebuildModel() {
   nfpBasis(dim);//!<build nfp polynomial basis>
 
   //!<Starting rowPivotGaussianElimination>
+
   double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
 
   int polynomials_num = pivot_polynomials_.size();
@@ -396,21 +397,21 @@ bool TrustRegionModel::rebuildModel() {
         //!< We do not have points to build a FL model.
         //!< How did this happen??? see Comment [1]>
         break;
-
       }
+
     } else { //!<Quadratic block -- being more carefull>
       max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
     }
 
-    max_layer = std::fmax(1, max_layer);
+    max_layer = std::fmax(1.0, max_layer);
 
     VectorXd all_layers;
-    all_layers.setLinSpaced(ceil(max_layer), 1, max_layer);
+    all_layers.setLinSpaced(ceil(max_layer), 1.0, max_layer);
 
-    double max_absval = 0;
-    double pt_max = 0;
+    double max_absval = 0.0;
+    double pt_max = 0.0;
     for (int i = 0; i < all_layers.size(); i++) {
 
       auto layer = all_layers(i);
@@ -1090,7 +1091,7 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
   auto incumbent_point = points_shifted_temp_.col(initial_i);
   auto pivot_polynomials = pivot_polynomials_;
   bool success = false;
-  double pivot_value = 0;
+  double pivot_value = 0.0;
 
   for (int k = initial_i; k <= final_i; k++) {
     auto polynomial = orthogonalizeToOtherPolynomials(k, last_point);
