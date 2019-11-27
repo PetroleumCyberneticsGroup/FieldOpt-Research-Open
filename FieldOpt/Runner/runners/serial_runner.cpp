@@ -51,10 +51,17 @@ void SerialRunner::Execute()
         }
         else {
             new_case = optimizer_->GetCaseForEvaluation();
+            if (new_case == nullptr) {
+                if (optimizer_->IsFinished()) {
+                    break;
+                } else {
+                    new_case = optimizer_->GetCaseForEvaluation();
+                }
+            }
         }
 
         if (!is_ensemble_run_ && bookkeeper_->IsEvaluated(new_case, true)) {
-            new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_BOOKKEEPED;
+           new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_BOOKKEEPED;
         }
         else {
             try {
