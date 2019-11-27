@@ -88,6 +88,7 @@ TrustRegionModel::TrustRegionModel(
 
     cached_points_.resize(0,0);
     points_shifted_.resize(0,0);
+    points_shifted_temp_.resize(0,0);
 
     SNOPTSolver_ = new SNOPTSolver();
 
