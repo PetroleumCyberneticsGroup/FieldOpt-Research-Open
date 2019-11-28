@@ -51,12 +51,16 @@ void SerialRunner::Execute()
         }
         else {
             new_case = optimizer_->GetCaseForEvaluation();
-            if (new_case == nullptr) {
-                if (optimizer_->IsFinished()) {
-                    break;
-                } else {
-                    new_case = optimizer_->GetCaseForEvaluation();
-                }
+            while (new_case == nullptr) {
+              if (optimizer_->IsFinished()) {
+                break;
+              } else {
+                new_case = optimizer_->GetCaseForEvaluation();
+              }
+            }
+
+            if (optimizer_->IsFinished()) {
+              break;
             }
         }
 
