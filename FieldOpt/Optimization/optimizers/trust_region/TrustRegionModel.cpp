@@ -155,14 +155,21 @@ void TrustRegionModel::criticalityStep() {
 
     int exit_flag = 0;
 
-    while (!isLambdaPoised() || isOld()) {
-
+    if (!isLambdaPoised() || isOld()) {
         exit_flag = ensureImprovement();
+        if (!areImprovementPointsComputed()) {
+          setIsImprovementNeeded(true);
+          return;
+        }
+
+        setIsImprovementNeeded(false);
+        if (!improvement_cases_.size() == 0) {
+          clearImprovementCasesList();
+        }
         computePolynomialModels();
         if (!exit_flag) {
             Printer::ext_info("[criticalityStep] Model did not change.",
                               "Optimization", "Trust Region Model");
-            break;
         }
     }
 
@@ -175,25 +182,34 @@ void TrustRegionModel::criticalityStep() {
     auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - mMatrix.g)) - x_center;
     auto crit_measure = mu * g_proj;
 
-    while (radius_ > crit_measure.minCoeff()) {
+    if (radius_ > crit_measure.minCoeff()) {
         radius_ *= omega;
 
-        while (!isLambdaPoised() || isOld()) {
+        if (!isLambdaPoised() || isOld()) {
 
             exit_flag = ensureImprovement();
+            if (!areImprovementPointsComputed()) {
+              setIsImprovementNeeded(true);
+              return;
+            }
+
+            setIsImprovementNeeded(false);
+            if (!improvement_cases_.size() == 0) {
+              clearImprovementCasesList();
+            }
             computePolynomialModels();
 
             if (!exit_flag) {
                 Printer::ext_info("[criticalityStep] Model did not change.",
                                   "Optimization", "Trust Region Model");
-                break;
+                return;
             }
         }
 
         if ((radius_ < tol_radius) ||
             (beta * crit_measure.norm() < tol_f) &&
             (radius_ < 100 * tol_radius)) {
-            break;
+            return;
 
             // Note: condition structured as: ((A || C) && B)
             // whereas in CG it is: (A || C && B) (CLion complains)

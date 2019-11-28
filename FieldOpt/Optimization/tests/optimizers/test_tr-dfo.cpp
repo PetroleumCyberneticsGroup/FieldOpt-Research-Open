@@ -185,28 +185,28 @@ namespace {
         EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
     }
 
-//    TEST_F(TrustRegionTest, tr_dfo_prob2) {
-//        cout << endl << FMAGENTA << "[          ] =============="
-//             << "=========================================== " << endl
-//             << "[ CG.prob2 ] "
-//             << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-//             << END << endl;
-//
-//        SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
-//        EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
-//    }
-//
-//    TEST_F(TrustRegionTest, tr_dfo_prob3) {
-//        cout << endl << FMAGENTA << "[          ] =============="
-//             << "=========================================== " << endl
-//             << "[ CG.prob3 ] "
-//             << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
-//             << END << endl;
-//
-//        SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
-//        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
-//    }
-//
+    TEST_F(TrustRegionTest, tr_dfo_prob2) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob2 ] "
+             << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
+             << END << endl;
+
+        SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
+    }
+
+    TEST_F(TrustRegionTest, tr_dfo_prob3) {
+        cout << endl << FMAGENTA << "[          ] =============="
+             << "=========================================== " << endl
+             << "[ CG.prob3 ] "
+             << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
+             << END << endl;
+
+        SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
+        EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
+    }
+
 //    TEST_F(TrustRegionTest, tr_dfo_prob4) {
 //        cout << endl << FMAGENTA << "[          ] =============="
 //             << "=========================================== " << endl
@@ -218,7 +218,7 @@ namespace {
 //        SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
 //        EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
 //    }
-//
+
 //    TEST_F(TrustRegionTest, tr_dfo_prob5) {
 //        cout << endl << FMAGENTA << "[          ] =============="
 //             << "=========================================== " << endl
