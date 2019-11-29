@@ -187,6 +187,106 @@ namespace TestResources {
             return arg3.sum();
         }
 
+        /*
+         * Hock and Schittkowski problems from
+         * https://apmonitor.com/wiki/index.php/Apps/HockSchittkowski
+         */
+
+        /*
+          HS1
+          Initial point x0 = (-2.0, 1.0);
+          Solution: 0.0
+        */
+        inline double hs1(VectorXd x) {
+          return 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2);
+        }
+
+        /*
+          HS2
+          Initial point x0 = (-2.0, 1.0);
+          Bounds: ub = (inf, 1.5);
+          Solution: 0.0
+        */
+        inline double hs2(VectorXd x){
+          return hs1(x);
+        }
+
+        /*
+          HS3
+          Initial point x0 = (10.0, 1.0);
+          Bounds: lb = (-inf, 0.0);
+          Solution: 0.0
+        */
+        inline double hs3(VectorXd x){
+          return x(1) + 1e-5*pow(x(1)-x(0), 2);
+        }
+
+
+        /*
+          HS4
+          Initial point x0 = (1.125, 0.125)
+          Bounds: lb = (1.0, 0.0)
+          Solution: 8.0/3.0
+        */
+        inline double hs4(VectorXd x){
+          return pow(x(0) + 1, 3)/3 + x(1);
+        }
+
+        /*
+          HS5
+          Initial point x0 = (0.0, 0.0)
+          Bounds: lb = (-1.5, -3), ub = (4, 3)
+          Solution: -(sqrt(3)/2 + 3.14159/3) = -1.91322207
+        */
+        inline double hs5(VectorXd x){
+          return sin(x(0) + x(1)) + pow(x(0) - x(1), 2) - 1.5*x(0) + 2.5*x(1) + 1;
+        }
+
+        /*
+          HS25
+          Initial point x0 = (100.0, 12.5, 3.0)
+          Bounds: lb = (0.1, 0, 0), ub = (100.0, 25.6, 5.0);
+          Solution: 0.0
+        */
+        inline double hs25(VectorXd x){
+          double result = 0;
+          double u;
+
+          for (double i = 1; i < 100; i++){
+            u = 25.0 + pow(-50.0*log(i/100), (2/3));
+            result = result + pow(exp(-u - pow(x(1), x(2))/x(0)) - i/100, 2);
+          }
+          return result;
+        }
+
+        /*
+          HS38
+          Initial point x0 = (-3.0, -1.0, -3.0, -1)
+          Bounds: lb = (-10.0, -10.0, -10.0, -10.0), ub = (10.0, 10.0, 10.0, 10.0)
+          Solution: 0
+        */
+        inline double hs38(VectorXd x){
+          return 100*pow(x(1) - pow(x(0), 2), 2)
+            + pow(1 - x(0), 2)
+            + 90*pow(x(3) - pow(x(2), 2), 2)
+            + pow(1 - x(2), 2)
+            + 10.1*(pow(x(1) - 1, 2)
+                + pow(x(3) - 1, 2))
+            + 19.8*(x(1) - 1)*(x(3) - 1);
+        }
+
+        /*
+          HS45
+          Initial point x0 = (0.0, 0.0, 0.0, 0.0, 0.0)
+          Bounds: lb = (0.0, 0.0, 0.0, 0.0, 0.0), ub = (1.0, 2.0, 3.0, 4.0, 5.0);
+          Solution: 1
+        */
+        inline double hs45(VectorXd x){
+          return 2 - x(0)*x(1)*x(2)*x(3)*x(4)/120;
+        }
+
+
+
     }
 }
 
