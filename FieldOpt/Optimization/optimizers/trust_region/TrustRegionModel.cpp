@@ -80,15 +80,15 @@ TrustRegionModel::TrustRegionModel(
     tr_center_ = 0;
     cache_max_ = (int)3*pow(dim_,2);
 
-    pivot_values_.resize(0);
-    cached_fvalues_.resize(0);
+    pivot_values_.conservativeResize(0);
+    cached_fvalues_.conservativeResize(0);
 
-    index_vector_.resize(0);
-    distances_.resize(0);
+    index_vector_.conservativeResize(0);
+    distances_.conservativeResize(0);
 
-    cached_points_.resize(0,0);
-    points_shifted_.resize(0,0);
-    points_shifted_temp_.resize(0,0);
+    cached_points_.conservativeResize(0,0);
+    points_shifted_.conservativeResize(0,0);
+    points_shifted_temp_.conservativeResize(0,0);
 
     SNOPTSolver_ = new SNOPTSolver();
 
@@ -1181,7 +1181,7 @@ void TrustRegionModel::sortVectorByIndex(
   for(int i=0; i<vec.size(); i++) {
     vec(i) = vec_ord(i);
   }
-  vec_ord.resize(0);
+  vec_ord.conservativeResize(0);
 }
 
 void TrustRegionModel::sortVectorByIndex(
@@ -1196,7 +1196,7 @@ void TrustRegionModel::sortVectorByIndex(
   for(int i=0; i<vec.size(); i++) {
     vec(i) = vec_ord(i);
   }
-  vec_ord.resize(0);
+  vec_ord.conservativeResize(0);
 }
 
 void TrustRegionModel::sortMatrixByIndex(
@@ -1212,7 +1212,7 @@ void TrustRegionModel::sortMatrixByIndex(
   for (int i=0; i<points.cols(); i++) {
     points.col(i) << points_ord.col(i);
   }
-  points_ord.resize(0,0);
+  points_ord.conservativeResize(0,0);
 }
 
 void TrustRegionModel::nfpBasis(int dim) {
@@ -1223,12 +1223,12 @@ void TrustRegionModel::nfpBasis(int dim) {
   //!<Calculating basis of polynomials>
   pivot_polynomials_.resize(poly_num);
   pivot_polynomials_[poly_num-1].dimension = dim;
-  pivot_polynomials_[poly_num-1].coefficients.resize(poly_num);
+  pivot_polynomials_[poly_num-1].coefficients.conservativeResize(poly_num);
   pivot_polynomials_[poly_num-1].coefficients.setZero(poly_num);
 
   for (int i=0; i<linear_size;i++) {
     pivot_polynomials_[i].dimension = dim;
-    pivot_polynomials_[i].coefficients.resize(poly_num);
+    pivot_polynomials_[i].coefficients.conservativeResize(poly_num);
     pivot_polynomials_[i].coefficients.setZero(poly_num);
     pivot_polynomials_[i].coefficients(i) = 1;
   }
@@ -1436,7 +1436,7 @@ Polynomial TrustRegionModel::addPolynomial(
 
   Polynomial p;
   p.dimension = p1.dimension;
-  p.coefficients.resize(p1.coefficients.size());
+  p.coefficients.conservativeResize(p1.coefficients.size());
   p.coefficients = p1.coefficients + p2.coefficients;
 
   if (p.coefficients.size() == 0) {
@@ -1640,7 +1640,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   bool success = false;
 
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
-  f_succeeded.resize(1);
+  f_succeeded.conservativeResize(1);
   f_succeeded.fill(false);
 
   //TODO: test this function
@@ -1684,7 +1684,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
           auto new_pivot_value = repl_new_pivots_(found_i);
 
           repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
-          repl_new_fvalues_.resize(repl_new_point_abs_.cols());
+          repl_new_fvalues_.conservativeResize(repl_new_point_abs_.cols());
 
           setIsReplacementNeeded(true);
 
@@ -1698,7 +1698,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
           return true; //TODO Probably not necessary
 
         } else if (areReplacementPointsComputed()) {
-          f_succeeded.resize(nfp_new_point_abs_.cols(), 1);
+          f_succeeded.conservativeResize(nfp_new_point_abs_.cols(), 1);
           f_succeeded.fill(false);
 
           for (int ii = 0; ii < repl_new_point_abs_.cols(); ii++) {
@@ -1817,7 +1817,7 @@ TrustRegionModel::pointNew(Polynomial polynomial,
             new_pivot_values << pivot_min, pivot_max;
 
         } else {
-            new_points.resize(dim_,1);
+            new_points.conservativeResize(dim_,1);
             new_points.col(0) = new_point_min;
 
             new_pivot_values.conservativeResize(new_points.cols());
@@ -1827,7 +1827,7 @@ TrustRegionModel::pointNew(Polynomial polynomial,
 
     } else if ((exitflag_max >= 0)
                && (abs(pivot_max) >= pivot_threshold)) {
-        new_points.resize(dim_,1);
+        new_points.conservativeResize(dim_,1);
         new_points.col(0) = new_point_max;
 
         new_pivot_values.conservativeResize(new_points.cols());
