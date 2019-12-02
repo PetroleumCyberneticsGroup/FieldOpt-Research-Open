@@ -1695,7 +1695,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
             repl_pt_case_uuid_.push_back(new_case->id());
           }
-          return 5; //TODO Probably not necessary
+          return true; //TODO Probably not necessary
 
         } else if (areReplacementPointsComputed()) {
           f_succeeded.resize(nfp_new_point_abs_.cols(), 1);
