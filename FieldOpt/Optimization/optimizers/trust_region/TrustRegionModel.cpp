@@ -1749,19 +1749,18 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       orthogonalizeBlock(repl_new_point_shifted_, pos, block_beginning, block_end);
 
       //!<Update model and recompute polynomials>
-      cached_points_ = points_abs_.leftCols(points_abs_.rows());
-      cached_fvalues_ = fvalues_.head(fvalues_.cols());
+      //TODO: check maximum cache size
+      int nc_cp = (int)cached_points_.cols();
+      cached_points_.conservativeResize(cached_points_.rows(), nc_cp+1);
+      cached_points_.col(nc_cp) = points_abs_.col(pos);
 
-      int nr = (int)points_abs_.rows();
-      int nc = (int)points_abs_.cols();
+      int nc_fv = (int)cached_fvalues_.cols();
+      cached_fvalues_.conservativeResize(nc_fv+1);
+      cached_fvalues_.col(nc_fv) = fvalues_.col(pos);
 
-      points_abs_.conservativeResize(nr, nc+1);
-      points_abs_.col(nc) = repl_new_point_abs_;
+      points_abs_.col(pos) = repl_new_point_abs_;
 
-      nr = (int)fvalues_.rows();
-      nc = (int)fvalues_.cols();
-      fvalues_.conservativeResize(nr, nc+1);
-      fvalues_.col(nc) = repl_new_fvalues_;
+      fvalues_.col(pos) = repl_new_fvalues_;
 
       pivot_values_((int)pos) *= new_pivot_value;
 
