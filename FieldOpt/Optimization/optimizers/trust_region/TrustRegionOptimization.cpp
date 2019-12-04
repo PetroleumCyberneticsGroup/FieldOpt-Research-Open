@@ -166,6 +166,11 @@ void TrustRegionOptimization::iterate() {
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
 
+      if (improve_model_) {
+	mchange_flag_ = tr_model_->ensureImprovement();
+	improve_model_ = ensureImprovementPostProcessing();
+      }
+      
       if ((!tr_model_->isImprovementNeeded() //_if-5
       && !tr_model_->areImprovementPointsComputed())
       && (!tr_model_->isReplacementNeeded()
@@ -211,23 +216,7 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-            auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
-            auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
-
-            if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
-              case_handler_->AddNewCases(improvement_cases);
-              return;
-            }
-
-            if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
-              case_handler_->AddNewCases(replacement_cases);
-              return;
-            }
-
-            if ((improvement_cases.size() == 0) && (replacement_cases.size() == 0)) {
-              updateRadius();
-              return;
-            }
+            ensureImprovementPostProcessing();
           } else {
             //!<Evaluate objective at trial point>
             Case *new_case = new Case(base_case_);
@@ -389,20 +378,18 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
             //!<Including this new point as the TR center>
             mchange_flag_ = tr_model_->changeTrCenter(trial_point_, fval_trial_);
-            //!<this mchange_flag_ is not being used (rho > eta1)
-            if (!iteration_model_fl_ && mchange_flag_ == 4) {
-              //!<Had to rebuild a model that wasn't even Fully Linear. This shouldn't happen.>
-              mchange_flag_ = tr_model_->ensureImprovement();
-            }
           } else {
-            mchange_flag_ = tr_model_->tryToAddPoint(trial_point_, fval_trial_);
-            //!<If mchange_flag_ == 4, we had to rebuild the model and the radius will be reduced>             }
+            auto point_added = tr_model_->tryToAddPoint(trial_point_, fval_trial_);
+	    if (!point_added) {
+	      improve_model_ = true;
+	    }
           }
           sum_rho_ += rho_;
           sum_rho_sqr_ += pow(rho_, 2);
 
-          updateRadius();
-
+	  if (!improve_model_) {
+	    updateRadius();
+	  }
       }
     }
 }
@@ -527,6 +514,26 @@ void TrustRegionOptimization::setLowerUpperBounds() {
           "Lower/upper bounds for DF-TR algorithm not specified.");
 
     }
+  }
+}
+
+bool TrustRegionOptimization::ensureImprovementPostProcessing(){
+  auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
+  auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
+
+  if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
+    case_handler_->AddNewCases(improvement_cases);
+    return true;
+  }
+
+  if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
+    case_handler_->AddNewCases(replacement_cases);
+    return true;
+  }
+
+  if ((improvement_cases.size() == 0) && (replacement_cases.size() == 0)) {
+    updateRadius();
+    return false;
   }
 }
 

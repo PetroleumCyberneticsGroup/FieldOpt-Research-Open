@@ -63,6 +63,8 @@ class TrustRegionOptimization : public Optimizer {
 
     int getNumIterations() { return iteration_; };
 
+    bool ensureImprovementPostProcessing();
+
  protected:
     void handleEvaluatedCase(Case *c) override;
 
@@ -91,6 +93,7 @@ class TrustRegionOptimization : public Optimizer {
     VectorXd trial_step_;
     double fval_trial_{};
     double predicted_red_{};
+    bool improve_model_;
 
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
