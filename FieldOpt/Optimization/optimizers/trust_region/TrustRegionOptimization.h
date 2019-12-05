@@ -94,7 +94,9 @@ class TrustRegionOptimization : public Optimizer {
     double fval_trial_{};
     double predicted_red_{};
     bool improve_model_;
-
+    double criticality_init_radius_;
+    bool criticality_step_execution_ongoing_;
+    
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
     Case *base_case_;

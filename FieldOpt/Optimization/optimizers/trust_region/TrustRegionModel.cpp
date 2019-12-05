@@ -38,6 +38,7 @@ using std::tie;
 using std::bind;
 using std::fmax;
 using std::fmin;
+using std::cerr;
 
 namespace Optimization {
 namespace Optimizers {
@@ -136,7 +137,7 @@ ModelMatrix TrustRegionModel::getModelMatrices(int m) {
     return mMatrix;
 }
 
-void TrustRegionModel::criticalityStep() {
+bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
 
     // factor b/e radius & criticality measure
     double mu = settings_->parameters().tr_criticality_mu;
@@ -151,25 +152,14 @@ void TrustRegionModel::criticalityStep() {
     double tol_radius = settings_->parameters().tr_tol_radius;
     double tol_f = settings_->parameters().tr_tol_f;
 
-    double init_radius_ = settings_->parameters().tr_initial_radius;
-
     int exit_flag = 0;
 
+ 
     if (!isLambdaPoised() || isOld()) {
         exit_flag = ensureImprovement();
         if (!areImprovementPointsComputed()) {
-          setIsImprovementNeeded(true);
-          return;
-        }
-
-        setIsImprovementNeeded(false);
-        if (!improvement_cases_.size() == 0) {
-          clearImprovementCasesList();
-        }
-        computePolynomialModels();
-        if (!exit_flag) {
-            Printer::ext_info("[criticalityStep] Model did not change.",
-                              "Optimization", "Trust Region Model");
+	  setIsImprovementNeeded(true);
+          return true;
         }
     }
 
@@ -190,26 +180,13 @@ void TrustRegionModel::criticalityStep() {
             exit_flag = ensureImprovement();
             if (!areImprovementPointsComputed()) {
               setIsImprovementNeeded(true);
-              return;
-            }
-
-            setIsImprovementNeeded(false);
-            if (!improvement_cases_.size() == 0) {
-              clearImprovementCasesList();
-            }
-            computePolynomialModels();
-
-            if (!exit_flag) {
-                Printer::ext_info("[criticalityStep] Model did not change.",
-                                  "Optimization", "Trust Region Model");
-                return;
+              return true;
             }
         }
 
         if ((radius_ < tol_radius) ||
             (beta * crit_measure.norm() < tol_f) &&
             (radius_ < 100 * tol_radius)) {
-            return;
 
             // Note: condition structured as: ((A || C) && B)
             // whereas in CG it is: (A || C && B) (CLion complains)
@@ -222,9 +199,9 @@ void TrustRegionModel::criticalityStep() {
     }
 
     // The final radius is increased to avoid a drastic reduction
-    radius_ = std::min(
-            std::max(radius_, beta * crit_measure.norm()),
-            init_radius_);
+    radius_ = std::min(radius_before_criticality_step,
+		       std::max(radius_, beta * crit_measure.norm()));
+    return false;
 }
 
 
@@ -317,6 +294,7 @@ void TrustRegionModel::clearReplacementCasesList() {
 
 bool TrustRegionModel::rebuildModel() {
 
+  checkDataSize("Starting rebuildModel");
   //!<All points we know>
   all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
@@ -374,7 +352,15 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<All fvalues>
   sortVectorByIndex(distances_, index_vector_);
-  sortVectorByIndex(all_fvalues_, index_vector_);
+    // cout << "fvalues size " << all_fvalues_.size() << endl;
+    // cout << "index size " << index_vector_.size() << endl;
+    // cout << "allpoints size " << all_points_.size() << endl;
+    // cout << "pointsshifted size " << points_shifted_.size() << endl;
+    // cout << "fvalues cols " << all_fvalues_.cols() << endl;
+    // cout << "index cols " << index_vector_.cols() << endl;
+    // cout << "allpoints cols " << all_points_.cols() << endl;
+    // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
+    sortVectorByIndex(all_fvalues_, index_vector_);
 
   nfpBasis(dim);//!<build nfp polynomial basis>
 
@@ -504,6 +490,7 @@ bool TrustRegionModel::rebuildModel() {
   if (cache_size > 0) {
     cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size);
     cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size);
+    
   } else {
     cached_points_.conservativeResize(0, 0);
     cached_fvalues_.conservativeResize(0);
@@ -513,6 +500,8 @@ bool TrustRegionModel::rebuildModel() {
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
 
+  checkDataSize("End of rebuildModel");
+  
   return last_pt_included < n_points; //!<model has changed>
 }
 
@@ -738,28 +727,48 @@ int TrustRegionModel::ensureImprovement() {
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
+    checkDataSize("Before improveModelNfp");
     success = improveModelNfp(); //!<improve model>
+    if (!checkDataSize("After improveModelNfp")){
+      cerr << "success: " << success << endl;
+      cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
+    }
+      
 
     if ((success) || (!success && improvement_cases_.size() > 0)) {
       exit_flag = 1;
     }
   } else if ((model_complete) && (!model_old)){
     //!<Replace some point with a new one that improves geometry>
+    checkDataSize("Before chooseAndReplacePoint");
     success = chooseAndReplacePoint(); //!<replace point>
+    if (!checkDataSize("After chooseAndReplacePoint")){
+      cerr << "success: " << success << endl;
+      cerr << "replacement_cases size: " << replacement_cases_.size() << endl;
+    }
     if ((success) || (!success && replacement_cases_.size() > 0))  {
       exit_flag = 2;
     }
   }
   if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
+    checkDataSize("Before rebuildModel");
     bool model_changed = rebuildModel();
+    checkDataSize("After rebuildModel");
     if (!model_changed) {
       if (!model_complete) {
         //!<Improve model>
+	checkDataSize("Before improveModelNfp second");
         success = improveModelNfp();
+	if (!checkDataSize("After improveModelNfp second")){
+	  cerr << "success: " << success << endl;
+	  cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
+	}
 
       } else {
         //!<Replace point>
+	checkDataSize("Before chooseandreplace");
         success = chooseAndReplacePoint();
+	checkDataSize("After chooseandreplace");
       }
     } else {
       success = true;
@@ -921,8 +930,7 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
     cached_fvalues_.conservativeResize(F.size());
     cached_fvalues_.swap(F);
 
-    //!<Either add a geometry improving point or rebuild model>
-    exit_flag = ensureImprovement();
+    exit_flag = 0;
 
   } else {
     exit_flag = 1;
@@ -1947,5 +1955,43 @@ TrustRegionModel::minimizeTr(Polynomial p,
     return make_tuple(x, fval, exitflag);
 }
 
+bool TrustRegionModel::checkDataSize(string context){
+
+    int points_abs_size;
+    int points_shifted_size;
+    int fvalues_size;
+    int cached_fvalues_size;
+    int cached_points_size;
+
+    bool test_passed;
+
+    points_abs_size = points_abs_.cols();
+    points_shifted_size = points_shifted_.cols();
+    fvalues_size = fvalues_.cols();
+    cached_fvalues_size = cached_fvalues_.cols();
+    cached_points_size = cached_points_.cols();
+
+    test_passed = (points_abs_size == points_shifted_size
+		   && points_abs_size == fvalues_size
+		   && cached_points_size == cached_fvalues_size);
+    
+    if (!test_passed){
+      cerr << endl;
+      cerr << "----------------------------------------------------------------------" << endl;
+      cerr << context << endl;
+      cerr << "======================================================================" << endl;
+      cerr << "points abs: " << points_abs_size << endl;
+      cerr << "points shifted: " << points_shifted_size << endl;
+      cerr << "fvalues: " << fvalues_size << endl;
+      cerr << "points cached: " << cached_points_size << endl;
+      cerr << "fvalues cached: " << cached_fvalues_size << endl;
+      cerr << "**********************************************************************" << endl;
+      cerr << endl;
+    }
+
+    return test_passed;
+
+}
+  
 }  // namespace Optimizers
 }  // namespace Optimization

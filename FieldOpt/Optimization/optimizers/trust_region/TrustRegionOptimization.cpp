@@ -168,7 +168,10 @@ void TrustRegionOptimization::iterate() {
 
       if (improve_model_) {
 	mchange_flag_ = tr_model_->ensureImprovement();
+	cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
+	cout << "radius before: " << tr_model_->getRadius() << endl;
 	improve_model_ = ensureImprovementPostProcessing();
+	cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
@@ -192,13 +195,22 @@ void TrustRegionOptimization::iterate() {
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
           if (model_criticality.norm() <= eps_c) {
-            tr_model_->criticalityStep();
+	    if (!criticality_step_execution_ongoing_) {
+	      criticality_init_radius_ = tr_model_->getRadius();
+	    }
+	    criticality_step_execution_ongoing_ = tr_model_->criticalityStep(criticality_init_radius_);
+	    if (criticality_step_execution_ongoing_) {
+	      ensureImprovementPostProcessing();
+	      return;
+	    }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
               return;
             }
-          }
+          } else {
+	    criticality_step_execution_ongoing_ = false;
+	  }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
           printIteration(fval_current);
@@ -216,7 +228,11 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-            ensureImprovementPostProcessing();
+	    cout << "updateRadius:  postProcessing small decrease" << endl;
+	    cout << "radius before: " << tr_model_->getRadius() << endl;
+	    improve_model_ = ensureImprovementPostProcessing();
+	    cout << "radius after: " << tr_model_->getRadius() << endl;
+
           } else {
             //!<Evaluate objective at trial point>
             Case *new_case = new Case(base_case_);
@@ -254,7 +270,11 @@ void TrustRegionOptimization::iterate() {
           if ((mchange_flag_ ==1) || (mchange_flag_ == 2)) {
             iteration_--;
           }
-          updateRadius();
+	  cout << "Final ensureImprovement" << endl;
+	  cout << "radius before: " << tr_model_->getRadius() << endl;
+	  updateRadius();
+	  cout << "radius after: " << tr_model_->getRadius() << endl;
+
           return;
         } else {
           if (tr_model_->isImprovementNeeded() && !improvement_cases.size() ==0) {
@@ -388,7 +408,10 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           sum_rho_sqr_ += pow(rho_, 2);
 
 	  if (!improve_model_) {
+	    cout << "updateRadius: handleEvaluatedCase" << endl;
+	    cout << "radius before: " << tr_model_->getRadius() << endl;
 	    updateRadius();
+	    cout << "radius after: " << tr_model_->getRadius() << endl;
 	  }
       }
     }
@@ -531,7 +554,15 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
     return true;
   }
 
-  if ((improvement_cases.size() == 0) && (replacement_cases.size() == 0)) {
+  if (criticality_step_execution_ongoing_) {
+    Printer::ext_warn(
+          "criticality step did not generate a case.",
+          "ensureImprovementPostProcessing", "TrustRegionOptimization");
+  }
+
+  if ((improvement_cases.size() == 0)
+      && (replacement_cases.size() == 0)
+      && !criticality_step_execution_ongoing_) {
     updateRadius();
     return false;
   }

@@ -103,7 +103,7 @@ class TrustRegionModel {
    */
     void moveToBestPoint();
 
-    void criticalityStep();
+    bool criticalityStep(double initial_criticality_radius);
 
     /*!
     * @brief gives the gradient of the model, calculated
@@ -299,6 +299,8 @@ class TrustRegionModel {
     * @return
     */
     void submitInitializationCases(QList<Case *>);
+
+    bool checkDataSize(string context);
 
     private:
     Settings::Optimizer *settings_;
