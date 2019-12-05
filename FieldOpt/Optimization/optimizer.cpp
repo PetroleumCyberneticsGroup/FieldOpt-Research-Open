@@ -31,11 +31,7 @@ Optimizer::Optimizer(Settings::Optimizer *settings,
      Optimization::Objective::Objective *objective_function,
      Logger *logger,
      CaseHandler *case_handler,
-     Constraints::ConstraintHandler *constraint_handler
-)
-{
-
-
+     Constraints::ConstraintHandler *constraint_handler) {
 }
 
 Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
@@ -43,30 +39,34 @@ Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
                      Reservoir::Grid::Grid *grid,
                      Logger *logger,
                      CaseHandler *case_handler,
-                     Constraints::ConstraintHandler *constraint_handler
-)
-{
+                     Constraints::ConstraintHandler *constraint_handler) {
+
     // Verify that the base case has been evaluated.
     try {
         base_case->objective_function_value();
     } catch (ObjectiveFunctionException) {
-        throw OptimizerInitializationException("The objective function value of the base case must be set before initializing an Optimizer.");
+        throw OptimizerInitializationException(
+                "The objective function value of the base case "
+                "must be set before initializing an Optimizer.");
     }
 
     max_evaluations_ = settings->parameters().max_evaluations;
     tentative_best_case_ = base_case;
     if (case_handler == 0) {
         case_handler_ = new CaseHandler(tentative_best_case_);
-    }
-    else {
-        Printer::ext_info("Using shared CaseHandler.", "Optimizer", "Optimization");
+    
+    } else {
+        Printer::ext_info("Using shared CaseHandler.",
+                "Optimizer", "Optimization");
         case_handler_ = case_handler;
     }
+
     if (constraint_handler == 0) {
         constraint_handler_ = new Constraints::ConstraintHandler(settings->constraints(), variables, grid);
-    }
-    else {
-        Printer::ext_info("Using shared ConstraintHandler.", "Optimizer", "Optimization");
+
+    } else {
+        Printer::ext_info("Using shared ConstraintHandler.",
+                "Optimizer", "Optimization");
         constraint_handler_ = constraint_handler;
     }
     iteration_ = 0;
@@ -89,7 +89,9 @@ Case *Optimizer::GetCaseForEvaluation()
         time(&end);
         seconds_spent_in_iterate_ = difftime(end, start);
     }
-    if (IsFinished() || (case_handler_->QueuedCases().size()  == 0))   {
+    if (IsFinished() || (case_handler_->QueuedCases().size() == 0)) {
+      std::cout << "IsFinished()" << IsFinished() << std::endl;
+      std::cout << "(case_handler_->QueuedCases().size() == 0)" << (case_handler_->QueuedCases().size() == 0) << std::endl;
       return nullptr;
     }
     return case_handler_->GetNextCaseForEvaluation();
