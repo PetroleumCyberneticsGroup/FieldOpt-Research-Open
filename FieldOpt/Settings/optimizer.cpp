@@ -377,6 +377,15 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             }
         }
 
+        if (json_parameters.contains("MaxTrustRegionRadius")) {
+            if (json_parameters["MaxTrustRegionRadius"].toDouble() >= 0.0) {
+                params.tr_radius_max = json_parameters["MaxTrustRegionRadius"].toDouble();
+            }
+            else {
+                throw std::runtime_error("Invalid value for setting MaxTrustRegionRadius");
+            }
+        }
+
         if (json_parameters.contains("TrustRegionLowerBound")) {
             if (json_parameters.contains("TrustRegionUpperBound")) {
                 if (json_parameters["TrustRegionLowerBound"].toDouble() <
