@@ -74,7 +74,7 @@
     },
     "Model": {
         "NPVInterval": "NPVYears",
-        "ControlTimes": [    0,  365,  730, 1095, 1460, 1825, 
+        "ControlTimes": [    0,  365,  730, 1095, 1460, 1825,
                               2190, 2555, 2920, 3285, 3650,
                               4015, 4380, 4745, 5110, 5475],
         "Reservoir": {
@@ -162,7 +162,7 @@
                     { "x": 7659, "y": 14146, "z": 1540 },
                     { "x": 8055, "y": 14249, "z": 1548 }
                 ],
-                "Controls": [ 
+                "Controls": [
                     { "TimeStep":    0, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
                     { "TimeStep": 1095, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
                     { "TimeStep": 2190, "Mode": "Rate", "Rate": 7500, "BHP": 50, "IsVariable": true },
