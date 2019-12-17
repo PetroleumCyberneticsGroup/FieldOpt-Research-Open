@@ -50,7 +50,7 @@ TrustRegionOptimization::TrustRegionOptimization(
     if (enable_logging_) { // Log base case
         logger_->AddEntry(this);
     }
-    
+
     // Construct shell of TRModel, does not initialize
     // model, i.e., is_model_initialized_ = false
     tr_model_ = new TrustRegionModel(lb_, ub_, base_case_, settings_);
@@ -376,7 +376,12 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           VectorXd x_current = tr_model_->getCurrentPoint();
           double fval_current = tr_model_->getCurrentFval();
           double eta_1 = settings_->parameters().tr_eta_1;
-          fval_trial_ = c->objective_function_value();
+
+          if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+            fval_trial_ = -c->objective_function_value();
+          } else {
+            fval_trial_ = c->objective_function_value();
+          }
 
           //!<Actual reduction>
           ared_ = fval_current - fval_trial_;

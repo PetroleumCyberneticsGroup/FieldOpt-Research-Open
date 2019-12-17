@@ -76,6 +76,11 @@ TrustRegionModel::TrustRegionModel(
     ub_ = ub;
     base_case_ = base_case;
 
+    if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+        base_case_->set_objective_function_value(-base_case_->objective_function_value());
+    }
+
+
     settings_ = settings;
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
@@ -260,7 +265,13 @@ void TrustRegionModel::submitTempInitCases() {
   int ii = 0;
   for (Case *c : initialization_cases_) {
     points_abs_.col(ii) = c->GetRealVarVector();
-    fvalues_(ii) = c->objective_function_value();
+
+    if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+      fvalues_(ii) = -c->objective_function_value();
+    } else {
+      fvalues_(ii) = c->objective_function_value();
+    }
+
     ii++;
   }
 }
@@ -619,7 +630,12 @@ bool TrustRegionModel::improveModelNfp() {
 
                     auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
                     nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
-                    nfp_new_fvalues_(ii) = c->objective_function_value();
+
+                    if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+                        nfp_new_fvalues_(ii) = -c->objective_function_value();
+                    } else {
+                        nfp_new_fvalues_(ii) = c->objective_function_value();
+                    }
 
                     std::map <string, string> stateMap = c->GetState();
                     // stateMap["EvalSt"] gives "pending" after evaluations of
@@ -1714,7 +1730,13 @@ bool TrustRegionModel::chooseAndReplacePoint() {
             int nvars = (int) replacement_cases_[0]->GetRealVarVector().size();
             auto c = replacement_cases_hash_[repl_pt_case_uuid_[ii]];
             repl_new_point_abs_.col(ii) = c->GetRealVarVector();
-            repl_new_fvalues_(ii) = c->objective_function_value();
+
+
+            if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+              repl_new_fvalues_(ii) = -c->objective_function_value();
+            } else {
+              repl_new_fvalues_(ii) = c->objective_function_value();
+            }
 
             std::map<string, string> stateMap = c->GetState();
             f_succeeded(ii) = true;
