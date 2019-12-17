@@ -180,7 +180,7 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
 
   QJsonObject get_json_settings_tr_opt_maximize_{
       {"Type", "TrustRegionOptimization"},
-      {"Mode", "Maximize"},
+      {"Mode", "Minimize"},
       {"Parameters", QJsonObject{
           {"MaxEvaluations", 3},
           {"InitialTrustRegionRadius", 1},

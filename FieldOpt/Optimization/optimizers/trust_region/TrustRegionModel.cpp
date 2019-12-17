@@ -75,13 +75,12 @@ TrustRegionModel::TrustRegionModel(
     lb_ = lb;
     ub_ = ub;
     base_case_ = base_case;
+    settings_ = settings;
 
     if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
         base_case_->set_objective_function_value(-base_case_->objective_function_value());
     }
 
-
-    settings_ = settings;
     radius_ = settings_->parameters().tr_initial_radius;
     tr_center_ = 0;
     cache_max_ = (int)3*pow(dim_,2);
