@@ -1100,7 +1100,7 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
 
       //!<Update model>
       int nc_cp = (int)cached_points_.cols();
-      cached_points_.conservativeResize(cached_points_.rows(), nc_cp+1);
+      cached_points_.conservativeResize(dim, nc_cp+1);
       cached_points_.col(nc_cp) = points_abs_.col(max_poly_i);
 
       int nc_fv = (int)cached_fvalues_.cols();
@@ -1780,7 +1780,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       //!<Update model and recompute polynomials>
       //TODO: check maximum cache size
       int nc_cp = (int)cached_points_.cols();
-      cached_points_.conservativeResize(cached_points_.rows(), nc_cp+1);
+      cached_points_.conservativeResize(dim, nc_cp+1);
       cached_points_.col(nc_cp) = points_abs_.col(pos);
 
       int nc_fv = (int)cached_fvalues_.cols();
