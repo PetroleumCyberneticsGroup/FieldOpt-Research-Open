@@ -167,11 +167,11 @@ void TrustRegionOptimization::iterate() {
       auto x_current = tr_model_->getCurrentPoint();
 
       if (improve_model_) {
-	mchange_flag_ = tr_model_->ensureImprovement();
-	cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
-	cout << "radius before: " << tr_model_->getRadius() << endl;
-	improve_model_ = ensureImprovementPostProcessing();
-	cout << "radius after: " << tr_model_->getRadius() << endl;
+        mchange_flag_ = tr_model_->ensureImprovement();
+        cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
+        cout << "radius before: " << tr_model_->getRadius() << endl;
+        improve_model_ = ensureImprovementPostProcessing();
+        cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
@@ -195,14 +195,14 @@ void TrustRegionOptimization::iterate() {
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
           if (model_criticality.norm() <= eps_c) {
-	    if (!criticality_step_execution_ongoing_) {
-	      criticality_init_radius_ = tr_model_->getRadius();
-	    }
-	    criticality_step_execution_ongoing_ = tr_model_->criticalityStep(criticality_init_radius_);
-	    if (criticality_step_execution_ongoing_) {
-	      ensureImprovementPostProcessing();
-	      return;
-	    }
+            if (!criticality_step_execution_ongoing_) {
+              criticality_init_radius_ = tr_model_->getRadius();
+            }
+            criticality_step_execution_ongoing_ = tr_model_->criticalityStep(criticality_init_radius_);
+            if (criticality_step_execution_ongoing_) {
+              ensureImprovementPostProcessing();
+              return;
+            }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
               Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
@@ -228,10 +228,10 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-	    cout << "updateRadius:  postProcessing small decrease" << endl;
-	    cout << "radius before: " << tr_model_->getRadius() << endl;
-	    improve_model_ = ensureImprovementPostProcessing();
-	    cout << "radius after: " << tr_model_->getRadius() << endl;
+            cout << "updateRadius:  postProcessing small decrease" << endl;
+            cout << "radius before: " << tr_model_->getRadius() << endl;
+            improve_model_ = ensureImprovementPostProcessing();
+            cout << "radius after: " << tr_model_->getRadius() << endl;
 
           } else {
             //!<Evaluate objective at trial point>
@@ -405,19 +405,19 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
             mchange_flag_ = tr_model_->changeTrCenter(trial_point_, fval_trial_);
           } else {
             auto point_added = tr_model_->tryToAddPoint(trial_point_, fval_trial_);
-	    if (!point_added) {
-	      improve_model_ = true;
-	    }
+            if (!point_added) {
+              improve_model_ = true;
+            }
           }
           sum_rho_ += rho_;
           sum_rho_sqr_ += pow(rho_, 2);
 
-	  if (!improve_model_) {
-	    cout << "updateRadius: handleEvaluatedCase" << endl;
-	    cout << "radius before: " << tr_model_->getRadius() << endl;
-	    updateRadius();
-	    cout << "radius after: " << tr_model_->getRadius() << endl;
-	  }
+        if (!improve_model_) {
+          cout << "updateRadius: handleEvaluatedCase" << endl;
+          cout << "radius before: " << tr_model_->getRadius() << endl;
+          updateRadius();
+          cout << "radius after: " << tr_model_->getRadius() << endl;
+        }
       }
     }
 }
