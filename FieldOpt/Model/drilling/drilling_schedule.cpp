@@ -20,3 +20,15 @@
 *********************************************************************/
 
 #include "drilling_schedule.h"
+
+public:
+  Drilling::DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
+    // TODO: implement this method
+  }
+
+
+
+
+
+
+

@@ -17,17 +17,21 @@
 
  You should have received a copy of the GNU General Public License
  along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+***************************************************************** ****/
 
 #include "drilling.h"
 
 namespace Model {
 namespace Drilling {
 
-Drilling::Drilling(Settings::Model settings){
+Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
+  variables_      = variables;
+  model_settings_ = settings;
+//  well_settings_  = settings->Well.Well();
+//  well_name_      = settings->Well_name;
 
+  drilling_schedule_ = new DrillingSchedule(model_settings_, variables_);
 };
-
 
 }
 }

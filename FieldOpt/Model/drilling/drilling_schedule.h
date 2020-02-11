@@ -22,17 +22,36 @@
 #ifndef FIELDOPT_DRILLING_SCHEDULE_H
 #define FIELDOPT_DRILLING_SCHEDULE_H
 
+#include "settings.h"
+#include "model.h"
+
+namespace Model {
+namespace Drilling {
+
 class DrillingSchedule {
 
  public:
-  DrillingSchedule(::Settings::Model::Well well,
-  ::Model::Properties::VariablePropertyContainer *variables);
+  DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
 
  private:
-  Properties::ContinousProperty *time_step_;
-  ::Settings::Model::DrillingOperation operation_;
+  vector<int> drilling_steps_;
+  map<int, double> time_steps_; //!< Indexed by the drilling steps
+  //vector<Settings::Model::Well::WellBlock block
+  map<int, tuple<double,double,double>> drilling_points_; //!< Indexed by the drilling steps
 
+  enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
+  enum ModelType: int {TrueModel=1, Surrogate=2};
+
+  struct DrillingSettings {
+    DrillingSettings() {}
+    map<int, DrillingOperation> drilling_operations;
+    map<int, ModelType> model_types;
+    map<int, bool> is_variable_drilling_points;
+    map<int, bool> is_variable_completions;
+  };
 
 };
 
+}
+}
 #endif //FIELDOPT_DRILLING_SCHEDULE_H

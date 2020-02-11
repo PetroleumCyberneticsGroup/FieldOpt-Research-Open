@@ -22,8 +22,9 @@
 #ifndef FIELDOPT_DRILLING_H
 #define FIELDOPT_DRILLING_H
 
+#include <QString>
+#include "drilling_schedule.h"
 #include "Settings/settings.h"
-#include "wells/well.h"
 
 namespace Model {
 namespace Drilling {
@@ -31,14 +32,19 @@ namespace Drilling {
 class Drilling {
 
  public:
-  Drilling(Settings::Model settings);
+  Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
 
- protected:
-  Settings::Model::Well well_settings_;
+  QString getWellName(){ return well_name_; }
 
-  Well* well_;
-  DrillingSchedule drilling_schedule_;
+  Properties::VariablePropertyContainer* getVariables() { return variables_;}
 
+ private:
+  Properties::VariablePropertyContainer *variables_;
+  Settings::Model  *model_settings_;
+  Settings::Model::Well *well_settings_;
+
+  DrillingSchedule *drilling_schedule_;
+  QString well_name_;
 };
 
 }
