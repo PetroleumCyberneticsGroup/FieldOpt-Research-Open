@@ -1476,7 +1476,7 @@ Polynomial TrustRegionModel::multiplyPolynomial(
     Polynomial p1,
     double factor) {
   Polynomial p = p1;
-  p.coefficients = p1.coefficients.array()*factor;
+  p.coefficients = p1.coefficients*factor;
   return p;
 }
 
