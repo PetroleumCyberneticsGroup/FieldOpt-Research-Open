@@ -1575,10 +1575,31 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   return l_alpha;
 }
 
+void TrustRegionModel::DBG_printPivotPolynomials(string msg=""){
+  string ENDSTRN = string(100, '=');
+  cout << BRED << BLDON << FBLACK << ENDSTRN << AEND << endl;
+  if (msg != "") {
+    cout << BRED << BLDON << FBLACK << "[" << msg << "]" << AEND << endl;
+  }
+
+  for (int kk = 1; kk < pivot_polynomials_.size(); kk++) {
+    auto vec = pivot_polynomials_[kk].coefficients;
+    
+    cout << FGREEN << "pivot.polyn#" << kk << "[ ";
+    for (int ii = 0; ii < vec.size()-1; ii++) {
+      cout << OSD(vec(ii));
+    }
+    cout << OSD(vec.size()-1) << " ]" << AEND <<  endl;
+  }  
+}
+
 Polynomial TrustRegionModel::combinePolynomials(
     int points_num,
     RowVectorXd coefficients) {
 
+    DBG_printPivotPolynomials("combinePolynomials");
+
+  // polynomials -> std::vector<Polynomial>
   auto polynomials = std::vector<Polynomial>(
       pivot_polynomials_.begin(),
       pivot_polynomials_.begin() + points_num);

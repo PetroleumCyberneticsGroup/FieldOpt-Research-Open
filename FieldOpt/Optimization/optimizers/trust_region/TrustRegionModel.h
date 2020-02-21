@@ -69,6 +69,16 @@ class TrustRegionModel {
             Settings::Optimizer *settings
             );
 
+    void DBG_printPivotPolynomials(string msg);
+
+    inline string OSD(double argout, string fstr="f") {
+      stringstream ss;
+      char buffer [100];
+      sprintf(buffer, "% 10.3e ", argout);
+      ss << buffer;
+      return ss.str();
+    }
+
     SNOPTSolver *SNOPTSolver_;
 
     void setXDim(int dim) { dim_ = dim; }
