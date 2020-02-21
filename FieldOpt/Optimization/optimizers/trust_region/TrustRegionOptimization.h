@@ -85,17 +85,18 @@ class TrustRegionOptimization : public Optimizer {
     double sum_rho_sqr_; //!<Cumulative squared rho>
     double delay_reduction_; //!<Delay reduction>
     int mchange_flag_{};
-    bool iteration_model_fl_{};
-    bool criticality_step_performed_{};
     double gamma_dec_;
 
     VectorXd trial_point_;
     VectorXd trial_step_;
     double fval_trial_{};
     double predicted_red_{};
-    bool improve_model_;
     double criticality_init_radius_;
-    bool criticality_step_execution_ongoing_;
+
+    bool iteration_model_fl_ = false;
+    bool criticality_step_performed_ = false;
+    bool improve_model_ = false;
+    bool criticality_step_execution_ongoing_ = false;
     
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
