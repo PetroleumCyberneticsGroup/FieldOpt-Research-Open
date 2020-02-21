@@ -90,8 +90,8 @@ Case *Optimizer::GetCaseForEvaluation()
         seconds_spent_in_iterate_ = difftime(end, start);
     }
     if (IsFinished() || (case_handler_->QueuedCases().size() == 0)) {
-      std::cout << "IsFinished()" << IsFinished() << std::endl;
-      std::cout << "(case_handler_->QueuedCases().size() == 0)" << (case_handler_->QueuedCases().size() == 0) << std::endl;
+//      std::cout << "IsFinished()" << IsFinished() << std::endl;
+//      std::cout << "(case_handler_->QueuedCases().size() == 0)" << (case_handler_->QueuedCases().size() == 0) << std::endl;
       return nullptr;
     }
     return case_handler_->GetNextCaseForEvaluation();
