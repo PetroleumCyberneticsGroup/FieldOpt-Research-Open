@@ -125,7 +125,8 @@ Model::Model(QJsonObject json_model, Paths &paths)
             for (auto jwell : json_model["Wells"].toArray()) { // Go through list of wells in json file
                 if (jwell.toObject().contains("Segmentation")) { // Check if the well has the Segmentation keyword
                     for (int j = 0; j < wells_.size(); ++j) { // Loop through parsed wells
-                        if (QString::compare(wells_[j].name, jwell.toObject()["Name"].toString()) == 0) { // Check if well names match
+                        if (QString::compare(wells_[j].name, jwell.toObject()["Name"].toString()) == 0) { // Check if
+                          // s match
                             wells_[j].use_segmented_model = true;
                             parseSegmentation(jwell.toObject()["Segmentation"].toObject(), wells_[j]);
                             break;
@@ -457,6 +458,24 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
         parseSegmentation(json_well["Segmentation"].toObject(), well);
     }
     return well;
+}
+
+Model::Drilling Model::readDrilling(QJsonObject json_model) {
+  if (json_model.contains("Drilling")) {
+    drilling_ = Drilling();
+    if (json_model.contains("wellName")) {
+      drilling_.well_name = json_model["wellName"].toString();
+    }
+
+    if (!json_model.contains("DrillingSchedule"))
+      throw UnableToParseModelSectionException(
+          "The Drilling schedule must be defined at least one time for the Drilling/Model.");
+
+    if (json_model.contains("DrillingSchedule")) {
+      //TODO
+
+    }
+
 }
 
 bool Model::controlTimeIsDeclared(int time) const

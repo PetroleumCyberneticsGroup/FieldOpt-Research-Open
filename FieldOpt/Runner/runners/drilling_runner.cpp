@@ -34,7 +34,7 @@ DrillingRunner::DrillingRunner(Runner::RuntimeSettings *runtime_settings)
   InitializeModel();
   InitializeSimulator();
 
-  InitializeDrillingWorkflow();
+//  InitializeDrillingWorkflow();
 
 //  EvaluateBaseModel();
 //  InitializeObjectiveFunction();
@@ -44,7 +44,7 @@ DrillingRunner::DrillingRunner(Runner::RuntimeSettings *runtime_settings)
 //  FinalizeInitialization(true);
 }
 
-void SerialRunner::Execute() {
+void DrillingRunner::Execute() {
 
 }
 

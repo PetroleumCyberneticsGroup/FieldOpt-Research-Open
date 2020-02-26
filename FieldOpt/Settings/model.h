@@ -86,6 +86,7 @@ class Model
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
     };
+
     /*!
      * @brief A grouping of ICVs that make up a compartment
      */
@@ -164,15 +165,38 @@ class Model
     std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
   };
 
+  struct Drilling {
+    Drilling(){}
+    QString well_name;
+    struct DrillingSchedule {
+      DrillingSchedule() {}
+      vector<int> drilling_steps_;
+      map<int, double> time_steps_; //!< Indexed by the drilling steps
+      map<int, Eigen::Vector3d> drilling_points_; //!< Indexed by the drilling steps
+
+      enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
+      enum ModelType: int {TrueModel=1, Surrogate=2};
+
+      map<int, DrillingOperation> drilling_operations;
+      map<int, ModelType> model_types;
+      map<int, bool> is_variable_drilling_points;
+      map<int, bool> is_variable_completions;
+      map<int, bool> is_model_update;
+    };
+  };
+
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
 
  private:
   QList<Well> wells_;
   QList<int> control_times_;
+  Drilling drilling_;
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
+  Drilling readDrilling(QJsonObject);
+
   void setImportedWellDefaults(QJsonObject json_model);
   void parseImportedWellOverrides(QJsonArray json_wells);
 
