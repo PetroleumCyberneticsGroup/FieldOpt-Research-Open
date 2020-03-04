@@ -17,7 +17,7 @@ add_executable(FieldOpt
         runners/worker.cpp
 		logger.cpp
 		bookkeeper.cpp
-        runners/ensemble_helper.cpp)
+        runners/ensemble_helper.cpp ../Optimization/optimizers/ensemble_exp_value.h ../Optimization/optimizers/ensemble_exp_value.cpp)
 
 add_library(runner STATIC
 		runtime_settings.cpp
