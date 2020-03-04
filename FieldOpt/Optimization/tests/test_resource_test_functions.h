@@ -33,6 +33,12 @@ namespace TestResources {
      */
     namespace TestFunctions {
 
+        /*
+        inline double function_test(Eigen::VectorXd x){
+            return (1 - x(1))^2);
+        }*/
+
+
         /*!
          * @brief Sphere function.
          *
@@ -77,6 +83,11 @@ namespace TestResources {
             return pow(arg1,2);
         }
 
+        inline double tr_dfo_prob1_test(VectorXd xs) {
+            double arg1 = 2 - xs(0);
+            return pow(arg1,2);
+        }
+
         /*!
          * @brief CG.prob2 -> f = @(x) log1p(x(1)^2) + x(2)^2;
          * Initial point: x0=[2.0 2.0]
@@ -85,6 +96,22 @@ namespace TestResources {
             double arg1 = pow(xs(0),2);
             double arg2 = pow(xs(1),2);
             return log1p(arg1) + arg2;
+        }
+
+        inline double tr_dfo_prob2_variation1(VectorXd xs) {
+            double arg1 = pow(xs(0),2);
+            double arg2 = pow(xs(1),2);
+            return 1.5*log1p(4*arg1) + 4*arg2;
+        }
+        inline double tr_dfo_prob2_variation2(VectorXd xs) {
+            double arg1 = pow(xs(0),2);
+            double arg2 = pow(xs(1),2);
+            return 2*log1p(3*arg1) + arg2;
+        }
+        inline double tr_dfo_prob2_variation3(VectorXd xs) {
+            double arg1 = pow(xs(0),2);
+            double arg2 = pow(xs(1),2);
+            return log1p(2*arg1) + 2*arg2 + 0.01;
         }
 
         /*!

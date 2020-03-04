@@ -90,6 +90,8 @@ if (BUILD_TESTING)
 #			tests/optimizers/test_ego.cpp
 #            tests/constraints/test_pseudo_cont_boundary_2d.cpp
 			tests/optimizers/test_tr-dfo.cpp
+#			tests/optimizers/test_tr-dfo.cpp
+			tests/optimizers/test_tr-dfo_exp-value.cpp
 			tests/optimizers/test_tr-model-data.hpp
 			tests/optimizers/test_tr-support.hpp)
 

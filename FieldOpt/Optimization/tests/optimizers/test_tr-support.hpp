@@ -183,5 +183,21 @@ namespace TestResources {
     c.set_objective_function_value(prob.fm(0,1));
   }
 
+    void OverrideSecondPointEn(TestResources::TrustRegionModelData::prob &prob,
+                             Optimization::Case &c,
+                             Optimization::Optimizers::EnsembleExpValue *tr_en_ ) {
+
+        VectorXd xbr(prob.xm.rows(),1);
+        for (int ii=0; ii<prob.xm.rows(); ii++) {
+            xbr.row(ii) << prob.xm(ii,1); // a proper order is ensured previously.
+        }
+
+        // dbg
+        // cout << "prob.xm: " << endl << prob.xm << endl;
+        // cout << "xbr: " << endl << xbr << endl;
+        c.SetRealVarValues(xbr.col(0));
+        c.set_objective_function_value(tr_en_ -> initialValue(xbr.col(0)));
+    }
+
 }
 #endif //FIELDOPT_TEST_TR_SUPPORT_HPP
