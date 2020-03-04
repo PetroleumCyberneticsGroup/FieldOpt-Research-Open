@@ -33,6 +33,7 @@ add_library(optimization STATIC
         optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.cpp
 		optimizers/trust_region/TrustRegionOptimization.cpp
 		optimizers/trust_region/TrustRegionModel.cpp
+		optimizers/ensemble_exp_value.cpp
 		constraints/pseudo_cont_boundary_2d.cpp
 		constraints/icv_constraint.cpp
         constraints/packer_constraint.cpp
@@ -66,6 +67,7 @@ target_include_directories(optimization PUBLIC
 
 add_compile_options(-std=c++11)
 
+set_target_properties(optimization PROPERTIES COMPILE_FLAGS "-fPIC")
 if (BUILD_TESTING)
 	# Unit tests
 	add_executable(test_optimization
