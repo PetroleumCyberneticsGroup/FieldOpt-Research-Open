@@ -33,7 +33,7 @@ option(BUILD_GTEST      "Build Google test framework"         ON )
 option(BUILD_RPPP       "Build RpolyPlusPlus library"         ON )
 option(BUILD_ECL        "Build ecl library from ERT"          ON )
 option(BUILD_QT5        "Build Qt5 base libraries"            OFF)
-option(USE_LOCAL_EIGEN3 "Use the local Eigen3 package"        ON )
+option(USE_LOCAL_EIGEN3 "Use the local Eigen3 package"        OFF)
 
 message(STATUS "BUILD_GP:         ${BUILD_GP}" )
 message(STATUS "BUILD_GTEST:      ${BUILD_GTEST}")
