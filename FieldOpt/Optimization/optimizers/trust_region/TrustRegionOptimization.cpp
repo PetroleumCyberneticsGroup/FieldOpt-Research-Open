@@ -168,10 +168,10 @@ void TrustRegionOptimization::iterate() {
 
       if (improve_model_) {
 	mchange_flag_ = tr_model_->ensureImprovement();
-	cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
-	cout << "radius before: " << tr_model_->getRadius() << endl;
+	//cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
+	//cout << "radius before: " << tr_model_->getRadius() << endl;
 	improve_model_ = ensureImprovementPostProcessing();
-	cout << "radius after: " << tr_model_->getRadius() << endl;
+	//cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
@@ -205,7 +205,7 @@ void TrustRegionOptimization::iterate() {
 	    }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
-              Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
+              //Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
               return;
             }
           } else {
@@ -228,10 +228,10 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-	    cout << "updateRadius:  postProcessing small decrease" << endl;
-	    cout << "radius before: " << tr_model_->getRadius() << endl;
+	    //cout << "updateRadius:  postProcessing small decrease" << endl;
+	    //cout << "radius before: " << tr_model_->getRadius() << endl;
 	    improve_model_ = ensureImprovementPostProcessing();
-	    cout << "radius after: " << tr_model_->getRadius() << endl;
+	    //cout << "radius after: " << tr_model_->getRadius() <<2 endl;
 
           } else {
             //!<Evaluate objective at trial point>
@@ -270,10 +270,10 @@ void TrustRegionOptimization::iterate() {
           if ((mchange_flag_ ==1) || (mchange_flag_ == 2)) {
             iteration_--;
           }
-	  cout << "Final ensureImprovement" << endl;
-	  cout << "radius before: " << tr_model_->getRadius() << endl;
+	  //cout << "Final ensureImprovement" << endl;
+	  //cout << "radius before: " << tr_model_->getRadius() << endl;
 	  updateRadius();
-	  cout << "radius after: " << tr_model_->getRadius() << endl;
+	  //cout << "radius after: " << tr_model_->getRadius() << endl;
 
           return;
         } else {
@@ -413,11 +413,12 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           sum_rho_sqr_ += pow(rho_, 2);
 
 	  if (!improve_model_) {
-	    cout << "updateRadius: handleEvaluatedCase" << endl;
-	    cout << "radius before: " << tr_model_->getRadius() << endl;
+	    //cout << "updateRadius: handleEvaluatedCase" << endl;
+	    //cout << "radius before: " << tr_model_->getRadius() << endl;
 	    updateRadius();
-	    cout << "radius after: " << tr_model_->getRadius() << endl;
+	    //cout << "radius after: " << tr_model_->getRadius() << endl;
 	  }
+
       }
     }
 }
@@ -535,11 +536,11 @@ void TrustRegionOptimization::setLowerUpperBounds() {
 
     } else {
       
-      Printer::ext_warn(
-          "Lower/upper bounds for DF-TR algorithm not specified.",
-          "Optimization", "TrustRegionOptimization");
-      throw std::runtime_error(
-          "Lower/upper bounds for DF-TR algorithm not specified.");
+      //Printer::ext_warn(
+      //    "Lower/upper bounds for DF-TR algorithm not specified.",
+      //    "Optimization", "TrustRegionOptimization");
+      //throw std::runtime_error(
+      //    "Lower/upper bounds for DF-TR algorithm not specified.");
 
     }
   }
@@ -560,9 +561,9 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
   }
 
   if (criticality_step_execution_ongoing_) {
-    Printer::ext_warn(
-          "criticality step did not generate a case.",
-          "ensureImprovementPostProcessing", "TrustRegionOptimization");
+    //Printer::ext_warn(
+    //      "criticality step did not generate a case.",
+    //      "ensureImprovementPostProcessing", "TrustRegionOptimization");
   }
 
   if ((improvement_cases.size() == 0)
