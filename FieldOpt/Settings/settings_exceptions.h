@@ -153,6 +153,13 @@ public:
         : std::runtime_error(message) {}
 };
 
+class UnableToParseDrillingModelSectionException : public std::runtime_error {
+ public:
+  UnableToParseDrillingModelSectionException(const string &message)
+      : std::runtime_error(message) {}
+};
+
+
 }
 
 #endif // SETTINGS_EXCEPTIONS_H

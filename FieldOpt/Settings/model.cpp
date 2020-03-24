@@ -150,6 +150,12 @@ Model::Model(QJsonObject json_model, Paths &paths)
                 "Unable to parse wells model section: " + std::string(ex.what()));
         }
     }
+
+  // Drilling
+  if (json_model.contains("Drilling")) {
+    QJsonObject json_drilling = json_model["Drilling"].toObject();
+    readDrilling(json_drilling);
+  }
 }
 
 void Model::readReservoir(QJsonObject json_reservoir, Paths &paths)
@@ -460,22 +466,109 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
     return well;
 }
 
-Model::Drilling Model::readDrilling(QJsonObject json_model) {
-  if (json_model.contains("Drilling")) {
+void Model::readDrilling(QJsonObject json_drilling_workflow) {
+  if (json_drilling_workflow.contains("Drilling")) {
+    QJsonObject json_drilling = json_drilling_workflow["Drilling"].toObject();
     drilling_ = Drilling();
-    if (json_model.contains("wellName")) {
-      drilling_.well_name = json_model["wellName"].toString();
+    if (json_drilling.contains("WellName")) {
+      drilling_.well_name = json_drilling["WellName"].toString();
     }
 
-    if (!json_model.contains("DrillingSchedule"))
-      throw UnableToParseModelSectionException(
-          "The Drilling schedule must be defined at least one time for the Drilling/Model.");
+    if (!json_drilling.contains("DrillingSchedule"))
+      throw UnableToParseDrillingModelSectionException(
+          "The Drilling schedule must be defined at least one time in the Drilling/Model section.");
 
-    if (json_model.contains("DrillingSchedule")) {
-      //TODO
+    if (json_drilling.contains("DrillingSchedule")) {
+      QJsonArray json_drilling_schedule = json_drilling["DrillingSchedule"].toArray();
+      Drilling::DrillingSchedule drilling_schedule;
+      for (int i = 0; i < json_drilling_schedule.size(); i++) {
 
+        QJsonObject json_drilling_step = json_drilling_schedule[i].toObject();
+        drilling_schedule.drilling_steps_.append(i);
+        if (json_drilling_step.contains("TimeStep")) {
+          drilling_schedule.time_steps_.insert(i, json_drilling_step["TimeStep"].toDouble());
+        }
+
+        if (json_drilling_step.contains("Operation")) {
+          if (QString::compare("StartDrilling", json_drilling_step["Operation"].toString()) == 0)
+            drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::StartDrilling);
+
+          if (QString::compare("Drilling", json_drilling_step["Operation"].toString()) == 0)
+            drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::StartDrilling);
+
+          if (QString::compare("PullingOutOfHole", json_drilling_step["Operation"].toString()) == 0)
+            drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::PullingOutOfHole);
+        }
+
+        if (json_drilling_step.contains("DrillingPoints")) {
+          QJsonObject json_drilling_points = json_drilling_step["DrillingPoints"].toObject();
+
+          if (!json_drilling_points.contains("x") || !json_drilling_points.contains("y")
+              || !json_drilling_points.contains("z"))
+            throw UnableToParseDrillingModelSectionException(
+                "The Drilling points are not properly defined Drilling/Model section.");
+          else {
+            QJsonArray json_drilling_points_x = json_drilling_points["x"].toArray();
+            QJsonArray json_drilling_points_y = json_drilling_points["y"].toArray();
+            QJsonArray json_drilling_points_z = json_drilling_points["z"].toArray();
+
+            if ((json_drilling_points_x.size() != json_drilling_points_y.size())
+                || (json_drilling_points_y.size() != json_drilling_points_z.size()))
+              throw UnableToParseDrillingModelSectionException(
+                  "The Drilling points have incompatible sizes in the different coordinates in the Drilling/Model section.");
+
+            QList<Model::Drilling::DrillingPoint> drilling_points;
+            for (int j = 0; j < json_drilling_points_x.size(); j++) {
+              Drilling::DrillingPoint point;
+              point.x = json_drilling_points_x.at(j).toDouble();
+              point.y = json_drilling_points_y.at(j).toDouble();
+              point.z = json_drilling_points_z.at(j).toDouble();
+
+              if (json_drilling_step.contains("OptimizeDrillingPoints")) {
+                if (json_drilling_step["OptimizeDrillingPoints"].toBool())
+                  point.is_variable = true;
+                else
+                  point.is_variable = false;
+              }
+              drilling_points.append(point);
+            }
+            drilling_schedule.drilling_points_.insert(i, drilling_points);
+          }
+        }
+
+        if (json_drilling_step.contains("OptimizeDrillingPoints")) {
+          if (json_drilling_step["OptimizeDrillingPoints"].toBool())
+            drilling_schedule.is_variable_drilling_points.insert(i, true);
+          else
+            drilling_schedule.is_variable_drilling_points.insert(i, false);
+        }
+
+        if (json_drilling_step.contains("ModelUpdate")) {
+          if (json_drilling_step["ModelUpdate"].toBool())
+            drilling_schedule.is_model_update.insert(i, true);
+          else
+            drilling_schedule.is_model_update.insert(i, false);
+        }
+
+        if (json_drilling_step.contains("OptimizeCompletion")) {
+          if (json_drilling_step["OptimizeCompletion"].toBool())
+            drilling_schedule.is_variable_completions.insert(i, true);
+          else
+            drilling_schedule.is_variable_completions.insert(i, false);
+        }
+
+        if (json_drilling_step.contains("ModelType")) {
+          if (json_drilling_step["ModelType"].toString().compare("TrueModel") == 0)
+            drilling_schedule.model_types.insert(i, Drilling::DrillingSchedule::ModelType::TrueModel);
+
+          if (json_drilling_step["ModelType"].toString().compare("Surrogate") == 0)
+            drilling_schedule.model_types.insert(i, Drilling::DrillingSchedule::ModelType::Surrogate);
+        }
+      }
+      drilling_.drilling_schedule = drilling_schedule;
     }
 
+  }
 }
 
 bool Model::controlTimeIsDeclared(int time) const

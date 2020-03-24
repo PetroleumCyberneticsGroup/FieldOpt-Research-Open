@@ -45,6 +45,7 @@ class TestResourceSettings {
       settings_hybridopt_optimizer_ = settings_hybridopt_full_->optimizer();
       settings_hybridopt_simulator_ = settings_hybridopt_full_->simulator();
       settings_hybridopt_model_ = settings_hybridopt_full_->model();
+    json_settings_drilling_ = get_json_settings_drilling_;
   }
 
   Settings::Settings *settings_full_;
@@ -58,8 +59,73 @@ class TestResourceSettings {
   Settings::Simulator *settings_hybridopt_simulator_;
   Settings::Model *settings_hybridopt_model_;
   Paths paths_hybridopt_;
-};
+  QJsonObject json_settings_drilling_;
 
+ private:
+  QJsonObject get_json_settings_drilling_{
+      {"Drilling", QJsonObject{
+          {"WellName", "D-2H"},
+          {"DrillingSchedule", QJsonArray{
+              QJsonObject{
+                  {"TimeStep", 0.0},
+                  {"Operation", "StartDrilling"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{1.0, 2.0, 3.0, 4.0}},
+                      {"y", QJsonArray{1.0, 2.0, 3.0, 4.0}},
+                      {"z", QJsonArray{1.0, 2.0, 3.0, 4.0}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", true},
+                  {"ModelUpdate", false},
+                  {"OptimizeCompletion", false},
+                  {"ModelType","TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 1.0},
+                  {"Operation", "Drilling"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{5.0}},
+                      {"y", QJsonArray{5.0}},
+                      {"z", QJsonArray{5.0}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", true},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 2.0},
+                  {"Operation", "Drilling"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{6.0}},
+                      {"y", QJsonArray{6.0}},
+                      {"z", QJsonArray{6.0}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", false},
+                  {"ModelType", "Surrogate"}
+              },
+              QJsonObject{
+                  {"TimeStep", 3.0},
+                  {"Operation", "Pulling-out-of-hole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.0}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{7.0}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", true},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "Surrogate"}
+              }
+          }
+          }}
+      }};
+};
 }
 
 #endif //FIELDOPT_TEST_RESOURCE_SETTINGS_H
