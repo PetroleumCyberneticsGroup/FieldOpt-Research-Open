@@ -178,9 +178,9 @@ class Model
 
     struct DrillingSchedule {
       DrillingSchedule() {}
-      QList<int> drilling_steps_;
-      QMap<int, double> time_steps_; //!< Indexed by the drilling steps
-      QMap<int, QList<DrillingPoint>> drilling_points_; //!< Indexed by the drilling steps
+      QList<int> drilling_steps;    //!<We assume the indexes are from ordered from 0 to N
+      QMap<int, double> time_steps; //!< Indexed by the drilling steps
+      QMap<int, QList<DrillingPoint>> drilling_points; //!< Indexed by the drilling steps
 
       enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
       enum ModelType: int {TrueModel=1, Surrogate=2};

@@ -70,9 +70,9 @@ class TestResourceSettings {
                   {"TimeStep", 0.0},
                   {"Operation", "StartDrilling"},
                   {"DrillingPoints", QJsonObject{
-                      {"x", QJsonArray{1.0, 2.0, 3.0, 4.0}},
-                      {"y", QJsonArray{1.0, 2.0, 3.0, 4.0}},
-                      {"z", QJsonArray{1.0, 2.0, 3.0, 4.0}}
+                      {"x", QJsonArray{1.5, 2.0, 3.0, 4.0}},
+                      {"y", QJsonArray{1.0, 2.5, 3.0, 4.0}},
+                      {"z", QJsonArray{1.0, 2.0, 3.5, 4.0}}
                   }
                   },
                   {"OptimizeDrillingPoints", true},
@@ -84,9 +84,9 @@ class TestResourceSettings {
                   {"TimeStep", 1.0},
                   {"Operation", "Drilling"},
                   {"DrillingPoints", QJsonObject{
-                      {"x", QJsonArray{5.0}},
+                      {"x", QJsonArray{5.5}},
                       {"y", QJsonArray{5.0}},
-                      {"z", QJsonArray{5.0}}
+                      {"z", QJsonArray{6.5}}
                   }
                   },
                   {"OptimizeDrillingPoints", true},
@@ -99,7 +99,7 @@ class TestResourceSettings {
                   {"Operation", "Drilling"},
                   {"DrillingPoints", QJsonObject{
                       {"x", QJsonArray{6.0}},
-                      {"y", QJsonArray{6.0}},
+                      {"y", QJsonArray{6.2}},
                       {"z", QJsonArray{6.0}}
                   }
                   },
@@ -112,9 +112,9 @@ class TestResourceSettings {
                   {"TimeStep", 3.0},
                   {"Operation", "Pulling-out-of-hole"},
                   {"DrillingPoints", QJsonObject{
-                      {"x", QJsonArray{7.0}},
+                      {"x", QJsonArray{7.5}},
                       {"y", QJsonArray{7.0}},
-                      {"z", QJsonArray{7.0}}
+                      {"z", QJsonArray{7.1}}
                   }
                   },
                   {"OptimizeDrillingPoints", true},

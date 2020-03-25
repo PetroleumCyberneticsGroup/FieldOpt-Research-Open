@@ -484,9 +484,9 @@ void Model::readDrilling(QJsonObject json_drilling_workflow) {
       for (int i = 0; i < json_drilling_schedule.size(); i++) {
 
         QJsonObject json_drilling_step = json_drilling_schedule[i].toObject();
-        drilling_schedule.drilling_steps_.append(i);
+        drilling_schedule.drilling_steps.append(i);
         if (json_drilling_step.contains("TimeStep")) {
-          drilling_schedule.time_steps_.insert(i, json_drilling_step["TimeStep"].toDouble());
+          drilling_schedule.time_steps.insert(i, json_drilling_step["TimeStep"].toDouble());
         }
 
         if (json_drilling_step.contains("Operation")) {
@@ -494,7 +494,7 @@ void Model::readDrilling(QJsonObject json_drilling_workflow) {
             drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::StartDrilling);
 
           if (QString::compare("Drilling", json_drilling_step["Operation"].toString()) == 0)
-            drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::StartDrilling);
+            drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::Drilling);
 
           if (QString::compare("PullingOutOfHole", json_drilling_step["Operation"].toString()) == 0)
             drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::PullingOutOfHole);
@@ -532,7 +532,7 @@ void Model::readDrilling(QJsonObject json_drilling_workflow) {
               }
               drilling_points.append(point);
             }
-            drilling_schedule.drilling_points_.insert(i, drilling_points);
+            drilling_schedule.drilling_points.insert(i, drilling_points);
           }
         }
 
