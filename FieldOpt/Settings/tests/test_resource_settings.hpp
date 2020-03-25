@@ -110,7 +110,7 @@ class TestResourceSettings {
               },
               QJsonObject{
                   {"TimeStep", 3.0},
-                  {"Operation", "Pulling-out-of-hole"},
+                  {"Operation", "PullingOutOfHole"},
                   {"DrillingPoints", QJsonObject{
                       {"x", QJsonArray{7.5}},
                       {"y", QJsonArray{7.0}},
