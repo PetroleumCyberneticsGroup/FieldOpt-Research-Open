@@ -23,8 +23,10 @@
 #define FIELDOPT_DRILLING_H
 
 #include <QString>
+#include <properties/variable_property_container.h>
 #include "drilling_schedule.h"
 #include "Settings/settings.h"
+#include "Settings/model.h"
 
 namespace Model {
 namespace Drilling {
@@ -40,8 +42,7 @@ class Drilling {
 
  private:
   Properties::VariablePropertyContainer *variables_;
-  Settings::Model  *model_settings_;
-  Settings::Model::Well *well_settings_;
+  Settings::Model  *settings_;
 
   DrillingSchedule *drilling_schedule_;
   QString well_name_;

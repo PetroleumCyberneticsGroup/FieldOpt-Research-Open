@@ -25,12 +25,11 @@ namespace Model {
 namespace Drilling {
 
 Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
-  variables_      = variables;
-  model_settings_ = settings;
-//  well_settings_  = settings->Well.Well();
-//  well_name_      = settings->Well_name;
+  variables_  = variables;
+  settings_   = settings;
 
-  drilling_schedule_ = new DrillingSchedule(model_settings_, variables_);
+  well_name_ = settings->drilling().well_name;
+  drilling_schedule_ = new DrillingSchedule(settings_, variables_);
 };
 
 }

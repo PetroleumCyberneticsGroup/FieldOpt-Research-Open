@@ -22,33 +22,51 @@
 #ifndef FIELDOPT_DRILLING_SCHEDULE_H
 #define FIELDOPT_DRILLING_SCHEDULE_H
 
-#include "settings.h"
-#include "model.h"
+#include <properties/variable_property_container.h>
+#include "drilling_schedule.h"
+#include "Settings/settings.h"
+#include "Settings/model.h"
+#include <iostream>
 
 namespace Model {
 namespace Drilling {
 
 class DrillingSchedule {
-
  public:
-  DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
-
- private:
-  vector<int> drilling_steps_;
-  map<int, double> time_steps_; //!< Indexed by the drilling steps
-  //vector<Settings::Model::Well::WellBlock block
-  map<int, tuple<double,double,double>> drilling_points_; //!< Indexed by the drilling steps
+  struct DrillingPoint {
+    DrillingPoint() {}
+    double x, y, z;
+    bool is_variable = false;
+  };
 
   enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
   enum ModelType: int {TrueModel=1, Surrogate=2};
 
-  struct DrillingSettings {
-    DrillingSettings() {}
-    map<int, DrillingOperation> drilling_operations;
-    map<int, ModelType> model_types;
-    map<int, bool> is_variable_drilling_points;
-    map<int, bool> is_variable_completions;
-  };
+  DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
+
+  QList<int> getSteps() { return drilling_steps_; }
+  QMap<int, double> getTimeSteps() { return time_steps_; }
+  QMap<int, QList<DrillingPoint>> getDrillingPoints() { return drilling_points_; }
+  QMap<int, DrillingOperation> getDrillingOperations() { return drilling_operations_; }
+  QMap<int, ModelType> getModelTypes() { return model_types_; }
+  QMap<int, bool> getIsVariableDrillingPoints() { return is_variable_drilling_points_; }
+  QMap<int, bool> getIsVariableCompletions() { return is_variable_completions_; }
+
+ private:
+  QList<int> drilling_steps_;
+  QMap<int, double> time_steps_; //!< Indexed by the drilling steps
+  QMap<int, QList<DrillingPoint>> drilling_points_; //!< Indexed by the drilling steps
+
+  QMap<int, DrillingOperation> drilling_operations_;
+  QMap<int, ModelType> model_types_;
+  QMap<int, bool> is_variable_drilling_points_;
+  QMap<int, bool> is_variable_completions_;
+
+  void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
+  void printDrillingPoints();
+
+
+
 
 };
 

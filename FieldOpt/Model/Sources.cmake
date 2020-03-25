@@ -28,6 +28,7 @@ SET(MODEL_HEADERS
 	wells/wellbore/wellspline.h
     wells/wellbore/polar_spline.h
 	drilling/drilling.h
+	drilling/drilling_schedule.h
 )
 
 SET(MODEL_SOURCES
@@ -58,6 +59,7 @@ SET(MODEL_SOURCES
 	wells/wellbore/wellspline.cpp
 	wells/wellbore/polar_spline.cpp
 	drilling/drilling.cpp
+	drilling/drilling_schedule.cpp
 )
 
 SET(MODEL_TESTS

@@ -20,11 +20,49 @@
 *********************************************************************/
 
 #include "drilling_schedule.h"
+using namespace std;
 
-public:
-  Drilling::DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
-    // TODO: implement this method
+namespace Model {
+namespace Drilling {
+DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
+
+  drilling_steps_ = settings->drilling().drilling_schedule.drilling_steps;
+  time_steps_ = settings->drilling().drilling_schedule.time_steps;
+
+  int ds;
+  for (int i=0; i < drilling_steps_.size(); i++) {
+    ds = drilling_steps_.value(i);
+
+    model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(ds));
+    drilling_operations_.insert(i,
+                                (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(ds));
+    is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(ds));
+    is_variable_drilling_points_.insert(i,
+                                        settings->drilling().drilling_schedule.is_variable_drilling_points.value(ds));
   }
+
+  assignDrillingPoints(settings->drilling().drilling_schedule.drilling_points);
+}
+
+void DrillingSchedule::assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings) {
+  for (int i: drilling_steps_) {
+    QList<DrillingSchedule::DrillingPoint> points_list;
+    for (int j = 0; j < drilling_points_settings.value(i).size(); j++) {
+      DrillingSchedule::DrillingPoint point;
+
+      point.x = drilling_points_settings.value(i).at(j).x;
+      point.y = drilling_points_settings.value(i).at(j).y;
+      point.z = drilling_points_settings.value(i).at(j).z;
+      point.is_variable = drilling_points_settings.value(i).at(j).is_variable;
+
+      points_list.append(point);
+    }
+    drilling_points_.insert(i, points_list);
+  }
+}
+
+}
+}
 
 
 
