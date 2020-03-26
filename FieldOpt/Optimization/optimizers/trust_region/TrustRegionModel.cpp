@@ -1715,16 +1715,16 @@ bool TrustRegionModel::chooseAndReplacePoint() {
     auto current_pivot_value = pivot_values_(pos);
 
     if (!areReplacementPointsComputed()) {
-      std::tie(repl_new_point_shifted_, repl_new_pivots_, repl_point_found_) =
+      std::tie(repl_new_points_shifted_, repl_new_pivots_, repl_point_found_) =
               pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
     }
 
     if (repl_point_found_) {
-      for (int found_i = 0; found_i < repl_new_point_shifted_.cols(); found_i++) {
+      for (int found_i = 0; found_i < repl_new_points_shifted_.cols(); found_i++) {
 
         if (!areReplacementPointsComputed()) {
 
-          repl_new_point_shifted_ = repl_new_point_shifted_.col(found_i);
+          repl_new_point_shifted_ = repl_new_points_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
 
           repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
