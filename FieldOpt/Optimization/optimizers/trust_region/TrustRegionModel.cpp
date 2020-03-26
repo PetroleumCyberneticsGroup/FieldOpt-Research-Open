@@ -1669,8 +1669,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   //TODO: test this function
   auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
     Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bl_shifted+shift_center);
-    shifted_x = shifted_x.cwiseMax(bu_shifted+shift_center);
+    shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center).eval();
+    shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center).eval();
     return shifted_x;
   };
 
