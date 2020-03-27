@@ -1347,7 +1347,7 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 
   //!< Order one term>
   int idx_coefficients = dimension;
-  auto g = coefficients.segment(1,idx_coefficients);
+  VectorXd g = coefficients.segment(1, idx_coefficients).eval();
 
   //!< Second order term>
   MatrixXd H(dimension, dimension);
