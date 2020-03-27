@@ -577,9 +577,12 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
 Optimization::Optimizer::TerminationCondition
 TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
-
-    if (tr_model_->isInitialized()) {
-      if (tr_model_->measureCriticality().norm() < settings_->parameters().tr_tol_f) {
+  
+    if (tr_model_->isInitialized() && !tr_model_->getModelingPolynomials().empty()) {
+  
+      auto model_criticality = tr_model_->measureCriticality();
+  
+      if (model_criticality.norm() < settings_->parameters().tr_tol_f) {
         tc =  OPTIMALITY_CRITERIA_REACHED;
       }
     }
