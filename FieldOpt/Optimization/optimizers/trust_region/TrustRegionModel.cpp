@@ -304,7 +304,7 @@ void TrustRegionModel::clearReplacementCasesList() {
 
 bool TrustRegionModel::rebuildModel() {
 
-  checkDataSize("Starting rebuildModel");
+  //checkDataSize("Starting rebuildModel");
   //!<All points we know>
   all_points_.conservativeResize(points_abs_.rows(), points_abs_.cols() + cached_points_.cols());
   if (cached_points_.size() == 0) {
