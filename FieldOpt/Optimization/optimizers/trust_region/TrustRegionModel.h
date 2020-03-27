@@ -106,7 +106,9 @@ class TrustRegionModel {
 
     std::vector<Polynomial> getModelingPolynomials() { return modeling_polynomials_ ;}
     RowVectorXd getPivotValues() { return pivot_values_;}
-
+  
+    Eigen::VectorXd unshiftPoint(Eigen::VectorXd &x);
+    
     /*!
    * @brief changes TR center pointer to best point
    * considering lower and upper bounds on variables.
@@ -371,8 +373,8 @@ class TrustRegionModel {
     Polynomial repl_polynomial_;
     MatrixXd repl_new_points_shifted_;
     RowVectorXd repl_new_pivots_;
-
-    MatrixXd repl_new_point_shifted_;
+  
+    VectorXd repl_new_point_shifted_;
     VectorXd repl_new_point_abs_;
     RowVectorXd repl_new_fvalues_;
     bool repl_point_found_ = false;
