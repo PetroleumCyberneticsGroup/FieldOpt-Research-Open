@@ -561,7 +561,7 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
   }
 
   if (criticality_step_execution_ongoing_) {
-    //Printer::ext_warn(
+    // Printer::ext_warn(
     //      "criticality step did not generate a case.",
     //      "ensureImprovementPostProcessing", "TrustRegionOptimization");
   }
