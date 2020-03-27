@@ -529,13 +529,16 @@ void TrustRegionOptimization::setLowerUpperBounds() {
       ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
       lb_.fill(settings_->parameters().tr_lower_bound);
       ub_.fill(settings_->parameters().tr_upper_bound);
-
+  
+      // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
+      // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
+      
     } else {
       
-      //Printer::ext_warn(
-      //    "Lower/upper bounds for DF-TR algorithm not specified.",
-      //    "Optimization", "TrustRegionOptimization");
-      //throw std::runtime_error(
+      // Printer::ext_warn(
+      //     "Lower/upper bounds for DF-TR algorithm not specified.",
+      //     "Optimization", "TrustRegionOptimization");
+      // throw std::runtime_error(
       //    "Lower/upper bounds for DF-TR algorithm not specified.");
 
     }
