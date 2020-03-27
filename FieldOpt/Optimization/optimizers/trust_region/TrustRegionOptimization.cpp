@@ -157,21 +157,17 @@ void TrustRegionOptimization::iterate() {
       double tol_radius = settings_->parameters().tr_tol_radius;
       double eps_c = settings_->parameters().tr_eps_c;
       double tol_f = settings_->parameters().tr_tol_f;
-      double eta_1 = settings_->parameters().tr_eta_1;
-      double gamma_1 = gamma_dec_;
-      double gamma_2 = settings_->parameters().tr_gamma_inc;
-      double radius_max = settings_->parameters().tr_radius_max;
       double err_model = 0.0;
 
       auto fval_current = tr_model_->getCurrentFval();
       auto x_current = tr_model_->getCurrentPoint();
 
       if (improve_model_) {
-	mchange_flag_ = tr_model_->ensureImprovement();
-	//cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
-	//cout << "radius before: " << tr_model_->getRadius() << endl;
-	improve_model_ = ensureImprovementPostProcessing();
-	//cout << "radius after: " << tr_model_->getRadius() << endl;
+        mchange_flag_ = tr_model_->ensureImprovement();
+        //cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
+        //cout << "radius before: " << tr_model_->getRadius() << endl;
+        improve_model_ = ensureImprovementPostProcessing();
+        //cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
