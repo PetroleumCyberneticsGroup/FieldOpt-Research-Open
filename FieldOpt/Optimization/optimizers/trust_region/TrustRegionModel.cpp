@@ -1600,9 +1600,8 @@ Polynomial TrustRegionModel::combinePolynomials(
     int points_num,
     RowVectorXd coefficients) {
 
-    DBG_printPivotPolynomials("combinePolynomials");
+    // DBG_printPivotPolynomials("combinePolynomials");
 
-  // polynomials -> std::vector<Polynomial>
   auto polynomials = std::vector<Polynomial>(
       pivot_polynomials_.begin(),
       pivot_polynomials_.begin() + points_num);
