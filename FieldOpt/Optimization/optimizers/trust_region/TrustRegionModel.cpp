@@ -553,13 +553,14 @@ bool TrustRegionModel::improveModelNfp() {
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
 
-  // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
-  auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
-    Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
-    shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
-    return shifted_x;
-  };
+  // Remove later, unshiftPoint function replaces this code
+  // // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
+  // auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
+  //   Eigen::VectorXd shifted_x = x + shift_center;
+  //   shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
+  //   shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
+  //   return shifted_x;
+  // };
 
   //!<Test if the model is already FL but old
   //!<Distance measured in inf norm>
@@ -607,7 +608,7 @@ bool TrustRegionModel::improveModelNfp() {
                 nfp_new_point_shifted_ = nfp_new_points_shifted_.col(found_i);
                 auto new_pivot_value = nfp_new_pivots_(found_i);
 
-                nfp_new_point_abs_ = unshift_point(nfp_new_point_shifted_);
+                nfp_new_point_abs_ = unshiftPoint(nfp_new_point_shifted_);
                 nfp_new_fvalues_.conservativeResize(nfp_new_point_abs_.cols());
 
                 setIsImprovementNeeded(true);
@@ -1665,14 +1666,15 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
   f_succeeded.conservativeResize(1);
   f_succeeded.fill(false);
-
-  //TODO: test this function
-  auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
-    Eigen::VectorXd shifted_x = x + shift_center;
-    shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center).eval();
-    shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center).eval();
-    return shifted_x;
-  };
+  
+  // Remove later, unshiftPoint function replaces this code
+  // //TODO: test this function
+  // auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
+  //   Eigen::VectorXd shifted_x = x + shift_center;
+  //   shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center).eval();
+  //   shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center).eval();
+  //   return shifted_x;
+  // };
 
   //!<Reorder points based on their pivot_values>
   piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
@@ -1706,7 +1708,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
           repl_new_point_shifted_ = repl_new_points_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
 
-          repl_new_point_abs_ = unshift_point(repl_new_point_shifted_);
+          repl_new_point_abs_ = unshiftPoint(repl_new_point_shifted_);
           repl_new_fvalues_.conservativeResize(repl_new_point_abs_.cols());
 
           setIsReplacementNeeded(true);
@@ -1797,11 +1799,24 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       success = true;
     }
   }
+  return success;
+}
+
+Eigen::VectorXd TrustRegionModel::unshiftPoint(Eigen::VectorXd &x) {
+  
+  auto shift_center = points_abs_.col(0);
+  auto bl_shifted = lb_ - shift_center;
+  auto bu_shifted = ub_ - shift_center;
+  
+  Eigen::VectorXd shifted_x = x + shift_center;
+  shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center).eval();
+  shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center).eval();
+  
+  return shifted_x;
 }
 
 
-tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
-TrustRegionModel::pointNew(Polynomial polynomial,
+tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool> TrustRegionModel::pointNew(Polynomial polynomial,
                            Eigen::VectorXd tr_center_point,
                            double radius_used,
                            Eigen::VectorXd bl,
