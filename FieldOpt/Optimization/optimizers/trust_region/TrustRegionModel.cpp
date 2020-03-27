@@ -535,7 +535,7 @@ bool TrustRegionModel::improveModelNfp() {
   f_succeeded.fill(false);
 
   int poly_i;
-  double new_pivot_value;
+  double new_pivot_value = 0.0;
 
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
