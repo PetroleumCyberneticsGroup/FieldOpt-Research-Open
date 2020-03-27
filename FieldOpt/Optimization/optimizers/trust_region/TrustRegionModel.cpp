@@ -743,12 +743,12 @@ int TrustRegionModel::ensureImprovement() {
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
-    checkDataSize("Before improveModelNfp");
+    checkDataSize("Before improveModelNfp"); // dbg
     success = improveModelNfp(); //!<improve model>
-    if (!checkDataSize("After improveModelNfp")){
-      cerr << "success: " << success << endl;
-      cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-    }
+    if (!checkDataSize("After improveModelNfp")){ // dbg
+      cerr << "success: " << success << endl; // dbg
+      cerr << "improvement_cases size: " << improvement_cases_.size() << endl; // dbg
+    } // dbg
       
 
     if ((success) || (!success && improvement_cases_.size() > 0)) {
@@ -756,35 +756,35 @@ int TrustRegionModel::ensureImprovement() {
     }
   } else if ((model_complete) && (!model_old)){
     //!<Replace some point with a new one that improves geometry>
-    checkDataSize("Before chooseAndReplacePoint");
+    checkDataSize("Before chooseAndReplacePoint"); // dbg
     success = chooseAndReplacePoint(); //!<replace point>
-    if (!checkDataSize("After chooseAndReplacePoint")){
-      cerr << "success: " << success << endl;
-      cerr << "replacement_cases size: " << replacement_cases_.size() << endl;
-    }
+    if (!checkDataSize("After chooseAndReplacePoint")){ // dbg
+      cerr << "success: " << success << endl; // dbg
+      cerr << "replacement_cases size: " << replacement_cases_.size() << endl; // dbg
+    } // dbg
     if ((success) || (!success && replacement_cases_.size() > 0))  {
       exit_flag = 2;
     }
   }
   if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
-    checkDataSize("Before rebuildModel");
+    checkDataSize("Before rebuildModel"); // dbg
     bool model_changed = rebuildModel();
-    checkDataSize("After rebuildModel");
+    checkDataSize("After rebuildModel"); // dbg
     if (!model_changed) {
       if (!model_complete) {
         //!<Improve model>
-	checkDataSize("Before improveModelNfp second");
+      	checkDataSize("Before improveModelNfp second"); // dbg
         success = improveModelNfp();
-	if (!checkDataSize("After improveModelNfp second")){
-	  cerr << "success: " << success << endl;
-	  cerr << "improvement_cases size: " << improvement_cases_.size() << endl;
-	}
+        if (!checkDataSize("After improveModelNfp second")){ // dbg
+          cerr << "success: " << success << endl; // dbg
+          cerr << "improvement_cases size: " << improvement_cases_.size() << endl; // dbg
+        } // dbg
 
       } else {
         //!<Replace point>
-	checkDataSize("Before chooseandreplace");
+        checkDataSize("Before chooseandreplace"); // dbg
         success = chooseAndReplacePoint();
-	checkDataSize("After chooseandreplace");
+	      checkDataSize("After chooseandreplace"); // dbg
       }
     } else {
       success = true;
@@ -1617,7 +1617,8 @@ Polynomial TrustRegionModel::combinePolynomials(
 
   auto p = multiplyPolynomial(polynomials[0], coefficients(0));
   for (int k = 1; k < terms; k++) {
-    p = addPolynomial(p, multiplyPolynomial(polynomials[k], coefficients[k]));
+    auto mp = multiplyPolynomial(polynomials[k], coefficients(k));
+    p = addPolynomial(p, mp);
   }
   return p;
 }
