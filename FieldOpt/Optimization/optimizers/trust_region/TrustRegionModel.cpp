@@ -489,17 +489,19 @@ bool TrustRegionModel::rebuildModel() {
   }
 
   tr_center_ = 0;
-  points_abs_ = all_points_.leftCols(last_pt_included + 1);
-  points_shifted_ = points_shifted_.leftCols(last_pt_included + 1);
-  fvalues_ = all_fvalues_.head(last_pt_included + 1);
+  points_abs_ = all_points_.leftCols(last_pt_included + 1).eval();
+  points_shifted_ = points_shifted_.leftCols(last_pt_included + 1).eval();
+  fvalues_ = all_fvalues_.head(last_pt_included + 1).eval();
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
+  
+  // Consider removing, vector seems cleared already
   modeling_polynomials_.clear();
-
+  
   //!<Points not included>
   if (cache_size > 0) {
-    cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size);
-    cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size);
+    cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size).eval();
+    cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size).eval();
     
   } else {
     cached_points_.conservativeResize(0, 0);
@@ -510,7 +512,7 @@ bool TrustRegionModel::rebuildModel() {
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
 
-  checkDataSize("End of rebuildModel");
+  checkDataSize("End of rebuildModel"); // dbg
   
   return last_pt_included < n_points; //!<model has changed>
 }
