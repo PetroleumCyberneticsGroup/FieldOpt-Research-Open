@@ -32,10 +32,10 @@ class MainRunner;
 class SerialRunner : public AbstractRunner
 {
   friend class MainRunner;
- private:
-  SerialRunner(RuntimeSettings *runtime_settings);
 
   // AbstractRunner interface
+ public:
+  SerialRunner(RuntimeSettings *runtime_settings);
  private:
   void Execute();
 };

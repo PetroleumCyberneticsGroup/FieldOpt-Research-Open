@@ -20,12 +20,21 @@
 #include <gtest/gtest.h>
 #include <drilling/drilling.h>
 #include "Model/tests/test_resource_model.h"
+#include "Reservoir/tests/test_resource_grids.h"
+#include "Optimization/tests/test_resource_optimizer.h"
+#include "Optimization/tests/test_resource_test_functions.h"
+#include "serial_runner.h"
 
 namespace {
 
-class DrillingTest : public ::testing::Test, public TestResources::TestResourceSettings {
+class DrillingTest :
+    public ::testing::Test,
+    public TestResources::TestResourceOptimizer,
+    public TestResources::TestResourceGrids {
  protected:
   DrillingTest() {}
+
+  void runOptimization(int drilling_step);
 
 };
 
@@ -71,7 +80,11 @@ TEST_F(DrillingTest, DrillingScheduleDataStructure) {
       is_drilling_object_correct = false;
 
     // check drilling completions
-    if (schedule->getIsVariableCompletions().value(i) != drilling_settings.drilling_schedule.is_variable_completions.value(i))
+    if (schedule->isVariableCompletions().value(i) != drilling_settings.drilling_schedule.is_variable_completions.value(i))
+      is_drilling_object_correct = false;
+
+    // check model updates
+    if (schedule->isModelUpdates().value(i) != drilling_settings.drilling_schedule.is_model_updates.value(i))
       is_drilling_object_correct = false;
 
     // check the drilling points
@@ -150,9 +163,66 @@ TEST_F(DrillingTest, ParseJson) {
 
       cout << "OptimizeDrillingPoints:" << schedule.is_variable_drilling_points.value(i) << endl;
       cout << "OptimizeCompletion:" << schedule.is_variable_completions.value(i) << endl;
-      cout << "ModelUpdate:" << schedule.is_model_update.value(i) << endl;
+      cout << "ModelUpdate:" << schedule.is_model_updates.value(i) << endl;
     }
   }
 }
 
+TEST_F(DrillingTest, DrillingRunner) {
+  settings_model_->readDrilling(json_settings_drilling_);
+  Settings::Model::Drilling drilling_settings = settings_model_->drilling();
+
+  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
+  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_model_, nullptr);
+  bool is_drilling_workflow_completed = false;
+
+  QList<int> drilling_steps = schedule->getSteps();
+  QList<int> time_steps = schedule->getSteps();
+  for (int i: drilling_steps) {
+    int ts = time_steps.value(i);
+
+    // Model update
+    if (schedule->isModelUpdates().value(i)) {
+      drilling->modelUpdate();
+    }
+
+    // Optimization
+    if ((schedule->isVariableDrillingPoints().value(i)) || (schedule->isVariableCompletions().value(i))) {
+      //TODO: create separate output folders in each execution
+      runOptimization(i);
+
+    }
+  }
+
+  is_drilling_workflow_completed = true;
+  EXPECT_TRUE(is_drilling_workflow_completed);
 }
+
+void DrillingTest::runOptimization(int drilling_step) {
+  // TODO: prepare the JSON/variables vector to launch the optimization
+  int argc = 16;
+  const char *argv[16] = {"FieldOpt",
+                          TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
+                          TestResources::ExampleFilePaths::directory_output_.c_str(),
+                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds.c_str(),
+                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds.c_str(),
+                          "-b", "./",
+                          "-r", "serial",
+                          "-f",
+                          "-v", "2",
+                          "-t", "1000"};
+
+  Runner::RuntimeSettings *rts = new Runner::RuntimeSettings(argc, argv);
+  Runner::SerialRunner serial_runner = Runner::SerialRunner(rts);
+
+  // TODO: get the results and update drilling object
+}
+
+
+}
+
+
+
+
+
+
