@@ -189,7 +189,7 @@ class Model
       QMap<int, ModelType> model_types;
       QMap<int, bool> is_variable_drilling_points;
       QMap<int, bool> is_variable_completions;
-      QMap<int, bool> is_model_update;
+      QMap<int, bool> is_model_updates;
     };
 
     DrillingSchedule drilling_schedule;
