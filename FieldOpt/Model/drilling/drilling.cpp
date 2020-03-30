@@ -32,5 +32,13 @@ Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContai
   drilling_schedule_ = new DrillingSchedule(settings_, variables_);
 };
 
+void Drilling::modelUpdate() {
+   /* TODO: implement interface to SLB model update code.
+    * Remember to check if the model update should be performed in a the full-scale model or
+    * in a surrogate model instead. Update the information in the drilling object afterwards.
+    */
+  //
+}
+
 }
 }

@@ -40,6 +40,8 @@ class Drilling {
 
   Properties::VariablePropertyContainer* getVariables() { return variables_;}
 
+  void modelUpdate();
+
  private:
   Properties::VariablePropertyContainer *variables_;
   Settings::Model  *settings_;
