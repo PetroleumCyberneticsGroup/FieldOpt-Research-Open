@@ -34,6 +34,11 @@ static std::string norne_sch_                = base_path() + "/examples/ECLIPSE/
 static std::string deck_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.DATA";
 static std::string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
 static std::string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
+
+static std::string deck_5spot_icds           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.DATA";
+static std::string grid_5spot_icds           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.EGRID";
+static std::string driver_5pot_icds          = base_path() + "/examples/ECLIPSE/5spot/fo_driver_2_horz_icds_packers_apps.json";
+
 static std::string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
 static std::string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
 static std::string grid_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.EGRID";
