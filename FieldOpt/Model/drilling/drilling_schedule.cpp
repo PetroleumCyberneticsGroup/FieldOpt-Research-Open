@@ -29,16 +29,13 @@ DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::Variab
   drilling_steps_ = settings->drilling().drilling_schedule.drilling_steps;
   time_steps_ = settings->drilling().drilling_schedule.time_steps;
 
-  int ds;
-  for (int i=0; i < drilling_steps_.size(); i++) {
-    ds = drilling_steps_.value(i);
 
-    model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(ds));
-    drilling_operations_.insert(i,
-                                (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(ds));
-    is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(ds));
-    is_variable_drilling_points_.insert(i,
-                                        settings->drilling().drilling_schedule.is_variable_drilling_points.value(ds));
+  for (int i: drilling_steps_) {
+    model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(i));
+    drilling_operations_.insert(i, (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(i));
+    is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
+    is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
+    is_model_updates_.insert(i, settings->drilling().drilling_schedule.is_model_updates.value(i));
   }
 
   assignDrillingPoints(settings->drilling().drilling_schedule.drilling_points);

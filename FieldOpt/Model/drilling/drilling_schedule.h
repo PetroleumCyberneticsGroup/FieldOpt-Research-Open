@@ -49,18 +49,20 @@ class DrillingSchedule {
   QMap<int, QList<DrillingPoint>> getDrillingPoints() { return drilling_points_; }
   QMap<int, DrillingOperation> getDrillingOperations() { return drilling_operations_; }
   QMap<int, ModelType> getModelTypes() { return model_types_; }
-  QMap<int, bool> getIsVariableDrillingPoints() { return is_variable_drilling_points_; }
-  QMap<int, bool> getIsVariableCompletions() { return is_variable_completions_; }
+  QMap<int, bool> isVariableDrillingPoints() { return is_variable_drilling_points_; }
+  QMap<int, bool> isVariableCompletions() { return is_variable_completions_; }
+  QMap<int, bool> isModelUpdates() { return is_model_updates_;}
 
  private:
   QList<int> drilling_steps_;
   QMap<int, double> time_steps_; //!< Indexed by the drilling steps
   QMap<int, QList<DrillingPoint>> drilling_points_; //!< Indexed by the drilling steps
 
-  QMap<int, DrillingOperation> drilling_operations_;
-  QMap<int, ModelType> model_types_;
-  QMap<int, bool> is_variable_drilling_points_;
-  QMap<int, bool> is_variable_completions_;
+  QMap<int, DrillingOperation> drilling_operations_; //!< Indexed by the drilling steps
+  QMap<int, ModelType> model_types_;                 //!< Indexed by the drilling steps
+  QMap<int, bool> is_variable_drilling_points_;      //!< Indexed by the drilling steps
+  QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
+  QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps
 
   void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
   void printDrillingPoints();
