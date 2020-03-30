@@ -545,9 +545,9 @@ void Model::readDrilling(QJsonObject json_drilling_workflow) {
 
         if (json_drilling_step.contains("ModelUpdate")) {
           if (json_drilling_step["ModelUpdate"].toBool())
-            drilling_schedule.is_model_update.insert(i, true);
+            drilling_schedule.is_model_updates.insert(i, true);
           else
-            drilling_schedule.is_model_update.insert(i, false);
+            drilling_schedule.is_model_updates.insert(i, false);
         }
 
         if (json_drilling_step.contains("OptimizeCompletion")) {
