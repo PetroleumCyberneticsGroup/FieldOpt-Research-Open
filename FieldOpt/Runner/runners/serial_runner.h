@@ -36,7 +36,6 @@ class SerialRunner : public AbstractRunner
   // AbstractRunner interface
  public:
   SerialRunner(RuntimeSettings *runtime_settings);
- private:
   void Execute();
 };
 

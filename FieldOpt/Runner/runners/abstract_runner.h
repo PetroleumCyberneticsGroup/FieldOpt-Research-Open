@@ -64,6 +64,12 @@ class AbstractRunner
   virtual void Execute() = 0;
   const double sentinel_value_ = 0.0001; //!< Value to be used as a sentinel value for the objective function of cases that cannot be evaluated.
 
+ public:
+  Model::Model* getModel() { return model_; }
+  Settings::Settings* getSettings() { return settings_; }
+  Optimization::Optimizer* getOptimizer() { return optimizer_; }
+  Simulation::Simulator* getSimulator() { return simulator_; }
+
  protected:
   AbstractRunner(RuntimeSettings *runtime_settings);
 

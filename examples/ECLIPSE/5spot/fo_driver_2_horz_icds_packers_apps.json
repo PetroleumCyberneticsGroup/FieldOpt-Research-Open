@@ -7,7 +7,7 @@
         "Type": "APPS",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 1,
+            "MaxEvaluations": 3,
             "AutoStepLengths": true,
             "AutoStepInitScale": 0.25,
             "AutoStepConvScale": 0.01        },
