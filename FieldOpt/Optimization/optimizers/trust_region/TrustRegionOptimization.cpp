@@ -174,7 +174,8 @@ void TrustRegionOptimization::iterate() {
       && !tr_model_->areImprovementPointsComputed())
       && (!tr_model_->isReplacementNeeded()
       && !tr_model_->areReplacementPointsComputed())) {
-
+  
+        
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
           return; //end of the algorithm
@@ -186,19 +187,22 @@ void TrustRegionOptimization::iterate() {
             x_current = tr_model_->getCurrentPoint();
             err_model = tr_model_->checkInterpolation();
           }
-
+  
+          //!<Print summary>
+          printIteration(fval_current);
+          
           //!<Criticality step -- if we are possibly close to the optimum>
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
           if (model_criticality.norm() <= eps_c) {
-	    if (!criticality_step_execution_ongoing_) {
-	      criticality_init_radius_ = tr_model_->getRadius();
-	    }
-	    criticality_step_execution_ongoing_ = tr_model_->criticalityStep(criticality_init_radius_);
-	    if (criticality_step_execution_ongoing_) {
-	      ensureImprovementPostProcessing();
-	      return;
-	    }
+            if (!criticality_step_execution_ongoing_) {
+              criticality_init_radius_ = tr_model_->getRadius();
+            }
+            criticality_step_execution_ongoing_ = tr_model_->criticalityStep(criticality_init_radius_);
+            if (criticality_step_execution_ongoing_) {
+              ensureImprovementPostProcessing();
+              return;
+            }
             criticality_step_performed_ = true;
             if (model_criticality.norm() < tol_f) {
               //Printer::ext_warn("Model criticality < tol_f.", "Optimization", "TrustRegionOptimization");
@@ -208,9 +212,7 @@ void TrustRegionOptimization::iterate() {
 	    criticality_step_execution_ongoing_ = false;
 	  }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
-          //!<Print summary>
-          printIteration(fval_current);
-
+          
           //!<Compute step>
           tie(trial_point_, predicted_red_) = tr_model_->solveTrSubproblem();
 
