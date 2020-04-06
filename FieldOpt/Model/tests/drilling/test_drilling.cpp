@@ -168,39 +168,7 @@ TEST_F(DrillingTest, ParseJson) {
   }
 }
 
-TEST_F(DrillingTest, DrillingRunner) {
-  settings_model_->readDrilling(json_settings_drilling_);
-  Settings::Model::Drilling drilling_settings = settings_model_->drilling();
-
-  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
-  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_model_, nullptr);
-  bool is_drilling_workflow_completed = false;
-
-  QList<int> drilling_steps = schedule->getSteps();
-  QList<int> time_steps = schedule->getSteps();
-  for (int i: drilling_steps) {
-    cout << "drilling_step:" << i << endl;
-    int ts = time_steps.value(i);
-
-    // Model update
-    if (schedule->isModelUpdates().value(i)) {
-      drilling->modelUpdate();
-    }
-
-    // Optimization
-    if ((schedule->isVariableDrillingPoints().value(i)) || (schedule->isVariableCompletions().value(i))) {
-      runOptimization(i);
-    }
-  }
-
-  is_drilling_workflow_completed = true;
-  EXPECT_TRUE(is_drilling_workflow_completed);
-}
-
-void DrillingTest::runOptimization(int drilling_step) {
-  // TODO: prepare the JSON/variables vector to launch the optimization
-  // TODO: change the deck and EGRID files in each drilling step
-
+TEST_F(DrillingTest, DrillingRunOptimization) {
   int argc = 16;
   const char *argv[16] = {"FieldOpt",
                           TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
@@ -215,19 +183,55 @@ void DrillingTest::runOptimization(int drilling_step) {
 
   Runner::RuntimeSettings *rts = new Runner::RuntimeSettings(argc, argv);
 
+  int drilling_step = 1;
   QString output_dir = QString::fromStdString(rts->paths().GetPath(Paths::OUTPUT_DIR)) + QString("/drilling_step_%1").arg(drilling_step);
   Utilities::FileHandling::CreateDirectory(output_dir);
   rts->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
 
   Runner::SerialRunner serial_runner = Runner::SerialRunner(rts);
   serial_runner.Execute();
-
-
-
-  //TODO: save optimal variables, optimal case, optimal results in the drilling object
-  Optimization::Optimizer* opt = serial_runner.getOptimizer();
-  //auto results = opt.GetValues(); // contains the results
 }
+
+TEST_F(DrillingTest, DrillingRunner) {
+  settings_model_->readDrilling(json_settings_drilling_);
+  Settings::Model::Drilling drilling_settings = settings_model_->drilling();
+  bool dbg = false;
+
+  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
+  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_model_, nullptr);
+  bool is_drilling_workflow_completed = false;
+
+  QList<int> drilling_steps = schedule->getSteps();
+  QList<int> time_steps = schedule->getSteps();
+
+  if (dbg) {
+    cout << drilling->GetStatusStringHeader().toStdString() << endl;
+  }
+  for (int i: drilling_steps) {
+    if (dbg) {
+      cout << "drilling_step:" << i << endl;
+    }
+    int ts = time_steps.value(i);
+
+    // Model update
+    if (schedule->isModelUpdates().value(i)) {
+      drilling->modelUpdate(i);
+    }
+
+    // Optimization
+    if ((schedule->isVariableDrillingPoints().value(i)) || (schedule->isVariableCompletions().value(i))) {
+      drilling->runOptimization(i);
+    }
+    if (dbg) {
+      cout << drilling->GetStatusString().toStdString() << endl;
+    }
+  }
+
+  is_drilling_workflow_completed = true;
+  EXPECT_TRUE(is_drilling_workflow_completed);
+}
+
+
 
 
 }

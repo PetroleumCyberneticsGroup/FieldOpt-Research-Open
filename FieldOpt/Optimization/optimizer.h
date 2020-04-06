@@ -113,6 +113,18 @@ class Optimizer : public Loggable
    */
   int GetSimulationDuration(Case *c);
 
+  /*!
+   * @brief Get the tentative optimal values
+   * @return Optimal values of tentative best case in a map
+   */
+  map<string, vector<double>> GetOptimalValues();
+
+  /*!
+  * @brief Get the tentative optimal variables
+  * @return Optimal variables of tentative best case in a map
+  */
+  map<string, QHash<QUuid, double>> GetOptimalVariables();
+
  protected:
   /*!
    * \brief Base constructor for optimizers. Initializes constraints and sets some member values.

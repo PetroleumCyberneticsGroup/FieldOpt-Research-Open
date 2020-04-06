@@ -197,6 +197,21 @@ map<string, vector<double>> Optimizer::GetValues() {
     return valmap;
 }
 
+map<string, vector<double>> Optimizer::GetOptimalValues() {
+  map<string, vector<double>> val_map;
+  val_map["TermCond"] = vector<double>{IsFinished()};
+  val_map["IterNr"]   = vector<double>{iteration_};
+  val_map["CBOFnV"]   = vector<double>{tentative_best_case_->objective_function_value()};
+  return val_map;
+}
+
+map<string, QHash<QUuid, double>> Optimizer::GetOptimalVariables() {
+  map<string, QHash<QUuid, double>> var_map;
+  var_map["realVar"]  = tentative_best_case_->real_variables();
+  //TODO: include integer and boolean variables in the map
+  return var_map;
+}
+
 Loggable::LogTarget Optimizer::Summary::GetLogTarget() {
     return LOG_SUMMARY;
 }

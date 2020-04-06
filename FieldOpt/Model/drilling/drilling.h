@@ -1,7 +1,8 @@
 /********************************************************************
  Copyright (C) 2020-
- Mathias Bellout <chakibbb-pcg@gmail.com>
  Thiago L. Silva <thiagolims@gmail.com>
+ Mathias Bellout <chakibbb-pcg@gmail.com>
+
 
  This file is part of the FieldOpt project.
 
@@ -23,10 +24,18 @@
 #define FIELDOPT_DRILLING_H
 
 #include <QString>
+#include <QList>
+
 #include <properties/variable_property_container.h>
 #include "drilling_schedule.h"
 #include "Settings/settings.h"
 #include "Settings/model.h"
+
+#include "Model/tests/test_resource_model.h"
+#include "Reservoir/tests/test_resource_grids.h"
+#include "Optimization/tests/test_resource_optimizer.h"
+
+#include "serial_runner.h"
 
 namespace Model {
 namespace Drilling {
@@ -34,20 +43,40 @@ namespace Drilling {
 class Drilling {
 
  public:
-  Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
+  Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *drilling_variables);
+
+  int getCurrentStep() { return current_step_; }
 
   QString getWellName(){ return well_name_; }
 
-  Properties::VariablePropertyContainer* getVariables() { return variables_;}
+  Properties::VariablePropertyContainer* getVariables() { return drilling_variables_;}
 
-  void modelUpdate();
+  QMap<int, std::map<string, QHash<QUuid, double>>> getOptimalVariables() { optimal_variables_; }
+  QMap<int, std::map<string, std::vector<double>>> getOptimalValues() { optimal_values_; }
+
+  QString GetStatusString(int drilling_step) const;
+  QString GetStatusString() const;
+  QString GetStatusStringHeader() const;
+
+  void modelUpdate(int drilling_step);
+
+  void runOptimization(int drilling_step);
 
  private:
-  Properties::VariablePropertyContainer *variables_;
+  int current_step_;
+
+  Properties::VariablePropertyContainer *drilling_variables_;
   Settings::Model  *settings_;
 
   DrillingSchedule *drilling_schedule_;
   QString well_name_;
+
+  QMap<int, std::map<string, QHash<QUuid, double>>> optimal_variables_;  //!< Optimal variables per drilling step
+  QMap<int, std::map<string, std::vector<double>>>  optimal_values_;       //!< Optimal values per drilling step
+
+  void setWellOptimalVariables(const std::map<string, QHash<QUuid, double>>& opt_var, int drilling_step);
+  void setWellOptimizationValues(const std::map<string, std::vector<double>>& opt_val, int drilling_step);
+
 };
 
 }
