@@ -7,7 +7,7 @@
         "Type": "APPS",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 500,
+            "MaxEvaluations": 3,
             "InitialStepLength": 1.0E-4,
             "MinimumStepLength": 1.0E-6,
             "ContractionFactor": 0.7,
@@ -74,7 +74,7 @@
                         "Roughness": 1.52E-5
                     },
                     "Compartments": {
-                        "Count": 3,
+                        "Count": 4,
                         "VariablePackers": false,
                         "VariableICDs": true,
                         "ICDType": "Valve",

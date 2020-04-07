@@ -53,14 +53,20 @@ class Drilling {
 
   QMap<int, std::map<string, QHash<QUuid, double>>> getOptimalVariables() { optimal_variables_; }
   QMap<int, std::map<string, std::vector<double>>> getOptimalValues() { optimal_values_; }
+  QMap<int, Runner::RuntimeSettings*> getRuntimeSettings() { return runtime_settings_; }
+
+  DrillingSchedule* getDrillingSchedule() { return drilling_schedule_; }
 
   QString GetStatusString(int drilling_step) const;
   QString GetStatusString() const;
   QString GetStatusStringHeader() const;
 
-  void modelUpdate(int drilling_step);
+  void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
 
+  void modelUpdate(int drilling_step);
   void runOptimization(int drilling_step);
+
+
 
  private:
   int current_step_;
@@ -72,7 +78,8 @@ class Drilling {
   QString well_name_;
 
   QMap<int, std::map<string, QHash<QUuid, double>>> optimal_variables_;  //!< Optimal variables per drilling step
-  QMap<int, std::map<string, std::vector<double>>>  optimal_values_;       //!< Optimal values per drilling step
+  QMap<int, std::map<string, std::vector<double>>>  optimal_values_;     //!< Optimal values per drilling step
+  QMap<int, Runner::RuntimeSettings*> runtime_settings_;                    //!< Optimization runtime settings per drilling step
 
   void setWellOptimalVariables(const std::map<string, QHash<QUuid, double>>& opt_var, int drilling_step);
   void setWellOptimizationValues(const std::map<string, std::vector<double>>& opt_val, int drilling_step);

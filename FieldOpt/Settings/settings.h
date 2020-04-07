@@ -72,6 +72,8 @@ class Settings
 
   Paths &paths() { return paths_; }
 
+  QJsonObject* &json_driver() { return json_driver_; }
+
  private:
   Paths paths_;
   QJsonObject *json_driver_;

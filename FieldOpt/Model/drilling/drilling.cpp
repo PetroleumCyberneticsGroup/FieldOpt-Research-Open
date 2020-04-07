@@ -20,7 +20,6 @@
 ***************************************************************** ****/
 
 #include "drilling.h"
-#include <algorithm>
 
 namespace Model {
 namespace Drilling {
@@ -69,8 +68,12 @@ QString Drilling::GetStatusString() const
   return GetStatusString(current_step_);
 }
 
+void Drilling::setOptRuntimeSettings(int drilling_step, int argc, const char** argv) {
+  runtime_settings_.insert(drilling_step, new Runner::RuntimeSettings(argc, argv));
+}
+
 void Drilling::modelUpdate(int drilling_step) {
-   /* TODO: implement interface to SLB model update code.
+   /* TODO: implement interface to SLB code for model update
     * Remember to check if the model update should be performed in a the full-scale model or
     * in a surrogate model instead. Update the information in the drilling object afterwards.
     *
@@ -81,35 +84,35 @@ void Drilling::modelUpdate(int drilling_step) {
 }
 
 void Drilling::runOptimization(int drilling_step) {
-  // TODO: prepare the JSON/variables vector to launch the optimization
-  // TODO: change the deck and EGRID files in each drilling step
-
   current_step_ = drilling_step;
 
-  int argc = 16;
-  const char *argv[16] = {"FieldOpt",
-                          TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
-                          TestResources::ExampleFilePaths::directory_output_.c_str(),
-                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds.c_str(),
-                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds.c_str(),
-                          "-b", "./",
-                          "-r", "serial",
-                          "-f",
-                          "-v", "0",
-                          "-t", "1000"};
-
-  Runner::RuntimeSettings *rts = new Runner::RuntimeSettings(argc, argv);
-
-  QString output_dir = QString::fromStdString(rts->paths().GetPath(Paths::OUTPUT_DIR)) + QString("/drilling_step_%1").arg(drilling_step);
+  //TODO: allow change of deck and EGRID files in each drilling step (folder structure with models)
+  QString output_dir = QString::fromStdString(runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR)) + QString("/drilling_step_%1").arg(drilling_step);
   Utilities::FileHandling::CreateDirectory(output_dir);
-  rts->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
+  runtime_settings_.value(drilling_step)->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
 
-  Runner::SerialRunner serial_runner = Runner::SerialRunner(rts);
+  Runner::SerialRunner serial_runner = Runner::SerialRunner(runtime_settings_.value(drilling_step));
+
+  // Configure the optimization with the drilling workflow settings.
+  for (auto well: serial_runner.getSettings()->model()->wells()) {
+    for (int i=0; i < well.completions.size(); i++) {
+      if (i < drilling_step) {  //!<Important: here we are assuming that exactly one completion is drilled per drilling step !>
+        well.completions.at(i).is_variable = false;
+        well.completions.at(i).variable_placement = false;
+        well.completions.at(i).variable_strength = false;
+      } else { // current drilling step
+        if (drilling_schedule_->isVariableDrillingPoints().value(i))
+          well.completions.at(i).variable_placement = true;
+
+        if (drilling_schedule_->isVariableCompletions().value(i))
+          well.completions.at(i).variable_strength = true;
+      }
+    }
+  }
+
   serial_runner.Execute();
 
-  //TODO: save path to the case (?)
   Optimization::Optimizer* opt = serial_runner.getOptimizer();
-
   map<string, QHash<QUuid, double>> opt_variables = opt->GetOptimalVariables();
   map<string, vector<double>> opt_values = opt->GetOptimalValues();
 

@@ -198,20 +198,35 @@ TEST_F(DrillingTest, DrillingRunner) {
   bool dbg = false;
 
   Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
-  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_model_, nullptr);
+  Model::Drilling::DrillingSchedule *schedule = drilling->getDrillingSchedule();
+
+  int argc = 16;
+  const char *argv[16] = {"FieldOpt",
+                          TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
+                          TestResources::ExampleFilePaths::directory_output_.c_str(),
+                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds.c_str(),
+                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds.c_str(),
+                          "-b", "./",
+                          "-r", "serial",
+                          "-f",
+                          "-v", "0",
+                          "-t", "1000"};
+
   bool is_drilling_workflow_completed = false;
 
   QList<int> drilling_steps = schedule->getSteps();
-  QList<int> time_steps = schedule->getSteps();
 
   if (dbg) {
     cout << drilling->GetStatusStringHeader().toStdString() << endl;
   }
   for (int i: drilling_steps) {
+    double ts = schedule->getTimeSteps().value(i);
+
+    drilling->setOptRuntimeSettings(i, argc, argv);
+
     if (dbg) {
       cout << "drilling_step:" << i << endl;
     }
-    int ts = time_steps.value(i);
 
     // Model update
     if (schedule->isModelUpdates().value(i)) {
