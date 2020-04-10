@@ -27,6 +27,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <math.h>
+#include <sstream>
+#include <iomanip>
+
+namespace fs = boost::filesystem;
 
 namespace Optimization {
 namespace Optimizers {
@@ -75,7 +80,7 @@ TrustRegionOptimization::TrustRegionOptimization(
         logger_->AddEntry(new ConfigurationSummary(this));
     }
 
-    cout << "iter        fval         rho      radius  pts" << endl;
+    cout << "iter        fval         rho         radius     pts      point                            model points" << endl;
 }
 
 void TrustRegionOptimization::iterate() {
@@ -209,7 +214,7 @@ void TrustRegionOptimization::iterate() {
 	  }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           //!<Print summary>
-          printIteration(fval_current);
+          printIteration(fval_current, x_current);
 
           //!<Compute step>
           tie(trial_point_, predicted_red_) = tr_model_->solveTrSubproblem();
@@ -288,14 +293,37 @@ void TrustRegionOptimization::iterate() {
     return;
 }
 
-void TrustRegionOptimization::printIteration(double fval_current) {
+void TrustRegionOptimization::printIteration(double fval_current, VectorXd x_current) {
   stringstream ss;
-  ss << setw(4) << right << iteration_ << setprecision(3)
-     << setw(12) << scientific << right << fval_current
-     << setw(12) << scientific << right << rho_
-     << setw(12) << scientific << right << tr_model_->getRadius()
-     << setw(5) << right << tr_model_->getNumPts();
-  cout << ss.str() << endl;
+  auto m_points = tr_model_->getPoints();
+  IOFormat CleanFmt(3, 0, ", ", ", ", "[", "]");
+  auto current_point = x_current.transpose();
+  auto polynomials = tr_model_-> getModelingPolynomials();
+  if(isinf(rho_) == 1){
+      rho_= 0;
+  }
+  ss << "[" << right << iteration_ << "," << setprecision(3)
+  << right << std::fixed << fval_current << ","
+  << right << rho_ << ","
+  << right << tr_model_->getRadius() << ","
+  << right << tr_model_->getNumPts() << ","
+     << current_point.format(CleanFmt) << ","
+     << m_points.format(CleanFmt) /*<< ","
+     <<  polynomials[0].dimension << ","
+     << (polynomials[0].coefficients).format(CleanFmt) */ << "]" << endl;
+    fs::path path =  fs::current_path();
+    string path_string = path.string();
+    path_string = path_string.substr(0,path_string.length() - 30);
+    string subdir;
+    subdir = path_string + "tools/python_scripts/ensemble_postprocessing/data_iterations.txt";
+    //std::cout << "Current path is (data_iterations2): " << subdir << '\n';
+    std::ofstream myfile (subdir, std::ios::app);
+    if(myfile.is_open()){
+        myfile << ss.str();
+        myfile.close();
+    }
+    else {cout << "Not possible to open file.";}
+
 }
 
 

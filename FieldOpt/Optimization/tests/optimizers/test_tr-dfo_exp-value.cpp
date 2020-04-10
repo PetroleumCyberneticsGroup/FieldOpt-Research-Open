@@ -37,12 +37,16 @@
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
+
 #include "Utilities/math.hpp"
 #include "Utilities/colors.hpp"
 #include "Utilities/stringhelpers.hpp"
 
 #include "test_tr-model-data.hpp"
 #include "test_tr-support.hpp"
+
+
+namespace fs = boost::filesystem;
 
 //namespace TestResources {
 //    void FindVarSequence(TestResources::TrustRegionModelData::prob &prob,
@@ -162,18 +166,8 @@ namespace {
             }
 
             // Printing the points calculated by EnsembleExpValue --------------------------
-            std::vector<std::string> points = tr_en_ -> getPrint();
-            cout << "    Xk          fval                                  expValue"<< endl;
-            std::ofstream myfile ("/home/gos/Documents/NTNU/Field-Opt/data.txt");
-            if(myfile.is_open()){
-                for (int element = 1; element < points.size(); ++element){
-                    if ( !(element == 3) ){
-                        myfile << points[element] << "\n";
-                    }
-                }
-                myfile.close();
-            }
-            else {cout << "Not possible to open file.";}
+            Print_Log();
+
             return true;
         }
         void TearDown() override {
@@ -186,6 +180,25 @@ namespace {
             delete(tr_dfo_);
             delete(test_case_tr_dfo_probs_);
             delete (varcont_tr_dfo_probs_);
+        }
+        void Print_Log(){
+            std::vector<std::string> points = tr_en_ -> getPrint();
+            fs::path path =  fs::current_path();
+            string path_string = path.string();
+            path_string = path_string.substr(0,path_string.length() - 30);
+            string subdir;
+            subdir = path_string + "tools/python_scripts/ensemble_postprocessing/data.txt";
+            //std::cout << "Current path is (data): " << subdir << '\n';
+            std::ofstream myfile (subdir);
+            if(myfile.is_open()){
+                for (int element = 1; element < points.size(); ++element){
+                    if ( !(element == 3) ){
+                        myfile << points[element] << "\n";
+                    }
+                }
+                myfile.close();
+            }
+            else {cout << "Not possible to open file.";}
         }
 
     };
@@ -206,12 +219,28 @@ namespace {
     << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
 
     tr_en_ = new EnsembleExpValue();
-    tr_en_-> addFunction(tr_dfo_prob2);
-    tr_en_-> addFunction(tr_dfo_prob2_variation1);
-    tr_en_-> addFunction(tr_dfo_prob2_variation2);
-    tr_en_-> addFunction(tr_dfo_prob2_variation3);
-    //tr_en_-> addFunction(tr_dfo_prob1_test);
-    //tr_en_-> addFunction(tr_dfo_prob2);
+    tr_en_-> addFunction(Rosenbrock);
+    //tr_en_-> addFunction(Rastingi_varation1);
+//    tr_en_-> addFunction(Rastingi_varation2);
+//    tr_en_-> addFunction(Rastingi_varation3);
+//    tr_en_-> addFunction(Rastingi_varation4);
+//    tr_en_-> addFunction(Rastingi_varation5);
+//    tr_en_-> addFunction(Rastingi_varation6);
+//    tr_en_-> addFunction(Rastingi_varation7);
+//    tr_en_-> addFunction(Rastingi_varation8);
+//    tr_en_-> addFunction(Rastingi_varation9);
+//    tr_en_-> addFunction(Rastingi_varation10);
+
+    // Clear file
+    fs::path path =  fs::current_path();
+    string path_string = path.string();
+    path_string = path_string.substr(0,path_string.length() - 30);
+    string subdir;
+    subdir = path_string + "tools/python_scripts/ensemble_postprocessing/data_iterations.txt";
+    //std::cout << "Current path is (data_iterations):" << subdir << '\n';
+    std::ofstream ofs;
+    ofs.open(subdir, std::ofstream::out | std::ofstream::trunc);
+    ofs.close();
 
     SetUpOptimizer(tr_mdata.prob1);
     //cout << "SetUp completed" << endl;

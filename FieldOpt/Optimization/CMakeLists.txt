@@ -68,6 +68,7 @@ target_include_directories(optimization PUBLIC
 add_compile_options(-std=c++11)
 
 set_target_properties(optimization PROPERTIES COMPILE_FLAGS "-fPIC")
+
 if (BUILD_TESTING)
 	# Unit tests
 	add_executable(test_optimization
@@ -89,7 +90,6 @@ if (BUILD_TESTING)
 #            tests/constraints/test_spline_well_length.cpp
 #			tests/optimizers/test_ego.cpp
 #            tests/constraints/test_pseudo_cont_boundary_2d.cpp
-			tests/optimizers/test_tr-dfo.cpp
 #			tests/optimizers/test_tr-dfo.cpp
 			tests/optimizers/test_tr-dfo_exp-value.cpp
 			tests/optimizers/test_tr-model-data.hpp

@@ -64,7 +64,10 @@ namespace TestResources {
          *
          * @param xs Vector of _continous_ variable values.
          * @return The function value at the given position.
+         *
+         *
          */
+
         inline double Rosenbrock(VectorXd xs) {
             VectorXd xhead = xs.head(xs.size() - 1);
             VectorXd xtail = xs.tail(xs.size() - 1);
@@ -74,6 +77,288 @@ namespace TestResources {
             return (100 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
         }
 
+        inline double Rosenbrock_variation1(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.8*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail + 4*VectorXd::Ones(xhead.size()) - v1.cwiseProduct(v1);
+
+            return (95 * p1.cwiseProduct(p1) + v1.cwiseProduct(v1)).sum();
+        }
+
+        inline double Rosenbrock_variation2(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.4*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail + 0.3*VectorXd::Ones(xhead.size()) - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead - VectorXd::Ones(xhead.size());
+            return (97 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+
+        inline double Rosenbrock_variation3(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead + 0.4*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail + 0.3*VectorXd::Ones(xhead.size()) - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead - 1.2*VectorXd::Ones(xhead.size());
+            return (103 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2) + 1*VectorXd::Ones(xhead.size())).sum();
+        }
+
+
+        inline double Rosenbrock_variation4(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.3*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail - 1.8*VectorXd::Ones(xhead.size()) - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead + 0.8*VectorXd::Ones(xhead.size());
+            return (94 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+
+        inline double Rosenbrock_variation5(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead + 0.7*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead + 0.3*VectorXd::Ones(xhead.size());
+            return (98 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+        inline double Rosenbrock_variation6(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.5*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail - 1.8*VectorXd::Ones(xhead.size())- v1.cwiseProduct(v1);
+            VectorXd p2 = xhead - VectorXd::Ones(xhead.size());
+            return (95 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+        inline double Rosenbrock_variation7(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.7*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead - 0.2*VectorXd::Ones(xhead.size());
+            return (106 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2) ).sum();
+        }
+
+        inline double Rosenbrock_variation8(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+
+            VectorXd p1 = xtail + 4*VectorXd::Ones(xhead.size()) - xhead.cwiseProduct(xhead);
+            VectorXd p2 = xhead - 1.3*VectorXd::Ones(xhead.size());
+            return (96 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2) ).sum();
+        }
+
+
+        inline double Rosenbrock_variation9(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+
+            VectorXd p1 = xtail - 2*VectorXd::Ones(xhead.size()) - xhead.cwiseProduct(xhead);
+            VectorXd p2 = xhead + 0.7*VectorXd::Ones(xhead.size());
+            return (105 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+
+        inline double Rosenbrock_variation10(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v1 = xhead - 0.2*VectorXd::Ones(xhead.size());
+
+            VectorXd p1 = xtail + 0.6*VectorXd::Ones(xhead.size()) - v1.cwiseProduct(v1);
+            VectorXd p2 = xhead - VectorXd::Ones(xhead.size());
+            return (90 * p1.cwiseProduct(p1) + p2.cwiseProduct(p2)).sum();
+        }
+
+        inline double Rastingi(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v2 = (2*M_PI*xhead).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+            VectorXd p1 = xhead.cwiseProduct(xhead) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = xtail.cwiseProduct(xtail) - 10*v3*VectorXd::Ones(xhead.size());
+            return (10*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation1(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd v2 = (2*M_PI*xhead).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+            VectorXd p1 = xhead.cwiseProduct(xhead) - 15*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = xtail.cwiseProduct(xtail) - 15*v3*VectorXd::Ones(xhead.size());
+            return (15*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation2(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead - 0.2*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail;
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y) - 10*v3*VectorXd::Ones(xhead.size());
+            return (10*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation3(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead;
+            VectorXd y = xtail + 0.2*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x+0.4*VectorXd::Ones(xhead.size())).array().cos();
+            VectorXd v3 = (2*M_PI*y).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y) - 10*v3*VectorXd::Ones(xhead.size());
+            return (10*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 +0.5*VectorXd::Ones(xhead.size())).sum();
+        }
+
+        inline double Rastingi_varation4(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead +0.6*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail + 0.15*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*y).array().cos();
+
+
+            VectorXd p1 = xhead.cwiseProduct(xhead) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y) - 10*v3*VectorXd::Ones(xhead.size());
+            return (11*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation5(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead -0.2*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail;
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*y).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y) - 0.5*VectorXd::Ones(xhead.size()) - 10*v3*VectorXd::Ones(xhead.size());
+            return (15*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation6(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead +0.3*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail -0.1*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y)  - 10*v3*VectorXd::Ones(xhead.size());
+            return (14*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation7(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead -0.4*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail -0.4*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*y).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) + 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y)  - 10*v3*VectorXd::Ones(xhead.size());
+            return (5*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation8(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead +0.2*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail -0.2*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*xhead).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+
+            VectorXd p1 = x.cwiseProduct(x) - 15*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y)  -0.2*VectorXd::Ones(xhead.size()) - 15*v3*VectorXd::Ones(xhead.size());
+            return (14*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation9(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead +0.6*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail +0.1*VectorXd::Ones(xhead.size());
+            VectorXd y1 = xtail -0.2*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x).array().cos();
+            VectorXd v3 = (2*M_PI*y1).array().cos();
+
+
+            VectorXd p1 = xhead.cwiseProduct(xhead) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y)  -10*v3*VectorXd::Ones(xhead.size());
+            return (13*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
+
+        inline double Rastingi_varation10(VectorXd xs) {
+            VectorXd xhead = xs.head(xs.size() - 1);
+            VectorXd xtail = xs.tail(xs.size() - 1);
+
+            VectorXd x = xhead -0.6*VectorXd::Ones(xhead.size());
+            VectorXd x1 = xhead +1*VectorXd::Ones(xhead.size());
+            VectorXd y = xtail -0.5*VectorXd::Ones(xhead.size());
+
+            VectorXd v2 = (2*M_PI*x1).array().cos();
+            VectorXd v3 = (2*M_PI*xtail).array().cos();
+
+
+            VectorXd p1 = xhead.cwiseProduct(xhead) - 10*v2*VectorXd::Ones(xhead.size());
+            VectorXd p2 = y.cwiseProduct(y)  -10*v3*VectorXd::Ones(xhead.size());
+            return (12*xs.size()*VectorXd::Ones(xhead.size()) + p1 + p2 ).sum();
+        }
         /*!
          * @brief CG.prob1 -> f = @(x) (1 - x(1))^2
          * Initial point: x0=[-1.2 2.0]
@@ -131,6 +416,24 @@ namespace TestResources {
         inline double tr_dfo_prob4(VectorXd xs) {
             double arg1 = 0.01 * pow((xs(0) - 1), 2);
             double arg2 = pow(xs(1) - pow(xs(0), 2), 2);
+            return arg1 + arg2;
+        }
+
+        inline double tr_dfo_prob4_variation1(VectorXd xs) {
+            double arg1 = 0.01 * pow((xs(0) + 10), 2);
+            double arg2 = pow((xs(1)-10) - pow((xs(0)+10), 2), 2);
+            return arg1 + arg2;
+        }
+
+        inline double tr_dfo_prob4_variation2(VectorXd xs) {
+            double arg1 = 0.01 * pow((xs(0) - 10), 2);
+            double arg2 = pow(10.0 * xs(1) - pow((xs(0)-10), 2), 2);
+            return arg1 + arg2;
+        }
+
+        inline double tr_dfo_prob4_variation3(VectorXd xs) {
+            double arg1 = 0.01 * pow((xs(0) - 1), 2);
+            double arg2 = pow(xs(1) - pow((xs(0)+4), 2), 2);
             return arg1 + arg2;
         }
 

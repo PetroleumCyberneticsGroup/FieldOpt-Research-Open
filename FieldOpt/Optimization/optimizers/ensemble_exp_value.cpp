@@ -26,6 +26,10 @@
 #include <numeric>
 #include <string>
 #include <sstream>
+#include <iomanip>
+#include <fstream>
+
+using namespace std;
 
 namespace Optimization {
 namespace Optimizers {
@@ -50,17 +54,31 @@ namespace Optimizers {
         }
 
         void EnsembleExpValue::Print(Eigen::VectorXd incubemt_solution_){
+            // Data preprocess
+            if(isinf(incubemt_solution_(0)) == 1){
+                incubemt_solution_(0) = 0;
+            }
+            if(isinf(incubemt_solution_(1)) == 1){
+                incubemt_solution_(1) = 0;
+            }
             std::ostringstream oss;
-            oss << "[ [" << incubemt_solution_(0) << ", " << incubemt_solution_(1) << "]; [";
+            Eigen::IOFormat CleanFmt(3, 0, ", ", ", ", "[", "]");
+            oss << "[ " << std::setprecision(3) << std::fixed << (incubemt_solution_.transpose()).format(CleanFmt) << " , [";
             var = oss.str();
 
             for (int element = 0; element < number_of_functions_; ++element){
+                if(isinf(function_values_[element]) == 1){
+                    function_values_[element] = 0;
+                }
+                if(isnan(function_values_[element]) == 1){
+                    function_values_[element] = 0;
+                }
                 var += std::to_string(function_values_[element]);
                 if(element < (number_of_functions_-1)){
                     var += ", ";
                 }
             }
-            var += "]; ";
+            var += "], ";
 
         }
 
@@ -81,9 +99,9 @@ namespace Optimizers {
             // Cleaning elements of Ensemble for the next case
             function_values_.clear();
             current_case_ = 0.0;
-
-
-            var += std::to_string(value); // Debug
+            stringstream ss;
+            ss << std::setprecision(3) << std::fixed << value;
+            var += ss.str(); // Debug
             var += "]";
             points.insert(points.end(), var);
             var = " ";

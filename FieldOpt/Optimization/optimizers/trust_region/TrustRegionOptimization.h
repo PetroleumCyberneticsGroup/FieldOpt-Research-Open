@@ -106,7 +106,7 @@ class TrustRegionOptimization : public Optimizer {
 
     void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);
-    void printIteration(double fval_current);
+    void printIteration(double fval_current, VectorXd x_current);
 
     class ConfigurationSummary : public Loggable {
     public:
