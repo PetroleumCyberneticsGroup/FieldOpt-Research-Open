@@ -25,6 +25,8 @@ static std::string bin_dir_                  = base_path() + "/bin/";
 static std::string driver_example_           = base_path() + "/examples/driver.json";
 static std::string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
 static std::string directory_output_         = base_path() + "/fieldopt-output";
+static std::string directory_output_icds_    = base_path() + "/fieldopt-output/5spot-ICD";
+static std::string dir_5spot_SLB_output_     = base_path() + "/fieldopt-output/5spot-SLB";
 static std::string norne_test_output_        = base_path() + "/fieldopt-output/norne_test";
 static std::string norne_driver_example_     = base_path() + "/examples/ECLIPSE/norne-simplified/fo_driver.1_rate.cs.json";
 static std::string norne_grid_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.EGRID";
@@ -35,9 +37,18 @@ static std::string deck_horzwel_             = base_path() + "/examples/ECLIPSE/
 static std::string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
 static std::string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
 
-static std::string deck_5spot_icds           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.DATA";
-static std::string grid_5spot_icds           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.EGRID";
-static std::string driver_5pot_icds          = base_path() + "/examples/ECLIPSE/5spot/fo_driver_2_horz_icd_apps.json";
+static std::string deck_ECL_5spot_           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.DATA";
+static std::string grid_ECL_5spot_           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.EGRID";
+static std::string driver_ECL_5pot_          = base_path() + "/examples/ECLIPSE/5spot/fo_driver_2_horz_icd_apps.json";
+
+static std::string deck_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT.DATA";
+static std::string grid_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT.EGRID";
+static std::string driver_5pot_icds_         = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps.json";
+
+static std::string deck_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.DATA ";
+static std::string grid_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.EGRID";
+static std::string driver_5spot_SLB          = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/fo-drv.r001.c04-5spot-flow.wbhp-opt.apps-t01.npv.json";
+static std::string aux_dir_5spot_SLB         = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow";
 
 static std::string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
 static std::string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
