@@ -106,7 +106,7 @@ class TestResourceSettings {
                   {"OptimizeDrillingPoints", false},
                   {"ModelUpdate", true},
                   {"OptimizeCompletion", true},
-                  {"ModelType", "Surrogate"}
+                  {"ModelType", "TrueModel"}
               },
               QJsonObject{
                   {"TimeStep", 3.0},
@@ -120,7 +120,91 @@ class TestResourceSettings {
                   {"OptimizeDrillingPoints", false},
                   {"ModelUpdate", true},
                   {"OptimizeCompletion", true},
-                  {"ModelType", "Surrogate"}
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 4.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{8.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 5.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{9.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 6.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{10.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 7.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{11.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 8.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{12.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
+              },
+              QJsonObject{
+                  {"TimeStep", 9.0},
+                  {"Operation", "PullingOutOfHole"},
+                  {"DrillingPoints", QJsonObject{
+                      {"x", QJsonArray{7.5}},
+                      {"y", QJsonArray{7.0}},
+                      {"z", QJsonArray{13.1}}
+                  }
+                  },
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
+                  {"ModelType", "TrueModel"}
               }
           }
           }}
