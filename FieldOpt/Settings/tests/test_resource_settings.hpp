@@ -72,12 +72,12 @@ class TestResourceSettings {
                   {"DrillingPoints", QJsonObject{
                       {"x", QJsonArray{1.5, 2.0, 3.0, 4.0}},
                       {"y", QJsonArray{1.0, 2.5, 3.0, 4.0}},
-                      {"z", QJsonArray{1.0, 2.0, 3.5, 4.0}}
+                      {"z", QJsonArray{1.0, 2.0, 3.0, 4.0}}
                   }
                   },
-                  {"OptimizeDrillingPoints", true},
-                  {"ModelUpdate", false},
-                  {"OptimizeCompletion", false},
+                  {"OptimizeDrillingPoints", false},
+                  {"ModelUpdate", true},
+                  {"OptimizeCompletion", true},
                   {"ModelType","TrueModel"}
               },
               QJsonObject{
@@ -89,7 +89,7 @@ class TestResourceSettings {
                       {"z", QJsonArray{6.5}}
                   }
                   },
-                  {"OptimizeDrillingPoints", true},
+                  {"OptimizeDrillingPoints", false},
                   {"ModelUpdate", true},
                   {"OptimizeCompletion", true},
                   {"ModelType", "TrueModel"}
@@ -105,7 +105,7 @@ class TestResourceSettings {
                   },
                   {"OptimizeDrillingPoints", false},
                   {"ModelUpdate", true},
-                  {"OptimizeCompletion", false},
+                  {"OptimizeCompletion", true},
                   {"ModelType", "Surrogate"}
               },
               QJsonObject{
@@ -117,7 +117,7 @@ class TestResourceSettings {
                       {"z", QJsonArray{7.1}}
                   }
                   },
-                  {"OptimizeDrillingPoints", true},
+                  {"OptimizeDrillingPoints", false},
                   {"ModelUpdate", true},
                   {"OptimizeCompletion", true},
                   {"ModelType", "Surrogate"}

@@ -171,10 +171,10 @@ TEST_F(DrillingTest, ParseJson) {
 TEST_F(DrillingTest, DrillingRunOptimization) {
   int argc = 16;
   const char *argv[16] = {"FieldOpt",
-                          TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
+                          TestResources::ExampleFilePaths::driver_ECL_5pot_.c_str(),
                           TestResources::ExampleFilePaths::directory_output_.c_str(),
-                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds.c_str(),
-                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds.c_str(),
+                          "-g", TestResources::ExampleFilePaths::grid_ECL_5spot_.c_str(),
+                          "-s", TestResources::ExampleFilePaths::deck_ECL_5spot_.c_str(),
                           "-b", "./",
                           "-r", "serial",
                           "-f",
@@ -202,10 +202,10 @@ TEST_F(DrillingTest, DrillingRunner) {
 
   int argc = 16;
   const char *argv[16] = {"FieldOpt",
-                          TestResources::ExampleFilePaths::driver_5pot_icds.c_str(),
-                          TestResources::ExampleFilePaths::directory_output_.c_str(),
-                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds.c_str(),
-                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds.c_str(),
+                          TestResources::ExampleFilePaths::driver_5pot_icds_.c_str(),
+                          TestResources::ExampleFilePaths::directory_output_icds_.c_str(),
+                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds_.c_str(),
+                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds_.c_str(),
                           "-b", "./",
                           "-r", "serial",
                           "-f",
@@ -219,24 +219,28 @@ TEST_F(DrillingTest, DrillingRunner) {
   if (dbg) {
     cout << drilling->GetStatusStringHeader().toStdString() << endl;
   }
+  drilling->setOptRuntimeSettings(0, argc, argv);
   for (int i: drilling_steps) {
     double ts = schedule->getTimeSteps().value(i);
 
-    drilling->setOptRuntimeSettings(i, argc, argv);
+
 
     if (dbg) {
       cout << "drilling_step:" << i << endl;
-    }
-
-    // Model update
-    if (schedule->isModelUpdates().value(i)) {
-      drilling->modelUpdate(i);
     }
 
     // Optimization
     if ((schedule->isVariableDrillingPoints().value(i)) || (schedule->isVariableCompletions().value(i))) {
       drilling->runOptimization(i);
     }
+
+    // Model update
+    if (schedule->isModelUpdates().value(i)) {
+      drilling->modelUpdate(i);
+    } else {
+      drilling->maintainRuntimeSettings(i);
+    }
+
     if (dbg) {
       cout << drilling->GetStatusString().toStdString() << endl;
     }
