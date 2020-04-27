@@ -62,6 +62,7 @@ class Drilling {
   QString GetStatusStringHeader() const;
 
   void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
+  void maintainRuntimeSettings(int drilling_step);
 
   void modelUpdate(int drilling_step);
   void runOptimization(int drilling_step);
@@ -70,6 +71,8 @@ class Drilling {
 
  private:
   int current_step_;
+  int current_model_;
+  string original_output_dir_;
 
   Properties::VariablePropertyContainer *drilling_variables_;
   Settings::Model  *settings_;
