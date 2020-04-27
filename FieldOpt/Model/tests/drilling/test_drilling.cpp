@@ -235,7 +235,7 @@ TEST_F(DrillingTest, DrillingRunner) {
     }
 
     // Model update
-    if (schedule->isModelUpdates().value(i)) {
+    if ((i < drilling_steps.size()-1) && (schedule->isModelUpdates().value(i))) {
       drilling->modelUpdate(i);
     } else {
       drilling->maintainRuntimeSettings(i);
