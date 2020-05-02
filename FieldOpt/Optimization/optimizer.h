@@ -33,20 +33,13 @@
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 
-
 #include "Model/model.h"
-//namespace Model {
-//    class Model;
-//}
 
 namespace Simulation {
     class Simulator;
 }
 
-//#include "Simulation/simulator_interfaces/simulator.h"
-
 #include "Optimization/objective/objective.h"
-//#include "Optimization/objective/NPV.h"
 
 class Logger;
 
@@ -145,16 +138,6 @@ class Optimizer : public Loggable
             Case *base_case,
             Model::Properties::VariablePropertyContainer *variables,
             Reservoir::Grid::Grid *grid,
-            Logger *logger,
-            CaseHandler *case_handler=0,
-            Constraints::ConstraintHandler *constraint_handler=0
-  );
-
-  Optimizer(::Settings::Optimizer *settings,
-            Case *base_case,
-            Model::Model *model,
-            Simulation::Simulator *simulator,
-            Optimization::Objective::Objective *objective_function,
             Logger *logger,
             CaseHandler *case_handler=0,
             Constraints::ConstraintHandler *constraint_handler=0
@@ -286,6 +269,8 @@ class Optimizer : public Loggable
   void DisableLogging(); //!< Disable logging for this optimizer. This is called by HybridOptimizer.
   bool penalize_; //!< Switch for whether or not to use penalty function to account for constraints.
   Case *tentative_best_case_; //!< The best case encountered thus far.
+  int tentative_best_case_iteration_; //!< The iteration in which the current tentative best case was found.
+  bool is_hybrid_component_; //!< Indicates that this object is a hybrid optimization component.
 
   Normalizer normalizer_ofv_; //!< Normalizer for objective function values.
 
@@ -315,7 +300,6 @@ class Optimizer : public Loggable
  private:
   QDateTime start_time_;
   int seconds_spent_in_iterate_; //!< The number of seconds spent in the iterate() method.
-  int tentative_best_case_iteration_; //!< The iteration in which the current tentative best case was found.
 
   /*!
    * @brief Initialize the OFV normalizer, setting the parameters for it
