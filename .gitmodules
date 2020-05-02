@@ -16,3 +16,6 @@
 [submodule "FieldOpt/ThirdParty/opm-common"]
 	path = FieldOpt/ThirdParty/opm-common
 	url = https://github.com/PetroleumCyberneticsGroup/opm-common.git
+[submodule "FieldOpt/ThirdParty/hdf5-1.8.16"]
+	path = FieldOpt/ThirdParty/hdf5-1.8.16
+	url = https://github.com/PetroleumCyberneticsGroup/hdf5-1.8.16.git
