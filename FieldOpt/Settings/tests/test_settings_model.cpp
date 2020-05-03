@@ -19,10 +19,6 @@ class ModelSettingsTest : public ::testing::Test,
   virtual void TearDown() {}
 };
 
-TEST_F(ModelSettingsTest, Reservoir) {
-    EXPECT_STREQ("../examples/ADGPRS/5spot/ECL_5SPOT.EGRID", settings_full_->paths().GetPath(Paths::GRID_FILE).c_str());
-}
-
 TEST_F(ModelSettingsTest, ControlTimes) {
     EXPECT_EQ(4, settings_model_->control_times().size());
     EXPECT_EQ(365, settings_model_->control_times().last());
@@ -115,8 +111,8 @@ TEST_F(ModelSettingsTest, InjectorControls) {
     EXPECT_EQ(0, injector.controls[0].time_step);
     EXPECT_EQ(Model::InjectionType::WaterInjection, injector.controls[0].injection_type);
     EXPECT_EQ(Model::WellState::WellOpen, injector.controls[0].state);
-    EXPECT_EQ(Model::ControlMode::RateControl, injector.controls[0].control_mode);
-    EXPECT_FLOAT_EQ(1200, injector.controls[0].rate);
+    EXPECT_EQ(Model::ControlMode::LRATControl, injector.controls[0].control_mode);
+    EXPECT_FLOAT_EQ(1200, injector.controls[0].liq_rate);
     EXPECT_FALSE(injector.controls[0].is_variable);
     EXPECT_STREQ("Rate#INJ#0", injector.controls[0].name.toLatin1().constData());
 }
@@ -125,8 +121,8 @@ TEST_F(ModelSettingsTest, MultisplineWell) {
 
     Paths paths_;
     QJsonObject partial_deck = model_adtl_pts;
-    paths_.SetPath(Paths::SIM_DRIVER_FILE, "../examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.DATA");
-    paths_.SetPath(Paths::SIM_SCH_FILE, "../examples/ECLIPSE/norne-simplified/INCLUDE/BC0407_HIST01122006.SCH");
+    paths_.SetPath(Paths::SIM_DRIVER_FILE, TestResources::ExampleFilePaths::norne_deck_ );
+    paths_.SetPath(Paths::SIM_SCH_FILE, TestResources::ExampleFilePaths::norne_sch_);
 //    QJsonObject sim_json_;
     QJsonObject mod_json_;
 //    sim_json_ = partial_deck["Simulator"].toObject();

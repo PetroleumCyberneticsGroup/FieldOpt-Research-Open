@@ -1,37 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 project(runner)
 
+include(Sources.cmake)
+
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 
-add_executable(FieldOpt
-		main.cpp
-		runtime_settings.cpp
-		runners/main_runner.cpp
-		runners/abstract_runner.cpp
-		runners/serial_runner.cpp
-        runners/oneoff_runner.cpp
-        runners/mpi_runner.cpp
-        runners/synchronous_mpi_runner.cpp
-        runners/overseer.cpp
-        runners/worker.cpp
-		logger.cpp
-		bookkeeper.cpp
-        runners/ensemble_helper.cpp ../Optimization/optimizers/ensemble_exp_value.h ../Optimization/optimizers/ensemble_exp_value.cpp)
+add_executable(FieldOpt main.cpp ${RUNNER_HEADERS} ${RUNNER_SOURCES})
 
-add_library(runner STATIC
-		runtime_settings.cpp
-		runners/main_runner.cpp
-		runners/abstract_runner.cpp
-		runners/serial_runner.cpp
-        runners/oneoff_runner.cpp
-        runners/mpi_runner.cpp
-        runners/synchronous_mpi_runner.cpp
-        runners/overseer.cpp
-        runners/worker.cpp
-        logger.cpp
-        bookkeeper.cpp
-        )
+add_library(runner STATIC ${RUNNER_HEADERS} ${RUNNER_SOURCES})
 add_library(fieldopt::runner ALIAS runner)
 
 target_link_libraries(FieldOpt
@@ -42,12 +19,11 @@ target_link_libraries(FieldOpt
 		PUBLIC fieldopt::ertwrapper
 		PUBLIC fieldopt::hdf5summaryreader
 		PUBLIC fieldopt::constraintmath
-		PUBLIC ${CMAKE_THREAD_LIBS_INIT}
-		PUBLIC ${Boost_LIBRARIES}
+                PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+                PUBLIC ${Boost_LIBRARIES}
         PUBLIC ${MPI_LIBRARIES}
-#		PUBLIC ${ERTLIB}
-		PUBLIC ri:ert_ecl
-		)
+                PUBLIC ri:ert_ecl
+                )
 
 target_link_libraries(runner
 		PUBLIC fieldopt::model
@@ -56,12 +32,11 @@ target_link_libraries(runner
 		PUBLIC fieldopt::settings
 		PUBLIC fieldopt::ertwrapper
 		PUBLIC fieldopt::hdf5summaryreader
-		PUBLIC fieldopt::constraintmath
-		PUBLIC ${CMAKE_THREAD_LIBS_INIT}
-		PUBLIC ${Boost_LIBRARIES}
-#		PUBLIC ${ERTLIB}
-		PUBLIC ri:ert_ecl
-		)
+                PUBLIC fieldopt::constraintmath
+                PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+                PUBLIC ${Boost_LIBRARIES}
+                PUBLIC ri:ert_ecl
+                )
 
 if(MPI_COMPILE_FLAGS)
 	set_target_properties(runner PROPERTIES
@@ -85,13 +60,11 @@ target_include_directories(runner PUBLIC
 add_compile_options(-std=c++11)
 
 if (BUILD_TESTING)
-	# Unit tests
-	add_executable(test_runner
-			tests/test_bookkeeper.cpp
-			tests/test_runtime_settings.cpp)
-	target_link_libraries(test_runner
-			fieldopt::runner
-			${gtest}
+        # Unit tests
+        add_executable(test_runner ${RUNNER_TESTS})
+        target_link_libraries(test_runner
+                        fieldopt::runner
+                        ${gtest}
 			${gtest_main}
 			${CMAKE_THREAD_LIBS_INIT})
 

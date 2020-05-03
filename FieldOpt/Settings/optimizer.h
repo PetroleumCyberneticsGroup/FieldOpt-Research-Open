@@ -40,14 +40,16 @@ class Optimizer
  public:
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer);
-  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, Hybrid, TrustRegionOptimization};
+  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization };
   enum OptimizerMode { Maximize, Minimize };
   enum ConstraintType { BHP, Rate, SplinePoints,
     WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
     CombinedWellSplineLengthInterwellDistance,
     CombinedWellSplineLengthInterwellDistanceReservoirBoundary,
-    ReservoirBoundary, PseudoContBoundary2D,
-    PackerConstraint, ICVConstraint
+    ReservoirBoundary, PseudoContBoundary2D, PolarXYZBoundary,
+    ReservoirXYZBoundary, ReservoirBoundaryToe,
+    PackerConstraint, ICVConstraint, PolarWellLength,
+    PolarAzimuth, PolarElevation, PolarSplineBoundary
   };
   enum ConstraintWellSplinePointsType { MaxMin, Function};
   enum ObjectiveType { WeightedSum, NPV};
@@ -62,7 +64,7 @@ class Optimizer
     double minimum_step_length; //!< The minimum step length in the algorithm when applicable.
     double contraction_factor;  //!< The contraction factor for GSS algorithms.
     double expansion_factor;    //!< The expansion factor for GSS algorithms.
-    double max_queue_size;      //!< Maximum size of evaluation queue.
+    int max_queue_size;      //!< Maximum size of evaluation queue.
     bool auto_step_lengths = false;     //!< Automatically determine appropriate step lengths from bound constraints.
     double auto_step_init_scale = 0.25; //!< Scaling factor for auto-determined initial step lengths (e.g. 0.25*(upper-lower)
     double auto_step_conv_scale = 0.01; //!< Scaling factor for auto-determined convergence step lengths (e.g. 0.01*(upper-lower)
@@ -78,6 +80,12 @@ class Optimizer
     double stagnation_limit;  //!< Stagnation limit. Default: 1e-10.
     double lower_bound;       //!< Simple lower bound. This is applied to _all_ variables. Default: -10.0.
     double upper_bound;       //!< Simple upper bound. This is applied to _all_ variables. Default: +10.0.
+
+    // PSO parameters
+    double pso_learning_factor_1; //!< Learning factor (c1), from the swarms best known perturbation. Default: 2
+    double pso_learning_factor_2; //!< Learning factor (c2), from the individual particle's best known perturbation. Default: 2
+    double pso_swarm_size; //!< The number of particles in the swarm. Default: 50
+    double pso_velocity_scale; //!< Scaling factor for particle velocities. Default: 1.0
 
     // EGO Parameters
     int ego_init_guesses = -1; //!< Number of initial guesses to be made (default is two times the number of variables).
@@ -110,6 +118,26 @@ class Optimizer
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
     std::string tr_basis = "diagonalHessian";
     std::string tr_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
+
+
+    // VFSA Parameters
+    int vfsa_evals_pr_iteration = 1; //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
+    int vfsa_max_iterations = 50;    //!< Maximum number of iterations to be performed. Default: 50.
+    bool vfsa_parallel = false;      //!< Run generate evals_pr_iteration cases immedeately in each generation? Default: false.
+    double vfsa_init_temp = 1.0;     //!< Initial temperature (same used for all dimensions). Default: 1.0.
+    double vfsa_temp_scale = 1.0;    //!< Constant used in scaling temperature. Default: 1.0.
+
+    // CMA-ES Parameters
+    bool improve_base_case = false;
+
+    // SPSA Parameters
+    int spsa_max_iterations = 50; //!< Maximum number of iterations to be performed. Default: 50.
+    double spsa_alpha = 0.602;    //!< Affects step length. Recommended 0.602 <= alpha <= 1.0. Default: 0.602.
+    double spsa_gamma = 0.101;    //!< Affects step length. Recommended 0.101 <= gamma <= 1/6. Default: 0.101.
+    double spsa_c = 1.0;          //!< Used to account for noise. Default: 1.0.
+    double spsa_A = 5;            //!< Affects step length in early iterations. Default: 10% of max iterations.
+    double spsa_a = 0.0;          //!< Affects step lengths. Default and recommended: automatically compute from spsa_init_step_magnitude.
+    double spsa_init_step_magnitude = 0.0; //!< Smallest desired step magnitude in early iterations.
 
     // Hybrid parameters
     /*!
@@ -154,13 +182,22 @@ class Optimizer
     double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
     struct WeightedSumComponent {
-      double coefficient; QString property; int time_step;
-      bool is_well_prop; QString well; }; //!< A component of a weighted sum formulatied objective function
+      double coefficient; 
+      QString property; 
+      int time_step;
+      bool is_well_prop; 
+      QString well; 
+    }; //!< A component of a weighted sum objective function
     struct NPVComponent{
-      double coefficient; QString property; QString interval;
-      bool usediscountfactor; QString well; double discount; };
+      double coefficient;
+      std::string property;
+      std::string interval = "";
+      bool usediscountfactor = false;
+      std::string well;
+      double discount = 0.0;
+    };
     QList<WeightedSumComponent> weighted_sum; //!< The expression for the Objective function formulated as a weighted sum
-    QList<NPVComponent> NPV_sum;
+    QList<NPVComponent> NPV_sum;  //!< The expression for the Objective function formulated as an NPV
 
   };
 
@@ -172,7 +209,8 @@ class Optimizer
     QStringList wells; //!< List of well names if the constraint applies to more than one.
     double max; //!< Max limit when using constraints like BHP.
     double min; //!< Min limit when using constraints like BHP.
-    double box_imin, box_imax, box_jmin, box_jmax, box_kmin, box_kmax; //!< Min max limits for geometrix box constraints.
+    double box_imin, box_imax, box_jmin, box_jmax, box_kmin, box_kmax; //!< Min max limits for geometric box constraints.
+    double box_xyz_xmin, box_xyz_ymin, box_xyz_zmin, box_xyz_xmax, box_xyz_ymax, box_xyz_zmax; //!< Min max limits for geometric xyz constraints.
     double min_length, max_length;
     double min_distance;
     double min_md, max_md;
