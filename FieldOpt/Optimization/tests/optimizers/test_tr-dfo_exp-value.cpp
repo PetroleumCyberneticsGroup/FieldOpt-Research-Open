@@ -3,6 +3,12 @@
  Copyright (C) 2020-2021 Amanda Machado
  <amanda.automacaoufsc@gmail.com>
 
+ Modified 2019-2020 Thiago Lima Silva
+ <thiagolims@gmail.com>
+
+ Modified 2019-2020 Mathias Bellout
+ <chakibbb-pcg@gmail.com>
+
  This file is part of the FieldOpt project.
 
  FieldOpt is free software: you can redistribute it and/or
