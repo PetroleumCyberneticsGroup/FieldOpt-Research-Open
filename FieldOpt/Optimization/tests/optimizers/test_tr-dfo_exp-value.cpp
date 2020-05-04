@@ -43,15 +43,21 @@
 #include "Utilities/stringhelpers.hpp"
 
 #include "test_tr-model-data.hpp"
-#include "test_tr-support.hpp"
+// #include "test_tr-support.hpp"
 
 
 namespace fs = boost::filesystem;
 
-//namespace TestResources {
-//    void FindVarSequence(TestResources::TrustRegionModelData::prob &prob,
-//                         Optimization::Case &base_case_tr_dfo_probs);
-//}
+//TODO make header file for test_tr-support.hpp
+namespace TestResources {
+   void FindVarSequence(TestResources::TrustRegionModelData::prob &prob,
+                        Optimization::Case &base_case_tr_dfo_probs);
+
+  void OverrideSecondPointEn(TestResources::TrustRegionModelData::prob &prob,
+                             Optimization::Case &c,
+                             Optimization::Optimizers::EnsembleExpValue *tr_en_);
+
+}
 
 using namespace TestResources::TestFunctions;
 using namespace Optimization::Optimizers;

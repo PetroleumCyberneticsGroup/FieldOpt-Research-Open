@@ -144,8 +144,8 @@ SET(OPTIMIZATION_TESTS
 	tests/optimizers/test_vfsa.cpp
 	tests/optimizers/test_spsa.cpp
 	tests/optimizers/test_cma_es.cpp
-  tests/optimizers/test_tr-dfo.cpp
+	tests/optimizers/test_tr-dfo.cpp
 	tests/optimizers/test_tr-dfo_exp-value.cpp
 	tests/optimizers/test_tr-model-data.hpp
-	tests/optimizers/test_tr-support.hpp		
+	tests/optimizers/test_tr-support.hpp
 )

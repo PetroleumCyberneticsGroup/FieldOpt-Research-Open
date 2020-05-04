@@ -1,7 +1,6 @@
 /***********************************************************
  Created by Mathias C. Bellout on 27.11.18
  Copyright (C) 2018-2019 Mathias Bellout
- <mathias.bellout@petroleumcyberneticsgroup.no>
  <chakibbb-pcg@gmail.com>
 
  Modified 2018-2019 Thiago Lima Silva
