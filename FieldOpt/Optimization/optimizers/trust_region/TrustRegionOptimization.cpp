@@ -22,6 +22,7 @@
 #include <Utilities/verbosity.h>
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
+#include "Utilities/random.hpp"
 #include "TrustRegionOptimization.h"
 
 #include <iostream>
