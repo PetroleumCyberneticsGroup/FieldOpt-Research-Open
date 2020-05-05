@@ -262,7 +262,10 @@ class Optimizer : public Loggable
   int max_evaluations_; //!< Maximum number of objective function evaluations allowed before terminating.
   int iteration_; //!< The current iteration.
   int verbosity_level_; //!< The verbosity level for runtime console logging.
+
   ::Settings::Optimizer::OptimizerMode mode_; //!< The optimization mode, i.e. whether the objective function should be maximized or minimized.
+  ::Settings::Optimizer::OptimizerType type_;
+
   bool is_async_; //!< Inidcates whether or not the optimizer is asynchronous. Defaults to false.
   Logger *logger_;
   bool enable_logging_; //!< Whether logging should be performed. This should be set to false when the optimizer is a component in HybridOptimizer.

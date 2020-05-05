@@ -40,8 +40,14 @@ class Optimizer
  public:
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer);
-  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization };
+
+  enum OptimizerType {
+    Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
+    EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization
+  };
+
   enum OptimizerMode { Maximize, Minimize };
+
   enum ConstraintType { BHP, Rate, SplinePoints,
     WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
     CombinedWellSplineLengthInterwellDistance,
