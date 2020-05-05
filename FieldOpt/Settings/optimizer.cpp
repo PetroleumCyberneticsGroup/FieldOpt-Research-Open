@@ -1,21 +1,35 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2019-2020 Brage Strand Kristoffersen
+<brage.s.kristoffersen@ntnu.no>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+Modified 2019-2020 Thiago Lima Silva
+<thiagolims@gmail.com>
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+Modified 2019-2020 Caio Giuliani
+<caiogiuliani@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "Utilities/printer.hpp"
 #include "optimizer.h"
@@ -158,7 +172,7 @@ Optimizer::Constraint Optimizer::parseSingleConstraint(QJsonObject json_constrai
     }
     else if (QString::compare(constraint_type, "WellSplineLength") == 0 || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
         if (constraint_type == "WellSplineLength"){
-            optimizer_constraint.type = ConstraintType::WellSplineLength;
+        optimizer_constraint.type = ConstraintType::WellSplineLength;
         } else {
             optimizer_constraint.type = ConstraintType::PolarWellLength;
         }
@@ -213,7 +227,7 @@ Optimizer::Constraint Optimizer::parseSingleConstraint(QJsonObject json_constrai
     else if (QString::compare(constraint_type, "ReservoirBoundary") == 0 || QString::compare(constraint_type, "PolarSplineBoundary") == 0 ||
     QString::compare(constraint_type, "ReservoirBoundaryToe") == 0) {
         if (QString::compare(constraint_type, "ReservoirBoundary") == 0){
-            optimizer_constraint.type = ConstraintType::ReservoirBoundary;
+        optimizer_constraint.type = ConstraintType::ReservoirBoundary;
         }
         else if (QString::compare(constraint_type, "PolarSplineBoundary") == 0){
             optimizer_constraint.type = ConstraintType::PolarSplineBoundary;
@@ -514,14 +528,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
 
         // RNG seed
         if (json_parameters.contains("RNGSeed")) {
-            Printer::error("Passing RNGSeed is no longer supported.");
-            Printer::ext_warn("Passing RNGSeed in settings is no longer supporte. In fact, it never really worked: this"
-                              "is why it has now been removed. Remove the RNGSeed line from your driver file and try again.",
-                              "Settings", "Optimization");
-            throw std::runtime_error("Error in driver file");
+            params.rng_seed = json_parameters["RNGSeed"].toInt();
         }
         else {
-            params.rng_seed = 0;
+            params.rng_seed = std::time(0);
         }
 
       // TRMaxIter
