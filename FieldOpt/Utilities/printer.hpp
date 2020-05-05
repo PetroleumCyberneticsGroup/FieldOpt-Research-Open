@@ -1,4 +1,29 @@
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 /*! This file contains helper functions for "prettyfied" printing
+ *
  *  to console.
  */
 #ifndef PRINTER_FUNCTIONS_H
@@ -21,8 +46,11 @@ namespace Printer {
  * @return String representation of num.
  */
 template<typename T>
-inline std::string num2str(const T num) {
-    return boost::lexical_cast<std::string>(num);
+inline std::string num2str(const T num, int prc=2) {
+  // return boost::lexical_cast<std::string>(num);
+  std::ostringstream ss;
+  ss << std::fixed << std::setprecision(prc) << num;
+  return ss.str();
 }
 
 
@@ -32,9 +60,9 @@ inline std::string num2str(const T num) {
  * @param width Width to to truncate to (including the added ellipsis).
  */
 inline void truncate_text(std::string &text, const int &width=66) {
-    if (text.size() > width) {
-        text = text.substr(0, width - 3) + "...";
-    }
+  if (text.size() > width) {
+    text = text.substr(0, width - 3) + "...";
+  }
 }
 
 /*!
@@ -43,9 +71,9 @@ inline void truncate_text(std::string &text, const int &width=66) {
  * @param width Width to pad to.
  */
 inline void pad_text(std::string &text, const int &width=66) {
-    if (text.size() < width) {
-        text.insert(text.size(), width - text.size(), ' ');
-    }
+  if (text.size() < width) {
+    text.insert(text.size(), width - text.size(), ' ');
+  }
 }
 
 /*!
@@ -56,36 +84,36 @@ inline void pad_text(std::string &text, const int &width=66) {
  * @return
  */
 inline std::vector<std::string> split_line(const std::string text, const int &width=67) {
-    std::vector<std::string> strv;
-    if (text.size() > width) {
-        std::size_t start_idx = 0;
-        std::size_t end_idx = 1;
-        int line_nr = 0;
-        std::string remainder = text;
-        while (remainder.size() > width) {
-            if (remainder.find_first_of("|") < width) {
-                end_idx = remainder.find_first_of("|");
-            }
-            else {
-                end_idx = remainder.find_last_of(".,;/ ", width);
-            }
-            std::string line = remainder.substr(start_idx, end_idx);
-            pad_text(line, width);
-            strv.push_back(line);
-            remainder = remainder.substr(end_idx+1, remainder.size());
-            if (end_idx >= width) {
-                break;
-            }
-        }
-        pad_text(remainder, width);
-        strv.push_back(remainder);
+  std::vector<std::string> strv;
+  if (text.size() > width) {
+    std::size_t start_idx = 0;
+    std::size_t end_idx = 1;
+    int line_nr = 0;
+    std::string remainder = text;
+    while (remainder.size() > width) {
+      if (remainder.find_first_of("|") < width) {
+        end_idx = remainder.find_first_of("|");
+      }
+      else {
+        end_idx = remainder.find_last_of(".,;/ ", width);
+      }
+      std::string line = remainder.substr(start_idx, end_idx);
+      pad_text(line, width);
+      strv.push_back(line);
+      remainder = remainder.substr(end_idx+1, remainder.size());
+      if (end_idx >= width) {
+        break;
+      }
     }
-    else {
-        std::string padded = text;
-        pad_text(padded, width);
-        strv.push_back(padded);
-    }
-    return strv;
+    pad_text(remainder, width);
+    strv.push_back(remainder);
+  }
+  else {
+    std::string padded = text;
+    pad_text(padded, width);
+    strv.push_back(padded);
+  }
+  return strv;
 }
 
 
@@ -97,17 +125,17 @@ inline std::vector<std::string> split_line(const std::string text, const int &wi
  └─────────────────────────────────────────────────────────────────────┘
  */
 inline void info(const std::string &text) {
-    std::stringstream ss;
-    ss << FLGREEN;
-    std::string content = text;
-    truncate_text(content);
-    pad_text(content);
-    ss << "┌─────────────────────────────────────────────────────────────────────┐" << "\n";
-    ss << "│ " << content <<                                                  " │" << "\n";
-    ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
-    ss << "\n";
-    ss << AEND;
-    std::cout << ss.str();
+  std::stringstream ss;
+  ss << FLGREEN;
+  std::string content = text;
+  truncate_text(content);
+  pad_text(content);
+  ss << "┌─────────────────────────────────────────────────────────────────────┐" << "\n";
+  ss << "│ " << content <<                                                  " │" << "\n";
+  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
+  ss << "\n";
+  ss << AEND;
+  std::cout << ss.str();
 }
 
 /* Extended info box.
@@ -122,25 +150,25 @@ Example:
 inline void ext_info(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="") {
-    std::string module_name = modulen;
-    std::string class_name = classn;
-    truncate_text(module_name, 12);
-    truncate_text(class_name, 29);
-    pad_text(module_name, 12);
-    pad_text(class_name, 29);
-    auto lines = split_line(text);
-    std::stringstream ss;
-    ss << FLGREEN;
-    ss << "┌───────┬──────────────────────┬──────────────────────────────────────┐" << "\n";
-    ss << "│ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
-    ss << "├───────┴──────────────────────┴──────────────────────────────────────┤" << "\n";
-    for (auto line : lines) {
-        ss << "│ " << line << " │" << "\n";
-    }
-    ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
-    ss << "\n";
-    ss << AEND;
-    std::cout << ss.str();
+  std::string module_name = modulen;
+  std::string class_name = classn;
+  truncate_text(module_name, 12);
+  truncate_text(class_name, 29);
+  pad_text(module_name, 12);
+  pad_text(class_name, 29);
+  auto lines = split_line(text);
+  std::stringstream ss;
+  ss << FLGREEN;
+  ss << "┌───────┬──────────────────────┬──────────────────────────────────────┐" << "\n";
+  ss << "│ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+  ss << "├───────┴──────────────────────┴──────────────────────────────────────┤" << "\n";
+  for (auto line : lines) {
+    ss << "│ " << line << " │" << "\n";
+  }
+  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
+  ss << "\n";
+  ss << AEND;
+  std::cout << ss.str();
 }
 
 /* Extended warning box.
@@ -155,25 +183,25 @@ Example:
 inline void ext_warn(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="") {
-    std::string module_name = modulen;
-    std::string class_name = classn;
-    truncate_text(module_name, 12);
-    truncate_text(class_name, 25);
-    pad_text(module_name, 12);
-    pad_text(class_name, 25);
-    auto lines = split_line(text);
-    std::stringstream ss;
-    ss << FLYELLOW;
-    ss << "┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓" << "\n";
-    ss << "┃ WARNING  ┃ Module: " << module_name << " ┃ Class: " << class_name << " ┃" << "\n";
-    ss << "┣━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫" << "\n";
-    for (auto line : lines) {
-        ss << "┃ " << line << " ┃" << "\n";
-    }
-    ss << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛" << "\n";
-    ss << "\n";
-    ss << AEND;
-    std::cout << ss.str();
+  std::string module_name = modulen;
+  std::string class_name = classn;
+  truncate_text(module_name, 12);
+  truncate_text(class_name, 25);
+  pad_text(module_name, 12);
+  pad_text(class_name, 25);
+  auto lines = split_line(text);
+  std::stringstream ss;
+  ss << FLYELLOW;
+  ss << "┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓" << "\n";
+  ss << "┃ WARNING  ┃ Module: " << module_name << " ┃ Class: " << class_name << " ┃" << "\n";
+  ss << "┣━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫" << "\n";
+  for (auto line : lines) {
+    ss << "┃ " << line << " ┃" << "\n";
+  }
+  ss << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛" << "\n";
+  ss << "\n";
+  ss << AEND;
+  std::cout << ss.str();
 }
 /* Error box.
 Example:
@@ -182,17 +210,17 @@ Example:
  ╚═════════════════════════════════════════════════════════════════════╝
  */
 inline void error(const std::string &text) {
-    std::stringstream ss;
-    ss << FLRED;
-    std::string content = text;
-    truncate_text(content, 59);
-    pad_text(content, 59);
-    ss << "╔═════════════════════════════════════════════════════════════════════╗" << "\n";
-    ss << "║ ERROR: " << content <<                                                  " ║" << "\n";
-    ss << "╚═════════════════════════════════════════════════════════════════════╝" << "\n";
-    ss << "\n";
-    ss << AEND;
-    std::cout << ss.str();
+  std::stringstream ss;
+  ss << FLRED;
+  std::string content = text;
+  truncate_text(content, 59);
+  pad_text(content, 59);
+  ss << "╔═════════════════════════════════════════════════════════════════════╗" << "\n";
+  ss << "║ ERROR: " << content <<                                                  " ║" << "\n";
+  ss << "╚═════════════════════════════════════════════════════════════════════╝" << "\n";
+  ss << "\n";
+  ss << AEND;
+  std::cout << ss.str();
 }
 
 }
