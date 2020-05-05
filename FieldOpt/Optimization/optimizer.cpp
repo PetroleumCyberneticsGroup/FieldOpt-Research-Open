@@ -113,16 +113,14 @@ Case *Optimizer::GetCaseForEvaluation() {
   }
 
   if (IsFinished() || (case_handler_->QueuedCases().size() == 0)) {
-    if (VERB_OPT >= 2) {
+    if (VERB_OPT >= 3) {
       std::cout << "IsFinished() => " << IsFinished() << std::endl;
       std::cout << "(case_handler_->QueuedCases().size() == 0) => "
                 << (case_handler_->QueuedCases().size() == 0) << std::endl;
     }
-  }
-
-  if (type_ == ::Settings::Optimizer::OptimizerType::TrustRegionOptimization) {
+    if (type_ == ::Settings::Optimizer::OptimizerType::TrustRegionOptimization) {
       return nullptr;
-  } else {
+    }
   }
 
   return case_handler_->GetNextCaseForEvaluation();
