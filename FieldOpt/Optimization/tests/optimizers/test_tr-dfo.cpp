@@ -95,7 +95,7 @@ class TrustRegionTest : public ::testing::Test,
     VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
     auto vec =test_case_tr_dfo_probs_->GetRealVarVector();
     for (int i=0; i <prob.idx.size(); i++) {
-      ordered_vec(i) = vec(prob.idx[i]);
+      ordered_vec(prob.idx[i]) = vec(i);
     }
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
@@ -108,9 +108,9 @@ class TrustRegionTest : public ::testing::Test,
         varcont_tr_dfo_probs_,
         grid_5spot_,
         logger_);
-
-  }
-
+  
+        }
+      
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
                   double (*tr_dfo_prob)(VectorXd xs)){
 
@@ -152,8 +152,33 @@ class TrustRegionTest : public ::testing::Test,
       }
       p_count++;
     }
-    return true;
+
+    stringstream sx;
+    string cc;
+
+    // ---------------------------------------------------
+    if (tr_dfo_->IsFinished() == Optimization::Optimizer::
+    TerminationCondition::OPTIMALITY_CRITERIA_REACHED) {
+      cc = "OPTIMALITY_CRITERIA_REACHED";
+
+    } else if (tr_dfo_->IsFinished() == Optimization::Optimizer::
+    TerminationCondition::MINIMUM_STEP_LENGTH_REACHED) {
+      cc = "MINIMUM_STEP_LENGTH_REACHED";
+
+    } else if (tr_dfo_->IsFinished() == Optimization::Optimizer::
+    TerminationCondition::MAX_ITERATIONS_REACHED) {
+      cc = "MAX_ITERATIONS_REACHED";
   }
+
+    sx << setw(12) << scientific << right << setprecision(6)
+       << "---------------------------------------------" << endl
+       << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
+       << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
+       << "tc: " << cc.c_str();
+    cout << sx.str();
+
+    return true;
+    }
   void TearDown() override {
     /*
           TrustRegionOptimization *tr_dfo_;
@@ -166,6 +191,7 @@ class TrustRegionTest : public ::testing::Test,
     delete (varcont_tr_dfo_probs_);
   }
 };
+
 // TEST_F(TrustRegionTest, trHS1) {
 //     cout << endl << FMAGENTA << "[          ] =============="
 //          << "=========================================== " << endl
@@ -175,6 +201,7 @@ class TrustRegionTest : public ::testing::Test,
 //     SetUpOptimizer(tr_mdata.prob_hs1, hs1);
 //     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
 // }
+
 TEST_F(TrustRegionTest, trDfoProb1) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
@@ -283,18 +310,18 @@ TEST_F(TrustRegionTest, trDfoProb9) {
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob9, tr_dfo_prob9));
 }
 
-// TEST_F(TrustRegionTest, trDfoProb10) {
-//     cout << endl << FMAGENTA << "[          ] =============="
-//          << "=========================================== " << endl
-//          << "[ CG.prob10 ] "
-//          << "f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^2 + " << endl
-//          << "(x(3) - x(4))^4 + (x(4) - x(5))^4; x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]"
-//          << END << endl;
+  TEST_F(TrustRegionTest, trDfoProb10) {
+      cout << endl << FMAGENTA << "[          ] =============="
+           << "=========================================== " << endl
+           << "[ CG.prob10 ] "
+           << "f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^2 + " << endl
+           << "(x(3) - x(4))^4 + (x(4) - x(5))^4; x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]"
+           << END << endl;
 
-//     // -------------------------------------------------------
-//     SetUpOptimizer(tr_mdata.prob10, tr_dfo_prob10);
-//     EXPECT_TRUE(RunnerSubs(tr_mdata.prob10, tr_dfo_prob10));
-// }
+      // -------------------------------------------------------
+      SetUpOptimizer(tr_mdata.prob10, tr_dfo_prob10);
+      EXPECT_TRUE(RunnerSubs(tr_mdata.prob10, tr_dfo_prob10));
+  }
 
 TEST_F(TrustRegionTest, trDfoProb11) {
   cout << endl << FMAGENTA << "[          ] =============="

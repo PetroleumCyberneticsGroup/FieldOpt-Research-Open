@@ -3,25 +3,28 @@ project(optimization)
 
 include(Sources.cmake)
 
-add_library(optimization STATIC ${OPTIMIZATION_HEADERS} ${OPTIMIZATION_SOURCES})
+add_library(optimization STATIC
+		${OPTIMIZATION_HEADERS}
+		${OPTIMIZATION_SOURCES})
+
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
 target_link_libraries(optimization
-        PUBLIC fieldopt::model
-        PUBLIC fieldopt::simulation
-        PUBLIC fieldopt::constraintmath
-                PUBLIC fieldopt::reservoir
-        PUBLIC fieldopt::runner
-                PUBLIC ${gp}
-        PUBLIC ${snopt}
-        Qt5::Core
-                PUBLIC ${Boost_LIBRARIES})
+		PUBLIC fieldopt::model
+		PUBLIC fieldopt::simulation
+		PUBLIC fieldopt::constraintmath
+		PUBLIC fieldopt::reservoir
+		PUBLIC fieldopt::runner
+		PUBLIC ${gp}
+		PUBLIC ${snopt}
+		Qt5::Core
+		PUBLIC ${Boost_LIBRARIES})
 
 target_include_directories(optimization PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 add_compile_options(-std=c++11)
 
@@ -29,17 +32,17 @@ set_target_properties(optimization PROPERTIES COMPILE_FLAGS "-fPIC")
 
 if (BUILD_TESTING)
 	# Unit tests
-  add_executable(test_optimization ${OPTIMIZATION_TESTS})
+	add_executable(test_optimization ${OPTIMIZATION_TESTS})
 
-        target_link_libraries(test_optimization
-                        PUBLIC fieldopt::model
-                        PUBLIC fieldopt::simulation
-                        PUBLIC fieldopt::constraintmath
-                        PUBLIC fieldopt::reservoir
-                        PUBLIC fieldopt::runner
-                        fieldopt::optimization
-                        ${gtest}
-                        ${gtest_main}
+	target_link_libraries(test_optimization
+			PUBLIC fieldopt::model
+			PUBLIC fieldopt::simulation
+			PUBLIC fieldopt::constraintmath
+			PUBLIC fieldopt::reservoir
+			PUBLIC fieldopt::runner
+			fieldopt::optimization
+			${gtest}
+			${gtest_main}
 			${CMAKE_THREAD_LIBS_INIT})
 
 	target_include_directories(test_optimization PUBLIC
@@ -47,12 +50,12 @@ if (BUILD_TESTING)
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 	add_test(NAME test_optimization COMMAND $<TARGET_FILE:test_optimization>)
 endif()
 
-install( TARGETS optimization
+install(TARGETS optimization
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib/static
