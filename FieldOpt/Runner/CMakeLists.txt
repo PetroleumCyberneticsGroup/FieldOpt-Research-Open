@@ -19,11 +19,11 @@ target_link_libraries(FieldOpt
 		PUBLIC fieldopt::ertwrapper
 		PUBLIC fieldopt::hdf5summaryreader
 		PUBLIC fieldopt::constraintmath
-                PUBLIC ${CMAKE_THREAD_LIBS_INIT}
-                PUBLIC ${Boost_LIBRARIES}
+		PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+		PUBLIC ${Boost_LIBRARIES}
         PUBLIC ${MPI_LIBRARIES}
-                PUBLIC ri:ert_ecl
-                )
+		PUBLIC ri:ert_ecl
+		)
 
 target_link_libraries(runner
 		PUBLIC fieldopt::model
@@ -32,11 +32,11 @@ target_link_libraries(runner
 		PUBLIC fieldopt::settings
 		PUBLIC fieldopt::ertwrapper
 		PUBLIC fieldopt::hdf5summaryreader
-                PUBLIC fieldopt::constraintmath
-                PUBLIC ${CMAKE_THREAD_LIBS_INIT}
-                PUBLIC ${Boost_LIBRARIES}
-                PUBLIC ri:ert_ecl
-                )
+		PUBLIC fieldopt::constraintmath
+		PUBLIC ${CMAKE_THREAD_LIBS_INIT}
+		PUBLIC ${Boost_LIBRARIES}
+		PUBLIC ri:ert_ecl
+		)
 
 if(MPI_COMPILE_FLAGS)
 	set_target_properties(runner PROPERTIES
@@ -60,11 +60,11 @@ target_include_directories(runner PUBLIC
 add_compile_options(-std=c++11)
 
 if (BUILD_TESTING)
-        # Unit tests
-        add_executable(test_runner ${RUNNER_TESTS})
-        target_link_libraries(test_runner
-                        fieldopt::runner
-                        ${gtest}
+	# Unit tests
+	add_executable(test_runner ${RUNNER_TESTS})
+	target_link_libraries(test_runner
+			fieldopt::runner
+			${gtest}
 			${gtest_main}
 			${CMAKE_THREAD_LIBS_INIT})
 

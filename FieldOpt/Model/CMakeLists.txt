@@ -25,7 +25,7 @@ add_compile_options(-std=c++11)
 
 if (BUILD_TESTING)
     # Unit tests
-        add_executable(test_model ${MODEL_TESTS})
+	add_executable(test_model ${MODEL_TESTS})
     target_link_libraries(test_model
             fieldopt::model
             fieldopt::reservoir

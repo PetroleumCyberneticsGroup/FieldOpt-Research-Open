@@ -8,7 +8,7 @@ include_directories(utilities PUBLIC
 
 if (BUILD_TESTING)
     # Unit tests
-        add_executable(test_utilities ${UTILITIES_TESTS})
+	add_executable(test_utilities ${UTILITIES_TESTS})
     target_link_libraries(test_utilities
             Qt5::Core
             ${Boost_LIBRARIES}

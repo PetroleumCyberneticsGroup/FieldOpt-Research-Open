@@ -21,7 +21,7 @@ add_compile_options(-std=c++11)
 
 if (BUILD_TESTING)
     # Unit tests
-        add_executable(test_settings ${SETTINGS_TESTS})
+	add_executable(test_settings ${SETTINGS_TESTS})
     target_link_libraries(test_settings
             fieldopt::settings
             ${Boost_LIBRARIES}

@@ -23,7 +23,7 @@ add_compile_options(-std=c++11)
 if (BUILD_TESTING)
     # Unit tests
     include_directories(${EIGEN3_INCLUDE_DIR})
-        add_executable(test_constraintmath ${CONSTRAINTMATH_TESTS})
+	add_executable(test_constraintmath ${CONSTRAINTMATH_TESTS})
     target_link_libraries(test_constraintmath
             fieldopt::constraintmath
             ${gtest}

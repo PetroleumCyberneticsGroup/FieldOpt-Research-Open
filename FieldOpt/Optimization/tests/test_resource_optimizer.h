@@ -259,16 +259,16 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
   };
 
   QJsonObject get_json_settings_cma_es_minimize_ {
-      {"Type", "CMA_ES"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxGenerations",        200},
-          {"LowerBound",             -1},
-          {"UpperBound",             1},
-          {"ImproveBaseCase", false}
-          //{"PopulationSize", 40}
-      }},
-      {"Objective", obj_fun_}
+          {"Type", "CMA_ES"},
+          {"Mode", "Minimize"},
+          {"Parameters", QJsonObject{
+                  {"MaxGenerations",        200},
+                  {"LowerBound",             -1},
+                  {"UpperBound",             1},
+                  {"ImproveBaseCase", false}
+                  //{"PopulationSize", 40}
+          }},
+          {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_ego_maximize_ {
