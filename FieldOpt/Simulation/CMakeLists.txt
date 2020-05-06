@@ -15,7 +15,7 @@ add_compile_options(-std=c++11)
 
 if (BUILD_TESTING)
     # Unit tests
-        add_executable(test_simulation ${SIMULATION_TESTS})
+	add_executable(test_simulation ${SIMULATION_TESTS})
     target_link_libraries(test_simulation
             fieldopt::simulation
             ${gtest}

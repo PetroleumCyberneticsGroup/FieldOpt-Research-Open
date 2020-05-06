@@ -22,10 +22,7 @@
 #ifndef MATH_FUNCTIONS_H
 #define MATH_FUNCTIONS_H
 
-#include <QList>
 #include <vector>
-#include <boost/random.hpp>
-#include <boost/random/random_device.hpp>
 #include <time.h>
 #include <Eigen/Core>
 #include <numeric>

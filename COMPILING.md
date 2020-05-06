@@ -1,4 +1,9 @@
-# Quick Start
+- [Quick Start](#Quickstart)
+- [Compiling FieldOpt: Detailed](#Detailed)
+- [Compiling on Windows with WSL](#Windows)
+- [Building a Docker or Singularity Container](#Containers)
+
+# Quickstart
 If you're on a Ubuntu 16.04 system with access to the package manager, the
 following should get you up and running. Navigate to wherever you want to place
 the FieldOpt files and execute the following commands:
@@ -16,7 +21,9 @@ git submodule update --init --recursive
 
 # Compile third party dependencies
 cd FieldOpt/ThirdParty
-cmake .
+mkdir build
+cd build
+cmake ..
 make
 make install
 
@@ -39,7 +46,7 @@ make
 A more detailed description is given in the following section.
 
 
-# Compiling FieldOpt: Detailed
+# Detailed
 
 Before compiling FieldOpt, ensure that it is properly cloned:
 ```
@@ -125,13 +132,17 @@ To compile the dependencies included as submodules, first navigate to the
 recommended desktop settings, modify which libraries should be built (either by
 editing `CMakeLists.txt` directly; by passing flags to CMake; or by using
 `ccmake`). After that, in the `ThirdParty` directory, execute
+
 ```
-cmake .
+mkdir build
+cd build
+cmake ..
 make
 make install
 ```
+
 *Note:* that if you chose to compile Qt, you need the `libxcb1-dev` package. And
-`cmake .` operation will likely take.
+`cmake .` operation will likely take a long time.
 
 ## Compiling on a Cluster (Maur)
 
@@ -150,7 +161,9 @@ module load cmake
 After loading these modules, navigate to the `ThirdParty` directory. Edit
 `CMakeLists.txt` to enable compiling _all_ the modules, then build them:
 ```
-cmake .
+mkdir build
+cd build
+cmake ..
 make
 make install
 ```
@@ -160,22 +173,21 @@ Now, compiling FieldOpt should work as usual:
 cd FieldOpt/FieldOpt
 mkdir build
 cd build
-cmake .
+cmake ..
 make
 ```
 
-# COMPILATION GUIDE WINDOWS/LINUX
+# Windows
 
 ## Prerequesits:
+
 (1) Proper installation of Windows 10, including Creators Update
 (2) Administrative privileges on said Windows 10 installation
-(3) An educational account at Clion; follow instructions at 
+(3) An educational account at Clion; follow instructions [here](https://www.jetbrains.com/clion/)
 
-'
-https://www.jetbrains.com/clion/
-'
 
 ## Step (1) - Enabling Windows to run WSL and downloading Ubuntu 16.04
+
 ### 1.1 - Enabling WSL
 Navigate to Control Panel -> Programs and Feature / Programs -> Activate or deactivate Windows-features. In the pop-up window; check "Windows-subsystem for Linux" and restart your computer.
 
@@ -184,12 +196,14 @@ Navigate to Microsoft Store, search for "Ubuntu 16.04 LTS", download and install
 
 
 ## Step (2) - Download and install SmartGit and CLion
+
 Download and follow instructions from
 SmartGit - https://www.syntevo.com/smartgit/download/
 and
 CLion - https://www.jetbrains.com/clion/download/#section=windows
 
 When CLion is activated or evaluation option is picked, navigate to Help -> Edit Custom Properties and add:
+
 ```
 idea.case.sensitive.fs=true
 ```
@@ -198,6 +212,7 @@ idea.case.sensitive.fs=true
 In this bash terminal from Ubuntu, navigate to your home folder. ("cd ~")
 
 ### 3.1 - Install packages from repositories and configuring SSH
+
 ```bash
 # Install packages from repositories
 sudo apt-get install git build-essential cmake \
@@ -219,7 +234,9 @@ ssh username@localhost -p2222
 
 
 ### 3.2 - Making a collaborative environment for CLion and Ubuntu
+
 In Ubuntu terminal, navigate to:
+
 ```bash
 cd /mnt/DISKLETTER/Users/USERNAME/
 # DISKLETTER=c
@@ -245,7 +262,9 @@ cd git
 mkdir PCG
 cd PCG
 ```
+
 ## Step (4) Cloning FieldOpt
+
 ```bash
 # Clone FieldOpt
 git clone https://github.com/PetroleumCyberneticsGroup/FieldOpt.git
@@ -293,3 +312,7 @@ Restart CLion -> Import Project:
 DISKLETTER:\Users\USERNAME\git\PCG\FieldOpt\FieldOpt or DISKLETTER:\git\PCG\FieldOpt\FieldOpt
 
 Compile FieldOpt after indexing.
+
+# Containers
+
+See separate [readme](Docker/README.md) on how to build Docker and Singularity containers.

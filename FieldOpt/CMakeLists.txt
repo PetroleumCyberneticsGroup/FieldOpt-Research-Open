@@ -105,17 +105,6 @@ include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
 option(BUILD_TESTING "Build unit tests"                 ON)
 option(COPY_EXAMPLES "Copy examples to build directory" ON)
 
-option(TEST_CMATH  ""   OFF)
-option(TEST_ERTWR  ""   OFF)
-option(TEST_MODEL  ""   OFF)
-option(TEST_OPTMZ  ""   ON)
-option(TEST_RSRVR  ""   OFF)
-option(TEST_STTNG  ""   OFF)
-option(TEST_RUNNR  ""   OFF)
-option(TEST_SMLTN  ""   OFF)
-option(TEST_UTILS  ""   OFF)
-option(TEST_WICCL  ""   OFF)
-
 if (BUILD_TESTING AND NOT COPY_EXAMPLES)
   message("It is recommended to copy examples when building unit
     tests. Several of the tests use files in the examples directory.")
@@ -208,7 +197,6 @@ else()
   message(STATUS "gp: ${gp}")
   message(STATUS "HDF5: ${HDF5}")
   message(STATUS "snopt: ${snopt}")
-  message(STATUS "opm-common: ${opm-common_LIBRARIES}")
 
 endif()
 

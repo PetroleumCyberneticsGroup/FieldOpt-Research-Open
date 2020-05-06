@@ -172,7 +172,7 @@ Optimizer::Constraint Optimizer::parseSingleConstraint(QJsonObject json_constrai
     }
     else if (QString::compare(constraint_type, "WellSplineLength") == 0 || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
         if (constraint_type == "WellSplineLength"){
-        optimizer_constraint.type = ConstraintType::WellSplineLength;
+            optimizer_constraint.type = ConstraintType::WellSplineLength;
         } else {
             optimizer_constraint.type = ConstraintType::PolarWellLength;
         }
@@ -227,7 +227,7 @@ Optimizer::Constraint Optimizer::parseSingleConstraint(QJsonObject json_constrai
     else if (QString::compare(constraint_type, "ReservoirBoundary") == 0 || QString::compare(constraint_type, "PolarSplineBoundary") == 0 ||
     QString::compare(constraint_type, "ReservoirBoundaryToe") == 0) {
         if (QString::compare(constraint_type, "ReservoirBoundary") == 0){
-        optimizer_constraint.type = ConstraintType::ReservoirBoundary;
+            optimizer_constraint.type = ConstraintType::ReservoirBoundary;
         }
         else if (QString::compare(constraint_type, "PolarSplineBoundary") == 0){
             optimizer_constraint.type = ConstraintType::PolarSplineBoundary;
@@ -531,7 +531,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             params.rng_seed = json_parameters["RNGSeed"].toInt();
         }
         else {
-            params.rng_seed = std::time(0);
+            params.rng_seed = 0;
         }
 
       // TRMaxIter

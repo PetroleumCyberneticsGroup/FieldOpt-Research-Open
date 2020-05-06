@@ -4,7 +4,7 @@ Copyright (C) 2015-2019
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 02/19/19 Einar J. M. Baumann
- <einar.baumann@gmail.com>
+<einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
 <chakibbb-pcg@gmail.com>
