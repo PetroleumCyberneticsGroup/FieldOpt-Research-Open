@@ -23,6 +23,7 @@
 #include "Utilities/printer.hpp"
 #include "Utilities/stringhelpers.hpp"
 #include "TrustRegionOptimization.h"
+#include "Utilities/random.hpp"
 
 #include <iostream>
 #include <fstream>
