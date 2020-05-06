@@ -1,21 +1,30 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2019-2020 Thiago Lima Silva
+<thiagolims@gmail.com>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This file is part of the FieldOpt project.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
@@ -30,6 +39,14 @@
 #include "normalizer.h"
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
+
+#include "Model/model.h"
+
+namespace Simulation {
+    class Simulator;
+}
+
+#include "Optimization/objective/objective.h"
 
 class Logger;
 
@@ -87,7 +104,7 @@ class Optimizer : public Loggable
    */
   enum TerminationCondition : int {NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
-    MAX_ITERATIONS_REACHED=3
+    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4
   };
 
   /*!
@@ -161,6 +178,89 @@ class Optimizer : public Loggable
   QUuid GetId() override;
   map<string, vector<double>> GetValues() override;
 
+ public:
+  class EmbeddedProblem {
+   public:
+
+    static EmbeddedProblem* pProb_;
+
+   public:
+    EmbeddedProblem() {};
+
+    // Set methods
+    void setProbName(string pn) { prob_name_ = pn; }
+    void setNunVars(int n) { n_vars_ = n; }
+    void setNumLinConst(int n_lc) { n_lconst_ = n_lc; }
+    void setNunNnlConst(int n_nlc) { n_nlconst_ = n_nlc; }
+
+    void setXInit(Eigen::VectorXd x_init) { x_init_ = x_init; }
+    void setXUb(Eigen::VectorXd x_ub) { x_ub_ = x_ub; }
+    void setXLb(Eigen::VectorXd x_lb) { x_lb_ = x_lb; }
+    void setFUb(Eigen::VectorXd F_ub) { F_ub_ = F_ub; }
+    void setFLb(Eigen::VectorXd F_lb) { F_lb_ = F_lb; }
+
+    void setTrC(double tr_c) { tr_c_ = tr_c; }
+    void setTrG(Eigen::VectorXd tr_g) { tr_g_ = tr_g; }
+    void setTrH(Eigen::MatrixXd tr_H) { tr_H_ = tr_H; }
+
+    void setXSol(vector<double> xsol) { xsol_ = xsol; }
+    void setFSol(vector<double> fsol) { fsol_ = fsol; }
+
+    void setSNOPTExitCode(int ec) { SNOPT_exit_code_ = ec; }
+    void setSNOPTErrorMsg(string em) { SNOPT_error_msg_ = em; }
+
+    // Get methods
+    string getProbName() { return prob_name_; }
+    int getNunVars() { return n_vars_; }
+    int getNumLinConst() { return n_lconst_; }
+    int getNunNnlConst() { return n_nlconst_; }
+
+    Eigen::VectorXd getXInit() { return x_init_; }
+    Eigen::VectorXd getXUb() { return x_ub_; }
+    Eigen::VectorXd getXLb() { return x_lb_; }
+    Eigen::VectorXd getFUb() { return F_ub_; }
+    Eigen::VectorXd getFLb() { return F_lb_; }
+
+    double getTrC() { return tr_c_; }
+    Eigen::VectorXd getTrG() { return tr_g_; }
+    Eigen::MatrixXd getTrH() { return tr_H_; }
+
+    Eigen::VectorXd getXSol() {
+        return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
+    }
+
+    Eigen::VectorXd getFSol() {
+        return Eigen::Map<VectorXd>(fsol_.data(), fsol_.size());
+    }
+
+    int getSNOPTExitCode() { return SNOPT_exit_code_ ; }
+    string getSNOPTErrorMsg() { return SNOPT_error_msg_; }
+
+   private:
+    // -----------------------------------------------------
+    string prob_name_ = "";
+    int n_vars_;
+    int n_lconst_;
+    int n_nlconst_;
+
+    Eigen::VectorXd x_init_;
+    Eigen::VectorXd x_ub_;
+    Eigen::VectorXd x_lb_;
+    Eigen::VectorXd F_ub_;
+    Eigen::VectorXd F_lb_;
+
+    double tr_c_;
+    Eigen::VectorXd tr_g_;
+    Eigen::MatrixXd tr_H_;
+
+    vector<double> xsol_;
+    vector<double> fsol_;
+    int tr_exit_flag_;
+
+    int SNOPT_exit_code_;
+    string SNOPT_error_msg_;
+  };
+
  protected:
   void updateTentativeBestCase(Case *c);
   CaseHandler *case_handler_; //!< All cases (base case, unevaluated cases and evaluated cases) passed to or generated by the optimizer.
@@ -169,7 +269,10 @@ class Optimizer : public Loggable
   int max_evaluations_; //!< Maximum number of objective function evaluations allowed before terminating.
   int iteration_; //!< The current iteration.
   int verbosity_level_; //!< The verbosity level for runtime console logging.
+
   ::Settings::Optimizer::OptimizerMode mode_; //!< The optimization mode, i.e. whether the objective function should be maximized or minimized.
+  ::Settings::Optimizer::OptimizerType type_;
+
   bool is_async_; //!< Inidcates whether or not the optimizer is asynchronous. Defaults to false.
   Logger *logger_;
   bool enable_logging_; //!< Whether logging should be performed. This should be set to false when the optimizer is a component in HybridOptimizer.

@@ -1,23 +1,27 @@
-/******************************************************************************
-   Created by einar on 2/6/16.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 2/6/16.
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_TEST_RESOURCE_OPTIMIZER_H
 #define FIELDOPT_TEST_RESOURCE_OPTIMIZER_H
@@ -30,24 +34,29 @@ namespace TestResources {
 class TestResourceOptimizer : public TestResourceModel, public TestResourceCases {
  protected:
   TestResourceOptimizer() {
-      base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                          model_->variables()->GetDiscreteVariableValues(),
-                                          model_->variables()->GetContinousVariableValues());
-      base_case_->set_objective_function_value(1000.0);
+    base_case_ = new Optimization::Case(
+        model_->variables()->GetBinaryVariableValues(),
+        model_->variables()->GetDiscreteVariableValues(),
+        model_->variables()->GetContinousVariableValues());
 
-      settings_compass_search_min_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_minimize_);
-      settings_compass_search_max_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_maximize_);
-      settings_apps_min_unconstr_ = new Settings::Optimizer(get_json_settings_apps_minimize_);
-      settings_apps_max_unconstr_ = new Settings::Optimizer(get_json_settings_apps_maximize_);
-      settings_cma_es_min_ = new Settings::Optimizer(get_json_settings_cma_es_minimize_);
-      settings_ga_min_ = new Settings::Optimizer(get_json_settings_ga_minimize_);
-      settings_ga_max_ = new Settings::Optimizer(get_json_settings_ga_maximize_);
-      settings_ego_max_ = new Settings::Optimizer(get_json_settings_ego_maximize_);
-      settings_pso_min_ = new Settings::Optimizer(get_json_settings_pso_minimize_);
-      settings_vfsa_min_ = new Settings::Optimizer(get_json_settings_vfsa_minimize_);
-      settings_vfsa_max_ = new Settings::Optimizer(get_json_settings_vfsa_maximize_);
-      settings_spsa_min_ = new Settings::Optimizer(get_json_settings_spsa_minimize_);
-      settings_spsa_max_ = new Settings::Optimizer(get_json_settings_spsa_maximize_);
+    base_case_->set_objective_function_value(1000.0);
+
+    settings_compass_search_min_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_minimize_);
+    settings_compass_search_max_unconstr_ = new Settings::Optimizer(get_json_settings_compass_search_maximize_);
+    settings_apps_min_unconstr_ = new Settings::Optimizer(get_json_settings_apps_minimize_);
+    settings_apps_max_unconstr_ = new Settings::Optimizer(get_json_settings_apps_maximize_);
+
+    settings_cma_es_min_ = new Settings::Optimizer(get_json_settings_cma_es_minimize_);
+    settings_ga_min_ = new Settings::Optimizer(get_json_settings_ga_minimize_);
+    settings_ga_max_ = new Settings::Optimizer(get_json_settings_ga_maximize_);
+    settings_ego_max_ = new Settings::Optimizer(get_json_settings_ego_maximize_);
+    settings_pso_min_ = new Settings::Optimizer(get_json_settings_pso_minimize_);
+
+    settings_vfsa_min_ = new Settings::Optimizer(get_json_settings_vfsa_minimize_);
+    settings_vfsa_max_ = new Settings::Optimizer(get_json_settings_vfsa_maximize_);
+    settings_spsa_min_ = new Settings::Optimizer(get_json_settings_spsa_minimize_);
+    settings_spsa_max_ = new Settings::Optimizer(get_json_settings_spsa_maximize_);
+    settings_tr_opt_max_ = new Settings::Optimizer(get_json_settings_tr_opt_maximize_);
   }
 
   Optimization::Case *base_case_;
@@ -64,16 +73,23 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
   Settings::Optimizer *settings_pso_min_;
   Settings::Optimizer *settings_ego_max_;
   Settings::Optimizer *settings_cma_es_min_;
+  Settings::Optimizer *settings_tr_opt_max_;
 
  private:
   QJsonObject obj_fun_ {
       {"Type", "WeightedSum"},
       {"WeightedSumComponents", QJsonArray{
           QJsonObject{
-              {"Coefficient", 1.0}, {"Property", "CumulativeOilProduction"}, {"TimeStep", -1}, {"IsWellProp", false}
+              {"Coefficient", 1.0},
+              {"Property", "CumulativeOilProduction"},
+              {"TimeStep", -1},
+              {"IsWellProp", false}
           },
           QJsonObject{
-              {"Coefficient", 0.0}, {"Property", "CumulativeWaterProduction"}, {"TimeStep", -1}, {"IsWellProp", false}
+              {"Coefficient", 0.0},
+              {"Property", "CumulativeWaterProduction"},
+              {"TimeStep", -1},
+              {"IsWellProp", false}
           }
       }}
   };
@@ -107,7 +123,15 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
           {"InitialStepLength", 0.64},
           {"MinimumStepLength", 0.005}
       }},
-      {"Objective", obj_fun_}
+      {"Objective", obj_fun_},
+      // {"Constraints", QJsonArray{
+      //    QJsonObject{
+      //        {"Type", "BHP"},
+      //        {"Wells", QJsonArray{"PRODUCER"}},
+      //        {"Min", 0},
+      //        {"Max", 4}
+      //    }
+      // }}
   };
 
   QJsonObject get_json_settings_apps_maximize_ {
@@ -271,6 +295,19 @@ class TestResourceOptimizer : public TestResourceModel, public TestResourceCases
 //      }}
   };
 
+  QJsonObject get_json_settings_tr_opt_maximize_{
+      {"Type", "TrustRegionOptimization"},
+      {"Mode", "Minimize"},
+      {"Parameters", QJsonObject{
+          {"MaxEvaluations", 3},
+          {"InitialTrustRegionRadius", 1},
+          {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
+          {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
+          {"RNGSeed", 25}
+      }},
+      {"Objective", obj_fun_},
+  };
 };
 }
+
 #endif //FIELDOPT_TEST_RESOURCE_OPTIMIZER_H

@@ -1,21 +1,35 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2019-2020 Brage Strand Kristoffersen
+<brage.s.kristoffersen@ntnu.no>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+Modified 2019-2020 Thiago Lima Silva
+<thiagolims@gmail.com>
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+Modified 2019-2020 Caio Giuliani
+<caiogiuliani@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "Utilities/printer.hpp"
 #include "optimizer.h"
@@ -467,18 +481,65 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             }
         }
 
+        // Trust Region parameters
+        if (json_parameters.contains("InitialTrustRegionRadius")) {
+            if (json_parameters["InitialTrustRegionRadius"].toDouble() >= 0.0) {
+                params.tr_initial_radius = json_parameters["InitialTrustRegionRadius"].toDouble();
+            }
+            else {
+                throw std::runtime_error("Invalid value for setting InitialTrustRegionRadius");
+            }
+        }
+
+        if (json_parameters.contains("MaxTrustRegionRadius")) {
+            if (json_parameters["MaxTrustRegionRadius"].toDouble() >= 0.0) {
+                params.tr_radius_max = json_parameters["MaxTrustRegionRadius"].toDouble();
+            }
+            else {
+                throw std::runtime_error("Invalid value for setting MaxTrustRegionRadius");
+            }
+        }
+
+        if (json_parameters.contains("TrustRegionLowerBound")) {
+            if (json_parameters.contains("TrustRegionUpperBound")) {
+                if (json_parameters["TrustRegionLowerBound"].toDouble() <
+                    json_parameters["TrustRegionUpperBound"].toDouble()) {
+                    params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
+                } else {
+                    throw std::runtime_error("Invalid value for setting TrustRegionLowerBound");
+                }
+            } else {
+                params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
+            }
+        }
+
+        if (json_parameters.contains("TrustRegionUpperBound")) {
+            if (json_parameters.contains("TrustRegionLowerBound")) {
+                if (json_parameters["TrustRegionLowerBound"].toDouble() <
+                    json_parameters["TrustRegionUpperBound"].toDouble()) {
+                    params.tr_upper_bound = json_parameters["TrustRegionUpperBound"].toDouble();
+                } else {
+                    throw std::runtime_error("Invalid value for setting TrustRegionUpperBound");
+                }
+            } else {
+                params.tr_upper_bound = json_parameters["TrustRegionUpperBound"].toDouble();
+            }
+        }
 
         // RNG seed
         if (json_parameters.contains("RNGSeed")) {
-            Printer::error("Passing RNGSeed is no longer supported.");
-            Printer::ext_warn("Passing RNGSeed in settings is no longer supporte. In fact, it never really worked: this"
-                              "is why it has now been removed. Remove the RNGSeed line from your driver file and try again.",
-                              "Settings", "Optimization");
-            throw std::runtime_error("Error in driver file");
+            params.rng_seed = json_parameters["RNGSeed"].toInt();
         }
         else {
             params.rng_seed = 0;
         }
+
+      // TRMaxIter
+      if (json_parameters.contains("TRMaxIter")) {
+        params.tr_iter_max = json_parameters["TRMaxIter"].toInt();
+      } else {
+        params.tr_iter_max = 10000;
+      }
     }
     catch (std::exception const &ex) {
         throw UnableToParseOptimizerParametersSectionException("Unable to parse optimizer parameters: " + std::string(ex.what()));
@@ -601,6 +662,8 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
         opt_type = OptimizerType::SPSA;
     else if (QString::compare(type, "Hybrid") == 0)
         opt_type = OptimizerType::Hybrid;
+    else if (QString::compare(type, "TrustRegionOptimization") == 0)
+        opt_type = OptimizerType::TrustRegionOptimization;
     else throw OptimizerTypeNotRecognizedException("The optimizer type " + type.toStdString() + " was not recognized.");
     return opt_type;
 }
