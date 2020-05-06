@@ -25,14 +25,14 @@ endif()
 if (BUILD_TESTING)
     # Unit tests
     include_directories(${GTEST_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} tests)
-        add_executable(test_reservoir ${RESERVOIR_TESTS})
-target_link_libraries(test_reservoir
-        fieldopt::reservoir
-        fieldopt::ertwrapper
-        ${gtest}
-        ${gtest_main}
-        ${CMAKE_THREAD_LIBS_INIT}
-        ${Boost_LIBRARIES})
+	add_executable(test_reservoir ${RESERVOIR_TESTS})
+	target_link_libraries(test_reservoir
+	        fieldopt::reservoir
+	        fieldopt::ertwrapper
+	        ${gtest}
+	        ${gtest_main}
+	        ${CMAKE_THREAD_LIBS_INIT}
+	        ${Boost_LIBRARIES})
 
     set_target_properties(test_reservoir
             PROPERTIES COMPILE_FLAGS "-fPIC")
