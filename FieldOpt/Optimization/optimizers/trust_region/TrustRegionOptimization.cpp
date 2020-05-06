@@ -193,6 +193,9 @@ void TrustRegionOptimization::iterate() {
             err_model = tr_model_->checkInterpolation();
           }
 
+          //!<Print summary>
+          printIteration(fval_current, x_current);
+
           //!<Criticality step -- if we are possibly close to the optimum>
           criticality_step_performed_ = false;
           auto model_criticality = tr_model_->measureCriticality();
@@ -214,8 +217,6 @@ void TrustRegionOptimization::iterate() {
 	    criticality_step_execution_ongoing_ = false;
 	  }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
-          //!<Print summary>
-          printIteration(fval_current, x_current);
 
           //!<Compute step>
           tie(trial_point_, predicted_red_) = tr_model_->solveTrSubproblem();
