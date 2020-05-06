@@ -1,23 +1,30 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
-   Modified 2019 by Mathias Bellout
-   <mathias.bellout@petroleumcyberneticsgroup.no> <chakibbb-pcg@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2019-2020 Thiago Lima Silva
+<thiagolims@gmail.com>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This file is part of the FieldOpt project.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef OPTIMIZER_H
 #define OPTIMIZER_H
 
@@ -33,20 +40,13 @@
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 
-
 #include "Model/model.h"
-//namespace Model {
-//    class Model;
-//}
 
 namespace Simulation {
     class Simulator;
 }
 
-//#include "Simulation/simulator_interfaces/simulator.h"
-
 #include "Optimization/objective/objective.h"
-//#include "Optimization/objective/NPV.h"
 
 class Logger;
 
@@ -145,16 +145,6 @@ class Optimizer : public Loggable
             Case *base_case,
             Model::Properties::VariablePropertyContainer *variables,
             Reservoir::Grid::Grid *grid,
-            Logger *logger,
-            CaseHandler *case_handler=0,
-            Constraints::ConstraintHandler *constraint_handler=0
-  );
-
-  Optimizer(::Settings::Optimizer *settings,
-            Case *base_case,
-            Model::Model *model,
-            Simulation::Simulator *simulator,
-            Optimization::Objective::Objective *objective_function,
             Logger *logger,
             CaseHandler *case_handler=0,
             Constraints::ConstraintHandler *constraint_handler=0
@@ -279,13 +269,18 @@ class Optimizer : public Loggable
   int max_evaluations_; //!< Maximum number of objective function evaluations allowed before terminating.
   int iteration_; //!< The current iteration.
   int verbosity_level_; //!< The verbosity level for runtime console logging.
+
   ::Settings::Optimizer::OptimizerMode mode_; //!< The optimization mode, i.e. whether the objective function should be maximized or minimized.
+  ::Settings::Optimizer::OptimizerType type_;
+
   bool is_async_; //!< Inidcates whether or not the optimizer is asynchronous. Defaults to false.
   Logger *logger_;
   bool enable_logging_; //!< Whether logging should be performed. This should be set to false when the optimizer is a component in HybridOptimizer.
   void DisableLogging(); //!< Disable logging for this optimizer. This is called by HybridOptimizer.
   bool penalize_; //!< Switch for whether or not to use penalty function to account for constraints.
   Case *tentative_best_case_; //!< The best case encountered thus far.
+  int tentative_best_case_iteration_; //!< The iteration in which the current tentative best case was found.
+  bool is_hybrid_component_; //!< Indicates that this object is a hybrid optimization component.
 
   Normalizer normalizer_ofv_; //!< Normalizer for objective function values.
 
@@ -315,7 +310,6 @@ class Optimizer : public Loggable
  private:
   QDateTime start_time_;
   int seconds_spent_in_iterate_; //!< The number of seconds spent in the iterate() method.
-  int tentative_best_case_iteration_; //!< The iteration in which the current tentative best case was found.
 
   /*!
    * @brief Initialize the OFV normalizer, setting the parameters for it

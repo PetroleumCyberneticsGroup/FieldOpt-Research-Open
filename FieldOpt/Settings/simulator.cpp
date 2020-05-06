@@ -21,6 +21,7 @@
 #include "simulator.h"
 #include "settings_exceptions.h"
 #include "Utilities/filehandling.hpp"
+#include "Settings/helpers.hpp"
 
 using namespace Utilities::FileHandling;
 
@@ -55,6 +56,9 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
         ensemble_ = Ensemble(paths.GetPath(Paths::ENSEMBLE_FILE));
         // Set the data file path to the first realization so that the deck parser can find it
         paths.SetPath(Paths::SIM_DRIVER_FILE, ensemble_.GetRealization(ensemble_.GetAliases()[0]).data());
+        if (json_simulator.contains("SelectRealizations")) {
+            ensemble_.SetNSelect(json_simulator["SelectRealizations"].toInt());
+        }
     }
 }
 
@@ -73,12 +77,10 @@ void Simulator::setType(QJsonObject json_simulator) {
 }
 
 void Simulator::setParams(QJsonObject json_simulator) {
-    if (json_simulator.contains("MaxMinutes") && json_simulator["MaxMinutes"].toInt() > 0) {
-        max_minutes_ = json_simulator["MaxMinutes"].toInt();
-    }
-    else {
-        max_minutes_ = -1;
-    }
+    set_opt_prop_int(max_minutes_, json_simulator, "MaxMinutes");
+    set_opt_prop_bool(ecl_use_actionx_, json_simulator, "UseACTIONX");
+    set_opt_prop_bool(use_post_sim_script_, json_simulator, "UsePostSimScript");
+    set_opt_prop_bool(read_external_json_results_, json_simulator, "ReadExternalJsonResults");
 }
 
 void Simulator::setCommands(QJsonObject json_simulator) {

@@ -1,33 +1,39 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Hilmar M. Magnusson <hilmarmag@gmail.com>
-   Modified by Alin G. Chitu (2016-2017) <alin.chitu@tno.nl, chitu_alin@yahoo.com>
-   Modified by Einar Baumann (2017) <einar.baumann@gmail.com>
-   Modified by Mathias Bellout (2017) <mathias.bellout@ntnu.no, chakibbb@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file and the WellIndexCalculator as a whole is part of the
-   FieldOpt project. However, unlike the rest of FieldOpt, the
-   WellIndexCalculator is provided under the GNU Lesser General Public
-   License.
+Modified 2016-2017 Alin G. Chitu
+<alin.chitu@tno.nl, chitu_alin@yahoo.com>
 
-   WellIndexCalculator is free software: you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public License
-   as published by the Free Software Foundation, either version 3 of
-   the License, or (at your option) any later version.
+Modified 2017-2019 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   WellIndexCalculator is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+This file and the WellIndexCalculator as a whole is part of
+the FieldOpt project. However, unlike the rest of FieldOpt,
+the WellIndexCalculator is provided under the GNU Lesser
+General Public License.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with WellIndexCalculator.  If not, see
-   <http://www.gnu.org/licenses/>.
-******************************************************************************/
+WellIndexCalculator is free software: you can redistribute
+it and/or modify it under the terms of the GNU Lesser General
+Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any
+later version.
+
+WellIndexCalculator is distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "Reservoir/grid/grid.h"
 #include "Reservoir/grid/eclgrid.h"
 #include "WellIndexCalculation/wicalc_rixx.h"
+#include "Settings/tests/test_resource_example_file_paths.hpp"
 
 using namespace Reservoir::Grid;
 using namespace Reservoir::WellIndexCalculation;
@@ -52,7 +58,7 @@ class IntersectedCellsTest : public ::testing::Test {
   virtual void TearDown() { }
 
   Grid *grid_;
-  string file_path_ = "../examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
+  string file_path_ = TestResources::ExampleFilePaths::grid_5spot_;
   wicalc_rixx *wic_;
 };
 

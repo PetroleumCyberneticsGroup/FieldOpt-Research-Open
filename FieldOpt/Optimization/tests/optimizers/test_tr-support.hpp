@@ -1,26 +1,30 @@
-/*********************************************************************
- Copyright (C) 2018 Mathias Bellout <mathias.bellout@ntnu.no>
+/***********************************************************
+Copyright (C) 2018-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published
- by the Free Software Foundation, either version 3 of the License,
- or (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_TEST_TR_SUPPORT_HPP
 #define FIELDOPT_TEST_TR_SUPPORT_HPP
 
 using std::vector;
+
+#include "Optimization/optimizers/ensemble_exp_value.h"
 
 namespace TestResources {
 
@@ -181,6 +185,22 @@ namespace TestResources {
     // cout << "xbr: " << endl << xbr << endl;
     c.SetRealVarValues(xbr.col(0));
     c.set_objective_function_value(prob.fm(0,1));
+  }
+
+  void OverrideSecondPointEn(TestResources::TrustRegionModelData::prob &prob,
+                           Optimization::Case &c,
+                           Optimization::Optimizers::EnsembleExpValue *tr_en_) {
+
+      VectorXd xbr(prob.xm.rows(),1);
+      for (int ii=0; ii<prob.xm.rows(); ii++) {
+          xbr.row(ii) << prob.xm(ii,1); // a proper order is ensured previously.
+      }
+
+      // dbg
+      // cout << "prob.xm: " << endl << prob.xm << endl;
+      // cout << "xbr: " << endl << xbr << endl;
+      c.SetRealVarValues(xbr.col(0));
+      c.set_objective_function_value(tr_en_ -> initialValue(xbr.col(0)));
   }
 
 }

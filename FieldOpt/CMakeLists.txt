@@ -11,7 +11,7 @@ project(FieldOpt)
 # CMAKE_MODULE_PATH: Commands like include() and find_package() search
 # for files in directories listed by this variable before checking the
 # default modules that come with CMake.
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 include(GetSysInfo.cmake)
 include(MaurConfig.cmake)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -Wno-sign-compare")
@@ -22,6 +22,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_COLOR_MAKEFILE ON)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
+
+#OLD behavior for policy CMP0042 will be removed in future versions of CMake.
+cmake_policy(SET CMP0054 OLD)
 
 # Sanitizing ===============================================
 option(USE_SANITIZING "Build sanitizing features for debugging"  OFF)
@@ -145,27 +148,19 @@ option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 # ║╣ ║║ ╦║╣ ║║║
 # ╚═╝╩╚═╝╚═╝╝╚╝
 # ----------------------------------------------------------
-option(SYSTEM_EIGEN "" OFF)
-find_package(Eigen3 REQUIRED)
 
-if(SYSTEM_EIGEN AND EIGEN3_FOUND)
-
-  message(STATUS "Using system Eigen3")
+# Include Eigen: Options ===================================
+if(NOT COMPILATION_AT_MAUR)
+  find_package(Eigen3 REQUIRED)
   include_directories(${EIGEN3_INCLUDE_DIR})
-
-else()
-
-  message(STATUS "Using local Eigen3")
-  set(EIGEN3_INCLUDE_DIR
-          ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
-  set(Eigen3_DIR
-          ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
-  include_directories(${EIGEN3_INCLUDE_DIR})
-
+  message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
-message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
-message(STATUS "Eigen3_DIR: ${Eigen3_DIR}")
+if(NOT EIGEN3_FOUND)
+  message(STATUS "Using local Eigen3")
+  set(EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
+#  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
+endif()
 
 # ----------------------------------------------------------
 # ╔═╗╔═╗
@@ -188,13 +183,15 @@ else()
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-  find_package(HDF5 REQUIRED COMPONENTS CXX)
-  add_definitions(${HDF5_DEFINITIONS})
-  include_directories(${HDF5_INCLUDE_DIRS})
+  find_library(HDF5_CPP NAMES hdf5_cpp
+      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+  find_library(HDF5 NAMES hdf5
+          HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
   find_package(Threads REQUIRED)
 
   message(".............................................................")
-  message(STATUS "Loading potentially local libraries: gp + opm-common")
+  message(STATUS "Loading potentially local libraries: gp")
 
   find_library(gp NAMES gp
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
@@ -205,17 +202,11 @@ else()
           PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
           REQUIRED)
 
-  find_package(opm-common
-      PATHS
-      ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/share/cmake/opm-common
-      NO_DEFAULT_PATH
-      REQUIRED)
-
   message(STATUS "ecl_LIBRARIES: ${ecl_LIBRARIES}")
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
+  message(STATUS "HDF5: ${HDF5}")
   message(STATUS "snopt: ${snopt}")
   message(STATUS "opm-common: ${opm-common_LIBRARIES}")
 
@@ -414,6 +405,7 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
 
   ## Create an empty directory for test output
   file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output/norne_test)
 endif()
 
 # Compile options ==========================================

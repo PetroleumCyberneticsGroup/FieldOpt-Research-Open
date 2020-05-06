@@ -1,6 +1,8 @@
 /******************************************************************************
    Created by einar on 11/21/16.
-   Copyright (C) 2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>
+
+   Modified by Einar J. M. Baumann <einar.baumann@gmail.com> 02/19/19.
 
    This file is part of the FieldOpt project.
 
@@ -51,11 +53,16 @@ void APPS::iterate() {
     if (enable_logging_) {
         logger_->AddEntry(this);
     }
-    if (inactive().size() > 0) {
+    if (inactive().size() > 0 && evaluated_cases_ < max_evaluations_) {
         case_handler_->AddNewCases(generate_trial_points(inactive()));
         set_active(inactive());
     }
     iteration_++;
+    if (is_hybrid_component_) {
+        // Increment this here if this object is a hybrid optimization component,
+        // as it will not be incremented elsewhere.
+        evaluated_cases_ = iteration_;
+    }
 }
 
 void APPS::handleEvaluatedCase(Case *c) {
@@ -65,7 +72,7 @@ void APPS::handleEvaluatedCase(Case *c) {
 
 void APPS::successful_iteration(Case *c) {
     updateTentativeBestCase(c);
-    set_step_lengths(c->origin_step_length());
+    set_step_lengths(c->origin_direction_index(), c->origin_step_length());
     expand();
     reset_active();
     prune_queue();
@@ -80,6 +87,7 @@ void APPS::unsuccessful_iteration(Case *c) {
         set_inactive(unsuccessful_direction);
         contract(unsuccessful_direction);
     }
+    if (VERB_OPT >= 3) print_state("Unsuccessful iteration");
     if (!is_converged()) iterate();
 }
 
@@ -108,10 +116,13 @@ vector<int> APPS::inactive() {
 }
 
 void APPS::prune_queue() {
-    if (case_handler_->QueuedCases().size() <= max_queue_length_ - directions_.size())
+    if (case_handler_->QueuedCases().size() <= max_queue_length_ - directions_.size()) {
         return;
+    }
     else {
-        while (case_handler_->QueuedCases().size() > max_queue_length_ - directions_.size()) {
+        int queue_size = max_queue_length_ - directions_.size();
+        if (evaluated_cases_ >= max_evaluations_) queue_size = 1;
+        while (case_handler_->QueuedCases().size() > queue_size) {
             auto dequeued_case = dequeue_case_with_worst_origin();
             if (dequeued_case->origin_case()->id() == GetTentativeBestCase()->id())
                 set_inactive(vector<int>{dequeued_case->origin_direction_index()});
@@ -123,10 +134,12 @@ void APPS::prune_queue() {
 void APPS::print_state(string header) {
     std::stringstream ss;
     ss << header << "|";
-    ss << "Step lengths  : " << vec_to_str(vector<double>(step_lengths_.data(), step_lengths_.data() + step_lengths_.size())) << "|";
-    ss << "Iteration: " << iteration_ << "|";
+    ss << "Iteration:         " << iteration_ << "|";
+    ss << "Evaluated cases:   " << evaluated_cases_ << "|";
+    ss << "Queued cases:      " << case_handler_->QueuedCases().size() << "|";
     ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
-    ss << "              OFV: " << tentative_best_case_->objective_function_value();
+    ss << "OFV:               " << tentative_best_case_->objective_function_value();
+    ss << "Step lengths  :    " << vec_to_str(vector<double>(step_lengths_.data(), step_lengths_.data() + step_lengths_.size())) << "|";
     Printer::ext_info(ss.str(), "Optimization", "APPS");
 }
 }

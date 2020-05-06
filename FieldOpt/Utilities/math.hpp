@@ -28,6 +28,7 @@
 #include <boost/random/random_device.hpp>
 #include <time.h>
 #include <Eigen/Core>
+#include <numeric>
 
 /*!
  * @brief Calculate the average value of the items in the list. The returned value will always be a double.
@@ -78,178 +79,13 @@ inline T calc_median(std::vector<T> list) {
  */
 template <typename T>
 inline std::vector<T> range(T start, T end, T step) {
-    int length = abs((end - start) / step);
+    int length = std::abs((end - start) / step);
     auto ran = std::vector<T>(length);
     ran[0] = start;
     for (int i = 1; i < length; ++i) {
         ran[i] = ran[i-1] + step;
     }
     return ran;
-}
-
-/*!
- * @brief Get a random generator (Mersenne Twister) for use with the random functions in this file.
- * @return A Mersenne Twister RNG.
- */
-inline boost::random::mt19937 get_random_generator(int seed = 0) {
-    if (seed == 0) {
-        boost::random_device dev;
-        boost::random::mt19937 gen(dev);
-        return gen;
-    }
-    else {
-        boost::random::mt19937 gen(seed);
-        return gen;
-    }
-}
-
-/*!
- * @brief Get a random integer in the range [lower .. upper]
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param lower The lowest possible int.
- * @param upper The highest possible int.
- * @return A random integer.
- */
-inline int random_integer(boost::random::mt19937 &gen,
-                          const int lower, const int upper) {
-    boost::random::uniform_int_distribution<> dist(lower, upper);
-    boost::variate_generator<boost::mt19937&, boost::random::uniform_int_distribution<> > rng(gen, dist);
-    return rng();
-}
-
-/*!
- * @brief Generate a vector of random integers in the range [lower .. upper].
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param lower The lowest possible int to generate.
- * @param upper The highest possible int to generate.
- * @param n Number of integers to generate.
- * @return A vector containing n random integers.
- */
-inline std::vector<int> random_integers(boost::random::mt19937 &gen,
-                                        const int lower, const int upper,
-                                        const int n) {
-    boost::random::uniform_int_distribution<> dist(lower, upper);
-    boost::variate_generator<boost::mt19937&, boost::random::uniform_int_distribution<> > rng(gen, dist);
-
-    std::vector<int> rands = std::vector<int>(n);
-    for (int i = 0; i < n; ++i) {
-        rands[i] = rng();
-    }
-    return rands;
-}
-
-/*!
- * @brief Generate a vector of _unique_ random integers in the range [lower .. upper].
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param lower The lowest possible int to generate.
- * @param upper The highest possible int to generate.
- * @param n Number of integers to generate.
- * @return A vector containing n random integers.
- */
-inline std::vector<int> unique_random_integers(boost::random::mt19937 &gen,
-                                        const int lower, const int upper,
-                                        const int n) {
-    boost::random::uniform_int_distribution<> dist(lower, upper);
-    boost::variate_generator<boost::mt19937&, boost::random::uniform_int_distribution<> > rng(gen, dist);
-
-    std::vector<int> rands = std::vector<int>(n);
-    int i = 0;
-    while (i < n) {
-        int rand = rng();
-        if(!rands.empty() && std::find(rands.begin(), rands.end(), rand) != rands.end()) {
-            continue;
-        }
-        else {
-            rands[i] = rand;
-            ++i;
-        }
-    }
-    return rands;
-}
-
-/*!
- * @brief Generate a vector of n random floats in the range [0, 1)
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param n Number numbers to generate.
- * @return A vector containing n random floats.
- */
-inline std::vector<float> random_floats(boost::random::mt19937 &gen,
-                                        const int n) {
-    boost::uniform_real<> dist(0.0, 1.0);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > rng(gen, dist);
-
-    std::vector<float> rands = std::vector<float>(n);
-    for (int i = 0; i < n; ++i) {
-        rands[i] = rng();
-    }
-    return rands;
-}
-
-/*!
- * @brief Generate a vector of n random floats in the range [min, max)
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param min Min limit for generated numbers.
- * @param max Max limit for generated numbers.
- * @param n Number numbers to generate.
- * @return A vector containing n random floats.
- */
-inline std::vector<double> random_doubles(boost::random::mt19937 &gen,
-                                          const double min, const double max,
-                                          const int n) {
-    boost::uniform_real<> dist(min, max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > rng(gen, dist);
-
-    std::vector<double> rands = std::vector<double>(n);
-    for (int i = 0; i < n; ++i) {
-        rands[i] = rng();
-    }
-    return rands;
-}
-
-/*!
- * @brief Generate a random double in the range [min, max)
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param min Min limit for generated number.
- * @param max Max limit for generated number.
- * @return A random double.
- */
-inline double random_double(boost::random::mt19937 &gen, const double min, const double max) {
-    boost::uniform_real<> dist(min, max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > rng(gen, dist);
-    double rand = rng();
-    return rand;
-}
-
-/*!
- * @brief Generate an Eigen vector of n random floats in the range [min, max)
- * @param gen Random number generator. You can get one by calling get_random_generator().
- * @param min Min limit for generated numbers.
- * @param max Max limit for generated numbers.
- * @param n Number numbers to generate.
- * @return A vector containing n random floats.
- */
-inline Eigen::VectorXd random_doubles_eigen(boost::random::mt19937 &gen,
-                                            const double min, const double max,
-                                            const int n) {
-    boost::uniform_real<> dist(min, max);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > rng(gen, dist);
-
-    Eigen::VectorXd rands(n);
-    for (int i = 0; i < n; ++i) {
-        rands(i) = rng();
-    }
-    return rands;
-}
-
-/*!
- * @brief Generate a random float (double precision) in the range [0.0 .. 1.0)
- * @param gen
- * @return One random float.
- */
-inline double random_double(boost::random::mt19937 &gen) {
-    boost::uniform_real<> dist(0.0, 1.0);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<> > rng(gen, dist);
-    return rng();
 }
 
 inline double calc_variance(std::vector<double> sums){

@@ -2034,7 +2034,7 @@ bool TrustRegionModel::checkDataSize(string context){
 		   && points_abs_size == fvalues_size
 		   && cached_points_size == cached_fvalues_size);
     
-    if (!test_passed){
+    /*if (!test_passed){
       cerr << endl;
       cerr << "----------------------------------------------------------------------" << endl;
       cerr << context << endl;
@@ -2046,7 +2046,7 @@ bool TrustRegionModel::checkDataSize(string context){
       cerr << "fvalues cached: " << cached_fvalues_size << endl;
       cerr << "**********************************************************************" << endl;
       cerr << endl;
-    }
+    }*/
 
     return test_passed;
 

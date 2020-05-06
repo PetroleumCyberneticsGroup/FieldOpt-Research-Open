@@ -1,11 +1,13 @@
 /***********************************************************
 Created by Mathias C. Bellout on 27.11.18
-Copyright (C) 2018-2019 Mathias Bellout
-<mathias.bellout@petroleumcyberneticsgroup.no>
+Copyright (C) 2018-2020 Mathias Bellout
 <chakibbb-pcg@gmail.com>
 
-Modified 2018-2019 Thiago Lima Silva
+Modified 2018-2020 Thiago Lima Silva
 <thiagolims@gmail.com>
+
+Modified 2018-2020 Caio Giuliani
+<caiogiuliani@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -37,10 +39,10 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Optimization/optimizers/trust_region/TrustRegionOptimization.h"
 
 #include <Eigen/Core>
-#include <Eigen/Dense>
+// #include <Eigen/Dense>
 #include "Utilities/math.hpp"
 #include "Utilities/colors.hpp"
-#include "Utilities/stringhelpers.hpp"
+// #include "Utilities/stringhelpers.hpp"
 
 #include "test_tr-model-data.hpp"
 #include "test_tr-support.hpp"

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm -ifr *.o
+for i in *.f; do echo "Compiling ${i}..."; gfortran -c ${i} -O3 -fPIC -fdefault-integer-8; done
+# ifort -shared *.o -o ../../lib/libsnopt-7.2.12.so
+gfortran -shared *.o -o ../../lib/libsnopt-7.2.12.so
+rm -ifr *.o

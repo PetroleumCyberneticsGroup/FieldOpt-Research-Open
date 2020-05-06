@@ -22,6 +22,7 @@
 #include "Utilities/stringhelpers.hpp"
 #include "gp/rprop.h"
 #include "Utilities/math.hpp"
+#include "Utilities/random.hpp"
 #include "Utilities/time.hpp"
 #include "optimizers/bayesian_optimization/af_optimizers/AFPSO.h"
 #include "EGO.h"
@@ -42,6 +43,20 @@ EGO::EGO(Settings::Optimizer *settings,
     time_fitting_ = 0;
     time_af_opt_ = 0;
     settings_ = settings;
+
+    initializeNormalizers();
+    
+    // penalize the base case
+    if (penalize_) {
+        double org_ofv = tentative_best_case_->objective_function_value();
+        double pen_ofv = PenalizedOFV(tentative_best_case_);
+        tentative_best_case_->set_objective_function_value(pen_ofv);
+        if (VERB_OPT >=1) {
+            Printer::ext_info("Penalized base case. " 
+                    "Original value: " + Printer::num2str(org_ofv) + "; "
+                    + "Penalized value: " + Printer::num2str(pen_ofv), "Optimization", "Optimizer");
+        }
+    }
 
     int n_cont_vars = variables->ContinousVariableSize();
 
@@ -148,9 +163,6 @@ Optimization::Optimizer::TerminationCondition EGO::IsFinished() {
     return tc;
 }
 void EGO::handleEvaluatedCase(Case *c) {
-    if (!normalizer_ofv_.is_ready())
-        initializeNormalizers();
-
     gp_->add_pattern(c->GetRealVarVector().data(), normalizer_ofv_.normalize(c->objective_function_value()));
     if (isImprovement(c)) {
         updateTentativeBestCase(c);
@@ -158,12 +170,6 @@ void EGO::handleEvaluatedCase(Case *c) {
     }
 }
 void EGO::iterate() {
-    if (!normalizer_ofv_.is_ready()) {
-        initializeNormalizers();
-        // Add base case to GP
-        gp_->add_pattern(tentative_best_case_->GetRealVarVector().data(), normalizer_ofv_.normalize(tentative_best_case_->objective_function_value()));
-    }
-
     if (enable_logging_) {
         logger_->AddEntry(this);
     }
@@ -173,12 +179,12 @@ void EGO::iterate() {
     start = QDateTime::currentDateTime();
     libgp::RProp rprop;
     rprop.init();
-    if (VERB_OPT >= 2) {
+    if (VERB_OPT >= 3) {
         Printer::ext_info("Optimizing Gaussian Process kernel hyperparameters ... ", "Optimization", "EGO");
         rprop.maximize(gp_, 100, 1);
     }
     else {
-        rprop.maximize(gp_, 100, 1);
+        rprop.maximize(gp_, 100, 0);
     }
     end = QDateTime::currentDateTime();
     time_fitting_ += time_span_seconds(start, end);

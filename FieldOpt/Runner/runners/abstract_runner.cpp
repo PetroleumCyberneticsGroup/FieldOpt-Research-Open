@@ -26,8 +26,11 @@
 #include <Optimization/optimizers/RGARDD.h>
 #include <Optimization/hybrid_optimizer.h>
 #include <Optimization/optimizers/bayesian_optimization/EGO.h>
-#include <Optimization/optimizers/trust_region/TrustRegionOptimization.h>
-#include <Simulation/simulator_interfaces/ix_simulator.h>
+#include "Optimization/optimizers/PSO.h"
+#include "Optimization/optimizers/CMA_ES.h"
+#include "Optimization/optimizers/VFSA.h"
+#include "Optimization/optimizers/SPSA.h"
+#include "Simulation/simulator_interfaces/ix_simulator.h"
 #include "abstract_runner.h"
 #include "Optimization/optimizers/compass_search.h"
 #include "Optimization/optimizers/ExhaustiveSearch2DVert.h"
@@ -144,7 +147,7 @@ void AbstractRunner::InitializeObjectiveFunction()
     switch (settings_->optimizer()->objective().type) {
         case Settings::Optimizer::ObjectiveType::WeightedSum:
             if (VERB_RUN >=1) Printer::ext_info("Using WeightedSum-type objective function.", "Runner", "AbstractRunner");
-            objective_function_ = new Optimization::Objective::WeightedSum(settings_->optimizer(), simulator_->results());
+            objective_function_ = new Optimization::Objective::WeightedSum(settings_->optimizer(), simulator_->results(), model_);
             break;
         case Settings::Optimizer::ObjectiveType::NPV:
             if (VERB_RUN >=1) Printer::ext_info("Using NPV-type objective function.", "Runner", "AbstractRunner");
@@ -240,16 +243,44 @@ void AbstractRunner::InitializeOptimizer()
             );
             optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
             break;
-        case Settings::Optimizer::OptimizerType::TrustRegionOptimization:
-            if (VERB_RUN >= 1) Printer::ext_info("Using Trust Region optimization algorithm.", "Runner", "AbstractRunner");
-
-            optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
-                                                                               base_case_,
-                                                                               model_->variables(),
-                                                                               model_->grid(),
-                                                                               logger_
+        case Settings::Optimizer::OptimizerType::PSO:
+            if (VERB_RUN >= 1) Printer::ext_info("Using PSO optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::PSO(settings_->optimizer(),
+                                                       base_case_,
+                                                       model_->variables(),
+                                                       model_->grid(),
+                                                       logger_
             );
-
+            optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
+            break;
+        case Settings::Optimizer::OptimizerType::CMA_ES:
+            if (VERB_RUN >= 1) Printer::ext_info("Using PSO optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::CMA_ES(settings_->optimizer(),
+                                                           base_case_,
+                                                           model_->variables(),
+                                                           model_->grid(),
+                                                           logger_
+            );
+            optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
+            break;
+        case Settings::Optimizer::OptimizerType::VFSA:
+            if (VERB_RUN >= 1) Printer::ext_info("Using VFSA optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::VFSA(settings_->optimizer(),
+                                                           base_case_,
+                                                           model_->variables(),
+                                                           model_->grid(),
+                                                           logger_
+            );
+            optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
+            break;
+        case Settings::Optimizer::OptimizerType::SPSA:
+            if (VERB_RUN >= 1) Printer::ext_info("Using SPSA optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::SPSA(settings_->optimizer(),
+                                                           base_case_,
+                                                           model_->variables(),
+                                                           model_->grid(),
+                                                           logger_
+            );
             optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
             break;
         default:
