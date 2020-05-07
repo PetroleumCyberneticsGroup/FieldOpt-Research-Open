@@ -27,20 +27,25 @@ If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 #include <gtest/gtest.h>
-
-// Define settings for tr-dfo
-#include "Optimization/tests/test_resource_optimizer.h"
-#include "Optimization/tests/test_resource_cases.h"
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <objective/objective.h>
 
 #include "Runner/tests/test_resource_runner.hpp"
 #include "Reservoir/tests/test_resource_grids.h"
 #include "Optimization/tests/test_resource_test_functions.h"
+#include "Optimization/tests/test_resource_optimizer.h"
+#include "Optimization/tests/test_resource_cases.h"
+#include "Settings/tests/test_resource_settings.hpp"
 
 #include "Optimization/optimizers/trust_region/TrustRegionOptimization.h"
+#include "Runner/runners/ensemble_helper.h"
+#include "Simulation/simulator_interfaces/eclsimulator.h"
+#include "Optimization/objective/weightedsum.h"
 
-#include <Eigen/Core>
-// #include <Eigen/Dense>
 #include "Utilities/math.hpp"
+#include "Utilities/printer.hpp"
+#include "Utilities/debug.hpp"
 #include "Utilities/colors.hpp"
 // #include "Utilities/stringhelpers.hpp"
 
@@ -49,26 +54,43 @@ If not, see <http://www.gnu.org/licenses/>.
 
 using namespace TestResources::TestFunctions;
 using namespace Optimization::Optimizers;
+using namespace Optimization::Objective;
+using namespace TestResources;
+using namespace Runner;
+using namespace Simulation;
 using namespace std;
 
 namespace {
 
 class TrustRegionTest : public ::testing::Test,
-                            public TestResources::TestResourceOptimizer,
-                            public TestResources::TestResourceGrids {
+                        public ::TestResourceOptimizer,
+                        public ::TestResourceGrids {
 
-protected:
-    TrustRegionTest() {}
+ protected:
+  TrustRegionTest() {}
 
-    virtual ~TrustRegionTest() {}
-    virtual void SetUp() {}
+  virtual ~TrustRegionTest() {}
+  virtual void SetUp() {}
 
   TrustRegionOptimization *tr_dfo_;
   Optimization::Case *test_case_tr_dfo_probs_;
   VariablePropertyContainer *varcont_tr_dfo_probs_;
-        TestResources::TrustRegionModelData tr_mdata;
+  ::TrustRegionModelData tr_mdata;
 
-        void SetUpOptimizer(TestResources::TrustRegionModelData::prob &prob,
+  TrustRegionOptimization *tr_dfo_en_5spot_;
+  Runner::EnsembleHelper ensemble_helper_;
+  Simulation::Simulator *simulator_en_5spot_;
+  Objective *objective_function_;
+  Optimization::Case *base_case_en_5spot_;
+
+  std::vector<int> simulation_times_;
+  const double sentinel_value_ = 0.0001;
+  const int timeout_value_ = 10000;
+
+  Optimization::Optimizer::TerminationCondition tc_NF_ =
+      Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
+
+  void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
 
     VectorXd x0 = prob.xm.col(0);
@@ -84,15 +106,15 @@ protected:
       varcont_tr_dfo_probs_->AddVariable(prop);
     }
 
-            // Set up base case using dummy var containter
+    // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-                    QHash<QUuid, bool>(), QHash<QUuid, int>(),
+        QHash<QUuid, bool>(), QHash<QUuid, int>(),
         varcont_tr_dfo_probs_->GetContinousVariableValues());
 
     TestResources::FindVarSequence(prob,
-        *test_case_tr_dfo_probs_);
+                                   *test_case_tr_dfo_probs_);
 
-            VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
+    VectorXd ordered_vec(test_case_tr_dfo_probs_->GetRealVarVector().size());
     auto vec =test_case_tr_dfo_probs_->GetRealVarVector();
     for (int i = 0; i < prob.idx.size(); i++) {
       ordered_vec(prob.idx[i]) = vec(i);
@@ -100,26 +122,26 @@ protected:
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
     // Use initial point from Matlab data
-            test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
+    test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
-            settings_tr_opt_max_,
-            test_case_tr_dfo_probs_,
-            varcont_tr_dfo_probs_,
-            grid_5spot_,
-            logger_);
-    
-  }
-  
-        bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
+        settings_tr_opt_max_,
+        test_case_tr_dfo_probs_,
+        varcont_tr_dfo_probs_,
+        grid_5spot_,
+        logger_);
+
+          }
+
+  bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
       double (*tr_dfo_prob)(VectorXd xs)){
 
-            stringstream ss; ss << "[          ] " << FMAGENTA;
+    stringstream ss; ss << "[          ] " << FMAGENTA;
     double tol = 1e-06;
     int p_count = 0;
 
-            while (tr_dfo_->IsFinished()
-            == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
+    // Start opt loop --------------------------------------
+    while (tr_dfo_->IsFinished() == tc_NF_) {
 
       auto next_case = tr_dfo_->GetCaseForEvaluation();
       while (next_case == nullptr) {
@@ -134,19 +156,19 @@ protected:
         break;
       }
 
-                // Compute obj.function value for case
+      // Compute obj.function value for case
       next_case->set_objective_function_value(
-              tr_dfo_prob(next_case->GetRealVarVector()));
+          tr_dfo_prob(next_case->GetRealVarVector()));
 
-                // Override 2nd point
+      // Override 2nd point
       if (p_count == 1 && prob.xm.cols() > 1) {
         TestResources::OverrideSecondPoint(prob, *next_case);
       }
 
-                // Finish Runner
+      // Finish Runner
       tr_dfo_->SubmitEvaluatedCase(next_case);
 
-                if (tr_dfo_->getTrustRegionModel()->isInitialized() && (p_count < 2)) {
+      if (tr_dfo_->getTrustRegionModel()->isInitialized() && (p_count < 2)) {
 
       }
       p_count++;
@@ -177,160 +199,154 @@ protected:
     cout << sx.str();
 
     return true;
-    }
-      void TearDown() override {
-        /*
-        TrustRegionOptimization *tr_dfo_;
-        Optimization::Case *test_case_tr_dfo_probs_;
-        VariablePropertyContainer *varcont_tr_dfo_probs_;
-        TestResources::TrustRegionModelData tr_mdata;
-         */
-        delete(tr_dfo_);
-        delete(test_case_tr_dfo_probs_);
-        delete (varcont_tr_dfo_probs_);
-}
-    };
-    // TEST_F(TrustRegionTest, trHS1) {
+  }
+
+};
+
+// TEST_F(TrustRegionTest, trHS1) {
 //   cout << endl << FMAGENTA << "[          ] =============="
 //        << "=========================================== " << endl
-    //          << "[ HS1 ] "
-    //          << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
+//          << "[ HS1 ] "
+//          << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
 
-    //     SetUpOptimizer(tr_mdata.prob_hs1, hs1);
-    //     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
+//     SetUpOptimizer(tr_mdata.prob_hs1, hs1);
+//     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
 // }
 
-   TEST_F(TrustRegionTest, trDfoProb1) {
-       cout << endl << FMAGENTA << "[          ] =============="
-            << "=========================================== " << endl
-            << "[ CG.prob1 ] "
-            << " f = @(x) (1 - x(1))^2; x0=[-1.2 2.0]" << END << endl;
+TEST_F(TrustRegionTest, trDfoProb1) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob1 ] "
+       << " f = @(x) (1 - x(0))^2; x0=[-1.2 2.0]" << END << endl;
 
-       SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
-       EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
-   }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
+}
 
-    TEST_F(TrustRegionTest, trDfoProb2) {
-        cout << endl << FMAGENTA << "[          ] =============="
-             << "=========================================== " << endl
-             << "[ CG.prob2 ] "
-             << "f = @(x) log1p(x(1)^2) + x(2)^2; x0=[2.0 2.0]"
-             << END << endl;
+TEST_F(TrustRegionTest, trDfoProb2) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob2 ] "
+       << "f = @(x) log1p(x(0)^2) + x(1)^2; x0=[2.0 2.0]"
+       << END << endl;
 
-        SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
-        EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
-    }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
+}
 
-   TEST_F(TrustRegionTest, trDfoProb3) {
-       cout << endl << FMAGENTA << "[          ] =============="
-            << "=========================================== " << endl
-            << "[ CG.prob3 ] "
-            << "f = @(x) sin(pi*x(1)/12) * cos(pi*x(2)/16); x0=[0.0 0.0]"
-            << END << endl;
+TEST_F(TrustRegionTest, trDfoProb3) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob3 ] "
+       << "f = @(x) sin(pi*x(0)/12) * cos(pi*x(1)/16); x0=[0.0 0.0]"
+       << END << endl;
 
-       SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
-       EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
-   }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb4) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob4 ] "
-           << "f = @(x) 0.01*(x(1) - 1)^2 + (x(2) - x(1)^2)^2; x0=[2.0 2.0 2.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb4) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob4 ] "
+       << "f = @(x) 0.01*(x(1) - 1)^2 + (x(2) - x(1)^2)^2; x0=[2.0 2.0 2.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb5) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob5 ] "
-           << "f = @(x) (x(1)-x(2))^2 + (x(2) - x(3))^4; x0=[-2.6 2.0 2.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb5) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob5 ] "
+       << "f = @(x) (x(0)-x(1))^2 + (x(1) - x(2))^4; x0=[-2.6 2.0 2.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
-      auto success_runnersubs = RunnerSubs(tr_mdata.prob5, tr_dfo_prob5);
-      cout << "success runnersubs: " << success_runnersubs << endl;
-      EXPECT_TRUE(true);
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
+  auto success_runnersubs = RunnerSubs(tr_mdata.prob5, tr_dfo_prob5);
+  cout << "success runnersubs: " << success_runnersubs << endl;
+  EXPECT_TRUE(true);
+}
 
-  TEST_F(TrustRegionTest, trDfoProb6) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob6 ] "
-           << "f = @(x) (x(1) + x(2))^2 + (x(2) + x(3))^2; x0=[-4.0 1.0 1.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb6) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob6 ] "
+       << "f = @(x) (x(0) + x(1))^2 + (x(1) + x(2))^2; x0=[-4.0 1.0 1.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob6, tr_dfo_prob6);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob6, tr_dfo_prob6));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob6, tr_dfo_prob6);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob6, tr_dfo_prob6));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb7) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob7 ] "
-           << "f = @(x) log1p(x(1)^2) + log1p((x(1) - x(2))^2) " << endl
-           << " + log1p((x(2) - x(3))^2) + log1p((x(3) - x(4))^2); "
-              "x0=[2.0 2.0 2.0 2.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb7) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob7 ] "
+       << "f = @(x) log1p(x(0)^2) + log1p((x(0) - x(1))^2) " << endl
+       << " + log1p((x(1) - x(2))^2) + log1p((x(2) - x(3))^2); "
+          "x0=[2.0 2.0 2.0 2.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob7, tr_dfo_prob7);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob7, tr_dfo_prob7));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob7, tr_dfo_prob7);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob7, tr_dfo_prob7));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb8) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob8 ] "
-           << "f = @(x) (x(1)*x(2)*x(3)*x(4))^2; x0=[0.8 0.8 0.8 0.8]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb8) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob8 ] "
+       << "f = @(x) (x(0)*x(1)*x(2)*x(3))^2; x0=[0.8 0.8 0.8 0.8]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob8, tr_dfo_prob8);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob8, tr_dfo_prob8));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob8, tr_dfo_prob8);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob8, tr_dfo_prob8));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb9) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob9 ] "
-           << "f = @(x) (x(1)-1)^2 + (x(2)-2)^2 + (x(3)-3)^2 + (x(4)-4)^2; x0=[1.0 1.0 1.0 1.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb9) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob9 ] "
+       << "f = @(x) (x(0)-1)^2 + (x(1)-2)^2 + (x(2)-3)^2 + (x(3)-4)^2; x0=[1.0 1.0 1.0 1.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob9, tr_dfo_prob9);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob9, tr_dfo_prob9));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob9, tr_dfo_prob9);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob9, tr_dfo_prob9));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb10) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob10 ] "
-           << "f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^2 + " << endl
-           << "(x(3) - x(4))^4 + (x(4) - x(5))^4; x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb10) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob10 ] "
+       << "f = @(x) (x(1) - x(2))^2 + (x(2) - x(3))^2 + " << endl
+       << "(x(2) - x(3))^4 + (x(3) - x(4))^4; x0=[2.0 sqrt(2) -1.0 2-sqrt(2) 0.5]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob10, tr_dfo_prob10);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob10, tr_dfo_prob10));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob10, tr_dfo_prob10);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob10, tr_dfo_prob10));
+}
 
-  TEST_F(TrustRegionTest, trDfoProb11) {
-      cout << endl << FMAGENTA << "[          ] =============="
-           << "=========================================== " << endl
-           << "[ CG.prob11 ] "
-           << "f = @(x) sum(2*x./(x.*x + 1));; x0=[1.0 1.0 1.0 1.0]"
-           << END << endl;
+TEST_F(TrustRegionTest, trDfoProb11) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+       << "[ CG.prob11 ] "
+       << "f = @(x) sum(2*x./(x.*x + 1));; x0=[1.0 1.0 1.0 1.0]"
+       << END << endl;
 
-      // -------------------------------------------------------
-      SetUpOptimizer(tr_mdata.prob11, tr_dfo_prob11);
-      EXPECT_TRUE(RunnerSubs(tr_mdata.prob11, tr_dfo_prob11));
-  }
+  // -------------------------------------------------------
+  SetUpOptimizer(tr_mdata.prob11, tr_dfo_prob11);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob11, tr_dfo_prob11));
+}
 
 }
