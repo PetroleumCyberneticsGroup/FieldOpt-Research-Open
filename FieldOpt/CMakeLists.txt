@@ -66,11 +66,18 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   message(STATUS "CMAKE_SYSTEM_NAME => ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# ____________________________________________________________________
+# ╔═╗  ╔═╗╔═╗╔═╗  ╔═╗╦  ╔═╗╔═╗╔═╗
+# ║    ║  ╠═╝╠═╝  ╠╣ ║  ╠═╣║ ╦╚═╗
+# ╚═╝  ╚═╝╩  ╩    ╚  ╩═╝╩ ╩╚═╝╚═╝
+# ____________________________________________________________________
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX -pipe -Wextra ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wextra ")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -g3 -O0 -DDEBUG -D_DEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNO_DEBUG")
+  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 endif()
 
 # ----------------------------------------------------------

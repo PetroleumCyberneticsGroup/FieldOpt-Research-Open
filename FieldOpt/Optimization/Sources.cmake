@@ -41,8 +41,9 @@ SET(OPTIMIZATION_HEADERS
 		# constraint-handling
 		constraints/constraint_handler.h
 		#
-		optimizers/APPS.h
+		# algorithms: pattern, stochastic
 		optimizers/compass_search.h
+		optimizers/APPS.h
 		optimizers/gss_patterns.hpp
 		optimizers/ExhaustiveSearch2DVert.h
 		optimizers/GSS.h
@@ -53,20 +54,20 @@ SET(OPTIMIZATION_HEADERS
 		optimizers/VFSA.h
 		optimizers/SPSA.h
 		#
-		# bayesion opt
+		# algorithms: bayesian
 		optimizers/bayesian_optimization/AcquisitionFunction.h
 		optimizers/bayesian_optimization/EGO.h
 		optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.h
 		optimizers/bayesian_optimization/af_optimizers/AFOptimizer.h
 		optimizers/bayesian_optimization/af_optimizers/AFPSO.h
 		#
-		# df-tr
+		# algorithms: df-tr
 		optimizers/trust_region/TrustRegionOptimization.h
 		optimizers/trust_region/TrustRegionModel.h
 		optimizers/trust_region/TrustRegionMath.h
 		optimizers/ensemble_exp_value.h
 		#
-		# hybrid
+		# algorithms: hybrid
 		hybrid_optimizer.h
 		#
 		# solvers
@@ -115,8 +116,9 @@ SET(OPTIMIZATION_SOURCES
 		# constraint-handling
 		constraints/constraint_handler.cpp
 		#
-		optimizers/APPS.cpp
+		# algorithms: pattern, stochastic
 		optimizers/compass_search.cpp
+		optimizers/APPS.cpp
 		optimizers/ExhaustiveSearch2DVert.cpp
 		optimizers/GSS.cpp
 		optimizers/GeneticAlgorithm.cpp
@@ -126,20 +128,20 @@ SET(OPTIMIZATION_SOURCES
 		optimizers/VFSA.cpp
 		optimizers/SPSA.cpp
 		#
-		# bayesion opt
+		# algorithms: bayesian
 		optimizers/bayesian_optimization/AcquisitionFunction.cpp
 		optimizers/bayesian_optimization/EGO.cpp
 		optimizers/bayesian_optimization/af_optimizers/AFCompassSearch.cpp
 		optimizers/bayesian_optimization/af_optimizers/AFOptimizer.cpp
 		optimizers/bayesian_optimization/af_optimizers/AFPSO.cpp
 		#
-		# df-tr
+		# algorithms: df-tr
 		optimizers/trust_region/TrustRegionOptimization.cpp
 		optimizers/trust_region/TrustRegionModel.cpp
 		optimizers/trust_region/TrustRegionMath.cpp
 		optimizers/ensemble_exp_value.cpp
 		#
-		# hybrid
+		# algorithms: hybrid
 		hybrid_optimizer.cpp
 		#
 		# solvers
@@ -156,33 +158,34 @@ SET(OPTIMIZATION_TESTS
 		tests/test_resource_test_functions.h
 		#
 		# objective / case / optimizer
-		tests/objective/test_weightedsum.cpp
-		tests/test_case.cpp
-		tests/test_case_handler.cpp
-		tests/test_case_transfer_object.cpp
-		tests/test_normalizer.cpp
+		# tests/objective/test_weightedsum.cpp
+		# tests/test_case.cpp
+		# tests/test_case_handler.cpp
+		# tests/test_case_transfer_object.cpp
+		# tests/test_normalizer.cpp
+		# #
+		# # constraints / constraint-handling
+		# tests/constraints/test_bhp_constraint.cpp
+		# tests/constraints/test_rate_constraint.cpp
+		# tests/constraints/test_reservoir_boundary.cpp
+		# tests/constraints/test_interwell_distance.cpp
+		# tests/constraints/test_spline_well_length.cpp
+		# tests/constraints/test_pseudo_cont_boundary_2d.cpp
+		# tests/constraints/test_constraint_handler.cpp
 		#
-		# constraints
-		tests/constraints/test_bhp_constraint.cpp
-		tests/constraints/test_constraint_handler.cpp
-		tests/constraints/test_interwell_distance.cpp
-		tests/constraints/test_pseudo_cont_boundary_2d.cpp
-		tests/constraints/test_rate_constraint.cpp
-		tests/constraints/test_reservoir_boundary.cpp
-		tests/constraints/test_spline_well_length.cpp
-		#
-		tests/optimizers/test_apps.cpp
+		# algorithms: pattern, stochastic
 		tests/optimizers/test_compass_search.cpp
-		tests/optimizers/test_ga.cpp
-		tests/optimizers/test_pso.cpp
-		tests/optimizers/test_cma_es.cpp
-		tests/optimizers/test_vfsa.cpp
-		tests/optimizers/test_spsa.cpp
+		tests/optimizers/test_apps.cpp
+		# tests/optimizers/test_ga.cpp
+		# tests/optimizers/test_pso.cpp
+		# tests/optimizers/test_cma_es.cpp
+		# tests/optimizers/test_vfsa.cpp
+		# tests/optimizers/test_spsa.cpp
+		# #
+		# # algorithms: bayesian
+		# tests/optimizers/test_ego.cpp
 		#
-		# bayesian opt
-		tests/optimizers/test_ego.cpp
-		#
-		# df-tr
+		# algorithms: df-tr
 		tests/optimizers/test_tr-dfo.cpp
 		tests/optimizers/test_tr-dfo_exp-value.cpp
 		tests/optimizers/test_tr-model-data.hpp
