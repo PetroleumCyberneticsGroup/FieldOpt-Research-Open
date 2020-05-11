@@ -11,9 +11,10 @@ echo "Data file path: " $2 >> $1/${FOUT}
 cd $1
 
 # exec /opt/ecl/2013.2/bin/linux_x86_64/eclipse.exe $2 >/dev/null
-exec /opt/ecl/ecl-2013.2/macros/@eclipse -file $2 -local >/dev/null
+#exec /opt/ecl/ecl-2013.2/macros/@eclipse -file $2 -local >/dev/null
 # exec /opt/ecl/ecl-2013.2/bin/linux_x86_64/eclipse.exe $2 >/dev/null
+exec flow $2 >/dev/null
 
-STR="Errors                 0"
-echo $STR
-grep "${STR}" ${1}/*.PRT >> $1/${FOUT}
+#STR="Errors                 0"
+#echo $STR
+#grep "${STR}" ${1}/*.PRT >> $1/${FOUT}
