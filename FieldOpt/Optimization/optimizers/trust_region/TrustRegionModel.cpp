@@ -1,23 +1,27 @@
-/*********************************************************************
- Created by thiagols on 27.11.18
- Copyright (C) 2018 Thiago Lima Silva<thiagolims@gmail.com>
- Modified 2018-2019 Mathias Bellout <mathias.bellout@ntnu.no>
+/***********************************************************
+Created by thiagols on 27.11.18
+Copyright (C) 2018-2019
+Thiago Lima Silva <thiagolims@gmail.com>
 
- This file is part of the FieldOpt project.
+Modified 2018-2019 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published
- by the Free Software Foundation, either version 3 of the License,
- or (at your option) any later version.
+This file is part of the FieldOpt project.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt. If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "TrustRegionModel.h"
 #include <Settings/optimizer.h>
@@ -43,169 +47,185 @@ using std::cerr;
 namespace Optimization {
 namespace Optimizers {
 
-bool compare(
-    const int &lhs,
-    const int &rhs,
-    const double *distances) {
+bool compare(const int &lhs,
+             const int &rhs,
+             const double *distances) {
   return distances[lhs] < distances[rhs];
 }
 
-bool compareAbs(
-    const int &lhs,
-    const int &rhs,
-    const double *distances) {
+bool compareAbs(const int &lhs,
+                const int &rhs,
+                const double *distances) {
   return abs(distances[lhs]) < abs(distances[rhs]);
 }
 
-TrustRegionModel::TrustRegionModel(
-    VectorXd& lb,
-    VectorXd& ub,
-    Case *base_case,
-    Settings::Optimizer *settings) {
+TrustRegionModel::TrustRegionModel(VectorXd& lb,
+                                   VectorXd& ub,
+                                   Case *base_case,
+                                   Settings::Optimizer *settings) {
+  init_points_computed_ = false;
+  impr_points_computed_ = false;
+  repl_points_computed_ = false;
 
-    init_points_computed_ = false;
-    impr_points_computed_ = false;
-    repl_points_computed_ = false;
+  is_initialized_ = false;
+  needs_improvement_ = false;
+  needs_replacement_ = false;
+  model_changed_ = false;
 
-    is_initialized_ = false;
-    needs_improvement_ = false;
-    needs_replacement_ = false;
-    model_changed_ = false;
+  lb_ = lb;
+  ub_ = ub;
+  base_case_ = base_case;
+  settings_ = settings;
 
-    lb_ = lb;
-    ub_ = ub;
-    base_case_ = base_case;
-    settings_ = settings;
+  if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+    base_case_->set_objective_function_value(-base_case_->objective_function_value());
+  }
 
-    if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-        base_case_->set_objective_function_value(-base_case_->objective_function_value());
-    }
+  radius_ = settings_->parameters().tr_initial_radius;
+  tr_center_ = 0;
+  cache_max_ = (int)3*pow(dim_,2);
 
-    radius_ = settings_->parameters().tr_initial_radius;
-    tr_center_ = 0;
-    cache_max_ = (int)3*pow(dim_,2);
+  pivot_values_.conservativeResize(0);
+  cached_fvalues_.conservativeResize(0);
 
-    pivot_values_.conservativeResize(0);
-    cached_fvalues_.conservativeResize(0);
+  index_vector_.conservativeResize(0);
+  distances_.conservativeResize(0);
 
-    index_vector_.conservativeResize(0);
-    distances_.conservativeResize(0);
+  cached_points_.conservativeResize(0,0);
+  points_shifted_.conservativeResize(0,0);
+  points_shifted_temp_.conservativeResize(0,0);
 
-    cached_points_.conservativeResize(0,0);
-    points_shifted_.conservativeResize(0,0);
-    points_shifted_temp_.conservativeResize(0,0);
+  SNOPTSolver_ = new SNOPTSolver();
 
-    SNOPTSolver_ = new SNOPTSolver();
+  // dbg
+  auto pn = settings_->parameters().tr_prob_name;
+  DBG_fn_pivp_ = "FOEx_PivotPolyns_" + pn + ".txt";
+  DBG_fn_mdat_ = "FOEx_ModelData_" + pn + ".txt";
+  DBG_fn_sdat_ = "FOEx_SettingsData_" + pn + ".txt";
+  DBG_fn_xchp_ = "FOEx_ExchPoint_" + pn + ".txt";
+  DBG_fn_co2m_ = "FOEx_Coeffs2Mat_" + pn + ".txt";
 
+  DBG_fn_pcfs_ = "FOEx_PolyCoeffs_" + pn + ".txt";
+  string cmdstr = "rm *" + pn + ".txt";
+  std::system(cmdstr.c_str());
 }
 
 void TrustRegionModel::moveToBestPoint() {
-    auto best_i = findBestPoint();
-    if (best_i != tr_center_) {
-      tr_center_ = best_i;
-    }
+  auto best_i = findBestPoint();
+  if (best_i != tr_center_) {
+    tr_center_ = best_i;
+  }
 }
 
 VectorXd TrustRegionModel::measureCriticality() {
-    //!<g is just the gradient, measured on the tr_center>
-    auto mMatrix = getModelMatrices(0);
+  // g is just the gradient, measured on the tr_center
+  DBG_printPolynomials("measureCriticality", modeling_polynomials_[0]);
+  auto mMatrix = getModelMatrices(0);
 
-    //!<Projected gradient>
-    VectorXd tr_center_pt = points_abs_.col(tr_center_);
-    VectorXd xmax = lb_.cwiseMax(tr_center_pt - mMatrix.g);
-    VectorXd xmin = ub_.cwiseMin(xmax);
-    VectorXd xdiff = xmin - tr_center_pt;
+  // Projected gradient
+  VectorXd tr_center_pt = points_abs_.col(tr_center_);
+  VectorXd xmax = lb_.cwiseMax(tr_center_pt - mMatrix.g);
+  VectorXd xmin = ub_.cwiseMin(xmax);
+  VectorXd xdiff = xmin - tr_center_pt;
 
-    return xdiff;
+  DBG_printVectorXd(mMatrix.g,    "mMatrix.g:    ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(tr_center_pt, "tr_center_pt: ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xmax,         "xmax:         ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xmin,         "xmin:         ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xdiff,        "xdiff:        ", "% 10.3e ", DBG_fn_mdat_);
+
+  return xdiff;
 }
 
 ModelMatrix TrustRegionModel::getModelMatrices(int m) {
 
-    Polynomial p = modeling_polynomials_[m];
+  Polynomial p = modeling_polynomials_[m];
 
-    double c;
-    VectorXd g(p.dimension);
-    MatrixXd H(p.dimension, p.dimension);
+  double c;
+  VectorXd g(p.dimension);
+  MatrixXd H(p.dimension, p.dimension);
 
-    tie(c, g, H) = coefficientsToMatrices(p.dimension,
-                                          p.coefficients);
+  DBG_printPolynomials("getModelMatrices", p);
+  tie(c, g, H) = coefficientsToMatrices(p.dimension,
+                                        p.coefficients);
 
-    ModelMatrix mMatrix;
-    mMatrix.c = c;
-    mMatrix.g.conservativeResize(g.rows());
-    mMatrix.g = g;
+  ModelMatrix mMatrix;
+  mMatrix.c = c;
+  mMatrix.g.conservativeResize(g.rows());
+  mMatrix.g = g;
 
-    mMatrix.H.conservativeResize(H.rows(),H.cols());
-    mMatrix.H = H;
+  mMatrix.H.conservativeResize(H.rows(), H.cols());
+  mMatrix.H = H;
 
-    return mMatrix;
+  return mMatrix;
 }
 
 bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
 
-    // factor b/e radius & criticality measure
-    double mu = settings_->parameters().tr_criticality_mu;
+  // factor b/e radius & criticality measure
+  double mu = settings_->parameters().tr_criticality_mu;
 
-    // factor used to reduce radius
-    double omega = settings_->parameters().tr_criticality_omega;
+  // factor used to reduce radius
+  double omega = settings_->parameters().tr_criticality_omega;
 
-    // Ensure the final radius reduction is not drastic
-    double beta = settings_->parameters().tr_criticality_beta;
+  // Ensure the final radius reduction is not drastic
+  double beta = settings_->parameters().tr_criticality_beta;
 
-    // Tolerance of TR algorithm
-    double tol_radius = settings_->parameters().tr_tol_radius;
-    double tol_f = settings_->parameters().tr_tol_f;
+  // Tolerance of TR algorithm
+  double tol_radius = settings_->parameters().tr_tol_radius;
+  double tol_f = settings_->parameters().tr_tol_f;
 
-    int exit_flag = 0;
+  int exit_flag = 0;
 
- 
+
+  if (!isLambdaPoised() || isOld()) {
+    exit_flag = ensureImprovement();
+    if (!areImprovementPointsComputed()) {
+      setIsImprovementNeeded(true);
+      return true;
+    }
+  }
+
+  // Get gradient (g) at TR center
+  // Note: assuming center polynomial is at position "0"
+  DBG_printPolynomials("criticalityStep", modeling_polynomials_[0]);
+  auto mMatrix = getModelMatrices(0);
+
+  // Project gradient
+  auto x_center = points_abs_.col(tr_center_);
+  auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - mMatrix.g)) - x_center;
+  auto crit_measure = mu * g_proj;
+
+  if (radius_ > crit_measure.minCoeff()) {
+    radius_ *= omega;
+
     if (!isLambdaPoised() || isOld()) {
-        exit_flag = ensureImprovement();
-        if (!areImprovementPointsComputed()) {
-	  setIsImprovementNeeded(true);
-          return true;
-        }
+
+      exit_flag = ensureImprovement();
+      if (!areImprovementPointsComputed()) {
+        setIsImprovementNeeded(true);
+        return true;
+      }
     }
 
-    // Get gradient (g) at TR center
-    // Note: assuming center polynomial is at position "0"
-    auto mMatrix = getModelMatrices(0);
-
-    // Project gradient
-    auto x_center = points_abs_.col(tr_center_);
-    auto g_proj = ub_.cwiseMin(lb_.cwiseMax(x_center - mMatrix.g)) - x_center;
-    auto crit_measure = mu * g_proj;
-
-    if (radius_ > crit_measure.minCoeff()) {
-        radius_ *= omega;
-
-        if (!isLambdaPoised() || isOld()) {
-
-            exit_flag = ensureImprovement();
-            if (!areImprovementPointsComputed()) {
-              setIsImprovementNeeded(true);
-              return true;
-            }
-        }
-
-        if ((radius_ < tol_radius) ||
-            (beta * crit_measure.norm() < tol_f) &&
+    if ((radius_ < tol_radius) ||
+        (beta * crit_measure.norm() < tol_f) &&
             (radius_ < 100 * tol_radius)) {
 
-            // Note: condition structured as: ((A || C) && B)
-            // whereas in CG it is: (A || C && B) (CLion complains)
+      // Note: condition structured as: ((A || C) && B)
+      // whereas in CG it is: (A || C && B) (CLion complains)
 
-            // CG comment: Better break. Not the end of algorithm,
-            // but satisfies stopping condition for outer algorithm
-            // anyway...
+      // CG comment: Better break. Not the end of algorithm,
+      // but satisfies stopping condition for outer algorithm
+      // anyway...
 
-        }
     }
+  }
 
-    // The final radius is increased to avoid a drastic reduction
-    radius_ = std::min(radius_before_criticality_step,
-		       std::max(radius_, beta * crit_measure.norm()));
-    return false;
+  // The final radius is increased to avoid a drastic reduction
+  radius_ = std::min(radius_before_criticality_step,
+                     std::max(radius_, beta * crit_measure.norm()));
+  return false;
 }
 
 
@@ -246,9 +266,9 @@ double TrustRegionModel::checkInterpolation() {
       // This should be written using only Eigen methods...
       cA = std::max(tol1 * fvalues_.array().abs().maxCoeff(), tol2);
       if (std::abs(cdiff) > cA) {
-          // TODO: removed this print just to avoid messing up output
-//        Printer::ext_warn("cmg:tr_interpolation_error",
-//                          "Interpolation error");
+        // TODO: removed this print just to avoid messing up output
+        // Printer::ext_warn("cmg:tr_interpolation_error",
+        //                  "Interpolation error");
       }
     }
   }
@@ -276,11 +296,11 @@ void TrustRegionModel::submitTempInitCases() {
 }
 
 void TrustRegionModel::submitTempImprCases() {
-    improvement_cases_ = temp_impr_cases_;
+  improvement_cases_ = temp_impr_cases_;
 
-    for (Case *c : improvement_cases_) {
-        improvement_cases_hash_.insert(c->id(), c);
-    }
+  for (Case *c : improvement_cases_) {
+    improvement_cases_hash_.insert(c->id(), c);
+  }
 }
 
 void TrustRegionModel::submitTempReplCases() {
@@ -350,11 +370,11 @@ bool TrustRegionModel::rebuildModel() {
   //!<Reorder points based on their distances to the tr center>
   index_vector_.setLinSpaced(distances_.size(), 0, distances_.size() - 1);
   std::sort(index_vector_.data(),
-          index_vector_.data() + index_vector_.size(),
-          std::bind(compare,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  distances_.data()));
+            index_vector_.data() + index_vector_.size(),
+            std::bind(compare,
+                      std::placeholders::_1,
+                      std::placeholders::_2,
+                      distances_.data()));
 
   //!<All points>
   sortMatrixByIndex(points_shifted_, index_vector_);
@@ -362,16 +382,17 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<All fvalues>
   sortVectorByIndex(distances_, index_vector_);
-    // cout << "fvalues size " << all_fvalues_.size() << endl;
-    // cout << "index size " << index_vector_.size() << endl;
-    // cout << "allpoints size " << all_points_.size() << endl;
-    // cout << "pointsshifted size " << points_shifted_.size() << endl;
-    // cout << "fvalues cols " << all_fvalues_.cols() << endl;
-    // cout << "index cols " << index_vector_.cols() << endl;
-    // cout << "allpoints cols " << all_points_.cols() << endl;
-    // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
-    sortVectorByIndex(all_fvalues_, index_vector_);
+  // cout << "fvalues size " << all_fvalues_.size() << endl;
+  // cout << "index size " << index_vector_.size() << endl;
+  // cout << "allpoints size " << all_points_.size() << endl;
+  // cout << "pointsshifted size " << points_shifted_.size() << endl;
+  // cout << "fvalues cols " << all_fvalues_.cols() << endl;
+  // cout << "index cols " << index_vector_.cols() << endl;
+  // cout << "allpoints cols " << all_points_.cols() << endl;
+  // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
+  sortVectorByIndex(all_fvalues_, index_vector_);
 
+  DBG_printPivotPolynomials("rebuildModel");
   nfpBasis(dim);//!<build nfp polynomial basis>
 
   //!<Starting rowPivotGaussianElimination>
@@ -388,10 +409,11 @@ bool TrustRegionModel::rebuildModel() {
   pivot_values_(0) = 1;
 
   //!<Gaussian elimination (using previous points)>
+  DBG_printModelData("rowPivotGaussianElim-00");
   for (int iter = 1; iter < polynomials_num; iter++) {
 
     pivot_polynomials_[poly_i] =
-            orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+        orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -435,7 +457,7 @@ bool TrustRegionModel::rebuildModel() {
         }
 
         auto val = evaluatePolynomial(
-                pivot_polynomials_[poly_i], points_shifted_.col(n));
+            pivot_polynomials_[poly_i], points_shifted_.col(n));
         val = val / dist_max; //!<minor adjustment>
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
@@ -471,7 +493,7 @@ bool TrustRegionModel::rebuildModel() {
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
       orthogonalizeBlock(
-              points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+          points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
@@ -488,21 +510,24 @@ bool TrustRegionModel::rebuildModel() {
     }
   }
 
+  DBG_printModelData("rowPivotGaussianElimination-01");
   tr_center_ = 0;
   points_abs_ = all_points_.leftCols(last_pt_included + 1).eval();
   points_shifted_ = points_shifted_.leftCols(last_pt_included + 1).eval();
   fvalues_ = all_fvalues_.head(last_pt_included + 1).eval();
+  DBG_printModelData("rowPivotGaussianElimination-02");
 
   double cache_size = std::min(double(n_points - last_pt_included - 1), 3 * pow(dim, 2));
-  
+
   // Consider removing, vector seems cleared already
   modeling_polynomials_.clear();
-  
+  //  DBG_printPolynomials("rowPivotGaussianElimination-02", modeling_polynomials_[0]);
+
   //!<Points not included>
   if (cache_size > 0) {
     cached_points_ = all_points_.middleCols(last_pt_included+1, cache_size).eval();
     cached_fvalues_ = all_fvalues_.segment(last_pt_included+1, cache_size).eval();
-    
+
   } else {
     cached_points_.conservativeResize(0, 0);
     cached_fvalues_.conservativeResize(0);
@@ -511,9 +536,10 @@ bool TrustRegionModel::rebuildModel() {
   //!<Clean auxiliary objects>
   all_points_.conservativeResize(0, 0);
   all_fvalues_.conservativeResize(0);
+  DBG_printModelData("rowPivotGaussianElim-03");
 
   checkDataSize("End of rebuildModel"); // dbg
-  
+
   return last_pt_included < n_points; //!<model has changed>
 }
 
@@ -539,6 +565,8 @@ bool TrustRegionModel::improveModelNfp() {
   int poly_i;
   double new_pivot_value = 0.0;
 
+  DBG_printPivotPolynomials("improveModelNfp-00");
+  DBG_printModelData("improveModelNfp-00");
   auto pivot_polynomials = pivot_polynomials_;
   auto polynomials_num = pivot_polynomials.size();
 
@@ -555,51 +583,42 @@ bool TrustRegionModel::improveModelNfp() {
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
 
-  // Remove later, unshiftPoint function replaces this code
-  // // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
-  // auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
-  //   Eigen::VectorXd shifted_x = x + shift_center;
-  //   shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
-  //   shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
-  //   return shifted_x;
-  // };
-
-  //!<Test if the model is already FL but old
-  //!<Distance measured in inf norm>
+  // Test if the model is already FL but old
+  // Distance measured in inf norm
   auto tr_center_pt = points_shifted_.col(tr_center);
 
   if ((tr_center_pt.lpNorm<Infinity>() > radius_factor*radius) && (p_ini > dim+1)) {
-    exit_flag = false; //!<Needs to rebuild>
+    exit_flag = false; // Needs to rebuild
   } else {
-    //!<The model is not old>
+    // The model is not old>
     if (p_ini < polynomials_num) {
       int block_end = (int)p_ini;
       int block_begining = 0;
-      //!<The model is not complete>
+      // The model is not complete
       if (p_ini < dim+1) {
-        //!<The model is not yet fully linear>
+        // The model is not yet fully linear
         block_begining = 1;
       } else {
-        //!<We can add a point to the quadratic block>
-        block_begining = (int)dim+1;
+        // We can add a point to the quadratic block
+        block_begining = (int)dim + 1;
       }
       int next_position = (int)p_ini;
       double radius_used = radius;
 
-      //!<Possibly try smaller radius>
+      // Possibly try smaller radius
       for (int attempts = 1; attempts<=3; attempts++) {
 
-        //!<Iterate through available polynomials>
+        // Iterate through available polynomials
         for (poly_i = next_position; poly_i<=block_end; poly_i++) {
 
           if(!areImprovementPointsComputed()) {
 
-              nfp_polynomial_ = orthogonalizeToOtherPolynomials(poly_i, p_ini);
-              std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
-                  pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+            nfp_polynomial_ = orthogonalizeToOtherPolynomials(poly_i, p_ini);
+            std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
+                pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
 
           } else if(areImprovementPointsComputed()) {
-              // Using previously computed points/pivot-points
+            // Using previously computed points/pivot-points
           }
 
           if (nfp_point_found_) {
@@ -616,39 +635,39 @@ bool TrustRegionModel::improveModelNfp() {
                 setIsImprovementNeeded(true);
 
                 for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
-                    Case *new_case = new Case(base_case_);
-                    new_case->SetRealVarValues(nfp_new_point_abs_.col(ii));
-                    addImprovementCase(new_case);
+                  Case *new_case = new Case(base_case_);
+                  new_case->SetRealVarValues(nfp_new_point_abs_.col(ii));
+                  addImprovementCase(new_case);
 
-                    pt_case_uuid_.push_back(new_case->id());
+                  pt_case_uuid_.push_back(new_case->id());
                 }
 
                 return 5;  //TODO Probably not necessary
 
               } else if (areImprovementPointsComputed()) {
-                  f_succeeded.conservativeResize(nfp_new_point_abs_.cols(),1);
-                  f_succeeded.fill(false);
-                  for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
+                f_succeeded.conservativeResize(nfp_new_point_abs_.cols(),1);
+                f_succeeded.fill(false);
+                for (int ii = 0; ii < nfp_new_point_abs_.cols(); ii++) {
 
-                    auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
-                    nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
+                  auto c = improvement_cases_hash_[pt_case_uuid_[ii]];
+                  nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
 
-                    if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-                        nfp_new_fvalues_(ii) = -c->objective_function_value();
-                    } else {
-                        nfp_new_fvalues_(ii) = c->objective_function_value();
-                    }
-
-                    std::map <string, string> stateMap = c->GetState();
-                    // stateMap["EvalSt"] gives "pending" after evaluations of
-                    // cases in tests...
-                    // TODO Update status of cases when called from tests
-                    // if(stateMap["EvalSt"] == "OKAY") {
-                      f_succeeded(ii) = true;
-                    // }
+                  if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
+                    nfp_new_fvalues_(ii) = -c->objective_function_value();
+                  } else {
+                    nfp_new_fvalues_(ii) = c->objective_function_value();
                   }
-                  setAreImprovementPointsComputed(false);
-                  pt_case_uuid_.clear();
+
+                  std::map <string, string> stateMap = c->GetState();
+                  // stateMap["EvalSt"] gives "pending" after evaluations of
+                  // cases in tests...
+                  // TODO Update status of cases when called from tests
+                  // if(stateMap["EvalSt"] == "OKAY") {
+                  f_succeeded(ii) = true;
+                  // }
+                }
+                setAreImprovementPointsComputed(false);
+                pt_case_uuid_.clear();
               }
               if (f_succeeded.all()) {
                 break;
@@ -656,24 +675,24 @@ bool TrustRegionModel::improveModelNfp() {
             }
             if (f_succeeded.all()) {
               break;
-              //!<Stop trying pivot polynomials for poly_i>
+              // Stop trying pivot polynomials for poly_i
             }
           }
-          //!<Attempt another polynomial if did not break>
+          // Attempt another polynomial if did not break
           if (poly_i < block_end) {
-              nfp_new_points_shifted_.conservativeResize(0,0);
-              nfp_new_pivots_.conservativeResize(0);
-              nfp_new_point_shifted_.conservativeResize(0);
-              nfp_new_point_abs_.conservativeResize(0);
-              nfp_point_found_ = false;
-              pt_case_uuid_.clear();
+            nfp_new_points_shifted_.conservativeResize(0,0);
+            nfp_new_pivots_.conservativeResize(0);
+            nfp_new_point_shifted_.conservativeResize(0);
+            nfp_new_point_abs_.conservativeResize(0);
+            nfp_point_found_ = false;
+            pt_case_uuid_.clear();
           }
         }
 
         if (nfp_point_found_ && f_succeeded.all()) {
-          break; //!<(for attempts)>
+          break; // (for attempts)
         } else if (nfp_point_found_) {
-          //!<Reduce radius if it did not break>
+          // Reduce radius if it did not break
           radius_used = 0.5 * radius_used;
           if (radius_used < tol_radius) {
             break;
@@ -690,28 +709,32 @@ bool TrustRegionModel::improveModelNfp() {
           clearImprovementCasesList();
         }
 
-        //!<Update this polynomial in the set>
+        DBG_printPivotPolynomials("update-this-polynomial-00");
+        // Update this polynomial in the set
         pivot_polynomials_[poly_i] = nfp_polynomial_;
-        //!<Swap polynomials>
-        std::swap(pivot_polynomials_[poly_i], pivot_polynomials_[next_position]);
+        DBG_printPivotPolynomials("update-this-polynomial-01+swap-polynomials-00");
 
-        //!<Add point>
+        // Swap polynomials
+        std::swap(pivot_polynomials_[poly_i], pivot_polynomials_[next_position]);
+        DBG_printPivotPolynomials("swaped-polynomials-01");
+
+        // Add point
         int nr, nc;
         nr = (int)points_shifted_.rows();
         nc = (int)points_shifted_.cols();
         points_shifted_.conservativeResize(nr, nc+1);
         points_shifted_.col(nc) = nfp_new_point_shifted_;
 
-        //!<Normalize polynomial value>
+        // Normalize polynomial value
         pivot_polynomials_[next_position] = normalizePolynomial(next_position, nfp_new_point_shifted_);
 
-        //!<Re-orthogonalize>
+        // Re-orthogonalize
         pivot_polynomials_[next_position] = orthogonalizeToOtherPolynomials(next_position, p_ini);
 
-        //!<Orthogonalize polynomials on present block (deffering subsequent ones)>
+        // Orthogonalize polynomials on present block (deffering subsequent ones)
         orthogonalizeBlock(nfp_new_point_shifted_, next_position, block_begining, p_ini);
 
-        //!<Update model and recompute polynomials>
+        // Update model and recompute polynomials
         nr = (int)points_abs_.rows();
         nc = (int)points_abs_.cols();
         points_abs_.conservativeResize(nr, nc+1);
@@ -722,17 +745,22 @@ bool TrustRegionModel::improveModelNfp() {
         fvalues_.conservativeResize(nr, nc+1);
         fvalues_.col(nc) = nfp_new_fvalues_;
 
+        DBG_printPivotPolynomials("new_pivot_value-use-00");
         pivot_values_(next_position) = new_pivot_value;
+        DBG_printPivotPolynomials("new_pivot_value-use-01");
 
         exit_flag = true;
       } else {
         exit_flag = false;
       }
     } else {
-      //!<The model is already complete>
+      // The model is already complete
       exit_flag = false;
     }
   }
+
+  DBG_printPivotPolynomials("improveModelNfp-01");
+  DBG_printModelData("improveModelNfp-01");
   return exit_flag;
 }
 
@@ -742,6 +770,8 @@ int TrustRegionModel::ensureImprovement() {
   bool model_old = isOld();
   int exit_flag = 0;
   bool success = false;
+
+  DBG_printModelData("EnsureImpr-00");
 
   if (!model_complete && (!model_old || !model_fl)) {
     //!<Calculate a new point to add>
@@ -768,6 +798,9 @@ int TrustRegionModel::ensureImprovement() {
       exit_flag = 2;
     }
   }
+
+  DBG_printModelData("EnsureImpr-01");
+
   if ((!success) && (improvement_cases_.size() == 0) && (replacement_cases_.size() == 0)) {
     checkDataSize("Before rebuildModel"); // dbg
     bool model_changed = rebuildModel();
@@ -775,7 +808,7 @@ int TrustRegionModel::ensureImprovement() {
     if (!model_changed) {
       if (!model_complete) {
         //!<Improve model>
-      	checkDataSize("Before improveModelNfp second"); // dbg
+        checkDataSize("Before improveModelNfp second"); // dbg
         success = improveModelNfp();
         if (!checkDataSize("After improveModelNfp second")){ // dbg
           cerr << "success: " << success << endl; // dbg
@@ -786,7 +819,7 @@ int TrustRegionModel::ensureImprovement() {
         //!<Replace point>
         checkDataSize("Before chooseandreplace"); // dbg
         success = chooseAndReplacePoint();
-	      checkDataSize("After chooseandreplace"); // dbg
+        checkDataSize("After chooseandreplace"); // dbg
       }
     } else {
       success = true;
@@ -797,6 +830,8 @@ int TrustRegionModel::ensureImprovement() {
       exit_flag = 4;
     }
   }
+
+  DBG_printModelData("EnsureImpr-02");
   return exit_flag;
 }
 
@@ -876,7 +911,10 @@ int TrustRegionModel::changeTrCenter(
 std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   auto x_tr_center = points_abs_.col(tr_center_);
   auto p = getModelingPolynomials()[0];
+  DBG_printPolynomials("solveTrSubproblem-00", p);
+
   auto ps = shiftPolynomial(p, -x_tr_center); //!<Shift to origin>
+  DBG_printPolynomials("solveTrSubproblem-01", ps);
 
   Eigen::VectorXd trial_point(getXDim(), 1);
   double trial_fval;
@@ -1000,7 +1038,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     int block_end = 0;
     if (next_position <= dim)  {
       //!<Add to linear block>
-      block_beginning =1;
+      block_beginning = 1;
       block_end = dim;
     } else {
       //!<Add to quadratic block>
@@ -1031,7 +1069,7 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
   if (exit_flag > 0) {
     points_shifted_temp_.col(next_position) = new_point_shifted;
     points_shifted_.conservativeResize(points_shifted_temp_.rows(),
-            points_shifted_temp_.cols());
+                                       points_shifted_temp_.cols());
     points_shifted_ = points_shifted_temp_;
 
     fvalues_.conservativeResize(fvalues_.cols()+1);
@@ -1042,7 +1080,18 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
     points_abs_.conservativeResize(nr, nc+1);
     points_abs_.col(next_position) = new_point;
 
+    DBG_printDouble((double)modeling_polynomials_.empty(),
+                    "mod_polys_.empty() - 00: % 10.0e ", DBG_fn_pcfs_);
+    DBG_printVectorXd(modeling_polynomials_[0].coefficients,
+                      "mod_polys_ vector b/f clear() 00:       ", "% 10.3e ", DBG_fn_pcfs_);
+    DBG_printPolynomials("addPoint b/f clear()             -- 00",
+                         modeling_polynomials_[0]); // dbg
+
     modeling_polynomials_.clear();
+
+    DBG_printDouble((double)modeling_polynomials_.empty(),
+                    "mod_polys_.empty() - 01: % 10.0e ", DBG_fn_pcfs_);
+
     // pivot_values_.conservativeResize(pivot_values_.cols() + 1); // bug: should not be resized.
     pivot_values_(next_position) = pivot_value;
   }
@@ -1075,6 +1124,8 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
       block_beginning = dim+1;
       block_end = last_p;
     }
+
+    DBG_printPivotPolynomials("exchangePoint-01");
 
     double max_val = 0;
     int max_poly_i = 0;
@@ -1114,12 +1165,16 @@ std::tuple<bool,int> TrustRegionModel::exchangePoint(
       fvalues_(max_poly_i) = new_fvalue;
       pivot_values_(max_poly_i) = new_pivot_val;
       modeling_polynomials_.clear();
+      DBG_printPolynomials("exchangePoint", modeling_polynomials_[0]);
+
       succeeded = true;
       pt_i = max_poly_i;
     } else {
       succeeded = false;
       pt_i = 0;
     }
+    DBG_printFunctionData("exchangePoint", "", new_point, shift_center); // dbg
+
   } else {
     succeeded = false;
     pt_i = 0;
@@ -1134,6 +1189,8 @@ tuple<double, bool> TrustRegionModel::choosePivotPolynomial(int initial_i, int f
   auto pivot_polynomials = pivot_polynomials_;
   bool success = false;
   double pivot_value = 0.0;
+
+  DBG_printPivotPolynomials("choosePivotPolynomial-01");
 
   for (int k = initial_i; k <= final_i; k++) {
     auto polynomial = orthogonalizeToOtherPolynomials(k, last_point);
@@ -1167,6 +1224,7 @@ void TrustRegionModel::computePolynomialModels() {
   int linear_terms = dim+1;
   int full_q_terms = (dim+1)*(dim+2)/2;
   std::vector<Polynomial> polynomials(functions_num);
+  DBG_printPivotPolynomials("computePolynomialModels-00");
 
   if ((linear_terms < points_num) && (points_num < full_q_terms)) {
     //!<Compute quadratic model>
@@ -1183,6 +1241,8 @@ void TrustRegionModel::computePolynomialModels() {
     }
   }
   modeling_polynomials_ = polynomials;
+  DBG_printPolynomials("computePolynomialModels", modeling_polynomials_[0]);
+  DBG_printPivotPolynomials("computePolynomialModels-01");
 }
 
 void TrustRegionModel::shiftPolynomialToEndBlock(
@@ -1191,7 +1251,7 @@ void TrustRegionModel::shiftPolynomialToEndBlock(
 
   std::swap(pivot_polynomials_[point_index], pivot_polynomials_[block_end]);
   for (int pi=block_end-1; pi>point_index; pi--) {
-        std::swap(pivot_polynomials_[pi], pivot_polynomials_[point_index]);
+    std::swap(pivot_polynomials_[pi], pivot_polynomials_[point_index]);
   }
 }
 
@@ -1370,6 +1430,7 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 Polynomial TrustRegionModel::normalizePolynomial(
     int poly_i,
     VectorXd point) {
+  DBG_printPivotPolynomials("normalizePolynomial-00");
   auto polynomial = pivot_polynomials_[poly_i];
   auto val = evaluatePolynomial(polynomial, point);
   for (int i = 0; i < 3; i++) {
@@ -1379,12 +1440,14 @@ Polynomial TrustRegionModel::normalizePolynomial(
       break;
     }
   }
+  DBG_printPivotPolynomials("normalizePolynomial-01");
   return polynomial;
 }
 
 Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
     int poly_i,
     int last_pt) {
+  DBG_printPivotPolynomials("orthogonalizeToOtherPolynomials-00");
   auto polynomial = pivot_polynomials_[poly_i];
   for (int n = 0; n <= last_pt; n++) {
     if (n != poly_i) {
@@ -1393,6 +1456,7 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
                                points_shifted_.col(n));
     }
   }
+  DBG_printPivotPolynomials("orthogonalizeToOtherPolynomials-01");
   return polynomial;
 }
 
@@ -1401,11 +1465,13 @@ void TrustRegionModel::orthogonalizeBlock(
     int np,
     int block_beginning,
     int block_end) {
+  DBG_printPivotPolynomials("orthogonalizeBlock-00");
   for (int p = block_beginning; p <= block_end; p++) {
     if (p != np) {
       pivot_polynomials_[p] = zeroAtPoint(pivot_polynomials_[p], pivot_polynomials_[np], point);
     }
   }
+  DBG_printPivotPolynomials("orthogonalizeBlock-01");
 }
 
 
@@ -1419,6 +1485,10 @@ Polynomial TrustRegionModel::zeroAtPoint(
   auto px = evaluatePolynomial(p, x);
   auto p2x = evaluatePolynomial(p2, x);
   int iter = 1;
+
+  VectorXd xd(3); xd << px, p2x, -px/p2x; // dbg
+  DBG_printVectorXd(xd, "p-vals: ", "% 10.3e ", DBG_fn_pivp_);
+
   while (px != 0) {
     p = addPolynomial(p, multiplyPolynomial(p2, -px/p2x));
     px = evaluatePolynomial(p, x);
@@ -1437,12 +1507,21 @@ double TrustRegionModel::evaluatePolynomial(
   double terms[3];
   VectorXd g(p1.dimension);
   MatrixXd H(p1.dimension, p1.dimension);
+
+  DBG_printPolynomials("evaluatePolynomial", p1);
   std::tie(c, g, H) = coefficientsToMatrices(p1.dimension, p1.coefficients);
+
+  VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
+  DBG_printVectorXd(xv, "c -- prod(gx) -- prod(xHx): ", "% 10.3e ", DBG_fn_pivp_);
 
   terms[0] = c;
   terms[1] = g.transpose()*x;
   terms[2] = (x.transpose()*H*x);
   terms[2] *= 0.5;
+
+  DBG_printVectorXd(x, "point x ", "% 10.3e ", DBG_fn_pivp_);
+  VectorXd xt(3); xt << terms[0], terms[1], terms[2]; // dbg
+  DBG_printVectorXd(xt, "c --    gx    --    xHx:    ", "% 10.3e ", DBG_fn_pivp_);
 
   return terms[0] + terms[1] + terms[2];
 
@@ -1459,6 +1538,9 @@ Polynomial TrustRegionModel::addPolynomial(
     throw std::runtime_error("Failed to compute add polynomials. "
                              "They have different dimensions.");
   }
+
+  DBG_printVectorXd(p1.coefficients, "add-p1: ", "% 10.3e ", DBG_fn_pivp_);
+  DBG_printVectorXd(p2.coefficients, "add-p2: ", "% 10.3e ", DBG_fn_pivp_);
 
   Polynomial p;
   p.dimension = p1.dimension;
@@ -1479,7 +1561,11 @@ Polynomial TrustRegionModel::multiplyPolynomial(
     Polynomial p1,
     double factor) {
   Polynomial p = p1;
-  p.coefficients = p1.coefficients*factor;
+  DBG_printVectorXd(p.coefficients, "multp0: ", "% 10.3e ", DBG_fn_pivp_);
+
+  p.coefficients = p1.coefficients * factor;
+  DBG_printVectorXd(p.coefficients, "multp1: ", "% 10.3e ", DBG_fn_pivp_);
+
   return p;
 }
 
@@ -1548,9 +1634,10 @@ TrustRegionModel::computeQuadraticMNPolynomials() {
       H += mult_mn(m)*(points_shifted.col(m)*points_shifted.col(m).transpose());
     }
     auto c = fvalues_(tr_center_);
-
     polynomials[n] = matricesToPolynomial(c, g, H);
   }
+
+  DBG_printPivotPolynomials("computeQuadraticMNPolynomials");
   return polynomials;
 }
 
@@ -1558,8 +1645,10 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   //!<Change so we can interpolate more functions at the same time>
   int dim = (int)points_shifted_.rows();
   RowVectorXd l_alpha = fvalues_;
-    std::vector<Polynomial> polynomials =
-            std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+  DBG_printPivotPolynomials("nfpFiniteDifferences");
+
+  std::vector<Polynomial> polynomials =
+      std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
 
   //!<Remove constant polynomial>
   for (int m = 1; m < points_num; m++) {
@@ -1578,29 +1667,153 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   return l_alpha;
 }
 
-void TrustRegionModel::DBG_printPivotPolynomials(string msg=""){
+void TrustRegionModel::DBG_printHeader(stringstream &ss, string msg, int htype) {
   string ENDSTRN = string(100, '=');
-  cout << BRED << BLDON << FBLACK << ENDSTRN << AEND << endl;
+
   if (msg != "") {
-    cout << BRED << BLDON << FBLACK << "[" << msg << "]" << AEND << endl;
+    if ( htype == 0 ) {
+      ss << ENDSTRN << endl;
+      ss << "[" << msg << "]" << endl;
+
+    } else if ( htype == 1 ) {
+      Printer::pad_text(msg, 28);
+      ss << "[" << msg << "]";
+    }
+  }
+}
+
+void TrustRegionModel::DBG_printModelData(string msg) {
+  stringstream ss;
+  DBG_printHeader(ss, msg);
+
+  ss << "cached_fvalues_: " << DBG_printVectorXd(cached_fvalues_) << "\n";
+  ss << "cached_points_: "  << DBG_printMatrixXd(cached_points_, " ") << "\n";
+  ss << "fvalues_: "        << DBG_printVectorXd(fvalues_) << "\n";
+
+  ss << "all_points_: "     << DBG_printMatrixXd(all_points_, " ") << "\n";
+  ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
+  ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
+
+  ss << "repl_new_points_shifted_: " << DBG_printMatrixXd(repl_new_points_shifted_, " ") << "\n";
+  ss << "repl_new_point_shifted_: " << DBG_printMatrixXd(repl_new_point_shifted_, " ") << "\n";
+  ss << "repl_new_pivots_: " << DBG_printMatrixXd(repl_new_pivots_, " ") << "\n";
+
+  ss << "repl_new_point_abs_: " << DBG_printMatrixXd(repl_new_point_abs_, " ") << "\n";
+  ss << "repl_new_fvalues_: "   << DBG_printVectorXd(repl_new_fvalues_) << "\n";
+
+  ss << "lb_: " << DBG_printVectorXd(lb_) << "\n";
+  ss << "ub_: " << DBG_printVectorXd(ub_) << "\n";
+
+  DBG_printToFile(DBG_fn_mdat_, ss.str());
+}
+
+string TrustRegionModel::DBG_printSettingsData(string msg) {
+  stringstream ss;
+  DBG_printHeader(ss, msg);
+
+  ss << "tr parameters      " << " & " << "value" << "\\\\ \\toprule \n";
+  // ss << "tr\\_prob\\_name:  " << " &  " << getParams().tr_prob_name << " \\\\ \n";
+  ss << "tr\\_init\\_rad:   " << " & $" << DBG_printDouble(getParams().tr_initial_radius) << " $ \\\\ \n";
+  ss << "tr\\_tol\\_f:      " << " & $" << DBG_printDouble(getParams().tr_tol_f) << " $ \\\\ \n";
+  ss << "tr\\_eps\\_c:      " << " & $" << DBG_printDouble(getParams().tr_eps_c) << " $ \\\\ \n";
+  ss << "tr\\_eta\\_0:      " << " & $" << DBG_printDouble(getParams().tr_eta_0) << " $ \\\\ \n";
+  ss << "tr\\_eta\\_1:      " << " & $" << DBG_printDouble(getParams().tr_eta_1) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_piv\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_pivot_threshold) << " $ \\\\ \n";
+  ss << "tr\\_add\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_add_threshold) << " $ \\\\ \n";
+  ss << "tr\\_exch\\_thresh:" << " & $" << DBG_printDouble(getParams().tr_exchange_threshold) << " $ \\\\ \n";
+  ss << "tr\\_rad\\_max:    " << " & $" << DBG_printDouble(getParams().tr_radius_max) << " $ \\\\ \n";
+  ss << "tr\\_rad\\_factor: " << " & $" << DBG_printDouble(getParams().tr_radius_factor) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_tol\\_rad:    " << " & $" << DBG_printDouble(getParams().tr_tol_radius) << " $ \\\\ \n";
+  ss << "tr\\_gamma\\_inc:  " << " & $" << DBG_printDouble(getParams().tr_gamma_inc) << " $ \\\\ \n";
+  ss << "tr\\_gamma\\_dec:  " << " & $" << DBG_printDouble(getParams().tr_gamma_dec) << " $ \\\\ \n";
+  ss << "tr\\_crit\\_mu:    " << " & $" << DBG_printDouble(getParams().tr_criticality_mu) << " $ \\\\ \n";
+  ss << "tr\\_crit\\_omega: " << " & $" << DBG_printDouble(getParams().tr_criticality_omega) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_crit\\_beta:  " << " & $" << DBG_printDouble(getParams().tr_criticality_beta) << " $ \\\\ \n";
+  ss << "tr\\_lower\\_b:    " << " & $" << DBG_printDouble(getParams().tr_lower_bound) << " $ \\\\ \n";
+  ss << "tr\\_upper\\_b:    " << " & $" << DBG_printDouble(getParams().tr_upper_bound) << " $ \\\\ \\bottomrule";
+
+  DBG_printToFile(DBG_fn_sdat_, ss.str());
+  return ss.str();
+}
+
+void TrustRegionModel::DBG_printFunctionData(
+    string fnm, string msg,
+    VectorXd v0, VectorXd v1, VectorXd v2,
+    double d0, double d1, double d2) {
+
+  stringstream ss;
+  DBG_printHeader(ss, "FOEx");
+  string fn;
+
+  if (fnm == "exchangePoint") {
+    ss << "[ p_abs_.rows(): " << DBG_printDouble(points_abs_.rows(),   "% 2.0f") << " ]";
+    ss << "[ last_p: "        << DBG_printDouble(points_abs_.cols()-1, "% 2.0f") << " ]";
+    ss << "[ center_i: "      << DBG_printDouble((double)tr_center_,         "% 2.0f") << " ]";
+    ss << "[ radius_: "       << DBG_printDouble((double)radius_,"% 6.3e") << " ]\n";
+    ss << "new_point: "       << DBG_printVectorXd(v0);
+    ss << "shift_center: "    << DBG_printVectorXd(v1) << "\n";
+    ss << "pivot_values_: "   << DBG_printVectorXd(pivot_values_) << "\n";
+
+    ss << "cached_fvalues_: " << DBG_printVectorXd(cached_fvalues_) << "\n";
+    ss << "cached_points_: "  << DBG_printMatrixXd(cached_points_, " ") << "\n";
+    ss << "fvalues_: "        << DBG_printVectorXd(fvalues_) << "\n";
+    ss << "points_abs_: "     << DBG_printMatrixXd(points_abs_, " ") << "\n";
+    ss << "points_shifted_: " << DBG_printMatrixXd(points_shifted_, " ") << "\n";
+    fn = DBG_fn_xchp_;
+
+  } else if (fnm == "none") {
+    cout << "Specify function name" << "\n";
   }
 
-  for (int kk = 1; kk < pivot_polynomials_.size(); kk++) {
+  DBG_printToFile(fn, ss.str());
+}
+
+void TrustRegionModel::DBG_printPolynomials(string msg, Polynomial polynomial) {
+  stringstream ss;
+  if (msg != "") DBG_printHeader(ss, msg, 1);
+  ss << DBG_printVectorXd(polynomial.coefficients) << endl;
+  DBG_printToFile(DBG_fn_pcfs_, ss.str());
+}
+
+void TrustRegionModel::DBG_printPivotValues(string msg="") {
+  stringstream ss;
+  if (msg != "") DBG_printHeader(ss, msg);
+  ss << DBG_printVectorXd(pivot_values_) << endl;
+  ss << DBG_printVectorXd(piv_order_) << endl;
+  DBG_printToFile(DBG_fn_pivp_, ss.str());
+}
+
+void TrustRegionModel::DBG_printPivotPolynomials(string msg="") {
+  stringstream ss;
+  DBG_printHeader(ss, msg);
+
+  for (int kk = 0; kk < pivot_polynomials_.size(); kk++) {
     auto vec = pivot_polynomials_[kk].coefficients;
-    
-    cout << FGREEN << "pivot.polyn#" << kk << "[ ";
-    for (int ii = 0; ii < vec.size()-1; ii++) {
-      cout << OSD(vec(ii));
-    }
-    cout << OSD(vec.size()-1) << " ]" << AEND <<  endl;
-  }  
+    stringstream si; si << "piv.p#" << kk << " ";
+    ss << DBG_printVectorXd(vec, si.str()) << endl;
+  }
+
+  if (pivot_values_.size() > 0) {
+    ss << DBG_printVectorXd(pivot_values_, "piv_vls ") << endl;
+  } else {
+    ss << "pivot_values_.size(): " << pivot_values_.size() << endl;
+  }
+
+  DBG_printToFile(DBG_fn_pivp_, ss.str());
+}
+
+void TrustRegionModel::DBG_printToFile(string fn, string sout) {
+  FILE * pFile;
+  pFile = std::fopen(fn.c_str(), "a");
+  std::fprintf(pFile, "%s", sout.c_str());
+  fclose (pFile);
 }
 
 Polynomial TrustRegionModel::combinePolynomials(
     int points_num,
     RowVectorXd coefficients) {
 
-    // DBG_printPivotPolynomials("combinePolynomials");
+  // DBG_printPivotPolynomials("combinePolynomials");
 
   auto polynomials = std::vector<Polynomial>(
       pivot_polynomials_.begin(),
@@ -1631,6 +1844,7 @@ Polynomial TrustRegionModel::shiftPolynomial(Polynomial polynomial, VectorXd s) 
   VectorXd g(polynomial.dimension);
   MatrixXd H(polynomial.dimension, polynomial.dimension);
 
+  DBG_printPolynomials("shiftPolynomial", polynomial);
   std::tie(c, g, H) = coefficientsToMatrices(polynomial.dimension, polynomial.coefficients);
 
   double c_mod = c + (double)(g.transpose()*s) + 0.5*(double)(s.transpose()*H*s);
@@ -1686,29 +1900,29 @@ bool TrustRegionModel::chooseAndReplacePoint() {
   auto bu_shifted = ub_ - shift_center;
   bool success = false;
 
+  DBG_printPivotPolynomials("chooseAndReplacePoint-00");
+  DBG_printModelData("chooseAndReplacePoint-00");
+
   Eigen::Matrix<bool, 1, Dynamic> f_succeeded;
   f_succeeded.conservativeResize(1);
   f_succeeded.fill(false);
-  
-  // Remove later, unshiftPoint function replaces this code
-  // //TODO: test this function
-  // auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
-  //   Eigen::VectorXd shifted_x = x + shift_center;
-  //   shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center).eval();
-  //   shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center).eval();
-  //   return shifted_x;
-  // };
 
   //!<Reorder points based on their pivot_values>
   piv_order_.setLinSpaced(pivot_values_.size(), 0, pivot_values_.size() - 1);
+  DBG_printPivotValues("chRplcPnt");
+
   std::sort(piv_order_.data(),
             piv_order_.data() + piv_order_.size(),
             std::bind(compareAbs,
                       std::placeholders::_1,
                       std::placeholders::_2,
                       pivot_values_.data()));
+  DBG_printPivotValues("chRplcPnt");
 
   int polynomials_num = pivot_polynomials_.size();
+  DBG_printPivotPolynomials("chooseAndReplacePoint-01");
+  DBG_printModelData("chooseAndReplacePoint-01");
+
   //!<Could iterate through all pivots, but will try just dealing with the worst one>
   auto pos = piv_order_(0);
   if ((pos == 0) || (pos == tr_center) || (pos <= linear_terms && points_num > linear_terms)) {
@@ -1720,7 +1934,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
     if (!areReplacementPointsComputed()) {
       std::tie(repl_new_points_shifted_, repl_new_pivots_, repl_point_found_) =
-              pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+          pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+      DBG_printModelData("chooseAndReplacePoint-02");
     }
 
     if (repl_point_found_) {
@@ -1728,11 +1943,14 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
         if (!areReplacementPointsComputed()) {
 
+          DBG_printModelData("chooseAndReplacePoint-03");
+          DBG_printDouble((double)found_i, "found_i: % 10.0e ", DBG_fn_mdat_);
           repl_new_point_shifted_ = repl_new_points_shifted_.col(found_i);
           auto new_pivot_value = repl_new_pivots_(found_i);
 
           repl_new_point_abs_ = unshiftPoint(repl_new_point_shifted_);
           repl_new_fvalues_.conservativeResize(repl_new_point_abs_.cols());
+          DBG_printModelData("chooseAndReplacePoint-04");
 
           setIsReplacementNeeded(true);
 
@@ -1746,6 +1964,8 @@ bool TrustRegionModel::chooseAndReplacePoint() {
           return true; //TODO Probably not necessary
 
         } else if (areReplacementPointsComputed()) {
+
+          DBG_printModelData("chooseAndReplacePoint-05");
           f_succeeded.conservativeResize(nfp_new_point_abs_.cols(), 1);
           f_succeeded.fill(false);
 
@@ -1764,8 +1984,9 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
             std::map<string, string> stateMap = c->GetState();
             f_succeeded(ii) = true;
-
           }
+
+          DBG_printModelData("chooseAndReplacePoint-06");
           setAreReplacementPointsComputed(false);
           repl_pt_case_uuid_.clear();
         }
@@ -1779,11 +2000,13 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       setIsReplacementNeeded(false);
 
       if (!replacement_cases_.size() == 0) {
-          clearReplacementCasesList();
+        clearReplacementCasesList();
       }
 
       //!<Normalize polynomial value>
       pivot_polynomials_[pos] = normalizePolynomial(pos, repl_new_point_shifted_);
+      DBG_printPivotPolynomials("chooseAndReplacePoint-03");
+      DBG_printModelData("chooseAndReplacePoint-07");
 
       //!<Orthogonalize polynomials on present block (all)>
       int block_beginning;
@@ -1812,6 +2035,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       cached_fvalues_.conservativeResize(nc_fv+1);
       cached_fvalues_.col(nc_fv) = fvalues_.col(pos);
 
+      DBG_printModelData("chooseAndReplacePoint-08");
       points_abs_.col(pos) = repl_new_point_abs_;
 
       fvalues_.col(pos) = repl_new_fvalues_;
@@ -1819,6 +2043,9 @@ bool TrustRegionModel::chooseAndReplacePoint() {
       pivot_values_((int)pos) *= new_pivot_value;
 
       modeling_polynomials_.clear();
+      DBG_printPolynomials("chooseAndReplacePoint", modeling_polynomials_[0]);
+      DBG_printModelData("chooseAndReplacePoint-09");
+
       success = true;
     }
   }
@@ -1826,89 +2053,100 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 }
 
 Eigen::VectorXd TrustRegionModel::unshiftPoint(Eigen::VectorXd &x) {
-  
+
   auto shift_center = points_abs_.col(0);
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
-  
+
+  DBG_printVectorXd(shift_center, "shift_cntr: ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(bl_shifted,   "bl_shifted: ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(bu_shifted,   "bu_shifted: ", "% 10.3e ", DBG_fn_mdat_);
+
   Eigen::VectorXd shifted_x = x + shift_center;
+  DBG_printVectorXd(shifted_x,    "shifted_x0: ", "% 10.3e ", DBG_fn_mdat_);
+
   shifted_x = shifted_x.cwiseMin(bu_shifted + shift_center).eval();
+  DBG_printVectorXd(shifted_x,    "shifted_x1: ", "% 10.3e ", DBG_fn_mdat_);
+
   shifted_x = shifted_x.cwiseMax(bl_shifted + shift_center).eval();
-  
+  DBG_printVectorXd(shifted_x,    "shifted_x2: ", "% 10.3e ", DBG_fn_mdat_);
+
   return shifted_x;
 }
 
 
-tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool> TrustRegionModel::pointNew(Polynomial polynomial,
-                           Eigen::VectorXd tr_center_point,
-                           double radius_used,
-                           Eigen::VectorXd bl,
-                           Eigen::VectorXd bu,
-                           double pivot_threshold) {
+tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
+    TrustRegionModel::pointNew(Polynomial polynomial,
+        Eigen::VectorXd tr_center_point,
+        double radius_used,
+        Eigen::VectorXd bl,
+        Eigen::VectorXd bu,
+        double pivot_threshold) {
 
-    Eigen::VectorXd new_point_min(getXDim(), 1);
-    Eigen::VectorXd new_point_max(getXDim(), 1);
-    Eigen::MatrixXd new_points(getXDim(), 2);
+  Eigen::VectorXd new_point_min(getXDim(), 1);
+  Eigen::VectorXd new_point_max(getXDim(), 1);
+  Eigen::MatrixXd new_points(getXDim(), 2);
 
-    double pivot_min, pivot_max;
-    Eigen::RowVectorXd new_pivot_values(new_points.cols());
+  double pivot_min, pivot_max;
+  Eigen::RowVectorXd new_pivot_values(new_points.cols());
 
-    int exitflag_min, exitflag_max;
-    bool point_found;
+  int exitflag_min, exitflag_max;
+  bool point_found;
 
-    tie(new_point_min, pivot_min, exitflag_min) = minimizeTr(polynomial,
-                                                             tr_center_point,
-                                                             radius_used,
-                                                             bl, bu);
+  tie(new_point_min, pivot_min, exitflag_min) = minimizeTr(polynomial,
+                                                           tr_center_point,
+                                                           radius_used,
+                                                           bl, bu);
 
-    auto polynomial_max = multiplyPolynomial(polynomial, -1);
+  auto polynomial_max = multiplyPolynomial(polynomial, -1);
 
-    tie(new_point_max, pivot_max, exitflag_max) = minimizeTr(polynomial_max,
-                                                             tr_center_point,
-                                                             radius_used,
-                                                             bl, bu);
+  tie(new_point_max, pivot_max, exitflag_max) = minimizeTr(polynomial_max,
+                                                           tr_center_point,
+                                                           radius_used,
+                                                           bl, bu);
 
-    if ((exitflag_min >= 0)
-        && (abs(pivot_min) >= pivot_threshold)) {
+  if ((exitflag_min >= 0)
+      && (abs(pivot_min) >= pivot_threshold)) {
 
-        if ((exitflag_max >= 0)
-            && (abs(pivot_max) >= abs(pivot_min))) {
-            new_points.col(0) = new_point_max;
-            new_points.col(1) = new_point_min;
-            new_pivot_values << pivot_max, pivot_min;
 
-        } else if ((exitflag_max >= 0)
-                   && (abs(pivot_max) >= pivot_threshold)) {
-            new_points.col(0) = new_point_min;
-            new_points.col(1) = new_point_max;
-            new_pivot_values << pivot_min, pivot_max;
-
-        } else {
-            new_points.conservativeResize(dim_,1);
-            new_points.col(0) = new_point_min;
-
-            new_pivot_values.conservativeResize(new_points.cols());
-            new_pivot_values << pivot_min;
-        }
-        point_found = true;
+    if ((exitflag_max >= 0)
+        && (abs(pivot_max) >= abs(pivot_min))) {
+      new_points.col(0) = new_point_max;
+      new_points.col(1) = new_point_min;
+      new_pivot_values << pivot_max, pivot_min;
 
     } else if ((exitflag_max >= 0)
-               && (abs(pivot_max) >= pivot_threshold)) {
-        new_points.conservativeResize(dim_,1);
-        new_points.col(0) = new_point_max;
-
-        new_pivot_values.conservativeResize(new_points.cols());
-        new_pivot_values << pivot_max;
-        point_found = true;
+        && (abs(pivot_max) >= pivot_threshold)) {
+      new_points.col(0) = new_point_min;
+      new_points.col(1) = new_point_max;
+      new_pivot_values << pivot_min, pivot_max;
 
     } else {
-        point_found = false;
-        new_points.conservativeResize(0, 0);
-        new_pivot_values.conservativeResize(1);
-        new_pivot_values << 0;
-    }
+      new_points.conservativeResize(dim_,1);
+      new_points.col(0) = new_point_min;
 
-    return make_tuple(new_points, new_pivot_values, point_found);
+      new_pivot_values.conservativeResize(new_points.cols());
+      new_pivot_values << pivot_min;
+    }
+    point_found = true;
+
+  } else if ((exitflag_max >= 0)
+      && (abs(pivot_max) >= pivot_threshold)) {
+    new_points.conservativeResize(dim_,1);
+    new_points.col(0) = new_point_max;
+
+    new_pivot_values.conservativeResize(new_points.cols());
+    new_pivot_values << pivot_max;
+    point_found = true;
+
+  } else {
+    point_found = false;
+    new_points.conservativeResize(0, 0);
+    new_pivot_values.conservativeResize(1);
+    new_pivot_values << 0;
+  }
+
+  return make_tuple(new_points, new_pivot_values, point_found);
 }
 
 tuple<Eigen::VectorXd, double, int>
@@ -1918,139 +2156,141 @@ TrustRegionModel::minimizeTr(Polynomial p,
                              Eigen::VectorXd bl,
                              Eigen::VectorXd bu) {
 
-    Eigen::VectorXd x(getXDim(), 1);
-    Eigen::VectorXd bl_tr(getXDim(), 1), bu_tr(getXDim(), 1);
-    Eigen::VectorXd bl_mod(getXDim(), 1), bu_mod(getXDim(), 1);
+  Eigen::VectorXd x(getXDim(), 1);
+  Eigen::VectorXd bl_tr(getXDim(), 1), bu_tr(getXDim(), 1);
+  Eigen::VectorXd bl_mod(getXDim(), 1), bu_mod(getXDim(), 1);
 
-    Eigen::VectorXd x0(getXDim(), 1);
-    double fval;
+  Eigen::VectorXd x0(getXDim(), 1);
+  double fval;
 
-    double tol_norm, tol_arg, tol_tr, tol_eps;
-    int exitflag = -1;
+  double tol_norm, tol_arg, tol_tr, tol_eps;
+  int exitflag = -1;
 
-    // TR tol
-    // CG: tol_arg = max(1, norm(x_tr_center, inf));
-    tol_tr = 10*std::numeric_limits<double>::epsilon();
-    if (x_tr_center.lpNorm<Infinity>() > 2.0) {
-        // Fix to match matlab code
-        tol_tr *= 2;
+  // TR tol
+  // CG: tol_arg = max(1, norm(x_tr_center, inf));
+  tol_tr = 10*std::numeric_limits<double>::epsilon();
+  if (x_tr_center.lpNorm<Infinity>() > 2.0) {
+    // Fix to match matlab code
+    tol_tr *= 2;
+  }
+
+  // TR bounds
+  bl_tr = x_tr_center.array() - radius;
+  bu_tr = x_tr_center.array() + radius;
+
+  bl_mod = bl.cwiseMax(bl_tr);
+  bl_mod = bl_mod.array() + tol_tr;
+
+  bu_mod = bu.cwiseMin(bu_tr);
+  bu_mod = bu_mod.array() - tol_tr;
+
+  // Restoring feasibility at TR center
+  for (int ii=0; ii < bl.rows(); ii++) {
+    if (x_tr_center(ii) <= bl(ii)) {
+      bl_mod(ii) = bl(ii);
     }
-
-    // TR bounds
-    bl_tr = x_tr_center.array() - radius;
-    bu_tr = x_tr_center.array() + radius;
-
-    bl_mod = bl.cwiseMax(bl_tr);
-    bl_mod = bl_mod.array() + tol_tr;
-
-    bu_mod = bu.cwiseMin(bu_tr);
-    bu_mod = bu_mod.array() - tol_tr;
-
-    // Restoring feasibility at TR center
-    for (int ii=0; ii < bl.rows(); ii++) {
-        if (x_tr_center(ii) <= bl(ii)) {
-            bl_mod(ii) = bl(ii);
-        }
-        if (x_tr_center(ii) >= bu(ii)) {
-            bu_mod(ii) = bu(ii);
-        }
+    if (x_tr_center(ii) >= bu(ii)) {
+      bu_mod(ii) = bu(ii);
     }
+  }
 
-    x0 = x_tr_center;
+  x0 = x_tr_center;
 
-    double c;
-    Eigen::VectorXd g(p.dimension);
-    Eigen::MatrixXd H(p.dimension, p.dimension);
-    tie(c, g, H) = coefficientsToMatrices(p.dimension,
-                                          p.coefficients);
+  double c;
+  Eigen::VectorXd g(p.dimension);
+  Eigen::MatrixXd H(p.dimension, p.dimension);
 
-    // Set prob name (incl. spec) to be solved
-    Optimizer::EmbeddedProblem prob;
-    prob.setProbName("TRMod_A");
-    // prob.setProbName("Rosenbrock"); // dbg
+  DBG_printPolynomials("minimizeTr", p);
+  tie(c, g, H) = coefficientsToMatrices(p.dimension,
+                                        p.coefficients);
 
-    // Set prob dims
-    prob.setNunVars(getXDim());
-    prob.setNumLinConst(0);
-    prob.setNunNnlConst(0);
+  // Set prob name (incl. spec) to be solved
+  Optimizer::EmbeddedProblem prob;
+  prob.setProbName("TRMod_A");
+  // prob.setProbName("Rosenbrock"); // dbg
 
-    // Set init point, bounds on vars
-    prob.setXInit(x0);
-    prob.setXUb(bu_mod);
-    prob.setXLb(bl_mod);
+  // Set prob dims
+  prob.setNunVars(getXDim());
+  prob.setNumLinConst(0);
+  prob.setNunNnlConst(0);
 
-    VectorXd FUb(1 + prob.getNunNnlConst());
-    VectorXd FLb(1 + prob.getNunNnlConst());
+  // Set init point, bounds on vars
+  prob.setXInit(x0);
+  prob.setXUb(bu_mod);
+  prob.setXLb(bl_mod);
 
-    // Bounds on objective of tr prob
-    FUb(0) = 1e200;
-    FLb(0) = -1e200;
+  VectorXd FUb(1 + prob.getNunNnlConst());
+  VectorXd FLb(1 + prob.getNunNnlConst());
 
-    // Bounds on nonlinear c imposed on tr prob
-    // NOTE: not active since prob.getNunNnlConst() = 0
-    // FUb(1) = radius;
-    // FLb(1) = 0;
+  // Bounds on objective of tr prob
+  FUb(0) = 1e200;
+  FLb(0) = -1e200;
 
-    prob.setFUb(FUb);
-    prob.setFLb(FLb);
+  // Bounds on nonlinear c imposed on tr prob
+  // NOTE: not active since prob.getNunNnlConst() = 0
+  // FUb(1) = radius;
+  // FLb(1) = 0;
 
-    // TODO Missing spec for linear constraints
+  prob.setFUb(FUb);
+  prob.setFLb(FLb);
 
-    // Transfer tr model data
-    prob.setTrC(c);
-    prob.setTrG(g);
-    prob.setTrH(H);
+  // TODO Missing spec for linear constraints
 
-    SNOPTSolver_->setUpSNOPTSolver(prob);
+  // Transfer tr model data
+  prob.setTrC(c);
+  prob.setTrG(g);
+  prob.setTrH(H);
 
-    x = prob.getXSol();
-    fval = prob.getFSol()(0);
+  SNOPTSolver_->setUpSNOPTSolver(prob);
 
-    if (prob.getSNOPTExitCode() == 1) {
-        // Should be zero -- double check
-        exitflag = 0;
-    }
+  x = prob.getXSol();
+  fval = prob.getFSol()(0);
 
-    return make_tuple(x, fval, exitflag);
+  if (prob.getSNOPTExitCode() == 1) {
+    // Should be zero -- double check
+    exitflag = 0;
+  }
+
+  return make_tuple(x, fval, exitflag);
 }
 
 bool TrustRegionModel::checkDataSize(string context){
 
-    int points_abs_size;
-    int points_shifted_size;
-    int fvalues_size;
-    int cached_fvalues_size;
-    int cached_points_size;
+  int points_abs_size;
+  int points_shifted_size;
+  int fvalues_size;
+  int cached_fvalues_size;
+  int cached_points_size;
 
-    bool test_passed;
+  bool test_passed;
 
-    points_abs_size = points_abs_.cols();
-    points_shifted_size = points_shifted_.cols();
-    fvalues_size = fvalues_.cols();
-    cached_fvalues_size = cached_fvalues_.cols();
-    cached_points_size = cached_points_.cols();
+  points_abs_size = points_abs_.cols();
+  points_shifted_size = points_shifted_.cols();
+  fvalues_size = fvalues_.cols();
+  cached_fvalues_size = cached_fvalues_.cols();
+  cached_points_size = cached_points_.cols();
 
-    test_passed = (points_abs_size == points_shifted_size
-		   && points_abs_size == fvalues_size
-		   && cached_points_size == cached_fvalues_size);
-    
-    /*if (!test_passed){
-      cerr << endl;
-      cerr << "----------------------------------------------------------------------" << endl;
-      cerr << context << endl;
-      cerr << "======================================================================" << endl;
-      cerr << "points abs: " << points_abs_size << endl;
-      cerr << "points shifted: " << points_shifted_size << endl;
-      cerr << "fvalues: " << fvalues_size << endl;
-      cerr << "points cached: " << cached_points_size << endl;
-      cerr << "fvalues cached: " << cached_fvalues_size << endl;
-      cerr << "**********************************************************************" << endl;
-      cerr << endl;
-    }*/
+  test_passed = (points_abs_size == points_shifted_size
+      && points_abs_size == fvalues_size
+      && cached_points_size == cached_fvalues_size);
 
-    return test_passed;
+  /*if (!test_passed){
+    cerr << endl;
+    cerr << "----------------------------------------------------------------------" << endl;
+    cerr << context << endl;
+    cerr << "======================================================================" << endl;
+    cerr << "points abs: " << points_abs_size << endl;
+    cerr << "points shifted: " << points_shifted_size << endl;
+    cerr << "fvalues: " << fvalues_size << endl;
+    cerr << "points cached: " << cached_points_size << endl;
+    cerr << "fvalues cached: " << cached_fvalues_size << endl;
+    cerr << "**********************************************************************" << endl;
+    cerr << endl;
+  }*/
+
+  return test_passed;
 
 }
-  
+
 }  // namespace Optimizers
 }  // namespace Optimization
