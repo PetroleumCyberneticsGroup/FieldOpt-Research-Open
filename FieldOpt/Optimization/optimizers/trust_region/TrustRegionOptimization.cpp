@@ -227,10 +227,10 @@ void TrustRegionOptimization::iterate() {
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
 
-	    //cout << "updateRadius:  postProcessing small decrease" << endl;
-	    //cout << "radius before: " << tr_model_->getRadius() << endl;
-	    improve_model_ = ensureImprovementPostProcessing();
-	    //cout << "radius after: " << tr_model_->getRadius() <<2 endl;
+            //cout << "updateRadius:  postProcessing small decrease" << endl;
+            //cout << "radius before: " << tr_model_->getRadius() << endl;
+            improve_model_ = ensureImprovementPostProcessing();
+            //cout << "radius after: " << tr_model_->getRadius() <<2 endl;
 
           } else {
             //!<Evaluate objective at trial point>
