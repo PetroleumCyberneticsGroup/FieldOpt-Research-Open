@@ -165,10 +165,7 @@ void TrustRegionOptimization::iterate() {
 
       if (improve_model_) {
         mchange_flag_ = tr_model_->ensureImprovement();
-        //cout << "updateRadius: postProcessing after handleEvaluatedCase" << endl;
-        //cout << "radius before: " << tr_model_->getRadius() << endl;
         improve_model_ = ensureImprovementPostProcessing();
-        //cout << "radius after: " << tr_model_->getRadius() << endl;
       }
       
       if ((!tr_model_->isImprovementNeeded() //_if-5
@@ -226,11 +223,7 @@ void TrustRegionOptimization::iterate() {
 
             rho_ = -std::numeric_limits<double>::infinity();
             mchange_flag_ = tr_model_->ensureImprovement();
-
-            //cout << "updateRadius:  postProcessing small decrease" << endl;
-            //cout << "radius before: " << tr_model_->getRadius() << endl;
             improve_model_ = ensureImprovementPostProcessing();
-            //cout << "radius after: " << tr_model_->getRadius() <<2 endl;
 
           } else {
             //!<Evaluate objective at trial point>
@@ -269,10 +262,7 @@ void TrustRegionOptimization::iterate() {
           if ((mchange_flag_ ==1) || (mchange_flag_ == 2)) {
             iteration_--;
           }
-	  //cout << "Final ensureImprovement" << endl;
-	  //cout << "radius before: " << tr_model_->getRadius() << endl;
-	  updateRadius();
-	  //cout << "radius after: " << tr_model_->getRadius() << endl;
+          updateRadius();
 
           return;
         } else {
@@ -412,10 +402,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
           sum_rho_sqr_ += pow(rho_, 2);
 
 	  if (!improve_model_) {
-	    //cout << "updateRadius: handleEvaluatedCase" << endl;
-	    //cout << "radius before: " << tr_model_->getRadius() << endl;
 	    updateRadius();
-	    //cout << "radius after: " << tr_model_->getRadius() << endl;
 	  }
 
       }
@@ -576,10 +563,8 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
   }
 }
 
-Optimization::Optimizer::TerminationCondition
-TrustRegionOptimization::IsFinished() {
+Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
-  
     if (tr_model_->isInitialized() && !tr_model_->getModelingPolynomials().empty()) {
   
       auto model_criticality = tr_model_->measureCriticality();

@@ -362,16 +362,7 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<All fvalues>
   sortVectorByIndex(distances_, index_vector_);
-    // cout << "fvalues size " << all_fvalues_.size() << endl;
-    // cout << "index size " << index_vector_.size() << endl;
-    // cout << "allpoints size " << all_points_.size() << endl;
-    // cout << "pointsshifted size " << points_shifted_.size() << endl;
-    // cout << "fvalues cols " << all_fvalues_.cols() << endl;
-    // cout << "index cols " << index_vector_.cols() << endl;
-    // cout << "allpoints cols " << all_points_.cols() << endl;
-    // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
-    sortVectorByIndex(all_fvalues_, index_vector_);
-
+  sortVectorByIndex(all_fvalues_, index_vector_);
   nfpBasis(dim);//!<build nfp polynomial basis>
 
   //!<Starting rowPivotGaussianElimination>
@@ -390,8 +381,7 @@ bool TrustRegionModel::rebuildModel() {
   //!<Gaussian elimination (using previous points)>
   for (int iter = 1; iter < polynomials_num; iter++) {
 
-    pivot_polynomials_[poly_i] =
-            orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+    pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -470,8 +460,7 @@ bool TrustRegionModel::rebuildModel() {
       pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-      orthogonalizeBlock(
-              points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+      orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
@@ -555,15 +544,6 @@ bool TrustRegionModel::improveModelNfp() {
   auto bl_shifted = lb_ - shift_center;
   auto bu_shifted = ub_ - shift_center;
 
-  // Remove later, unshiftPoint function replaces this code
-  // // Matlab version: unshift_point = @(x) max(min(x + shift_center, bu), bl);
-  // auto unshift_point = [shift_center, bl_shifted, bu_shifted](Eigen::VectorXd x) {
-  //   Eigen::VectorXd shifted_x = x + shift_center;
-  //   shifted_x = shifted_x.cwiseMin(bu_shifted+shift_center);
-  //   shifted_x = shifted_x.cwiseMax(bl_shifted+shift_center);
-  //   return shifted_x;
-  // };
-
   //!<Test if the model is already FL but old
   //!<Distance measured in inf norm>
   auto tr_center_pt = points_shifted_.col(tr_center);
@@ -595,8 +575,7 @@ bool TrustRegionModel::improveModelNfp() {
           if(!areImprovementPointsComputed()) {
 
               nfp_polynomial_ = orthogonalizeToOtherPolynomials(poly_i, p_ini);
-              std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
-                  pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+              std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) = pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
 
           } else if(areImprovementPointsComputed()) {
               // Using previously computed points/pivot-points
