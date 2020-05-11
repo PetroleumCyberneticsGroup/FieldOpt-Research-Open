@@ -77,18 +77,17 @@ class TrustRegionTest : public ::testing::Test,
   VariablePropertyContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
-  TrustRegionOptimization *tr_dfo_en_5spot_;
-  Runner::EnsembleHelper ensemble_helper_;
-  Simulation::Simulator *simulator_en_5spot_;
-  Objective *objective_function_;
-  Optimization::Case *base_case_en_5spot_;
-
-  std::vector<int> simulation_times_;
-  const double sentinel_value_ = 0.0001;
-  const int timeout_value_ = 10000;
-
-  Optimization::Optimizer::TerminationCondition tc_NF_ =
+  Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
       Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
+
+  Optimization::Optimizer::TerminationCondition TC_MAX_ITERS_ =
+      Optimization::Optimizer::TerminationCondition::MAX_ITERATIONS_REACHED;
+
+  Optimization::Optimizer::TerminationCondition TC_MIN_STEP_ =
+      Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED;
+
+  Optimization::Optimizer::TerminationCondition TC_OPT_CRIT =
+      Optimization::Optimizer::TerminationCondition::OPTIMALITY_CRITERIA_REACHED;
 
   void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
@@ -130,18 +129,17 @@ class TrustRegionTest : public ::testing::Test,
         varcont_tr_dfo_probs_,
         grid_5spot_,
         logger_);
-
-          }
+  }
 
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
-      double (*tr_dfo_prob)(VectorXd xs)){
+                  double (*tr_dfo_prob)(VectorXd xs)){
 
     stringstream ss; ss << "[          ] " << FMAGENTA;
     double tol = 1e-06;
     int p_count = 0;
 
     // Start opt loop --------------------------------------
-    while (tr_dfo_->IsFinished() == tc_NF_) {
+    while (tr_dfo_->IsFinished() == TC_NOT_FIN_) {
 
       auto next_case = tr_dfo_->GetCaseForEvaluation();
       while (next_case == nullptr) {
@@ -177,17 +175,13 @@ class TrustRegionTest : public ::testing::Test,
     stringstream sx;
     string cc;
 
-    // ---------------------------------------------------
-    if (tr_dfo_->IsFinished() == Optimization::Optimizer::
-    TerminationCondition::OPTIMALITY_CRITERIA_REACHED) {
+    if (tr_dfo_->IsFinished() == TC_OPT_CRIT) {
       cc = "OPTIMALITY_CRITERIA_REACHED";
 
-    } else if (tr_dfo_->IsFinished() == Optimization::Optimizer::
-    TerminationCondition::MINIMUM_STEP_LENGTH_REACHED) {
+    } else if (tr_dfo_->IsFinished() == TC_MIN_STEP_) {
       cc = "MINIMUM_STEP_LENGTH_REACHED";
 
-    } else if (tr_dfo_->IsFinished() == Optimization::Optimizer::
-    TerminationCondition::MAX_ITERATIONS_REACHED) {
+    } else if (tr_dfo_->IsFinished() == TC_MAX_ITERS_) {
       cc = "MAX_ITERATIONS_REACHED";
     }
 
@@ -203,15 +197,15 @@ class TrustRegionTest : public ::testing::Test,
 
 };
 
-// TEST_F(TrustRegionTest, trHS1) {
-//   cout << endl << FMAGENTA << "[          ] =============="
-//        << "=========================================== " << endl
-//          << "[ HS1 ] "
-//          << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
+TEST_F(TrustRegionTest, trHS1) {
+  cout << endl << FMAGENTA << "[          ] =============="
+       << "=========================================== " << endl
+         << "[ HS1 ] "
+         << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
 
-//     SetUpOptimizer(tr_mdata.prob_hs1, hs1);
-//     EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
-// }
+    SetUpOptimizer(tr_mdata.prob_hs1, hs1);
+    EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
+}
 
 TEST_F(TrustRegionTest, trDfoProb1) {
   cout << endl << FMAGENTA << "[          ] =============="
@@ -269,9 +263,7 @@ TEST_F(TrustRegionTest, trDfoProb5) {
 
   // -------------------------------------------------------
   SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
-  auto success_runnersubs = RunnerSubs(tr_mdata.prob5, tr_dfo_prob5);
-  cout << "success runnersubs: " << success_runnersubs << endl;
-  EXPECT_TRUE(true);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob5, tr_dfo_prob5));
 }
 
 TEST_F(TrustRegionTest, trDfoProb6) {
