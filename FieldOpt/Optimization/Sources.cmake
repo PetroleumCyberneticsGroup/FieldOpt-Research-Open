@@ -174,8 +174,8 @@ SET(OPTIMIZATION_TESTS
 		# tests/constraints/test_constraint_handler.cpp
 		#
 		# algorithms: pattern, stochastic
-		tests/optimizers/test_compass_search.cpp
-		tests/optimizers/test_apps.cpp
+		# tests/optimizers/test_compass_search.cpp
+		# tests/optimizers/test_apps.cpp
 		# tests/optimizers/test_ga.cpp
 		# tests/optimizers/test_pso.cpp
 		# tests/optimizers/test_cma_es.cpp
@@ -186,7 +186,8 @@ SET(OPTIMIZATION_TESTS
 		# tests/optimizers/test_ego.cpp
 		#
 		# algorithms: df-tr
-		tests/optimizers/test_tr-dfo.cpp
+		# tests/optimizers/test_tr-dfo.cpp
+		tests/optimizers/test_en-tr-dfo.cpp
 		tests/optimizers/test_tr-dfo_exp-value.cpp
 		tests/optimizers/test_tr-model-data.hpp
 		tests/optimizers/test_tr-support.hpp
