@@ -22,21 +22,45 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-/*! This file contains helper functions for "prettyfied" printing
- *
- *  to console.
- */
+// This file contains helper functions
+// for "prettyfied" printing to console.
+
 #ifndef PRINTER_FUNCTIONS_H
 #define PRINTER_FUNCTIONS_H
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+
+#include <stdio.h>
 #include <string>
 #include <vector>
 #include <iomanip>
 #include <iostream>
-#include <boost/algorithm/string.hpp>
-#include <Utilities/colors.hpp>
 #include <sstream>
+#include <fstream>
+
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <Utilities/colors.hpp>
+
+// ---------------------------------------------------------
+using std::cout;
+using std::endl;
+using std::vector;
+using std::string;
+using std::to_string;
+using std::stringstream;
+using std::ofstream;
+using std::setfill;
+using std::left;
+using std::setprecision;
+using std::fixed;
+using std::setw;
+
+using Eigen::VectorXd;
+using Eigen::Map;
 
 namespace Printer {
 
@@ -59,37 +83,41 @@ inline std::string num2str(const T num, int prc=2) {
  * @param text Text to truncate.
  * @param width Width to to truncate to (including the added ellipsis).
  */
-inline void truncate_text(std::string &text, const int &width=66) {
+inline void truncate_text(string &text, const int &width=66) {
   if (text.size() > width) {
     text = text.substr(0, width - 3) + "...";
   }
 }
 
 /*!
- * @brief Pad a string, adding spaces at the _end_ to make it the required length.
+ * @brief Pad a string, adding spaces at the
+ * _end_ to make it the required length.
  * @param text Text to pad.
  * @param width Width to pad to.
  */
-inline void pad_text(std::string &text, const int &width=66) {
+inline void pad_text(string &text, const int &width=66) {
   if (text.size() < width) {
     text.insert(text.size(), width - text.size(), ' ');
   }
 }
 
 /*!
- * @brief Split a string into multiple lines of the required width, padding each with spaces at the end.
+ * @brief Split a string into multiple lines of the required width,
+ * padding each with spaces at the end.
  * Note that the | character in the input string will insert a linebreak.
  * @param text Text to split.
  * @param width Width to split at (and pad to).
  * @return
  */
-inline std::vector<std::string> split_line(const std::string text, const int &width=67) {
-  std::vector<std::string> strv;
+inline vector<string> split_line(const string text,
+                                 const int &width=67) {
+
+  vector<string> strv;
   if (text.size() > width) {
     std::size_t start_idx = 0;
     std::size_t end_idx = 1;
     int line_nr = 0;
-    std::string remainder = text;
+    string remainder = text;
     while (remainder.size() > width) {
       if (remainder.find_first_of("|") < width) {
         end_idx = remainder.find_first_of("|");
@@ -97,7 +125,7 @@ inline std::vector<std::string> split_line(const std::string text, const int &wi
       else {
         end_idx = remainder.find_last_of(".,;/ ", width);
       }
-      std::string line = remainder.substr(start_idx, end_idx);
+      string line = remainder.substr(start_idx, end_idx);
       pad_text(line, width);
       strv.push_back(line);
       remainder = remainder.substr(end_idx+1, remainder.size());
@@ -109,7 +137,7 @@ inline std::vector<std::string> split_line(const std::string text, const int &wi
     strv.push_back(remainder);
   }
   else {
-    std::string padded = text;
+    string padded = text;
     pad_text(padded, width);
     strv.push_back(padded);
   }
