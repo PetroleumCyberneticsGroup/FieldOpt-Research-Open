@@ -207,8 +207,8 @@ void TrustRegionOptimization::iterate() {
               return;
             }
           } else {
-	    criticality_step_execution_ongoing_ = false;
-	  }
+            criticality_step_execution_ongoing_ = false;
+	      }
           iteration_model_fl_ = tr_model_->isLambdaPoised();
           
           //!<Compute step>
