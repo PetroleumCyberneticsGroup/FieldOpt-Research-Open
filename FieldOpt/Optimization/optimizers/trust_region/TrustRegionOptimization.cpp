@@ -119,13 +119,6 @@ void TrustRegionOptimization::iterate() {
             } else {
                 tr_model_->setIsInitialized(true);
                 iteration_++;
-
-                //!<Print summary>
-                printIteration(tr_model_->getCurrentFval());
-
-                if (enable_logging_) {
-                  logger_->AddEntry(this);
-                }
             }
         }
 
