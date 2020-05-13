@@ -121,8 +121,8 @@ void TrustRegionOptimization::iterate() {
                 iteration_++;
 
                 //!<Print summary>
-                printIteration(fval_current);
-                
+                printIteration(tr_model_->getCurrentFval());
+
                 if (enable_logging_) {
                   logger_->AddEntry(this);
                 }
