@@ -76,14 +76,10 @@ TrustRegionOptimization::TrustRegionOptimization(
         logger_->AddEntry(new ConfigurationSummary(this));
     }
 
-    cout << "iter        fval         rho      radius  pts" << endl;
+    createLogFile();
 }
 
 void TrustRegionOptimization::iterate() {
-    if (enable_logging_) {
-      logger_->AddEntry(this);
-    }
-
     if (iteration_ == 0) {
 
         if (!tr_model_->areInitPointsComputed() //_if-1
@@ -123,6 +119,13 @@ void TrustRegionOptimization::iterate() {
             } else {
                 tr_model_->setIsInitialized(true);
                 iteration_++;
+
+                //!<Print summary>
+                printIteration(fval_current);
+                
+                if (enable_logging_) {
+                  logger_->AddEntry(this);
+                }
             }
         }
 
@@ -136,6 +139,9 @@ void TrustRegionOptimization::iterate() {
           if (!tr_model_->isImprovementNeeded()) {
               tr_model_->setIsInitialized(true);
               iteration_++;
+              if (enable_logging_) {
+                logger_->AddEntry(this);
+              }
           }
         }
 
@@ -149,6 +155,9 @@ void TrustRegionOptimization::iterate() {
           if (!tr_model_->isReplacementNeeded()) {
             tr_model_->setIsInitialized(true);
             iteration_++;
+            if (enable_logging_) {
+              logger_->AddEntry(this);
+            }
           }
         }
     }
@@ -174,6 +183,9 @@ void TrustRegionOptimization::iterate() {
       && !tr_model_->areReplacementPointsComputed())) {
   
         
+        if (enable_logging_) {
+          logger_->AddEntry(this);
+        }
         if ((tr_model_->getRadius() < tol_radius)
             || (iteration_ == iter_max)) {
           return; //end of the algorithm
@@ -246,6 +258,9 @@ void TrustRegionOptimization::iterate() {
               if (isImprovement(c)) {
                 updateTentativeBestCase(c);
               }
+              if (enable_logging_) {
+                logger_->AddEntry(this);
+              }
             }
           }
 
@@ -253,6 +268,9 @@ void TrustRegionOptimization::iterate() {
             for (Case* c: replacement_cases) {
               if (isImprovement(c)) {
                 updateTentativeBestCase(c);
+              }
+              if (enable_logging_) {
+                logger_->AddEntry(this);
               }
             }
           }
@@ -281,6 +299,22 @@ void TrustRegionOptimization::iterate() {
     return;
 }
 
+void TrustRegionOptimization::createLogFile() {
+  QString output_dir = logger_->getOutputDir();
+  if (output_dir.length() > 0) {
+    Utilities::FileHandling::CreateDirectory(output_dir);
+  }
+  tr_log_path_ = output_dir + "/log_trust_region.csv";
+
+  // Delete existing logs if --force flag is on
+  if (Utilities::FileHandling::FileExists(tr_log_path_)) {
+    Utilities::FileHandling::DeleteFile(tr_log_path_);
+  }
+
+  const QString tr_log_header = "iter        fval         rho      radius  pts";
+  Utilities::FileHandling::WriteLineToFile(tr_log_header, tr_log_path_);
+}
+
 void TrustRegionOptimization::printIteration(double fval_current) {
   stringstream ss;
   ss << setw(4) << right << iteration_ << setprecision(3)
@@ -288,13 +322,15 @@ void TrustRegionOptimization::printIteration(double fval_current) {
      << setw(12) << scientific << right << rho_
      << setw(12) << scientific << right << tr_model_->getRadius()
      << setw(5) << right << tr_model_->getNumPts();
-  cout << ss.str() << endl;
+
+  string str = ss.str();
+  Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), tr_log_path_);
 }
 
 
 void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
-    if (enable_logging_) {
-      logger_->AddEntry(this);
+    if (isImprovement(c)) {
+      updateTentativeBestCase(c);
     }
 
     if (iteration_ == 0) {
@@ -583,9 +619,6 @@ Optimization::Optimizer::TerminationCondition TrustRegionOptimization::IsFinishe
     }
 
     if (tc != NOT_FINISHED) {
-        if (enable_logging_) {
-            logger_->AddEntry(this);
-        }
     }
     return tc;
 }

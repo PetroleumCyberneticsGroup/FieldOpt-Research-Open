@@ -97,6 +97,7 @@ class TrustRegionOptimization : public Optimizer {
     bool criticality_step_performed_ = false;
     bool improve_model_ = false;
     bool criticality_step_execution_ongoing_ = false;
+    QString tr_log_path_;
     
     Settings::Optimizer *settings_;
     Model::Properties::VariablePropertyContainer *variables_;
@@ -108,6 +109,7 @@ class TrustRegionOptimization : public Optimizer {
     void setLowerUpperBounds();
     void projectToBounds(VectorXd *point);
     void printIteration(double fval_current);
+    void createLogFile();
 
     class ConfigurationSummary : public Loggable {
     public:
