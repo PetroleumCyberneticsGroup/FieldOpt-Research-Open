@@ -1469,10 +1469,9 @@ int TrustRegionModel::findBestPoint() {
   int best_i = 0;
   auto min_f = std::numeric_limits<double>::infinity();
 
-
   for (int k = 0; k < n_points; k++) {
     VectorXd point = points_abs_.col(k);
-    if (((point - lb_).minCoeff() >= 0) &&  ((ub_ - point).minCoeff() > 0)) {
+    if (((point - lb_).minCoeff() >= 0) &&  ((ub_ - point).minCoeff() >= 0)) {
       auto val = fvalues_(k);
       if (val < min_f) {
         min_f = val;
