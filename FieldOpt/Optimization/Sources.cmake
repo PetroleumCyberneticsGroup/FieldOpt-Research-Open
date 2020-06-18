@@ -186,8 +186,8 @@ SET(OPTIMIZATION_TESTS
 		# tests/optimizers/test_ego.cpp
 		#
 		# algorithms: df-tr
-		# tests/optimizers/test_tr-dfo.cpp
-		tests/optimizers/test_en-tr-dfo.cpp
+		tests/optimizers/test_tr-dfo.cpp
+		# tests/optimizers/test_en-tr-dfo.cpp
 		tests/optimizers/test_tr-dfo_exp-value.cpp
 		tests/optimizers/test_tr-model-data.hpp
 		tests/optimizers/test_tr-support.hpp

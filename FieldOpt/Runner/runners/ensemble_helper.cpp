@@ -23,11 +23,10 @@ If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 #include <iostream>
-
-#include "ensemble_helper.h"
 #include "Utilities/math.hpp"
-
 #include "Utilities/random.hpp"
+#include "ensemble_helper.h"
+
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 

@@ -156,7 +156,7 @@ TEST_F(ModelSettingsTest, MultisplineWell) {
   // QJsonObject sim_json_;
   QJsonObject mod_json_;
   // sim_json_ = partial_deck["Simulator"].toObject();
-  mod_json_ = partial_deck["dc_2Model"].toObject();
+  mod_json_ = partial_deck["Model"].toObject();
   // auto sim_settings = dc_6Settings::Simulator(sim_json_, paths_);
   auto mod_settings = Settings::Model(mod_json_, paths_);
 }

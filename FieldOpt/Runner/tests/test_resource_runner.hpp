@@ -35,9 +35,9 @@ namespace TestResources {
 
 //==========================================================
 class RunnerResources {
- 
+
  private:
-  
+
   // -------------------------------------------------------
   // string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.apps-t01.npv";
   string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv";
@@ -46,23 +46,23 @@ class RunnerResources {
 
   string en_5spot_simexe = en_5spot_dir + "/drivers/bash_flw_en_5spot.sh";
   // string en_5spot_simexe = en_5spot_dir + "/drivers/bash_ecl_en_5spot.sh";
-  
+
   string en_5spot_xdir = "../fieldopt-output/en_5spot/" + driver_nm;
   string en_5spot_aux = en_5spot_dir + "/include";
-  
+
   // string en_5spot_egrid = en_5spot_dir +
   //     "/data/ECL_5SPOT_C04_FLOW__R000.EGRID";
   // string en_5spot_data = en_5spot_dir +
   //     "/data/ECL_5SPOT_C04_FLOW__R000.DATA";
-  
+
   string en_5spot_egrid = en_5spot_dir +
       "/r001/ECL_5SPOT_C04_FLOW__R001.EGRID";
   string en_5spot_data = en_5spot_dir +
       "/r001/ECL_5SPOT_C04_FLOW__R001.DATA";
-  
+
   // string en_5spot_ensf = en_5spot_dir + "/en_5spot_dbg.ens";
   string en_5spot_ensf = en_5spot_dir + "/en_5spot.ens";
-  
+
   int argc_en_5spot = 22;
   const char *argv_en_5spot[22] = {
       "FieldOpt", en_5spot_driver.c_str(),
@@ -78,7 +78,7 @@ class RunnerResources {
       "-n", "1", // threads-per-sim
       "-t", "1000", // sim-timeout
   };
-  
+
   // -------------------------------------------------------
   const int argc = 16;
   const char *argv[16] = {
@@ -93,27 +93,25 @@ class RunnerResources {
       "-v", "0",
       "-t", "1000"
   };
- 
+
  public:
 
   Runner::RuntimeSettings *rts_ =
       new Runner::RuntimeSettings(argc, argv);
-  
+
   Runner::RuntimeSettings *rts_en_5spot_ =
       new Runner::RuntimeSettings(argc_en_5spot, argv_en_5spot);
- 
+
  protected:
 
-  Logger *logger_ = new Logger(
-      rts_,
-      QString::fromStdString(TestResources::ExampleFilePaths::directory_output_),
-      false);
+  // -------------------------------------------------------
+  Logger *logger_ = new Logger(rts_, QString::fromStdString(
+      TestResources::ExampleFilePaths::directory_output_), false);
 
-  Logger *logger_norne_ = new Logger(
-      rts_,
-      QString::fromStdString(TestResources::ExampleFilePaths::norne_test_output_),
-      false);
-  
+  // -------------------------------------------------------
+  Logger *logger_norne_ = new Logger(rts_, QString::fromStdString(
+      TestResources::ExampleFilePaths::norne_test_output_), false);
+
 };
 
 }

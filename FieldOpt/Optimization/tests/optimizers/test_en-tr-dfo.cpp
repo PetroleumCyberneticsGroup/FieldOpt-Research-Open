@@ -146,14 +146,12 @@ class EnTRTest : public ::testing::Test,
         timeout_value_, 1);
 
     // -----------------------------------------------------
-    // InitializeObjectiveFunction();
     objective_function_ = new WeightedSum(
         settings_en_5spot_full_->optimizer(),
         simulator_en_5spot_->results(),
         model_en_5spot_);
 
     // -----------------------------------------------------
-    // InitializeBaseCase();
     base_case_en_5spot_ = new Optimization::Case(
         model_en_5spot_->variables()->GetBinaryVariableValues(),
         model_en_5spot_->variables()->GetDiscreteVariableValues(),

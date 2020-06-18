@@ -1,21 +1,27 @@
-/******************************************************************************
-Copyright (C) 2015-2017 Brage S. Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Copyright (C) 2015-2020
+Brage S. Kristoffersen <brage_sk@hotmail.com>
+
+Modified 2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
-FieldOpt is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
 FieldOpt is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include "NPV.h"
 
 #include <iostream>
@@ -57,6 +63,7 @@ NPV::NPV(Settings::Optimizer *settings,
         comp->property = results_->GetPropertyKeyFromString(QString::fromStdString(comp->property_name));
     }
     comp->coefficient = settings->objective().NPV_sum.at(i).coefficient;
+
     if (settings->objective().NPV_sum.at(i).usediscountfactor == true) {
       comp->interval = settings->objective().NPV_sum.at(i).interval;
       comp->discount = settings->objective().NPV_sum.at(i).discount;
@@ -78,6 +85,7 @@ double NPV::value() const {
   auto report_times = results_->GetValueVector(results_->Time);
   auto NPV_times = new QList<double>;
   auto discount_factor_list = new QList<double>;
+
   for (int k = 0; k < components_->size(); ++k) {
     if (components_->at(k)->is_json_component == true) {
         continue;
@@ -116,6 +124,7 @@ double NPV::value() const {
         }
       }
     }
+
     for (int i = 0; i < components_->size(); ++i) {
       if (components_->at(i)->is_json_component == true) {
           continue;
@@ -131,6 +140,7 @@ double NPV::value() const {
         std::string prop_name = components_->at(i)->property_name;
       }
     }
+
     if (well_economy_->use_well_cost) {
       for (auto well: well_economy_->wells_pointer) {
         if (well_economy_->separate) {
@@ -155,18 +165,21 @@ double NPV::value() const {
       }
     }
     return value;
-  }
-  catch (...) {
+
+  } catch (...) {
     Printer::error("Failed to compute NPV. Returning 0.0");
     return 0.0;
   }
 }
 
-double NPV::Component::resolveValue(Simulation::Results::Results *results) {
+double NPV::Component::resolveValue(
+    Simulation::Results::Results *results) {
   return coefficient * results->GetValue(property);
 
 }
-double NPV::Component::resolveValueDiscount(Simulation::Results::Results *results, double time_step) {
+
+double NPV::Component::resolveValueDiscount(
+    Simulation::Results::Results *results, double time_step) {
   int time_step_int = (int) time_step;
   return results->GetValue(property, time_step_int);
 }
