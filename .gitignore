@@ -62,9 +62,9 @@ test-*
 # Ignore ECLIPSE output files
 *.DBG
 *.ECLEND
-*.EGRID
+#*.EGRID
 *.GRID
-*.INIT
+#*.INIT
 *.INSPEC
 *.MSG
 *.RSM
@@ -82,3 +82,4 @@ FieldOpt/CMakeCache.txt
 FieldOpt/CMakeFiles/cmake.check_cache
 *.bin
 /fieldopt-output/
+*.RFT
