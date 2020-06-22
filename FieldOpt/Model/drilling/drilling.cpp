@@ -81,6 +81,12 @@ void Drilling::setOptRuntimeSettings(int drilling_step, int argc, const char** a
   original_output_dir_ = runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR);
 }
 
+void Drilling::setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts) {
+  Runner::RuntimeSettings* runtime_settings = rts;
+  runtime_settings_.insert(drilling_step, runtime_settings);
+  original_output_dir_ = runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR);
+}
+
 void Drilling::modelUpdate(int drilling_step) {
    /* TODO: implement interface to SLB code for model update
     * Remember to check if the model update should be performed in a the full-scale model or
@@ -109,11 +115,6 @@ void Drilling::modelUpdate(int drilling_step) {
 
   Runner::RuntimeSettings* rts = runtime_settings_.value(drilling_step);
   runtime_settings_.insert(drilling_step+1, rts);
-
-  cout << "sim_driver_file:" << sim_driver_file << endl;
-  cout << "grid_file:" << grid_file << endl;
-  cout << "driver_file:" << driver_file << endl;
-
   runtime_settings_.value(drilling_step+1)->paths().SetPath(Paths::SIM_DRIVER_FILE, sim_driver_file);
   runtime_settings_.value(drilling_step+1)->paths().SetPath(Paths::GRID_FILE, grid_file);
   runtime_settings_.value(drilling_step+1)->paths().SetPath(Paths::DRIVER_FILE, driver_file);

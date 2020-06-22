@@ -26,14 +26,14 @@
 #include <QString>
 #include <QList>
 
-#include <properties/variable_property_container.h>
+#include "Model/properties/variable_property_container.h"
 #include "drilling_schedule.h"
 #include "Settings/settings.h"
 #include "Settings/model.h"
 
-#include "Model/tests/test_resource_model.h"
-#include "Reservoir/tests/test_resource_grids.h"
-#include "Optimization/tests/test_resource_optimizer.h"
+//#include "Model/tests/test_resource_model.h"
+//#include "Reservoir/tests/test_resource_grids.h"
+//#include "Optimization/tests/test_resource_optimizer.h"
 
 #include "serial_runner.h"
 
@@ -62,6 +62,7 @@ class Drilling {
   QString GetStatusStringHeader() const;
 
   void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
+  void setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts);
   void maintainRuntimeSettings(int drilling_step);
 
   void modelUpdate(int drilling_step);

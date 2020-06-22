@@ -1,7 +1,7 @@
 /********************************************************************
  Copyright (C) 2020-
- Mathias Bellout <chakibbb-pcg@gmail.com>
  Thiago L. Silva <thiagolims@gmail.com>
+ Mathias Bellout <chakibbb-pcg@gmail.com>
 
  This file is part of the FieldOpt project.
 

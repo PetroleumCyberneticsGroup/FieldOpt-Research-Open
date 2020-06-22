@@ -22,7 +22,7 @@
 #ifndef FIELDOPT_DRILLING_SCHEDULE_H
 #define FIELDOPT_DRILLING_SCHEDULE_H
 
-#include <properties/variable_property_container.h>
+#include "Model/properties/variable_property_container.h"
 #include "drilling_schedule.h"
 #include "Settings/settings.h"
 #include "Settings/model.h"
