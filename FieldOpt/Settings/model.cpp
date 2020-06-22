@@ -153,6 +153,8 @@ Model::Model(QJsonObject json_model, Paths &paths)
 
   // Drilling
   if (json_model.contains("Drilling")) {
+
+
     QJsonObject json_drilling = json_model["Drilling"].toObject();
     readDrilling(json_drilling);
   }
@@ -466,9 +468,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
     return well;
 }
 
-void Model::readDrilling(QJsonObject json_drilling_workflow) {
-  if (json_drilling_workflow.contains("Drilling")) {
-    QJsonObject json_drilling = json_drilling_workflow["Drilling"].toObject();
+void Model::readDrilling(QJsonObject json_drilling) {
     drilling_ = Drilling();
     if (json_drilling.contains("WellName")) {
       drilling_.well_name = json_drilling["WellName"].toString();
@@ -567,8 +567,6 @@ void Model::readDrilling(QJsonObject json_drilling_workflow) {
       }
       drilling_.drilling_schedule = drilling_schedule;
     }
-
-  }
 }
 
 bool Model::controlTimeIsDeclared(int time) const
