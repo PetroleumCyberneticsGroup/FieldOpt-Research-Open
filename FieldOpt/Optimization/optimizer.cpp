@@ -205,12 +205,20 @@ map<string, vector<double>> Optimizer::GetOptimalValues() {
   return val_map;
 }
 
-map<string, QHash<QUuid, double>> Optimizer::GetOptimalVariables() {
-  map<string, QHash<QUuid, double>> var_map;
-  var_map["realVar"]  = tentative_best_case_->real_variables();
-  //TODO: include integer and boolean variables in the map
-  return var_map;
+QHash<QUuid, double> Optimizer::GetOptimalVariables() {
+  return tentative_best_case_->real_variables();
 }
+
+
+QHash<QUuid, bool> Optimizer::GetOptimalBinaryVariables() {
+  return tentative_best_case_->binary_variables();
+}
+
+
+QHash<QUuid, int> Optimizer::GetOptimalIntegerVariables() {
+  return tentative_best_case_->integer_variables();
+}
+
 
 Loggable::LogTarget Optimizer::Summary::GetLogTarget() {
     return LOG_SUMMARY;

@@ -123,7 +123,20 @@ class Optimizer : public Loggable
   * @brief Get the tentative optimal variables
   * @return Optimal variables of tentative best case in a map
   */
-  map<string, QHash<QUuid, double>> GetOptimalVariables();
+  QHash<QUuid, double> GetOptimalVariables();
+
+
+  /*!
+  * @brief Get the tentative optimal binary variables
+  * @return Optimal binary variables of tentative best case in a map
+  */
+  QHash<QUuid, bool> GetOptimalBinaryVariables();
+
+  /*!
+  * @brief Get the tentative optimal integer variables
+  * @return Optimal integer variables of tentative best case in a map
+  */
+  QHash<QUuid, int> GetOptimalIntegerVariables();
 
  protected:
   /*!

@@ -37,7 +37,9 @@ Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContai
   current_model_ = 0;
 };
 
-void Drilling::setWellOptimalVariables(const std::map<string, QHash<QUuid, double>>& opt_var, int drilling_step) {
+void Drilling::setWellOptimalVariables(const QHash<QUuid, bool>& opt_bin_var,  const QHash<QUuid, int>& opt_int_var, const QHash<QUuid, double>& opt_var, int drilling_step) {
+  optimal_int_variables_.insert(drilling_step, opt_int_var);
+  optimal_bin_variables_.insert(drilling_step, opt_bin_var);
   optimal_variables_.insert(drilling_step, opt_var);
 }
 
@@ -148,11 +150,9 @@ void Drilling::runOptimization(int drilling_step) {
   serial_runner.Execute();
 
   Optimization::Optimizer* opt = serial_runner.getOptimizer();
-  map<string, QHash<QUuid, double>> opt_variables = opt->GetOptimalVariables();
-  map<string, vector<double>> opt_values = opt->GetOptimalValues();
 
-  setWellOptimalVariables(opt_variables, drilling_step);
-  setWellOptimizationValues(opt_values, drilling_step);
+  setWellOptimalVariables(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables(), drilling_step);
+  setWellOptimizationValues(opt->GetOptimalValues(), drilling_step);
 }
 
 }
