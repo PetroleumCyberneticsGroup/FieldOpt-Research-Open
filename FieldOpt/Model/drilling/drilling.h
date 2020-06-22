@@ -61,6 +61,8 @@ class Drilling {
   QString GetStatusString() const;
   QString GetStatusStringHeader() const;
 
+  Optimization::Case* best_case_;
+
   void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
   void setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts);
   void maintainRuntimeSettings(int drilling_step);

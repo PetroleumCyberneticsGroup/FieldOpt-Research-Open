@@ -257,7 +257,7 @@ map<string, vector<double>> Optimizer::Summary::GetValues() {
     return valmap;
 }
 
-void Optimizer::updateTentativeBestCase(Case *c) {
+void * Optimizer::updateTentativeBestCase(Case *c) {
     tentative_best_case_ = c;
     tentative_best_case_iteration_ = iteration_;
 }
