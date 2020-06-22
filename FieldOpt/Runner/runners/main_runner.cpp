@@ -2,6 +2,7 @@
 #include "serial_runner.h"
 #include "oneoff_runner.h"
 #include "synchronous_mpi_runner.h"
+#include "drilling_runner.h"
 
 namespace Runner {
 
@@ -19,6 +20,10 @@ namespace Runner {
             case RuntimeSettings::RunnerType::MPISYNC:
                 runner_ = new MPI::SynchronousMPIRunner(runtime_settings_);
                 break;
+            case RuntimeSettings::RunnerType::DRILLINGWORKFLOW:
+                runner_ = new DrillingRunner(runtime_settings_);
+                break;
+
             default:
                 throw std::runtime_error("Runner type not recognized.");
         }

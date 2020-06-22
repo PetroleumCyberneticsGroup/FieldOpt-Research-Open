@@ -68,6 +68,8 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[])
             runner_type_ = RunnerType::ONEOFF;
         else if (QString::compare(runner_str, "mpisync") == 0)
             runner_type_ = RunnerType::MPISYNC;
+        else if (QString::compare(runner_str, "drillingworkflow") == 0)
+            runner_type_ = RunnerType::DRILLINGWORKFLOW;
     } else runner_type_ = RunnerType::SERIAL;
 
     if (vm.count("sim-drv-path")) {
@@ -164,6 +166,8 @@ QString RuntimeSettings::runnerTypeString() const {
         return "oneoff";
     else if (runner_type_ == RunnerType::MPISYNC)
         return "mpisync";
+    else if (runner_type_ == RunnerType::DRILLINGWORKFLOW)
+        return "drillingworkflow";
     else return "NOT SET";
 }
 
@@ -186,7 +190,7 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
         ("threads-per-simulation,n", po::value<int>(&thr_per_sim)->default_value(1),
          "number of threads allocated to each simulation")
         ("runner-type,r", po::value<std::string>(),
-         "type of runner (serial/oneoff/mpisync)")
+         "type of runner (serial/oneoff/mpisync/drillingworkflow)")
         ("grid-path,g", po::value<std::string>(),
          "path to model grid file (e.g. *.GRID)")
         ("sim-exec-path,e", po::value<std::string>(),
@@ -250,6 +254,7 @@ map<string, string> RuntimeSettings::GetState() {
         case SERIAL: statemap["runner"] = "Serial"; break;
         case ONEOFF: statemap["runner"] = "One-off"; break;
         case MPISYNC: statemap["runner"] = "MPI Parallel"; break;
+        case DRILLINGWORKFLOW: statemap["runner"] = "Drilling Workflow"; break;
     }
 
     statemap["path FieldOpt driver"] = paths_.GetPath(Paths::DRIVER_FILE);
