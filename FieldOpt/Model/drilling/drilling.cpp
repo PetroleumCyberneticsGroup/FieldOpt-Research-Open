@@ -148,9 +148,9 @@ void Drilling::runOptimization(int drilling_step) {
     }
   }
 
-  if (drilling_step > 0) { // warm-starting optimization
-    serial_runner.getOptimizer()->updateTentativeBestCase(best_case_);
-  }
+  //if (drilling_step > 0) { // warm-starting optimization
+  // serial_runner.getOptimizer()->updateTentativeBestCase(best_case_);
+  //}
 
   serial_runner.Execute();
 
@@ -159,7 +159,7 @@ void Drilling::runOptimization(int drilling_step) {
   setWellOptimalVariables(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables(), drilling_step);
   setWellOptimizationValues(opt->GetOptimalValues(), drilling_step);
 
-  best_case_ = new Optimization::Case(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables());
+  //best_case_ = new Optimization::Case(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables());
 
 
 
