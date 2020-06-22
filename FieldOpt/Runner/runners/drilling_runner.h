@@ -1,7 +1,7 @@
 /********************************************************************
  Copyright (C) 2020-
- Mathias Bellout <chakibbb-pcg@gmail.com>
  Thiago L. Silva <thiagolims@gmail.com>
+ Mathias Bellout <chakibbb-pcg@gmail.com>
 
  This file is part of the FieldOpt project.
 
@@ -23,6 +23,9 @@
 #define FIELDOPT_DRILLING_RUNNER_H
 
 #include "abstract_runner.h"
+#include "Model/model.h"
+#include "Model/drilling/drilling.h"
+#include "Model/drilling/drilling_schedule.h"
 
 namespace Runner {
 
@@ -30,13 +33,21 @@ class MainRunner;
 
 class DrillingRunner : public AbstractRunner {
 
-  friend class MainRunner;
- private:
-  DrillingRunner(RuntimeSettings *runtime_settings);
+ friend class MainRunner;
 
-  // AbstractRunner interface
  private:
+  Model::Drilling::Drilling* drilling_;
+
+  void InitializeDrillingWorkflow();
+
+ // AbstractRunner interface
+ public:
+  DrillingRunner(RuntimeSettings *runtime_settings);
   void Execute();
+
+
+
+
 };
 
 }

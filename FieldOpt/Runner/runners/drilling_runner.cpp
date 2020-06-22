@@ -1,7 +1,7 @@
 /********************************************************************
  Copyright (C) 2020-
- Mathias Bellout <chakibbb-pcg@gmail.com>
  Thiago L. Silva <thiagolims@gmail.com>
+ Mathias Bellout <chakibbb-pcg@gmail.com>
 
  This file is part of the FieldOpt project.
 
@@ -21,8 +21,7 @@
 
 #include <Utilities/time.hpp>
 #include "drilling_runner.h"
-#include "Utilities/printer.hpp"
-#include "Model/model.h"
+
 
 namespace Runner {
 
@@ -34,18 +33,46 @@ DrillingRunner::DrillingRunner(Runner::RuntimeSettings *runtime_settings)
   InitializeModel();
   InitializeSimulator();
 
-//  InitializeDrillingWorkflow();
+  EvaluateBaseModel();
+  InitializeObjectiveFunction();
 
-//  EvaluateBaseModel();
-//  InitializeObjectiveFunction();
-//  InitializeBaseCase();
-//  InitializeOptimizer();
-//  InitializeBookkeeper();
-//  FinalizeInitialization(true);
+  InitializeBaseCase();
+  InitializeOptimizer();
+  InitializeBookkeeper();
+
+  InitializeDrillingWorkflow();
+
+  FinalizeInitialization(true);
+}
+
+
+void DrillingRunner::InitializeDrillingWorkflow() {
+  Settings::Model::Drilling drilling_settings = settings_->model()->drilling();
+  drilling_ = new Model::Drilling::Drilling(settings_->model(), nullptr);
 }
 
 void DrillingRunner::Execute() {
+  QList<int> drilling_steps = drilling_->getDrillingSchedule()->getSteps();
+
+  drilling_->setOptRuntimeSettings(0, runtime_settings_);
+  for (int i: drilling_steps) {
+    double ts = drilling_->getDrillingSchedule()->getTimeSteps().value(i);
+
+    // Optimization
+    if ((drilling_->getDrillingSchedule()->isVariableDrillingPoints().value(i)) || (drilling_->getDrillingSchedule()->isVariableCompletions().value(i))) {
+      drilling_->runOptimization(i);
+    }
+
+    // Model update
+    if ((i < drilling_steps.size()-1) && (drilling_->getDrillingSchedule()->isModelUpdates().value(i))) {
+      drilling_->modelUpdate(i);
+    } else {
+      drilling_->maintainRuntimeSettings(i);
+    }
+
+  }
 
 }
+
 
 }
