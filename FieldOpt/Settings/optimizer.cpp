@@ -632,6 +632,15 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
       }
     }
 
+    // Trust Region parameters:: Trust region radius tolerance
+    if (json_parameters.contains("TrustRegionRadiusTolerance")) {
+      if (json_parameters["TrustRegionRadiusTolerance"].toDouble() >= 0.0) {
+        params.tr_tol_radius = json_parameters["TrustRegionRadiusTolerance"].toDouble();
+      } else {
+        throw std::runtime_error(ind_val + "TrustRegionRadiusTolerance");
+      }
+    }
+
     // Trust Region parameters :: Max trust region radius
     if (json_parameters.contains("MaxTrustRegionRadius")) {
       if (json_parameters["MaxTrustRegionRadius"].toDouble() >= 0.0) {
