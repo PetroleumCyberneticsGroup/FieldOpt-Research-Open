@@ -239,6 +239,11 @@ class EnTRTest : public ::testing::Test,
               next_case = tr_dfo_en_5spot_->GetCaseForEvaluation();
             }
           }
+
+          if (tr_dfo_en_5spot_->IsFinished()) {
+            break;
+          }
+
           ensemble_helper_.SetActiveCase(next_case);
 
         } else {
@@ -358,12 +363,12 @@ class EnTRTest : public ::testing::Test,
     simulator_en_5spot_->WriteDriverFilesOnly();
 
     // PrintCompletionMessage();
-    model_->Finalize();
+    model_en_5spot_->Finalize();
     logger_->FinalizePostrunSummary();
 
     // dbg
-    // DBG_prntSoln(sd);
-    // tr_dfo_mod_->DBG_printToFile(DBG_fn_ensrnr_, sd.str());
+    DBG_prntSoln(sd);
+    tr_dfo_mod_->DBG_printToFile(DBG_fn_ensrnr_, sd.str());
   }
 
 };
