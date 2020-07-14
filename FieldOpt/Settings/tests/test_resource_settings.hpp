@@ -45,7 +45,7 @@ class TestResourceSettings {
       settings_hybridopt_optimizer_ = settings_hybridopt_full_->optimizer();
       settings_hybridopt_simulator_ = settings_hybridopt_full_->simulator();
       settings_hybridopt_model_ = settings_hybridopt_full_->model();
-    json_settings_drilling_ = get_json_settings_drilling_;
+      json_settings_drilling_ = get_json_settings_drilling_;
   }
 
   Settings::Settings *settings_full_;
@@ -63,7 +63,7 @@ class TestResourceSettings {
 
  private:
   QJsonObject get_json_settings_drilling_{
-      {"Drilling", QJsonObject{
+//      {"Drilling", QJsonObject{
           {"WellName", "D-2H"},
           {"DrillingSchedule", QJsonArray{
               QJsonObject{
@@ -207,8 +207,9 @@ class TestResourceSettings {
                   {"ModelType", "TrueModel"}
               }
           }
-          }}
-      }};
+          }
+//    }}
+  };
 };
 }
 
