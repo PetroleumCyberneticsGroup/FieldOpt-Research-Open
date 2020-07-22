@@ -27,6 +27,7 @@
 #include <QList>
 
 #include "Model/properties/variable_property_container.h"
+#include "Model/model_synchronization_object.h"
 #include "drilling_schedule.h"
 #include "Settings/settings.h"
 #include "Settings/model.h"
@@ -62,6 +63,7 @@ class Drilling {
   QString GetStatusStringHeader() const;
 
   Optimization::Case* best_case_;
+  ModelSynchronizationObject* mso_;
 
   void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
   void setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts);

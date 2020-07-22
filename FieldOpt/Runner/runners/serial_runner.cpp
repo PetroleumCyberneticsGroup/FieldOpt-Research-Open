@@ -26,17 +26,33 @@ namespace Runner {
 SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings)
     : AbstractRunner(runtime_settings)
 {
-    InitializeLogger();
-    InitializeSettings();
-    InitializeModel();
-    InitializeSimulator();
-    EvaluateBaseModel();
-    InitializeObjectiveFunction();
-    InitializeBaseCase();
-    InitializeOptimizer();
-    InitializeBookkeeper();
-    FinalizeInitialization(true);
+  InitializeModules();
 }
+
+void SerialRunner::InitializeModules() {
+  InitializeLogger();
+  InitializeSettings();
+  InitializeModel();
+  InitializeSimulator();
+  EvaluateBaseModel();
+  InitializeObjectiveFunction();
+  InitializeBaseCase();
+  InitializeOptimizer();
+  InitializeBookkeeper();
+  FinalizeInitialization(true);
+}
+
+SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings, Optimization::Case* base_case, Model::ModelSynchronizationObject* mso)
+    : AbstractRunner(runtime_settings) {
+  if (base_case != 0 && mso != 0) {
+    base_case_ = base_case;
+    mso_ = mso;
+  }
+
+  InitializeModules();
+}
+
+
 
 void SerialRunner::Execute()
 {

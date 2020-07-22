@@ -52,6 +52,7 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings)
     simulator_ = 0;
     objective_function_ = 0;
     base_case_ = 0;
+    mso_ = 0;
     optimizer_ = 0;
     bookkeeper_ = 0;
 }
@@ -162,9 +163,18 @@ void AbstractRunner::InitializeBaseCase()
 {
     if (objective_function_ == 0 || model_ == 0)
         throw std::runtime_error("The Objective Function and the Model must be initialized before the Base Case.");
-    base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                        model_->variables()->GetDiscreteVariableValues(),
-                                        model_->variables()->GetContinousVariableValues());
+
+    if (!base_case_) {
+      base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
+                                          model_->variables()->GetDiscreteVariableValues(),
+                                          model_->variables()->GetContinousVariableValues());
+    } else {
+      mso_->UpdateVariablePropertyIds(model_);
+      base_case_ = new Optimization::Case(base_case_->binary_variables(),
+                                          base_case_->integer_variables(),
+                                          base_case_->real_variables());
+    }
+
     if (!simulator_->results()->isAvailable()) {
         if (runtime_settings_->verbosity_level())
             std::cout << "Simulation results are unavailable. Setting base case objective function value to sentinel value." << std::endl;

@@ -28,6 +28,7 @@
 
 #include "runtime_settings.h"
 #include "Model/model.h"
+#include "Model/model_synchronization_object.h"
 #include "Optimization/optimizer.h"
 #include "Optimization/case.h"
 #include "Optimization/objective/objective.h"
@@ -75,6 +76,7 @@ class AbstractRunner
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
+  Model::ModelSynchronizationObject *mso_;
   Settings::Settings *settings_;
   RuntimeSettings *runtime_settings_;
   Optimization::Case *base_case_;

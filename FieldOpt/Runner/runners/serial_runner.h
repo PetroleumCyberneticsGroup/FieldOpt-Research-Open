@@ -34,8 +34,13 @@ class SerialRunner : public AbstractRunner
   friend class MainRunner;
 
   // AbstractRunner interface
+
+ protected:
+  void InitializeModules();
+
  public:
   SerialRunner(RuntimeSettings *runtime_settings);
+  SerialRunner(RuntimeSettings *runtime_settings, Optimization::Case* base_case, Model::ModelSynchronizationObject* mso);
   void Execute();
 };
 
