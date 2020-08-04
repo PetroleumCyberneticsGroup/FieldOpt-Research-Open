@@ -103,6 +103,7 @@ class TrustRegionOptimization : public Optimizer {
   bool criticality_step_performed_ = false;
   bool improve_model_ = false;
   bool criticality_step_execution_ongoing_ = false;
+  QString tr_log_path_;
 
   // -------------------------------------------------------
   // FO constructs
@@ -119,6 +120,7 @@ class TrustRegionOptimization : public Optimizer {
   // \todo make new version of printIteration function
   //  such that function rints out to file conditionally
   void printIteration(double fval_current, string ifile);
+  void createLogFile();
 
   // -------------------------------------------------------
   class ConfigurationSummary : public Loggable {
