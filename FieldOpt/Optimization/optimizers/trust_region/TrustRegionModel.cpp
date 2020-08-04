@@ -382,14 +382,6 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<All fvalues>
   sortVectorByIndex(distances_, index_vector_);
-  // cout << "fvalues size " << all_fvalues_.size() << endl;
-  // cout << "index size " << index_vector_.size() << endl;
-  // cout << "allpoints size " << all_points_.size() << endl;
-  // cout << "pointsshifted size " << points_shifted_.size() << endl;
-  // cout << "fvalues cols " << all_fvalues_.cols() << endl;
-  // cout << "index cols " << index_vector_.cols() << endl;
-  // cout << "allpoints cols " << all_points_.cols() << endl;
-  // cout << "pointsshifted cols " << points_shifted_.cols() << endl;
   sortVectorByIndex(all_fvalues_, index_vector_);
 
   DBG_printPivotPolynomials("rebuildModel");
@@ -412,8 +404,7 @@ bool TrustRegionModel::rebuildModel() {
   DBG_printModelData("rowPivotGaussianElim-00");
   for (int iter = 1; iter < polynomials_num; iter++) {
 
-    pivot_polynomials_[poly_i] =
-        orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
+    pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
     double max_layer;
     double farthest_point = (double)distances_(distances_.size()-1);
@@ -492,8 +483,7 @@ bool TrustRegionModel::rebuildModel() {
       pivot_polynomials_[poly_i] = orthogonalizeToOtherPolynomials(poly_i, last_pt_included);
 
       //!<Orthogonalize polynomials on present block (deferring subsequent ones)>
-      orthogonalizeBlock(
-          points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
+      orthogonalizeBlock(points_shifted_.col(poly_i), poly_i, block_beginning, poly_i);
 
       last_pt_included = pt_next;
       poly_i++;
