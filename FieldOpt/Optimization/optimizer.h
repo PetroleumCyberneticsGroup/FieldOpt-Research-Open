@@ -31,22 +31,25 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/optimizer.h"
 #include "case.h"
 #include "case_handler.h"
+#include "normalizer.h"
 #include "constraints/constraint_handler.h"
 #include "optimization_exceptions.h"
+#include "Optimization/objective/objective.h"
+
+#include "Model/model.h"
 #include "Model/properties/variable_property_container.h"
+
 #include "Runner/loggable.hpp"
 #include "Runner/logger.h"
-#include "normalizer.h"
 #include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 
-#include "Model/model.h"
+using Eigen::VectorXd;
+using Eigen::MatrixXd;
 
 namespace Simulation {
     class Simulator;
 }
-
-#include "Optimization/objective/objective.h"
 
 class Logger;
 
@@ -54,10 +57,11 @@ namespace Optimization {
 
 class HybridOptimizer;
 
-/*!
- * \brief The Optimizer class is the abstract parent class for all optimizers. It is primarily
- * designed to support direct search optimization algorithms.
- */
+// =========================================================
+// The Optimizer class is the abstract parent class for all
+// optimizers. It is primarily designed to support direct
+// search optimization algorithms.
+
 class Optimizer : public Loggable
 {
   friend class HybridOptimizer;
@@ -75,36 +79,45 @@ class Optimizer : public Loggable
   Case *GetCaseForEvaluation();
 
   /*!
-   * \brief SubmitEvaluatedCase Submit an already evaluated case to the optimizer.
+   * \brief SubmitEvaluatedCase Submit an already evaluated 
+   case to the optimizer.
    *
-   * The submitted case is marked as recently evaluated in the CaseHandler.
+   * Submitted case is marked "recently evaluated" in CaseHandler.
    * \param c Case to submit.
    */
   void SubmitEvaluatedCase(Case *c);
 
+  // -------------------------------------------------------
   /*!
-   * \brief GetTentativeBestCase Get the best case found so far.
+   * \brief GetTentativeBestCase Get best case found so far.
    * \return
    */
   Case *GetTentativeBestCase() const;
 
   /*!
-   * \brief case_handler Get the case handler. Used by the bookkeeper in the runner lib.
+   * \brief case_handler Get the case handler. 
+   Used by the bookkeeper in the runner lib.
    */
   CaseHandler *case_handler() const { return case_handler_; }
 
   // Status related methods
-  int nr_evaluated_cases() const { return case_handler_->EvaluatedCases().size(); }
-  int nr_queued_cases() const { return case_handler_->QueuedCases().size(); }
-  int nr_recently_evaluated_cases() const { return case_handler_->RecentlyEvaluatedCases().size(); }
+  int nr_evaluated_cases() const {
+    return case_handler_->EvaluatedCases().size();
+  }
+  int nr_queued_cases() const {
+    return case_handler_->QueuedCases().size();
+  }
+  int nr_recently_evaluated_cases() const {
+    return case_handler_->RecentlyEvaluatedCases().size();
+  }
 
-  /*!
-   * The TerminationCondition enum enumerates the reasons why an optimization run is deemed
-   * finished. It is returned by the IsFinished method
-   */
+  // -------------------------------------------------------
+  // TerminationCondition enum enumerates the reasons for
+  // ending the opt runs. Returned by IsFinished method.
   enum TerminationCondition : int {NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
-    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4
+    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4, 
+    TR_MIN_RADIUS_REACHED=5
   };
 
   /*!
@@ -182,7 +195,22 @@ class Optimizer : public Loggable
   class EmbeddedProblem {
    public:
 
+    // EmbeddedProblem& operator=(const EmbeddedProblem& prob);
     static EmbeddedProblem* pProb_;
+
+    static EmbeddedProblem& getReference() {
+      if (pProb_ == 0) {
+        static EmbeddedProblem prob_;
+        pProb_ = &prob_;
+        return prob_;
+      } else {
+        return *pProb_;
+      }
+    }
+
+    // In code:
+    // Optimization::Optimizer::EmbeddedProblem& prob =
+    // Optimization::Optimizer::EmbeddedProblem::getReference();
 
    public:
     EmbeddedProblem() {};
@@ -193,15 +221,15 @@ class Optimizer : public Loggable
     void setNumLinConst(int n_lc) { n_lconst_ = n_lc; }
     void setNunNnlConst(int n_nlc) { n_nlconst_ = n_nlc; }
 
-    void setXInit(Eigen::VectorXd x_init) { x_init_ = x_init; }
-    void setXUb(Eigen::VectorXd x_ub) { x_ub_ = x_ub; }
-    void setXLb(Eigen::VectorXd x_lb) { x_lb_ = x_lb; }
-    void setFUb(Eigen::VectorXd F_ub) { F_ub_ = F_ub; }
-    void setFLb(Eigen::VectorXd F_lb) { F_lb_ = F_lb; }
+    void setXInit(VectorXd x_init) { x_init_ = x_init; }
+    void setXUb(VectorXd x_ub) { x_ub_ = x_ub; }
+    void setXLb(VectorXd x_lb) { x_lb_ = x_lb; }
+    void setFUb(VectorXd F_ub) { F_ub_ = F_ub; }
+    void setFLb(VectorXd F_lb) { F_lb_ = F_lb; }
 
     void setTrC(double tr_c) { tr_c_ = tr_c; }
-    void setTrG(Eigen::VectorXd tr_g) { tr_g_ = tr_g; }
-    void setTrH(Eigen::MatrixXd tr_H) { tr_H_ = tr_H; }
+    void setTrG(VectorXd tr_g) { tr_g_ = tr_g; }
+    void setTrH(MatrixXd tr_H) { tr_H_ = tr_H; }
 
     void setXSol(vector<double> xsol) { xsol_ = xsol; }
     void setFSol(vector<double> fsol) { fsol_ = fsol; }
@@ -215,21 +243,21 @@ class Optimizer : public Loggable
     int getNumLinConst() { return n_lconst_; }
     int getNunNnlConst() { return n_nlconst_; }
 
-    Eigen::VectorXd getXInit() { return x_init_; }
-    Eigen::VectorXd getXUb() { return x_ub_; }
-    Eigen::VectorXd getXLb() { return x_lb_; }
-    Eigen::VectorXd getFUb() { return F_ub_; }
-    Eigen::VectorXd getFLb() { return F_lb_; }
+    VectorXd getXInit() { return x_init_; }
+    VectorXd getXUb() { return x_ub_; }
+    VectorXd getXLb() { return x_lb_; }
+    VectorXd getFUb() { return F_ub_; }
+    VectorXd getFLb() { return F_lb_; }
 
     double getTrC() { return tr_c_; }
-    Eigen::VectorXd getTrG() { return tr_g_; }
-    Eigen::MatrixXd getTrH() { return tr_H_; }
+    VectorXd getTrG() { return tr_g_; }
+    MatrixXd getTrH() { return tr_H_; }
 
-    Eigen::VectorXd getXSol() {
+    VectorXd getXSol() {
         return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
     }
 
-    Eigen::VectorXd getFSol() {
+    VectorXd getFSol() {
         return Eigen::Map<VectorXd>(fsol_.data(), fsol_.size());
     }
 
@@ -243,15 +271,15 @@ class Optimizer : public Loggable
     int n_lconst_;
     int n_nlconst_;
 
-    Eigen::VectorXd x_init_;
-    Eigen::VectorXd x_ub_;
-    Eigen::VectorXd x_lb_;
-    Eigen::VectorXd F_ub_;
-    Eigen::VectorXd F_lb_;
+    VectorXd x_init_;
+    VectorXd x_ub_;
+    VectorXd x_lb_;
+    VectorXd F_ub_;
+    VectorXd F_lb_;
 
     double tr_c_;
-    Eigen::VectorXd tr_g_;
-    Eigen::MatrixXd tr_H_;
+    VectorXd tr_g_;
+    MatrixXd tr_H_;
 
     vector<double> xsol_;
     vector<double> fsol_;
@@ -263,45 +291,87 @@ class Optimizer : public Loggable
 
  protected:
   void updateTentativeBestCase(Case *c);
-  CaseHandler *case_handler_; //!< All cases (base case, unevaluated cases and evaluated cases) passed to or generated by the optimizer.
-  Constraints::ConstraintHandler *constraint_handler_; //!< All constraints defined for the optimization.
-  int evaluated_cases_; //!< Number of evaluated cases.
-  int max_evaluations_; //!< Maximum number of objective function evaluations allowed before terminating.
-  int iteration_; //!< The current iteration.
-  int verbosity_level_; //!< The verbosity level for runtime console logging.
 
-  ::Settings::Optimizer::OptimizerMode mode_; //!< The optimization mode, i.e. whether the objective function should be maximized or minimized.
+  // All cases (base case, unevaluated cases and evaluated
+  // cases) passed to or generated by the optimizer.
+  CaseHandler *case_handler_;
+
+  // All constraints defined for the optimization.
+  Constraints::ConstraintHandler *constraint_handler_;
+
+  int evaluated_cases_;  // Number of evaluated cases.
+
+  // Maximum number of objective function evaluations
+  // allowed before terminating.
+  int max_evaluations_;
+
+  int iteration_;  // The current iteration.
+
+  // Verbosity level for runtime console logging.
+  int verbosity_level_;
+
+  // The optimization mode, i.e. whether the objective
+  // function should be maximized or minimized.
+  ::Settings::Optimizer::OptimizerMode mode_;
   ::Settings::Optimizer::OptimizerType type_;
 
-  bool is_async_; //!< Inidcates whether or not the optimizer is asynchronous. Defaults to false.
+  // Inidcates whether or not the optimizer is asynchronous;
+  // defaults to false.
+  bool is_async_;
+
   Logger *logger_;
-  bool enable_logging_; //!< Whether logging should be performed. This should be set to false when the optimizer is a component in HybridOptimizer.
-  void DisableLogging(); //!< Disable logging for this optimizer. This is called by HybridOptimizer.
-  bool penalize_; //!< Switch for whether or not to use penalty function to account for constraints.
-  Case *tentative_best_case_; //!< The best case encountered thus far.
-  int tentative_best_case_iteration_; //!< The iteration in which the current tentative best case was found.
-  bool is_hybrid_component_; //!< Indicates that this object is a hybrid optimization component.
 
-  Normalizer normalizer_ofv_; //!< Normalizer for objective function values.
+  // Whether logging should be performed; this should be
+  // set to false when the optimizer is a component in
+  // HybridOptimizer.
+  bool enable_logging_;
 
-  void initializeNormalizers(); //!< Initialize all normalization parameters.
+  // Disable logging for this optimizer;
+  // this is called by HybridOptimizer.
+  void DisableLogging();
+
+
+  // Switch for whether or not to use penalty
+  // function to account for constraints.
+  bool penalize_;
+
+  // The best case encountered thus far.
+  Case *tentative_best_case_;
+
+  // The iteration in which the current tentative best case was found.
+  int tentative_best_case_iteration_;
+
+  // Indicates this object is a hybrid optimization component.
+  bool is_hybrid_component_;
+
+  // Normalizer for objective function values.
+  Normalizer normalizer_ofv_;
+
+  // Initialize all normalization parameters.
+  void initializeNormalizers();
 
   class Summary : public Loggable {
    public:
     Summary(Optimizer *opt, TerminationCondition cond,
-            map<string, string> ext_state=map<string, string>()) { opt_ = opt; cond_ = cond; ext_state_ = ext_state; }
+            map<string, string> ext_state=map<string, string>()) {
+      opt_ = opt;
+      cond_ = cond;
+      ext_state_ = ext_state;
+    }
+
     LogTarget GetLogTarget() override;
     map<string, string> GetState() override;
     QUuid GetId() override;
     map<string, vector<double>> GetValues() override;
+
    private:
-    map<string, string> ext_state_;
     Optimizer *opt_;
     Optimizer::TerminationCondition cond_;
+    map<string, string> ext_state_;
   };
 
   /*!
-   * @brief Calculate the penalized objective function value for a case.
+   * @brief Calculate penalized objf function value for a case.
    * @param c Case to calculate the penalized objective function value for.
    * @return The penalized objective function value.
    */
@@ -309,8 +379,11 @@ class Optimizer : public Loggable
 
  private:
   QDateTime start_time_;
-  int seconds_spent_in_iterate_; //!< The number of seconds spent in the iterate() method.
 
+  // The number of seconds spent in the iterate() method.
+  int seconds_spent_in_iterate_;
+
+  // -------------------------------------------------------
   /*!
    * @brief Initialize the OFV normalizer, setting the parameters for it
    * from the cases that have been evaluated so far.
