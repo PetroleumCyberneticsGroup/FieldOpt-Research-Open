@@ -46,7 +46,8 @@ class RunnerResources {
 
   string en_5spot_simexe = en_5spot_dir + "/drivers/bash_flw_en_5spot.sh";
   // string en_5spot_simexe = en_5spot_dir + "/drivers/bash_ecl_en_5spot.sh";
-
+  // string en_5spot_simexe = en_5spot_dir + "/drivers/bash_ecl_en_5spot_xe.sh";
+  
   string en_5spot_xdir = "../fieldopt-output/en_5spot/" + driver_nm;
   string en_5spot_aux = en_5spot_dir + "/include";
 

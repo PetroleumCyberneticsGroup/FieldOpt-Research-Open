@@ -150,7 +150,9 @@ bool ECLSimulator::Evaluate(
   paths_.SetPath(Paths::SIM_DRIVER_DIR, GetParentDirectoryPath(realization.data()));
   paths_.SetPath(Paths::SIM_SCH_FILE, realization.schedule());
 
-  return Evaluate(timeout, threads);
+//  return Evaluate(timeout, threads);
+  Evaluate();
+  return true;
 }
 
 void ECLSimulator::CleanUp() {
