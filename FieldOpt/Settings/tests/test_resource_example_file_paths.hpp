@@ -1,6 +1,27 @@
-//
-// Created by einar on 6/2/16.
-//
+/***********************************************************
+Created by einar on 6.2.16
+Copyright (C) 2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2020- Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_TEST_RESOURCE_EXAMPLE_FILE_PATHS_H
 #define FIELDOPT_TEST_RESOURCE_EXAMPLE_FILE_PATHS_H
@@ -12,13 +33,13 @@ namespace TestResources {
 namespace ExampleFilePaths {
 
 inline std::string base_path() {
-    char const* fieldopt_path = getenv("FIELDOPT_BUILD_ROOT");
-    if (!is_env_var_set("FIELDOPT_BUILD_ROOT")) {
-        return "..";
-    }
-    else {
-        return get_env_var_value("FIELDOPT_BUILD_ROOT");
-    }
+  char const* fieldopt_path = getenv("FIELDOPT_BUILD_ROOT");
+  if (!is_env_var_set("FIELDOPT_BUILD_ROOT")) {
+    return "..";
+  }
+  else {
+    return get_env_var_value("FIELDOPT_BUILD_ROOT");
+  }
 }
 
 static std::string bin_dir_                  = base_path() + "/bin/";

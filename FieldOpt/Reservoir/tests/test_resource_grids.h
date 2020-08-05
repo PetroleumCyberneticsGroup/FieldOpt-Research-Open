@@ -1,36 +1,51 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 
 #ifndef FIELDOPT_TEST_RESOURCE_RESERVOIRS_H
 #define FIELDOPT_TEST_RESOURCE_RESERVOIRS_H
 
 #include "Reservoir/grid/grid.h"
 #include "Reservoir/grid/eclgrid.h"
-#include "Settings/tests/test_resource_example_file_paths.hpp"
 
 namespace TestResources {
+
+// =========================================================
 class TestResourceGrids {
+
  protected:
+
   TestResourceGrids() {
-      grid_horzwel_ = new Reservoir::Grid::ECLGrid(TestResources::ExampleFilePaths::grid_horzwel_);
-      grid_5spot_ = new Reservoir::Grid::ECLGrid(TestResources::ExampleFilePaths::grid_5spot_);
-      grid_norne_ = new Reservoir::Grid::ECLGrid(TestResources::ExampleFilePaths::norne_atw_grid_);
+    grid_horzwel_ = new Reservoir::Grid::ECLGrid(
+        "../examples/ECLIPSE/HORZWELL/HORZWELL.EGRID");
+
+    grid_5spot_ = new Reservoir::Grid::ECLGrid(
+        "../examples/ADGPRS/5spot/ECL_5SPOT.EGRID");
+
+    grid_norne_ = new Reservoir::Grid::ECLGrid(
+        "../examples/Flow/norne/NORNE_ATW2013.EGRID"
+    );
   }
 
   Reservoir::Grid::Grid *grid_5spot_;

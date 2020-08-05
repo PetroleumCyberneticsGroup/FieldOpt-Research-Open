@@ -54,6 +54,17 @@ void SerialRunner::Execute()
             if (VERB_RUN >= 3) Printer::ext_info("Getting case from Optimizer.", "Runner", "Serial Runner");
             new_case = optimizer_->GetCaseForEvaluation();
             if (VERB_RUN >= 3) Printer::ext_info("Got case from Optimizer.", "Runner", "Serial Runner");
+            while (new_case == nullptr) {
+              if (optimizer_->IsFinished()) {
+                break;
+              } else {
+                new_case = optimizer_->GetCaseForEvaluation();
+              }
+            }
+
+            if (optimizer_->IsFinished()) {
+              break;
+            }
         }
 
         if (!is_ensemble_run_ && bookkeeper_->IsEvaluated(new_case, true)) {
