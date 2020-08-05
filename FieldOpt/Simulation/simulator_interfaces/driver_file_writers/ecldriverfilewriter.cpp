@@ -69,21 +69,45 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path)
   }
 }
 std::string EclDriverFileWriter::buildActionStrings() {
-  if (VERB_SIM >= 2) {
-    Printer::ext_info("Generating action strings", "Simulation", "EclDriverFileWriter");
-  }
-  std::string actions = "";
-
-  std::string icv_actions = "";
-  for (auto well : *model_->wells()) {
-    if (well->HasSimpleICVs()) {
-      auto wsegv = ECLDriverParts::Wsegvalv(well);
-      icv_actions += wsegv.GetPartString().toStdString() + "\n";
+    if (VERB_SIM >= 2) {
+        Printer::ext_info("Generating action strings", "Simulation", "EclDriverFileWriter");
     }
-  }
-  actions += ActionX::ACTIONX("ICVS_T0", ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
-                              ECLDriverParts::ActionX::ACTX_Operator::GE, 0, icv_actions);
-  return actions;
+    std::string actions = "";
+
+    std::string icv_actions = "";
+    for (auto well : *model_->wells()) {
+        if (well->HasSimpleICVs()) {
+            auto wsegv = ECLDriverParts::Wsegvalv(well);
+            icv_actions += wsegv.GetPartString().toStdString() + "\n";
+        }
+    }
+
+    std::string ctrl_actions = "";
+    if (model_->wells()->first()->controls()->size() > 0) {
+        Schedule schedule = ECLDriverParts::Schedule(model_->wells(), settings_->model()->control_times(), insets_);
+        auto schedule_time_entries = schedule.GetScheduleTimeEntries();
+        for (auto entry : schedule_time_entries) {
+            int ctrl_time = 0;
+            entry.control_time == 0 ? ctrl_time = 1 : ctrl_time = entry.control_time;
+            for (QString entry_part : entry.well_controls.GetWellEntryList()) {
+                ctrl_actions += ActionX::ACTIONX("CTR_" + Printer::num2str(entry.control_time),
+                        ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
+                        ECLDriverParts::ActionX::ACTX_Operator::GE, 
+                        ctrl_time,
+                        entry_part.toStdString()
+                );
+                ctrl_actions += "\n";
+            }
+        }
+    }
+    else if (VERB_SIM >= 2) {
+        Printer::ext_warn("First well did not have controls; assuming none do.", "Simulation", "ECLDriverFileWriter");
+    }
+
+    actions += ActionX::ACTIONX("ICVS_T0", ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
+        ECLDriverParts::ActionX::ACTX_Operator::GE, 0, icv_actions);
+    actions += ctrl_actions;
+    return actions;
 }
 
 }
