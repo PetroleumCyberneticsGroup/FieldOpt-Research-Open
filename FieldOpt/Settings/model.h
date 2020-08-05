@@ -1,27 +1,27 @@
-/******************************************************************************
- *
- * model.h
- *
- * Created: 28.09.2015 2015 by einar
- *
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2015 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Created: 28.09.2015 2015 by einar
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef SETTINGS_MODEL_H
 #define SETTINGS_MODEL_H
@@ -41,24 +41,40 @@ namespace Settings {
 class DeckParser;
 
 /*!
- * \brief The Model class contains model-specific settings. Model settings objects may _only_ be
- * created by the Settings class. They are created when reading a JSON-formatted "driver file".
+ * \brief The Model class contains model-specific settings. Model
+ * settings objects may _only_ be created by the Settings class.
+ * They are created when reading a JSON-formatted "driver file".
  *
- * \todo Add more control types, e.g. multiple rate types (liquid rate, oil rate, gas rate, etc.) for producers.
+ * \todo Add more control types, e.g. multiple rate types
+ * (liquid rate, oil rate, gas rate, etc.) for producers.
  */
 class Model
 {
   friend class Settings;
 
  public:
-  Model(QJsonObject json_model, Paths &paths); // This should only be accessed externally for testing purposes.
+  // This should only be accessed externally for testing purposes.
+  Model(QJsonObject json_model, Paths &paths);
+
   enum WellType : int { Injector=11, Producer=12, UNKNOWN_TYPE=19 };
-  enum ControlMode : int { BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24, RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
+  enum ControlMode : int {
+    BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24,
+    RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
   enum InjectionType : int { WaterInjection=31, GasInjection=32 };
-  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42, PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
-  enum WellCompletionType : int { Perforation=61, ICV=62, Packer=63, Tubing=64, Annulus=65 };
+
+  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42,
+      PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
+
+  enum WellCompletionType : int { Perforation=61, ICV=62,
+      Packer=63, Tubing=64, Annulus=65 };
+
   enum WellState : int { WellOpen=71, WellShut=72 };
-  enum PreferredPhase : int { Oil=81, Water=82, Gas=83, Liquid=84, UNKNOWN_PHASE=89 };
+
+  enum PreferredPhase : int { Oil=81, Water=82, Gas=83,
+      Liquid=84, UNKNOWN_PHASE=89 };
+
   enum Direction : int { X=91, Y=92, Z=93 };
 
   struct Well {

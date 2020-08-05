@@ -7,8 +7,8 @@ SET(SETTINGS_HEADERS
 	settings_exceptions.h
 	simulator.h
 	trajectory_importer.h
-    helpers.hpp
-)
+	helpers.hpp
+	)
 
 SET(SETTINGS_SOURCES
 	ensemble.cpp
@@ -18,7 +18,7 @@ SET(SETTINGS_SOURCES
 	settings.cpp
 	simulator.cpp
 	trajectory_importer.cpp
-)
+	)
 
 SET(SETTINGS_TESTS
 	tests/test_resource_example_file_paths.hpp
@@ -29,4 +29,4 @@ SET(SETTINGS_TESTS
 	tests/test_settings_optimizer.cpp
 	tests/test_settings_simulator.cpp
 	tests/test_trajectory_importer.cpp
-)
+	)

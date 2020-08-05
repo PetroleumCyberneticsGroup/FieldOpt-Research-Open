@@ -5,7 +5,7 @@ SET(SIMULATION_HEADERS
 	results/eclresults.h
 	results/results.h
 	results/results_exceptions.h
-    results/json_results.h
+	results/json_results.h
 	simulator_interfaces/adgprssimulator.h
 	simulator_interfaces/driver_file_writers/adgprsdriverfilewriter.h
 	simulator_interfaces/driver_file_writers/driver_parts/adgprs_driver_parts/adgprs_wellcontrols.h
@@ -32,7 +32,7 @@ SET(SIMULATION_HEADERS
 	simulator_interfaces/ix_simulator.h
 	simulator_interfaces/simulator.h
 	simulator_interfaces/simulator_exceptions.h
-)
+	)
 
 SET(SIMULATION_SOURCES
 	results/adgprsresults.cpp
@@ -58,8 +58,8 @@ SET(SIMULATION_SOURCES
 	simulator_interfaces/flowsimulator.cpp
 	simulator_interfaces/ix_simulator.cpp
 	simulator_interfaces/simulator.cpp
-    results/json_results.cpp
-)
+	results/json_results.cpp
+	)
 
 SET(SIMULATION_TESTS
 	tests/test_resource_results.h
@@ -75,4 +75,4 @@ SET(SIMULATION_TESTS
 	tests/simulator_interfaces/test_adgprssimulator.cpp
 	tests/simulator_interfaces/test_eclsimulator.cpp
 	tests/simulator_interfaces/test_ix_simulator.cpp
-)
+	)
