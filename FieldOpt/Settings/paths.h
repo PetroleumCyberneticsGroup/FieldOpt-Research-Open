@@ -35,7 +35,7 @@ using std::map;
 class Paths {
  public:
   Paths();
-  
+
   /*!
    * Path enum. Directory paths should have values < 0; files >= 0.
    */
@@ -45,38 +45,40 @@ class Paths {
     SIM_OUT_DRIVER_FILE = 5, SIM_OUT_SCH_FILE = 6,
     SIM_HDF5_FILE=7, ENSEMBLE_FILE=8, SIM_SCH_INSET_FILE=9,
     BUILD_DIR = -1, OUTPUT_DIR = -2, SIM_DRIVER_DIR = -3,
-    SIM_WORK_DIR = -4, SIM_AUX_DIR = -5, TRAJ_DIR = -6
+    SIM_WORK_DIR = -4, SIM_AUX_DIR = -5, TRAJ_DIR = -6,
+    CASE_ROOT_DIR = -7
   };
-  
+
   const string &GetPathDescription(Path path) const;
 
   void SetPath(Path path, string path_string);
-  
+
   bool IsSet(Path path);
-  
+
   string GetPath(Path path);
-  
+
   void ShowPaths();
- 
+
  private:
   map<Path, string> path_descriptions = {
-      pair<Path, string> {DRIVER_FILE, "Driver file"},
-      pair<Path, string> {SIM_DRIVER_FILE, "Simulator driver file"},
-      pair<Path, string> {GRID_FILE, "Grid file"},
-      pair<Path, string> {SIM_EXEC_SCRIPT_FILE, "Simulator execution script"},
-      pair<Path, string> {SIM_SCH_FILE, "Simulator schedule section file"},
-      pair<Path, string> {SIM_OUT_DRIVER_FILE, "Simulation output driver file"},
-      pair<Path, string> {SIM_OUT_SCH_FILE, "Simulation output schedule file"},
-      pair<Path, string> {SIM_SCH_INSET_FILE, "Simulator schedule inset file"},
-      pair<Path, string> {SIM_HDF5_FILE, "HDF5 Summary file"},
-      pair<Path, string> {ENSEMBLE_FILE, "Ensemble description file"},
-      pair<Path, string> {BUILD_DIR, "Build directory"},
-      pair<Path, string> {OUTPUT_DIR, "Output directory"},
-      pair<Path, string> {SIM_DRIVER_DIR, "Simulation driver parent directory"},
-      pair<Path, string> {SIM_WORK_DIR, "Simulation work directory"},
-      pair<Path, string> {SIM_AUX_DIR, "Auxilary files for simulation directory"},
-      pair<Path, string> {TRAJ_DIR, "Directory contaning trajectory files for import"}
-};
+    pair<Path, string> {DRIVER_FILE, "Driver file"},
+    pair<Path, string> {SIM_DRIVER_FILE, "Sim driver file"},
+    pair<Path, string> {GRID_FILE, "Grid file"},
+    pair<Path, string> {SIM_EXEC_SCRIPT_FILE, "Sim exe script"},
+    pair<Path, string> {SIM_SCH_FILE, "Sim schedule file"},
+    pair<Path, string> {SIM_OUT_DRIVER_FILE, "Sim output driver file"},
+    pair<Path, string> {SIM_OUT_SCH_FILE, "Sim output schedule file"},
+    pair<Path, string> {SIM_SCH_INSET_FILE, "Sim schedule inset file"},
+    pair<Path, string> {SIM_HDF5_FILE, "HDF5 Summary file"},
+    pair<Path, string> {ENSEMBLE_FILE, "Ensemble description file"},
+    pair<Path, string> {BUILD_DIR, "Build directory"},
+    pair<Path, string> {OUTPUT_DIR, "Output directory"},
+    pair<Path, string> {SIM_DRIVER_DIR, "Sim driver parent directory"},
+    pair<Path, string> {SIM_WORK_DIR, "Sim work directory"},
+    pair<Path, string> {SIM_AUX_DIR, "Auxiliary files for simulation directory"},
+    pair<Path, string> {TRAJ_DIR, "Dir w/ trajectory files for import"},
+    pair<Path, string> {CASE_ROOT_DIR, "Case root dir"}
+  };
 
   map<Path, string> paths_;
 };

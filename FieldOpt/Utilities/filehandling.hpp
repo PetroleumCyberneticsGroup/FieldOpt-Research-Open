@@ -304,7 +304,6 @@ inline QString GetCurrentDirectoryPath()
 
 /*!
  * \brief GetAbsoluteFilePath Gets absolute path of file.
- *
  * \param file (relative) path to file
  */
 inline QString GetAbsoluteFilePath(const QString &file) {

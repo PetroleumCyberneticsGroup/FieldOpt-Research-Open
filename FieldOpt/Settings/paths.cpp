@@ -40,7 +40,7 @@ void Paths::SetPath(Paths::Path path, string path_string) {
   if (path >= 0 && !FileExists(path_string)) {
     
     stringstream ss;
-    ss << "ERROR: Cannot set " << GetPathDescription(path)
+    ss << "Cannot set " << GetPathDescription(path)
        << " path to non-existing file (" << path_string << ")";
     Printer::error(ss.str());
     throw runtime_error(
@@ -48,7 +48,7 @@ void Paths::SetPath(Paths::Path path, string path_string) {
         + " not found at " + path_string);
     
   } else if (path < 0 && !DirectoryExists(path_string)) {
-    cerr << "ERROR: Cannot set " << GetPathDescription(path)
+    cerr << "Cannot set " << GetPathDescription(path)
     << " path to non-existing directory (" << path_string
     << ")" << endl;
     throw runtime_error(

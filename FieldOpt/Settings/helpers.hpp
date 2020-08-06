@@ -42,8 +42,8 @@ namespace Settings {
  */
 inline bool is_prop_variable(const QJsonObject &container) {
   if (container.contains("IsVariable")
-  && container["IsVariable"].isBool()
-  && container["IsVariable"].toBool() == true) {
+    && container["IsVariable"].isBool()
+    && container["IsVariable"].toBool() == true) {
     return true;
   }
   else {
@@ -59,18 +59,18 @@ inline bool is_prop_variable(const QJsonObject &container) {
 * @param prop_name Name of property to find in the container.
 */
 inline bool set_opt_prop_double(double &prop,
-    const QJsonObject &container, const QString &prop_name) {
+                                const QJsonObject &container, const QString &prop_name) {
 
   if (container.contains(prop_name)
-  && (container[prop_name].isDouble())) {
+    && (container[prop_name].isDouble())) {
     prop = container[prop_name].toDouble();
     return true;
 
   } else {
     if (VERB_SET >= 2) {
       Printer::ext_info("Property " + prop_name.toStdString()
-        + " not found. Using default ("+ Printer::num2str(prop) + ").",
-        "Settings", "Helpers");
+                          + " not found. Using default ("+ Printer::num2str(prop) + ").",
+                        "Settings", "Helpers");
     }
     return false;
   }
@@ -94,7 +94,9 @@ inline void set_req_prop_double(double &prop, const QJsonObject &container, cons
 * @param container The JSON object that should contain the property.
 * @param prop_name The name of the property to find in the container.
 */
-inline bool set_opt_prop_int(int &prop, const QJsonObject &container, const QString &prop_name) {
+inline bool set_opt_prop_int(int &prop,
+                             const QJsonObject &container,
+                             const QString &prop_name) {
   if (container.contains(prop_name) && (container[prop_name].isDouble())) {
     prop = container[prop_name].toInt();
     return true;
@@ -102,8 +104,8 @@ inline bool set_opt_prop_int(int &prop, const QJsonObject &container, const QStr
   } else {
     if (VERB_SET >= 2) {
       Printer::ext_info("Property " + prop_name.toStdString() +
-      " not found. Using default (" + Printer::num2str(prop) + ").",
-      "Settings", "Helpers");
+                          " not found. Using default (" + Printer::num2str(prop) + ").",
+                        "Settings", "Helpers");
     }
     return false;
   }
@@ -123,8 +125,8 @@ inline bool set_opt_prop_bool(bool &prop, const QJsonObject &container, const QS
   } else {
     if (VERB_SET >= 2) {
       Printer::ext_info("Property " + prop_name.toStdString() +
-      " not found. Using default (" + Printer::num2str(prop) + ").",
-      "Settings", "Helpers");
+                          " not found. Using default (" + Printer::num2str(prop) + ").",
+                        "Settings", "Helpers");
     }
     return false;
   }
