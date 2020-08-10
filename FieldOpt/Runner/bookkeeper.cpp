@@ -4,7 +4,7 @@ namespace Runner {
 
     Bookkeeper::Bookkeeper(Settings::Settings *settings, Optimization::CaseHandler *case_handler)
     {
-        tolerance_ = settings->bookkeeper_tolerance();
+        tolerance_ = settings->bookkeeper_tol();
         case_handler_ = case_handler;
     }
 

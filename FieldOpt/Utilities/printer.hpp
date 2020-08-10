@@ -44,6 +44,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 
 #include <Utilities/colors.hpp>
+#include <Utilities/verbosity.h>
 
 // ---------------------------------------------------------
 using std::cout;
@@ -63,6 +64,94 @@ using Eigen::VectorXd;
 using Eigen::Map;
 
 namespace Printer {
+
+inline string RepStr(string str, int n) {
+  std::ostringstream os;
+  for(int i = 0; i < n; i++) { os << str; }
+  return os.str();
+}
+
+struct BoxSym {
+
+  string hll = "\u2500"; // ─ : horizontal line light
+  string hlb = "\u2501"; // ━ : horizontal line bold
+  string vll = "\u2502"; // ─ : vertical line light
+  string vlb = "\u2503"; // ━ : vertical line bold
+
+  string hdl = "\u2504"; // ─ : horizontal dashed-line light
+  string hdb = "\u2505"; // ━ : horizontal dashed-line bold
+  string vdl = "\u2506"; // ─ : vertical dashed-line light
+  string vdb = "\u2507"; // ━ : vertical dashed-line bold
+
+  string ull = "\u250C"; // ─ : upper left corner light
+  string ulb = "\u250F"; // ━ : upper left corner bold
+  string url = "\u2510"; // ─ : upper right corner light
+  string urb = "\u2513"; // ━ : upper right corner bold
+
+  string lll = "\u2514"; // ─ : lower left corner light
+  string llb = "\u2517"; // ━ : lower left corner bold
+  string lrl = "\u2518"; // ─ : lower right corner light
+  string lrb = "\u251B"; // ━ : lower right corner bold
+
+  string ulnl = ""; // upper line light
+  string ulnb = ""; // upper line bold
+  string llnl = ""; // lower line light
+  string llnb = ""; // lower line bold
+
+// Box Drawing symbols in unicode
+
+//         0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+// U+250x  ─   ━   │   ┃   ┄   ┅   ┆   ┇   ┈   ┉   ┊   ┋   ┌   ┍   ┎   ┏
+// U+251x  ┐   ┑   ┒   ┓   └   ┕   ┖   ┗   ┘   ┙   ┚   ┛   ├   ┝   ┞   ┟
+// U+252x  ┠   ┡   ┢   ┣   ┤   ┥   ┦   ┧   ┨   ┩   ┪   ┫   ┬   ┭   ┮   ┯
+// U+253x  ┰   ┱   ┲   ┳   ┴   ┵   ┶   ┷   ┸   ┹   ┺   ┻   ┼   ┽   ┾   ┿
+// U+254x  ╀   ╁   ╂   ╃   ╄   ╅   ╆   ╇   ╈   ╉   ╊   ╋   ╌   ╍   ╎   ╏
+// U+255x  ═   ║   ╒   ╓   ╔   ╕   ╖   ╗   ╘   ╙   ╚   ╛   ╜   ╝   ╞   ╟
+// U+256x  ╠   ╡   ╢   ╣   ╤   ╥   ╦   ╧   ╨   ╩   ╪   ╫   ╬   ╭   ╮   ╯
+// U+257x  ╰   ╱   ╲   ╳   ╴   ╵   ╶   ╷   ╸   ╹   ╺   ╻   ╼   ╽   ╾   ╿
+
+};
+
+inline BoxSym bSym(int lw=60, bool dbg=false) {
+  std::stringstream ss;
+  BoxSym bS;
+
+  bS.ulnl = bS.ull + RepStr(bS.hll, lw) + bS.url + "\n"; // upper line light
+  bS.ulnb = bS.ull + RepStr(bS.hlb, lw) + bS.urb + "\n"; // upper line bold
+  bS.llnl = bS.lll + RepStr(bS.hll, lw) + bS.lrl + "\n"; // lower line light
+  bS.llnb = bS.lll + RepStr(bS.hlb, lw) + bS.lrb + "\n"; // lower line bold
+
+  if(dbg) {
+    ss << "horizontal line light:        " << bS.hll << " -- ";
+    ss << "horizontal line bold:         " << bS.hlb << " -- ";
+    ss << "vertical line light:          " << bS.vll << " -- ";
+    ss << "vertical line bold:           " << bS.vlb << " -- \n";
+
+    ss << "horizontal dashed-line light: " << bS.hdl << " -- ";
+    ss << "horizontal dashed-line bold:  " << bS.hdb << " -- ";
+    ss << "vertical dashed-line light:   " << bS.vdl << " -- ";
+    ss << "vertical dashed-line bold:    " << bS.vdb << " -- \n";
+
+    ss << "upper left corner light:      " << bS.ull << " -- ";
+    ss << "upper left corner bold:       " << bS.ulb << " -- ";
+    ss << "upper right corner light:     " << bS.url << " -- ";
+    ss << "upper right corner bold:      " << bS.urb << " -- \n";
+
+    ss << "lower left corner light:      " << bS.lll << " -- ";
+    ss << "lower left corner bold:       " << bS.llb << " -- ";
+    ss << "lower right corner light:     " << bS.lrl << " -- ";
+    ss << "lower right corner bold:      " << bS.lrb << " -- \n";
+
+    ss << "upper line light:             " << bS.ulnl << "\n";
+    ss << "upper line bold:              " << bS.ulnb << "\n";
+    ss << "lower line light:             " << bS.llnl << "\n";
+    ss << "lower line bold:              " << bS.llnb << "\n\n";
+
+    cout << ss.str();
+  }
+
+  return bS;
+}
 
 /*!
  * @brief Convert a number to its string representation.
@@ -146,25 +235,27 @@ inline vector<string> split_line(const string text,
 
 
 /*! @brief Print a compact infobox.
-
  Example:
  ┌─────────────────────────────────────────────────────────────────────┐
  │ This is a compact info box                                         │
  └─────────────────────────────────────────────────────────────────────┘
  */
-inline void info(const std::string &text) {
+inline void info(const std::string &text, int lw=120) {
   std::stringstream ss;
   ss << FLGREEN;
   std::string content = text;
   truncate_text(content);
-  pad_text(content);
-  ss << "┌─────────────────────────────────────────────────────────────────────┐" << "\n";
-  ss << "│ " << content <<                                                  " │" << "\n";
-  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
+  pad_text(content, lw - 3);
+
+  BoxSym bS = bSym(lw);
+  ss << bS.ulnl;
+  ss << "│■ " << content << " │" << "\n";
+  ss << bS.llnl;
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();
 }
+
 
 /* Extended info box.
 Example:
@@ -177,23 +268,39 @@ Example:
  */
 inline void ext_info(const std::string &text,
                      const std::string &modulen="",
-                     const std::string &classn="") {
+                     const std::string &classn="",
+                     const int &lw=120) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 12);
   truncate_text(class_name, 29);
   pad_text(module_name, 12);
   pad_text(class_name, 29);
-  auto lines = split_line(text);
+
+  auto lines = split_line(text, lw - 2);
+
   std::stringstream ss;
   ss << FLGREEN;
-  ss << "┌───────┬──────────────────────┬──────────────────────────────────────┐" << "\n";
-  ss << "│ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
-  ss << "├───────┴──────────────────────┴──────────────────────────────────────┤" << "\n";
+
+  BoxSym bS = bSym(lw);
+  ss << bS.ulnl;
+  pad_text(module_name, lw - 74);
+  pad_text(class_name, lw - 74);
+  ss << "│■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
+    pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";
   }
-  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
+  ss << bS.llnl;
+
+//  ss << "┌───────┬──────────────────────┬──────────────────────────────────────┐" << "\n";
+//  ss << "│ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+//  ss << "├───────┴──────────────────────┴──────────────────────────────────────┤" << "\n";
+//  for (auto line : lines) {
+//    ss << "│ " << line << " │" << "\n";
+//  }
+//  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
+
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();
@@ -210,23 +317,38 @@ Example:
  */
 inline void ext_warn(const std::string &text,
                      const std::string &modulen="",
-                     const std::string &classn="") {
+                     const std::string &classn="",
+                     const int &lw=120) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 12);
   truncate_text(class_name, 25);
   pad_text(module_name, 12);
   pad_text(class_name, 25);
-  auto lines = split_line(text);
+
+  auto lines = split_line(text, lw - 2);
   std::stringstream ss;
   ss << FLYELLOW;
-  ss << "┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓" << "\n";
-  ss << "┃ WARNING  ┃ Module: " << module_name << " ┃ Class: " << class_name << " ┃" << "\n";
-  ss << "┣━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫" << "\n";
+
+  BoxSym bS = bSym(lw);
+  ss << bS.ulnl;
+  pad_text(module_name, lw - 74);
+  pad_text(class_name, lw - 74);
+  ss << "│■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
-    ss << "┃ " << line << " ┃" << "\n";
+    pad_text(line, lw - 2);
+    ss << "│ " << line << " │" << "\n";
   }
-  ss << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛" << "\n";
+  ss << bS.llnl;
+
+//  ss << "┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓" << "\n";
+//  ss << "┃ WARNING  ┃ Module: " << module_name << " ┃ Class: " << class_name << " ┃" << "\n";
+//  ss << "┣━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫" << "\n";
+//  for (auto line : lines) {
+//    ss << "┃ " << line << " ┃" << "\n";
+//  }
+//  ss << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛" << "\n";
+
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();
@@ -237,15 +359,23 @@ Example:
  ║ ERROR: This is an error message.                                   ║
  ╚═════════════════════════════════════════════════════════════════════╝
  */
-inline void error(const std::string &text) {
+inline void error(const std::string &text, const int &lw=120) {
   std::stringstream ss;
   ss << FLRED;
+
   std::string content = text;
-  truncate_text(content, 59);
-  pad_text(content, 59);
-  ss << "╔═════════════════════════════════════════════════════════════════════╗" << "\n";
-  ss << "║ ERROR: " << content <<                                                  " ║" << "\n";
-  ss << "╚═════════════════════════════════════════════════════════════════════╝" << "\n";
+  BoxSym bS = bSym(lw);
+  ss << bS.ulnl;
+  pad_text(content, lw - 3);
+  ss << "│■ ERROR: " << content << " │" << "\n";
+  ss << bS.llnl;
+
+//  truncate_text(content, 59);
+//  pad_text(content, 59);
+//  ss << "╔═════════════════════════════════════════════════════════════════════╗" << "\n";
+//  ss << "║ ERROR: " << content <<                                                  " ║" << "\n";
+//  ss << "╚═════════════════════════════════════════════════════════════════════╝" << "\n";
+
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();

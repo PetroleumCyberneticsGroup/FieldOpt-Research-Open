@@ -40,12 +40,14 @@ If not, see <http://www.gnu.org/licenses/>.
  */
 
 //                    Module
-#define VERB_MOD 1 // Model
+#define VERB_MOD 3 // Model
 #define VERB_OPT 3 // Optimization
 #define VERB_WIC 1 // WellIndexCalculation
-#define VERB_SIM 1 // Simulation
-#define VERB_RUN 1 // Runner
-#define VERB_RES 1 // Reservoir
-#define VERB_SET 1 // Settings
+#define VERB_SIM 3 // Simulation
+#define VERB_RUN 3 // Runner
+#define VERB_RES 3 // Reservoir
+#define VERB_SET 3 // Settings
+
+#define LINEWDTH 120
 
 #endif //FIELDOPT_VERBOSITY_H

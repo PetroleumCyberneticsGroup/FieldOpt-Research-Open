@@ -1,27 +1,28 @@
-/******************************************************************************
- *
- *
- *
- * Created: 16.12.2015 2015 by einar
- *
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2015 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Created: 16.12.2015 2015 by einar
+
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef ABSTRACTRUNNER_H
 #define ABSTRACTRUNNER_H
@@ -44,14 +45,18 @@ namespace Runner {
 class MainRunner;
 
 /*!
- * \brief The AbstractRunner class is the abstract parent class for all runners. It should only be constructed by the MainRunner class.
+ * \brief The AbstractRunner class is the abstract parent
+ * class for all runners. It should only be constructed by
+ * the MainRunner class.
  *
- * This class initializes the primary objects needed and provides some utility functions for logging.
+ * This class initializes the primary objects needed and
+ * provides some utility functions for logging.
  *
- * It also defines the purely virtual Execute() method which should be implemented by all concrete
- * runners.
+ * It also defines the purely virtual Execute() method which
+ * should be implemented by all concrete runners.
  *
- * todo: Create a method to get the timeout it seconds that uses the recorded simulation times and the timeout argument.
+ * todo: Create a method to get the timeout it seconds that
+ * uses the recorded simulation times and the timeout argument.
  */
 class AbstractRunner
 {
@@ -63,6 +68,7 @@ class AbstractRunner
    */
   virtual void Execute() = 0;
   const double sentinel_value_ = 0.0001; //!< Value to be used as a sentinel value for the objective function of cases that cannot be evaluated.
+  Settings::VerbParams vp_;
 
  protected:
   AbstractRunner(RuntimeSettings *runtime_settings);
@@ -83,10 +89,11 @@ class AbstractRunner
   void PrintCompletionMessage() const;
 
   /*!
-   * \brief sentinelValue Get the sentinel value to be used as objective function values for cases
-   * that cannot be evaluated.
+   * \brief sentinelValue Get the sentinel value to be used
+   * as objective function values for cases that fail.
    *
-   * When maximizing, this will be 0.0001; when minimizing, this will be -0.0001.
+   * When maximizing, this will be 0.0001; when minimizing,
+   * this will be -0.0001.
    * \return
    */
   double sentinelValue() const;

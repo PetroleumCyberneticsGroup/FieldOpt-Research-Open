@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef WELLSPLINE_H
 #define WELLSPLINE_H
@@ -34,7 +39,8 @@ namespace Wellbore {
 using namespace Model::Properties;
 
 /*!
- * \brief The WellSpline class Generates the well blocks making up the trajectory from a set of spline points.
+ * \brief WellSpline class Generates the well blocks making
+ * up the trajectory from a set of spline points.
  * It uses the WellIndexCalculation library to do this.
  */
 class WellSpline
@@ -43,12 +49,12 @@ class WellSpline
   WellSpline(::Settings::Model::Well well_settings,
              Properties::VariablePropertyContainer *variable_container,
              Reservoir::Grid::Grid *grid,
-             Reservoir::WellIndexCalculation::wicalc_rixx *wic
-  );
+             Reservoir::WellIndexCalculation::wicalc_rixx *wic);
   WellSpline();
 
   /*!
-   * \brief GetWellBlocks Get the set of well blocks with proper WI's defined by the spline.
+   * \brief GetWellBlocks Get the set of well
+   * blocks with proper WI's defined by the spline.
    * \return
    */
   virtual QList<WellBlock *> *GetWellBlocks();
@@ -70,12 +76,15 @@ class WellSpline
    */
   QList<SplinePoint *> GetSplinePoints() const { return spline_points_; }
 
+  Settings::VerbParams *vp_;
 
  protected:
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
   Settings::Model::Well well_settings_;
-  int seconds_spent_in_compute_wellblocks_; //!< Number of seconds spent in the ComputeWellBlocks() method.
+
+  //!< # of seconds spent in the ComputeWellBlocks() method.
+  int seconds_spent_in_compute_wellblocks_;
   bool is_variable_;
   bool use_bezier_spline_;
 
@@ -86,15 +95,17 @@ class WellSpline
   QList<WellBlock *> *computeWellBlocks();
 
   /*!
-   * @brief Get the vector of spline points to be used. Will return converted spline_points if not using 
+   * @brief Get the vector of spline points to be used.
+   * Will return converted spline_points if not using
    * bezier method; else will call convertToBezierSpline().
    * @return 
    */
   vector<Eigen::Vector3d> getPoints() const;
-  
+
   /*!
-   * @brief Use the current set of spline_points_ to generate a set of points representing a
-   * bezier curve formed from the original points.
+   * @brief Use the current set of spline_points_ to generate
+   * a set of points representing a bezier curve formed from
+   * the original points.
    */
   vector<Eigen::Vector3d> convertToBezierSpline() const;
 

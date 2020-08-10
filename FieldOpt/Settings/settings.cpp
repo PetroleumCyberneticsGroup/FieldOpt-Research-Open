@@ -83,27 +83,18 @@ void Settings::readDriverFile() {
 }
 
 void Settings::readGlobalSection() {
-
   try {
-    QJsonObject global = json_driver_->value("Global").toObject();
-    name_ = global["Name"].toString();
-    bookkeeper_tolerance_ = global["BookkeeperTolerance"].toDouble();
-
-    if (bookkeeper_tolerance_ < 0.0) {
-      throw UnableToParseGlobalSectionException(
-        "The bookkeeper tolerance must be a positive number.");
-    }
-
+    QJsonObject json_global =
+      json_driver_->value("Global").toObject();
+    global_ = new Global(json_global);
   } catch (std::exception const &ex) {
     throw UnableToParseGlobalSectionException(
-      "Unable to parse driver file global section: "
+      "Unable to parse Global section: "
         + std::string(ex.what()));
   }
 }
 
 void Settings::readSimulatorSection() {
-
-  // Simulator root
   try {
     QJsonObject json_simulator =
       json_driver_->value("Simulator").toObject();
@@ -111,13 +102,12 @@ void Settings::readSimulatorSection() {
   }
   catch (std::exception const &ex) {
     throw UnableToParseSimulatorSectionException(
-      "Unable to parse driver file simulator section: "
+      "Unable to parse Simulator section: "
         + std::string(ex.what()));
   }
 }
 
 void Settings::readOptimizerSection() {
-
   try {
     QJsonObject optimizer =
       json_driver_->value("Optimizer").toObject();
@@ -125,20 +115,21 @@ void Settings::readOptimizerSection() {
 
   } catch (std::exception const &ex) {
     throw UnableToParseOptimizerSectionException(
-      "Unable to parse driver file optimizer section: "
+      "Unable to parse Optimizer section: "
         + std::string(ex.what()));
   }
 }
 
 void Settings::readModelSection() {
-
   try {
-    QJsonObject model = json_driver_->value("Model").toObject();
+    QJsonObject model =
+      json_driver_->value("Model").toObject();
     model_ = new Model(model, paths_);
+//    model_->copyVerbParams(global_->verbParams());
 
   } catch (std::exception const &ex) {
     throw UnableToParseModelSectionException(
-      "Unable to parse model section: "
+      "Unable to parse Model section: "
         + std::string(ex.what()));
   }
 }

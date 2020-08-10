@@ -38,6 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+struct VerbParams;
 class DeckParser;
 
 /*!
@@ -65,15 +66,15 @@ class Model
   enum InjectionType : int { WaterInjection=31, GasInjection=32 };
 
   enum WellDefinitionType : int { WellBlocks=41, WellSpline=42,
-      PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
+    PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
 
   enum WellCompletionType : int { Perforation=61, ICV=62,
-      Packer=63, Tubing=64, Annulus=65 };
+    Packer=63, Tubing=64, Annulus=65 };
 
   enum WellState : int { WellOpen=71, WellShut=72 };
 
   enum PreferredPhase : int { Oil=81, Water=82, Gas=83,
-      Liquid=84, UNKNOWN_PHASE=89 };
+    Liquid=84, UNKNOWN_PHASE=89 };
 
   enum Direction : int { X=91, Y=92, Z=93 };
 
@@ -106,8 +107,8 @@ class Model
      * @brief A grouping of ICVs that make up a compartment
      */
     struct ICVGroup : Completion {
-        std::string icv_group_name;
-        std::vector<std::string> icvs;
+      std::string icv_group_name;
+      std::vector<std::string> icvs;
     };
     struct WellBlock {
       WellBlock(){}
@@ -124,17 +125,19 @@ class Model
       bool is_variable = false;
     };
     struct PolarSpline{
-        SplinePoint midpoint;
-        double azimuth=0;
-        double length=0;
-        double elevation=90;
-        QString name="";
-        bool is_variable=false;
+      SplinePoint midpoint;
+      double azimuth=0;
+      double length=0;
+      double elevation=90;
+      QString name="";
+      bool is_variable=false;
     };
+
     struct PseudoContPosition {
       int i, j;
       bool is_variable = false;
     };
+
     struct ControlEntry {
       int time_step;                                 //!< The time step this control is to be applied at.
       WellState state;                               //!< Whether the well is open or shut.
@@ -151,6 +154,7 @@ class Model
       bool isDifferent(ControlEntry other);
       std::string toString();
     };
+
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
     QString name;                               //!< The name to be used for the well.
     WellType type;                              //!< The well type, i.e. producer or injector.
@@ -178,10 +182,18 @@ class Model
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
     std::string toString();
     std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
+
+    VerbParams *verb_params_;
+    void copyVerbParams(VerbParams *vp) { verb_params_ = vp; };
+    VerbParams* verbParams() { return verb_params_; };
   };
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
+
+  VerbParams *verb_params_;
+  void copyVerbParams(VerbParams *vp) { verb_params_ = vp; };
+  VerbParams* verbParams() { return verb_params_; };
 
  private:
   QList<Well> wells_;
