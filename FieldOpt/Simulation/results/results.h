@@ -34,18 +34,20 @@ namespace Simulation {
 namespace Results {
 
 /*!
- * \brief The Results class handles access to the results of an evaluated model. It acts
- * as an interface to the utilities doing the actual reading of simulator summary/result
- * files.
+ * \brief Results class handles access to the results of an
+ * evaluated model. It acts as an interface to the utilities
+ * doing the actual reading of simulator summary/result files.
  */
 class Results
 {
  public:
   /*!
-   * \brief The Property enum Lists the properties that can be retrieved from the results.
+   * \brief Property enum Lists the properties that can be
+   * retrieved from the results.
    *
-   * If results other than these are to be retrieved, they must be added here and
-   * functionality to retrieve them must be implemented in the underlying classes.
+   * If results other than these are to be retrieved, they
+   * must be added here and functionality to retrieve them
+   * must be implemented in the underlying classes.
    */
   enum Property {
     CumulativeOilProduction,
@@ -59,6 +61,7 @@ class Results
     CumulativeWellWaterInjection,
     CumulativeWellGasInjection,
     Time
+//    EclAjdGradients
   };
 
   Property GetPropertyKeyFromString(QString prop) {
@@ -73,41 +76,54 @@ class Results
     else throw ResultPropertyKeyDoesNotExistException("");
   }
 
+  struct EclAjdGData {
+    std::vector<string> id;
+    std::vector<string> domain;
+    std::vector<string> type;
+    std::vector<double> grad;
+    std::vector<double> time;
+    std::vector<double> norm;
+  };
+
   /*!
    * \brief ReadResults Read the summary data from file.
-   * \param file_path The path to the summary file without suffixes.
+   * \param file_path path to summary file without suffixes.
    */
   virtual void ReadResults(QString file_path) = 0;
 
   /*!
-   * \brief DumpResults Dump the results that have been read. Should be called when the results are no longer valid.
+   * \brief DumpResults Dump the results that have been read.
+   * Should be called when the results are no longer valid.
    *
    * Should call setUnavailable().
    */
   virtual void DumpResults() = 0;
 
   /*!
-   * \brief GetFinalValue Gets the value of the given _field_ or _misc_ property at the final time index.
+   * \brief GetFinalValue Gets the value of the given _field_
+   * or _misc_ property at the final time index.
    * \param prop The property to be retrieved.
    */
   virtual double GetValue(Property prop) = 0;
 
   /*!
-   * \brief GetValueVector Get the vector containing all values for the specified property.
+   * \brief GetValueVector Get the vector containing all
+   * values for the specified property.
    * \param prop The property to be retrieved.
    */
   virtual std::vector<double> GetValueVector(Property prop) = 0;
 
   /*!
-   * \brief GetFinalValue Gets the value of the given property for the given well at the
-   * final time index.
+   * \brief GetFinalValue Gets the value of the given property
+   * for the given well at the final time index.
    * \param prop The property to be retireved.
    * \param well The well to get the value from.
    */
   virtual double GetValue(Property prop, QString well) = 0;
 
   /*!
-   * \brief GetValue Get the value of the given _field_ or _misc_ property at the given time index.
+   * \brief GetValue Get the value of the given _field_
+   * or _misc_ property at the given time index.
    * \param prop The property to be retrieved.
    * \param time_index The time index to get the value of the property at.
    */

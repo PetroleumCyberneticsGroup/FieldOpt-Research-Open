@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef SIMULATOR
 #define SIMULATOR
 
@@ -30,10 +36,11 @@
 namespace Simulation {
 
 /*!
- * \brief The Simulator class acts as an interface for all reservoir simulators.
+ * \brief Simulator class acts as interface
+ * for all reservoir simulators.
  *
- * The constructor for this class is not intended to be used directly. The intended use
- * is as follows:
+ * The constructor is not intended to be used directly.
+ * The intended use is as follows:
  *
  * \code
  *  Simulator sim = new ECLSimulator();
@@ -90,8 +97,6 @@ class Simulator {
    */
   virtual void CleanUp() = 0;
 
-  void SetVerbosityLevel(int level);
-
  protected:
   /*!
    * Set various path variables. Should only be called by child classes.
@@ -110,11 +115,15 @@ class Simulator {
    * the .DATA file (if the script is found).
    */
   void PostSimWork();
+  void PreSimWork();
+
+  ::Simulation::Results::Results::EclAjdGData ReadEclAdjG();
 
   Paths paths_;
 
   QString driver_file_name_; //!< The name of the driver main file.
   QString driver_parent_dir_name_; //!< The name of the directory containing the initial main driver file.
+  QString case_parent_dir_name_;
 
   ::Simulation::Results::Results *results_;
   Settings::Settings *settings_;
@@ -122,7 +131,6 @@ class Simulator {
   QStringList script_args_;
   QList<int> control_times_;
   virtual void UpdateFilePaths() = 0;
-  int verbosity_level_; //!< Verbosity level for runtime console logging.
 };
 
 }
