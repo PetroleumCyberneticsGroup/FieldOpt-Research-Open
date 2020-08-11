@@ -46,16 +46,19 @@ class Paths {
     SIM_HDF5_FILE=7, ENSEMBLE_FILE=8, SIM_SCH_INSET_FILE=9,
     BUILD_DIR = -1, OUTPUT_DIR = -2, SIM_DRIVER_DIR = -3,
     SIM_WORK_DIR = -4, SIM_AUX_DIR = -5, TRAJ_DIR = -6,
-    CASE_ROOT_DIR = -7
+    CASE_ROOT_DIR = -7, CASE_DRVR_DIR = -8,
+    SIM_EXEC_DIR = -9
   };
 
-  const string &GetPathDescription(Path path) const;
+  const string &GetPathDesc(Path path) const;
 
-  void SetPath(Path path, string path_string);
+  void SetPath(Path path, string path_string,
+               bool skip_check = false);
 
   bool IsSet(Path path);
 
   string GetPath(Path path);
+  QString GetPathQstr(Path path);
 
   void ShowPaths();
 
@@ -77,7 +80,8 @@ class Paths {
     pair<Path, string> {SIM_WORK_DIR, "Sim work directory"},
     pair<Path, string> {SIM_AUX_DIR, "Auxiliary files for simulation directory"},
     pair<Path, string> {TRAJ_DIR, "Dir w/ trajectory files for import"},
-    pair<Path, string> {CASE_ROOT_DIR, "Case root dir"}
+    pair<Path, string> {CASE_ROOT_DIR, "Case root dir"},
+    pair<Path, string> {CASE_DRVR_DIR, "Case driver dir (relative to ROOT)"}
   };
 
   map<Path, string> paths_;

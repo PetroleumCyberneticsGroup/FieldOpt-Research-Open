@@ -47,14 +47,14 @@ class Simulator
   Simulator(QJsonObject json_simulator, Paths &paths);
   enum SimulatorType { ECLIPSE, ADGPRS, Flow, INTERSECT };
   enum SimulatorFluidModel { BlackOil, DeadOil };
-
+  enum FileStructType { Flat, Branched };
 
   /*! @brief Get simulator type (e.g. ECLIPSE). */
   SimulatorType type() const { return type_; }
 
   /*! @brief Get simulator commands (commands used to execute a
    * simulation). Each list element is executed in sequence. */
-  QStringList *commands() const { return commands_; }
+  QStringList *sim_exec_cmds() const { return sim_exec_cmds_; }
 
   /*! @brief Get name of script used to execute simulations. */
   QString script_name() const { return script_name_; }
@@ -80,6 +80,11 @@ class Simulator
    * FO_POSTSIM.sh in the same directory as the simulator
    * DATA file after simulation, if the script is found. */
   bool use_post_sim_script() const { return use_post_sim_script_; }
+  bool use_pre_sim_script() const { return use_pre_sim_script_; }
+  bool add_sim_scripts() const { return add_sim_scripts_; }
+
+  QStringList* pre_sim_args() const { return pre_sim_args_; };
+  QStringList* post_sim_args() const { return post_sim_args_; };
 
   /*! @brief Check whether or not to read external results
    * component from a file named FO_EXT_RESULTS.json in the
@@ -87,24 +92,34 @@ class Simulator
    * (and potential call of PostSimScript). */
   bool read_external_json_results() const { return read_external_json_results_; }
 
+  struct FileStructure {
+    FileStructType type_ = FileStructType::Flat;
+    int levels_num_ = 0;
+    string levels_str_ = "";
+  };
+
+  /*! @brief Get the fluid model. */
+  FileStructure file_structure() { return file_structure_; }
+
  private:
   SimulatorType type_;
   SimulatorFluidModel fluid_model_;
-  QStringList *commands_;
+
   QString script_name_;
+  QStringList* sim_exec_cmds_;
+  QStringList* pre_sim_args_;
+  QStringList* post_sim_args_;
+
   bool is_ensemble_ = false;
   bool ecl_use_actionx_ = false;
+
   bool use_post_sim_script_ = false;
+  bool use_pre_sim_script_ = false;
+  bool add_sim_scripts_ = false;
+
   bool read_external_json_results_ = false;
   int max_minutes_ = -1;
   Ensemble ensemble_;
-
-  enum FileStructType { Flat, Branched };
-  struct FileStructure {
-    FileStructType type;
-    int levels_num = 0;
-    string levels_str = "";
-  };
 
   FileStructure file_structure_;
 
