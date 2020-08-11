@@ -57,12 +57,11 @@ class Well
    * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
    * \param variables The variables object to add all new variable variables to.
    */
-  Well(Settings::Model settings,
+  Well(Settings::Model model_settings,
        int well_number,
        ::Model::Properties::VariablePropertyContainer *variable_container,
        ::Reservoir::Grid::Grid *grid,
-       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic
-  );
+       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
   struct Heel { int i; int j; int k; };
 
@@ -105,7 +104,10 @@ class Well
   ::Settings::Model::PreferredPhase preferred_phase_;
   Properties::ContinousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
-  bool trajectory_defined_ = true; //!< Whether the trajectory is defined. It does not need to be for, e.g., control optimization.
+
+  //!< Whether the trajectory is defined. It does not
+  //!< need to be for, e.g., control optimization.
+  bool trajectory_defined_ = true;
 
   Heel heel_;
   QList<Control *> *controls_;

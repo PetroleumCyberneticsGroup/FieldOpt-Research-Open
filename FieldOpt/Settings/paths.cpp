@@ -35,24 +35,26 @@ using std::runtime_error;
 Paths::Paths() {}
 
 // =========================================================
-void Paths::SetPath(Paths::Path path, string path_string) {
+void Paths::SetPath(Paths::Path path, string path_string,
+    bool skip_check) {
   
-  if (path >= 0 && !FileExists(path_string)) {
+  if (path >= 0 && !FileExists(path_string) && ! skip_check) {
     
     stringstream ss;
-    ss << "Cannot set " << GetPathDescription(path)
+    ss << "Cannot set " << GetPathDesc(path)
        << " path to non-existing file (" << path_string << ")";
     Printer::error(ss.str());
     throw runtime_error(
-        Paths::GetPathDescription(path)
+        Paths::GetPathDesc(path)
         + " not found at " + path_string);
     
-  } else if (path < 0 && !DirectoryExists(path_string)) {
-    cerr << "Cannot set " << GetPathDescription(path)
+  } else if (path < 0 && !DirExists(path_string) && ! skip_check) {
+
+    cerr << "Cannot set " << GetPathDesc(path)
     << " path to non-existing directory (" << path_string
     << ")" << endl;
     throw runtime_error(
-        Paths::GetPathDescription(path)
+        Paths::GetPathDesc(path)
         + " not found at " + path_string);
     
   } else {
@@ -67,8 +69,8 @@ bool Paths::IsSet(Paths::Path path) {
 string Paths::GetPath(Paths::Path path) {
   if (!IsSet(path)) {
    Printer::ext_warn("Getting unset variable ("
-       + GetPathDescription(path) + ")","Settings",
-       "Paths");
+       + GetPathDesc(path) + ")", "Settings",
+                     "Paths");
     return "UNSET";
     
   } else {
@@ -76,15 +78,19 @@ string Paths::GetPath(Paths::Path path) {
   }
 }
 
+QString Paths::GetPathQstr(Paths::Path path) {
+ return QString::fromStdString(GetPath(path));
+}
+
 void Paths::ShowPaths() {
   for (auto it = paths_.begin(); it != paths_.end(); it++) {
-    string pth = Paths::GetPathDescription(it->first);
+    string pth = Paths::GetPathDesc(it->first);
     Printer::pad_text(pth, 30);
     cout << FYELLOW <<  pth << ": " << AEND
     << it->second << endl;
   }
 }
 
-const string &Paths::GetPathDescription(Paths::Path path) const {
+const string &Paths::GetPathDesc(Paths::Path path) const {
   return path_descriptions.at(path);
 }

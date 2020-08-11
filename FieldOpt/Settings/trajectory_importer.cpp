@@ -32,7 +32,7 @@ namespace Settings {
 TrajectoryImporter::TrajectoryImporter(const std::string &traj_dir_path,
                                        const std::vector<std::string> &wells) {
     std::cout << "Importing well trajectories ... " << std::endl;
-    assert(DirectoryExists(traj_dir_path));
+    assert(DirExists(traj_dir_path));
     traj_dir_path_ = GetAbsoluteFilePath(traj_dir_path);
     well_names_ = wells;
     findTrajectoryFiles();

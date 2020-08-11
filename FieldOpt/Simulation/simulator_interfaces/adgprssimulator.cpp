@@ -58,7 +58,7 @@ void AdgprsSimulator::CleanUp()
 void AdgprsSimulator::copyDriverFiles()
 {
     auto workdir = paths_.GetPath(Paths::OUTPUT_DIR) + driver_parent_dir_name_.toStdString();
-    if (!DirectoryExists(workdir)) {
+    if (!DirExists(workdir)) {
         if (VERB_SIM >= 1) {
             Printer::ext_info("Output deck directory not found. Copying input deck:"
                                   + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir, "Simulation", "ADGPRSSimulator" );

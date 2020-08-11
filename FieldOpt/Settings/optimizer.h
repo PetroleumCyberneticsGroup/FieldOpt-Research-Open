@@ -194,11 +194,11 @@ class Optimizer
     double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
     struct WeightedSumComponent {
-      double coefficient; 
-      QString property; 
+      double coefficient;
+      QString property;
       int time_step;
-      bool is_well_prop; 
-      QString well; 
+      bool is_well_prop;
+      QString well;
     }; //!< A component of a weighted sum objective function
     struct NPVComponent{
       double coefficient;

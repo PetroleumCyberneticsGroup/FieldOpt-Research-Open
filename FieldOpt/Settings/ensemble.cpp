@@ -43,9 +43,9 @@ Ensemble::Ensemble() {}
 
 Ensemble::Ensemble(const std::string &ens_path) {
 
-  ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirectoryPath(ens_path));
+  ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirPath(ens_path));
   assert(FileExists(ens_path, false));
-  assert(DirectoryExists(Ensemble::ensemble_parent_dir_, false));
+  assert(DirExists(Ensemble::ensemble_parent_dir_, false));
 
   vector<string> file_contents = ReadFileToStdStringList(ens_path);
   for (auto line : file_contents) {
@@ -66,8 +66,8 @@ Ensemble::Ensemble(const std::string &ens_path) {
 
     string alias = entries[0];
     string data = ensemble_parent_dir_ + "/" + entries[1];
-    string schedule = GetParentDirectoryPath(data) + "/" + entries[2];
-    string grid = GetParentDirectoryPath(data) + "/" + entries[3];
+    string schedule = GetParentDirPath(data) + "/" + entries[2];
+    string grid = GetParentDirPath(data) + "/" + entries[3];
 
     // Check that the alias has not already been used.
     assert(realizations_.count(entries[0]) == 0);

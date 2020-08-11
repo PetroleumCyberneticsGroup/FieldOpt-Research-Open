@@ -43,7 +43,7 @@ TEST_F(FileHandlingTest, Existance) {
     EXPECT_TRUE(::Utilities::FileHandling::FileExists(TestResources::ExampleFilePaths::driver_example_));
     EXPECT_FALSE(::Utilities::FileHandling::FileExists(TestResources::ExampleFilePaths::driver_example_ + "wrong"));
 
-    EXPECT_FALSE(::Utilities::FileHandling::DirectoryExists(TestResources::ExampleFilePaths::driver_example_));
+    EXPECT_FALSE(::Utilities::FileHandling::DirExists(TestResources::ExampleFilePaths::driver_example_));
 }
 
 TEST_F(FileHandlingTest, FileReading) {

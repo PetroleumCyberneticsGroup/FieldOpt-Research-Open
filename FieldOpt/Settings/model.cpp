@@ -110,7 +110,7 @@ Model::Model(QJsonObject json_model, Paths &paths) {
       std::string trajectories_path;
       if (!paths.IsSet(Paths::TRAJ_DIR)) {
         trajectories_path = paths.GetPath(Paths::SIM_DRIVER_DIR) + "/trajectories";
-        assert(DirectoryExists(trajectories_path));
+        assert(DirExists(trajectories_path));
       }
       else {
         trajectories_path = paths.GetPath(Paths::TRAJ_DIR);

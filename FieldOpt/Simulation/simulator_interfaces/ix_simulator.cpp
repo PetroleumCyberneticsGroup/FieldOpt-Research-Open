@@ -112,7 +112,7 @@ void IXSimulator::UpdateFilePaths() {
 void IXSimulator::copyDriverFiles() {
     std::string workdir = paths_.GetPath(Paths::OUTPUT_DIR) + "/" + driver_parent_dir_name_.toStdString();
 
-    if (!DirectoryExists(workdir)) {
+    if (!DirExists(workdir)) {
         if (VERB_SIM >= 1) {
             Printer::ext_info("Output deck directory not found. Copying input deck:"
                                   + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir,
@@ -122,7 +122,7 @@ void IXSimulator::copyDriverFiles() {
         CopyDirectory(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, false);
         if (paths_.IsSet(Paths::SIM_AUX_DIR)) {
             std::string auxdir = paths_.GetPath(Paths::OUTPUT_DIR) + "/" + FileName(paths_.GetPath(Paths::SIM_AUX_DIR));
-            if (!DirectoryExists(auxdir)) {
+            if (!DirExists(auxdir)) {
                 if (VERB_SIM >= 1) {
                     Printer::ext_info("Copying simulation aux. directory:"
                                           + paths_.GetPath(Paths::SIM_AUX_DIR) + " -> " + auxdir,
