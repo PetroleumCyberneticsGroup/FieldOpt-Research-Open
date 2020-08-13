@@ -79,9 +79,8 @@ class Simulator {
    * @param threads Number of threads to be used by the simulator. Only works for AD-GPRS.
    * @return True if the simuation completes before the set timeout, otherwise false.
    */
-  virtual bool Evaluate(const Settings::Ensemble::Realization &realization, int timeout, int threads=1) = 0;
-
-
+  virtual bool Evaluate(const Settings::Ensemble::Realization &realization,
+                        int timeout, int threads=1) = 0;
 
   /*!
    * @brief Only write driver files; don't execute simulation.
@@ -124,13 +123,20 @@ class Simulator {
   QString driver_file_name_; //!< The name of the driver main file.
   QString driver_parent_dir_name_; //!< The name of the directory containing the initial main driver file.
   QString case_parent_dir_name_;
+  QString sim_wrk_dir_;
 
   ::Simulation::Results::Results *results_;
   Settings::Settings *settings_;
+  Settings::VerbParams vp_;
+
   Model::Model *model_;
   QStringList script_args_;
+  QStringList *post_sim_args_;
   QList<int> control_times_;
   virtual void UpdateFilePaths() = 0;
+
+  string md_ = "Simulation::simulation_interfaces";
+  string cl_ = "simulator";
 };
 
 }

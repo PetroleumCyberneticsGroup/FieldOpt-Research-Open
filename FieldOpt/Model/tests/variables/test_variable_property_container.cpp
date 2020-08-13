@@ -19,7 +19,7 @@ namespace {
 
         virtual void SetUp() { }
 
-        VariablePropertyContainer *vc_;
+        VarPropContainer *vc_;
     };
 
     TEST_F(VariableContainerTest, Constructor) {

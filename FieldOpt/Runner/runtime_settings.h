@@ -26,6 +26,7 @@
 #include <QPair>
 #include <stdexcept>
 #include "Utilities/filehandling.hpp"
+#include "Utilities/verbosity.h"
 #include "loggable.hpp"
 #include "Settings/paths.h"
 
@@ -76,6 +77,8 @@ class RuntimeSettings : public Loggable
   RunnerType runner_type_; //!< The type of runner to be used (e.g. serial or parallel).
   QPair<QVector<double>, QVector<double>> prod_coords_; //!< The spline coordinates for the production well
   QPair<QVector<double>, QVector<double>> inje_coords_; //!< The spline coordinates for the injection well
+
+  Settings::VerbParams vp_;
 
   QString runnerTypeString() const; //!< Get a string representation of the runner type (used when printing settings to the terminal).
   QString wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const;

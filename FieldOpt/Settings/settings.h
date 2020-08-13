@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include <QJsonObject>
 
+#include "Utilities/verbosity.h"
 #include "global.h"
 #include "simulator.h"
 #include "optimizer.h"
@@ -36,8 +37,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/paths.h"
 
 namespace Settings {
-
-struct VerbParams;
 
 class Global;
 class Simulator;
@@ -64,18 +63,9 @@ class Settings {
   //!< and folder names are derived from this.
   QString name() const { return name_; }
 
-  // To be removed:
-//  //!< Verbose mode (with or without debug printing).
-//  bool verbose() const { return verbose_; }
-//  void set_verbosity(const bool verbosity) {
-//    verbose_ = verbosity;
-//  }
-
   //!< Get the value for the bookkeeper tolerance.
   //!< Used by the Bookkeeper in the Runner library.
-  double bookkeeper_tol() const {
-    return bookkeeper_tol_;
-  }
+  double bookkeeper_tol() const { return bookkeeper_tol_; }
 
   Global *global() const { return global_; }
 
@@ -94,17 +84,11 @@ class Settings {
 
   Paths &paths() { return paths_; }
 
-  void setOptimizer(Optimizer *opt) {
-    optimizer_ = opt;
-  }
+  void setOptimizer(Optimizer *opt) { optimizer_ = opt; }
 
-  void setSimulator(Simulator *sim) {
-    simulator_ = sim;
-  }
+  void setSimulator(Simulator *sim) { simulator_ = sim; }
 
-  void setModel(Model *mod) {
-    model_ = mod;
-  }
+  void setModel(Model *mod) { model_ = mod; }
 
  private:
   Paths paths_;
@@ -112,9 +96,6 @@ class Settings {
   QString name_;
 
   double bookkeeper_tol_;
-
-  //  bool verbose_ = false;
-//  int ibox_lw_ = 120;
 
   Global *global_;
   Model *model_;

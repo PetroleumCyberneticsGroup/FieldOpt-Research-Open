@@ -1,29 +1,33 @@
-/******************************************************************************
-   Created by einar on 4/11/18.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 4/11/18.
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "Settings/trajectory_importer.h"
 #include "Settings/tests/test_resource_example_file_paths.hpp"
 
 namespace {
-
 
 class TrajectoryImporterTest : public ::testing::Test {
  protected:
@@ -35,32 +39,34 @@ class TrajectoryImporterTest : public ::testing::Test {
 
   std::string trajectory_path_ = TestResources::ExampleFilePaths::trajectories_;
   std::vector<std::string> well_names_ = {"D-2H"};
+
+  Settings::VerbParams vp_ = {};
 };
 
 TEST_F(TrajectoryImporterTest, Initialization) {
-    auto importer = Settings::TrajectoryImporter(trajectory_path_, well_names_);
+  auto importer = Settings::TrajectoryImporter(trajectory_path_, well_names_, vp_);
 }
 
 TEST_F(TrajectoryImporterTest, ImportedWell) {
-    auto importer = Settings::TrajectoryImporter(trajectory_path_, well_names_);
-    EXPECT_TRUE(importer.ContainsTrajectory("D-2H"));
-    auto d_2h_traj = importer.GetImportedTrajectory("D-2H");
-    EXPECT_EQ(13, d_2h_traj.size());
+  auto importer = Settings::TrajectoryImporter(trajectory_path_, well_names_, vp_);
+  EXPECT_TRUE(importer.ContainsTrajectory("D-2H"));
+  auto d_2h_traj = importer.GetImportedTrajectory("D-2H");
+  EXPECT_EQ(13, d_2h_traj.size());
 
-    EXPECT_EQ(14, d_2h_traj[0].ijk().x());
-    EXPECT_EQ(25, d_2h_traj[0].ijk().y());
-    EXPECT_EQ(9, d_2h_traj[0].ijk().z());
-    EXPECT_NEAR(456687, d_2h_traj[0].in().x(), 1);
-    EXPECT_NEAR(7321412, d_2h_traj[0].in().y(), 1);
-    EXPECT_NEAR(2614, d_2h_traj[0].in().z(), 1);
-    EXPECT_NEAR(456657, d_2h_traj[0].out().x(), 1);
-    EXPECT_NEAR(7321379, d_2h_traj[0].out().y(), 1);
-    EXPECT_NEAR(2615, d_2h_traj[0].out().z(), 1);
+  EXPECT_EQ(14, d_2h_traj[0].ijk().x());
+  EXPECT_EQ(25, d_2h_traj[0].ijk().y());
+  EXPECT_EQ(9, d_2h_traj[0].ijk().z());
+  EXPECT_NEAR(456687, d_2h_traj[0].in().x(), 1);
+  EXPECT_NEAR(7321412, d_2h_traj[0].in().y(), 1);
+  EXPECT_NEAR(2614, d_2h_traj[0].in().z(), 1);
+  EXPECT_NEAR(456657, d_2h_traj[0].out().x(), 1);
+  EXPECT_NEAR(7321379, d_2h_traj[0].out().y(), 1);
+  EXPECT_NEAR(2615, d_2h_traj[0].out().z(), 1);
 
 
-    EXPECT_EQ(14, d_2h_traj[d_2h_traj.size()-1].ijk().x());
-    EXPECT_EQ(14, d_2h_traj[d_2h_traj.size()-1].ijk().y());
-    EXPECT_EQ(9, d_2h_traj[d_2h_traj.size()-1].ijk().z());
+  EXPECT_EQ(14, d_2h_traj[d_2h_traj.size()-1].ijk().x());
+  EXPECT_EQ(14, d_2h_traj[d_2h_traj.size()-1].ijk().y());
+  EXPECT_EQ(9, d_2h_traj[d_2h_traj.size()-1].ijk().z());
 }
 
 }

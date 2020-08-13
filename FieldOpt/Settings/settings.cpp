@@ -98,7 +98,8 @@ void Settings::readSimulatorSection() {
   try {
     QJsonObject json_simulator =
       json_driver_->value("Simulator").toObject();
-    simulator_ = new Simulator(json_simulator, paths_);
+    simulator_ = new Simulator(json_simulator, paths_,
+                               global()->verbParams());
   }
   catch (std::exception const &ex) {
     throw UnableToParseSimulatorSectionException(
@@ -111,7 +112,8 @@ void Settings::readOptimizerSection() {
   try {
     QJsonObject optimizer =
       json_driver_->value("Optimizer").toObject();
-    optimizer_ = new Optimizer(optimizer);
+    optimizer_ = new Optimizer(optimizer,
+                               global()->verbParams());
 
   } catch (std::exception const &ex) {
     throw UnableToParseOptimizerSectionException(
@@ -124,8 +126,8 @@ void Settings::readModelSection() {
   try {
     QJsonObject model =
       json_driver_->value("Model").toObject();
-    model_ = new Model(model, paths_);
-//    model_->copyVerbParams(global_->verbParams());
+    model_ = new Model(model, paths_,
+                       global()->verbParams());
 
   } catch (std::exception const &ex) {
     throw UnableToParseModelSectionException(

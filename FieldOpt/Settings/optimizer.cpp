@@ -39,7 +39,8 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
-Optimizer::Optimizer(QJsonObject json_optimizer) {
+Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
+  vp_=vp;
 
   // Get the root objects.
   QJsonObject json_parameters = json_optimizer["Parameters"].toObject();
@@ -205,10 +206,10 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
           "Well spline constraint type not recognized.");
     }
 
-  } else if (QString::compare(constraint_type, "WellSplineLength") == 0
+  } else if (QString::compare(constraint_type, "WSplineLength") == 0
       || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
 
-    if (constraint_type == "WellSplineLength"){
+    if (constraint_type == "WSplineLength"){
       optimizer_constraint.type = ConstraintType::WellSplineLength;
     } else {
       optimizer_constraint.type = ConstraintType::PolarWellLength;
@@ -274,11 +275,11 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       optimizer_constraint.min = json_constraint["Min"].toDouble();
     }
 
-  } else if (QString::compare(constraint_type, "ReservoirBoundary") == 0
+  } else if (QString::compare(constraint_type, "ResBoundary") == 0
       || QString::compare(constraint_type, "PolarSplineBoundary") == 0
       || QString::compare(constraint_type, "ReservoirBoundaryToe") == 0) {
 
-    if (QString::compare(constraint_type, "ReservoirBoundary") == 0){
+    if (QString::compare(constraint_type, "ResBoundary") == 0){
       optimizer_constraint.type = ConstraintType::ReservoirBoundary;
 
     } else if (QString::compare(constraint_type, "PolarSplineBoundary") == 0){

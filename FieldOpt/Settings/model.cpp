@@ -40,7 +40,8 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
-Model::Model(QJsonObject json_model, Paths &paths) {
+Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
+  vp_ = vp;
 
   // Reservoir
   if (!paths.IsSet(Paths::ENSEMBLE_FILE)) {
@@ -63,7 +64,6 @@ Model::Model(QJsonObject json_model, Paths &paths) {
         "with at least one time for the model.");
   }
 
-  // -------------------------------------------------------
   control_times_ = QList<int>();
   if (json_model.contains("NPVInterval")) {
     if (json_model["NPVInterval"].toString().compare("Yearly") == 0) {
@@ -85,6 +85,7 @@ Model::Model(QJsonObject json_model, Paths &paths) {
       }
     }
   }
+
   for (int i = 0; i < json_model["ControlTimes"].toArray().size(); ++i) {
     if (!control_times_.contains(json_model["ControlTimes"].toArray().at(i).toInt())) {
       control_times_.append(json_model["ControlTimes"].toArray().at(i).toInt());
@@ -110,12 +111,12 @@ Model::Model(QJsonObject json_model, Paths &paths) {
       std::string trajectories_path;
       if (!paths.IsSet(Paths::TRAJ_DIR)) {
         trajectories_path = paths.GetPath(Paths::SIM_DRIVER_DIR) + "/trajectories";
-        assert(DirExists(trajectories_path));
+        assert(DirExists(trajectories_path, vp_));
       }
       else {
         trajectories_path = paths.GetPath(Paths::TRAJ_DIR);
       }
-      auto traj_importer = TrajectoryImporter(trajectories_path, import_well_names);
+      auto traj_importer = TrajectoryImporter(trajectories_path, import_well_names, vp_);
 
       // set list in well objects
       for (auto wname : import_well_names) {

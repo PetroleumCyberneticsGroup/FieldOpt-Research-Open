@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 
@@ -23,6 +29,8 @@
 #include "Optimization/case.h"
 #include "Settings/optimizer.h"
 #include "Model/properties/variable_property_container.h"
+
+#include "Utilities/verbosity.h"
 
 namespace Optimization {
 namespace Constraints {
@@ -34,7 +42,7 @@ namespace Constraints {
 class Constraint
 {
  public:
-  Constraint();
+  Constraint(Settings::VerbParams vp);
 
   /*!
    * \brief CaseSatisfiesConstraint checks whether a case satisfies the constraints for all
@@ -52,7 +60,8 @@ class Constraint
   virtual void SnapCaseToConstraints(Case *c) = 0;
 
   virtual void EnableLogging(QString output_directory_path);
-  virtual void SetVerbosityLevel(int level);
+
+  virtual void SetVerbParams(Settings::VerbParams vp) { vp_  = vp; };
 
   /*!
    * @brief Indicates whether the constaint is a bound constraint.
@@ -129,7 +138,10 @@ class Constraint
 
  protected:
   bool logging_enabled_;
-  int verbosity_level_;
+  Settings::VerbParams vp_;
+  string md_ = "Optimization";
+  string cl_ = "Constraint";
+
   Normalizer normalizer_; //!< Normalizer for constraint violation value; to be used with penalty functions.
   long double penalty_weight_; //!< The weight to be used when considering the constraint in a penalty function. (default: 0.0)
 

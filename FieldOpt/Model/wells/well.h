@@ -57,9 +57,9 @@ class Well
    * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
    * \param variables The variables object to add all new variable variables to.
    */
-  Well(Settings::Model model_settings,
+  Well(const Settings::Model& model_settings,
        int well_number,
-       ::Model::Properties::VariablePropertyContainer *variable_container,
+       ::Model::Properties::VarPropContainer *variable_container,
        ::Reservoir::Grid::Grid *grid,
        ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
@@ -105,6 +105,8 @@ class Well
   Properties::ContinousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
 
+  Settings::VerbParams vp_;
+
   //!< Whether the trajectory is defined. It does not
   //!< need to be for, e.g., control optimization.
   bool trajectory_defined_ = true;
@@ -114,7 +116,7 @@ class Well
 
   // Fields for segmented wells
   bool is_segmented_ = false;
-  void initializeSegmentedWell(Properties::VariablePropertyContainer *variable_container);
+  void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
   double tub_cross_sect_area_; //!< Tubing cross section area.

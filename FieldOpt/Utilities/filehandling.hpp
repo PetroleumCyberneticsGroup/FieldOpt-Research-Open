@@ -14,33 +14,39 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <utility>
 #include <vector>
 
-using std::cout;
-using std::endl;
+#include "Utilities/verbosity.h"
+#include <Utilities/printer.hpp>
 
 namespace Utilities {
 namespace FileHandling {
 
+using Printer::ext_info;
+using Printer::info;
+
 /*!
- * \brief FileExists Checks whether or not a file exists at the specified path.
+ * \brief FileExists Checks whether or not file exists at specified path.
  * \param file_path Path to a file that may or may not exist.
  * \param verbose Whether the path being checked should be printed.
  * \return True if a file exists at the specified path, otherwise false.
  */
-inline bool FileExists(const QString &file_path, const bool &verbose=false) {
+inline bool FileExists(const QString &file_path, Settings::VerbParams vp,
+                       string mod="", string cls="") {
   QFileInfo file(file_path);
   QFileInfo file_relative(file.absoluteFilePath());
+  auto fp = file_path.toStdString();
   if (file.exists() && file.isFile()) {
-    if (verbose) std::cout << "File exists at path: " << file_path.toStdString() << std::endl;
+    if (vp.vSIM >= 5) { ext_info("File exists at path: " + fp, mod, cls, vp.lnw); }
     return true;
-  }
-  else if (file_relative.exists() && file_relative.isFile()) {
-    if (verbose) std::cout << "File exists at relative path: " << file_path.toStdString() << std::endl;
+
+  } else if (file_relative.exists() && file_relative.isFile()) {
+    if (vp.vSIM >= 5) { ext_info("File exists at rel.path: " + fp, mod, cls, vp.lnw); }
     return true;
-  }
-  else {
-    if (verbose) std::cout << "File does not exists: " << file_path.toStdString() << std::endl;
+
+  } else {
+    if (vp.vSIM >= 5) { ext_info("File does not exists: " + fp, mod, cls, vp.lnw); }
     return false;
   }
 }
@@ -49,8 +55,11 @@ inline bool FileExists(const QString &file_path, const bool &verbose=false) {
  * Overload of the FileExists(QString, bool) function. Creates a
  * QString from the std string and calls the other function.
  */
-inline bool FileExists(const std::string file_path, const bool verbose=false) {
-  return FileExists(QString::fromStdString(file_path), verbose);
+inline bool FileExists(const std::string& file_path,
+                       const Settings::VerbParams vp,
+                       string mod="", string cls="") {
+  return FileExists(QString::fromStdString(file_path), vp,
+                    std::move(mod), std::move(cls));
 }
 
 /*!
@@ -59,14 +68,21 @@ inline bool FileExists(const std::string file_path, const bool verbose=false) {
  * \param verbose Whether the path being checked should be printed.
  * \return True if a folder exists at the specified path, otherwise false.
  */
-inline bool DirectoryExists(const QString &directory_path, const bool &verbose=false) {
+inline bool DirExists(const QString &directory_path,
+                      const Settings::VerbParams vp,
+                      string mod="", string cls="") {
   QFileInfo folder(directory_path);
+  auto dp = directory_path.toStdString();
   if (folder.exists() && folder.isDir()) {
-    if (verbose) std::cout << "Directory exists at path: " << directory_path.toStdString() << std::endl;
+    if (vp.vSIM >= 5) {
+      auto tm = "Dir exists at path: " + dp;
+      ext_info(tm, mod, cls, vp.lnw); }
     return true;
-  }
-  else {
-    if (verbose) std::cout << "Directory does not exists at path: " << directory_path.toStdString() << std::endl;
+
+  } else {
+    if (vp.vSIM >= 5) {
+      auto tm = "Dir does not exists at path: " + dp;
+      ext_info(tm, mod, cls, vp.lnw); }
     return false;
   }
 }
@@ -75,33 +91,38 @@ inline bool DirectoryExists(const QString &directory_path, const bool &verbose=f
  * Overload of the DirExists(QString, bool) function. Creates a
  * QString from the std string and calls the other function.
  */
-inline bool DirExists(const std::string &directory_path, const bool &verbose= false) {
-  return DirectoryExists(QString::fromStdString(directory_path), verbose);
+inline bool DirExists(const std::string &directory_path,
+                      const Settings::VerbParams vp,
+                      string mod="", string cls="") {
+  return DirExists(QString::fromStdString(directory_path),
+                   vp, std::move(mod), std::move(cls));
 }
 
 
 /*!
- * \brief DirectoryIsEmpty Check whether or not a directory is empty.
+ * \brief DirIsEmpty Check whether or not a directory is empty.
  * \param folder_path Path a folder to check.
  * \return True if the directory is empty, otherwise false.
  */
-inline bool DirectoryIsEmpty(const QString &folder_path) {
-  if (!DirectoryExists(folder_path)) return false;
+inline bool DirIsEmpty(const QString &folder_path,
+                       const Settings::VerbParams vp) {
+  if (!DirExists(folder_path, vp)) return false;
   QDir directory = QDir(folder_path);
-  return directory.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries).count() == 0;
+  return directory.entryInfoList(QDir::NoDotAndDotDot |
+    QDir::AllEntries).count() == 0;
 }
 
-inline bool DirectoryIsEmpty(const std::string &folder_path) {
-  return DirectoryIsEmpty(QString::fromStdString(folder_path));
+inline bool DirIsEmpty(const std::string &folder_path,
+                       const Settings::VerbParams vp) {
+  return DirIsEmpty(QString::fromStdString(folder_path), vp);
 }
 
 /*!
- * \brief ParentDirectoryExists Checks whether a specified file's parent directory exists.
+ * \brief ParentDirExists Checks whether a specified file's parent directory exists.
  * \param file_path Path a file (the file itself does not have to exist).
  * \return True if the parent directory exists, otherwise false.
  */
-inline bool ParentDirectoryExists(QString file_path)
-{
+inline bool ParentDirExists(QString file_path) {
   QFileInfo file(file_path);
   QDir parent_directory = file.dir();
   return parent_directory.exists();
@@ -113,8 +134,7 @@ inline bool ParentDirectoryExists(QString file_path)
  * \param file_path The file to create a list from.
  * \return List where each element is a line in the file.
  */
-inline QStringList *ReadFileToStringList(const QString &file_path)
-{
+inline QStringList *ReadFileToStringList(const QString &file_path) {
   QStringList *string_list = new QStringList();
   QFile file(file_path);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -153,8 +173,7 @@ inline std::vector<std::string> ReadFileToStdStringList(const std::string &filep
  * \param file_path Path to the file to write the string into.
  */
 inline void WriteStringToFile(QString string, QString file_path) {
-
-  if (!ParentDirectoryExists(file_path))
+  if (!ParentDirExists(file_path))
     throw std::runtime_error("File's parent directory not found: " + file_path.toStdString());
 
   if (!string.endsWith("\n"))
@@ -174,9 +193,8 @@ inline void WriteStringToFile(QString string, QString file_path) {
  * \param string The string/line to be written.
  * \param file_path The file to write the string/line to.
  */
-inline void WriteLineToFile(QString string, QString file_path) {
-
-  if (!ParentDirectoryExists(file_path))
+inline void WriteLineToFile(QString string, const QString& file_path) {
+  if (!ParentDirExists(file_path))
     throw std::runtime_error("File's parent directory not found: " + file_path.toStdString());
 
   if (!string.endsWith("\n"))
@@ -193,28 +211,34 @@ inline void WriteLineToFile(QString string, QString file_path) {
  * \brief DeleteFile Deletes the file at the given path.
  * \param path Path to file to be deleted.
  */
-inline void DeleteFile(QString path)
-{
-  if (FileExists(path)) {
+inline void DeleteFile(const QString& path,
+                       const Settings::VerbParams vp,
+                       string mod="", string cls="") {
+  if (FileExists(path, vp, mod, cls)) {
     QFile file(path);
     file.remove();
+
+  } else {
+    throw std::runtime_error("File not found: " + path.toStdString());
   }
-  else throw std::runtime_error("File not found: " + path.toStdString());
 }
 
 /*!
- * \brief CreateDirectory Create a new drectory with the specified path.
+ * \brief CreateDir Create a new drectory with the specified path.
  * \param path Path to new directory.
  */
-inline void CreateDirectory(QString path)
-{
-  if (DirectoryExists(path))
+inline void CreateDir(QString path,
+                      const Settings::VerbParams vp,
+                      string mod="", string cls="") {
+  if (DirExists(path, vp, mod, cls))
     return; // Do nothing if the directory already exists.
   QDir().mkdir(path);
 }
 
-inline void CreateDirectory(std::string path) {
-  CreateDirectory(QString::fromStdString(path));
+inline void CreateDir(std::string path,
+                      const Settings::VerbParams vp,
+                      string mod="", string cls="") {
+  CreateDir(QString::fromStdString(path), vp, mod, cls);
 }
 
 /*!
@@ -225,8 +249,16 @@ inline void CreateDirectory(std::string path) {
  */
 inline std::string FileName(const std::string file_path) {
   std::vector<std::string> parts;
-  boost::split(parts, file_path, boost::is_any_of("/"), boost::token_compress_on);
+  boost::split(parts, file_path,
+               boost::is_any_of("/"), boost::token_compress_on);
   return parts.back();
+}
+
+inline std::string FileNameRoot(const std::string file_path) {
+  std::vector<std::string> parts;
+  boost::split(parts, file_path,
+               boost::is_any_of("."), boost::token_compress_on);
+  return parts.front();
 }
 
 inline QString FileNameQstr(const std::string file_path) {
@@ -238,7 +270,7 @@ inline QString FileNameQstr(const std::string file_path) {
  * @param file_path Path to a file.
  * @return Name of a directory.
  */
-inline std::string ParentDirectoryName(const std::string file_path) {
+inline std::string ParentDirName(const std::string file_path) {
   std::vector<std::string> parts;
   boost::split(parts, file_path, boost::is_any_of("/"),
                boost::token_compress_on);
@@ -246,7 +278,7 @@ inline std::string ParentDirectoryName(const std::string file_path) {
 }
 
 inline QString ParentDirectoryNameQstr(const std::string file_path) {
-  return QString::fromStdString(ParentDirectoryName(file_path));
+  return QString::fromStdString(ParentDirName(file_path));
 }
 
 /*!
@@ -255,9 +287,10 @@ inline QString ParentDirectoryNameQstr(const std::string file_path) {
  * \param destination Path to the copy of the file.
  * \param overwrite Overwrite existing file.
  */
-inline void CopyFile(QString origin, QString destination, bool overwrite) {
-
-  if (!FileExists(origin)) {
+inline void CopyFile(QString origin, QString destination,
+                     bool overwrite, Settings::VerbParams vp,
+                     string mod="", string cls="") {
+  if (!FileExists(origin, vp, mod, cls)) {
     throw std::runtime_error("Error copying. Original file not found: " + origin.toStdString());
   }
 
@@ -270,16 +303,18 @@ inline void CopyFile(QString origin, QString destination, bool overwrite) {
   }
 }
 
-inline void CopyFile(std::string origin,
-                     std::string destination,
-                     bool overwrite=false) {
+inline void CopyFile(const std::string& origin,
+                     const std::string& destination,
+                     bool overwrite=false,
+                     Settings::VerbParams vp={},
+                     string mod="", string cls="") {
   CopyFile(QString::fromStdString(origin),
            QString::fromStdString(destination),
-           overwrite);
+           overwrite, vp, mod, cls);
 }
 
 /*!
- * \brief CopyDirectory
+ * \brief CopyDir
  * Copy a directory and it's contents to a new destination.
  *
  * Note this is not a recursive function: It will copy files
@@ -288,17 +323,17 @@ inline void CopyFile(std::string origin,
  * \param origin Path to the original directory to be copied.
  * \param dest Path to the _parent directory_ for the copy.
  */
-inline void CopyDirectory(QString origin,
-                          QString dest,
-                          bool verbose=false,
-                          bool ecl_slim=false) {
+inline void CopyDir(QString origin, QString dest,
+                    bool verbose=false, bool ecl_slim=false,
+                    const Settings::VerbParams vp={},
+                    string mod="", string cls="") {
 
-  if (!DirectoryExists(origin)) {
+  if (!DirExists(origin, vp)) {
     throw std::runtime_error("Parent dir for copying not found:\n"
                                + origin.toStdString());
   }
 
-  if (!DirectoryExists(dest)) {
+  if (!DirExists(dest, vp)) {
     throw std::runtime_error("Destination (parent) dir for copying not found:\n"
                                + dest.toStdString());
   }
@@ -318,29 +353,31 @@ inline void CopyDirectory(QString origin,
     if (entry.isFile() && !entry.isDir()) {
       if (ecl_slim) {
         if (! eclOutFiles.contains(entry.suffix())) {
-          CopyFile(entry.absoluteFilePath(), dest + "/" + entry.fileName(), true);
+          CopyFile(entry.absoluteFilePath(),dest + "/" + entry.fileName(), true, vp, mod, cls);
           if (verbose) std::cout << "Copying FILE: " << entry.fileName().toStdString() << std::endl;
         }
       } else {
-        CopyFile(entry.absoluteFilePath(), dest + "/" + entry.fileName(), true);
+        CopyFile(entry.absoluteFilePath(), dest + "/" + entry.fileName(), true, vp, mod, cls);
         if (verbose) std::cout << "Copying FILE: " << entry.fileName().toStdString() << std::endl;
       }
 
     } else if (entry.isDir()) {
-      CreateDirectory(dest + "/" + entry.fileName());
+      CreateDir(dest + "/" + entry.fileName(), vp);
       if(verbose) std::cout << "Copying FOLDER: " << entry.fileName().toStdString() << std::endl;
-      CopyDirectory(entry.absoluteFilePath(), dest + "/" + entry.fileName(), verbose, true);
+      CopyDir(entry.absoluteFilePath(), dest + "/" + entry.fileName(), verbose, true, vp, mod, cls);
     }
   }
 }
 
-inline void CopyDirectory(std::string origin,
-                          std::string destination,
-                          bool verbose=false,
-                          bool ecl_slim=false) {
-  CopyDirectory(QString::fromStdString(origin),
-                QString::fromStdString(destination),
-                verbose, ecl_slim);
+inline void CopyDir(const std::string& origin,
+                    const std::string& destination,
+                    bool verbose= false,
+                    bool ecl_slim= false,
+                    const Settings::VerbParams vp={},
+                    string mod="", string cls="") {
+  CopyDir(QString::fromStdString(origin),
+          QString::fromStdString(destination),
+          verbose, ecl_slim, vp, mod, cls);
 }
 
 /*!

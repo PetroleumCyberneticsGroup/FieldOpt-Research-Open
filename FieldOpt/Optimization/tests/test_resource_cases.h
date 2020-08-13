@@ -102,7 +102,7 @@ class TestResourceCases :
             real_variables_sph_rand_30d_);
 
     std::vector<double> rand_reals_6 = random_doubles(gen, -5.12, 5.12, 6);
-    varcont_6r_ = new VariablePropertyContainer();
+    varcont_6r_ = new VarPropContainer();
 
     QString base_name = "BHP#PRODUCER#";
 

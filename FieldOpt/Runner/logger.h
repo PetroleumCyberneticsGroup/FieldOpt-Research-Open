@@ -41,7 +41,6 @@ If not, see <http://www.gnu.org/licenses/>.
 
 using namespace std;
 
-
 /*!
  * \brief The Logger class is responsible for writing CSV and JSON logs to the disk.
  *
@@ -69,7 +68,8 @@ class Logger
    * \param output_subdir Optional subdirectory in the output directory to write the logs in.
    * \param write_logs Whether or not the logs should be written. This setting is mainly here for tests.
    */
-  Logger(Runner::RuntimeSettings *rts, QString output_subdir="", bool write_logs=true);
+  Logger(Runner::RuntimeSettings *rts, QString output_subdir="",
+         bool write_logs=true, Settings::VerbParams vp={});
 
   void AddEntry(Loggable *obj);
   void FinalizePrerunSummary();
@@ -79,7 +79,8 @@ class Logger
  private:
   bool is_worker_; //!< Indicates whether or not this logger is on a worker process. This determines which logs are written.
   bool write_logs_;
-  bool verbose_; //!< Whether or not new log entries should also be printed to the console.
+  Settings::VerbParams vp_;
+
   QString output_dir_; //!< Directory in which the files will be written.
   QString opt_log_path_; //!< Path to the optimization log file.
   QString cas_log_path_; //!< Path to the case log file.
@@ -101,27 +102,27 @@ class Logger
    * last letter in the name of the column. The trailing space and comma are added separately.
    */
   map<string, int> cas_log_col_widths_ {
-      {"TimeSt", 19 },
-      {"EvalSt", 7},
-      {"ConsSt", 7},
-      {"ErrMsg", 7},
-      {"SimDur", 9},
-      {"OFnVal", 12},
-      {"CaseId", 39}
+    {"TimeSt", 19 },
+    {"EvalSt", 7},
+    {"ConsSt", 7},
+    {"ErrMsg", 7},
+    {"SimDur", 9},
+    {"OFnVal", 12},
+    {"CaseId", 39}
   };
   QString cas_log_header_ = "             TimeSt , EvalSt , ConsSt , ErrMsg ,   SimDur ,   WicDur ,       OFnVal ,                                 CaseId";
   map<string, int> opt_log_col_widths_ {
-      {"TimeSt", 19},
-      {"TimeEl", 9},
-      {"IterNr", 6},
-      {"TotlNr", 6},
-      {"EvalNr", 6},
-      {"BkpdNr", 6},
-      {"TimONr", 6},
-      {"FailNr", 6},
-      {"InvlNr", 6},
-      {"CBOFnV", 12},
-      {"CurBst", 41}
+    {"TimeSt", 19},
+    {"TimeEl", 9},
+    {"IterNr", 6},
+    {"TotlNr", 6},
+    {"EvalNr", 6},
+    {"BkpdNr", 6},
+    {"TimONr", 6},
+    {"FailNr", 6},
+    {"InvlNr", 6},
+    {"CBOFnV", 12},
+    {"CurBst", 41}
   };
   const QString opt_log_header_ = "             TimeSt ,   TimeEl ,   TimeIt , IterNr , TotlNr , EvalNr , BkpdNr , TimONr , FailNr , InvlNr ,       CBOFnV ,                                 CurBst";
 

@@ -45,7 +45,7 @@ class Optimizer
 
  public:
   Optimizer(){}
-  Optimizer(QJsonObject json_optimizer);
+  Optimizer(QJsonObject json_optimizer, VerbParams vp);
 
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
@@ -252,6 +252,7 @@ class Optimizer
   void SetRngSeed(const int seed) { parameters_.rng_seed = seed; } //!< Change the RNG seed (used by HybridOptimizer).
 
   void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
+  VerbParams verbParams() { return vp_; };
 
  private:
   QList<Constraint> constraints_;
@@ -267,6 +268,8 @@ class Optimizer
   Parameters parseParameters(QJsonObject &json_parameters);
   Objective parseObjective(QJsonObject &json_objective);
   QList<HybridComponent> parseHybridComponents(QJsonObject &json_optimizer);
+
+  VerbParams vp_;
 };
 
 }

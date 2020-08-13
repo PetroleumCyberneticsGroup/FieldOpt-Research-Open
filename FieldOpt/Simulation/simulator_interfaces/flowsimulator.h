@@ -39,6 +39,8 @@ class FlowSimulator : public Simulator {
   FlowDriverFileWriter *driver_file_writer_;
   QStringList script_args_;
 
+  string cl_ = "flowsimulator";
+
   void verifyOriginalDriverFileDirectory();
   void copyDriverFiles();
 };

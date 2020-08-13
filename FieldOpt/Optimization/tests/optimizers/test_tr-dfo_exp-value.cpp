@@ -84,7 +84,7 @@ class EnTrTest : public ::testing::Test,
   TrustRegionOptimization *tr_dfo_;
   EnsembleExpValue *tr_en_;
   Optimization::Case *test_case_tr_dfo_probs_;
-  VariablePropertyContainer *varcont_tr_dfo_probs_;
+  VarPropContainer *varcont_tr_dfo_probs_;
   TestResources::TrustRegionModelData tr_mdata;
 
 
@@ -93,7 +93,7 @@ class EnTrTest : public ::testing::Test,
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VariablePropertyContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer();
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {
@@ -185,7 +185,7 @@ class EnTrTest : public ::testing::Test,
     /*
         TrustRegionOptimization *tr_dfo_;
         Optimization::Case *test_case_tr_dfo_probs_;
-        VariablePropertyContainer *varcont_tr_dfo_probs_;
+        VarPropContainer *varcont_tr_dfo_probs_;
         TestResources::TrustRegionModelData tr_mdata;
      */
     delete(tr_dfo_);

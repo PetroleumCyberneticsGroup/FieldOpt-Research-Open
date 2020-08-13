@@ -29,10 +29,13 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/helpers.hpp"
 
 using namespace Utilities::FileHandling;
+using Printer::num2str;
 
 namespace Settings {
 
-Simulator::Simulator(QJsonObject json_simulator, Paths &paths) {
+Simulator::Simulator(const QJsonObject& json_simulator,
+                     Paths &paths, VerbParams vp) {
+  vp_ = vp;
   setStructure(json_simulator);
   setPaths(json_simulator, paths);
   setType(json_simulator);
@@ -101,7 +104,7 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
 
   } else { // Ensemble run
     is_ensemble_ = true;
-    ensemble_ = Ensemble(paths.GetPath(Paths::ENSEMBLE_FILE));
+    ensemble_ = Ensemble(paths.GetPath(Paths::ENSEMBLE_FILE), vp_);
     // Set the data file path to the first realization so that the deck parser can find it
     paths.SetPath(Paths::SIM_DRIVER_FILE,
                   ensemble_.GetRealization(ensemble_.GetAliases()[0]).data());
@@ -132,6 +135,7 @@ void Simulator::setParams(QJsonObject json_simulator) {
   set_opt_prop_bool(use_pre_sim_script_, json_simulator, "UsePreSimScript");
   set_opt_prop_bool(add_sim_scripts_, json_simulator, "AddSimScripts");
   set_opt_prop_bool(read_external_json_results_, json_simulator, "ReadExternalJsonResults");
+  set_opt_prop_bool(read_adj_grad_data_, json_simulator, "ReadAdjGrads");
 }
 
 void Simulator::setCommands(QJsonObject json_simulator) {
@@ -139,11 +143,13 @@ void Simulator::setCommands(QJsonObject json_simulator) {
   QJsonArray sim_exec_cmds = json_simulator["SimExecCmds"].toArray();
   QJsonArray pre_sim_args = json_simulator["PreSimArgs"].toArray();
   QJsonArray post_sim_args = json_simulator["PostSimArgs"].toArray();
+  string tm;
 
   // ExecScript
   if (json_simulator.contains("ExecScript")
     && json_simulator["ExecScript"].toString().size() > 0) {
     script_name_ = json_simulator["ExecScript"].toString();
+    tm += "| ExecScript: " + script_name_.toStdString() + " ";
   }
 
   // SimExecCmds
@@ -153,15 +159,17 @@ void Simulator::setCommands(QJsonObject json_simulator) {
     for (int i = 0; i < sim_exec_cmds.size(); ++i) {
       sim_exec_cmds_->append(sim_exec_cmds[i].toString());
     }
+    tm += "| SimExecCmds: " + sim_exec_cmds_->join(" ").toStdString() + " ";
   }
 
   // PreSimArgs
   if (json_simulator.contains("PreSimArgs")
-    && !pre_sim_args.isEmpty()) {
+   && !pre_sim_args.isEmpty()) {
     pre_sim_args_ = new QStringList();
     for (int i = 0; i < pre_sim_args.size(); ++i) {
-      pre_sim_args_->append(pre_sim_args[i].toString());
+      pre_sim_args_->append("\"" + pre_sim_args[i].toString() + "\"");
     }
+    tm += "| PreSimArgs: " + pre_sim_args_->join(" ").toStdString() + " ";
   }
 
   // PostSimArgs
@@ -169,8 +177,14 @@ void Simulator::setCommands(QJsonObject json_simulator) {
     && !post_sim_args.isEmpty()) {
     post_sim_args_ = new QStringList();
     for (int i = 0; i < post_sim_args.size(); ++i) {
-      post_sim_args_->append(post_sim_args[i].toString());
+
+      if(post_sim_args[i].toString().isEmpty()) {
+        post_sim_args_->append(QString::fromStdString(num2str(post_sim_args[i].toInt(),0)));
+      } else {
+        post_sim_args_->append( "\""+ post_sim_args[i].toString() + "\"");
+      }
     }
+    tm += "| PostSimArgs: " + post_sim_args_->join(" ").toStdString() + " ";
   }
 
   if (script_name_.length() == 0 && sim_exec_cmds.isEmpty()) {
@@ -179,6 +193,8 @@ void Simulator::setCommands(QJsonObject json_simulator) {
                       "path being passed as runtime argument.",
                       "Settings", "Simulator");
   }
+
+  if(vp_.vSET >= 3) { ext_info(tm, md_, cl_, vp_.lnw); }
 }
 
 void Simulator::setFluidModel(QJsonObject json_simulator) {

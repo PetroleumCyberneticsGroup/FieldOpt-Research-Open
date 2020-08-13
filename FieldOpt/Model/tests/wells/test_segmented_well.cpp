@@ -43,15 +43,16 @@ class SegmentedWellTest : public ::testing::Test {
     paths_.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
     // paths_.SetPath(Paths::SIM_SCH_FILE, TestResources::ExampleFilePaths::norne_sch_);
     mod_json_ = partial_deck["Model"].toObject();
-    mod_settings_ = new Settings::Model(mod_json_, paths_);
-    varcont_ = new Model::Properties::VariablePropertyContainer();
+    mod_settings_ = new Settings::Model(mod_json_, paths_, vp_);
+    varcont_ = new Model::Properties::VarPropContainer();
     grid_ = new Reservoir::Grid::ECLGrid(paths_.GetPath(Paths::GRID_FILE));
   }
 
   QJsonObject sim_json_;
   QJsonObject mod_json_;
   Settings::Model *mod_settings_;
-  Model::Properties::VariablePropertyContainer *varcont_;
+  Settings::VerbParams vp_ = {};
+  Model::Properties::VarPropContainer *varcont_;
   Reservoir::Grid::Grid *grid_;
   Paths paths_;
   ::Model::Wells::Well *well;

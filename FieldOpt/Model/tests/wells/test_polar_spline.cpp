@@ -1,22 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>,
-   Brage Strand Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "Model/cpp-spline/src/Bezier.h"
@@ -28,139 +32,137 @@
 
 namespace {
 
+class PolarSplineTest : public ::testing::Test,
+                        public TestResources::TestResourceModel,
+                        public TestResources::TestResourceGrids {
+ protected:
+  PolarSplineTest() {}
+  Settings::VerbParams vp_ = {};
+};
 
-    class PolarSplineTest : public ::testing::Test,
-                            public TestResources::TestResourceModel,
-                            public TestResources::TestResourceGrids {
-    protected:
-        PolarSplineTest() {
-        }
+TEST_F(PolarSplineTest, Constructor) {
+  Paths paths;
+  paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
+  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths, vp_);
+  auto wsettings = settings.wells()[0];
 
-    };
+  // Reservoir size/dimensions:
+  // 1440 x 1440 m, 1700-1724 m
+  // 60x60x1
 
-    TEST_F(PolarSplineTest, Constructor) {
-        Paths paths;
-        paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
-        auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths);
-        auto wsettings = settings.wells()[0];
+  wsettings.polar_spline.elevation = 0;
+  wsettings.polar_spline.azimuth = 0;
+  wsettings.polar_spline.length = 1440;
+  wsettings.polar_spline.midpoint.x = 720;
+  wsettings.polar_spline.midpoint.y = 732;
+  wsettings.polar_spline.midpoint.z = 1712;
 
-        // Reservoir size/dimensions:
-        // 1440 x 1440 m, 1700-1724 m
-        // 60x60x1
+  auto varcont = new Model::Properties::VarPropContainer();
+  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto well_blocks = well.GetWellBlocks();
 
-        wsettings.polar_spline.elevation = 0;
-        wsettings.polar_spline.azimuth = 0;
-        wsettings.polar_spline.length = 1440;
-        wsettings.polar_spline.midpoint.x = 720;
-        wsettings.polar_spline.midpoint.y = 732;
-        wsettings.polar_spline.midpoint.z = 1712;
+}
 
-        auto varcont = new Model::Properties::VariablePropertyContainer();
-        auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
-        auto well_blocks = well.GetWellBlocks();
+TEST_F(PolarSplineTest, Endblocks) {
+  Paths paths;
+  paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
+  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths, vp_);
+  auto wsettings = settings.wells()[0];
 
-    }
+  // Reservoir size/dimensions:
+  // 1440 x 1440 m, 1700-1724 m
+  // 60x60x1
 
-    TEST_F(PolarSplineTest, Endblocks) {
-        Paths paths;
-        paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
-        auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths);
-        auto wsettings = settings.wells()[0];
+  wsettings.polar_spline.elevation = 90;
+  wsettings.polar_spline.azimuth = 180;
+  wsettings.polar_spline.length = 1440;
+  wsettings.polar_spline.midpoint.x = 720;
+  wsettings.polar_spline.midpoint.y = 732;
+  wsettings.polar_spline.midpoint.z = 1712;
 
-        // Reservoir size/dimensions:
-        // 1440 x 1440 m, 1700-1724 m
-        // 60x60x1
+  auto varcont = new Model::Properties::VarPropContainer();
+  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto well_blocks = well.GetWellBlocks();
 
-        wsettings.polar_spline.elevation = 90;
-        wsettings.polar_spline.azimuth = 180;
-        wsettings.polar_spline.length = 1440;
-        wsettings.polar_spline.midpoint.x = 720;
-        wsettings.polar_spline.midpoint.y = 732;
-        wsettings.polar_spline.midpoint.z = 1712;
+  auto first_block = well_blocks->front();
+  auto last_block = well_blocks->back();
 
-        auto varcont = new Model::Properties::VariablePropertyContainer();
-        auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
-        auto well_blocks = well.GetWellBlocks();
+  EXPECT_EQ(60, well_blocks->size());
 
-        auto first_block = well_blocks->front();
-        auto last_block = well_blocks->back();
+  EXPECT_EQ(1, first_block->k());
+  EXPECT_EQ(1, last_block->k());
 
-        EXPECT_EQ(60, well_blocks->size());
+  EXPECT_EQ(1, first_block->i());
+  EXPECT_EQ(60, last_block->i());
 
-        EXPECT_EQ(1, first_block->k());
-        EXPECT_EQ(1, last_block->k());
+  EXPECT_EQ(31, first_block->j());
+  EXPECT_EQ(31, last_block->j());
 
-        EXPECT_EQ(1, first_block->i());
-        EXPECT_EQ(60, last_block->i());
+}
 
-        EXPECT_EQ(31, first_block->j());
-        EXPECT_EQ(31, last_block->j());
+TEST_F(PolarSplineTest, Tilting) {
+  Paths paths;
+  paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
+  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths, vp_);
+  auto wsettings = settings.wells()[0];
 
-    }
+  // Reservoir size/dimensions:
+  // 1440 x 1440 m, 1700-1724 m
+  // 60x60x1
 
-    TEST_F(PolarSplineTest, Tilting) {
-        Paths paths;
-        paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
-        auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths);
-        auto wsettings = settings.wells()[0];
+  wsettings.polar_spline.elevation = 90+5;
+  wsettings.polar_spline.azimuth = 180;
+  wsettings.polar_spline.length = 1440;
+  wsettings.polar_spline.midpoint.x = 720;
+  wsettings.polar_spline.midpoint.y = 732;
+  wsettings.polar_spline.midpoint.z = 1712;
 
-        // Reservoir size/dimensions:
-        // 1440 x 1440 m, 1700-1724 m
-        // 60x60x1
+  auto varcont = new Model::Properties::VarPropContainer();
+  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto well_blocks = well.GetWellBlocks();
 
-        wsettings.polar_spline.elevation = 90+5;
-        wsettings.polar_spline.azimuth = 180;
-        wsettings.polar_spline.length = 1440;
-        wsettings.polar_spline.midpoint.x = 720;
-        wsettings.polar_spline.midpoint.y = 732;
-        wsettings.polar_spline.midpoint.z = 1712;
+  auto first_block = well_blocks->front();
+  auto last_block = well_blocks->back();
 
-        auto varcont = new Model::Properties::VariablePropertyContainer();
-        auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
-        auto well_blocks = well.GetWellBlocks();
-
-        auto first_block = well_blocks->front();
-        auto last_block = well_blocks->back();
-
-        EXPECT_EQ(12, well_blocks->size());
+  EXPECT_EQ(12, well_blocks->size());
 
 
-    }
-    TEST_F(PolarSplineTest, Screwing) {
-        Paths paths;
-        paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
-        auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths);
-        auto wsettings = settings.wells()[0];
+}
+TEST_F(PolarSplineTest, Screwing) {
+  Paths paths;
+  paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
+  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_polar_well(), paths, vp_);
+  auto wsettings = settings.wells()[0];
 
-        // Reservoir size/dimensions:
-        // 1440 x 1440 m, 1700-1724 m
-        // 60x60x1
+  // Reservoir size/dimensions:
+  // 1440 x 1440 m, 1700-1724 m
+  // 60x60x1
 
-        wsettings.polar_spline.elevation = 90;
-        wsettings.polar_spline.azimuth = 180+45;
-        wsettings.polar_spline.length = sqrt(pow(1440,2)+pow(1440,2));
-        wsettings.polar_spline.midpoint.x = 720;
-        wsettings.polar_spline.midpoint.y = 732;
-        wsettings.polar_spline.midpoint.z = 1712;
+  wsettings.polar_spline.elevation = 90;
+  wsettings.polar_spline.azimuth = 180+45;
+  wsettings.polar_spline.length = sqrt(pow(1440,2)+pow(1440,2));
+  wsettings.polar_spline.midpoint.x = 720;
+  wsettings.polar_spline.midpoint.y = 732;
+  wsettings.polar_spline.midpoint.z = 1712;
 
-        auto varcont = new Model::Properties::VariablePropertyContainer();
-        auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
-        auto well_blocks = well.GetWellBlocks();
+  auto varcont = new Model::Properties::VarPropContainer();
+  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto well_blocks = well.GetWellBlocks();
 
-        auto first_block = well_blocks->front();
-        auto last_block = well_blocks->back();
+  auto first_block = well_blocks->front();
+  auto last_block = well_blocks->back();
 
-        EXPECT_EQ(119, well_blocks->size());
+  EXPECT_EQ(119, well_blocks->size());
 
-        EXPECT_EQ(1, first_block->k());
-        EXPECT_EQ(1, last_block->k());
+  EXPECT_EQ(1, first_block->k());
+  EXPECT_EQ(1, last_block->k());
 
-        EXPECT_EQ(1, first_block->i());
-        EXPECT_EQ(1, first_block->j());
+  EXPECT_EQ(1, first_block->i());
+  EXPECT_EQ(1, first_block->j());
 
-        EXPECT_EQ(60, last_block->j());
-        EXPECT_EQ(60, last_block->i());
+  EXPECT_EQ(60, last_block->j());
+  EXPECT_EQ(60, last_block->i());
 
 
-    }
+}
 }

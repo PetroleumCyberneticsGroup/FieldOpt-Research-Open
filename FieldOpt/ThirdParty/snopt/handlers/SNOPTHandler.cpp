@@ -34,6 +34,8 @@ namespace Optimizers {
 SNOPTHandler::SNOPTHandler(const char *prntname,
                            const char *summname,
                            const char *specname) {
+  vp_ = {};
+  vp_.vUTI = 1;
 
   initCalled = 0;
   init2zero_();
@@ -61,7 +63,7 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
 
 
   this->has_snopt_option_file = true;
-  if (!FileExists(QString(specname))) {
+  if (!FileExists(QString(specname), vp_, md_, cl_)) {
     this->has_snopt_option_file = false;
     // cout << "-- SNOPT: Couldn't open file: " << string(specname) << "\n";
     // cout << "-- SNOPT: Using default options for SNOPT\n";

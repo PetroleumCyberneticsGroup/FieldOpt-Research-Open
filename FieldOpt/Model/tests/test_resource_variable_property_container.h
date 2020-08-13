@@ -68,7 +68,7 @@ class TestResourceVariablePropertyContainer {
     pseudocont_x_->setName("PseudoContVert#TESTW#x");
     pseudocont_y_->setName("PseudoContVert#TESTW#y");
 
-    varcont_prod_spline_ = new VariablePropertyContainer();
+    varcont_prod_spline_ = new VarPropContainer();
     varcont_prod_spline_->AddVariable(prod_heel_x_);
     varcont_prod_spline_->AddVariable(prod_heel_y_);
     varcont_prod_spline_->AddVariable(prod_heel_z_);
@@ -76,7 +76,7 @@ class TestResourceVariablePropertyContainer {
     varcont_prod_spline_->AddVariable(prod_toe_y_);
     varcont_prod_spline_->AddVariable(prod_toe_z_);
 
-    varcont_two_spline_wells_ = new VariablePropertyContainer();
+    varcont_two_spline_wells_ = new VarPropContainer();
     varcont_two_spline_wells_->AddVariable(prod_heel_x_);
     varcont_two_spline_wells_->AddVariable(prod_heel_y_);
     varcont_two_spline_wells_->AddVariable(prod_heel_z_);
@@ -90,7 +90,7 @@ class TestResourceVariablePropertyContainer {
     varcont_two_spline_wells_->AddVariable(inje_toe_y_);
     varcont_two_spline_wells_->AddVariable(inje_toe_z_);
 
-    varcont_pseudocont_ = new VariablePropertyContainer();
+    varcont_pseudocont_ = new VarPropContainer();
     varcont_pseudocont_->AddVariable(pseudocont_x_);
     varcont_pseudocont_->AddVariable(pseudocont_y_);
 
@@ -98,16 +98,16 @@ class TestResourceVariablePropertyContainer {
     prod_bhp_10_ = new ContinousProperty(1.0);
     prod_bhp_0_->setName("BHP#PRODUCER#0");
     prod_bhp_10_->setName("BHP#PRODUCER#10");
-    varcont_prod_bhp_ = new VariablePropertyContainer();
+    varcont_prod_bhp_ = new VarPropContainer();
     varcont_prod_bhp_->AddVariable(prod_bhp_0_);
     varcont_prod_bhp_->AddVariable(prod_bhp_10_);
   }
 
-  VariablePropertyContainer *varcont_prod_spline_;
-  VariablePropertyContainer *varcont_pseudocont_;
-  VariablePropertyContainer *varcont_two_spline_wells_;
-  VariablePropertyContainer *varcont_prod_bhp_;
-  VariablePropertyContainer *varcont_6r_;
+  VarPropContainer *varcont_prod_spline_;
+  VarPropContainer *varcont_pseudocont_;
+  VarPropContainer *varcont_two_spline_wells_;
+  VarPropContainer *varcont_prod_bhp_;
+  VarPropContainer *varcont_6r_;
 
  private:
   ContinousProperty *prod_heel_x_;

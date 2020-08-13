@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_PACKER_CONSTRAINT_H
 #define FIELDOPT_PACKER_CONSTRAINT_H
@@ -29,7 +34,10 @@ namespace Constraints {
 
 class PackerConstraint : public Constraint {
  public:
-  PackerConstraint(Settings::Optimizer::Constraint settings, Model::Properties::VariablePropertyContainer *variables);
+  PackerConstraint(Settings::Optimizer::Constraint settings,
+                   Model::Properties::VarPropContainer *variables,
+                   Settings::VerbParams vp);
+
   string name() override;
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
@@ -40,6 +48,7 @@ class PackerConstraint : public Constraint {
  private:
   std::vector<QUuid> affected_variables_;
   std::map<QUuid, Model::Properties::Property::PropertyInfo> affected_var_props_;
+  string cl_ = "PackerConstraint";
 
 };
 

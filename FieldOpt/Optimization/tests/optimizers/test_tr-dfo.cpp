@@ -74,7 +74,7 @@ class TrustRegionTest : public ::testing::Test,
 
   TrustRegionOptimization *tr_dfo_;
   Optimization::Case *test_case_tr_dfo_probs_;
-  VariablePropertyContainer *varcont_tr_dfo_probs_;
+  VarPropContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
   Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
@@ -95,7 +95,7 @@ class TrustRegionTest : public ::testing::Test,
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VariablePropertyContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer();
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {

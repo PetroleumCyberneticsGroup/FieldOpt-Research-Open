@@ -79,7 +79,9 @@ class ECLSimulator : public Simulator {
   QString deck_name_;
   Settings::Settings *settings_;
   void copyDriverFiles();
-  
+
+  string cl_ = "eclsimulator";
+
   // Simulator interface
  protected:
   void UpdateFilePaths() override;

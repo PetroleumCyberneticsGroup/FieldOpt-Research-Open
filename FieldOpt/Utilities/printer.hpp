@@ -28,6 +28,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef PRINTER_FUNCTIONS_H
 #define PRINTER_FUNCTIONS_H
 
+//#include <QString>
+
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -166,6 +168,10 @@ inline std::string num2str(const T num, int prc=2) {
   return ss.str();
 }
 
+//template<typename T>
+//inline QString num2Qstr(const T num, int prc=2) {
+//  return QString::fromStdString(num2str(num, prc));
+//}
 
 /*!
  * @brief Truncate a string, adding an ellipsis to the end.
@@ -191,16 +197,15 @@ inline void pad_text(string &text, const int &width=66) {
 }
 
 /*!
- * @brief Split a string into multiple lines of the required width,
- * padding each with spaces at the end.
- * Note that the | character in the input string will insert a linebreak.
+ * @brief Split a string into multiple lines of the required
+ * width, padding each with spaces at the end. Note that the
+ * | character in the input string will insert a linebreak.
  * @param text Text to split.
  * @param width Width to split at (and pad to).
  * @return
  */
 inline vector<string> split_line(const string text,
                                  const int &width=67) {
-
   vector<string> strv;
   if (text.size() > width) {
     std::size_t start_idx = 0;
@@ -240,16 +245,16 @@ inline vector<string> split_line(const string text,
  │ This is a compact info box                                         │
  └─────────────────────────────────────────────────────────────────────┘
  */
-inline void info(const std::string &text, int lw=120) {
+inline void info(const std::string &text, int lw=165) {
   std::stringstream ss;
   ss << FLGREEN;
   std::string content = text;
-  truncate_text(content);
-  pad_text(content, lw - 3);
+  truncate_text(content, lw - 10);
+  pad_text(content, lw - 4);
 
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
-  ss << "│■ " << content << " │" << "\n";
+  ss << "│ ■ " << content << " │" << "\n";
   ss << bS.llnl;
   ss << "\n";
   ss << AEND;
@@ -269,38 +274,30 @@ Example:
 inline void ext_info(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=120) {
+                     const int &lw=165) {
   std::string module_name = modulen;
   std::string class_name = classn;
-  truncate_text(module_name, 12);
-  truncate_text(class_name, 29);
-  pad_text(module_name, 12);
-  pad_text(class_name, 29);
+  truncate_text(module_name, 30);
+  truncate_text(class_name, 30);
+  pad_text(module_name, 30);
+  pad_text(class_name, 30);
 
   auto lines = split_line(text, lw - 2);
 
   std::stringstream ss;
   ss << FLGREEN;
 
+  auto width = floor(lw * 25/60);
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
-  pad_text(module_name, lw - 74);
-  pad_text(class_name, lw - 74);
-  ss << "│■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+  pad_text(module_name, width);
+  pad_text(class_name, width);
+  ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";
   }
   ss << bS.llnl;
-
-//  ss << "┌───────┬──────────────────────┬──────────────────────────────────────┐" << "\n";
-//  ss << "│ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
-//  ss << "├───────┴──────────────────────┴──────────────────────────────────────┤" << "\n";
-//  for (auto line : lines) {
-//    ss << "│ " << line << " │" << "\n";
-//  }
-//  ss << "└─────────────────────────────────────────────────────────────────────┘" << "\n";
-
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();
@@ -318,37 +315,29 @@ Example:
 inline void ext_warn(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=120) {
+                     const int &lw=165) {
   std::string module_name = modulen;
   std::string class_name = classn;
-  truncate_text(module_name, 12);
-  truncate_text(class_name, 25);
-  pad_text(module_name, 12);
-  pad_text(class_name, 25);
+  truncate_text(module_name, 30);
+  truncate_text(class_name, 30);
+  pad_text(module_name, 30);
+  pad_text(class_name, 30);
 
   auto lines = split_line(text, lw - 2);
   std::stringstream ss;
   ss << FLYELLOW;
 
+  auto width = floor(lw * 25/60);
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
-  pad_text(module_name, lw - 74);
-  pad_text(class_name, lw - 74);
-  ss << "│■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+  pad_text(module_name, width);
+  pad_text(class_name, width);
+  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";
   }
   ss << bS.llnl;
-
-//  ss << "┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓" << "\n";
-//  ss << "┃ WARNING  ┃ Module: " << module_name << " ┃ Class: " << class_name << " ┃" << "\n";
-//  ss << "┣━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫" << "\n";
-//  for (auto line : lines) {
-//    ss << "┃ " << line << " ┃" << "\n";
-//  }
-//  ss << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛" << "\n";
-
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();
@@ -359,23 +348,16 @@ Example:
  ║ ERROR: This is an error message.                                   ║
  ╚═════════════════════════════════════════════════════════════════════╝
  */
-inline void error(const std::string &text, const int &lw=120) {
+inline void error(const std::string &text, const int &lw=165) {
   std::stringstream ss;
   ss << FLRED;
 
   std::string content = text;
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
-  pad_text(content, lw - 3);
-  ss << "│■ ERROR: " << content << " │" << "\n";
+  pad_text(content, lw - 4);
+  ss << "│ ■ ERROR: " << content << " │" << "\n";
   ss << bS.llnl;
-
-//  truncate_text(content, 59);
-//  pad_text(content, 59);
-//  ss << "╔═════════════════════════════════════════════════════════════════════╗" << "\n";
-//  ss << "║ ERROR: " << content <<                                                  " ║" << "\n";
-//  ss << "╚═════════════════════════════════════════════════════════════════════╝" << "\n";
-
   ss << "\n";
   ss << AEND;
   std::cout << ss.str();

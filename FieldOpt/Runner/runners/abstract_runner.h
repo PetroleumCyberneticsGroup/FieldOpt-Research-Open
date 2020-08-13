@@ -68,6 +68,9 @@ class AbstractRunner
    */
   virtual void Execute() = 0;
   const double sentinel_value_ = 0.0001; //!< Value to be used as a sentinel value for the objective function of cases that cannot be evaluated.
+
+  string md_ = "Runner";
+  string cl_ = "AbstractRunner";
   Settings::VerbParams vp_;
 
  protected:

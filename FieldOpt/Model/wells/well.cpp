@@ -30,14 +30,19 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Wells {
 
-Well::Well(Settings::Model model_settings,
+using Printer::info;
+using Printer::ext_info;
+using Printer::num2str;
+
+Well::Well(const Settings::Model& model_settings,
            int well_number,
-           Properties::VariablePropertyContainer *variable_container,
+           Properties::VarPropContainer *variable_container,
            Reservoir::Grid::Grid *grid,
            Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
   well_settings_ = model_settings.wells()[well_number];
-  well_settings_.copyVerbParams(model_settings.verb_params_);
+  well_settings_.copyVerbParams(model_settings.vp_);
+  vp_ = well_settings_.verbParams();
 
   name_ = well_settings_.name;
   type_ = well_settings_.type;
@@ -50,9 +55,8 @@ Well::Well(Settings::Model model_settings,
   wellbore_radius_ = new Properties::ContinousProperty(well_settings_.wellbore_radius);
 
   controls_ = new QList<Control *>();
-  for (int i = 0; i < well_settings_.controls.size(); ++i) {
-    controls_->append(new Control(well_settings_.controls[i],
-                                  well_settings_, variable_container));
+  for (const auto & control : well_settings_.controls) {
+    controls_->append(new Control(control,well_settings_, variable_container));
   }
 
   trajectory_defined_ = well_settings_.definition_type != Settings::Model::WellDefinitionType::UNDEFINED;
@@ -70,39 +74,47 @@ Well::Well(Settings::Model model_settings,
       is_segmented_ = false;
     }
 
-  } else { // Completions for wells with no defined trajectory (they are specified by segment number)
-    if (well_settings_.completions.size() > 0
-      && well_settings_.icv_compartments.size() == 0) {
+  } else {
+    // Completions for wells with no defined trajectory
+    // (they are specified by segment number)
+    if (!well_settings_.completions.empty()
+      && well_settings_.icv_compartments.empty()) {
+
       for (auto comp : well_settings_.completions) {
         auto base_name = comp.name;
-        for (int i = 0; i < comp.device_names.size(); ++i) {
+        auto comp_num = comp.device_names.size();
+        for (int i = 0; i < comp_num; ++i) {
           comp.device_name = comp.device_names[i];
           comp.segment_index = comp.segment_indexes[i];
           comp.name = base_name + "#" + QString::number(comp.segment_index);
-          icds_.push_back(Wellbore::Completions::ICD(comp, variable_container));
-          if (VERB_MOD >=2) {Printer::ext_info("Added an ICV.", "Well", "Model"); }
+          icds_.emplace_back(comp, variable_container);
+        }
+        if (VERB_MOD >=2 || vp_.vMOD >= 2 ) {
+          ext_info("Added " + num2str(comp_num) + " ICDs.",
+                   "Well", "Model", vp_.lnw);
         }
       }
 
-    } else if (well_settings_.icv_compartments.size() > 0) {
-      if (VERB_MOD >= 2) Printer::ext_info("Adding ICV compartments", "Model", "Well");
-      for (auto comp : well_settings_.icv_compartments) {
-        icds_.push_back(Wellbore::Completions::ICD(comp, variable_container));
-        if (VERB_MOD >=2) {Printer::ext_info("Added an ICV compartment.", "Well", "Model"); }
+    } else if (!well_settings_.icv_compartments.empty()) {
+      for (const auto& comp : well_settings_.icv_compartments) {
+        icds_.emplace_back(comp, variable_container);
+      }
+      if (VERB_MOD >=2 || vp_.vMOD >= 2 ) {
+        ext_info("Added " + num2str(well_settings_.icv_compartments.size())
+                   + " ICV compartment.", "Well", "Model", vp_.lnw);
       }
     }
   }
 }
 
-bool Well::IsProducer()
-{
+bool Well::IsProducer() {
   return type_ == ::Settings::Model::WellType::Producer;
 }
 
-bool Well::IsInjector()
-{
+bool Well::IsInjector() {
   return type_ == ::Settings::Model::WellType::Injector;
 }
+
 void Well::Update() {
   if (trajectory_defined_) {
     trajectory_->UpdateWellBlocks();
@@ -117,7 +129,8 @@ void Well::Update() {
     }
   }
 }
-void Well::initializeSegmentedWell(Properties::VariablePropertyContainer *variable_container) {
+
+void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_container) {
   assert(well_settings_.seg_n_compartments > 0);
   assert(trajectory_->GetDefinitionType() == Settings::Model::WellDefinitionType::WellSpline);
 
@@ -195,6 +208,7 @@ std::vector<Packer *> Well::GetPackers() const {
   }
   return packers;
 }
+
 std::vector<ICD *> Well::GetICDs() const {
   assert(is_segmented_);
   std::vector<ICD *> icds;
@@ -203,10 +217,12 @@ std::vector<ICD *> Well::GetICDs() const {
   }
   return icds;
 }
+
 std::vector<Compartment> Well::GetCompartments() const {
   assert(is_segmented_);
   return compartments_;
 }
+
 std::vector<Segment> Well::GetSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
@@ -222,7 +238,9 @@ std::vector<Segment> Well::GetSegments() {
 
   return segments;
 }
-void Well::createAnnulusSegments(std::vector<Segment> &segments, const std::vector<int> &icd_indexes) {
+
+void Well::createAnnulusSegments(std::vector<Segment> &segments,
+                                 const std::vector<int> &icd_indexes) {
   assert(is_segmented_);
   std::vector<int> annulus_indexes;
   for (int i = 0; i < compartments_.size(); ++i) {
@@ -264,7 +282,9 @@ void Well::createAnnulusSegments(std::vector<Segment> &segments, const std::vect
     }
   }
 }
-std::vector<int> Well::createICDSegments(std::vector<Segment> &segments, std::vector<int> &tubing_indexes) const {
+
+std::vector<int> Well::createICDSegments(std::vector<Segment> &segments,
+                                         std::vector<int> &tubing_indexes) const {
   assert(is_segmented_);
   std::vector<int> icd_indexes;
   for (int i = 0; i < compartments_.size(); ++i) {
@@ -286,6 +306,7 @@ std::vector<int> Well::createICDSegments(std::vector<Segment> &segments, std::ve
   }
   return icd_indexes;
 }
+
 std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) const {
   assert(is_segmented_);
   std::vector<int> tubing_indexes;
@@ -307,6 +328,7 @@ std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) cons
   }
   return tubing_indexes;
 }
+
 std::vector<Segment> Well::GetTubingSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
@@ -318,6 +340,7 @@ std::vector<Segment> Well::GetTubingSegments() {
   std::vector<int> tubing_indexes = createTubingSegments(segments);
   return segments;
 }
+
 std::vector<Segment> Well::GetICDSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
@@ -337,6 +360,7 @@ std::vector<Segment> Well::GetICDSegments() {
   }
   return icd_segments;
 }
+
 std::vector<Segment> Well::GetAnnulusSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
@@ -357,6 +381,7 @@ std::vector<Segment> Well::GetAnnulusSegments() {
   }
   return ann_segments;
 }
+
 std::vector<int> Well::GetICDSegmentIndices() {
   std::vector<int> indices;
   for (auto seg : GetICDSegments()) {

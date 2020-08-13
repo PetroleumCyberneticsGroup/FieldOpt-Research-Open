@@ -35,12 +35,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 
 using namespace Utilities::FileHandling;
+using Printer::ext_info;
+using Printer::info;
 
 ECLSimulator::ECLSimulator(Settings::Settings *settings,
                            Model::Model *model) : Simulator(settings) {
 
   model_ = model;
   settings_ = settings;
+  vp_ = settings_->global()->verbParams();
 
   if ( !paths_.IsSet(Paths::ENSEMBLE_FILE)) {
     deck_name_ = driver_file_name_.split(".DATA").first();
@@ -76,7 +79,7 @@ void ECLSimulator::Evaluate() {
   if ( VERB_SIM >= 2 ) { Printer::info("Starting unmonitored sim."); }
   Utilities::Unix::ExecShellScript(
     paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
-    script_args_
+    script_args_, vp_
   );
   PostSimWork();
 
@@ -102,7 +105,7 @@ bool ECLSimulator::Evaluate(int timeout, int threads) {
 
   if ( VERB_SIM >= 2 ) { Printer::info("Starting monitored sim w/ timeout."); }
   auto script_path = paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE);
-  bool success = ::Utilities::Unix::ExecShellScriptTimeout(script_path, script_args_, t);
+  bool success = ::Utilities::Unix::ExecShellScriptTimeout(script_path, script_args_, t, vp_);
 
   if ( VERB_SIM >= 2 ) { Printer::info("Monitored sim done."); }
   if ( success ) {
@@ -124,7 +127,7 @@ bool ECLSimulator::Evaluate(
   driver_file_name_ =
     QString::fromStdString(FileName(realization.data()));
   driver_parent_dir_name_ =
-    QString::fromStdString(ParentDirectoryName(realization.data()));
+    QString::fromStdString(ParentDirName(realization.data()));
   deck_name_ = driver_file_name_.split(".").first();
 
   paths_.SetPath(Paths::SIM_DRIVER_FILE, realization.data());
@@ -146,7 +149,7 @@ void ECLSimulator::CleanUp() {
     paths_.GetPath(Paths::SIM_OUT_DRIVER_FILE)).split(".DATA").first();
 
   for ( QString ending : file_endings_to_delete ) {
-    DeleteFile(base_file_path + "." + ending);
+    DeleteFile(base_file_path + "." + ending, vp_);
   }
 }
 
@@ -192,20 +195,20 @@ void ECLSimulator::copyDriverFiles() {
   workdir += "/" + driver_parent_dir_name_.toStdString();
   casedir += "/" + case_parent_dir_name_.toStdString();
 
-  if ( !DirExists(workdir) && settings_->simulator()->file_structure().type_
-    == Settings::Simulator::FileStructType::Flat) {
+  if ( !DirExists(workdir, vp_, md_, cl_)
+  && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Flat) {
     if ( VERB_SIM >= 1 ) {
       Printer::ext_info("Output deck directory not found. Copying input deck:"
                           + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir,
                         "Simulation",
                         "ECLSimulator");
     }
-    CreateDirectory(workdir);
-    CopyDirectory(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, false);
+    CreateDir(workdir, vp_);
+    CopyDir(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, false, false, vp_);
     paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
   }
 
-  if ( !DirExists(casedir) && settings_->simulator()->file_structure().type_
+  if ( !DirExists(casedir, vp_, md_, cl_) && settings_->simulator()->file_structure().type_
     == Settings::Simulator::FileStructType::Branched) {
     if ( VERB_SIM >= 1 ) {
       Printer::ext_info("Output dir not found. Copying input deck:"
@@ -213,22 +216,22 @@ void ECLSimulator::copyDriverFiles() {
                         "Simulation",
                         "ECLSimulator");
     }
-    CreateDirectory(casedir);
-    CopyDirectory(paths_.GetPath(Paths::CASE_ROOT_DIR), casedir, false, true);
+    CreateDir(casedir, vp_);
+    CopyDir(paths_.GetPath(Paths::CASE_ROOT_DIR), casedir, false, true, vp_);
     paths_.SetPath(Paths::SIM_WORK_DIR, casedir + paths_.GetPath(Paths::CASE_DRVR_DIR));
   }
 
   if ( paths_.IsSet(Paths::SIM_AUX_DIR)) {
     std::string auxdir = paths_.GetPath(Paths::OUTPUT_DIR)
       + "/" + FileName(paths_.GetPath(Paths::SIM_AUX_DIR));
-    if ( !DirExists(auxdir)) {
+    if ( !DirExists(auxdir, vp_, md_, cl_)) {
       if ( VERB_SIM >= 1 ) {
         Printer::ext_info("Copying simulation aux. directory:"
                             + paths_.GetPath(Paths::SIM_AUX_DIR)
                             + " -> " + auxdir, "Simulation", "Simulator" );
       }
-      CreateDirectory(auxdir);
-      CopyDirectory(paths_.GetPath(Paths::SIM_AUX_DIR), auxdir, false);
+      CreateDir(auxdir, vp_);
+      CopyDir(paths_.GetPath(Paths::SIM_AUX_DIR), auxdir, false);
     }
   }
 
@@ -239,8 +242,8 @@ void ECLSimulator::copyDriverFiles() {
     string post_script_trg = paths_.GetPath(Paths::SIM_WORK_DIR) + "/FO_POSTSIM.sh";
     string pre_script_trg = paths_.GetPath(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
 
-    CopyFile(post_script_src, post_script_trg, true);
-    CopyFile(pre_script_src, pre_script_trg, true);
+    CopyFile(post_script_src, post_script_trg, true, vp_);
+    CopyFile(pre_script_src, pre_script_trg, true, vp_);
   }
 
   if ( VERB_SIM >= 2 ) {

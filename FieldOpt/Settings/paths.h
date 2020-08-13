@@ -26,6 +26,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #define FIELDOPT_PATHS_H
 
 #include "Utilities/filehandling.hpp"
+#include "Utilities/verbosity.h"
 
 using namespace Utilities::FileHandling;
 using std::string;
@@ -52,8 +53,9 @@ class Paths {
 
   const string &GetPathDesc(Path path) const;
 
-  void SetPath(Path path, string path_string,
-               bool skip_check = false);
+  void SetPath(Path path, const string& path_string,
+               bool skip_check = false,
+               Settings::VerbParams vp={});
 
   bool IsSet(Path path);
 
@@ -85,6 +87,10 @@ class Paths {
   };
 
   map<Path, string> paths_;
+
+  string md_ = "Settings";
+  string cl_ = "paths";
+  Settings::VerbParams vp_;
 };
 
 #endif //FIELDOPT_PATHS_H

@@ -56,9 +56,7 @@ VerbParams Global::parseVerbParams(QJsonObject json_verb) {
 }
 
 void Global::showVerbParams() {
-
   cout << "lnw:" << verb_params_.lnw << endl;
-
   cout << "vMOD:" << verb_params_.vMOD << endl;
   cout << "vOPT:" << verb_params_.vOPT << endl;
   cout << "vWIC:" << verb_params_.vWIC << endl;
@@ -67,7 +65,6 @@ void Global::showVerbParams() {
   cout << "vRES:" << verb_params_.vRES << endl;
   cout << "vSET:" << verb_params_.vSET << endl;
   cout << "vUTI:" << verb_params_.vUTI << endl;
-
 }
 
 }

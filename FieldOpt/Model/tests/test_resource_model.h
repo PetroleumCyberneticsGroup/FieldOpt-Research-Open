@@ -34,25 +34,25 @@ namespace TestResources {
 
 // =========================================================
 class TestResourceModel :
-    public TestResourceSettings,
-    public TestResources::RunnerResources {
-  
+  public TestResourceSettings,
+  public TestResources::RunnerResources {
+
  protected:
-  
+
   TestResourceModel() {
 
     settings_full_->paths().SetPath(Paths::GRID_FILE,
-        ExampleFilePaths::grid_5spot_);
-    
+                                    ExampleFilePaths::grid_5spot_);
+
     model_ = new Model::Model(*settings_full_, logger_);
-  
+
     model_en_5spot_ = new Model::Model(
-        *settings_en_5spot_full_, logger_);
+      *settings_en_5spot_full_, logger_);
   }
-  
+
   Model::Model *model_;
   Model::Model *model_en_5spot_;
-  
+
 };
 }
 

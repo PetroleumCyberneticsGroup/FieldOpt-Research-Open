@@ -44,7 +44,7 @@ class Simulator
   friend class Settings;
 
  public:
-  Simulator(QJsonObject json_simulator, Paths &paths);
+  Simulator(const QJsonObject& json_simulator, Paths &paths, VerbParams vp);
   enum SimulatorType { ECLIPSE, ADGPRS, Flow, INTERSECT };
   enum SimulatorFluidModel { BlackOil, DeadOil };
   enum FileStructType { Flat, Branched };
@@ -92,6 +92,8 @@ class Simulator
    * (and potential call of PostSimScript). */
   bool read_external_json_results() const { return read_external_json_results_; }
 
+  bool read_adj_grad_data() const { return read_adj_grad_data_; }
+
   struct FileStructure {
     FileStructType type_ = FileStructType::Flat;
     int levels_num_ = 0;
@@ -101,9 +103,14 @@ class Simulator
   /*! @brief Get the fluid model. */
   FileStructure file_structure() { return file_structure_; }
 
+  VerbParams verbParams() { return vp_; };
+
  private:
   SimulatorType type_;
   SimulatorFluidModel fluid_model_;
+  VerbParams vp_;
+  string md_ = "Settings";
+  string cl_ = "Simulator";
 
   QString script_name_;
   QStringList* sim_exec_cmds_;
@@ -118,6 +125,7 @@ class Simulator
   bool add_sim_scripts_ = false;
 
   bool read_external_json_results_ = false;
+  bool read_adj_grad_data_ = false;
   int max_minutes_ = -1;
   Ensemble ensemble_;
 

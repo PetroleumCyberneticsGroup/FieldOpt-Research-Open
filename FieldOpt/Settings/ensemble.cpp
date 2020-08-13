@@ -41,11 +41,12 @@ using namespace Utilities::FileHandling;
 
 Ensemble::Ensemble() {}
 
-Ensemble::Ensemble(const std::string &ens_path) {
+Ensemble::Ensemble(const std::string &ens_path, VerbParams vp) {
+  vp_=vp;
 
   ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirPath(ens_path));
-  assert(FileExists(ens_path, false));
-  assert(DirExists(Ensemble::ensemble_parent_dir_, false));
+  assert(FileExists(ens_path, vp_));
+  assert(DirExists(Ensemble::ensemble_parent_dir_, vp_, md_, cl_));
 
   vector<string> file_contents = ReadFileToStdStringList(ens_path);
   for (auto line : file_contents) {
@@ -71,9 +72,9 @@ Ensemble::Ensemble(const std::string &ens_path) {
 
     // Check that the alias has not already been used.
     assert(realizations_.count(entries[0]) == 0);
-    assert(FileExists(data, false));
-    assert(FileExists(schedule, false));
-    assert(FileExists(grid, false));
+    assert(FileExists(data, vp_));
+    assert(FileExists(schedule, vp_));
+    assert(FileExists(grid, vp_));
 
     realizations_.insert(
         pair<string, Realization>

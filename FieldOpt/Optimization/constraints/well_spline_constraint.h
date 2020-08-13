@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2016-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2016-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef WELLSPLINECONSTRAINT_H
 #define WELLSPLINECONSTRAINT_H
@@ -31,9 +36,11 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The WellSplineConstraint class acts as a parent class for constraints dealing with well splines.
+ * \brief The WellSplineConstraint class acts as a parent
+ * class for constraints dealing with well splines.
  *
- * This class provides datastructures with initialization methods that ease the application of well spline
+ * This class provides datastructures with initialization
+ * methods that ease the application of well spline
  * constraints.
  */
 class WellSplineConstraint
@@ -42,8 +49,8 @@ class WellSplineConstraint
   WellSplineConstraint() {}
 
   /*!
-   * \brief The Coord struct hodlds the UUIDs for the variables containing coordinate
-   * values of a WellSpline point.
+   * \brief The Coord struct hodlds the UUIDs for the
+   * variables containing coordinate values of a WellSpline point.
    */
   struct Coord {
     QUuid x;

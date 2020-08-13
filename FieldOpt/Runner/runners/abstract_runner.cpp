@@ -78,19 +78,20 @@ void AbstractRunner::InitializeSettings(QString output_subdirectory) {
   if (output_subdirectory.length() > 0) {
     output_directory.append(QString("/%1/").arg(output_subdirectory));
   }
-  if (!DirectoryExists(output_directory)) {
-    CreateDirectory(output_directory);
-  }
   runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_directory.toStdString());
   settings_ = new Settings::Settings(runtime_settings_->paths());
   vp_ = settings_->global()->verbParams();
   // settings_->global()->showVerbParams();
 
+  if (!DirExists(output_directory, vp_)) {
+    CreateDir(output_directory, vp_);
+  }
+
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
-    ensemble_helper_ = EnsembleHelper(settings_->simulator()->get_ensemble(), settings_->optimizer()->parameters().rng_seed);
-  }
-  else {
+    ensemble_helper_ = EnsembleHelper(settings_->simulator()->get_ensemble(),
+                                      settings_->optimizer()->parameters().rng_seed);
+  } else {
     is_ensemble_run_ = false;
   }
 }
@@ -143,11 +144,9 @@ void AbstractRunner::InitializeSimulator() {
       throw std::runtime_error("Unable to initialize runner: simulator "
                                "type set in JSON driver file not recognized.");
   }
-//    simulator_->SetVerbosityLevel(runtime_settings_->verbosity_level());
 }
 
 void AbstractRunner::EvaluateBaseModel() {
-
   if (simulator_ == nullptr)
     throw std::runtime_error("Simulator must be initialized before evaluating base model.");
 
@@ -163,15 +162,14 @@ void AbstractRunner::EvaluateBaseModel() {
   }
 }
 
-void AbstractRunner::InitializeObjectiveFunction()
-{
+void AbstractRunner::InitializeObjectiveFunction() {
   if (simulator_ == nullptr || settings_ == nullptr)
     throw std::runtime_error("Simulator and the Settings must be initialized before ObjectiveFunction.");
 
   switch (settings_->optimizer()->objective().type) {
     case Settings::Optimizer::ObjectiveType::WeightedSum: {
       auto tm = "Using WeightedSum-type objective function.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { ext_info(tm, "Runner", "AbstractRunner", vp_.lnw); }
+      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
       objective_function_ = new Optimization::Objective::WeightedSum(
         settings_->optimizer(), simulator_->results(), model_);
       break;
@@ -179,7 +177,7 @@ void AbstractRunner::InitializeObjectiveFunction()
 
     case Settings::Optimizer::ObjectiveType::NPV: {
       auto tm = "Using NPV-type objective function.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { ext_info(tm, "Runner", "AbstractRunner", vp_.lnw); }
+      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
       objective_function_ = new Optimization::Objective::NPV(
         settings_->optimizer(), simulator_->results(), model_);
       break;
@@ -208,7 +206,7 @@ void AbstractRunner::InitializeBaseCase() {
     base_case_->set_objective_function_value(objective_function_->value());
   }
   auto tm = "Base case objective function value set to " + num2str(base_case_->objective_function_value());
-  if (VERB_RUN >= 1 || vp_.vRUN >= 1) { ext_info(tm, "Runner", "AbstractRunner", vp_.lnw); }
+  if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
 }
 
 void AbstractRunner::InitializeOptimizer() {
@@ -216,132 +214,131 @@ void AbstractRunner::InitializeOptimizer() {
     throw std::runtime_error("The Base Case and the Model must be initialized before the Optimizer");
 
   switch (settings_->optimizer()->type()) {
-    case Settings::Optimizer::OptimizerType::Compass:
-      if (VERB_RUN >= 1) Printer::ext_info("Using CompassSearch optimization algorithm.", "Runner", "AbstractRunner");
+
+    case Settings::Optimizer::OptimizerType::Compass: {
+      if (VERB_RUN >= 1) info("Using CompassSearch optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::CompassSearch(settings_->optimizer(),
                                                                base_case_,
                                                                model_->variables(),
                                                                model_->grid(),
                                                                logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::APPS:
-      if (VERB_RUN >= 1) Printer::ext_info("Using APPS optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::APPS: {
+      if (VERB_RUN >= 1) info("Using APPS optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::APPS(settings_->optimizer(),
                                                       base_case_,
                                                       model_->variables(),
                                                       model_->grid(),
                                                       logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::GeneticAlgorithm:
-      if (VERB_RUN >= 1) Printer::ext_info("Using GeneticAlgorithm optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::GeneticAlgorithm: {
+      if (VERB_RUN >= 1) info("Using GeneticAlgorithm optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::RGARDD(settings_->optimizer(),
                                                         base_case_,
                                                         model_->variables(),
                                                         model_->grid(),
                                                         logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::EGO:
-      if (VERB_RUN >= 1) Printer::ext_info("Using EGO optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::EGO: {
+      if (VERB_RUN >= 1) info("Using EGO optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::BayesianOptimization::EGO(settings_->optimizer(),
                                                                            base_case_,
                                                                            model_->variables(),
                                                                            model_->grid(),
                                                                            logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::ExhaustiveSearch2DVert:
-      if (VERB_RUN >= 1) Printer::ext_info("Using ExhaustiveSearch2DVert optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::ExhaustiveSearch2DVert: {
+      if (VERB_RUN >= 1) info("Using ExhaustiveSearch2DVert optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::ExhaustiveSearch2DVert(settings_->optimizer(),
                                                                         base_case_,
                                                                         model_->variables(),
                                                                         model_->grid(),
                                                                         logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::Hybrid:
-      if (VERB_RUN >= 1) Printer::ext_info("Using Hybrid optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::Hybrid: {
+      if (VERB_RUN >= 1) info("Using Hybrid optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
                                                      model_->grid(),
                                                      logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::TrustRegionOptimization:
-      if (VERB_RUN >= 1) Printer::ext_info("Using Trust Region optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::TrustRegionOptimization: {
+      if (VERB_RUN >= 1) info("Using Trust Region optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
                                                                          base_case_,
                                                                          model_->variables(),
                                                                          model_->grid(),
                                                                          logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::PSO:
-      if (VERB_RUN >= 1) Printer::ext_info("Using PSO optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::PSO: {
+      if (VERB_RUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::PSO(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
                                                      model_->grid(),
                                                      logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::CMA_ES:
-      if (VERB_RUN >= 1) Printer::ext_info("Using CMA_ES optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::CMA_ES: {
+      if (VERB_RUN >= 1) info("Using CMA_ES optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::CMA_ES(settings_->optimizer(),
                                                         base_case_,
                                                         model_->variables(),
                                                         model_->grid(),
                                                         logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::VFSA:
-      if (VERB_RUN >= 1) Printer::ext_info("Using VFSA optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::VFSA: {
+      if (VERB_RUN >= 1) info("Using VFSA optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::VFSA(settings_->optimizer(),
                                                       base_case_,
                                                       model_->variables(),
                                                       model_->grid(),
                                                       logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
-    case Settings::Optimizer::OptimizerType::SPSA:
-      if (VERB_RUN >= 1) Printer::ext_info("Using SPSA optimization algorithm.", "Runner", "AbstractRunner");
+    }
+    case Settings::Optimizer::OptimizerType::SPSA: {
+      if (VERB_RUN >= 1) info("Using SPSA optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::Optimizers::SPSA(settings_->optimizer(),
                                                       base_case_,
                                                       model_->variables(),
                                                       model_->grid(),
                                                       logger_
       );
-      optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
       break;
+    }
     default:
       throw std::runtime_error("Unable to initialize runner: optimization algorithm set in driver file not recognized.");
   }
   optimizer_->EnableConstraintLogging(QString::fromStdString(runtime_settings_->paths().GetPath(Paths::OUTPUT_DIR)));
 }
 
-void AbstractRunner::InitializeBookkeeper()
-{
+void AbstractRunner::InitializeBookkeeper() {
   if (settings_ == nullptr || optimizer_ == nullptr)
     throw std::runtime_error("The Settings and the Optimizer must be initialized before the Bookkeeper.");
 
   bookkeeper_ = new Bookkeeper(settings_, optimizer_->case_handler());
 }
 
-void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs)
-{
+void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
   logger_ = new Logger(runtime_settings_, output_subdir, write_logs);
 }
 
