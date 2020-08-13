@@ -25,7 +25,7 @@ namespace Wellbore {
 namespace Completions {
 
 SegmentedCompletion::SegmentedCompletion(Settings::Model::Well::Completion completion_settings,
-                                         Model::Properties::VariablePropertyContainer *variable_container)
+                                         Model::Properties::VarPropContainer *variable_container)
     : Completion(completion_settings)
 {
     placement_ = new Properties::ContinousProperty(completion_settings.placement);

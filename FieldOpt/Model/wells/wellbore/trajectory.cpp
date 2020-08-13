@@ -37,7 +37,7 @@ namespace Wells {
 namespace Wellbore {
 
 Trajectory::Trajectory(Settings::Model::Well well_settings,
-                       Properties::VariablePropertyContainer *variable_container,
+                       Properties::VarPropContainer *variable_container,
                        ::Reservoir::Grid::Grid *grid,
                        Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
@@ -126,7 +126,7 @@ double Trajectory::GetLength() const {
 }
 
 void Trajectory::initializeWellBlocks(Settings::Model::Well well,
-                                      Properties::VariablePropertyContainer *variable_container)
+                                      Properties::VarPropContainer *variable_container)
 {
   QList<Settings::Model::Well::WellBlock> blocks = well.well_blocks;
   for (int i = 0; i < blocks.size(); ++i) {

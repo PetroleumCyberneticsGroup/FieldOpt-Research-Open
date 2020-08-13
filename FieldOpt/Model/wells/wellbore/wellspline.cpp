@@ -48,7 +48,7 @@ using Printer::ext_warn;
 using std::string;
 
 WellSpline::WellSpline(Settings::Model::Well well_settings,
-                       Properties::VariablePropertyContainer *variable_container,
+                       Properties::VarPropContainer *variable_container,
                        Reservoir::Grid::Grid *grid,
                        Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
@@ -72,22 +72,22 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
     imported_wellblocks_ = well_settings.imported_wellblocks_;
   }
 
-  if (VERB_MOD >= 2 || vp_->vMOD >= 2) {
+  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
     auto wn = well_settings.name.toStdString();
     auto sp = num2str(well_settings.spline_points.size());
     auto sn = well_settings.spline_points[0].name.toStdString();
     ext_info("Init well spline for well " + wn + ". N points: " + sp
                + "; First spline point name: " + sn, "Model", "WellSpline",
-             vp_->lnw);
+             vp_.lnw);
   }
 
   for (auto point : well_settings.spline_points) {
-    if (VERB_MOD >= 2 || vp_->vMOD >= 2) {
+    if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
       auto wn = well_settings.name.toStdString();
       ext_info("Adding new spline point for well " + wn +
                  ": " + num2str(point.x) + ", " + num2str(point.y) +
                  ", " + num2str(point.z) + " (" + point.name.toStdString() + ")",
-               "Model", "WellSpline", vp_->lnw);
+               "Model", "WellSpline", vp_.lnw);
     }
     SplinePoint *pt = new SplinePoint();
     pt->x = new ContinousProperty(point.x);
@@ -148,7 +148,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
   assert(spline_points_.size() >= 2);
   assert(grid_ != nullptr && grid_ != 0);
 
-  if (VERB_MOD >= 2) {
+  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
     std::string points_str = "";
     for (auto pt : spline_points_) {
       auto point = pt->ToEigenVector();
@@ -159,7 +159,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
 
     ext_info("Starting well index calculation. Points: "
                + points_str + "Grid: " + grid_->GetGridFilePath(),
-             "WellSpline", "Model", vp_->lnw);
+             "WellSpline", "Model", vp_.lnw);
   }
 
 
@@ -195,10 +195,10 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     wic_->ComputeWellBlocks(block_data, welldef);
   }
   else {
-    if (VERB_MOD >= 1 || vp_->vMOD >= 1 ) {
+    if (VERB_MOD >= 1 || vp_.vMOD >= 1) {
       ext_warn("Well index calculation for imported "
                "paths is not properly implemented at this time.",
-               "Model", "WellSpline", vp_->lnw);
+               "Model", "WellSpline", vp_.lnw);
     }
     block_data = convertImportedWellblocksToIntersectedCells();
     for (int i = 0; i < block_data.size(); ++i) {
@@ -220,15 +220,15 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     throw WellBlocksNotDefined("WIC could not compute.");
   }
 
-  if (VERB_MOD >= 2 || vp_->vMOD >= 2) {
+  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
     auto tm = boost::lexical_cast<string>(seconds_spent_in_compute_wellblocks_);
-    info("Done computing WIs after " + tm + " seconds", vp_->lnw);
+    info("Done computing WIs after " + tm + " seconds", vp_.lnw);
   }
 
-  if (VERB_MOD >=2 || vp_->vMOD >= 2) {
+  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
     ext_info("Computed " + num2str(blocks->size()) + " well blocks from "
                + num2str(block_data.size()) + " intersected cells for well "
-               + welldef.wellname,"Model", "WellSpline", vp_->lnw);
+               + welldef.wellname,"Model", "WellSpline", vp_.lnw);
   }
   return blocks;
 
@@ -241,9 +241,9 @@ QList<WellBlock *> *WellSpline::GetWellBlocks()
 
 WellBlock *WellSpline::getWellBlock(Reservoir::WellIndexCalculation::IntersectedCell block_data)
 {
-  if (VERB_MOD >= 3 || vp_->vMOD >= 2) {
+  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
     info("Creating WellBlock for IC " + block_data.ijk_index().to_string()
-           + " with WI " + num2str(block_data.cell_well_index_matrix()),vp_->lnw);
+           + " with WI " + num2str(block_data.cell_well_index_matrix()),vp_.lnw);
   }
   auto wb = new WellBlock(block_data.ijk_index().i()+1, block_data.ijk_index().j()+1, block_data.ijk_index().k()+1);
   auto comp = new Completions::Perforation();

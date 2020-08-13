@@ -46,7 +46,7 @@ class CMA_ES : public Optimizer {
 public:
     CMA_ES(Settings::Optimizer *settings,
            Case *base_case,
-           Model::Properties::VariablePropertyContainer *variables,
+           Model::Properties::VarPropContainer *variables,
            Reservoir::Grid::Grid *grid,
            Logger *logger,
            CaseHandler *case_handler=0,

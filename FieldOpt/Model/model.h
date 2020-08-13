@@ -62,7 +62,7 @@ class Model : public Loggable
   /*!
    * \brief variables Get the set of variable properties of all types.
    */
-  Properties::VariablePropertyContainer *variables() const { return variable_container_; }
+  Properties::VarPropContainer *variables() const { return variable_container_; }
 
   /*!
    * \brief wells Get a list of all the wells in the model.
@@ -94,7 +94,7 @@ class Model : public Loggable
  private:
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
-  Properties::VariablePropertyContainer *variable_container_;
+  Properties::VarPropContainer *variable_container_;
   QList<Wells::Well *> *wells_;
   void verify(); //!< Verify the model. Throws an exception if it is not.
 

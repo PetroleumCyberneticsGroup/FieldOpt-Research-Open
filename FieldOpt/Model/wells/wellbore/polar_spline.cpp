@@ -28,7 +28,7 @@ namespace Wellbore {
 
 
 PolarSpline::PolarSpline(::Settings::Model::Well well_settings,
-         Properties::VariablePropertyContainer *variable_container,
+         Properties::VarPropContainer *variable_container,
          Reservoir::Grid::Grid *grid,
          Reservoir::WellIndexCalculation::wicalc_rixx *wic )
 {

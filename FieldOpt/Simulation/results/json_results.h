@@ -30,6 +30,9 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "vector"
 #include "map"
 
+#include <Settings/simulator.h>
+#include "Utilities/verbosity.h"
+
 namespace Simulation {
 namespace Results {
 
@@ -61,18 +64,26 @@ namespace Results {
  * }
  */
 class JsonResults {
-    public:
-     JsonResults(){}
-     JsonResults(std::string file_path);
+ public:
+  JsonResults(){}
+  JsonResults(std::string file_path, Settings::Simulator sim_settings);
 
-     double GetSingleValue(std::string name);
-     std::vector<double> GetMonthlyValues(std::string name);
-     std::vector<double> GetYearlyValues(std::string name);
+  double GetSingleValue(std::string name);
+  std::vector<double> GetMonthlyValues(std::string name);
+  std::vector<double> GetYearlyValues(std::string name);
 
-    private:
-     std::map<std::string, double> singles_;
-     std::map<std::string, std::vector<double>> monthlies_;
-     std::map<std::string, std::vector<double>> yearlies_;
+ private:
+  std::map<std::string, double> singles_;
+  std::map<std::string, std::vector<double>> monthlies_;
+  std::map<std::string, std::vector<double>> yearlies_;
+
+  std::map<std::string, double> grads_map_;
+  std::vector<double> grads_vec_;
+  std::vector<double> norms_vec_;
+
+  string md_ = "Simulation::results";
+  string cl_ = "JsonResults";
+  Settings::VerbParams vp_;
 };
 
 }

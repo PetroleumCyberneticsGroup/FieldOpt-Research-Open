@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include "runtime_settings.h"
 #include <boost/lexical_cast.hpp>
 #include <QtCore/QUuid>
@@ -25,9 +31,10 @@ namespace Runner {
 
 using namespace Utilities::FileHandling;
 
-RuntimeSettings::RuntimeSettings(int argc, const char *argv[])
-{
+RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
   auto vm = createVariablesMap(argc, argv);
+  vp_ = {};
+  vp_.vUTI = 1;
 
   if (vm.count("input-file")) {
     paths_.SetPath(Paths::DRIVER_FILE, vm["input-file"].as<std::string>());
@@ -44,7 +51,7 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[])
   else simulation_delay_ = 0;
 
   overwrite_existing_ = vm.count("force") != 0;
-  if (!overwrite_existing_ && !DirectoryIsEmpty(paths_.GetPath(Paths::OUTPUT_DIR)))
+  if (!overwrite_existing_ && !DirIsEmpty(paths_.GetPath(Paths::OUTPUT_DIR), vp_))
     throw std::runtime_error("Output directory is not empty. Use the --force flag to "
                              "overwrite existing content in: " + paths_.GetPath(Paths::OUTPUT_DIR));
 
@@ -157,7 +164,6 @@ QString RuntimeSettings::wellSplineCoordinateString(const QPair<QVector<double>,
     .arg(spline.first[0]).arg(spline.first[1]).arg(spline.first[2])
     .arg(spline.second[0]).arg(spline.second[1]).arg(spline.second[2]);
 }
-
 
 QString RuntimeSettings::runnerTypeString() const {
   if (runner_type_ == RunnerType::SERIAL)

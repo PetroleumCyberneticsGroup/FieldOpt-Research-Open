@@ -37,10 +37,10 @@ namespace Completions {
 class ICD : public SegmentedCompletion {
  public:
   ICD(const Settings::Model::Well::Completion &completion_settings,
-      Properties::VariablePropertyContainer *variable_container);
+      Properties::VarPropContainer *variable_container);
 
   ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
-      Properties::VariablePropertyContainer *variable_container);
+      Properties::VarPropContainer *variable_container);
 
   /*!
    * @brief Get the setting for the valve.

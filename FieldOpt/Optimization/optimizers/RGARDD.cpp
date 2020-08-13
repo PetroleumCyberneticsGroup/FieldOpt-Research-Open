@@ -26,7 +26,7 @@ namespace Optimizers {
 
 RGARDD::RGARDD(Settings::Optimizer *settings,
                Optimization::Case *base_case,
-               Model::Properties::VariablePropertyContainer *variables,
+               Model::Properties::VarPropContainer *variables,
                Reservoir::Grid::Grid *grid,
                Logger *logger,
                CaseHandler *case_handler,

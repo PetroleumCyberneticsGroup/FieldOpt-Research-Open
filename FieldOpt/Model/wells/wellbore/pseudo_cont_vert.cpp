@@ -24,7 +24,7 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 PseudoContVert::PseudoContVert(Settings::Model::Well well_settings,
-                               Properties::VariablePropertyContainer *variable_container,
+                               Properties::VarPropContainer *variable_container,
                                Reservoir::Grid::Grid *grid) {
     grid_ = grid;
     int i_idx = well_settings.pseudo_cont_position.i;

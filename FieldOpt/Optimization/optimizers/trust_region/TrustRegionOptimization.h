@@ -52,13 +52,13 @@ class TrustRegionOptimization : public Optimizer {
   TerminationCondition IsFinished() override;
 
   TrustRegionOptimization(
-      Settings::Optimizer *settings,
-      Case *base_case,
-      Model::Properties::VariablePropertyContainer *variables,
-      Reservoir::Grid::Grid *grid,
-      Logger *logger,
-      CaseHandler *case_handler = 0,
-      Constraints::ConstraintHandler *constraint_handler=0
+    Settings::Optimizer *settings,
+    Case *base_case,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Logger *logger,
+    CaseHandler *case_handler = 0,
+    Constraints::ConstraintHandler *constraint_handler=0
   );
 
   TrustRegionModel *getTrustRegionModel() { return tr_model_; };
@@ -103,12 +103,14 @@ class TrustRegionOptimization : public Optimizer {
   bool criticality_step_performed_ = false;
   bool improve_model_ = false;
   bool criticality_step_execution_ongoing_ = false;
+
   QString tr_log_path_;
+  Settings::VerbParams vp_;
 
   // -------------------------------------------------------
   // FO constructs
   Settings::Optimizer *settings_;
-  Model::Properties::VariablePropertyContainer *variables_;
+  Model::Properties::VarPropContainer *variables_;
   Case *base_case_;
 
   void computeInitialPoints();

@@ -47,7 +47,7 @@ class WellSpline
 {
  public:
   WellSpline(::Settings::Model::Well well_settings,
-             Properties::VariablePropertyContainer *variable_container,
+             Properties::VarPropContainer *variable_container,
              Reservoir::Grid::Grid *grid,
              Reservoir::WellIndexCalculation::wicalc_rixx *wic);
   WellSpline();
@@ -76,7 +76,7 @@ class WellSpline
    */
   QList<SplinePoint *> GetSplinePoints() const { return spline_points_; }
 
-  Settings::VerbParams *vp_;
+  Settings::VerbParams vp_;
 
  protected:
   Reservoir::Grid::Grid *grid_;

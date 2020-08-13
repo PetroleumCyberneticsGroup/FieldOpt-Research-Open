@@ -38,7 +38,6 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
-struct VerbParams;
 class DeckParser;
 
 /*!
@@ -55,7 +54,7 @@ class Model
 
  public:
   // This should only be accessed externally for testing purposes.
-  Model(QJsonObject json_model, Paths &paths);
+  Model(QJsonObject json_model, Paths &paths, VerbParams vp);
 
   enum WellType : int { Injector=11, Producer=12, UNKNOWN_TYPE=19 };
 
@@ -183,17 +182,16 @@ class Model
     std::string toString();
     std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
 
-    VerbParams *verb_params_;
-    void copyVerbParams(VerbParams *vp) { verb_params_ = vp; };
-    VerbParams* verbParams() { return verb_params_; };
+    VerbParams verb_params_;
+    void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
+    VerbParams verbParams() { return verb_params_; };
   };
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
 
-  VerbParams *verb_params_;
-  void copyVerbParams(VerbParams *vp) { verb_params_ = vp; };
-  VerbParams* verbParams() { return verb_params_; };
+  VerbParams vp_;
+  VerbParams verbParams() { return vp_; };
 
  private:
   QList<Well> wells_;

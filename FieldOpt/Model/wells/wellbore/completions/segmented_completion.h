@@ -34,7 +34,7 @@ class SegmentedCompletion : public Completion {
 
  protected:
   SegmentedCompletion(Settings::Model::Well::Completion completion_settings,
-                      Properties::VariablePropertyContainer *variable_container);
+                      Properties::VarPropContainer *variable_container);
 
 
  public:

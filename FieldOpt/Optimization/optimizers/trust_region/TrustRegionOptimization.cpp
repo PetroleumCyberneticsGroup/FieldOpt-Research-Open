@@ -35,7 +35,7 @@ namespace Optimizers {
 TrustRegionOptimization::TrustRegionOptimization(
     Settings::Optimizer *settings,
     Case *base_case,
-    Model::Properties::VariablePropertyContainer *variables,
+    Model::Properties::VarPropContainer *variables,
     Reservoir::Grid::Grid *grid,
     Logger *logger,
     CaseHandler *case_handler,
@@ -45,6 +45,7 @@ TrustRegionOptimization::TrustRegionOptimization(
   settings_ = settings;
   variables_ = variables;
   base_case_ = base_case;
+  vp_ = settings_->verbParams();
 
   setLowerUpperBounds();
 
@@ -296,13 +297,13 @@ void TrustRegionOptimization::iterate() {
 void TrustRegionOptimization::createLogFile() {
   QString output_dir = logger_->getOutputDir();
   if (output_dir.length() > 0) {
-    Utilities::FileHandling::CreateDirectory(output_dir);
+    Utilities::FileHandling::CreateDir(output_dir, vp_);
   }
   tr_log_path_ = output_dir + "/log_trust_region.csv";
 
   // Delete existing logs if --force flag is on
-  if (Utilities::FileHandling::FileExists(tr_log_path_)) {
-    Utilities::FileHandling::DeleteFile(tr_log_path_);
+  if (Utilities::FileHandling::FileExists(tr_log_path_, vp_)) {
+    Utilities::FileHandling::DeleteFile(tr_log_path_, vp_);
   }
 
   const QString tr_log_header = "iter        fval         rho      radius  pts";

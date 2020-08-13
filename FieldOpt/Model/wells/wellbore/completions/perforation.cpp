@@ -6,7 +6,7 @@ namespace Wellbore {
 namespace Completions {
 
 Perforation::Perforation(Settings::Model::Well::Completion completion_settings,
-                         Properties::VariablePropertyContainer *variable_container)
+                         Properties::VarPropContainer *variable_container)
     : Completion(completion_settings)
 {
     transmissibility_factor_ = new Properties::ContinousProperty(completion_settings.transmissibility_factor);

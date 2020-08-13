@@ -40,7 +40,7 @@ Model::Model(Settings::Settings settings, Logger *logger) {
   }
   current_case_ = nullptr;
 
-  variable_container_ = new Properties::VariablePropertyContainer();
+  variable_container_ = new Properties::VarPropContainer();
 
   wells_ = new QList<Wells::Well *>();
   for (int well_nr = 0; well_nr < settings.model()->wells().size(); ++well_nr) {

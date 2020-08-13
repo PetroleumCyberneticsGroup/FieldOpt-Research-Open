@@ -39,7 +39,7 @@ class ExhaustiveSearch2DVert : public Optimizer {
    */
   ExhaustiveSearch2DVert(Settings::Optimizer *settings,
                          Case *base_case,
-                         Model::Properties::VariablePropertyContainer *variables,
+                         Model::Properties::VarPropContainer *variables,
                          Reservoir::Grid::Grid *grid,
                          Logger *logger
   );

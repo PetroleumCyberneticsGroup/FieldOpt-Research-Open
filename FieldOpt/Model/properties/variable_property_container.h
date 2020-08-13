@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef VARIABLE_PROPERTY_CONTAINER_H
 #define VARIABLE_PROPERTY_CONTAINER_H
@@ -37,19 +42,21 @@ namespace Model {
 namespace Properties {
 
 /*!
- * \brief The VariablePropertyContainer class facilitates the handling of variable properties.
+ * \brief VarPropContainer class facilitates the handling
+ * of variable properties.
  *
- * This class has members that hold all continous, discrete and binary properties that are
- * considered _variable_ in the model, as well as and methods to maintain the lists.
+ * This class has members that hold all continuous, discrete
+ * and binary properties that are considered _variable_ in
+ * the model, as well as and methods to maintain the lists.
  *
- * This class also maintains unique IDs in the form of hashtable keys for every variable property
- * of each type.
+ * This class also maintains unique IDs in the form of
+ * hashtable keys for every variable property of each type.
  */
-class VariablePropertyContainer
+class VarPropContainer
 {
   friend class ::Model::ModelSynchronizationObject;
  public:
-  VariablePropertyContainer();
+  VarPropContainer();
 
   void AddVariable(BinaryProperty *var); //!< Add a property to the container and mark it as variable
   void AddVariable(DiscreteProperty *var); //!< Add a property to the container and mark it as variable

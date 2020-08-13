@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by Brage on 31/03/19.
-   Copyright (C) 2018 Brage Strand Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Created by Brage on 31/03/19.
+Copyright (C) 2019
+Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include "reservoir_xyz_boundary.h"
 #include "ConstraintMath/well_constraint_projections/well_constraint_projections.h"
 #include <iomanip>
@@ -24,10 +30,11 @@
 
 namespace Optimization {
 namespace Constraints {
-ReservoirXYZBoundary::ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                                           Model::Properties::VariablePropertyContainer *variables,
-                                           Reservoir::Grid::Grid *grid) {
 
+ReservoirXYZBoundary::ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
+                                           Model::Properties::VarPropContainer *variables,
+                                           Reservoir::Grid::Grid *grid,
+                                           Settings::VerbParams vp) : Constraint(vp) {
   xmin_ = settings.box_xyz_xmin;
   xmax_ = settings.box_xyz_xmax;
   ymin_ = settings.box_xyz_ymin;
@@ -58,11 +65,11 @@ bool ReservoirXYZBoundary::CaseSatisfiesConstraint(Case *c) {
 
   for (int ii = 0; ii < index_list_.length(); ii++) {
     if (grid_->GetCell(index_list_[ii]).EnvelopsPoint(
-        Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val))) {
+      Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val))) {
       heel_feasible = true;
     }
     if (grid_->GetCell(index_list_[ii]).EnvelopsPoint(
-        Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val))) {
+      Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val))) {
       toe_feasible = true;
     }
   }
@@ -81,17 +88,17 @@ void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
   double toe_z_val = c->real_variables()[affected_well_.toe.z];
 
   Eigen::Vector3d projected_heel =
-      WellConstraintProjections::well_domain_constraint_indices(
-          Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val),
-          grid_,
-          index_list_
-      );
+    WellConstraintProjections::well_domain_constraint_indices(
+      Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val),
+      grid_,
+      index_list_
+    );
   Eigen::Vector3d projected_toe =
-      WellConstraintProjections::well_domain_constraint_indices(
-          Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val),
-          grid_,
-          index_list_
-      );
+    WellConstraintProjections::well_domain_constraint_indices(
+      Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val),
+      grid_,
+      index_list_
+    );
 
   c->set_real_variable_value(affected_well_.heel.x, projected_heel(0));
   c->set_real_variable_value(affected_well_.heel.y, projected_heel(1));

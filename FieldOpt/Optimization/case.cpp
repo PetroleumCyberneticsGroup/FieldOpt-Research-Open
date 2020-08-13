@@ -229,7 +229,7 @@ map <string, vector<double>> Case::GetValues() {
     }
     return valmap;
 }
-string Case::StringRepresentation(Model::Properties::VariablePropertyContainer *varcont) {
+string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) {
     stringstream str;
     str << "|=========================================================|" << endl;
     str << "| Case:            " << id_stdstr() << " |" << endl;

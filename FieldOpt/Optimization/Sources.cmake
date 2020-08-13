@@ -19,10 +19,10 @@ SET(OPTIMIZATION_HEADERS
 		constraints/constraint.h
 		constraints/bhp_constraint.h
 		constraints/rate_constraint.h
-		constraints/combined_spline_length_interwell_distance.h
-		constraints/combined_spline_length_interwell_distance_reservoir_boundary.h
+        constraints/mx_spline_length_interw_dist.h
+		constraints/mx_spline_length_interw_dist_res_bound.h
 		constraints/reservoir_boundary.h
-		constraints/interwell_distance.h
+		constraints/interw_dist.h
 		constraints/well_spline_length.h
 		constraints/well_spline_constraint.h
 		#
@@ -94,10 +94,10 @@ SET(OPTIMIZATION_SOURCES
 		constraints/constraint.cpp
 		constraints/bhp_constraint.cpp
 		constraints/rate_constraint.cpp
-		constraints/combined_spline_length_interwell_distance.cpp
-		constraints/combined_spline_length_interwell_distance_reservoir_boundary.cpp
+        constraints/mx_spline_length_interw_dist.cpp
+		constraints/mx_spline_length_interw_dist_res_bound.cpp
 		constraints/reservoir_boundary.cpp
-		constraints/interwell_distance.cpp
+		constraints/interw_dist.cpp
 		constraints/well_spline_length.cpp
 		constraints/well_spline_constraint.cpp
 		#

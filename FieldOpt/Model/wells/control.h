@@ -45,7 +45,7 @@ class Control
    */
   Control(::Settings::Model::Well::ControlEntry entry,
           ::Settings::Model::Well well,
-          ::Model::Properties::VariablePropertyContainer *variables);
+          ::Model::Properties::VarPropContainer *variables);
 
   /*!
    * Copy constructor.

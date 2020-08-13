@@ -58,7 +58,7 @@ class Trajectory
 {
  public:
   Trajectory(::Settings::Model::Well well_settings,
-             Properties::VariablePropertyContainer *variable_container,
+             Properties::VarPropContainer *variable_container,
              Reservoir::Grid::Grid *grid,
              Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
@@ -84,7 +84,7 @@ class Trajectory
   PseudoContVert *pseudo_cont_vert_; //!< A pseudo-continuous vertical well.
 
   void initializeWellBlocks(Settings::Model::Well well,
-                            Properties::VariablePropertyContainer *variable_container);
+                            Properties::VarPropContainer *variable_container);
 
   void calculateDirectionOfPenetration(); // Calculate direction of penetration for all well blocks
 

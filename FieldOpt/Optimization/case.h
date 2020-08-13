@@ -106,7 +106,7 @@ class Case : public Loggable
    * @param varcont Pointer to the variable container. This is needed to get variable names.
    * @return An std string describing the case.
    */
-  string StringRepresentation(Model::Properties::VariablePropertyContainer *varcont);
+  string StringRepresentation(Model::Properties::VarPropContainer *varcont);
 
   QHash<QUuid, bool> binary_variables() const { return binary_variables_; }
   QHash<QUuid, int> integer_variables() const { return integer_variables_; }

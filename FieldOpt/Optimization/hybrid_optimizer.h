@@ -45,7 +45,7 @@ class HybridOptimizer : public Optimizer {
   HybridOptimizer(
       Settings::Optimizer *settings,
       Case *base_case,
-      Model::Properties::VariablePropertyContainer *variables,
+      Model::Properties::VarPropContainer *variables,
       Reservoir::Grid::Grid *grid,
       Logger *logger);
 
@@ -74,7 +74,7 @@ class HybridOptimizer : public Optimizer {
   Settings::Optimizer *primary_settings_;
   Settings::Optimizer *secondary_settings_;
 
-  Model::Properties::VariablePropertyContainer *variables_;
+  Model::Properties::VarPropContainer *variables_;
   Reservoir::Grid::Grid *grid_;
 
   /*!

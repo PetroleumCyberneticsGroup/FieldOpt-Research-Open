@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 8/16/17.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 8/16/17.
+Copyright (C) 2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_PSEUDOCONTBOUNDARY2D_H
 #define FIELDOPT_PSEUDOCONTBOUNDARY2D_H
 
@@ -41,9 +47,12 @@ class PseudoContBoundary2D : public Constraint {
   void InitializeNormalizer(QList<Case *> cases) override;
   double Penalty(Case *c) override;
   long double PenaltyNormalized(Case *c) override;
+
   PseudoContBoundary2D(const Settings::Optimizer::Constraint &settings,
-                       Model::Properties::VariablePropertyContainer *variables,
-                       Reservoir::Grid::Grid *grid);
+                       Model::Properties::VarPropContainer *variables,
+                       Reservoir::Grid::Grid *grid,
+                       Settings::VerbParams vp);
+
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
 
