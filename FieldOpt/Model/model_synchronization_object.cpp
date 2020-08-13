@@ -80,8 +80,8 @@ namespace Model {
                 QUuid new_uuid = GetContinousVariableMap()[name];
                 QUuid old_uuid = prop->id();
                 prop->UpdateId(new_uuid);
-                vpc->continous_variables_->insert(new_uuid, prop);
-                vpc->continous_variables_->remove(old_uuid);
+                vpc->continuous_variables_->insert(new_uuid, prop);
+                vpc->continuous_variables_->remove(old_uuid);
             }
         }
 
