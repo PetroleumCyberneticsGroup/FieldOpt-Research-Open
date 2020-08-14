@@ -33,7 +33,7 @@ PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
   min_azimuth_ = settings.min;
   max_azimuth_ = settings.max;
 
-  for (auto var : variables->GetContinousVariables()->values()){
+  for (auto var : variables->GetContinuousVariables()->values()){
     if (var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
       && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0){
       affected_variable_ = var->id();

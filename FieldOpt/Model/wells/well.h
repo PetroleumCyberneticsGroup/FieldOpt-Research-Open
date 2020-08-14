@@ -29,7 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/model.h"
 #include "Model/wells/wellbore/completions/completion.h"
 #include "Model/wells/wellbore/completions/perforation.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/wells/control.h"
 #include "Model/wells/wellbore/trajectory.h"
@@ -102,7 +102,7 @@ class Well
   ::Settings::Model::WellType type_;
   QString group_;
   ::Settings::Model::PreferredPhase preferred_phase_;
-  Properties::ContinousProperty *wellbore_radius_;
+  Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
 
   Settings::VerbParams vp_;

@@ -59,7 +59,7 @@ class BhpConstraint : public Constraint
   double min_;
   double max_;
   QStringList affected_well_names_;
-  QList<Model::Properties::ContinousProperty *> affected_real_variables_;
+  QList<Model::Properties::ContinuousProperty *> affected_real_variables_;
 };
 
 }

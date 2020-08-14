@@ -63,7 +63,7 @@ class ICD : public SegmentedCompletion {
   std::vector<int> segmentIdxs() const { return segment_idxs_; }
 
  private:
-  Properties::ContinousProperty *valve_size_;
+  Properties::ContinuousProperty *valve_size_;
   double min_valve_size_, max_valve_size_;
   double flow_coefficient_;
   int time_step_;

@@ -90,9 +90,9 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
                "Model", "WellSpline", vp_.lnw);
     }
     SplinePoint *pt = new SplinePoint();
-    pt->x = new ContinousProperty(point.x);
-    pt->y = new ContinousProperty(point.y);
-    pt->z = new ContinousProperty(point.z);
+    pt->x = new ContinuousProperty(point.x);
+    pt->y = new ContinuousProperty(point.y);
+    pt->z = new ContinuousProperty(point.z);
     assert(point.name.size() > 0);
     pt->x->setName(point.name + "#x");
     pt->y->setName(point.name + "#y");

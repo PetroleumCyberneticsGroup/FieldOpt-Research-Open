@@ -32,7 +32,7 @@ ExhaustiveSearch2DVert::ExhaustiveSearch2DVert(Settings::Optimizer *settings,
     : Optimizer(settings, base_case, variables, grid, logger) {
     grid_ = grid;
 
-    if (variables->BinaryVariableSize() != 0 || variables->ContinousVariableSize() != 0
+    if (variables->BinaryVariableSize() != 0 || variables->ContinuousVariableSize() != 0
         || variables->DiscreteVariableSize() != 3)
         throw std::runtime_error("ExhaustiveSearch2DVert: Expecting to receive exactly three discrete variables.");
 

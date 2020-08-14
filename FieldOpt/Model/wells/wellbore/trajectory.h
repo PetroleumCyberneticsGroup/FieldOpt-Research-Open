@@ -31,7 +31,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "completions/perforation.h"
 #include "Reservoir/grid/eclgrid.h"
 #include "Settings/model.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "Model/properties/property.h"
 #include "pseudo_cont_vert.h"
 

@@ -52,7 +52,7 @@ Well::Well(const Settings::Model& model_settings,
 
   preferred_phase_ = well_settings_.preferred_phase;
 
-  wellbore_radius_ = new Properties::ContinousProperty(well_settings_.wellbore_radius);
+  wellbore_radius_ = new Properties::ContinuousProperty(well_settings_.wellbore_radius);
 
   controls_ = new QList<Control *>();
   for (const auto & control : well_settings_.controls) {

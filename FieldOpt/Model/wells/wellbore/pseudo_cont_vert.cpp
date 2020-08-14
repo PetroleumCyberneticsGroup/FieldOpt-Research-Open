@@ -43,8 +43,8 @@ PseudoContVert::PseudoContVert(Settings::Model::Well well_settings,
         exit(1);
     }
     z_pos_ = init_cell.center().z();
-    x_pos_ = new Properties::ContinousProperty(init_cell.center().x());
-    y_pos_ = new Properties::ContinousProperty(init_cell.center().y());
+    x_pos_ = new Properties::ContinuousProperty(init_cell.center().x());
+    y_pos_ = new Properties::ContinuousProperty(init_cell.center().y());
 
     if (well_settings.pseudo_cont_position.is_variable) {
         x_pos_->setName("PseudoContVert#" + well_settings.name + "#x");

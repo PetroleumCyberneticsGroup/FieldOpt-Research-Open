@@ -61,9 +61,9 @@ class WellSpline
   int GetTimeSpentInWIC() const { return seconds_spent_in_compute_wellblocks_; }
 
   struct SplinePoint {
-    ContinousProperty *x;
-    ContinousProperty *y;
-    ContinousProperty *z;
+    ContinuousProperty *x;
+    ContinuousProperty *y;
+    ContinuousProperty *z;
     Eigen::Vector3d ToEigenVector() const;
     void FromEigenVector(const Eigen::Vector3d vec);
   };

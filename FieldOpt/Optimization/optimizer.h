@@ -38,7 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Optimization/objective/objective.h"
 
 #include "Model/model.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 #include "Runner/loggable.hpp"
 #include "Runner/logger.h"

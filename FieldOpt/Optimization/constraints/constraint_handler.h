@@ -43,7 +43,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "rate_constraint.h"
 #include "Optimization/case.h"
 #include "reservoir_xyz_boundary.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 #include "Settings/optimizer.h"
 #include "Reservoir/grid/grid.h"

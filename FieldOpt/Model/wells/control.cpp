@@ -38,12 +38,12 @@ Control::Control(::Settings::Model::Well::ControlEntry entry,
         open_ = new Properties::BinaryProperty(false);
 
 
-    liq_rate_ = new Properties::ContinousProperty(entry.liq_rate); // (-1 if not set in settings)
-    oil_rate_ = new Properties::ContinousProperty(entry.oil_rate); // (-1 if not set in settings)
-    gas_rate_ = new Properties::ContinousProperty(entry.gas_rate); // (-1 if not set in settings)
-    wat_rate_ = new Properties::ContinousProperty(entry.wat_rate); // (-1 if not set in settings)
-    res_rate_ = new Properties::ContinousProperty(entry.res_rate); // (-1 if not set in settings)
-    bhp_ = new Properties::ContinousProperty(entry.bhp);           // (-1 if not set in settings)
+    liq_rate_ = new Properties::ContinuousProperty(entry.liq_rate); // (-1 if not set in settings)
+    oil_rate_ = new Properties::ContinuousProperty(entry.oil_rate); // (-1 if not set in settings)
+    gas_rate_ = new Properties::ContinuousProperty(entry.gas_rate); // (-1 if not set in settings)
+    wat_rate_ = new Properties::ContinuousProperty(entry.wat_rate); // (-1 if not set in settings)
+    res_rate_ = new Properties::ContinuousProperty(entry.res_rate); // (-1 if not set in settings)
+    bhp_ = new Properties::ContinuousProperty(entry.bhp);           // (-1 if not set in settings)
 
     mode_ = entry.control_mode;
     switch (mode_) {

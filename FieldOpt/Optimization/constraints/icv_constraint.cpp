@@ -46,7 +46,7 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
   tm += num2str(min_, 5) + ", " + num2str(max_, 5);
   tm += "] for well " + settings.well.toStdString() + " with variables: ";
 
-  for (ContinousProperty *var : variables->GetContinousVariables()->values()) {
+  for (ContinuousProperty *var : variables->GetContinuousVariables()->values()) {
     if (var->propertyInfo().prop_type == Property::PropertyType::ICD
       && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0) {
       affected_variables_.push_back(var->id());

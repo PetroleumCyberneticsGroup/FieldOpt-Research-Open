@@ -30,7 +30,7 @@ namespace {
     }
 
     TEST_F(PropertiesTest, ContinousPropertyConstructor) {
-        ContinousProperty *realvar = new ContinousProperty(2.0);
+        ContinuousProperty *realvar = new ContinuousProperty(2.0);
         EXPECT_TRUE(realvar->value() == 2.0);
         EXPECT_FALSE(realvar->IsLocked());
         EXPECT_TRUE(realvar->type() == Property::Type::Continous);
@@ -39,7 +39,7 @@ namespace {
     TEST_F(PropertiesTest, Locking) {
         BinaryProperty *binvar = new BinaryProperty(true);
         DiscreteProperty *intvar = new DiscreteProperty(4);
-        ContinousProperty *realvar = new ContinousProperty(2.0);
+        ContinuousProperty *realvar = new ContinuousProperty(2.0);
 
         // Lock and check
         binvar->Lock(); intvar->Lock(); realvar->Lock();
@@ -67,7 +67,7 @@ namespace {
     }
 
     TEST_F(PropertiesTest, ContinousPropertyAddition) {
-        ContinousProperty *realvar = new ContinousProperty(7.0);
+        ContinuousProperty *realvar = new ContinuousProperty(7.0);
         realvar->Add(-2.5);
         EXPECT_TRUE(realvar->value() == 4.5);
     }
@@ -81,10 +81,10 @@ namespace {
     }
 
     TEST_F(PropertiesTest, ContinousPropertyEquals) {
-        ContinousProperty *realvar_1 = new ContinousProperty(2.0);
-        ContinousProperty *realvar_2 = new ContinousProperty(2.0);
-        ContinousProperty *realvar_3 = new ContinousProperty(3.0);
-        ContinousProperty *realvar_4 = new ContinousProperty(2.1);
+        ContinuousProperty *realvar_1 = new ContinuousProperty(2.0);
+        ContinuousProperty *realvar_2 = new ContinuousProperty(2.0);
+        ContinuousProperty *realvar_3 = new ContinuousProperty(3.0);
+        ContinuousProperty *realvar_4 = new ContinuousProperty(2.1);
         EXPECT_TRUE(realvar_1->Equals(realvar_2));
         EXPECT_FALSE(realvar_1->Equals(realvar_3));
         EXPECT_FALSE(realvar_1->Equals(realvar_4, 0.09)); // Should be outside epsilon
@@ -99,13 +99,13 @@ namespace {
                << "Transmissibility#PROD#6"
                << "Rate#PROD#1" << "BHP#PROD#50";
 
-        ContinousProperty sp_h_x = ContinousProperty(1.0);
-        ContinousProperty sp_t_z = ContinousProperty(1.0);
+        ContinuousProperty sp_h_x = ContinuousProperty(1.0);
+        ContinuousProperty sp_t_z = ContinuousProperty(1.0);
         DiscreteProperty wb_4_x = DiscreteProperty(1);
         DiscreteProperty wb_2_y = DiscreteProperty(1);
-        ContinousProperty tr_6 = ContinousProperty(2.0);
-        ContinousProperty ra_1 = ContinousProperty(1.0);
-        ContinousProperty pr_50 = ContinousProperty(1.0);
+        ContinuousProperty tr_6 = ContinuousProperty(2.0);
+        ContinuousProperty ra_1 = ContinuousProperty(1.0);
+        ContinuousProperty pr_50 = ContinuousProperty(1.0);
 
         EXPECT_FALSE(sp_h_x.isVariable());
         EXPECT_THROW(sp_t_z.propertyInfo(), std::runtime_error);

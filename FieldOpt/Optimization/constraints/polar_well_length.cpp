@@ -34,7 +34,7 @@ PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint settings,
   minimum_length_ = settings.min_length;
   maximum_length_ = settings.max_length;
 
-  for (auto var : variables->GetContinousVariables()->values()) {
+  for (auto var : variables->GetContinuousVariables()->values()) {
     if (var->propertyInfo().parent_well_name == settings.well
       && var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Length) {
       affected_variable_ = var->id();

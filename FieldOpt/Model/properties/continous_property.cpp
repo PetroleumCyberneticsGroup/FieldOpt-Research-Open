@@ -30,30 +30,30 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Properties {
 
-ContinousProperty::ContinousProperty(double value)
+ContinuousProperty::ContinuousProperty(double value)
     : Property(Continous)
 {
     value_ = value;
 }
 
-void ContinousProperty::setValue(double value)
+void ContinuousProperty::setValue(double value)
 {
     if (IsLocked()) throw PropertyLockedException("Cant change locked real variable.");
     else value_ = value;
 }
 
-void ContinousProperty::Add(double d)
+void ContinuousProperty::Add(double d)
 {
     if (IsLocked()) throw PropertyLockedException("Cant add to locked real variable");
     else value_ += d;
 }
 
-bool ContinousProperty::Equals(const ContinousProperty *other, double epsilon) const
+bool ContinuousProperty::Equals(const ContinuousProperty *other, double epsilon) const
 {
     return std::abs(this->value() - other->value()) <= epsilon;
 }
 
-QString ContinousProperty::ToString() const
+QString ContinuousProperty::ToString() const
 {
     return QString("Type:\tContinous\nUUID:\t%1\nName:\t%2\nValue:\t%3\n").arg(id().toString()).arg(name()).arg(value());
 }

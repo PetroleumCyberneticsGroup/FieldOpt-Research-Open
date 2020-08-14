@@ -34,7 +34,7 @@ PSO::PSO(Settings::Optimizer *settings,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
 ) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
-    n_vars_ = variables->ContinousVariableSize();
+    n_vars_ = variables->ContinuousVariableSize();
     gen_ = get_random_generator(settings->parameters().rng_seed);
     max_iterations_ = settings->parameters().max_generations;
     stagnation_limit_ = settings->parameters().stagnation_limit;

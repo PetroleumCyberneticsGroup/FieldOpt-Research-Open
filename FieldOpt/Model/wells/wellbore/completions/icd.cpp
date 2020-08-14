@@ -30,7 +30,7 @@ ICD::ICD(const Settings::Model::Well::Completion &completion_settings,
          Properties::VarPropContainer *variable_container) : SegmentedCompletion(completion_settings,
                                                                                  variable_container) {
     flow_coefficient_ = completion_settings.valve_flow_coeff;
-    valve_size_ = new Properties::ContinousProperty(completion_settings.valve_size);
+    valve_size_ = new Properties::ContinuousProperty(completion_settings.valve_size);
     valve_size_->setName(completion_settings.name);
 
     min_valve_size_ = completion_settings.min_valve_size;
@@ -52,7 +52,7 @@ ICD::ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
         Properties::VarPropContainer *variable_container) : SegmentedCompletion(icv_group_settings,
                                                                                 variable_container) {
     flow_coefficient_ = icv_group_settings.valve_flow_coeff;
-    valve_size_ = new Properties::ContinousProperty(icv_group_settings.valve_size);
+    valve_size_ = new Properties::ContinuousProperty(icv_group_settings.valve_size);
     valve_size_->setName(icv_group_settings.name);
     device_name_ = icv_group_settings.icv_group_name;
 

@@ -3,7 +3,7 @@
 #include "Model/properties/binary_property.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/properties/continous_property.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "Model/tests/test_resource_model.h"
 
 using namespace Model::Properties;
@@ -29,7 +29,7 @@ namespace {
         // TESTW well: 6 float pos vars, 1 float bhp var
         // Total: 12 int vars, 20 float vars, no binary vars
         EXPECT_EQ(9, vc_->GetDiscreteVariables()->size());
-        EXPECT_EQ(19, vc_->GetContinousVariables()->size());
+        EXPECT_EQ(19, vc_->GetContinuousVariables()->size());
         EXPECT_EQ(0, vc_->GetBinaryVariables()->size());
     }
 

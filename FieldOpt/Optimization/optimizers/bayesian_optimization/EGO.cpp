@@ -58,7 +58,7 @@ EGO::EGO(Settings::Optimizer *settings,
         }
     }
 
-    int n_cont_vars = variables->ContinousVariableSize();
+    int n_cont_vars = variables->ContinuousVariableSize();
 
     if (constraint_handler_->HasBoundaryConstraints()) {
         lb_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());

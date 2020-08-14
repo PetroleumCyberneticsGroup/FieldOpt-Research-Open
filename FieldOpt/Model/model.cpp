@@ -192,7 +192,7 @@ map<string, vector<double>> Model::GetValues() {
   for (auto const item : results_) {
     valmap["Res#"+item.first] = item.second;
   }
-  for (auto const var : variable_container_->GetContinousVariables()->values()) {
+  for (auto const var : variable_container_->GetContinuousVariables()->values()) {
     valmap["Var#"+var->name().toStdString()] = vector<double>{var->value()};
   }
   for (auto const var : variable_container_->GetDiscreteVariables()->values()) {

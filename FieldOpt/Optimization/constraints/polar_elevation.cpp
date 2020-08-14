@@ -32,7 +32,7 @@ PolarElevation::PolarElevation(Settings::Optimizer::Constraint settings,
                                Settings::VerbParams vp) : Constraint(vp) {
   min_elevation_ = settings.min;
   max_elevation_ = settings.max;
-  for (auto var : variables->GetContinousVariables()->values()){
+  for (auto var : variables->GetContinuousVariables()->values()){
     if (var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Elevation
       && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0){
       affected_variable_ = var->id();

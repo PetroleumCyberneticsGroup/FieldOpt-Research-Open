@@ -22,7 +22,7 @@
 
 #include "Settings/model.h"
 #include "Reservoir/grid/grid.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "wellblock.h"
 
 namespace Model {
@@ -60,8 +60,8 @@ class PseudoContVert {
  private:
   Reservoir::Grid::Grid *grid_;
   double z_pos_;
-  Properties::ContinousProperty *x_pos_;
-  Properties::ContinousProperty *y_pos_;
+  Properties::ContinuousProperty *x_pos_;
+  Properties::ContinuousProperty *y_pos_;
 };
 
 }

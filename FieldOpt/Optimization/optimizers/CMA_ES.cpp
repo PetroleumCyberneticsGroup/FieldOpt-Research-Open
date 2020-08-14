@@ -38,7 +38,7 @@ CMA_ES::CMA_ES(Settings::Optimizer *settings,
 ) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
     settings_ = settings;
     // User defined parameters (need to be edited)
-    n_vars_ = variables->ContinousVariableSize();
+    n_vars_ = variables->ContinuousVariableSize();
     improve_base_case_ = settings->parameters().improve_base_case;
 
     penalty_ = 0.01;

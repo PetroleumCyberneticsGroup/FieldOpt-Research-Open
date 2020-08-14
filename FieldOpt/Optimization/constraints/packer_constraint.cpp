@@ -37,7 +37,7 @@ using Printer::ext_info;
 PackerConstraint::PackerConstraint(Settings::Optimizer::Constraint settings,
                                    Model::Properties::VarPropContainer *variables,
                                    Settings::VerbParams vp) : Constraint(vp) {
-  for (ContinousProperty *var : variables->GetContinousVariables()->values()) {
+  for (ContinuousProperty *var : variables->GetContinuousVariables()->values()) {
     if (var->propertyInfo().prop_type == Property::PropertyType::Packer
       && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0) {
       affected_variables_.push_back(var->id());

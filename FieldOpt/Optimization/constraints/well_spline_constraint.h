@@ -26,7 +26,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #define WELLSPLINECONSTRAINT_H
 
 #include "Settings/optimizer.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include <QPair>
 #include <Eigen/Core>
 #include <vector>
@@ -74,7 +74,7 @@ class WellSplineConstraint
    * variables.
    * \param vars the six variables defining the spline for a well.
    */
-  Well initializeWell(QList<Model::Properties::ContinousProperty *> vars);
+  Well initializeWell(QList<Model::Properties::ContinuousProperty *> vars);
 
   /*!
    * @brief Get the vectors containing the endpoint (heel/toe) coordinate values for a case.

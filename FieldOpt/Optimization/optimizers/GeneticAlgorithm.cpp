@@ -35,7 +35,7 @@ GeneticAlgorithm::GeneticAlgorithm(Settings::Optimizer *settings,
                                    Constraints::ConstraintHandler *constraint_handler
 )
     : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
-    n_vars_ = variables->ContinousVariableSize();
+    n_vars_ = variables->ContinuousVariableSize();
     gen_ = get_random_generator(settings->parameters().rng_seed);
     max_generations_ = settings->parameters().max_generations;
     if (settings->parameters().population_size < 0)

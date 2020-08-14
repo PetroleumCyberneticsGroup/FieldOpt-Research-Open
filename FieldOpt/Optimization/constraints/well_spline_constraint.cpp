@@ -33,7 +33,7 @@ namespace Constraints {
 using namespace Model::Properties;
 
 WellSplineConstraint::Well
-WellSplineConstraint::initializeWell(QList<Model::Properties::ContinousProperty *> vars) {
+WellSplineConstraint::initializeWell(QList<Model::Properties::ContinuousProperty *> vars) {
   Well well;
   if (vars.length() >= 6 && (vars.length() % 3) == 0 && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
     if (VERB_OPT >= 2) Printer::ext_info("Using heel-toe parameterization for well spline constraint", "Optimization", "WellSplineConstraint");

@@ -33,14 +33,14 @@ namespace Model {
 namespace Properties {
 
 /*!
- * \brief The ContinousProperty class describes a continous property in the model. The
+ * \brief The ContinuousProperty class describes a continous property in the model. The
  * value of the property is held as a floating-point number. Continous properties
  * are typically used for production properties, such as rates and pressures.
  */
-class ContinousProperty : public Property
+class ContinuousProperty : public Property
 {
 public:
-    ContinousProperty(double value);
+    ContinuousProperty(double value);
 
     double value() const { return value_; }
     void setValue(double value);
@@ -54,7 +54,7 @@ public:
      * \param epsilon Optional tolerance. Default: 0.0
      * \return True if abs(this->value() - other->value()) <= epsilon; otherwise false.
      */
-    bool Equals(const ContinousProperty *other, double epsilon=0.0) const;
+    bool Equals(const ContinuousProperty *other, double epsilon=0.0) const;
 
     QString ToString() const;
 

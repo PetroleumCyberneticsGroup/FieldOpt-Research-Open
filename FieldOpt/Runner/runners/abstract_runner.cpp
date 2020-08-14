@@ -195,7 +195,7 @@ void AbstractRunner::InitializeBaseCase() {
 
   base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
                                       model_->variables()->GetDiscreteVariableValues(),
-                                      model_->variables()->GetContinousVariableValues());
+                                      model_->variables()->GetContinuousVariableValues());
 
   if (!simulator_->results()->isAvailable()) {
     auto tm = "Simulation results are unavailable. Setting base case objective function value to sentinel value.";

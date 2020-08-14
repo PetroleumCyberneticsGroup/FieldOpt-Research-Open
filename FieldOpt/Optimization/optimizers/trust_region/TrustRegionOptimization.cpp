@@ -478,7 +478,7 @@ void TrustRegionOptimization::updateRadius() {
 
 void TrustRegionOptimization::computeInitialPoints() {
 
-  tr_model_->setXDim(variables_->ContinousVariableSize());
+  tr_model_->setXDim(variables_->ContinuousVariableSize());
   int n_cont_vars = tr_model_->getXDim();
 
   auto initial_point = base_case_->GetRealVarVector();
