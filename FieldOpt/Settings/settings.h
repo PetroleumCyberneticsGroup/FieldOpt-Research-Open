@@ -95,6 +95,9 @@ class Settings {
   QJsonObject *json_driver_;
   QString name_;
 
+  string md_ = "Settings";
+  string cl_ = "Settings";
+
   double bookkeeper_tol_;
 
   Global *global_;

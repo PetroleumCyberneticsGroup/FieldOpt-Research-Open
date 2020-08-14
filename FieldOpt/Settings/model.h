@@ -197,6 +197,9 @@ class Model
   QList<Well> wells_;
   QList<int> control_times_;
 
+  string md_ = "Settings";
+  string cl_ = "Model";
+
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
   void setImportedWellDefaults(QJsonObject json_model);

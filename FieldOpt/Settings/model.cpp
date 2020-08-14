@@ -40,6 +40,10 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using Printer::ext_warn;
+using Printer::ext_info;
+using Printer::info;
+
 Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
   vp_ = vp;
 
@@ -359,8 +363,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
     else well.spline_heel.is_variable = false;
   }
   else {
-    Printer::ext_warn("Well definition type not recognized. Proceeding without defining a well trajectory.",
-                      "Settings", "Model");
+    ext_warn("Well definition type not recognized. Proceeding without defining a well trajectory.",
+                      md_, cl_, vp_.lnw);
     well.definition_type = UNDEFINED;
   }
 
@@ -368,7 +372,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
   if (json_well.contains("WellboreRadius"))
     well.wellbore_radius = json_well["WellboreRadius"].toDouble();
   else {
-    Printer::ext_warn("WellBoreRadius not set. Defaulting to 0.01905");
+    ext_warn("WellBoreRadius not set. Defaulting to 0.01905", md_, cl_, vp_.lnw);
     well.wellbore_radius = 0.1905;
   }
 

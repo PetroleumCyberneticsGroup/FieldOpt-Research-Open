@@ -108,9 +108,10 @@ class Simulator
  private:
   SimulatorType type_;
   SimulatorFluidModel fluid_model_;
-  VerbParams vp_;
+
   string md_ = "Settings";
   string cl_ = "Simulator";
+  VerbParams vp_;
 
   QString script_name_;
   QStringList* sim_exec_cmds_;

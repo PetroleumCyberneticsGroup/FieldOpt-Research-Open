@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef MODEL_H
 #define MODEL_H
@@ -23,7 +28,7 @@
 #include <QString>
 #include <QList>
 #include "Reservoir/grid/eclgrid.h"
-#include "properties/variable_property_container.h"
+#include "properties/var_prop_container.h"
 #include "wells/well.h"
 #include "WellIndexCalculation/wicalc_rixx.h"
 #include "Settings/model.h"
@@ -38,8 +43,9 @@ namespace Model {
 class ModelSynchronizationObject;
 
 /*!
- * \brief The Model class represents the reservoir model as a whole, including wells and
- * any related variables, and the reservoir grid.
+ * \brief The Model class represents the reservoir model
+ * as a whole, including wells and any related variables,
+ * and the reservoir grid.
  */
 class Model : public Loggable
 {
@@ -95,6 +101,7 @@ class Model : public Loggable
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
   Properties::VarPropContainer *variable_container_;
+
   QList<Wells::Well *> *wells_;
   void verify(); //!< Verify the model. Throws an exception if it is not.
 
@@ -124,6 +131,7 @@ class Model : public Loggable
    private:
     Model *model_;
   };
+
   /*! The Economy struct is intended for use in calculations for drilling costs.
    *  The costs are represented in [$/m] if used in tandem with NPV
    */
@@ -139,6 +147,7 @@ class Model : public Loggable
     bool use_well_cost = false;
     QList<Wells::Well *> wells_pointer;
   };
+
   Economy well_economy_;
   void wellCost(Settings::Optimizer *settings);
   Economy* wellCostConstructor();
