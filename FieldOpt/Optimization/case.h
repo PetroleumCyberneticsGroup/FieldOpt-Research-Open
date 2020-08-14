@@ -1,30 +1,37 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef CASE_H
 #define CASE_H
 
+#include <QMap>
 #include <QHash>
 #include <QUuid>
 #include <Utilities/math.hpp>
 #include <Eigen/Core>
 #include <QtCore/QDateTime>
-#include <Model/properties/variable_property_container.h>
+#include <Model/properties/var_prop_container.h>
 #include "Runner/loggable.hpp"
 #include "optimization_exceptions.h"
 
@@ -34,8 +41,9 @@ class CaseHandler;
 class CaseTransferObject;
 
 /*!
- * \brief The Case class represents a specific case for the optimizer, i.e. a specific set of variable values
- * and the value of the objective function after evaluation.
+ * \brief The Case class represents a specific case for the
+ * optimizer, i.e. a specific set of variable values and
+ * the value of the objective function after evaluation.
  */
 class Case : public Loggable
 {
@@ -44,9 +52,14 @@ class Case : public Loggable
   friend class CaseTransferObject;
 
   Case();
-  Case(const QHash<QUuid, bool> &binary_variables,
-       const QHash<QUuid, int> &integer_variables,
-       const QHash<QUuid, double> &real_variables);
+  // Case(const QHash<QUuid, bool> &binary_variables,
+  //      const QHash<QUuid, int> &integer_variables,
+  //      const QHash<QUuid, double> &real_variables);
+
+  Case(const QMap<QUuid, bool> &binary_variables,
+       const QMap<QUuid, int> &integer_variables,
+       const QMap<QUuid, double> &real_variables);
+
   Case(const Case &c) = delete;
   Case(const Case *c);
 
@@ -108,12 +121,21 @@ class Case : public Loggable
    */
   string StringRepresentation(Model::Properties::VarPropContainer *varcont);
 
-  QHash<QUuid, bool> binary_variables() const { return binary_variables_; }
-  QHash<QUuid, int> integer_variables() const { return integer_variables_; }
-  QHash<QUuid, double> real_variables() const { return real_variables_; }
-  void set_binary_variables(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
-  void set_integer_variables(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
-  void set_real_variables(const QHash<QUuid, double> &real_variables) { real_variables_ = real_variables; }
+  // QHash<QUuid, bool> binary_variables() const { return binary_variables_; }
+  // QHash<QUuid, int> integer_variables() const { return integer_variables_; }
+  // QHash<QUuid, double> real_variables() const { return real_variables_; }
+
+  QMap<QUuid, bool> binary_variables() const { return binary_variables_; }
+  QMap<QUuid, int> integer_variables() const { return integer_variables_; }
+  QMap<QUuid, double> real_variables() const { return real_variables_; }
+
+  // void set_binary_variables(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
+  // void set_integer_variables(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
+  // void set_real_variables(const QHash<QUuid, double> &real_variables) { real_variables_ = real_variables; }
+
+  void set_binary_variables(const QMap<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
+  void set_integer_variables(const QMap<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
+  void set_real_variables(const QMap<QUuid, double> &real_variables) { real_variables_ = real_variables; }
 
   double objective_function_value() const; //!< Get the objective function value. Throws an exception if the value has not been defined.
   void set_objective_function_value(double objective_function_value);
@@ -250,9 +272,13 @@ class Case : public Loggable
   int wic_time_sec_; //!< The number of seconds spent computing the well index for this case.
 
   double objective_function_value_;
-  QHash<QUuid, bool> binary_variables_;
-  QHash<QUuid, int> integer_variables_;
-  QHash<QUuid, double> real_variables_;
+  // QHash<QUuid, bool> binary_variables_;
+  // QHash<QUuid, int> integer_variables_;
+  // QHash<QUuid, double> real_variables_;
+
+  QMap<QUuid, bool> binary_variables_;
+  QMap<QUuid, int> integer_variables_;
+  QMap<QUuid, double> real_variables_;
 
   QList<QUuid> real_id_index_map_;
   QList<QUuid> integer_id_index_map_;

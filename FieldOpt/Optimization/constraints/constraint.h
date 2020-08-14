@@ -28,7 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Optimization/normalizer.h"
 #include "Optimization/case.h"
 #include "Settings/optimizer.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 #include "Utilities/verbosity.h"
 

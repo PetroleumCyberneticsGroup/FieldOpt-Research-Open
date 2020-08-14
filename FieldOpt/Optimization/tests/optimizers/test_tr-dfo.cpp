@@ -100,15 +100,15 @@ class TrustRegionTest : public ::testing::Test,
 
     for (int i = 0; i < x0.rows(); ++i) {
       // Use initial point values to construct container
-      auto *prop = new ContinousProperty(x0(i));
+      auto *prop = new ContinuousProperty(x0(i));
       prop->setName(base_varname + QString::number(i));
       varcont_tr_dfo_probs_->AddVariable(prop);
     }
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-        QHash<QUuid, bool>(), QHash<QUuid, int>(),
-        varcont_tr_dfo_probs_->GetContinousVariableValues());
+        QMap<QUuid, bool>(), QMap<QUuid, int>(),
+        varcont_tr_dfo_probs_->GetContinuousVariableValues());
 
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
