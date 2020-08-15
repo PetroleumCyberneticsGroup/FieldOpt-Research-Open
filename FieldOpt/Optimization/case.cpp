@@ -43,9 +43,14 @@ Case::Case() {
   // binary_variables_ = QHash<QUuid, bool>();
   // integer_variables_ = QHash<QUuid, int>();
   // real_variables_ = QHash<QUuid, double>();
-  binary_variables_ = QMap<QUuid, bool>();
-  integer_variables_ = QMap<QUuid, int>();
-  real_variables_ = QMap<QUuid, double>();
+
+  //binary_variables_ = QMap<QUuid, bool>();
+  //integer_variables_ = QMap<QUuid, int>();
+  //real_variables_ = QMap<QUuid, double>();
+
+  binary_variables_ = QList<QPair<QUuid, bool>>();
+  integer_variables_ = QList<QPair<QUuid, int>>();
+  real_variables_ = QList<QPair<QUuid, double>>();
 
   objective_function_value_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
@@ -54,17 +59,26 @@ Case::Case() {
   ensemble_ofvs_ = QHash<QString, double>();
 }
 
-Case::Case(const QMap<QUuid, bool> &binary_variables,
-           const QMap<QUuid, int> &integer_variables,
-           const QMap<QUuid, double> &real_variables) {
+Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
+           const QList<QPair<QUuid, int>> &integer_variables,
+           const QList<QPair<QUuid, double>> &real_variables) {
+
   id_ = QUuid::createUuid();
   binary_variables_ = binary_variables;
   integer_variables_ = integer_variables;
   real_variables_ = real_variables;
   objective_function_value_ = std::numeric_limits<double>::max();
 
-  real_id_index_map_ = real_variables_.keys();
-  integer_id_index_map_ = integer_variables_.keys();
+  // real_id_index_map_ = real_variables_.keys();
+  for(int ii=0; ii < binary_variables_.size(); ii++) {
+    real_id_index_map_.append(binary_variables_.at(ii).first);
+  }
+
+  // integer_id_index_map_ = integer_variables_.keys();
+  for(int ii=0; ii < integer_variables_.size(); ii++) {
+    integer_id_index_map_.append(integer_variables_.at(ii).first);
+  }
+
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -73,13 +87,18 @@ Case::Case(const QMap<QUuid, bool> &binary_variables,
 
 Case::Case(const Case *c) {
   id_ = QUuid::createUuid();
-  binary_variables_ = QMap<QUuid, bool>(c->binary_variables());
-  integer_variables_ = QMap<QUuid, int> (c->integer_variables());
-  real_variables_ = QMap<QUuid, double> (c->real_variables());
-  objective_function_value_ = c->objective_function_value_;
+  binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
+  integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
+  real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
 
+  objective_function_value_ = c->objective_function_value_;
   real_id_index_map_ = c->real_id_index_map_;
-  integer_id_index_map_ = c->integer_variables_.keys();
+
+  // integer_id_index_map_ = c->integer_variables_.keys();
+  for(int ii=0; ii < integer_variables_.size(); ii++) {
+    integer_id_index_map_.append(integer_variables_.at(ii).first);
+  }
+
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -93,19 +112,43 @@ bool Case::Equals(const Case *other, double tolerance) const {
     || this->real_variables().size() != other->real_variables().size())
     return false;
 
-  for (QUuid key : this->binary_variables().keys()) {
-    if (std::abs(this->binary_variables()[key] - other->binary_variables()[key]) > tolerance)
-      return false;
+  // for (QUuid key : this->binary_variables().keys()) {
+  //   if (std::abs(this->binary_variables()[key] - other->binary_variables()[key]) > tolerance)
+  //     return false;
+  // }
+
+  for(int ii=0; ii < binary_variables_.size(); ii++) {
+    auto lhs = this->binary_variables_.at(ii).second;
+    auto rhs = other->binary_variables_.at(ii).second;
+      if (std::abs(lhs - rhs) > tolerance) {
+        return false;
+      }
   }
 
-  for (QUuid key : this->integer_variables().keys()) {
-    if (std::abs(this->integer_variables()[key] - other->integer_variables()[key]) > tolerance)
+  // for (QUuid key : this->integer_variables().keys()) {
+  //   if (std::abs(this->integer_variables()[key] - other->integer_variables()[key]) > tolerance)
+  //     return false;
+  // }
+
+  for(int ii=0; ii < integer_variables_.size(); ii++) {
+    auto lhs = this->integer_variables_.at(ii).second;
+    auto rhs = other->integer_variables_.at(ii).second;
+    if (std::abs(lhs - rhs) > tolerance) {
       return false;
+    }
   }
 
-  for (QUuid key : this->real_variables().keys()) {
-    if (std::abs(this->real_variables()[key] - other->real_variables()[key]) > tolerance)
+  // for (QUuid key : this->real_variables().keys()) {
+  //   if (std::abs(this->real_variables()[key] - other->real_variables()[key]) > tolerance)
+  //     return false;
+  // }
+
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    auto lhs = this->real_variables_.at(ii).second;
+    auto rhs = other->real_variables_.at(ii).second;
+    if (std::abs(lhs - rhs) > tolerance) {
       return false;
+    }
   }
 
   return true; // All variable values are equal if we reach this point.
@@ -120,48 +163,91 @@ double Case::objective_function_value() const {
 
 
 void Case::set_integer_variable_value(const QUuid id, const int val) {
-  if (!integer_variables_.contains(id))
-    throw VariableException("Unable to set value of variable " + id.toString());
-  integer_variables_[id] = val;
+  for(int ii=0; ii < integer_variables_.size(); ii++) {
+    if (integer_variables_.at(ii).first==id) {
+      auto pair_int = qMakePair(integer_variables_.at(ii).first, val);
+      integer_variables_.replace(ii, pair_int);
+      return;
+    }
+  }
+  QString tm = "Unable to set value of variable " + id.toString();
+  throw VariableException(tm);
 }
 
 void Case::set_binary_variable_value(const QUuid id, const bool val) {
-  if (!binary_variables_.contains(id))
-    throw VariableException("Unable to set value of variable " + id.toString());
-  binary_variables_[id] = val;
+  for(int ii=0; ii < binary_variables_.size(); ii++) {
+    if (binary_variables_.at(ii).first==id) {
+      auto pair_int = qMakePair(binary_variables_.at(ii).first, val);
+      binary_variables_.replace(ii, pair_int);
+      return;
+    }
+  }
+  QString tm = "Unable to set value of variable " + id.toString();
+  throw VariableException(tm);
 }
 
 void Case::set_real_variable_value(const QUuid id, const double val) {
-  if (!real_variables_.contains(id))
-    throw VariableException("Unable to set value of variable " + id.toString());
-  real_variables_[id] = val;
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    if (real_variables_.at(ii).first==id) {
+      auto pair_int = qMakePair(real_variables_.at(ii).first, val);
+      real_variables_.replace(ii, pair_int);
+      return;
+    }
+  }
+  QString tm = "Unable to set value of variable " + id.toString();
+  throw VariableException(tm);
 }
 
 QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude) {
   QList<Case *> new_cases = QList<Case *>();
-  if (this->integer_variables().contains(variabe_id)) {
+  int var_indx;
+
+  // if (this->integer_variables().contains(variabe_id)) {
+  if (this->integer_vars_contain(var_indx, variabe_id)) {
     if (sign == PLUS || sign == PLUSMINUS) {
       Case *new_case_p = new Case(this);
-      new_case_p->integer_variables_[variabe_id] += magnitude;
+
+      // new_case_p->integer_variables_[variabe_id] += magnitude;
+      auto pval = integer_variables_.at(var_indx).second + magnitude;
+      auto pair = qMakePair(integer_variables_.at(var_indx).first, pval);
+      new_case_p->integer_variables_.replace(var_indx, pair);
+
       new_case_p->objective_function_value_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_p);
     }
     if (sign == MINUS || sign == PLUSMINUS) {
       Case *new_case_m = new Case(this);
-      new_case_m->integer_variables_[variabe_id] -= magnitude;
+
+      // new_case_m->integer_variables_[variabe_id] -= magnitude;
+      auto pval = integer_variables_.at(var_indx).second - magnitude;
+      auto pair = qMakePair(integer_variables_.at(var_indx).first, pval);
+      new_case_m->integer_variables_.replace(var_indx, pair);
+
       new_case_m->objective_function_value_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_m);
     }
-  } else if (real_variables_.contains(variabe_id)) {
+
+  // } else if (real_variables_.contains(variabe_id)) {
+  } else if (real_vars_contain(var_indx, variabe_id)) {
     if (sign == PLUS || sign == PLUSMINUS) {
       Case *new_case_p = new Case(this);
-      new_case_p->real_variables_[variabe_id] += magnitude;
+
+      // new_case_p->real_variables_[variabe_id] += magnitude;
+      auto pval = real_variables_.at(var_indx).second + magnitude;
+      auto pair = qMakePair(real_variables_.at(var_indx).first, pval);
+      new_case_p->real_variables_.replace(var_indx, pair);
+
       new_case_p->objective_function_value_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_p);
     }
     if (sign == MINUS || sign == PLUSMINUS) {
       Case *new_case_m = new Case(this);
-      new_case_m->real_variables_[variabe_id] -= magnitude;
+
+      // new_case_m->real_variables_[variabe_id] -= magnitude;
+      auto pval = real_variables_.at(var_indx).second - magnitude;
+      auto pair = qMakePair(real_variables_.at(var_indx).first, pval);
+      new_case_m->real_variables_.replace(var_indx, pair);
+
       new_case_m->objective_function_value_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_m);
     }
@@ -172,7 +258,8 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
 Eigen::VectorXd Case::GetRealVarVector() {
   Eigen::VectorXd vec(real_id_index_map_.length());
   for (int i = 0; i < real_id_index_map_.length(); ++i) {
-    vec[i] = real_variables_.value(real_id_index_map_[i]);
+    // vec[i] = real_variables_.value(real_id_index_map_[i]);
+    vec[i] = real_variables_.at(i).second;
   }
   return vec;
 }
@@ -186,7 +273,8 @@ void Case::SetRealVarValues(Eigen::VectorXd vec) {
 Eigen::VectorXi Case::GetIntegerVarVector() {
   Eigen::VectorXi vec(integer_id_index_map_.length());
   for (int i = 0; i < integer_id_index_map_.length(); ++i) {
-    vec[i] = integer_variables_.value(integer_id_index_map_[i]);
+    // vec[i] = integer_variables_.value(integer_id_index_map_[i]);
+    vec[i] = integer_variables_.at(i).second;
   }
   return vec;
 }
@@ -204,9 +292,11 @@ void Case::set_origin_data(Case *parent,
   direction_index_ = direction_index;
   step_length_ = step_length;
 }
+
 Loggable::LogTarget Case::GetLogTarget() {
   return Loggable::LogTarget::LOG_CASE;
 }
+
 map <string, string> Case::GetState() {
   map<string, string> statemap;
   switch (state.eval) {
@@ -258,32 +348,33 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
 
   if (real_variables_.size() > 0) {
     str << "| Continuous variable values:                             |" << endl;
-    for (auto key : real_variables_.keys()) {
-      string varname = varcont->GetContinuousVariables()->value(key)->name().toStdString();
-      str << "| > " << varname << ": " << std::setw (51 - varname.size())
-          << boost::lexical_cast<string>(real_variables_[key]) << " |" << endl;
+    for (int ii=0; ii < real_variables_.size(); ii++) {
+      string vn = varcont->GetContinuousVariables()->at(ii).second->name().toStdString();
+      double vv = real_variables_.at(ii).second;
+        str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
   }
 
   if (integer_variables_.size() > 0) {
     str << "| Discrete variable values:                             |" << endl;
-    for (auto key : integer_variables_.keys()) {
-      string varname = varcont->GetDiscreteVariables()->value(key)->name().toStdString();
-      str << "| > " << varname << ": " << std::setw (51 - varname.size())
-          << boost::lexical_cast<string>(integer_variables_[key]) << " |" << endl;
+    for (int ii=0; ii < real_variables_.size(); ii++) {
+      string vn = varcont->GetDiscreteVariables()->at(ii).second->name().toStdString();
+      double vv = integer_variables_.at(ii).second;
+      str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
   }
 
   if (binary_variables_.size() > 0) {
     str << "| Discrete variable values:                             |" << endl;
-    for (auto key : binary_variables_.keys()) {
-      string varname = varcont->GetBinaryVariables()->value(key)->name().toStdString();
-      str << "| > " << varname << ": " << std::setw (51 - varname.size())
-          << boost::lexical_cast<string>(binary_variables_[key]) << " |" << endl;
+    for (int ii=0; ii < real_variables_.size(); ii++) {
+      string vn = varcont->GetBinaryVariables()->at(ii).second->name().toStdString();
+      double vv = binary_variables_.at(ii).second;
+      str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
-  }
+      }
   str << "|=========================================================|" << endl;
   return str.str();
+
 //    tringstream entry;
 //    entry << setw(cas_log_col_widths_["TimeSt"]) << timestamp_string() << " ,";
 //    entry << setw(cas_log_col_widths_["EvalSt"]) << obj->GetState()["EvalSt"] << " ,";
@@ -310,7 +401,6 @@ double Case::GetRealizationOfv(const QString &alias) {
                         +"Returning sentinel value (-1.0)", "Case", "Optimization");
     return -1.0;
   }
-
 }
 
 bool Case::HasRealizationOfv(const QString &alias) {

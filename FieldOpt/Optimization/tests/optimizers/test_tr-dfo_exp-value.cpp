@@ -105,8 +105,9 @@ class EnTrTest : public ::testing::Test,
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-      QMap<QUuid, bool>(), QMap<QUuid, int>(),
-      varcont_tr_dfo_probs_->GetContinuousVariableValues());
+        QList<QPair<QUuid, bool>>(),
+        QList<QPair<QUuid, int>>(),
+        varcont_tr_dfo_probs_->GetContinuousVariableValues());
 
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
@@ -122,14 +123,11 @@ class EnTrTest : public ::testing::Test,
     test_case_tr_dfo_probs_->set_objective_function_value(tr_en_ -> initialValue(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
-      settings_tr_opt_max_,
-      test_case_tr_dfo_probs_,
-      varcont_tr_dfo_probs_,
-      grid_5spot_,
-      logger_);
-
-
-
+        settings_tr_opt_max_,
+        test_case_tr_dfo_probs_,
+        varcont_tr_dfo_probs_,
+        grid_5spot_,
+        logger_);
   }
 
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
@@ -140,7 +138,7 @@ class EnTrTest : public ::testing::Test,
     int p_count = 0;
     //bool is_ensemble_run_ = true;
     while (tr_dfo_->IsFinished()
-      == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
+        == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
 
       auto new_case = tr_dfo_->GetCaseForEvaluation();
 

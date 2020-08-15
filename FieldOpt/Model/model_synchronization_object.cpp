@@ -37,47 +37,109 @@ ModelSynchronizationObject::ModelSynchronizationObject(Model *model) {
   binary_variable_ids_ = createNameToIdMapping(model->variables()->GetBinaryVariables());
 }
 
-map<string, uuid>
-ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::DiscreteProperty *> *qhash) const {
-  auto name_id_map = map<string, uuid>();
-  for (auto prop : qhash->values())
-    name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+template<typename T>
+list<pair<string, uuid>>
+ModelSynchronizationObject::createNameToIdMapping(const QList<QPair<QUuid, T>> *qhash) const {
+  auto name_id_map = list<pair<string, uuid>>();
+  for (auto prop : *qhash) {
+    pair<string, uuid> pval = pair<string, uuid>(prop.second->name().toStdString(), qUuidToBoostUuid(prop.first));
+    name_id_map.push_back(pval);
+  }
   return name_id_map;
 }
 
-map<string, uuid>
-ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::ContinuousProperty *> *qhash) const {
-  auto name_id_map = map<string, uuid>();
-  for (auto prop : qhash->values())
-    name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+// map<string, uuid>
+// ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::DiscreteProperty *> *qhash) const {
+//   auto name_id_map = map<string, uuid>();
+//   for (auto prop : qhash->values())
+//     name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+//   return name_id_map;
+// }
+
+list<pair<string, uuid>>
+ModelSynchronizationObject::createNameToIdMapping(const QList<QPair<QUuid, Properties::DiscreteProperty *>> *qhash) const {
+  auto name_id_map = list<pair<string, uuid>>();
+  for (auto prop : *qhash) {
+    pair<string, uuid> pval = pair<string, uuid>(prop.second->name().toStdString(), qUuidToBoostUuid(prop.first));
+    name_id_map.push_back(pval);
+  }
   return name_id_map;
 }
 
-map<string, uuid>
-ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::BinaryProperty *> *qhash) const {
-  auto name_id_map = map<string, uuid>();
-  for (auto prop : qhash->values())
-    name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+// map<string, uuid>
+// ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::ContinuousProperty *> *qhash) const {
+//   auto name_id_map = map<string, uuid>();
+//   for (auto prop : qhash->values())
+//     name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+//   return name_id_map;
+// }
+
+list<pair<string, uuid>>
+ModelSynchronizationObject::createNameToIdMapping(const QList<QPair<QUuid, Properties::ContinuousProperty *>> *qhash) const {
+  auto name_id_map = list<pair<string, uuid>>();
+  for (auto prop : *qhash) {
+    pair<string, uuid> pval = pair<string, uuid>(prop.second->name().toStdString(), qUuidToBoostUuid(prop.first));
+    name_id_map.push_back(pval);
+  }
   return name_id_map;
 }
 
-QMap<QString, QUuid> ModelSynchronizationObject::convertToQtMapping(const std::map<string, uuid> map) {
-  QMap<QString, QUuid> qmap = QMap<QString, QUuid>();
+// map<string, uuid>
+// ModelSynchronizationObject::createNameToIdMapping(const QMap<QUuid, Properties::BinaryProperty *> *qhash) const {
+//   auto name_id_map = map<string, uuid>();
+//   for (auto prop : qhash->values())
+//     name_id_map[prop->name().toStdString()] = qUuidToBoostUuid(prop->id());
+//   return name_id_map;
+// }
+
+list<pair<string, uuid>>
+ModelSynchronizationObject::createNameToIdMapping(const QList<QPair<QUuid, Properties::BinaryProperty *>> *qhash) const {
+  auto name_id_map = list<pair<string, uuid>>();
+  for (auto prop : *qhash) {
+    pair<string, uuid> pval = pair<string, uuid>(prop.second->name().toStdString(), qUuidToBoostUuid(prop.first));
+    name_id_map.push_back(pval);
+  }
+  return name_id_map;
+}
+
+// QMap<QString, QUuid> ModelSynchronizationObject::convertToQtMapping(const std::map<string, uuid> map) {
+//   QMap<QString, QUuid> qmap = QMap<QString, QUuid>();
+//   for (auto const &ent : map) {
+//     qmap[QString::fromStdString((ent.first))] = boostUuidToQuuid(ent.second);
+//   }
+//   return qmap;
+// }
+
+QList<QPair<QString, QUuid>> ModelSynchronizationObject::convertToQtMapping(const std::list<pair<string, uuid>> map) {
+  QList<QPair<QString, QUuid>> qmap = QList<QPair<QString, QUuid>>();
   for (auto const &ent : map) {
-    qmap[QString::fromStdString((ent.first))] = boostUuidToQuuid(ent.second);
+    QPair<QString, QUuid> pval = QPair<QString, QUuid>(QString::fromStdString((ent.first)), boostUuidToQuuid(ent.second));
+    qmap.append(pval);
   }
   return qmap;
 }
 
-QMap<QString, QUuid> ModelSynchronizationObject::GetDiscreteVariableMap() {
+// QMap<QString, QUuid> ModelSynchronizationObject::GetDiscreteVariableMap() {
+//   return convertToQtMapping(discrete_variable_ids_);
+// }
+
+QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetDiscreteVariableMap() {
   return convertToQtMapping(discrete_variable_ids_);
 }
 
-QMap<QString, QUuid> ModelSynchronizationObject::GetContinousVariableMap() {
+// QMap<QString, QUuid> ModelSynchronizationObject::GetContinousVariableMap() {
+//   return convertToQtMapping(continous_variable_ids_);
+// }
+
+QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetContinousVariableMap() {
   return convertToQtMapping(continous_variable_ids_);
 }
 
-QMap<QString, QUuid> ModelSynchronizationObject::GetBinaryVariableMap() {
+// QMap<QString, QUuid> ModelSynchronizationObject::GetBinaryVariableMap() {
+//   return convertToQtMapping(binary_variable_ids_);
+// }
+
+QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetBinaryVariableMap() {
   return convertToQtMapping(binary_variable_ids_);
 }
 
@@ -86,37 +148,53 @@ void ModelSynchronizationObject::UpdateVariablePropertyIds(Model *model) {
 
   // Binary variables
   if (vpc->BinaryVariableSize() > 0) {
-    for (auto name : GetBinaryVariableMap().keys()) {
+    // for (auto name : GetBinaryVariableMap().keys()) {
+    for (int ii=0; ii < GetBinaryVariableMap().size(); ii++) {
+      auto var = GetBinaryVariableMap().at(ii);
+      auto name = var.first;
       auto prop = vpc->GetBinaryVariable(name);
-      QUuid new_uuid = GetBinaryVariableMap()[name];
+      // QUuid new_uuid = GetBinaryVariableMap()[name];
+      QUuid new_uuid = var.second;
       QUuid old_uuid = prop->id();
       prop->UpdateId(new_uuid);
-      vpc->binary_variables_->insert(new_uuid, prop);
-      vpc->binary_variables_->remove(old_uuid);
+      // vpc->binary_variables_->insert(new_uuid, prop);
+      // vpc->binary_variables_->remove(old_uuid);
+      vpc->binary_variables_->append(qMakePair(new_uuid, prop));
+      vpc->binary_variables_->removeOne(qMakePair(old_uuid, prop));
     }
   }
 
   // Continous variables
   if (vpc->ContinuousVariableSize() > 0) {
-    for (auto name : GetContinousVariableMap().keys()) {
+    for (int ii=0; ii < GetContinousVariableMap().size(); ii++) {
+      auto var = GetContinousVariableMap().at(ii);
+      auto name = var.first;
       auto prop = vpc->GetContinousVariable(name);
-      QUuid new_uuid = GetContinousVariableMap()[name];
+      // QUuid new_uuid = GetContinousVariableMap()[name];
+      QUuid new_uuid = var.second;
       QUuid old_uuid = prop->id();
       prop->UpdateId(new_uuid);
-      vpc->continuous_variables_->insert(new_uuid, prop);
-      vpc->continuous_variables_->remove(old_uuid);
+      // vpc->continuous_variables_->insert(new_uuid, prop);
+      // vpc->continuous_variables_->remove(old_uuid);
+      vpc->continuous_variables_->append(qMakePair(new_uuid, prop));
+      vpc->continuous_variables_->removeOne(qMakePair(old_uuid, prop));
     }
   }
 
   // Discrete variables
   if (vpc->DiscreteVariableSize() > 0) {
-    for (auto name : GetDiscreteVariableMap().keys()) {
+    for (int ii=0; ii < GetDiscreteVariableMap().size(); ii++) {
+      auto var = GetDiscreteVariableMap().at(ii);
+      auto name = var.first;
       auto prop = vpc->GetDiscreteVariable(name);
-      QUuid new_uuid = GetDiscreteVariableMap()[name];
+      // QUuid new_uuid = GetDiscreteVariableMap()[name];
+      QUuid new_uuid = var.second;
       QUuid old_uuid = prop->id();
       prop->UpdateId(new_uuid);
-      vpc->discrete_variables_->insert(new_uuid, prop);
-      vpc->discrete_variables_->remove(old_uuid);
+      // vpc->discrete_variables_->insert(new_uuid, prop);
+      // vpc->discrete_variables_->remove(old_uuid);
+      vpc->discrete_variables_->append(qMakePair(new_uuid, prop));
+      vpc->discrete_variables_->removeOne(qMakePair(old_uuid, prop));
     }
   }
 }

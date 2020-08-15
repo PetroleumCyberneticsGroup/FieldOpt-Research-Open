@@ -83,14 +83,18 @@ class CaseTransferObject {
   Case *CreateCase();
 
   // Getters
-  uuid id() const { return id_; }
+  boost::uuids::uuid id() const { return id_; }
   QString id_string() const { return boostUuidToQstring(id_); }
   string id_stdstr() const { return boostUuidToQstring(id_).toStdString(); }
   double objective_function_value() const { return objective_function_value_; }
 
-  map<uuid, bool> binary_variables() const { return binary_variables_; }
-  map<uuid, int> integer_variables() const { return integer_variables_; }
-  map<uuid, double> real_variables() const { return real_variables_; }
+  // map<uuid, bool> binary_variables() const { return binary_variables_; }
+  // map<uuid, int> integer_variables() const { return integer_variables_; }
+  // map<uuid, double> real_variables() const { return real_variables_; }
+
+  list<pair<uuid, bool>> binary_variables() const { return binary_variables_; }
+  list<pair<uuid, int>> integer_variables() const { return integer_variables_; }
+  list<pair<uuid, double>> real_variables() const { return real_variables_; }
 
   int wic_time_secs() { return wic_time_secs_; }
   int sim_time_secs() { return sim_time_secs_; }
@@ -99,14 +103,18 @@ class CaseTransferObject {
   string  ensemble_realization_stdstr() const { return ensemble_realization_; }
 
  private:
-  uuid id_;
+  boost::uuids::uuid id_;
   double objective_function_value_;
   int wic_time_secs_;
   int sim_time_secs_;
 
-  map<uuid, bool> binary_variables_;
-  map<uuid, int> integer_variables_;
-  map<uuid, double> real_variables_;
+  // map<uuid, bool> binary_variables_;
+  // map<uuid, int> integer_variables_;
+  // map<uuid, double> real_variables_;
+
+  list<pair<uuid, bool>> binary_variables_;
+  list<pair<uuid, int>> integer_variables_;
+  list<pair<uuid, double>> real_variables_;
 
   string ensemble_realization_;
 
@@ -125,12 +133,16 @@ class CaseTransferObject {
   QString boostUuidToQstring(const uuid buuid) const;
 
   //!< Create a standard library hash map from a QHash
-  template<typename T> std::map<uuid, T> qHashToStdMap(const QHash<QUuid, T> &qhash) const;
-  template<typename T> std::map<uuid, T> qMapToStdMap(const QMap<QUuid, T> &qhash) const;
+  // template<typename T> std::map<uuid, T> qHashToStdMap(const QHash<QUuid, T> &qhash) const;
+  // template<typename T> std::map<uuid, T> qMapToStdMap(const QMap<QUuid, T> &qhash) const;
+  template<typename T> std::list<pair<uuid, T>> qListToStdList(const QList<QPair<QUuid, T>> &qhash) const;
 
   //!< Create a QHash from a standard library hash map
-  template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
-  template<typename T> QMap<QUuid, T> stdMapToQmap(const std::map<uuid, T> &stmap) const;
+  // template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
+  // template<typename T> QMap<QUuid, T> stdMapToQmap(const std::map<uuid, T> &stmap) const;
+  template<typename T> QList<QPair<QUuid, T>> stdListToQlist(const std::list<pair<uuid, T>> &stmap) const;
+
+
 
 };
 

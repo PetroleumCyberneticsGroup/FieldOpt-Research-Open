@@ -59,8 +59,8 @@ TEST_F(ModelTest, Variables) {
   EXPECT_EQ(3, model_->wells()->at(0)->controls()->size());
 
   EXPECT_EQ(9, model_->variables()->GetWellBlockVariables("PROD").size());
-  for (int value : model_->variables()->GetDiscreteVariableValues().values()) {
-    EXPECT_GE(value, 0);
+  for (auto value : model_->variables()->GetDiscreteVariableValues()) {
+    EXPECT_GE(value.second, 0);
   }
 }
 

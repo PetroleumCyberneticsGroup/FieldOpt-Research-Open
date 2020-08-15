@@ -46,11 +46,12 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
   tm += num2str(min_, 5) + ", " + num2str(max_, 5);
   tm += "] for well " + settings.well.toStdString() + " with variables: ";
 
-  for (ContinuousProperty *var : variables->GetContinuousVariables()->values()) {
-    if (var->propertyInfo().prop_type == Property::PropertyType::ICD
-      && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0) {
-      affected_variables_.push_back(var->id());
-      tm += var->name().toStdString() + ", ";
+  for (auto var : *variables->GetContinuousVariables()) {
+    auto lvar = var.second;
+    if (lvar->propertyInfo().prop_type == Property::PropertyType::ICD
+      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0) {
+      affected_variables_.push_back(lvar->id());
+      tm += lvar->name().toStdString() + ", ";
     }
   }
 
@@ -59,7 +60,7 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
 
 bool ICVConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
   for (auto id : affected_variables_) {
-    if (c->real_variables()[id] > max_ || c->real_variables()[id] < min_) {
+    if (c->get_real_variable_value(id) > max_ || c->get_real_variable_value(id) < min_) {
       return false;
     }
   }
@@ -74,11 +75,11 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   }
 
   for (auto id : affected_variables_) {
-    if (c->real_variables()[id] > max_) {
+    if (c->get_real_variable_value(id) > max_) {
       c->set_real_variable_value(id, max_);
       if (vp_.vOPT >= 1) { ext_info("Snapped value to upper bound.", md_, cl_, vp_.lnw); }
 
-    } else if (c->real_variables()[id] < min_) {
+    } else if (c->get_real_variable_value(id) < min_) {
       c->set_real_variable_value(id, min_);
       if (vp_.vOPT >= 1) { ext_info("Snapped value to lower bound.", md_, cl_, vp_.lnw); }
     }

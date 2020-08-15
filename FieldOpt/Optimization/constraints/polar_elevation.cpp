@@ -32,10 +32,11 @@ PolarElevation::PolarElevation(Settings::Optimizer::Constraint settings,
                                Settings::VerbParams vp) : Constraint(vp) {
   min_elevation_ = settings.min;
   max_elevation_ = settings.max;
-  for (auto var : variables->GetContinuousVariables()->values()){
-    if (var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Elevation
-      && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0){
-      affected_variable_ = var->id();
+  for (auto var : *variables->GetContinuousVariables()){
+    auto lvar = var.second;
+    if (lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Elevation
+      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0){
+      affected_variable_ = lvar->id();
       break;
     }
   }
@@ -43,8 +44,8 @@ PolarElevation::PolarElevation(Settings::Optimizer::Constraint settings,
 }
 
 bool PolarElevation::CaseSatisfiesConstraint(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] <= max_elevation_
-    && c->real_variables()[affected_variable_] >= min_elevation_){
+  if (c->get_real_variable_value(affected_variable_) <= max_elevation_
+    && c->get_real_variable_value(affected_variable_) >= min_elevation_){
     return true;
   } else {
     return false;
@@ -52,9 +53,9 @@ bool PolarElevation::CaseSatisfiesConstraint(Optimization::Case *c) {
 }
 
 void PolarElevation::SnapCaseToConstraints(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] >= max_elevation_){
+  if (c->get_real_variable_value(affected_variable_) >= max_elevation_){
     c->set_real_variable_value(affected_variable_, max_elevation_);
-  } else if (c->real_variables()[affected_variable_] <= min_elevation_) {
+  } else if (c->get_real_variable_value(affected_variable_) <= min_elevation_) {
     c->set_real_variable_value(affected_variable_, min_elevation_);
   }
 }

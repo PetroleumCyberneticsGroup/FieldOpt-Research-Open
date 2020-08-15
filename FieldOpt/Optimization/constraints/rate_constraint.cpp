@@ -44,7 +44,7 @@ RateConstraint::RateConstraint(Settings::Optimizer::Constraint settings,
 
 bool RateConstraint::CaseSatisfiesConstraint(Case *c) {
   for (auto var : affected_real_variables_) {
-    double case_value = c->real_variables()[var->id()];
+    double case_value = c->get_real_variable_value(var->id());
     if (case_value > max_ || case_value < min_)
       return false;
   }
@@ -53,9 +53,9 @@ bool RateConstraint::CaseSatisfiesConstraint(Case *c) {
 
 void RateConstraint::SnapCaseToConstraints(Case *c) {
   for (auto var : affected_real_variables_) {
-    if (c->real_variables()[var->id()] > max_)
+    if (c->get_real_variable_value(var->id()) > max_)
       c->set_real_variable_value(var->id(), max_);
-    else if (c->real_variables()[var->id()] < min_)
+    else if (c->get_real_variable_value(var->id()) < min_)
       c->set_real_variable_value(var->id(), min_);
   }
 }

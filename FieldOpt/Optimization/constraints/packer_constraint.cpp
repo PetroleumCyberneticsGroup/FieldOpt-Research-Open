@@ -37,11 +37,12 @@ using Printer::ext_info;
 PackerConstraint::PackerConstraint(Settings::Optimizer::Constraint settings,
                                    Model::Properties::VarPropContainer *variables,
                                    Settings::VerbParams vp) : Constraint(vp) {
-  for (ContinuousProperty *var : variables->GetContinuousVariables()->values()) {
-    if (var->propertyInfo().prop_type == Property::PropertyType::Packer
-      && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0) {
-      affected_variables_.push_back(var->id());
-      affected_var_props_[var->id()] = var->propertyInfo();
+  for (auto var : *variables->GetContinuousVariables()) {
+    auto lvar = var.second;
+    if (lvar->propertyInfo().prop_type == Property::PropertyType::Packer
+      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0) {
+      affected_variables_.push_back(lvar->id());
+      affected_var_props_[lvar->id()] = lvar->propertyInfo();
     }
   }
   // Sort affected variables list by packer index
@@ -58,7 +59,7 @@ string PackerConstraint::name() {
 
 bool PackerConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
   for (auto id : affected_variables_) {
-    if (c->real_variables()[id] > 1.0 || c->real_variables()[id] < 0.0) {
+    if (c->get_real_variable_value(id) > 1.0 || c->get_real_variable_value(id) < 0.0) {
       return false;
     }
   }
@@ -68,13 +69,12 @@ bool PackerConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
 void PackerConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   // Snap to upper/lower bounds
   for (auto id : affected_variables_) {
-    if (c->real_variables()[id] > 1.0) {
+    if (c->get_real_variable_value(id) > 1.0) {
       c->set_real_variable_value(id, 1.0);
       if (vp_.vOPT >= 2) {
         ext_info("Snapped value to upper bound.", md_, cl_, vp_.lnw);
       }
-    }
-    else if (c->real_variables()[id] < 0.0) {
+    } else if (c->get_real_variable_value(id) < 0.0) {
       c->set_real_variable_value(id, 0.0);
       if (vp_.vOPT >= 2) {
         ext_info("Snapped value to lower bound.", md_, cl_, vp_.lnw);
@@ -84,8 +84,8 @@ void PackerConstraint::SnapCaseToConstraints(Optimization::Case *c) {
 
   // Enforce packer-ordering
   for (int i = 1; i < affected_variables_.size(); ++i) {
-    if (c->real_variables()[affected_variables_[i]] < c->real_variables()[affected_variables_[i-1]]) {
-      c->set_real_variable_value(affected_variables_[i], c->real_variables()[affected_variables_[i-1]]);
+    if (c->get_real_variable_value(affected_variables_[i]) < c->get_real_variable_value(affected_variables_[i-1])) {
+      c->set_real_variable_value(affected_variables_[i], c->get_real_variable_value(affected_variables_[i-1]));
       if (vp_.vOPT >= 2) ext_info("Enforced packer-ordering.", md_, cl_, vp_.lnw);
     }
   }

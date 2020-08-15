@@ -107,7 +107,7 @@ class TrustRegionTest : public ::testing::Test,
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-        QMap<QUuid, bool>(), QMap<QUuid, int>(),
+        QList<QPair<QUuid, bool>>(), QList<QPair<QUuid, int>>(),
         varcont_tr_dfo_probs_->GetContinuousVariableValues());
 
     TestResources::FindVarSequence(prob,

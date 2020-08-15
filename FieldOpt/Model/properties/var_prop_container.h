@@ -84,7 +84,7 @@ class VarPropContainer
   DiscreteProperty *GetDiscreteVariable(QUuid id) const;
 
   //!< Get the continous variable with index id.
-  ContinuousProperty *GetContinousVariable(QUuid id) const;
+  ContinuousProperty *GetContinuousVariable(QUuid id) const;
 
   //!< Get the binary variable with the specified name.
   BinaryProperty *GetBinaryVariable(QString name) const;
@@ -102,34 +102,40 @@ class VarPropContainer
   void SetDiscreteVariableValue(QUuid id, int val);
 
   //!< Set the value of a binary variable.
-  void SetContinousVariableValue(QUuid id, double val);
+  void SetContinuousVariableValue(QUuid id, double val);
 
   //!< Get all binary variables
-//  QHash<QUuid, BinaryProperty *> *GetBinaryVariables() const { return binary_variables_; }
-  QMap<QUuid, BinaryProperty *> *GetBinaryVariables() const { return binary_variables_; }
+  // QHash<QUuid, BinaryProperty *> *GetBinaryVariables() const { return binary_variables_; }
+  // QMap<QUuid, BinaryProperty *> *GetBinaryVariables() const { return binary_variables_; }
+  QList<QPair<QUuid, BinaryProperty *>> *GetBinaryVariables() const { return binary_variables_; }
 
   //!< Get all discrete variables
-//  QHash<QUuid, DiscreteProperty *> *GetDiscreteVariables() const { return discrete_variables_; }
-  QMap<QUuid, DiscreteProperty *> *GetDiscreteVariables() const { return discrete_variables_; }
+  // QHash<QUuid, DiscreteProperty *> *GetDiscreteVariables() const { return discrete_variables_; }
+  // QMap<QUuid, DiscreteProperty *> *GetDiscreteVariables() const { return discrete_variables_; }
+  QList<QPair<QUuid, DiscreteProperty *>> *GetDiscreteVariables() const { return discrete_variables_; }
 
   //!< Get all continous variables
-//  QHash<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
-  QMap<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
+  // QHash<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
+  // QMap<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
+  QList<QPair<QUuid, ContinuousProperty *>> *GetContinuousVariables() const { return continuous_variables_; }
 
   //!< Get a hashmap containing all binary variable values.
   //!< The key represents each variable's ID.
-//  QHash<QUuid, bool> GetBinaryVariableValues() const;
-  QMap<QUuid, bool> GetBinaryVariableValues() const;
+  // QHash<QUuid, bool> GetBinaryVariableValues() const;
+  // QMap<QUuid, bool> GetBinaryVariableValues() const;
+  QList<QPair<QUuid, bool>> GetBinaryVariableValues() const;
 
   //!< Get a hashmap containing all discrete variable values.
   //!< The key represents each variable's ID.
-//  QHash<QUuid, int> GetDiscreteVariableValues() const;
-  QMap<QUuid, int> GetDiscreteVariableValues() const;
+  // QHash<QUuid, int> GetDiscreteVariableValues() const;
+  // QMap<QUuid, int> GetDiscreteVariableValues() const;
+  QList<QPair<QUuid, int>> GetDiscreteVariableValues() const;
 
   //!< Get a hashmap containing all continuous variable values.
   //!< The key represents each variable's ID.
-//  QHash<QUuid, double> GetContinuousVariableValues() const;
-  QMap<QUuid, double> GetContinuousVariableValues() const;
+  // QHash<QUuid, double> GetContinuousVariableValues() const;
+  // QMap<QUuid, double> GetContinuousVariableValues() const;
+  QList<QPair<QUuid, double>> GetContinuousVariableValues() const;
 
   //!< Get all control (rate/bhp) variables.
   QList<ContinuousProperty *> GetWellControlVariables() const;
@@ -186,9 +192,14 @@ class VarPropContainer
 //  QHash<QUuid, DiscreteProperty *> *discrete_variables_;
 //  QHash<QUuid, ContinuousProperty *> *continuous_variables_;
 
-  QMap<QUuid, BinaryProperty *> *binary_variables_;
-  QMap<QUuid, DiscreteProperty *> *discrete_variables_;
-  QMap<QUuid, ContinuousProperty *> *continuous_variables_;
+//  QMap<QUuid, BinaryProperty *> *binary_variables_;
+//  QMap<QUuid, DiscreteProperty *> *discrete_variables_;
+//  QMap<QUuid, ContinuousProperty *> *continuous_variables_;
+
+  QList<QPair<QUuid, BinaryProperty *>> *binary_variables_;
+  QList<QPair<QUuid, DiscreteProperty *>> *discrete_variables_;
+  QList<QPair<QUuid, ContinuousProperty *>> *continuous_variables_;
+
 };
 
 }

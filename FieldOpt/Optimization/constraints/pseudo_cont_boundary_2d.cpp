@@ -70,27 +70,31 @@ PseudoContBoundary2D::PseudoContBoundary2D(const Settings::Optimizer::Constraint
     exit(1);
   }
 }
+
 bool PseudoContBoundary2D::CaseSatisfiesConstraint(Case *c) {
-  if (c->real_variables()[affected_x_var_id_] < x_min_
-    || c->real_variables()[affected_x_var_id_] > x_max_
-    || c->real_variables()[affected_y_var_id_] < y_min_
-    || c->real_variables()[affected_y_var_id_] > y_max_)
+  if (c->get_real_variable_value(affected_x_var_id_) < x_min_
+    || c->get_real_variable_value(affected_x_var_id_) > x_max_
+    || c->get_real_variable_value(affected_y_var_id_) < y_min_
+    || c->get_real_variable_value(affected_y_var_id_) > y_max_)
     return false;
   else return true;
 }
+
 void PseudoContBoundary2D::SnapCaseToConstraints(Case *c) {
-  if (c->real_variables()[affected_x_var_id_] < x_min_)
+  if (c->get_real_variable_value(affected_x_var_id_) < x_min_)
     c->set_real_variable_value(affected_x_var_id_, x_min_);
-  else if (c->real_variables()[affected_x_var_id_] > x_max_)
+  else if (c->get_real_variable_value(affected_x_var_id_) > x_max_)
     c->set_real_variable_value(affected_x_var_id_, x_max_);
-  else if (c->real_variables()[affected_y_var_id_] < y_min_)
+  else if (c->get_real_variable_value(affected_y_var_id_) < y_min_)
     c->set_real_variable_value(affected_y_var_id_, y_min_);
-  else if (c->real_variables()[affected_y_var_id_] > y_max_)
+  else if (c->get_real_variable_value(affected_y_var_id_) > y_max_)
     c->set_real_variable_value(affected_y_var_id_, y_max_);
 }
+
 bool PseudoContBoundary2D::IsBoundConstraint() const {
   return true;
 }
+
 Eigen::VectorXd PseudoContBoundary2D::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
@@ -98,6 +102,7 @@ Eigen::VectorXd PseudoContBoundary2D::GetLowerBounds(QList<QUuid> id_vector) con
   lbounds[id_vector.indexOf(affected_y_var_id_)] = y_min_;
   return lbounds;
 }
+
 Eigen::VectorXd PseudoContBoundary2D::GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
@@ -105,14 +110,17 @@ Eigen::VectorXd PseudoContBoundary2D::GetUpperBounds(QList<QUuid> id_vector) con
   ubounds[id_vector.indexOf(affected_y_var_id_)] = y_max_;
   return ubounds;
 }
+
 string PseudoContBoundary2D::name() {
   return "PseudoContBoundary2D";
 }
+
 void PseudoContBoundary2D::InitializeNormalizer(QList<Case *> cases) {
   normalizer_.set_max(1.0L);
   normalizer_.set_midpoint(0.0L);
   normalizer_.set_steepness(1.0L);
 }
+
 double PseudoContBoundary2D::Penalty(Case *c) {
   if (CaseSatisfiesConstraint(c))
     return 0.0;

@@ -37,9 +37,9 @@ ReservoirBoundaryToe::ReservoirBoundaryToe(const Settings::Optimizer::Constraint
   : ResBoundary(settings, variables, grid, vp) {}
 
 bool ReservoirBoundaryToe::CaseSatisfiesConstraint(Case *c) {
-  double toe_x_val = c->real_variables()[affected_well_.toe.x];
-  double toe_y_val = c->real_variables()[affected_well_.toe.y];
-  double toe_z_val = c->real_variables()[affected_well_.toe.z];
+  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
 
   bool midpoint_feasible = false;
 
@@ -53,9 +53,9 @@ bool ReservoirBoundaryToe::CaseSatisfiesConstraint(Case *c) {
 }
 
 void ReservoirBoundaryToe::SnapCaseToConstraints(Case *c) {
-  double toe_x_val = c->real_variables()[affected_well_.toe.x];
-  double toe_y_val = c->real_variables()[affected_well_.toe.y];
-  double toe_z_val = c->real_variables()[affected_well_.toe.z];
+  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
 
   Eigen::Vector3d projected_toe =
     WellConstraintProjections::well_domain_constraint_indices(

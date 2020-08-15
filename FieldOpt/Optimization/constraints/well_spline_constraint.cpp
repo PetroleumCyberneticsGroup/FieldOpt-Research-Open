@@ -106,12 +106,12 @@ WellSplineConstraint::initializeWell(QList<Model::Properties::ContinuousProperty
 }
 
 QPair<Eigen::Vector3d, Eigen::Vector3d> WellSplineConstraint::GetEndpointValueVectors(Case *c, Well well) {
-  double hx = c->real_variables()[well.heel.x];
-  double hy = c->real_variables()[well.heel.y];
-  double hz = c->real_variables()[well.heel.z];
-  double tx = c->real_variables()[well.toe.x];
-  double ty = c->real_variables()[well.toe.y];
-  double tz = c->real_variables()[well.toe.z];
+  double hx = c->get_real_variable_value(well.heel.x);
+  double hy = c->get_real_variable_value(well.heel.y);
+  double hz = c->get_real_variable_value(well.heel.z);
+  double tx = c->get_real_variable_value(well.toe.x);
+  double ty = c->get_real_variable_value(well.toe.y);
+  double tz = c->get_real_variable_value(well.toe.z);
   Eigen::Vector3d heel(hx, hy, hz);
   Eigen::Vector3d toe(tx, ty, tz);
   return qMakePair(heel, toe);
@@ -123,9 +123,9 @@ std::vector<Eigen::Vector3d> WellSplineConstraint::GetPointValueVectors(Case *c,
   points.push_back(endpoints.first);
 
   for (auto p : well.additional_points) {
-    double x = c->real_variables()[p.x];
-    double y = c->real_variables()[p.y];
-    double z = c->real_variables()[p.z];
+    double x = c->get_real_variable_value(p.x);
+    double y = c->get_real_variable_value(p.y);
+    double z = c->get_real_variable_value(p.z);
     Eigen::Vector3d ep = Eigen::Vector3d(x, y, z);
     points.push_back(ep);
   }

@@ -34,18 +34,19 @@ PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint settings,
   minimum_length_ = settings.min_length;
   maximum_length_ = settings.max_length;
 
-  for (auto var : variables->GetContinuousVariables()->values()) {
-    if (var->propertyInfo().parent_well_name == settings.well
-      && var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Length) {
-      affected_variable_ = var->id();
+  for (auto var : *variables->GetContinuousVariables()) {
+    auto lvar = var.second;
+    if (lvar->propertyInfo().parent_well_name == settings.well
+      && lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Length) {
+      affected_variable_ = lvar->id();
       break;
     }
   }
 }
 
 bool PolarWellLength::CaseSatisfiesConstraint(Case *c) {
-  if (c->real_variables()[affected_variable_] <= maximum_length_
-    && c->real_variables()[affected_variable_] >= minimum_length_){
+  if (c->get_real_variable_value(affected_variable_) <= maximum_length_
+    && c->get_real_variable_value(affected_variable_) >= minimum_length_){
     return true;
   } else {
     return false;
@@ -53,9 +54,9 @@ bool PolarWellLength::CaseSatisfiesConstraint(Case *c) {
 }
 
 void PolarWellLength::SnapCaseToConstraints(Case *c) {
-  if (c->real_variables()[affected_variable_] > maximum_length_){
+  if (c->get_real_variable_value(affected_variable_) > maximum_length_){
     c->set_real_variable_value(affected_variable_, maximum_length_);
-  } else if (c-> real_variables()[affected_variable_] < minimum_length_){
+  } else if (c-> get_real_variable_value(affected_variable_) < minimum_length_){
     c->set_real_variable_value(affected_variable_, minimum_length_);
   }
 }

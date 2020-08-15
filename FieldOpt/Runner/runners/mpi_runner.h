@@ -1,9 +1,34 @@
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_MPIRUNNER_H
 #define FIELDOPT_MPIRUNNER_H
 
 #include "abstract_runner.h"
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
+
 namespace mpi = boost::mpi;
 
 namespace Runner {
@@ -48,13 +73,13 @@ class MPIRunner : public AbstractRunner {
   };
 
   std::map<int, std::string> tag_to_string = {
-      {-1, "any tag"},
-      {1, "unevaluated case"},
-      {2, "successfully evaluated case"},
-      {3, "invalid case"},
-      {4, "timed out case"},
-      {10, "model synchronization object"},
-      {100, "termination signal"}
+    {-1, "any tag"},
+    {1, "unevaluated case"},
+    {2, "successfully evaluated case"},
+    {3, "invalid case"},
+    {4, "timed out case"},
+    {10, "model synchronization object"},
+    {100, "termination signal"}
   };
 
   /*!
@@ -62,20 +87,20 @@ class MPIRunner : public AbstractRunner {
    */
   struct Message {
     Message() {
-        c = nullptr; this->tag = MPI_ANY_TAG; this->source = MPI_ANY_SOURCE; this->destination = MPI_ANY_SOURCE;
+      c = nullptr; this->tag = MPI_ANY_TAG; this->source = MPI_ANY_SOURCE; this->destination = MPI_ANY_SOURCE;
     }
     void set_status(mpi::status status) {
-        this->status = status; this->source = status.source(); this->tag = status.tag();
+      this->status = status; this->source = status.source(); this->tag = status.tag();
     }
     MsgTag get_tag() {
-        switch (tag) {
-            case 1: return CASE_UNEVAL;
-            case 2: return CASE_EVAL_SUCCESS;
-            case 3: return CASE_EVAL_INVALID;
-            case 4: return CASE_EVAL_TIMEOUT;
-            case 10: return MODEL_SYNC;
-            case 100: return TERMINATE;
-        }
+      switch (tag) {
+        case 1: return CASE_UNEVAL;
+        case 2: return CASE_EVAL_SUCCESS;
+        case 3: return CASE_EVAL_INVALID;
+        case 4: return CASE_EVAL_TIMEOUT;
+        case 10: return MODEL_SYNC;
+        case 100: return TERMINATE;
+      }
     }
     Optimization::Case *c; //!< The case associated with the message (if any).
     int tag; //!< The tag for the message.

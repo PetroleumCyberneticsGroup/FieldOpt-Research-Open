@@ -39,9 +39,13 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   // integer_variables_ = qHashToStdMap(c->integer_variables_);
   // real_variables_ = qHashToStdMap(c->real_variables_);
 
-  binary_variables_ = qMapToStdMap(c->binary_variables_);
-  integer_variables_ = qMapToStdMap(c->integer_variables_);
-  real_variables_ = qMapToStdMap(c->real_variables_);
+  // binary_variables_ = qMapToStdMap(c->binary_variables_);
+  // integer_variables_ = qMapToStdMap(c->integer_variables_);
+  // real_variables_ = qMapToStdMap(c->real_variables_);
+
+  binary_variables_ = qListToStdList(c->binary_variables_);
+  integer_variables_ = qListToStdList(c->integer_variables_);
+  real_variables_ = qListToStdList(c->real_variables_);
 
   wic_time_secs_ = c->GetWICTime();
   sim_time_secs_ = c->GetSimTime();
@@ -59,9 +63,14 @@ Case *CaseTransferObject::CreateCase() {
   // c->binary_variables_ = stdMapToQhash(binary_variables_);
   // c->integer_variables_ = stdMapToQhash(integer_variables_);
   // c->real_variables_ = stdMapToQhash(real_variables_);
-  c->binary_variables_ = stdMapToQmap(binary_variables_);
-  c->integer_variables_ = stdMapToQmap(integer_variables_);
-  c->real_variables_ = stdMapToQmap(real_variables_);
+
+  // c->binary_variables_ = stdMapToQmap(binary_variables_);
+  // c->integer_variables_ = stdMapToQmap(integer_variables_);
+  // c->real_variables_ = stdMapToQmap(real_variables_);
+
+  c->binary_variables_ = stdListToQlist(binary_variables_);
+  c->integer_variables_ = stdListToQlist(integer_variables_);
+  c->real_variables_ = stdListToQlist(real_variables_);
 
   c->id_ = boostUuidToQuuid(id_);
   c->objective_function_value_ = objective_function_value_;
@@ -92,38 +101,57 @@ QString CaseTransferObject::boostUuidToQstring(const uuid buuid) const {
   return uuid_qstring;
 }
 
-template<typename T>
-std::map<uuid, T> CaseTransferObject::qHashToStdMap(const QHash<QUuid, T> &qhash) const {
-  std::map<uuid, T> stdmap = std::map<uuid, T>();
-  for (auto key : qhash.keys()) {
-    stdmap[qUuidToBoostUuid(key)] = qhash[key];
-  }
-  return stdmap;
-}
+// template<typename T>
+// std::map<uuid, T> CaseTransferObject::qHashToStdMap(const QHash<QUuid, T> &qhash) const {
+//   std::map<uuid, T> stdmap = std::map<uuid, T>();
+//   for (auto key : qhash.keys()) {
+//     stdmap[qUuidToBoostUuid(key)] = qhash[key];
+//   }
+//   return stdmap;
+// }
+
+// template<typename T>
+// std::map<uuid, T> CaseTransferObject::qMapToStdMap(const QMap<QUuid, T> &qhash) const {
+//   std::map<uuid, T> stdmap = std::map<uuid, T>();
+//   for (auto key : qhash.keys()) {
+//     stdmap[qUuidToBoostUuid(key)] = qhash[key];
+//   }
+//   return stdmap;
+// }
 
 template<typename T>
-std::map<uuid, T> CaseTransferObject::qMapToStdMap(const QMap<QUuid, T> &qhash) const {
-  std::map<uuid, T> stdmap = std::map<uuid, T>();
-  for (auto key : qhash.keys()) {
-    stdmap[qUuidToBoostUuid(key)] = qhash[key];
+std::list<pair<uuid, T>> CaseTransferObject::qListToStdList(const QList<QPair<QUuid, T>> &qhash) const {
+  std::list<pair<uuid, T>> stdlist = std::list<pair<uuid, T>>();
+  for (int ii=0; ii < qhash.size(); ii++) {
+    pair<uuid, T> qpair = pair<uuid, T>(qUuidToBoostUuid(qhash.at(ii).first), qhash.at(ii).second);
+    stdlist.push_back(qpair);
   }
-  return stdmap;
 }
 
+// template<typename T>
+// QHash<QUuid, T> CaseTransferObject::stdMapToQhash(const std::map<uuid, T> &stmap) const {
+//   QHash<QUuid, T> qhash = QHash<QUuid, T>();
+//   for (auto const &ent : stmap) {
+//     qhash[boostUuidToQuuid(ent.first)] = ent.second;
+//   }
+//   return qhash;
+// }
+
+// template<typename T>
+// QMap<QUuid, T> CaseTransferObject::stdMapToQmap(const std::map<uuid, T> &stmap) const {
+//   QMap<QUuid, T> qhash = QMap<QUuid, T>();
+//   for (auto const &ent : stmap) {
+//     qhash[boostUuidToQuuid(ent.first)] = ent.second;
+//   }
+//   return qhash;
+// }
+
 template<typename T>
-QHash<QUuid, T> CaseTransferObject::stdMapToQhash(const std::map<uuid, T> &stmap) const {
-  QHash<QUuid, T> qhash = QHash<QUuid, T>();
+QList<QPair<QUuid, T>> CaseTransferObject::stdListToQlist(const std::list<pair<uuid, T>> &stmap) const {
+  QList<QPair<QUuid, T>> qhash = QList<QPair<QUuid, T>>();
   for (auto const &ent : stmap) {
-    qhash[boostUuidToQuuid(ent.first)] = ent.second;
-  }
-  return qhash;
-}
-
-template<typename T>
-QMap<QUuid, T> CaseTransferObject::stdMapToQmap(const std::map<uuid, T> &stmap) const {
-  QMap<QUuid, T> qhash = QMap<QUuid, T>();
-  for (auto const &ent : stmap) {
-    qhash[boostUuidToQuuid(ent.first)] = ent.second;
+    QPair<QUuid, T> qpair = QPair<QUuid, T>(boostUuidToQuuid(ent.first), ent.second);
+    qhash.append(qpair);
   }
   return qhash;
 }

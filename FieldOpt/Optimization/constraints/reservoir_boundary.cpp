@@ -328,13 +328,13 @@ QList<int> ResBoundary::getIndicesOfEdgeCells() {
 
 bool ResBoundary::CaseSatisfiesConstraint(Case *c) {
 
-  double heel_x_val = c->real_variables()[affected_well_.heel.x];
-  double heel_y_val = c->real_variables()[affected_well_.heel.y];
-  double heel_z_val = c->real_variables()[affected_well_.heel.z];
+  double heel_x_val = c->get_real_variable_value(affected_well_.heel.x);
+  double heel_y_val = c->get_real_variable_value(affected_well_.heel.y);
+  double heel_z_val = c->get_real_variable_value(affected_well_.heel.z);
 
-  double toe_x_val = c->real_variables()[affected_well_.toe.x];
-  double toe_y_val = c->real_variables()[affected_well_.toe.y];
-  double toe_z_val = c->real_variables()[affected_well_.toe.z];
+  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
 
   bool heel_feasible = false;
   bool toe_feasible = false;
@@ -355,13 +355,13 @@ bool ResBoundary::CaseSatisfiesConstraint(Case *c) {
 
 void ResBoundary::SnapCaseToConstraints(Case *c) {
 
-  double heel_x_val = c->real_variables()[affected_well_.heel.x];
-  double heel_y_val = c->real_variables()[affected_well_.heel.y];
-  double heel_z_val = c->real_variables()[affected_well_.heel.z];
+  double heel_x_val = c->get_real_variable_value(affected_well_.heel.x);
+  double heel_y_val = c->get_real_variable_value(affected_well_.heel.y);
+  double heel_z_val = c->get_real_variable_value(affected_well_.heel.z);
 
-  double toe_x_val = c->real_variables()[affected_well_.toe.x];
-  double toe_y_val = c->real_variables()[affected_well_.toe.y];
-  double toe_z_val = c->real_variables()[affected_well_.toe.z];
+  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
 
   Eigen::Vector3d projected_heel =
     WellConstraintProjections::well_domain_constraint_indices(

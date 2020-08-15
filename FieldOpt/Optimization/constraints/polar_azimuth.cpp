@@ -33,10 +33,11 @@ PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
   min_azimuth_ = settings.min;
   max_azimuth_ = settings.max;
 
-  for (auto var : variables->GetContinuousVariables()->values()){
-    if (var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
-      && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0){
-      affected_variable_ = var->id();
+  for (auto var : *variables->GetContinuousVariables()){
+    auto lvar = var.second;
+    if (lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
+      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0){
+      affected_variable_ = lvar->id();
       break;
     }
   }
@@ -44,8 +45,8 @@ PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
 }
 
 bool PolarAzimuth::CaseSatisfiesConstraint(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] <= max_azimuth_
-    && c->real_variables()[affected_variable_] >= min_azimuth_){
+  if (c->get_real_variable_value(affected_variable_) <= max_azimuth_
+    && c->get_real_variable_value(affected_variable_) >= min_azimuth_){
     return true;
   } else {
     return false;
@@ -53,9 +54,9 @@ bool PolarAzimuth::CaseSatisfiesConstraint(Optimization::Case *c) {
 }
 
 void PolarAzimuth::SnapCaseToConstraints(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] >= max_azimuth_){
+  if (c->get_real_variable_value(affected_variable_) >= max_azimuth_){
     c->set_real_variable_value(affected_variable_, max_azimuth_);
-  } else if (c->real_variables()[affected_variable_] <= min_azimuth_) {
+  } else if (c->get_real_variable_value(affected_variable_) <= min_azimuth_) {
     c->set_real_variable_value(affected_variable_, min_azimuth_);
   }
 }

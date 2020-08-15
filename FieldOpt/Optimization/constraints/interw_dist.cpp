@@ -49,13 +49,13 @@ InterwDist::InterwDist(Settings::Optimizer::Constraint settings,
 bool InterwDist::CaseSatisfiesConstraint(Case *c) {
   QList<Eigen::Vector3d> points;
   for (Well well : affected_wells_) {
-    double heel_x_val = c->real_variables()[well.heel.x];
-    double heel_y_val = c->real_variables()[well.heel.y];
-    double heel_z_val = c->real_variables()[well.heel.z];
+    double heel_x_val = c->get_real_variable_value(well.heel.x);
+    double heel_y_val = c->get_real_variable_value(well.heel.y);
+    double heel_z_val = c->get_real_variable_value(well.heel.z);
 
-    double toe_x_val = c->real_variables()[well.toe.x];
-    double toe_y_val = c->real_variables()[well.toe.y];
-    double toe_z_val = c->real_variables()[well.toe.z];
+    double toe_x_val = c->get_real_variable_value(well.toe.x);
+    double toe_y_val = c->get_real_variable_value(well.toe.y);
+    double toe_z_val = c->get_real_variable_value(well.toe.z);
 
     Eigen::Vector3d heel_vals;
     Eigen::Vector3d toe_vals;
@@ -82,13 +82,13 @@ void InterwDist::SnapCaseToConstraints(Case *c)
 {
   QList<Eigen::Vector3d> points;
   for (Well well : affected_wells_) {
-    double heel_x_val = c->real_variables()[well.heel.x];
-    double heel_y_val = c->real_variables()[well.heel.y];
-    double heel_z_val = c->real_variables()[well.heel.z];
+    double heel_x_val = c->get_real_variable_value(well.heel.x);
+    double heel_y_val = c->get_real_variable_value(well.heel.y);
+    double heel_z_val = c->get_real_variable_value(well.heel.z);
 
-    double toe_x_val = c->real_variables()[well.toe.x];
-    double toe_y_val = c->real_variables()[well.toe.y];
-    double toe_z_val = c->real_variables()[well.toe.z];
+    double toe_x_val = c->get_real_variable_value(well.toe.x);
+    double toe_y_val = c->get_real_variable_value(well.toe.y);
+    double toe_z_val = c->get_real_variable_value(well.toe.z);
 
     Eigen::Vector3d heel_vals;
     Eigen::Vector3d toe_vals;

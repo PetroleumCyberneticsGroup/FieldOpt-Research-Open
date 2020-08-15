@@ -50,9 +50,9 @@ PolarXYZBoundary::PolarXYZBoundary(const Settings::Optimizer::Constraint &settin
 }
 
 bool PolarXYZBoundary::CaseSatisfiesConstraint(Case *c) {
-  double midpoint_x_val = c->real_variables()[affected_well_.midpoint.x];
-  double midpoint_y_val = c->real_variables()[affected_well_.midpoint.y];
-  double midpoint_z_val = c->real_variables()[affected_well_.midpoint.z];
+  double midpoint_x_val = c->get_real_variable_value(affected_well_.midpoint.x);
+  double midpoint_y_val = c->get_real_variable_value(affected_well_.midpoint.y);
+  double midpoint_z_val = c->get_real_variable_value(affected_well_.midpoint.z);
 
   bool midpoint_feasible = false;
 
@@ -67,9 +67,9 @@ bool PolarXYZBoundary::CaseSatisfiesConstraint(Case *c) {
 }
 
 void PolarXYZBoundary::SnapCaseToConstraints(Case *c) {
-  double midpoint_x_val = c->real_variables()[affected_well_.midpoint.x];
-  double midpoint_y_val = c->real_variables()[affected_well_.midpoint.y];
-  double midpoint_z_val = c->real_variables()[affected_well_.midpoint.z];
+  double midpoint_x_val = c->get_real_variable_value(affected_well_.midpoint.x);
+  double midpoint_y_val = c->get_real_variable_value(affected_well_.midpoint.y);
+  double midpoint_z_val = c->get_real_variable_value(affected_well_.midpoint.z);
 
   Eigen::Vector3d projected_midpoint =
     WellConstraintProjections::well_domain_constraint_indices(
