@@ -63,27 +63,27 @@ void ECLSimulator::Evaluate() {
   }
   copyDriverFiles();
 
-  if ( VERB_SIM >= 2 ) { Printer::info("Updating file paths."); }
+  if (vp_.vSIM >= 2) { Printer::info("Updating file paths."); }
   UpdateFilePaths();
   script_args_ = (QStringList()
     << paths_.GetPathQstr(Paths::SIM_WORK_DIR) << deck_name_);
 
   auto driver_file_writer = EclDriverFileWriter(settings_, model_);
 
-  if ( VERB_SIM >= 2 ) { Printer::info("Writing schedule."); }
+  if (vp_.vSIM >= 2) { Printer::info("Writing schedule."); }
   driver_file_writer.WriteDriverFile(
     QString::fromStdString(
       paths_.GetPath(Paths::SIM_OUT_SCH_FILE)));
 
   PreSimWork();
-  if ( VERB_SIM >= 2 ) { Printer::info("Starting unmonitored sim."); }
+  if (vp_.vSIM >= 2) { Printer::info("Starting unmonitored sim."); }
   Utilities::Unix::ExecShellScript(
     paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
     script_args_, vp_
   );
   PostSimWork();
 
-  if ( VERB_SIM >= 2 ) { Printer::info("Unmonitored sim done. Reading results."); }
+  if (vp_.vSIM >= 2) { Printer::info("Unmonitored sim done. Reading results."); }
   results_->ReadResults(paths_.GetPathQstr(Paths::SIM_OUT_DRIVER_FILE));
   updateResultsInModel();
 }
@@ -103,13 +103,13 @@ bool ECLSimulator::Evaluate(int timeout, int threads) {
   if ( timeout < 10 ) { t = 10; }
   PreSimWork();
 
-  if ( VERB_SIM >= 2 ) { Printer::info("Starting monitored sim w/ timeout."); }
+  if (vp_.vSIM >= 2) { Printer::info("Starting monitored sim w/ timeout."); }
   auto script_path = paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE);
   bool success = ::Utilities::Unix::ExecShellScriptTimeout(script_path, script_args_, t, vp_);
 
-  if ( VERB_SIM >= 2 ) { Printer::info("Monitored sim done."); }
+  if (vp_.vSIM >= 2) { Printer::info("Monitored sim done."); }
   if ( success ) {
-    if ( VERB_SIM >= 2 ) { Printer::info("Sim successful. Reading results."); }
+    if (vp_.vSIM >= 2) { Printer::info("Sim successful. Reading results."); }
     results_->DumpResults();
     PostSimWork();
 
@@ -186,7 +186,7 @@ void ECLSimulator::UpdateFilePaths() {
 void ECLSimulator::WriteDriverFilesOnly() {
   UpdateFilePaths();
   auto driver_file_writer = EclDriverFileWriter(settings_, model_);
-  driver_file_writer.WriteDriverFile(QString::fromStdString(paths_.GetPath(Paths::SIM_OUT_SCH_FILE)));
+  driver_file_writer.WriteDriverFile(paths_.GetPathQstr(Paths::SIM_OUT_SCH_FILE));
 }
 
 void ECLSimulator::copyDriverFiles() {
@@ -195,46 +195,48 @@ void ECLSimulator::copyDriverFiles() {
   workdir += "/" + driver_parent_dir_name_.toStdString();
   casedir += "/" + case_parent_dir_name_.toStdString();
 
-  if ( !DirExists(workdir, vp_, md_, cl_)
-  && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Flat) {
-    if ( VERB_SIM >= 1 ) {
-      Printer::ext_info("Output deck directory not found. Copying input deck:"
-                          + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir,
-                        "Simulation",
-                        "ECLSimulator");
+  // Flat file structure
+  if (!DirExists(workdir, vp_, md_, cl_)
+    && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Flat) {
+    if (vp_.vSIM >= 1) {
+      ext_info("Output deck directory not found. Copying input deck:"
+                 + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir,
+               md_,cl_);
     }
     CreateDir(workdir, vp_);
     CopyDir(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, false, false, vp_);
     paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
   }
 
-  if ( !DirExists(casedir, vp_, md_, cl_) && settings_->simulator()->file_structure().type_
-    == Settings::Simulator::FileStructType::Branched) {
-    if ( VERB_SIM >= 1 ) {
-      Printer::ext_info("Output dir not found. Copying input deck:"
-                          + paths_.GetPath(Paths::CASE_ROOT_DIR) + " -> " + casedir,
-                        "Simulation",
-                        "ECLSimulator");
+  // Branched file structure
+  if (!DirExists(casedir, vp_, md_, cl_)
+    && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Branched) {
+    if (vp_.vSIM >= 1) {
+      ext_info("Output dir not found. Copying input deck:"
+                 + paths_.GetPath(Paths::CASE_ROOT_DIR) + " -> " + casedir, md_, cl_);
     }
     CreateDir(casedir, vp_);
     CopyDir(paths_.GetPath(Paths::CASE_ROOT_DIR), casedir, false, true, vp_);
     paths_.SetPath(Paths::SIM_WORK_DIR, casedir + paths_.GetPath(Paths::CASE_DRVR_DIR));
   }
 
+  // Copy sim aux dir
   if ( paths_.IsSet(Paths::SIM_AUX_DIR)) {
     std::string auxdir = paths_.GetPath(Paths::OUTPUT_DIR)
       + "/" + FileName(paths_.GetPath(Paths::SIM_AUX_DIR));
+
     if ( !DirExists(auxdir, vp_, md_, cl_)) {
-      if ( VERB_SIM >= 1 ) {
+      if (vp_.vSIM >= 1) {
         Printer::ext_info("Copying simulation aux. directory:"
                             + paths_.GetPath(Paths::SIM_AUX_DIR)
-                            + " -> " + auxdir, "Simulation", "Simulator" );
+                            + " -> " + auxdir, md_, cl_ );
       }
       CreateDir(auxdir, vp_);
       CopyDir(paths_.GetPath(Paths::SIM_AUX_DIR), auxdir, false);
     }
   }
 
+  // Copy pre-/postsim scripts to workdir
   if (settings_->simulator()->add_sim_scripts()) {
     string post_script_src = paths_.GetPath(Paths::SIM_EXEC_DIR) + "/FO_POSTSIM.sh";
     string pre_script_src = paths_.GetPath(Paths::SIM_EXEC_DIR) + "/FO_PRESIM.sh";

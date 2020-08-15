@@ -342,6 +342,7 @@ inline void ext_warn(const std::string &text,
   ss << AEND;
   std::cout << ss.str();
 }
+
 /* Error box.
 Example:
  ╔═════════════════════════════════════════════════════════════════════╗
@@ -349,14 +350,18 @@ Example:
  ╚═════════════════════════════════════════════════════════════════════╝
  */
 inline void error(const std::string &text, const int &lw=165) {
+  std::string content = text;
+
+  auto lines = split_line(content, lw - 11);
   std::stringstream ss;
   ss << FLRED;
 
-  std::string content = text;
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
-  pad_text(content, lw - 4);
-  ss << "│ ■ ERROR: " << content << " │" << "\n";
+  for (auto line : lines) {
+    pad_text(line, lw - 11);
+    ss << "│ ■ ERROR: " << line << " │" << "\n";
+  }
   ss << bS.llnl;
   ss << "\n";
   ss << AEND;

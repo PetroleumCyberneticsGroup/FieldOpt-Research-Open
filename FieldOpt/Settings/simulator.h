@@ -124,6 +124,7 @@ class Simulator
   bool use_post_sim_script_ = false;
   bool use_pre_sim_script_ = false;
   bool add_sim_scripts_ = false;
+  QString sched_file_name_ = "";
 
   bool read_external_json_results_ = false;
   bool read_adj_grad_data_ = false;

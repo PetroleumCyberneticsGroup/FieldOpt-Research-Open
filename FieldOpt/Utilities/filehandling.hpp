@@ -25,6 +25,7 @@ namespace FileHandling {
 
 using Printer::ext_info;
 using Printer::info;
+using boost::filesystem::copy_file;
 
 /*!
  * \brief FileExists Checks whether or not file exists at specified path.
@@ -109,7 +110,7 @@ inline bool DirIsEmpty(const QString &folder_path,
   if (!DirExists(folder_path, vp)) return false;
   QDir directory = QDir(folder_path);
   return directory.entryInfoList(QDir::NoDotAndDotDot |
-    QDir::AllEntries).count() == 0;
+      QDir::AllEntries).count() == 0;
 }
 
 inline bool DirIsEmpty(const std::string &folder_path,
@@ -217,7 +218,6 @@ inline void DeleteFile(const QString& path,
   if (FileExists(path, vp, mod, cls)) {
     QFile file(path);
     file.remove();
-
   } else {
     throw std::runtime_error("File not found: " + path.toStdString());
   }
@@ -295,11 +295,11 @@ inline void CopyFile(QString origin, QString destination,
   }
 
   if (overwrite) {
-    boost::filesystem::copy_file(origin.toStdString(),
-                                 destination.toStdString(),
-                                 boost::filesystem::copy_option::overwrite_if_exists);
+    copy_file(origin.toStdString(),
+              destination.toStdString(),
+              boost::filesystem::copy_option::overwrite_if_exists);
   } else {
-    boost::filesystem::copy_file(origin.toStdString(), destination.toStdString());
+    copy_file(origin.toStdString(), destination.toStdString());
   }
 }
 
@@ -330,12 +330,12 @@ inline void CopyDir(QString origin, QString dest,
 
   if (!DirExists(origin, vp)) {
     throw std::runtime_error("Parent dir for copying not found:\n"
-                               + origin.toStdString());
+                                 + origin.toStdString());
   }
 
   if (!DirExists(dest, vp)) {
     throw std::runtime_error("Destination (parent) dir for copying not found:\n"
-                               + dest.toStdString());
+                                 + dest.toStdString());
   }
 
   QDir original(origin);

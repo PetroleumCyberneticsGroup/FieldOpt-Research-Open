@@ -28,10 +28,11 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Utilities/filehandling.hpp"
 #include "Settings/helpers.hpp"
 
+namespace Settings {
+
 using namespace Utilities::FileHandling;
 using Printer::num2str;
-
-namespace Settings {
+using Printer::info;
 
 Simulator::Simulator(const QJsonObject& json_simulator,
                      Paths &paths, VerbParams vp) {
@@ -64,18 +65,23 @@ void Simulator::setStructure(QJsonObject json_simulator) {
 }
 
 void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
+
+  sched_file_name_ = json_simulator["ScheduleFile"].toString();
+
   if (!paths.IsSet(Paths::ENSEMBLE_FILE)) {
     is_ensemble_ = false;
 
+    if(vp_.vSET >= 3) { info("Setting SIM_DRIVER_FILE, SIM_DRIVER_DIR"); }
     if (!paths.IsSet(Paths::SIM_DRIVER_FILE)
-      && json_simulator.contains("DriverPath")) {
+        && json_simulator.contains("DriverPath")) {
       paths.SetPath(Paths::SIM_DRIVER_FILE,
                     json_simulator["DriverPath"].toString().toStdString());
     }
 
-    QString sim_drvr_dir = QString::fromStdString(GetParentDirPath(paths.GetPath(Paths::SIM_DRIVER_FILE)));
+    QString sim_drvr_dir = GetParentDirPath(paths.GetPathQstr(Paths::SIM_DRIVER_FILE));
     paths.SetPath(Paths::SIM_DRIVER_DIR, sim_drvr_dir.toStdString());
 
+    if(vp_.vSET >= 3) { info("Setting CASE_DRVR_DIR, CASE_ROOT_DIR, SIM_SCH_FILE"); }
     QStringList parts = sim_drvr_dir.split("/");
     string root_drvr_path;
     for (int ii=parts.length() - file_structure_.levels_num_ ; ii < parts.length(); ii++) {
@@ -85,21 +91,20 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
 
     string schedule_path;
     if (!paths.IsSet(Paths::SIM_SCH_FILE)
-      && json_simulator.contains("ScheduleFile")) {
+        && json_simulator.contains("ScheduleFile")) {
 
       if (file_structure_.type_ == FileStructType::Flat) {
         schedule_path = paths.GetPath(Paths::SIM_DRIVER_DIR) + "/"
-          + json_simulator["ScheduleFile"].toString().toStdString();
+            + sched_file_name_.toStdString();
 
       } else if (file_structure_.type_ == FileStructType::Branched) {
         schedule_path = paths.GetPath(Paths::SIM_DRIVER_DIR) + "/"
-          + file_structure_.levels_str_
-          + json_simulator["ScheduleFile"].toString().toStdString();
-
+            + file_structure_.levels_str_ + sched_file_name_.toStdString();
         paths.SetPath(Paths::CASE_ROOT_DIR,
                       GetParentDirPath(GetAbsoluteFilePath(schedule_path)));
       }
-      paths.SetPath(Paths::SIM_SCH_FILE, schedule_path);
+
+      paths.SetPath(Paths::SIM_SCH_FILE, schedule_path, true);
     }
 
   } else { // Ensemble run
@@ -125,7 +130,7 @@ void Simulator::setType(QJsonObject json_simulator) {
   else if (QString::compare(type, "IX", Qt::CaseInsensitive) == 0)
     type_ = SimulatorType::INTERSECT;
   else throw SimulatorTypeNotRecognizedException(
-      "Simulator type " + type.toStdString() + " not recognized.");
+        "Simulator type " + type.toStdString() + " not recognized.");
 }
 
 void Simulator::setParams(QJsonObject json_simulator) {
@@ -147,14 +152,14 @@ void Simulator::setCommands(QJsonObject json_simulator) {
 
   // ExecScript
   if (json_simulator.contains("ExecScript")
-    && json_simulator["ExecScript"].toString().size() > 0) {
+      && json_simulator["ExecScript"].toString().size() > 0) {
     script_name_ = json_simulator["ExecScript"].toString();
     tm += "| ExecScript: " + script_name_.toStdString() + " ";
   }
 
   // SimExecCmds
   if (json_simulator.contains("SimExecCmds")
-    && !sim_exec_cmds.isEmpty()) {
+      && !sim_exec_cmds.isEmpty()) {
     sim_exec_cmds_ = new QStringList();
     for (int i = 0; i < sim_exec_cmds.size(); ++i) {
       sim_exec_cmds_->append(sim_exec_cmds[i].toString());
@@ -164,7 +169,7 @@ void Simulator::setCommands(QJsonObject json_simulator) {
 
   // PreSimArgs
   if (json_simulator.contains("PreSimArgs")
-   && !pre_sim_args.isEmpty()) {
+      && !pre_sim_args.isEmpty()) {
     pre_sim_args_ = new QStringList();
     for (int i = 0; i < pre_sim_args.size(); ++i) {
       pre_sim_args_->append("\"" + pre_sim_args[i].toString() + "\"");
@@ -174,7 +179,7 @@ void Simulator::setCommands(QJsonObject json_simulator) {
 
   // PostSimArgs
   if (json_simulator.contains("PostSimArgs")
-    && !post_sim_args.isEmpty()) {
+      && !post_sim_args.isEmpty()) {
     post_sim_args_ = new QStringList();
     for (int i = 0; i < post_sim_args.size(); ++i) {
 
