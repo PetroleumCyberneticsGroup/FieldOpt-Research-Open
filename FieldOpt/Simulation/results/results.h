@@ -137,7 +137,8 @@ class Results
    * \param time_index The time index to get the property at.
    * \return
    */
-  virtual double GetValue(Property prop, QString well, int time_index) = 0;
+  virtual double GetValue(Property prop, QString well,
+                          int time_index) = 0;
 
   /*!
    * \brief available Indicates whether results are available.
@@ -152,10 +153,14 @@ class Results
 
  protected:
   /*!
-   * \brief Results Default constructor. A Results object is not useful on its own; One of the
-   * subclasses' constructor must be called.
+   * \brief Results Default constructor. A Results object is
+   * not useful on its own; One of the subclasses' constructor
+   * must be called.
    */
-  Results() { available_ = false; }
+  explicit Results(Settings::Simulator *settings) {
+    available_ = false;
+    vp_ = settings->verbParams();
+  }
 
   /*!
    * \brief setAvailable Sets the availability to true. This shuld be called when results
@@ -169,10 +174,14 @@ class Results
    */
   void setUnavailable() { available_ = false; }
 
+  Settings::VerbParams vp_;
 
  private:
   bool available_;
   JsonResults json_results_;
+
+  string md_ = "Simulation";
+  string cl_ = "results";
 };
 
 }}
