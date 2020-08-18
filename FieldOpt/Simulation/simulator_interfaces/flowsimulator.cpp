@@ -40,7 +40,7 @@ FlowSimulator::FlowSimulator(Settings::Settings *settings, Model::Model *model)
 
   verifyOriginalDriverFileDirectory();
 
-  results_ = new Results::ECLResults();
+  results_ = new Results::ECLResults(settings->simulator());
   try {
     results()->ReadResults(driver_file_writer_->output_driver_file_name_);
   } catch (...) {} // At this stage we don't really care if the results can be read, we just want to set the path.
@@ -111,7 +111,7 @@ bool FlowSimulator::Evaluate(int timeout, int threads) {
 }
 void FlowSimulator::WriteDriverFilesOnly() {
   copyDriverFiles();
-  driver_file_writer_->WriteDriverFile(QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR )));
+  driver_file_writer_->WriteDriverFile(paths_.GetPathQstr(Paths::SIM_WORK_DIR ));
 }
 bool FlowSimulator::Evaluate(const Settings::Ensemble::Realization &realization, int timeout, int threads) {
   throw std::runtime_error("Ensemble optimization not yet implemented for the FLOW reservoir simulator.");

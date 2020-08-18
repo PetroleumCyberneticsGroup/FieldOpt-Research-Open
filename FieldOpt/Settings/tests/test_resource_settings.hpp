@@ -71,7 +71,7 @@ class TestResourceSettings {
     runner_resources_ = new TestResources::RunnerResources();
 
     settings_en_5spot_full_ = new Settings::Settings(
-        runner_resources_->rts_en_5spot_->paths());
+      runner_resources_->rts_en_5spot_->paths());
   }
 
   TestResources::RunnerResources *runner_resources_;

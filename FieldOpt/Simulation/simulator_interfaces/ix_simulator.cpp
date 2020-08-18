@@ -31,7 +31,11 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Simulation {
 
-IXSimulator::IXSimulator(Settings::Settings *settings, Model::Model *model)
+using Printer::info;
+using Printer::ext_info;
+
+IXSimulator::IXSimulator(Settings::Settings *settings,
+                         Model::Model *model)
   : Simulator(settings) {
   model_ = model;
   settings_ = settings;
@@ -40,7 +44,7 @@ IXSimulator::IXSimulator(Settings::Settings *settings, Model::Model *model)
     throw std::runtime_error("Multiple realization is not yet supported in the INTERSECT interface.");
   }
   deck_name_ = driver_file_name_.split(".afi").first();
-  results_ = new Results::ECLResults();
+  results_ = new Results::ECLResults(settings->simulator());
   result_path_ = "";
 }
 
@@ -50,7 +54,11 @@ void IXSimulator::Evaluate() {
   script_args_ = (QStringList() << QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR)) << deck_name_);
   auto driver_file_writer = IXDriverFileWriter(model_);
   driver_file_writer.WriteDriverFile(paths_.GetPath(Paths::SIM_OUT_SCH_FILE));
-  if (VERB_SIM >= 1) { Printer::ext_info("Starting unmonitored evaluation.", "Simulation", "IXSimulator"); }
+
+  if (VERB_SIM >= 1) {
+    ext_info("Starting unmonitored evaluation.", "Simulation", "IXSimulator");
+  }
+
   Utilities::Unix::ExecShellScript(
     QString::fromStdString(paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE)),
     script_args_, vp_
@@ -86,7 +94,9 @@ bool IXSimulator::Evaluate(int timeout, int threads) {
       setResultPath();
     }
     PostSimWork();
-    if (VERB_SIM >= 1) { Printer::info("Simulation successful. Reading results from " + result_path_.toStdString()); }
+    if (VERB_SIM >= 1) {
+      Printer::info("Simulation successful. Reading results from " + result_path_.toStdString());
+    }
     results_->ReadResults(result_path_);
   }
   else {
@@ -96,7 +106,8 @@ bool IXSimulator::Evaluate(int timeout, int threads) {
   return success;
 }
 
-bool IXSimulator::Evaluate(const Settings::Ensemble::Realization &realization, int timeout, int threads) {
+bool IXSimulator::Evaluate(const Settings::Ensemble::Realization &realization,
+                           int timeout, int threads) {
   throw std::runtime_error("Multiple realization is not yet supported in the INTERSECT interface.");
 }
 

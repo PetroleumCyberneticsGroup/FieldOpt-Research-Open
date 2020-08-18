@@ -39,7 +39,8 @@ using Printer::ext_info;
 using Printer::info;
 
 ECLSimulator::ECLSimulator(Settings::Settings *settings,
-                           Model::Model *model) : Simulator(settings) {
+                           Model::Model *model)
+  : Simulator(settings) {
 
   model_ = model;
   settings_ = settings;
@@ -51,7 +52,7 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
     deck_name_ = "";
   }
 
-  results_ = new Results::ECLResults();
+  results_ = new Results::ECLResults(settings->simulator());
 }
 
 void ECLSimulator::Evaluate() {

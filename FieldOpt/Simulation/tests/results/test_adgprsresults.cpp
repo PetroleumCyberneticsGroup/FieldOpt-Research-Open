@@ -25,15 +25,17 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <gtest/gtest.h>
 #include "Settings/tests/test_resource_example_file_paths.hpp"
 #include "Simulation/results/adgprsresults.h"
+#include "Settings/tests/test_resource_settings.hpp"
 
 namespace {
 
-class AdgprsResultsTest : public ::testing::Test {
+class AdgprsResultsTest : public ::testing::Test,
+                          public TestResources::TestResourceSettings {
  protected:
-  AdgprsResultsTest()
-  {
-    results_ = new Simulation::Results::AdgprsResults();
-    results_->ReadResults(QString::fromStdString(TestResources::ExampleFilePaths::gprs_base_5spot_));
+  AdgprsResultsTest() {
+    results_ = new Simulation::Results::AdgprsResults(settings_simulator_);
+    auto fp = QString::fromStdString(TestResources::ExampleFilePaths::gprs_base_5spot_);
+    results_->ReadResults(fp);
   }
   virtual ~AdgprsResultsTest() {}
   virtual void SetUp() {}

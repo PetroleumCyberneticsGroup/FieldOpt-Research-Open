@@ -37,7 +37,7 @@ AdgprsSimulator::AdgprsSimulator(Settings::Settings *settings, Model::Model *mod
   verifyOriginalDriverFileDirectory();
 
   model_ = model;
-  results_ = new Simulation::Results::AdgprsResults();
+  results_ = new Simulation::Results::AdgprsResults(settings->simulator());
   vp_ = settings_->global()->verbParams();
   driver_file_writer_ = new AdgprsDriverFileWriter(settings_, model_);
 }
@@ -51,7 +51,7 @@ void AdgprsSimulator::Evaluate() {
                  paths_.GetPath(Paths::SIM_WORK_DIR) + "/"
                    + driver_file_name_.split(".").first().toStdString() + ".vars.h5"
   );
-  results_->ReadResults(QString::fromStdString(paths_.GetPath(Paths::SIM_HDF5_FILE)));
+  results_->ReadResults(paths_.GetPathQstr(Paths::SIM_HDF5_FILE));
   updateResultsInModel();
 }
 
