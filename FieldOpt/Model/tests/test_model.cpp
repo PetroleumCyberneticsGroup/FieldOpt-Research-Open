@@ -122,16 +122,16 @@ TEST_F(ModelTest, Logging) {
   }
 
   model_->ApplyCase(c);
-  model_->SetResult("CumulativeOilProduction", vector<double>{1.0, 2.0, 3.0});
+  model_->SetResult("FieldOilProdTotal", vector<double>{1.0, 2.0, 3.0});
   model_->SetCompdatString("This is the compdat string.");
   model_->ApplyCase(c);
-  model_->SetResult("CumulativeOilProduction", vector<double>{1.0, 2.0, 3.0});
-  model_->SetResult("CumulativeWaterProduction", vector<double>{4.0, 5.0, 6.0});
+  model_->SetResult("FieldOilProdTotal", vector<double>{1.0, 2.0, 3.0});
+  model_->SetResult("FieldWatProdTotal", vector<double>{4.0, 5.0, 6.0});
   model_->SetCompdatString("This is the compdat string.");
   model_->ApplyCase(c);
   model_->SetCompdatString("This is the compdat string.");
-  model_->SetResult("CumulativeOilProduction", vector<double>{1.0, 2.0, 3.0});
-  model_->SetResult("CumulativeWaterProduction", vector<double>{4.0, 5.0, 6.0});
+  model_->SetResult("FieldOilProdTotal", vector<double>{1.0, 2.0, 3.0});
+  model_->SetResult("FieldWatProdTotal", vector<double>{4.0, 5.0, 6.0});
 }
 
 }

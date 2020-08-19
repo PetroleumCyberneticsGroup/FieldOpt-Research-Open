@@ -56,12 +56,12 @@ TEST_F(OptimizerSettingsTest, Objective) {
     EXPECT_EQ(Optimizer::ObjectiveType::WeightedSum, obj.type);
     EXPECT_EQ(2, obj.weighted_sum.size());
 
-    EXPECT_STREQ("CumulativeOilProduction", obj.weighted_sum.at(0).property.toLatin1().constData());
+    EXPECT_STREQ("FieldOilProdTotal", obj.weighted_sum.at(0).property.toLatin1().constData());
     EXPECT_FLOAT_EQ(1.0, obj.weighted_sum.at(0).coefficient);
     EXPECT_EQ(-1, obj.weighted_sum.at(0).time_step);
     EXPECT_FALSE(obj.weighted_sum.at(0).is_well_prop);
 
-    EXPECT_STREQ("CumulativeWellWaterProduction", obj.weighted_sum.at(1).property.toLatin1().constData());
+    EXPECT_STREQ("WellWatProdTotal", obj.weighted_sum.at(1).property.toLatin1().constData());
     EXPECT_FLOAT_EQ(-0.2, obj.weighted_sum.at(1).coefficient);
     EXPECT_EQ(10, obj.weighted_sum.at(1).time_step);
     EXPECT_TRUE(obj.weighted_sum.at(1).is_well_prop);

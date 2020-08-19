@@ -60,7 +60,7 @@ class AdgprsResults : public Results
 
  private:
   QString file_path_;
-  Hdf5SummaryReader *summary_reader_;
+  Hdf5SummaryReader *smry_reader_;
 };
 
 }}

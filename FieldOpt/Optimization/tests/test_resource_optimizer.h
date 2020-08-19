@@ -134,13 +134,13 @@ class TestResourceOptimizer :
     {"WeightedSumComponents", QJsonArray{
       QJsonObject{
         {"Coefficient", 1.0},
-        {"Property", "CumulativeOilProduction"},
+        {"Property", "FieldOilProdTotal"},
         {"TimeStep", -1},
         {"IsWellProp", false}
       },
       QJsonObject{
         {"Coefficient", 0.0},
-        {"Property", "CumulativeWaterProduction"},
+        {"Property", "FieldWatProdTotal"},
         {"TimeStep", -1},
         {"IsWellProp", false}
       }

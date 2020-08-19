@@ -53,21 +53,21 @@ TEST_F(AdgprsResultsTest, Time) {
 }
 
 TEST_F(AdgprsResultsTest, FOPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeOilProduction).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeOilProduction).front());
-  EXPECT_FLOAT_EQ(178150.12, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeOilProduction).back());
+  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).front());
+  EXPECT_FLOAT_EQ(178150.12, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).back());
 }
 
 TEST_F(AdgprsResultsTest, FWPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeWaterProduction).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeWaterProduction).front());
-  EXPECT_FLOAT_EQ(305866.53, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeWaterProduction).back());
+  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).front());
+  EXPECT_FLOAT_EQ(305866.53, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).back());
 }
 
 TEST_F(AdgprsResultsTest, FGPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeGasProduction).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeGasProduction).front());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::CumulativeGasProduction).back());
+  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).front());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).back());
 }
 
 }

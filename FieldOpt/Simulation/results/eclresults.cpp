@@ -41,14 +41,13 @@ ECLResults::ECLResults(Settings::Simulator *settings)
 
 void ECLResults::ReadResults(QString file_path) {
   if (vp_.vSIM >= 2) {
-    ext_info("Attempting to read results from" + file_path.toStdString(), "Simulation", "ECLResults");
+    ext_info("Attempting to read results from" + file_path.toStdString(), md_, cl_);
   }
   file_path_ = file_path;
   if (summary_reader_ != 0) delete summary_reader_;
   try {
     summary_reader_ = new ERTWrapper::ECLSummary::ECLSummaryReader(file_path.toStdString());
-  }
-  catch (ERTWrapper::SummaryFileNotFoundAtPathException) {
+  } catch (ERTWrapper::SummaryFileNotFoundAtPathException) {
     throw ResultFileNotFoundException(file_path.toLatin1().constData());
   }
 
@@ -90,11 +89,11 @@ double ECLResults::GetValue(Results::Property prop, QString well, int time_index
 std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
   if (!isAvailable()) throw ResultsNotAvailableException();
   switch (prop) {
-    case CumulativeOilProduction:   return summary_reader_->fopt();
-    case CumulativeGasProduction:   return summary_reader_->fgpt();
-    case CumulativeWaterProduction: return summary_reader_->fwpt();
-    case CumulativeWaterInjection:  return summary_reader_->fwit();
-    case CumulativeGasInjection:    return summary_reader_->fgit();
+    case FieldOilProdTotal:   return summary_reader_->fopt();
+    case FieldGasProdTotal:   return summary_reader_->fgpt();
+    case FieldWatProdTotal: return summary_reader_->fwpt();
+    case FieldWatInjTotal:  return summary_reader_->fwit();
+    case FieldGasInjTotal:    return summary_reader_->fgit();
     case Time:                      return summary_reader_->time();
     default: throw std::runtime_error("In ECLResults: The requested property is not a field or misc property.");
   }
@@ -103,11 +102,11 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
 std::vector<double> ECLResults::GetValueVector(Results::Property prop, QString well_name) {
   if (!isAvailable()) throw ResultsNotAvailableException();
   switch (prop) {
-    case CumulativeWellOilProduction:   return summary_reader_->wopt(well_name.toStdString());
-    case CumulativeWellGasProduction:   return summary_reader_->wgpt(well_name.toStdString());
-    case CumulativeWellWaterProduction: return summary_reader_->wwpt(well_name.toStdString());
-    case CumulativeWellWaterInjection:  return summary_reader_->wwit(well_name.toStdString());
-    case CumulativeWellGasInjection:    return summary_reader_->wgit(well_name.toStdString());
+    case WellOilProdTotal:   return summary_reader_->wopt(well_name.toStdString());
+    case WellGasProdTotal:   return summary_reader_->wgpt(well_name.toStdString());
+    case WellWatProdTotal: return summary_reader_->wwpt(well_name.toStdString());
+    case WellWatInjTotal:  return summary_reader_->wwit(well_name.toStdString());
+    case WellGasInjTotal:    return summary_reader_->wgit(well_name.toStdString());
     default: throw std::runtime_error("In ECLResults: The requested property is not a well property.");
   }
 }

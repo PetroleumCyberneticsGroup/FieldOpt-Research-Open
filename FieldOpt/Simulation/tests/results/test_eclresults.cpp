@@ -81,11 +81,11 @@ TEST_F(ECLResultsTest, DumpingAndAvailability) {
 TEST_F(ECLResultsTest, FieldVariables) {
   auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
   results_->ReadResults(fp);
-  EXPECT_FLOAT_EQ(187866.44, results_->GetValue(ECLResults::Property::CumulativeOilProduction));
-  EXPECT_FLOAT_EQ(115870.73, results_->GetValue(ECLResults::Property::CumulativeOilProduction, 10));
-  EXPECT_THROW(results_->GetValue(ECLResults::Property::CumulativeOilProduction, 30), std::runtime_error);
+  EXPECT_FLOAT_EQ(187866.44, results_->GetValue(ECLResults::Property::FieldOilProdTotal));
+  EXPECT_FLOAT_EQ(115870.73, results_->GetValue(ECLResults::Property::FieldOilProdTotal, 10));
+  EXPECT_THROW(results_->GetValue(ECLResults::Property::FieldOilProdTotal, 30), std::runtime_error);
 
-  std::vector<double> fopt_vec = results_->GetValueVector(ECLResults::Property::CumulativeOilProduction);
+  std::vector<double> fopt_vec = results_->GetValueVector(ECLResults::Property::FieldOilProdTotal);
   EXPECT_EQ(21, fopt_vec.size());
   EXPECT_FLOAT_EQ(0, fopt_vec.front());
   EXPECT_FLOAT_EQ(187866.44, fopt_vec.back());
@@ -107,8 +107,8 @@ TEST_F(ECLResultsTest, MiscVariables) {
 TEST_F(ECLResultsTest, WellVariables) {
   auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
   results_->ReadResults(fp);
-  EXPECT_FLOAT_EQ(1116.8876, results_->GetValue(ECLResults::Property::CumulativeWellWaterProduction, "PROD"));
-  EXPECT_FLOAT_EQ(524.5061, results_->GetValue(ECLResults::Property::CumulativeWellWaterProduction, "PROD", 10));
+  EXPECT_FLOAT_EQ(1116.8876, results_->GetValue(ECLResults::Property::WellWatProdTotal, "PROD"));
+  EXPECT_FLOAT_EQ(524.5061, results_->GetValue(ECLResults::Property::WellWatProdTotal, "PROD", 10));
 }
 
 }
