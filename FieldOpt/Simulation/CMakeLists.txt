@@ -15,6 +15,10 @@ target_link_libraries(simulation
     PUBLIC ${Boost_LIBRARIES}
     PUBLIC fieldopt::hdf5summaryreader)
 
+target_include_directories(simulation PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/results>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/simulator_interfaces>)
+
 add_compile_options(-std=c++11)
 
 # Test exec ================================================

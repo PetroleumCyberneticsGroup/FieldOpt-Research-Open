@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "results_exceptions.h"
 #include <vector>
 #include "Simulation/results/json_results.h"
+#include <Eigen/Core>
 
 namespace Simulation {
 namespace Results {
@@ -134,6 +135,7 @@ class Results
    * \param prop The property to be retrieved.
    */
   virtual std::vector<double> GetValueVector(Property prop) = 0;
+  virtual VectorXd GetValueVectorXd(Property prop) = 0;
 
   /*!
    * \brief GetFinalValue Gets the value of the given property

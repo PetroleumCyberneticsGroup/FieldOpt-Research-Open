@@ -56,7 +56,9 @@ class AdgprsResults : public Results
   double GetValue(Property prop, QString well) override;
   double GetValue(Property prop, int time_index) override;
   double GetValue(Property prop, QString well, int time_index) override;
+
   std::vector<double> GetValueVector(Property prop) override;
+  VectorXd GetValueVectorXd(Property prop) override;
 
  private:
   QString file_path_;

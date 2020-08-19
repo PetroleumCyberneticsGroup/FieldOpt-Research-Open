@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 namespace Results {
 
+using namespace Eigen;
 using Printer::ext_info;
 
 ECLResults::ECLResults(Settings::Simulator *settings)
@@ -109,6 +110,9 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop, QString w
     case WellGasInjTotal:    return summary_reader_->wgit(well_name.toStdString());
     default: throw std::runtime_error("In ECLResults: The requested property is not a well property.");
   }
+}
+
+VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
 }
 
 }}

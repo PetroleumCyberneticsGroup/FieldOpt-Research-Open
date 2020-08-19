@@ -97,5 +97,7 @@ std::vector<double> AdgprsResults::GetValueVector(Results::Property prop) {
   }
 }
 
+VectorXd AdgprsResults::GetValueVectorXd(Results::Property prop) {
+}
 
 }}

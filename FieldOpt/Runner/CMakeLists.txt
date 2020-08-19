@@ -22,7 +22,7 @@ target_link_libraries(FieldOpt
 		PUBLIC fieldopt::constraintmath
 		PUBLIC ${CMAKE_THREAD_LIBS_INIT}
 		PUBLIC ${Boost_LIBRARIES}
-        PUBLIC ${MPI_LIBRARIES}
+		PUBLIC ${MPI_LIBRARIES}
 		PUBLIC ri:ert_ecl
 		)
 

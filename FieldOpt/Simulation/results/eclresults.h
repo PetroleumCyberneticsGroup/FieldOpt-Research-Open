@@ -54,6 +54,9 @@ class ECLResults : public Results
   std::vector<double> GetValueVector(Property prop) override;
   std::vector<double> GetValueVector(Property prop, QString well_name);
 
+  VectorXd GetValueVectorXd(Property prop) override;
+  VectorXd GetValueVectorXd(Property prop, QString well_name);
+
  private:
   QString file_path_;
   ERTWrapper::ECLSummary::ECLSummaryReader *summary_reader_;
