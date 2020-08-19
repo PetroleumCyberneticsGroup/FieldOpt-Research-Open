@@ -50,30 +50,52 @@ class Results
    * must be implemented in the underlying classes.
    */
   enum Property {
-    CumulativeOilProduction,
-    CumulativeGasProduction,
-    CumulativeWaterProduction,
-    CumulativeWaterInjection,
-    CumulativeGasInjection,
-    CumulativeWellOilProduction,
-    CumulativeWellGasProduction,
-    CumulativeWellWaterProduction,
-    CumulativeWellWaterInjection,
-    CumulativeWellGasInjection,
-    Time
+    FieldOilProdTotal,
+    FieldGasProdTotal,
+    FieldWatProdTotal,
+    FieldWatInjTotal,
+    FieldGasInjTotal,
+    WellOilProdTotal,
+    WellGasProdTotal,
+    WellWatProdTotal,
+    WellWatInjTotal,
+    WellGasInjTotal,
+    Time,
+    FieldOilProdRate,
+    FieldGasProdRate,
+    FieldWatProdRate,
+    FieldWatInjRate,
+    WellOilProdRate,
+    WellGasProdRate,
+    WellWatProdRate,
+    WellWatInjRate,
+    AuxProp
 //    EclAjdGradients
   };
 
-  Property GetPropertyKeyFromString(QString prop) {
-    if (prop == "CumulativeOilProduction") return CumulativeOilProduction;
-    else if (prop == "CumulativeGasProduction") return CumulativeGasProduction;
-    else if (prop == "CumulativeWaterProduction") return CumulativeWaterProduction;
-    else if (prop == "CumulativeWaterInjection") return CumulativeWaterInjection;
-    else if (prop == "CumulativeWellOilProduction") return CumulativeWellOilProduction;
-    else if (prop == "CumulativeWellGasProduction") return CumulativeWellGasProduction;
-    else if (prop == "CumulativeWellWaterProduction") return CumulativeWellWaterProduction;
-    else if (prop == "Time") return Time;
-    else throw ResultPropertyKeyDoesNotExistException("");
+  static Property GetPropertyKeyFromString(QString prop) {
+    if (prop == "FieldOilProdTotal")      return FieldOilProdTotal;
+    else if (prop == "FieldGasProdTotal") return FieldGasProdTotal;
+    else if (prop == "FieldWatProdTotal") return FieldWatProdTotal;
+    else if (prop == "FieldWatInjTotal")  return FieldWatInjTotal;
+    else if (prop == "WellOilProdTotal")  return WellOilProdTotal;
+    else if (prop == "WellGasProdTotal")  return WellGasProdTotal;
+    else if (prop == "WellWatProdTotal")  return WellWatProdTotal;
+    else if (prop == "Time")              return Time;
+    else if (prop == "FieldOilProdRate")  return FieldOilProdRate;
+    else if (prop == "FieldGasProdRate")  return FieldGasProdRate;
+    else if (prop == "FieldWatProdRate")  return FieldWatProdRate;
+    else if (prop == "FieldWatInjRate")   return FieldWatInjRate;
+    else if (prop == "WellOilProdRate")   return WellOilProdRate;
+    else if (prop == "WellGasProdRate")   return WellGasProdRate;
+    else if (prop == "WellWatProdRate")   return WellWatProdRate;
+    else if (prop == "WellWatInjRate")    return WellWatInjRate;
+    else throw ResultPropertyKeyDoesNotExistException("", prop.toStdString());
+  }
+
+  static Property GetPropertyKeyFromString(std::string p) {
+    auto prop = QString::fromStdString(p);
+    return GetPropertyKeyFromString(prop);
   }
 
   struct EclAjdGData {
@@ -175,13 +197,14 @@ class Results
   void setUnavailable() { available_ = false; }
 
   Settings::VerbParams vp_;
+  string md_ = "Simulation";
+  string cl_ = "results";
 
  private:
   bool available_;
   JsonResults json_results_;
 
-  string md_ = "Simulation";
-  string cl_ = "results";
+
 };
 
 }}

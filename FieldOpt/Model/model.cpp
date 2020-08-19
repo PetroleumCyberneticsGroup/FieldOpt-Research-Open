@@ -30,7 +30,6 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 
 Model::Model(Settings::Settings settings, Logger *logger) {
-
   if (settings.paths().IsSet(Paths::GRID_FILE)) {
     grid_ = new Reservoir::Grid::ECLGrid(settings.paths().GetPath(Paths::GRID_FILE));
     wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
@@ -139,7 +138,7 @@ void Model::verifyWells() {
   }
 }
 
-Model::Economy* Model::wellCostConstructor(){
+Model::Economy* Model::wellCostConstructor() {
   return &well_economy_;
 }
 
@@ -169,16 +168,13 @@ void Model::wellCost(Settings::Optimizer *settings) {
   }
 }
 
-
-void Model::verifyWellTrajectory(Wells::Well *w)
-{
+void Model::verifyWellTrajectory(Wells::Well *w) {
   for (Wells::Wellbore::WellBlock *wb : *w->trajectory()->GetWellBlocks()) {
     verifyWellBlock(wb);
   }
 }
 
-void Model::verifyWellBlock(Wells::Wellbore::WellBlock *wb)
-{
+void Model::verifyWellBlock(Wells::Wellbore::WellBlock *wb) {
   if (wb->i() < 1 || wb->i() > grid()->Dimensions().nx ||
       wb->j() < 1 || wb->j() > grid()->Dimensions().ny ||
       wb->k() < 1 || wb->k() > grid()->Dimensions().nz)
@@ -192,17 +188,21 @@ void Model::verifyWellBlock(Wells::Wellbore::WellBlock *wb)
 void Model::SetResult(const std::string key, std::vector<double> vec) {
   results_[key] = vec;
 }
+
 Loggable::LogTarget Model::GetLogTarget() {
   return Loggable::LogTarget::LOG_EXTENDED;
 }
+
 map<string, string> Model::GetState() {
   map<string, string> statemap;
   statemap["COMPDAT"] = compdat_.toStdString();
   return statemap;
 }
+
 QUuid Model::GetId() {
   return current_case_id_;
 }
+
 map<string, vector<double>> Model::GetValues() {
   map<string, vector<double>> valmap;
   for (auto const item : results_) {
@@ -230,6 +230,7 @@ map<string, vector<double>> Model::GetValues() {
   }
   return valmap;
 }
+
 void Model::set_grid_path(const std::string &grid_path) {
   if (wic_->HasGrid(grid_path) == false) {
     if (VERB_MOD >= 2) Printer::ext_info("Initializing new Grid: " + grid_path, "Model", "Model");
@@ -243,6 +244,7 @@ void Model::set_grid_path(const std::string &grid_path) {
     wic_->SetGridActive(grid_);
   }
 }
+
 void Model::verifyWellCompartments(Wells::Well *w) {
   double well_length = w->trajectory()->GetLength();
   for (int i = 0; i < w->GetCompartments().size() - 1; ++i) {
@@ -281,18 +283,22 @@ void Model::verifyWellCompartments(Wells::Well *w) {
 Loggable::LogTarget Model::Summary::GetLogTarget() {
   return LOG_SUMMARY;
 }
+
 map<string, string> Model::Summary::GetState() {
   map<string, string> statemap;
   statemap["compdat"] = model_->compdat_.toStdString();
   return statemap;
 }
+
 QUuid Model::Summary::GetId() {
   return nullptr;
 }
+
 map<string, vector<double>> Model::Summary::GetValues() {
   map<string, vector<double>> valmap;
   return valmap;
 }
+
 map<string, Loggable::WellDescription> Model::Summary::GetWellDescriptions() {
   map<string, Loggable::WellDescription> wellmap;
 
@@ -329,8 +335,7 @@ map<string, Loggable::WellDescription> Model::Summary::GetWellDescriptions() {
           }
         }
       }
-    }
-    else {
+    } else {
       wdesc.def_type =  "Blocks";
     }
 
