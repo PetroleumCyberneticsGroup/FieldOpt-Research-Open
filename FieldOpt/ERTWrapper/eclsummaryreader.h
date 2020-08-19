@@ -31,6 +31,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <set>
 #include <string>
+#include <Eigen/Core>
 
 #include "Settings/settings.h"
 
@@ -38,6 +39,7 @@ namespace ERTWrapper {
 namespace ECLSummary {
 
 using namespace std;
+using namespace Eigen;
 
 /*!
  * \brief ECLSummaryReader class is a wrapper for ecl_sum in
@@ -48,10 +50,11 @@ class ECLSummaryReader
 {
  public:
   /*!
-   * \brief ECLSummaryReader Reads the summary file specified in the parameter.
-   * \param file_name Path to the eclipse summary, with or without file suffix.
+   * \brief ECLSummaryReader Reads the Eclipse summary file
+   * \param file_name Path to the eclipse summary, with or
+   * without file suffix.
    */
-  ECLSummaryReader(string file_name);
+  explicit ECLSummaryReader(string file_name);
   ~ECLSummaryReader();
 
   /*!
@@ -102,6 +105,9 @@ class ECLSummaryReader
 
   //!< Get the time vector (days).
   const vector<double> &time() const { return time_; }
+  const vector<double> &step() const { return step_; }
+  const VectorXd &timeXd() const { return timeXd_; }
+  const VectorXd &stepXd() const { return stepXd_; }
 
   const vector<double> &fopt() const;
   const vector<double> &fwpt() const;
@@ -115,17 +121,29 @@ class ECLSummaryReader
   const vector<double> &fwir() const;
   const vector<double> &fgir() const;
 
+  const VectorXd &foptXd() const;
+  const VectorXd &fwptXd() const;
+  const VectorXd &fgptXd() const;
+  const VectorXd &fwitXd() const;
+  const VectorXd &fgitXd() const;
+
+  const VectorXd &foprXd() const;
+  const VectorXd &fwprXd() const;
+  const VectorXd &fgprXd() const;
+  const VectorXd &fwirXd() const;
+  const VectorXd &fgirXd() const;
+
   const vector<double> wopt(const string well_name) const;
   const vector<double> wwpt(const string well_name) const;
   const vector<double> wgpt(const string well_name) const;
   const vector<double> wwit(const string well_name) const;
   const vector<double> wgit(const string well_name) const;
 
-  const vector<double> wopr(const string well_name) const;
-  const vector<double> wwpr(const string well_name) const;
-  const vector<double> wgpr(const string well_name) const;
-  const vector<double> wwir(const string well_name) const;
-  const vector<double> wgir(const string well_name) const;
+  vector<double> wopr(const string well_name) const;
+  vector<double> wwpr(const string well_name) const;
+  vector<double> wgpr(const string well_name) const;
+  vector<double> wwir(const string well_name) const;
+  vector<double> wgir(const string well_name) const;
 
   Settings::VerbParams vp_;
   string md_ = "ERTWrapper";
@@ -145,6 +163,8 @@ class ECLSummaryReader
   void populateKeyLists();
 
   vector<double> time_;
+  vector<double> step_;
+
   vector<double> fopt_;
   vector<double> fwpt_;
   vector<double> fgpt_;
@@ -156,6 +176,21 @@ class ECLSummaryReader
   vector<double> fgpr_;
   vector<double> fwir_;
   vector<double> fgir_;
+
+  VectorXd timeXd_;
+  VectorXd stepXd_;
+
+  VectorXd foptXd_;
+  VectorXd fwptXd_;
+  VectorXd fgptXd_;
+  VectorXd fwitXd_;
+  VectorXd fgitXd_;
+
+  VectorXd foprXd_;
+  VectorXd fwprXd_;
+  VectorXd fgprXd_;
+  VectorXd fwirXd_;
+  VectorXd fgirXd_;
 
   map<string, vector<double> > wopt_;
   map<string, vector<double> > wwpt_;
@@ -170,7 +205,9 @@ class ECLSummaryReader
   map<string, vector<double> > wgir_;
 
   void initializeVectors();
+  void initVectorsXd();
   void initializeTimeVector();
+
   void initializeWellRates();
   void initializeWellCumulatives();
 

@@ -62,17 +62,44 @@ class Results
     WellWatInjTotal,
     WellGasInjTotal,
     Time,
+    Step,
     FieldOilProdRate,
     FieldGasProdRate,
     FieldWatProdRate,
     FieldWatInjRate,
+    FieldGasInjRate,
     WellOilProdRate,
     WellGasProdRate,
     WellWatProdRate,
     WellWatInjRate,
+    WellGasInjRate,
     AuxProp
 //    EclAjdGradients
   };
+
+  static string GetPropertyKey(Property prop) {
+    string pstr = "???";
+    if (prop == FieldOilProdTotal)      pstr = "FieldOilProdTotal";
+    else if (prop == FieldGasProdTotal) pstr = "FieldGasProdTotal";
+    else if (prop == FieldWatProdTotal) pstr = "FieldWatProdTotal";
+    else if (prop == FieldWatInjTotal)  pstr = "FieldWatInjTotal";
+    else if (prop == WellOilProdTotal)  pstr = "WellOilProdTotal";
+    else if (prop == WellGasProdTotal)  pstr = "WellGasProdTotal";
+    else if (prop == WellWatProdTotal)  pstr = "WellWatProdTotal";
+    else if (prop == Time)              pstr = "Time";
+    else if (prop == Step)              pstr = "Step";
+    else if (prop == FieldOilProdRate)  pstr = "FieldOilProdRate";
+    else if (prop == FieldGasProdRate)  pstr = "FieldGasProdRate";
+    else if (prop == FieldWatProdRate)  pstr = "FieldWatProdRate";
+    else if (prop == FieldWatInjRate)   pstr = "FieldWatInjRate";
+    else if (prop == FieldGasInjRate)   pstr = "FieldGasInjRate";
+    else if (prop == WellOilProdRate)   pstr = "WellOilProdRate";
+    else if (prop == WellGasProdRate)   pstr = "WellGasProdRate";
+    else if (prop == WellWatProdRate)   pstr = "WellWatProdRate";
+    else if (prop == WellWatInjRate)    pstr = "WellWatInjRate";
+    else if (prop == WellGasInjRate)    pstr = "WellGasInjRate";
+    else throw RsltPropKeyDoesNotExistExc("", pstr);
+  }
 
   static Property GetPropertyKey(QString prop) {
     if (prop == "FieldOilProdTotal")      return FieldOilProdTotal;
@@ -83,15 +110,18 @@ class Results
     else if (prop == "WellGasProdTotal")  return WellGasProdTotal;
     else if (prop == "WellWatProdTotal")  return WellWatProdTotal;
     else if (prop == "Time")              return Time;
+    else if (prop == "Step")              return Step;
     else if (prop == "FieldOilProdRate")  return FieldOilProdRate;
     else if (prop == "FieldGasProdRate")  return FieldGasProdRate;
     else if (prop == "FieldWatProdRate")  return FieldWatProdRate;
     else if (prop == "FieldWatInjRate")   return FieldWatInjRate;
+    else if (prop == "FieldGasInjRate")   return FieldGasInjRate;
     else if (prop == "WellOilProdRate")   return WellOilProdRate;
     else if (prop == "WellGasProdRate")   return WellGasProdRate;
     else if (prop == "WellWatProdRate")   return WellWatProdRate;
     else if (prop == "WellWatInjRate")    return WellWatInjRate;
-    else throw ResultPropertyKeyDoesNotExistException("", prop.toStdString());
+    else if (prop == "WellGasInjRate")    return WellGasInjRate;
+    else throw RsltPropKeyDoesNotExistExc("", prop.toStdString());
   }
 
   static Property GetPropertyKey(std::string p) {

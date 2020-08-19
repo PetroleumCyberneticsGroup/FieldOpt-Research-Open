@@ -167,6 +167,23 @@ void ECLSummaryReader::initializeVectors() {
   initializeWellCumulatives();
   initFieldTotals();
   initFieldRates();
+
+  initVectorsXd();
+}
+
+void ECLSummaryReader::initVectorsXd() {
+  timeXd_ = Eigen::Map<VectorXd>(time_.data(), time_.size());
+  foptXd_ = Eigen::Map<VectorXd>(fopt_.data(), fopt_.size());
+  fwptXd_ = Eigen::Map<VectorXd>(fwpt_.data(), fwpt_.size());
+  fgptXd_ = Eigen::Map<VectorXd>(fgpt_.data(), fgpt_.size());
+  fwitXd_ = Eigen::Map<VectorXd>(fwit_.data(), fwit_.size());
+  fgitXd_ = Eigen::Map<VectorXd>(fgit_.data(), fgit_.size());
+
+  foprXd_ = Eigen::Map<VectorXd>(fopr_.data(), fopr_.size());
+  fwprXd_ = Eigen::Map<VectorXd>(fwpr_.data(), fwpr_.size());
+  fgprXd_ = Eigen::Map<VectorXd>(fgpr_.data(), fgpr_.size());
+  fwirXd_ = Eigen::Map<VectorXd>(fwir_.data(), fwir_.size());
+  fgirXd_ = Eigen::Map<VectorXd>(fgir_.data(), fgir_.size());
 }
 
 void ECLSummaryReader::initializeTimeVector() {
@@ -177,6 +194,12 @@ void ECLSummaryReader::initializeTimeVector() {
     time_[i] = (double_vector_safe_iget(time, i));
   }
   time_[0] = GetFirstReportStep();
+
+  step_.resize(double_vector_size(time));
+  step_[0] = time_[0];
+  for (int i = 1; i < double_vector_size(time); ++i) {
+    step_[i] = time_[i] - time_[i-1];
+  }
   double_vector_free(time);
 }
 
@@ -348,7 +371,7 @@ void ECLSummaryReader::initFieldRates() {
     double_vector_type * fopr = ecl_sum_alloc_data_vector(ecl_sum_, fopr_index, true);
     assert(double_vector_size(fopr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
-      fopt_[i] = double_vector_safe_iget(fopr, i);
+      fopr_[i] = double_vector_safe_iget(fopr, i);
     }
     fopr_[0] = 0.0;
   } else {
@@ -367,7 +390,7 @@ void ECLSummaryReader::initFieldRates() {
     double_vector_type * fwpr = ecl_sum_alloc_data_vector(ecl_sum_, fwpr_index, true);
     assert(double_vector_size(fwpr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
-      fwpt_[i] = double_vector_safe_iget(fwpr, i);
+      fwpr_[i] = double_vector_safe_iget(fwpr, i);
     }
     fwpr_[0] = 0.0;
   } else {
@@ -386,7 +409,7 @@ void ECLSummaryReader::initFieldRates() {
     double_vector_type * fgpr = ecl_sum_alloc_data_vector(ecl_sum_, fgpr_index, true);
     assert(double_vector_size(fgpr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
-      fgpt_[i] = double_vector_safe_iget(fgpr, i);
+      fgpr_[i] = double_vector_safe_iget(fgpr, i);
     }
     fgpr_[0] = 0.0;
   } else {
@@ -405,7 +428,7 @@ void ECLSummaryReader::initFieldRates() {
     double_vector_type * fwir = ecl_sum_alloc_data_vector(ecl_sum_, fwir_index, true);
     assert(double_vector_size(fwir) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
-      fwit_[i] = double_vector_safe_iget(fwir, i);
+      fwir_[i] = double_vector_safe_iget(fwir, i);
     }
     fwir_[0] = 0.0;
   } else {
@@ -424,7 +447,7 @@ void ECLSummaryReader::initFieldRates() {
     double_vector_type * fgir = ecl_sum_alloc_data_vector(ecl_sum_, fgir_index, true);
     assert(double_vector_size(fgir) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
-      fgit_[i] = double_vector_safe_iget(fgir, i);
+      fgir_[i] = double_vector_safe_iget(fgir, i);
     }
     fgir_[0] = 0.0;
   } else {
@@ -599,60 +622,155 @@ void ECLSummaryReader::warnPropertyZero(string propname) const {
 }
 
 const std::vector<double> &ECLSummaryReader::fopt() const {
-  if (fopt_.back() == 0.0)
-    warnPropertyZero("FOPT");
+  if (fopt_.back() == 0.0) { warnPropertyZero("FOPT"); }
   return fopt_;
 }
 
 const std::vector<double> &ECLSummaryReader::fwpt() const {
-  if (fwpt_.back() == 0.0)
-    warnPropertyZero("WOPT");
+  if (fwpt_.back() == 0.0) { warnPropertyZero("FWPT"); }
   return fwpt_;
 }
 
 const std::vector<double> &ECLSummaryReader::fgpt() const {
-  if (fgpt_.back() == 0.0)
-    warnPropertyZero("FGPT");
+  if (fgpt_.back() == 0.0) { warnPropertyZero("FGPT"); }
   return fgpt_;
 }
 
 const std::vector<double> &ECLSummaryReader::fwit() const {
-  if (fgpt_.back() == 0.0)
-    warnPropertyZero("FWIT");
+  if (fgpt_.back() == 0.0) { warnPropertyZero("FWIT"); }
   return fwit_;
 }
 
 const std::vector<double> &ECLSummaryReader::fgit() const {
-  if (fgit_.back() == 0.0)
-    warnPropertyZero("FGIT");
+  if (fgit_.back() == 0.0) { warnPropertyZero("FGIT"); }
   return fgit_;
 }
 
-const std::vector<double> ECLSummaryReader::wopr(const string well_name) const {
+const std::vector<double> &ECLSummaryReader::fopr() const {
+  if (fopr_.back() == 0.0) { warnPropertyZero("FOPR"); }
+  return fopr_;
+}
+
+const std::vector<double> &ECLSummaryReader::fwpr() const {
+  if (fwpr_.back() == 0.0) { warnPropertyZero("FWPR"); }
+  return fwpr_;
+}
+
+const std::vector<double> &ECLSummaryReader::fgpr() const {
+  if (fgpr_.back() == 0.0) { warnPropertyZero("FGPR"); }
+  return fgpr_;
+}
+
+const std::vector<double> &ECLSummaryReader::fwir() const {
+  if (fgpr_.back() == 0.0) { warnPropertyZero("FWIR"); }
+  return fwir_;
+}
+
+const std::vector<double> &ECLSummaryReader::fgir() const {
+  if (fgir_.back() == 0.0) { warnPropertyZero("FGIR"); }
+  return fgir_;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+const VectorXd &ECLSummaryReader::foptXd() const {
+  if (foptXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPT"); }
+  return foptXd_;
+}
+
+const VectorXd &ECLSummaryReader::fwptXd() const {
+  if (fwptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPT"); }
+  return fwptXd_;
+}
+
+const VectorXd &ECLSummaryReader::fgptXd() const {
+  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPT"); }
+  return fgptXd_;
+}
+
+const VectorXd &ECLSummaryReader::fwitXd() const {
+  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWIT"); }
+  return fwitXd_;
+}
+
+const VectorXd &ECLSummaryReader::fgitXd() const {
+  if (fgitXd_.tail(1).value() == 0.0) { warnPropertyZero("FGIT"); }
+  return fgitXd_;
+}
+
+const VectorXd &ECLSummaryReader::foprXd() const {
+  if (foprXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPR"); }
+  return foprXd_;
+}
+
+const VectorXd &ECLSummaryReader::fwprXd() const {
+  if (fwprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPR"); }
+  return fwprXd_;
+}
+
+const VectorXd &ECLSummaryReader::fgprXd() const {
+  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPR"); }
+  return fgprXd_;
+}
+
+const VectorXd &ECLSummaryReader::fwirXd() const {
+  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWIR"); }
+  return fwirXd_;
+}
+
+const VectorXd &ECLSummaryReader::fgirXd() const {
+  if (fgirXd_.tail(1).value() == 0.0) { warnPropertyZero("FGIR"); }
+  return fgirXd_;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+std::vector<double> ECLSummaryReader::wopr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
     throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
   return wopr_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wwpr(const string well_name) const {
+std::vector<double> ECLSummaryReader::wwpr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
     throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
   return wwpr_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wgpr(const string well_name) const {
+std::vector<double> ECLSummaryReader::wgpr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
     throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
   return wgpr_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wwir(const string well_name) const {
+std::vector<double> ECLSummaryReader::wwir(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
     throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
   return wwir_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wgir(const string well_name) const {
+std::vector<double> ECLSummaryReader::wgir(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
     throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
   return wgir_.at(well_name);

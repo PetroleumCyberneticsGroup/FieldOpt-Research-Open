@@ -59,7 +59,7 @@ class ECLResults : public Results
 
  private:
   QString file_path_;
-  ERTWrapper::ECLSummary::ECLSummaryReader *summary_reader_;
+  ERTWrapper::ECLSummary::ECLSummaryReader *smry_reader_;
 
   string cl_ = "eclresults";
 };
