@@ -38,7 +38,7 @@ WeightedSum::WeightedSum(Settings::Optimizer *settings,
 
   for (int i = 0; i < settings->objective().weighted_sum.size(); ++i) {
     WeightedSum::Component *comp = new WeightedSum::Component();
-    comp->property = results_->GetPropertyKeyFromString(settings->objective().weighted_sum.at(i).property);
+    comp->property = results_->GetPropertyKey(settings->objective().weighted_sum.at(i).property);
     comp->coefficient = settings->objective().weighted_sum.at(i).coefficient;
     comp->time_step = settings->objective().weighted_sum.at(i).time_step;
 

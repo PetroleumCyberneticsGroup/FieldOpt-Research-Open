@@ -73,7 +73,7 @@ class Results
 //    EclAjdGradients
   };
 
-  static Property GetPropertyKeyFromString(QString prop) {
+  static Property GetPropertyKey(QString prop) {
     if (prop == "FieldOilProdTotal")      return FieldOilProdTotal;
     else if (prop == "FieldGasProdTotal") return FieldGasProdTotal;
     else if (prop == "FieldWatProdTotal") return FieldWatProdTotal;
@@ -93,9 +93,9 @@ class Results
     else throw ResultPropertyKeyDoesNotExistException("", prop.toStdString());
   }
 
-  static Property GetPropertyKeyFromString(std::string p) {
+  static Property GetPropertyKey(std::string p) {
     auto prop = QString::fromStdString(p);
-    return GetPropertyKeyFromString(prop);
+    return GetPropertyKey(prop);
   }
 
   struct EclAjdGData {
