@@ -8,6 +8,7 @@ include_directories(${MPI_INCLUDE_PATH})
 
 add_executable(FieldOpt main.cpp ${RUNNER_HEADERS} ${RUNNER_SOURCES})
 
+# Target lib ===============================================
 add_library(runner STATIC ${RUNNER_HEADERS} ${RUNNER_SOURCES})
 add_library(fieldopt::runner ALIAS runner)
 
@@ -59,6 +60,7 @@ target_include_directories(runner PUBLIC
 
 add_compile_options(-std=c++11)
 
+# Test exec ================================================
 if (BUILD_TESTING)
 	# Unit tests
 	add_executable(test_runner ${RUNNER_TESTS})
@@ -71,9 +73,9 @@ if (BUILD_TESTING)
 	add_test(NAME test_runner COMMAND $<TARGET_FILE:test_runner>)
 endif()
 
+# Install ==================================================
 install(TARGETS FieldOpt runner
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib/static
-)
+		ARCHIVE DESTINATION lib/static)
 
