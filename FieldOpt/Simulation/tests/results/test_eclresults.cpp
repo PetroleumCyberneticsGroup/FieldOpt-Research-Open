@@ -70,7 +70,7 @@ TEST_F(ECLResultsTest, DumpingAndAvailability) {
   results_->DumpResults();
   EXPECT_FALSE(results_->isAvailable());
   EXPECT_THROW(results_->GetValue(ECLResults::Property::Time),
-               ResultsNotAvailableException);
+               RsltsNotAvailExc);
 
   // Make results available again
   results_->ReadResults(fp);

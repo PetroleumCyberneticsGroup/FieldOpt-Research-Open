@@ -64,31 +64,31 @@ void ECLResults::DumpResults() {
 }
 
 double ECLResults::GetValue(Results::Property prop) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   return GetValueVector(prop).back();
 }
 
 double ECLResults::GetValue(Results::Property prop, int time_index) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   if (time_index < 0 || time_index >= summary_reader_->time().size())
     throw std::runtime_error("The time index " + boost::lexical_cast<std::string>(time_index) + " is outside the range of the summary.");
   return GetValueVector(prop)[time_index];
 }
 
 double ECLResults::GetValue(Results::Property prop, QString well) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   return GetValueVector(prop, well).back();
 }
 
 double ECLResults::GetValue(Results::Property prop, QString well, int time_index) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   if (time_index < 0 || time_index >= summary_reader_->time().size())
     throw std::runtime_error("The time index " + boost::lexical_cast<std::string>(time_index) + " is outside the range of the summary.");
   return GetValueVector(prop, well)[time_index];
 }
 
 std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   switch (prop) {
     case FieldOilProdTotal:   return summary_reader_->fopt();
     case FieldGasProdTotal:   return summary_reader_->fgpt();
@@ -101,7 +101,7 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
 }
 
 std::vector<double> ECLResults::GetValueVector(Results::Property prop, QString well_name) {
-  if (!isAvailable()) throw ResultsNotAvailableException();
+  if (!isAvailable()) throw RsltsNotAvailExc();
   switch (prop) {
     case WellOilProdTotal:   return summary_reader_->wopt(well_name.toStdString());
     case WellGasProdTotal:   return summary_reader_->wgpt(well_name.toStdString());
@@ -113,6 +113,7 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop, QString w
 }
 
 VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
+  if (!isAvailable()) throw RsltsNotAvailExc();
 }
 
 }}

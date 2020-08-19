@@ -42,16 +42,16 @@ class ResultFileNotFoundException : public std::runtime_error {
     : runtime_error("No valid result file found at path" + path) {}
 };
 
-class ResultsNotAvailableException : public std::runtime_error {
+class RsltsNotAvailExc : public std::runtime_error {
  public:
-  ResultsNotAvailableException()
+  RsltsNotAvailExc()
     : runtime_error("Results are not currently available.") {}
 };
 
-class ResultPropertyKeyDoesNotExistException : public std::runtime_error {
+class RsltPropKeyDoesNotExistExc : public std::runtime_error {
  public:
-  explicit ResultPropertyKeyDoesNotExistException(const string &simulator,
-                                                  const string &prop)
+  explicit RsltPropKeyDoesNotExistExc(const string &simulator,
+                                      const string &prop)
     : runtime_error("Requested property key (" + prop
                       + ") cannot be retrieved from " + simulator
                       + "summaries.") {}
