@@ -108,7 +108,7 @@ class TrustRegionTest : public ::testing::Test,
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
         QList<QPair<QUuid, bool>>(), QList<QPair<QUuid, int>>(),
-        varcont_tr_dfo_probs_->GetContinuousVariableValues());
+        varcont_tr_dfo_probs_->GetContVarValues());
 
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
@@ -121,7 +121,7 @@ class TrustRegionTest : public ::testing::Test,
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
     // Use initial point from Matlab data
-    test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
+    test_case_tr_dfo_probs_->set_objf_value(tr_dfo_prob(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
         settings_tr_opt_max_,
@@ -155,8 +155,8 @@ class TrustRegionTest : public ::testing::Test,
       }
 
       // Compute obj.function value for case
-      next_case->set_objective_function_value(
-          tr_dfo_prob(next_case->GetRealVarVector()));
+      next_case->set_objf_value(
+        tr_dfo_prob(next_case->GetRealVarVector()));
 
       // Override 2nd point
       if (p_count == 1 && prob.xm.cols() > 1) {

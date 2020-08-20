@@ -107,7 +107,7 @@ class EnTrTest : public ::testing::Test,
     test_case_tr_dfo_probs_ = new Optimization::Case(
         QList<QPair<QUuid, bool>>(),
         QList<QPair<QUuid, int>>(),
-        varcont_tr_dfo_probs_->GetContinuousVariableValues());
+        varcont_tr_dfo_probs_->GetContVarValues());
 
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
@@ -120,7 +120,7 @@ class EnTrTest : public ::testing::Test,
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
     // Use initial point from Matlab data
-    test_case_tr_dfo_probs_->set_objective_function_value(tr_en_ -> initialValue(x0));
+    test_case_tr_dfo_probs_->set_objf_value(tr_en_->initialValue(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
         settings_tr_opt_max_,
@@ -162,7 +162,7 @@ class EnTrTest : public ::testing::Test,
       // Check if all ensembles were evaluated
       if (tr_en_->IsCaseDone()) {
         // Calculate ExpValue and submit the case
-        new_case->set_objective_function_value(tr_en_->ExpValue());
+        new_case->set_objf_value(tr_en_->ExpValue());
         if (p_count == 1 && prob.xm.cols() > 1) {
           TestResources::OverrideSecondPointEn(prob, *new_case, tr_en_);
         }

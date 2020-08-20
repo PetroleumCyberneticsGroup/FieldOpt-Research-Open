@@ -24,14 +24,13 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-
 #include "objective.h"
 
 namespace Optimization {
 namespace Objective {
 
-Objective::Objective()
-{
+Objective::Objective(Settings::Optimizer *settings) {
+  vp_ = settings->verbParams();
 }
 
 }

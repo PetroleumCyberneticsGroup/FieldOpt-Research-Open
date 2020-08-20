@@ -50,7 +50,7 @@ EGO::EGO(Settings::Optimizer *settings,
     if (penalize_) {
         double org_ofv = tentative_best_case_->objective_function_value();
         double pen_ofv = PenalizedOFV(tentative_best_case_);
-        tentative_best_case_->set_objective_function_value(pen_ofv);
+      tentative_best_case_->set_objf_value(pen_ofv);
         if (VERB_OPT >=1) {
             Printer::ext_info("Penalized base case. " 
                     "Original value: " + Printer::num2str(org_ofv) + "; "

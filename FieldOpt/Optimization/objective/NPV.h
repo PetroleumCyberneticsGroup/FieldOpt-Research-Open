@@ -74,7 +74,7 @@ class NPV : public Objective {
   Settings::Optimizer *settings_;
   Model::Model::Economy *well_economy_;
 
-  string cl_ = "Objective";
+  string cl_ = "NPV";
 };
 
 

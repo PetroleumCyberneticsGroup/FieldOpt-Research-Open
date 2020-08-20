@@ -175,11 +175,11 @@ void CMA_ES::iterate() {
     }
     for (int i = 0; i < population_.size(); i++) {
         if (Settings::Optimizer::Minimize == settings_->mode()) {
-            population_[i].case_pointer_->set_objective_function_value(
-                    population_[i].ofv() + (exp(penalty_ * population_[i].penalty_dist_) - 1));
+          population_[i].case_pointer_->set_objf_value(
+            population_[i].ofv() + (exp(penalty_ * population_[i].penalty_dist_) - 1));
         } else {
-            population_[i].case_pointer_->set_objective_function_value(
-                    population_[i].ofv() - (exp(penalty_ * population_[i].penalty_dist_) - 1));
+          population_[i].case_pointer_->set_objf_value(
+            population_[i].ofv() - (exp(penalty_ * population_[i].penalty_dist_) - 1));
         }
     }
     population_ = sortPopulation(population_);

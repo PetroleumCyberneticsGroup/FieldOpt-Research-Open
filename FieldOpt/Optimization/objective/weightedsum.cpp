@@ -32,7 +32,7 @@ namespace Objective {
 
 WeightedSum::WeightedSum(Settings::Optimizer *settings,
                          Simulation::Results::Results *results,
-                         Model::Model *model) {
+                         Model::Model *model) : Objective(settings) {
   results_ = results;
   components_ = new QList<WeightedSum::Component *>();
 

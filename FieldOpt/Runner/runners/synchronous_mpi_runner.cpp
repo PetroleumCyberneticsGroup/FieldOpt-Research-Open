@@ -101,7 +101,7 @@ void SynchronousMPIRunner::Execute() {
           if (ensemble_helper_.IsCaseDone()) {
               printMessage("All selected realizations evaluated. Getting composite case.", 2);
               auto evaluated_case = ensemble_helper_.GetEvaluatedCase();
-              evaluated_case->set_objective_function_value(evaluated_case->GetEnsembleAverageOfv());
+            evaluated_case->set_objf_value(evaluated_case->GetEnsembleAverageOfv());
               optimizer_->SubmitEvaluatedCase(evaluated_case);
               model_->ApplyCase(evaluated_case);
               printMessage("Submitted evaluated case to optimizer and model.", 2);
@@ -222,7 +222,7 @@ void SynchronousMPIRunner::Execute() {
                     tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS;
                     printMessage("Setting objective function value.", 2);
                     model_->wellCost(settings_->optimizer());
-                    worker_->GetCurrentCase()->set_objective_function_value(objective_function_->value());
+                  worker_->GetCurrentCase()->set_objf_value(objective_function_->value());
                     worker_->GetCurrentCase()->SetSimTime(sim_time);
                     worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
                     simulation_times_.push_back(sim_time);
@@ -232,7 +232,7 @@ void SynchronousMPIRunner::Execute() {
                     printMessage("Timed out. Setting objective function value to SENTINEL VALUE.", 2);
                     worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_TIMEOUT;
                     worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_SIM;
-                    worker_->GetCurrentCase()->set_objective_function_value(sentinelValue());
+                  worker_->GetCurrentCase()->set_objf_value(sentinelValue());
                 }
             } catch (std::runtime_error e) {
                 std::cout << e.what() << std::endl;
@@ -240,7 +240,7 @@ void SynchronousMPIRunner::Execute() {
                 worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
                 worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_WIC;
                 printMessage("Invalid case. Setting objective function value to SENTINEL VALUE.", 2);
-                worker_->GetCurrentCase()->set_objective_function_value(sentinelValue());
+              worker_->GetCurrentCase()->set_objf_value(sentinelValue());
             }
             printMessage("Sending back evaluated case.", 2);
             worker_->SendEvaluatedCase(tag);

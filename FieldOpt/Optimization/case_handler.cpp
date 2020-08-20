@@ -92,7 +92,7 @@ void CaseHandler::SetCaseEvaluated(const QUuid id)
 }
 
 void CaseHandler::UpdateCaseObjectiveFunctionValue(const QUuid id, const double ofv) {
-    cases_[id]->set_objective_function_value(ofv);
+  cases_[id]->set_objf_value(ofv);
 }
 
 void CaseHandler::SetCaseState(QUuid id, Case::CaseState state, int wic_time, int sim_time) {

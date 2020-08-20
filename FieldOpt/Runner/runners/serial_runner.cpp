@@ -104,13 +104,13 @@ void SerialRunner::Execute()
                 int sim_time = time_span_seconds(start, end);
                 if (simulation_success) {
                     model_->wellCost(settings_->optimizer());
-                    new_case->set_objective_function_value(objective_function_->value());
+                  new_case->set_objf_value(objective_function_->value());
                     new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
                     new_case->SetSimTime(sim_time);
                     simulation_times_.push_back((sim_time));
                 }
                 else {
-                    new_case->set_objective_function_value(sentinelValue());
+                  new_case->set_objf_value(sentinelValue());
                     new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
                     new_case->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_SIM;
                     if (sim_time >= timeoutValue())
@@ -118,7 +118,7 @@ void SerialRunner::Execute()
                 }
             } catch (std::runtime_error e) {
                 Printer::ext_warn("Exception thrown while applying/simulating case: " + std::string(e.what()) + ". Setting obj. fun. value to sentinel value.", "Runner", "SerialRunner");
-                new_case->set_objective_function_value(sentinelValue());
+              new_case->set_objf_value(sentinelValue());
                 new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
                 new_case->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_WIC;
             }

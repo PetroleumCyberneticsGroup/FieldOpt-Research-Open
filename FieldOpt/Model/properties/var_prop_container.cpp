@@ -129,21 +129,21 @@ void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   throw VariableIdDoesNotExistException(tm);
 }
 
-//QHash<QUuid, bool> VarPropContainer::GetBinaryVariableValues() const {
+//QHash<QUuid, bool> VarPropContainer::GetBinVarValues() const {
 //  QHash<QUuid, bool> binary_values = QHash<QUuid, bool>();
 //  for (QUuid key : binary_variables_->keys())
 //    binary_values[key] = binary_variables_->value(key)->value();
 //  return binary_values;
 //}
 
-// QMap<QUuid, bool> VarPropContainer::GetBinaryVariableValues() const {
+// QMap<QUuid, bool> VarPropContainer::GetBinVarValues() const {
 //   QMap<QUuid, bool> binary_values = QMap<QUuid, bool>();
 //   for (QUuid key : binary_variables_->keys())
 //     binary_values[key] = binary_variables_->value(key)->value();
 //   return binary_values;
 // }
 
-QList<QPair<QUuid, bool>> VarPropContainer::GetBinaryVariableValues() const {
+QList<QPair<QUuid, bool>> VarPropContainer::GetBinVarValues() const {
   QList<QPair<QUuid, bool>> bin_vals = QList<QPair<QUuid, bool>>();
   for(int ii=0; ii < binary_variables_->size(); ii++) {
     bin_vals.append(qMakePair(binary_variables_->at(ii).first,
@@ -152,7 +152,7 @@ QList<QPair<QUuid, bool>> VarPropContainer::GetBinaryVariableValues() const {
   return bin_vals;
 }
 
-//QHash<QUuid, int> VarPropContainer::GetDiscreteVariableValues() const {
+//QHash<QUuid, int> VarPropContainer::GetDiscVarValues() const {
 //  QHash<QUuid, int> discrete_values = QHash<QUuid, int>();
 //  for (QUuid key : discrete_variables_->keys()) {
 //    discrete_values[key] = discrete_variables_->value(key)->value();
@@ -160,7 +160,7 @@ QList<QPair<QUuid, bool>> VarPropContainer::GetBinaryVariableValues() const {
 //  return discrete_values;
 //}
 
-//QMap<QUuid, int> VarPropContainer::GetDiscreteVariableValues() const {
+//QMap<QUuid, int> VarPropContainer::GetDiscVarValues() const {
 //  QMap<QUuid, int> discrete_values = QMap<QUuid, int>();
 //  for (QUuid key : discrete_variables_->keys()) {
 //    discrete_values[key] = discrete_variables_->value(key)->value();
@@ -168,7 +168,7 @@ QList<QPair<QUuid, bool>> VarPropContainer::GetBinaryVariableValues() const {
 //  return discrete_values;
 //}
 
-QList<QPair<QUuid, int>> VarPropContainer::GetDiscreteVariableValues() const {
+QList<QPair<QUuid, int>> VarPropContainer::GetDiscVarValues() const {
   QList<QPair<QUuid, int>> int_vals = QList<QPair<QUuid, int>>();
   for(int ii=0; ii < discrete_variables_->size(); ii++) {
     int_vals.append(qMakePair(discrete_variables_->at(ii).first,
@@ -177,7 +177,7 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscreteVariableValues() const {
   return int_vals;
 }
 
-//QHash<QUuid, double> VarPropContainer::GetContinuousVariableValues() const {
+//QHash<QUuid, double> VarPropContainer::GetContVarValues() const {
 //  QHash<QUuid, double> continous_values = QHash<QUuid, double>();
 //  for (QUuid key : continuous_variables_->keys()) {
 //    continous_values[key] = continuous_variables_->value(key)->value();
@@ -185,7 +185,7 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscreteVariableValues() const {
 //  return continous_values;
 //}
 
-//QMap<QUuid, double> VarPropContainer::GetContinuousVariableValues() const {
+//QMap<QUuid, double> VarPropContainer::GetContVarValues() const {
 //  QMap<QUuid, double> continous_values = QMap<QUuid, double>();
 //  for (QUuid key : continuous_variables_->keys()) {
 //    continous_values[key] = continuous_variables_->value(key)->value();
@@ -193,7 +193,7 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscreteVariableValues() const {
 //  return continous_values;
 //}
 
-QList<QPair<QUuid, double>> VarPropContainer::GetContinuousVariableValues() const {
+QList<QPair<QUuid, double>> VarPropContainer::GetContVarValues() const {
   QList<QPair<QUuid, double>> cont_vals = QList<QPair<QUuid, double>>();
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     cont_vals.append(qMakePair(continuous_variables_->at(ii).first,

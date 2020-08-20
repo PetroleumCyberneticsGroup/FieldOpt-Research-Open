@@ -39,7 +39,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "abstract_runner.h"
 #include "Optimization/optimizers/compass_search.h"
 #include "Optimization/optimizers/ExhaustiveSearch2DVert.h"
-#include "Optimization/objective/weightedsum.h"
 #include "Simulation/simulator_interfaces/eclsimulator.h"
 #include "Simulation/simulator_interfaces/adgprssimulator.h"
 #include "Utilities/math.hpp"
@@ -51,6 +50,7 @@ namespace Runner {
 using Printer::info;
 using Printer::ext_info;
 using Printer::num2str;
+using std::runtime_error;
 
 AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
   runtime_settings_ = runtime_settings;
@@ -73,18 +73,18 @@ double AbstractRunner::sentinelValue() const {
   return sentinel_value_;
 }
 
-void AbstractRunner::InitializeSettings(QString output_subdirectory) {
-  QString output_directory = QString::fromStdString(runtime_settings_->paths().GetPath(Paths::OUTPUT_DIR));
-  if (output_subdirectory.length() > 0) {
-    output_directory.append(QString("/%1/").arg(output_subdirectory));
+void AbstractRunner::InitializeSettings(QString output_subdir) {
+  QString output_dir = runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR);
+  if (output_subdir.length() > 0) {
+    output_dir.append(QString("/%1/").arg(output_subdir));
   }
-  runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_directory.toStdString());
+  runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
   settings_ = new Settings::Settings(runtime_settings_->paths());
   vp_ = settings_->global()->verbParams();
   // settings_->global()->showVerbParams();
 
-  if (!DirExists(output_directory, vp_)) {
-    CreateDir(output_directory, vp_);
+  if (!DirExists(output_dir, vp_)) {
+    CreateDir(output_dir, vp_);
   }
 
   if (settings_->simulator()->is_ensemble()) {
@@ -101,7 +101,8 @@ void AbstractRunner::InitializeModel() {
     throw std::runtime_error("Settings must be initialized before Model.");
 
   if (is_ensemble_run_) {
-    settings_->paths().SetPath(Paths::GRID_FILE,ensemble_helper_.GetBaseRealization().grid());
+    settings_->paths().SetPath(Paths::GRID_FILE,
+                               ensemble_helper_.GetBaseRealization().grid());
   }
 
   model_ = new Model::Model(*settings_, logger_);
@@ -114,130 +115,178 @@ void AbstractRunner::InitializeSimulator() {
   switch (settings_->simulator()->type()) {
     case ::Settings::Simulator::SimulatorType::ECLIPSE: {
       string tm = "Using ECLIPSE simulator.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::ECLSimulator(settings_, model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      simulator_ = new Simulation::ECLSimulator(settings_,
+                                                model_);
       break;
     }
 
     case ::Settings::Simulator::SimulatorType::ADGPRS: {
       auto tm = "Using ADGPRS simulator.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::AdgprsSimulator(settings_, model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      simulator_ = new Simulation::AdgprsSimulator(settings_,
+                                                   model_);
       break;
     }
 
     case ::Settings::Simulator::SimulatorType::Flow: {
       auto tm = "Using Flow simulator.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::ECLSimulator(settings_, model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      simulator_ = new Simulation::ECLSimulator(settings_,
+                                                model_);
       break;
     }
 
     case ::Settings::Simulator::SimulatorType::INTERSECT: {
       auto tm = "Using INTERSECT simulator.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::IXSimulator(settings_, model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      simulator_ = new Simulation::IXSimulator(settings_,
+                                               model_);
       break;
     }
 
-    default:
-      throw std::runtime_error("Unable to initialize runner: simulator "
-                               "type set in JSON driver file not recognized.");
+    default: {
+      string em = "Unable to initialize runner: simulator ";
+      em += "type set in JSON driver file not recognized.";
+      throw runtime_error(em);
+    }
   }
 }
 
 void AbstractRunner::EvaluateBaseModel() {
-  if (simulator_ == nullptr)
-    throw std::runtime_error("Simulator must be initialized before evaluating base model.");
+  if (simulator_ == nullptr) {
+    string em = "Simulator must be initialized before evaluating base model.";
+    throw runtime_error(em);
+  }
 
   if (is_ensemble_run_) {
     auto tm = "Simulating ensemble base case.";
-    if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-    simulator_->Evaluate(ensemble_helper_.GetBaseRealization(), 10000, 4);
-  }
-  else if (!simulator_->results()->isAvailable()) {
+    if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+
+    auto base_rlz = ensemble_helper_.GetBaseRealization();
+    simulator_->Evaluate(base_rlz, 10000, 4);
+
+  } else if (!simulator_->results()->isAvailable()) {
     auto tm = "Simulating base case.";
-    if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+    if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+
     simulator_->Evaluate();
   }
 }
 
 void AbstractRunner::InitializeObjectiveFunction() {
-  if (simulator_ == nullptr || settings_ == nullptr)
-    throw std::runtime_error("Simulator and the Settings must be initialized before ObjectiveFunction.");
+  if (simulator_ == nullptr || settings_ == nullptr) {
+    string em = "Simulator and Settings must be initialized before ObjectiveFunction.";
+    throw runtime_error(em);
+  }
 
   switch (settings_->optimizer()->objective().type) {
     case Settings::Optimizer::ObjectiveType::WeightedSum: {
       auto tm = "Using WeightedSum-type objective function.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objective_function_ = new Optimization::Objective::WeightedSum(
-        settings_->optimizer(), simulator_->results(), model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      objective_function_ =
+        new Optimization::Objective::WeightedSum(settings_->optimizer(),
+                                                 simulator_->results(),
+                                                 model_);
       break;
     }
 
     case Settings::Optimizer::ObjectiveType::NPV: {
       auto tm = "Using NPV-type objective function.";
-      if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objective_function_ = new Optimization::Objective::NPV(
-        settings_->optimizer(), simulator_->results(), model_);
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      objective_function_ =
+        new Optimization::Objective::NPV(settings_->optimizer(),
+                                         simulator_->results(),
+                                         model_);
       break;
     }
 
-    default:
-      throw std::runtime_error("Unable to initialize Runner: "
-                               "ObjectiveFunction type not recognized.");
+    case Settings::Optimizer::ObjectiveType::Augmented: {
+      auto tm = "Using Augmented objective.";
+      if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+      objective_function_ =
+        new Optimization::Objective::Augmented(settings_->optimizer(),
+                                               simulator_->results(),
+                                               model_);
+      break;
+    }
+
+    default: {
+      string em = "Unable to initialize Runner: ObjectiveFunction type not recognized.";
+      throw runtime_error(em);
+    }
   }
 }
 
 void AbstractRunner::InitializeBaseCase() {
-  if (objective_function_ == nullptr || model_ == nullptr)
-    throw std::runtime_error("ObjectiveFunction and Model must be initialized before BaseCase.");
-
-  base_case_ = new Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                      model_->variables()->GetDiscreteVariableValues(),
-                                      model_->variables()->GetContinuousVariableValues());
+  if (objective_function_ == nullptr || model_ == nullptr) {
+    string em = "ObjectiveFunction and Model must be initialized before BaseCase.";
+    throw runtime_error(em);
+  }
+  base_case_ = new Optimization::Case(model_->variables()->GetBinVarValues(),
+                                      model_->variables()->GetDiscVarValues(),
+                                      model_->variables()->GetContVarValues());
 
   if (!simulator_->results()->isAvailable()) {
-    auto tm = "Simulation results are unavailable. Setting base case objective function value to sentinel value.";
-    if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-    base_case_->set_objective_function_value(sentinelValue());
+    base_case_->set_objf_value(sentinelValue());
+
+    string tm = "Simulation results are unavailable.";
+    tm += "Base case objective set to sentinel value.";
+    if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+
   } else {
     model_->wellCost(settings_->optimizer());
-    base_case_->set_objective_function_value(objective_function_->value());
+    base_case_->set_objf_value(objective_function_->value());
+
+    string tm = "Base case objective function value set to ";
+    tm += num2str(base_case_->objective_function_value(), 5);
+    if (vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
   }
-  auto tm = "Base case objective function value set to " + num2str(base_case_->objective_function_value());
-  if (VERB_RUN >= 1 || vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
 }
 
+namespace Optzr = Optimization::Optimizers;
+
 void AbstractRunner::InitializeOptimizer() {
-  if (base_case_ == nullptr || model_ == nullptr)
-    throw std::runtime_error("The Base Case and the Model must be initialized before the Optimizer");
+  if (base_case_ == nullptr || model_ == nullptr) {
+    string em = "The Base Case and the Model must be initialized before the Optimizer";
+    throw runtime_error(em);
+  }
 
   switch (settings_->optimizer()->type()) {
 
     case Settings::Optimizer::OptimizerType::Compass: {
-      if (VERB_RUN >= 1) info("Using CompassSearch optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::CompassSearch(settings_->optimizer(),
-                                                               base_case_,
-                                                               model_->variables(),
-                                                               model_->grid(),
-                                                               logger_
+      if (vp_.vRUN >= 1) info("Using CompassSearch optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
+                                            base_case_,
+                                            model_->variables(),
+                                            model_->grid(),
+                                            logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::APPS: {
-      if (VERB_RUN >= 1) info("Using APPS optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::APPS(settings_->optimizer(),
-                                                      base_case_,
-                                                      model_->variables(),
-                                                      model_->grid(),
-                                                      logger_
+      if (vp_.vRUN >= 1) info("Using APPS optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::APPS(settings_->optimizer(),
+                                   base_case_,
+                                   model_->variables(),
+                                   model_->grid(),
+                                   logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::GeneticAlgorithm: {
-      if (VERB_RUN >= 1) info("Using GeneticAlgorithm optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::RGARDD(settings_->optimizer(),
+      if (vp_.vRUN >= 1) info("Using GeneticAlgorithm optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::RGARDD(settings_->optimizer(),
+                                     base_case_,
+                                     model_->variables(),
+                                     model_->grid(),
+                                     logger_
+      );
+      break;
+    }
+    case Settings::Optimizer::OptimizerType::EGO: {
+      if (vp_.vRUN >= 1) info("Using EGO optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::BayesianOptimization::EGO(settings_->optimizer(),
                                                         base_case_,
                                                         model_->variables(),
                                                         model_->grid(),
@@ -245,28 +294,18 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::EGO: {
-      if (VERB_RUN >= 1) info("Using EGO optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::BayesianOptimization::EGO(settings_->optimizer(),
-                                                                           base_case_,
-                                                                           model_->variables(),
-                                                                           model_->grid(),
-                                                                           logger_
-      );
-      break;
-    }
     case Settings::Optimizer::OptimizerType::ExhaustiveSearch2DVert: {
-      if (VERB_RUN >= 1) info("Using ExhaustiveSearch2DVert optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::ExhaustiveSearch2DVert(settings_->optimizer(),
-                                                                        base_case_,
-                                                                        model_->variables(),
-                                                                        model_->grid(),
-                                                                        logger_
+      if (vp_.vRUN >= 1) info("Using ExhaustiveSearch2DVert optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::ExhaustiveSearch2DVert(settings_->optimizer(),
+                                                     base_case_,
+                                                     model_->variables(),
+                                                     model_->grid(),
+                                                     logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::Hybrid: {
-      if (VERB_RUN >= 1) info("Using Hybrid optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) info("Using Hybrid optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
@@ -277,65 +316,73 @@ void AbstractRunner::InitializeOptimizer() {
     }
     case Settings::Optimizer::OptimizerType::TrustRegionOptimization: {
       if (VERB_RUN >= 1) info("Using Trust Region optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
-                                                                         base_case_,
-                                                                         model_->variables(),
-                                                                         model_->grid(),
-                                                                         logger_
+      optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
+                                                      base_case_,
+                                                      model_->variables(),
+                                                      model_->grid(),
+                                                      logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::PSO: {
       if (VERB_RUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::PSO(settings_->optimizer(),
-                                                     base_case_,
-                                                     model_->variables(),
-                                                     model_->grid(),
-                                                     logger_
+      optimizer_ = new Optzr::PSO(settings_->optimizer(),
+                                  base_case_,
+                                  model_->variables(),
+                                  model_->grid(),
+                                  logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::CMA_ES: {
       if (VERB_RUN >= 1) info("Using CMA_ES optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::CMA_ES(settings_->optimizer(),
-                                                        base_case_,
-                                                        model_->variables(),
-                                                        model_->grid(),
-                                                        logger_
+      optimizer_ = new Optzr::CMA_ES(settings_->optimizer(),
+                                     base_case_,
+                                     model_->variables(),
+                                     model_->grid(),
+                                     logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::VFSA: {
       if (VERB_RUN >= 1) info("Using VFSA optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::VFSA(settings_->optimizer(),
-                                                      base_case_,
-                                                      model_->variables(),
-                                                      model_->grid(),
-                                                      logger_
+      optimizer_ = new Optzr::VFSA(settings_->optimizer(),
+                                   base_case_,
+                                   model_->variables(),
+                                   model_->grid(),
+                                   logger_
       );
       break;
     }
     case Settings::Optimizer::OptimizerType::SPSA: {
       if (VERB_RUN >= 1) info("Using SPSA optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optimization::Optimizers::SPSA(settings_->optimizer(),
-                                                      base_case_,
-                                                      model_->variables(),
-                                                      model_->grid(),
-                                                      logger_
+      optimizer_ = new Optzr::SPSA(settings_->optimizer(),
+                                   base_case_,
+                                   model_->variables(),
+                                   model_->grid(),
+                                   logger_
       );
       break;
     }
-    default:
-      throw std::runtime_error("Unable to initialize runner: optimization algorithm set in driver file not recognized.");
+    default: {
+      string em = "Unable to initialize runner: ";
+      em += "Optimization algorithm set in driver file not recognized.";
+      throw runtime_error(em);
+    }
+
   }
-  optimizer_->EnableConstraintLogging(QString::fromStdString(runtime_settings_->paths().GetPath(Paths::OUTPUT_DIR)));
+  optimizer_->EnableConstraintLogging(
+    runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR));
 }
 
 void AbstractRunner::InitializeBookkeeper() {
-  if (settings_ == nullptr || optimizer_ == nullptr)
-    throw std::runtime_error("The Settings and the Optimizer must be initialized before the Bookkeeper.");
+  if (settings_ == nullptr || optimizer_ == nullptr) {
+    string em = "The Settings and Optimizer must be initialized before the Bookkeeper.";
+    throw runtime_error(em);
+  }
 
-  bookkeeper_ = new Bookkeeper(settings_, optimizer_->case_handler());
+  bookkeeper_ = new Bookkeeper(settings_,
+                               optimizer_->case_handler());
 }
 
 void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {

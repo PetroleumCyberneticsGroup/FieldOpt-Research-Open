@@ -78,7 +78,7 @@ TrustRegionModel::TrustRegionModel(VectorXd& lb,
   settings_ = settings;
 
   if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-    base_case_->set_objective_function_value(-base_case_->objective_function_value());
+    base_case_->set_objf_value(-base_case_->objective_function_value());
   }
 
   radius_ = settings_->parameters().tr_initial_radius;

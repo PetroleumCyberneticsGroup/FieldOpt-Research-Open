@@ -93,7 +93,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
       // penalize the base case
       double org_ofv = tentative_best_case_->objective_function_value();
       double pen_ofv = PenalizedOFV(tentative_best_case_);
-      tentative_best_case_->set_objective_function_value(pen_ofv);
+      tentative_best_case_->set_objf_value(pen_ofv);
       if (VERB_OPT >=1) {
         Printer::ext_info("Penalized base case. "
                           "Original value: " + Printer::num2str(org_ofv) + "; "
@@ -132,7 +132,7 @@ void Optimizer::SubmitEvaluatedCase(Case *c)
   evaluated_cases_++;
   if (penalize_ && iteration_ > 0) {
     double penalized_ofv = PenalizedOFV(c);
-    c->set_objective_function_value(penalized_ofv);
+    c->set_objf_value(penalized_ofv);
   }
   case_handler_->UpdateCaseObjectiveFunctionValue(c->id(), c->objective_function_value());
   case_handler_->SetCaseState(c->id(), c->state, c->GetWICTime(), c->GetSimTime());

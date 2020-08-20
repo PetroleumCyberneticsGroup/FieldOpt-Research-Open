@@ -47,11 +47,11 @@ class TestResourceOptimizer :
 
   TestResourceOptimizer() {
     base_case_ = new Optimization::Case(
-      model_->variables()->GetBinaryVariableValues(),
-      model_->variables()->GetDiscreteVariableValues(),
-      model_->variables()->GetContinuousVariableValues());
+      model_->variables()->GetBinVarValues(),
+      model_->variables()->GetDiscVarValues(),
+      model_->variables()->GetContVarValues());
 
-    base_case_->set_objective_function_value(1000.0);
+    base_case_->set_objf_value(1000.0);
 
     auto vp = settings_full_->global()->verbParams();
 

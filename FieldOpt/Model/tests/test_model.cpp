@@ -59,15 +59,15 @@ TEST_F(ModelTest, Variables) {
   EXPECT_EQ(3, model_->wells()->at(0)->controls()->size());
 
   EXPECT_EQ(9, model_->variables()->GetWellBlockVariables("PROD").size());
-  for (auto value : model_->variables()->GetDiscreteVariableValues()) {
+  for (auto value : model_->variables()->GetDiscVarValues()) {
     EXPECT_GE(value.second, 0);
   }
 }
 
 TEST_F(ModelTest, ApplyCase) {
-  Optimization::Case *c = new ::Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                                   model_->variables()->GetDiscreteVariableValues(),
-                                                   model_->variables()->GetContinuousVariableValues());
+  Optimization::Case *c = new ::Optimization::Case(model_->variables()->GetBinVarValues(),
+                                                   model_->variables()->GetDiscVarValues(),
+                                                   model_->variables()->GetContVarValues());
 
   // Set all continous variables for the PROD well to 1. Should affect BHP and transmissibilty.
   auto producer_vars = model_->variables()->GetWellBHPVariables("PROD");
@@ -104,9 +104,9 @@ TEST_F(ModelTest, ApplyCase) {
 }
 
 TEST_F(ModelTest, Logging) {
-  Optimization::Case *c = new ::Optimization::Case(model_->variables()->GetBinaryVariableValues(),
-                                                   model_->variables()->GetDiscreteVariableValues(),
-                                                   model_->variables()->GetContinuousVariableValues());
+  Optimization::Case *c = new ::Optimization::Case(model_->variables()->GetBinVarValues(),
+                                                   model_->variables()->GetDiscVarValues(),
+                                                   model_->variables()->GetContVarValues());
 
   // Set all continous variables for the PROD well to 1. Should affect BHP and transmissibilty.
   auto producer_vars = model_->variables()->GetWellBHPVariables("PROD");

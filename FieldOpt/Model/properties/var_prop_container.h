@@ -121,21 +121,21 @@ class VarPropContainer
 
   //!< Get a hashmap containing all binary variable values.
   //!< The key represents each variable's ID.
-  // QHash<QUuid, bool> GetBinaryVariableValues() const;
-  // QMap<QUuid, bool> GetBinaryVariableValues() const;
-  QList<QPair<QUuid, bool>> GetBinaryVariableValues() const;
+  // QHash<QUuid, bool> GetBinVarValues() const;
+  // QMap<QUuid, bool> GetBinVarValues() const;
+  QList<QPair<QUuid, bool>> GetBinVarValues() const;
 
   //!< Get a hashmap containing all discrete variable values.
   //!< The key represents each variable's ID.
-  // QHash<QUuid, int> GetDiscreteVariableValues() const;
-  // QMap<QUuid, int> GetDiscreteVariableValues() const;
-  QList<QPair<QUuid, int>> GetDiscreteVariableValues() const;
+  // QHash<QUuid, int> GetDiscVarValues() const;
+  // QMap<QUuid, int> GetDiscVarValues() const;
+  QList<QPair<QUuid, int>> GetDiscVarValues() const;
 
   //!< Get a hashmap containing all continuous variable values.
   //!< The key represents each variable's ID.
-  // QHash<QUuid, double> GetContinuousVariableValues() const;
-  // QMap<QUuid, double> GetContinuousVariableValues() const;
-  QList<QPair<QUuid, double>> GetContinuousVariableValues() const;
+  // QHash<QUuid, double> GetContVarValues() const;
+  // QMap<QUuid, double> GetContVarValues() const;
+  QList<QPair<QUuid, double>> GetContVarValues() const;
 
   //!< Get all control (rate/bhp) variables.
   QList<ContinuousProperty *> GetWellControlVariables() const;

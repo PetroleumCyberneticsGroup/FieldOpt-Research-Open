@@ -436,7 +436,7 @@ QPair<double, double> Case::GetEnsembleExpectedOfv() const {
   return pair;
 }
 
-void Case::set_objective_function_value(double objective_function_value) {
+void Case::set_objf_value(double objective_function_value) {
   objective_function_value_ = objective_function_value;
 }
 

@@ -53,14 +53,14 @@ class TestResourceCases :
         QList<QPair<QUuid, int>>(),
         real_variables_3d_);
 
-    test_case_2_3r_->set_objective_function_value(100.0);
+    test_case_2_3r_->set_objf_value(100.0);
 
     test_case_3_4b3i3r_ = new Optimization::Case(
         binary_variables_4d_,
         integer_variables_3d_,
         real_variables_3d_);
 
-    test_case_3_4b3i3r_->set_objective_function_value(-50.0);
+    test_case_3_4b3i3r_->set_objf_value(-50.0);
     test_case_3_4b3i3r_->SetWICTime(5);
     test_case_4_4b3i3r =
         new Optimization::Case(
@@ -68,21 +68,21 @@ class TestResourceCases :
             integer_variables_3d_,
             real_variables_3d_);
 
-    test_case_4_4b3i3r->set_objective_function_value(-50.0);
+    test_case_4_4b3i3r->set_objf_value(-50.0);
     trivial_cases_ << test_case_1_3i_<< test_case_2_3r_
                    << test_case_3_4b3i3r_ << test_case_4_4b3i3r;
 
     test_case_two_well_splines_ =
         new Optimization::Case(
-            varcont_two_spline_wells_->GetBinaryVariableValues(),
-            varcont_two_spline_wells_->GetDiscreteVariableValues(),
-            varcont_two_spline_wells_->GetContinuousVariableValues());
+          varcont_two_spline_wells_->GetBinVarValues(),
+          varcont_two_spline_wells_->GetDiscVarValues(),
+          varcont_two_spline_wells_->GetContVarValues());
 
     test_case_spline_ =
         new Optimization::Case(
-            varcont_prod_spline_->GetBinaryVariableValues(),
-            varcont_prod_spline_->GetDiscreteVariableValues(),
-            varcont_prod_spline_->GetContinuousVariableValues());
+          varcont_prod_spline_->GetBinVarValues(),
+          varcont_prod_spline_->GetDiscVarValues(),
+          varcont_prod_spline_->GetContVarValues());
 
     test_case_2r_ = new Optimization::Case(
         QList<QPair<QUuid, bool>>(),
@@ -119,7 +119,7 @@ class TestResourceCases :
         new Optimization::Case(
             QList<QPair<QUuid, bool>>(),
             QList<QPair<QUuid, int>>(),
-            varcont_6r_->GetContinuousVariableValues());
+            varcont_6r_->GetContVarValues());
 
   }
 

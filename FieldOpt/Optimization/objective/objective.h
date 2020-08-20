@@ -36,19 +36,20 @@ namespace Optimization {
 namespace Objective {
 
 /*!
- * \brief The Objective class defines an interface for objective functions.
- * It cannot be instantiated on its own.
+ * \brief The Objective class defines an interface for
+ * objective functions. It cannot be instantiated on its
+ * own.
  */
 class Objective
 {
  public:
   /*!
-   * \brief value Get the evaluated value of the objective function.
+   * \brief value Get evaluated value for objective function.
    */
   virtual double value() const = 0;
 
  protected:
-  Objective();
+  Objective(Settings::Optimizer *settings);
 
   Settings::VerbParams vp_;
   string md_ = "Optimization";

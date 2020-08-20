@@ -189,7 +189,7 @@ void OverrideSecondPoint(TestResources::TrustRegionModelData::prob &prob,
   // cout << "prob.xm: " << endl << prob.xm << endl;
   // cout << "xbr: " << endl << xbr << endl;
   c.SetRealVarValues(xbr.col(0));
-  c.set_objective_function_value(prob.fm(0,1));
+  c.set_objf_value(prob.fm(0, 1));
 }
 
 void OverrideSecondPointEn(TestResources::TrustRegionModelData::prob &prob,
@@ -205,7 +205,7 @@ void OverrideSecondPointEn(TestResources::TrustRegionModelData::prob &prob,
   // cout << "prob.xm: " << endl << prob.xm << endl;
   // cout << "xbr: " << endl << xbr << endl;
   c.SetRealVarValues(xbr.col(0));
-  c.set_objective_function_value(tr_en_ -> initialValue(xbr.col(0)));
+  c.set_objf_value(tr_en_->initialValue(xbr.col(0)));
 }
 
 }

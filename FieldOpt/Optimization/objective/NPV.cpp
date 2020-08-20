@@ -51,7 +51,7 @@ using namespace Simulation::Results;
 
 NPV::NPV(Settings::Optimizer *settings,
          Simulation::Results::Results *results,
-         Model::Model *model) {
+         Model::Model *model) : Objective(settings) {
   settings_ = settings;
   vp_ = settings->verbParams();
 
