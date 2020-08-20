@@ -800,6 +800,17 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
         obj.NPV_sum.append(component);
       }
 
+    } else if (QString::compare(objective_type, "Augmented") == 0) {
+      obj.type = ObjectiveType::Augmented;
+      obj.terms = QList<Objective::AugTerms>();
+
+      QJsonArray terms = json_objective["Terms"].toArray();
+      for (int ii = 0; ii < terms.size(); ++ii) {
+        Objective::AugTerms term;
+        set_req_prop_double(term.coefficient, terms[ii].toObject(), "Coefficient");
+        set_req_prop_string(term.prop_name, terms[ii].toObject(), "Property");
+      }
+
     } else {
       throw UnableToParseOptimizerObjectiveSectionException(
           "Objective type " + objective_type.toStdString()

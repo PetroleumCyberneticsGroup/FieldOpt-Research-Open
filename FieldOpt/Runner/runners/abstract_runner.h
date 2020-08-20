@@ -31,14 +31,17 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Model/model.h"
 #include "Optimization/optimizer.h"
 #include "Optimization/case.h"
-#include "Optimization/objective/objective.h"
 #include "Simulation/simulator_interfaces/simulator.h"
 #include "Settings/settings.h"
 #include "bookkeeper.h"
 #include "Runner/logger.h"
 #include "ensemble_helper.h"
 #include <vector>
+
+#include "Optimization/objective/objective.h"
 #include "Optimization/objective/NPV.h"
+#include "Optimization/objective/weightedsum.h"
+#include "Optimization/objective/augmented.h"
 
 namespace Runner {
 

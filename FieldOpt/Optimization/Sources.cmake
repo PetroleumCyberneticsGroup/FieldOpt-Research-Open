@@ -4,6 +4,7 @@ SET(OPTIMIZATION_HEADERS
 		objective/NPV.h
 		objective/objective.h
 		objective/weightedsum.h
+		objective/augmented.h
 		#
 		# case
 		case.h
@@ -19,7 +20,7 @@ SET(OPTIMIZATION_HEADERS
 		constraints/constraint.h
 		constraints/bhp_constraint.h
 		constraints/rate_constraint.h
-        constraints/mx_spline_length_interw_dist.h
+		constraints/mx_spline_length_interw_dist.h
 		constraints/mx_spline_length_interw_dist_res_bound.h
 		constraints/reservoir_boundary.h
 		constraints/interw_dist.h
@@ -80,6 +81,7 @@ SET(OPTIMIZATION_SOURCES
 		objective/NPV.cpp
 		objective/objective.cpp
 		objective/weightedsum.cpp
+		objective/augmented.cpp
 		#
 		# case
 		case.cpp
@@ -94,7 +96,7 @@ SET(OPTIMIZATION_SOURCES
 		constraints/constraint.cpp
 		constraints/bhp_constraint.cpp
 		constraints/rate_constraint.cpp
-        constraints/mx_spline_length_interw_dist.cpp
+		constraints/mx_spline_length_interw_dist.cpp
 		constraints/mx_spline_length_interw_dist_res_bound.cpp
 		constraints/reservoir_boundary.cpp
 		constraints/interw_dist.cpp

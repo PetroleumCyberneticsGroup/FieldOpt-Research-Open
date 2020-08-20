@@ -63,8 +63,9 @@ class Optimizer
     PackerConstraint, ICVConstraint, PolarWellLength,
     PolarAzimuth, PolarElevation, PolarSplineBoundary
   };
+
   enum ConstraintWellSplinePointsType { MaxMin, Function};
-  enum ObjectiveType { WeightedSum, NPV};
+  enum ObjectiveType { WeightedSum, NPV, Augmented};
 
   struct Parameters {
     // Common parameters
@@ -186,20 +187,24 @@ class Optimizer
   };
 
   struct Objective {
-    ObjectiveType type; //!< The objective definition type (e.g. WeightedSum, NPV)
+    ObjectiveType type; //!< Objective function type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
     bool use_well_cost; //!<Whether or not to use costs associated to wells in calculation of the objective.
     bool separatehorizontalandvertical; //!<Whether or not to use different values in the horizontal or vertical direction
     double wellCostXY; //!<Cost associated with drilling in the horizontal plane [$/m]
     double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
+
+    //!< Weighted sum component
     struct WeightedSumComponent {
       double coefficient;
       QString property;
       int time_step;
       bool is_well_prop;
       QString well;
-    }; //!< A component of a weighted sum objective function
+    };
+
+    //!< NPV component
     struct NPVComponent{
       double coefficient;
       std::string property;
@@ -209,8 +214,20 @@ class Optimizer
       double discount = 0.0;
     };
 
-    QList<WeightedSumComponent> weighted_sum; //!< The expression for the Objective function formulated as a weighted sum
-    QList<NPVComponent> NPV_sum;  //!< The expression for the Objective function formulated as an NPV
+    //!< Augmented function term
+    struct AugTerms {
+      double coefficient;
+      std::string prop_name;
+    };
+
+    //!< Weighted sum formulation
+    QList<WeightedSumComponent> weighted_sum;
+
+     //!< NPV formulation
+    QList<NPVComponent> NPV_sum;
+
+    //!< Augmented formulation
+    QList<AugTerms> terms;
 
   };
 
