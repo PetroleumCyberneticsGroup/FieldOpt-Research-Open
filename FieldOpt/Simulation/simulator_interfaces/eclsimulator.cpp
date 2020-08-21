@@ -52,7 +52,7 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
     deck_name_ = "";
   }
 
-  results_ = new Results::ECLResults(settings->simulator());
+  results_ = new Results::ECLResults(settings);
 }
 
 void ECLSimulator::Evaluate() {

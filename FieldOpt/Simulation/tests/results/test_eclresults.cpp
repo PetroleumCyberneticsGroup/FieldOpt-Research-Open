@@ -38,7 +38,7 @@ class ECLResultsTest : public ::testing::Test,
  protected:
 
   ECLResultsTest() {
-    results_ = new ECLResults(settings_simulator_);
+    results_ = new ECLResults(settings_full_);
   }
 
   virtual ~ECLResultsTest() { }
@@ -54,7 +54,7 @@ class ECLResultsTest : public ::testing::Test,
 
 TEST_F(ECLResultsTest, ReadSummary) {
   EXPECT_THROW(results_->ReadResults("a"),
-               ResultFileNotFoundException);
+               RsltFileNotFoundExc);
   auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
   EXPECT_NO_THROW(results_->ReadResults(fp));
 }

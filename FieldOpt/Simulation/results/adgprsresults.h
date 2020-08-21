@@ -43,7 +43,7 @@ namespace Results {
 class AdgprsResults : public Results
 {
  public:
-  explicit AdgprsResults(Settings::Simulator *settings);
+  explicit AdgprsResults(Settings::Settings *settings);
 
   double GetValue(int well_nr, Property prop);
   double GetValue(int well_nr, Property prop, int time_index);

@@ -28,7 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 namespace Results {
 
-AdgprsResults::AdgprsResults(Settings::Simulator *settings)
+AdgprsResults::AdgprsResults(Settings::Settings *settings)
   : Results(settings) {
   smry_reader_ = 0;
 }

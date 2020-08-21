@@ -39,11 +39,11 @@ namespace Results {
 class ECLResults : public Results
 {
  public:
-  explicit ECLResults(Settings::Simulator *settings);
+  explicit ECLResults(Settings::Settings *settings);
 
   void ReadResults(QString file_path);
-  void ReadResults(QString file_path,
-                   QString build_dir);
+  static void ReadResults(const QString& file_path,
+                          QString build_dir);
   void DumpResults() override;
 
 
@@ -52,15 +52,18 @@ class ECLResults : public Results
   double GetValue(Property prop, QString well) override;
   double GetValue(Property prop, QString well, int time_index) override;
   std::vector<double> GetValueVector(Property prop) override;
-  std::vector<double> GetValueVector(Property prop, QString well_name);
+  std::vector<double> GetValueVector(Property prop,
+                                     QString well_name);
 
   VectorXd GetValueVectorXd(Property prop) override;
-  VectorXd GetValueVectorXd(Property prop, QString well_name);
+  VectorXd GetValueVectorXd(Property prop,
+                            QString well_name);
 
  private:
   QString file_path_;
   ERTWrapper::ECLSummary::ECLSummaryReader *smry_reader_;
 
+  Settings::Settings* settings_;
   string cl_ = "eclresults";
 };
 
