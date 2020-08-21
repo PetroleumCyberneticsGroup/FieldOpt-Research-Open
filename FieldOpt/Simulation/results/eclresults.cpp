@@ -35,32 +35,37 @@ namespace Results {
 using namespace Eigen;
 using Printer::ext_info;
 using std::runtime_error;
+using std::to_string;
 
-ECLResults::ECLResults(Settings::Simulator *settings)
+ECLResults::ECLResults(Settings::Settings *settings)
   : Results(settings) {
-  smry_reader_ = 0;
+  smry_reader_ = nullptr;
+  settings_ = settings;
 }
 
 void ECLResults::ReadResults(QString file_path) {
-  if (vp_.vSIM >= 2) {
-    ext_info("Attempting to read results from" + file_path.toStdString(), md_, cl_);
-  }
   file_path_ = file_path;
-  if (smry_reader_ != 0) delete smry_reader_;
+  auto fp = file_path_.toStdString();
+  if (vp_.vSIM >= 2) {
+    ext_info("Reading results from " + fp, md_, cl_);
+  }
+
+  if (smry_reader_ != nullptr) delete smry_reader_;
   try {
-    smry_reader_ = new ERTWrapper::ECLSummary::ECLSummaryReader(file_path.toStdString());
-  } catch (ERTWrapper::SummaryFileNotFoundAtPathException) {
-    throw ResultFileNotFoundException(file_path.toLatin1().constData());
+    smry_reader_ = new ERTWrapper::ECLSummary::ECLSummaryReader(fp, settings_);
+  } catch (ERTWrapper::SummaryFileNotFoundAtPathException &e) {
+    throw RsltFileNotFoundExc(file_path.toLatin1().constData());
   }
 
   setAvailable();
 }
 
-void ECLResults::ReadResults(QString file_path, QString build_dir){ }
+void ECLResults::ReadResults(const QString& file_path,
+                             const QString build_dir){ }
 
 void ECLResults::DumpResults() {
-  if (smry_reader_ != 0) delete smry_reader_;
-  smry_reader_ = 0;
+  if (smry_reader_ != nullptr) delete smry_reader_;
+  smry_reader_ = nullptr;
   setUnavailable();
 }
 
@@ -71,8 +76,12 @@ double ECLResults::GetValue(Results::Property prop) {
 
 double ECLResults::GetValue(Results::Property prop, int time_index) {
   if (!isAvailable()) throw RsltsNotAvailExc();
-  if (time_index < 0 || time_index >= smry_reader_->time().size())
-    throw std::runtime_error("The time index " + boost::lexical_cast<std::string>(time_index) + " is outside the range of the summary.");
+
+  if (time_index < 0 || time_index >= smry_reader_->time().size()) {
+    string em = "Time index " + to_string(time_index);
+    em += " is outside the range of the summary.";
+    throw runtime_error(em);
+  }
   return GetValueVector(prop)[time_index];
 }
 
@@ -83,8 +92,11 @@ double ECLResults::GetValue(Results::Property prop, QString well) {
 
 double ECLResults::GetValue(Results::Property prop, QString well, int time_index) {
   if (!isAvailable()) throw RsltsNotAvailExc();
-  if (time_index < 0 || time_index >= smry_reader_->time().size())
-    throw std::runtime_error("The time index " + boost::lexical_cast<std::string>(time_index) + " is outside the range of the summary.");
+  if (time_index < 0 || time_index >= smry_reader_->time().size()) {
+    string em = "Time index " + to_string(time_index);
+    em += " is outside the range of the summary.";
+    throw runtime_error(em);
+  }
   return GetValueVector(prop, well)[time_index];
 }
 
@@ -112,7 +124,8 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
   }
 }
 
-std::vector<double> ECLResults::GetValueVector(Results::Property prop, QString well_name) {
+std::vector<double> ECLResults::GetValueVector(Results::Property prop,
+                                               QString well_name) {
   if (!isAvailable()) throw RsltsNotAvailExc();
   switch (prop) {
     case WellOilProdTotal: return smry_reader_->wopt(well_name.toStdString());

@@ -36,8 +36,14 @@ namespace ECLSummary {
 
 using std::string;
 using Printer::ext_info;
+using Printer::num2str;
+using Printer::ext_warn;
 
-ECLSummaryReader::ECLSummaryReader(string file_name) {
+ECLSummaryReader::ECLSummaryReader(const string& file_name,
+                                   Settings::Settings *settings) {
+  settings_ = settings;
+  vp_ = settings_->global()->verbParams();
+
   file_name_ = file_name;
   ecl_sum_ = ecl_sum_fread_alloc_case(file_name_.c_str(), "");
   if (ecl_sum_ == nullptr) {
@@ -57,11 +63,11 @@ ECLSummaryReader::~ECLSummaryReader() {
 double ECLSummaryReader::GetMiscVar(const string& var_name,
                                     int time_index) {
   if (!hasMiscVar(var_name)) {
-    throw SummaryVariableDoesNotExistException(
-      "Misc variable " + string(var_name) + " does not exist.");
+    string em = "Misc variable " + var_name + " does not exist.";
+    throw SmryVarDoesNotExistExc(em);
   }
   if (!HasReportStep(time_index)) {
-    throw SummaryTimeStepDoesNotExistException("Time step does not exist");
+    throw SmryTimeStepDoesNotExistExc("Time step does not exist");
   }
   return ecl_sum_get_misc_var(ecl_sum_, time_index, var_name.c_str());
 }
@@ -69,21 +75,23 @@ double ECLSummaryReader::GetMiscVar(const string& var_name,
 double ECLSummaryReader::GetFieldVar(const string& var_name,
                                      int time_index) {
   if (!HasReportStep(time_index)) {
-    throw SummaryTimeStepDoesNotExistException("Time step does not exist");
+    throw SmryTimeStepDoesNotExistExc("Time step does not exist");
   }
   if (!hasFieldVar(var_name)) {
-    throw SummaryVariableDoesNotExistException("Field variable" + var_name + " does not exist.");
+    throw SmryVarDoesNotExistExc("Field variable" + var_name + " does not exist.");
   }
   return ecl_sum_get_field_var(ecl_sum_, time_index, var_name.c_str());
 }
 
-double ECLSummaryReader::GetWellVar(const string& well_name, string var_name, int time_index) {
+double ECLSummaryReader::GetWellVar(const string& well_name,
+                                    string var_name, int time_index) {
   if (!hasWellVar(well_name, var_name)) {
-    throw SummaryVariableDoesNotExistException("Well variable " + std::string(well_name) + ":"
-                                                 + std::string(var_name) + " does not exist.");
+    string em = "Well variable " + std::string(well_name) + ":";
+    em += std::string(var_name) + " does not exist.";
+    throw SmryVarDoesNotExistExc(em);
   }
   if (!HasReportStep(time_index)) {
-    throw SummaryTimeStepDoesNotExistException("Time step does not exist");
+    throw SmryTimeStepDoesNotExistExc("Time step does not exist");
   }
   return ecl_sum_get_well_var(ecl_sum_, time_index, well_name.c_str(), var_name.c_str());
 }
@@ -144,15 +152,104 @@ void ECLSummaryReader::populateKeyLists() {
     well_keys_.insert(stringlist_safe_iget(well_keys, l));
   }
 
-  std::stringstream ss;
-  ss << "Found summary keys: ";
-  for (const auto& key : keys_) ss << key << ", ";
-  for (const auto& key : field_keys_) ss << key << ", ";
-  for (const auto& well : wells_) {
-    for (const auto& key : well_keys_) ss << well << ":" << key << ", ";
+  stringlist_type * seg_sofr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SOFR*");
+  stringlist_type * seg_swfr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SWFR*");
+  stringlist_type * seg_spr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SPR*");
+  stringlist_type * seg_sprd_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SPRD*");
+  stringlist_type * seg_swct_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SWCT*");
+  stringlist_type * seg_scsa_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SCSA*");
+  stringlist_type * comp_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "C*");
+
+  for (int l = 0; l < stringlist_get_size(seg_sofr_keys); ++l) {
+    seg_sofr_keys_.insert(stringlist_safe_iget(seg_sofr_keys, l));
   }
-  if (VERB_SIM >= 2) {
-    ext_info("Found summary keys: " + ss.str(), md_, cl_);
+
+  for (int l = 0; l < stringlist_get_size(seg_swfr_keys); ++l) {
+    seg_swfr_keys_.insert(stringlist_safe_iget(seg_swfr_keys, l));
+  }
+
+  for (int l = 0; l < stringlist_get_size(seg_spr_keys); ++l) {
+    seg_spr_keys_.insert(stringlist_safe_iget(seg_spr_keys, l));
+  }
+
+  for (int l = 0; l < stringlist_get_size(seg_sprd_keys); ++l) {
+    seg_sprd_keys_.insert(stringlist_safe_iget(seg_sprd_keys, l));
+  }
+
+  for (int l = 0; l < stringlist_get_size(seg_swct_keys); ++l) {
+    seg_swct_keys_.insert(stringlist_safe_iget(seg_swct_keys, l));
+  }
+
+  for (int l = 0; l < stringlist_get_size(seg_scsa_keys); ++l) {
+    seg_scsa_keys_.insert(stringlist_safe_iget(seg_scsa_keys, l));
+  }
+
+  for (int l = 0; l < stringlist_get_size(comp_keys); ++l) {
+    comp_keys_.insert(stringlist_safe_iget(comp_keys, l));
+  }
+
+  if (vp_.vSIM >= 3) {
+    std::stringstream skeys, sfield, swells, sseg, scomp;
+    int ii = 0;
+
+    skeys << "All summary keys: ";
+    for (const auto& skey : keys_) { skeys << skey << ", "; }
+    // ext_info(skeys.str(), md_, cl_, vp_.lnw);
+
+    sfield << "Field keys: ";
+    for (const auto& fkey : field_keys_) { sfield << fkey << ", "; }
+    ext_info(sfield.str(), md_, cl_, vp_.lnw);
+
+    swells << "Well keys: ";
+    for (const auto& well : wells_) {
+      for (const auto& wkey : well_keys_) {
+        swells << well << ":" << wkey << ", ";
+      }
+    }
+    ext_info(swells.str(), md_, cl_, vp_.lnw);
+
+    sseg << "Segment SOFR keys: ";
+    for (const auto& ckey : seg_sofr_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SWFR keys: ";
+    for (const auto& ckey : seg_swfr_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SOFR keys: ";
+    for (const auto& ckey : seg_sofr_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SPR keys: ";
+    for (const auto& ckey : seg_spr_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SPRD keys: ";
+    for (const auto& ckey : seg_sprd_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SWCT keys: ";
+    for (const auto& ckey : seg_swct_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SCSA keys: ";
+    for (const auto& ckey : seg_scsa_keys_) { sseg << ckey << ", "; }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    // scomp << "Compartment keys: ";
+    ii = 0;
+    for (const auto& ckey : comp_keys_) {
+      scomp << ckey << ", "; ii++;
+      // if (ii % 7 == 0) { scomp << "\t\t"; }
+    }
+    ext_info(scomp.str(), md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);
@@ -164,15 +261,19 @@ void ECLSummaryReader::populateKeyLists() {
 void ECLSummaryReader::initializeVectors() {
   initializeTimeVector();
   initializeWellRates();
-  initializeWellCumulatives();
+  initWellTotals();
   initFieldTotals();
   initFieldRates();
+
+  initWellSegRates();
 
   initVectorsXd();
 }
 
 void ECLSummaryReader::initVectorsXd() {
   timeXd_ = Eigen::Map<VectorXd>(time_.data(), time_.size());
+  stepXd_ = Eigen::Map<VectorXd>(step_.data(), step_.size());
+
   foptXd_ = Eigen::Map<VectorXd>(fopt_.data(), fopt_.size());
   fwptXd_ = Eigen::Map<VectorXd>(fwpt_.data(), fwpt_.size());
   fgptXd_ = Eigen::Map<VectorXd>(fgpt_.data(), fgpt_.size());
@@ -269,15 +370,16 @@ void ECLSummaryReader::initializeWellRates() {
   }
 }
 
-void ECLSummaryReader::initializeWellCumulatives() {
+void ECLSummaryReader::initWellTotals() {
   const ecl_smspec_type * smspec = ecl_sum_get_smspec(ecl_sum_);
 
   for (auto wname : wells_) {
 
+    // WOPT
     wopt_[wname] = std::vector<double>(time_.size(), 0.0);
     if (hasWellVar(wname, "WOPT")) {
       int wopt_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WOPT");
-      double_vector_type * wopt = ecl_sum_alloc_data_vector(ecl_sum_, wopt_index, true);
+      double_vector_type * wopt = ecl_sum_alloc_data_vector(ecl_sum_, wopt_index,true);
       assert(double_vector_size(wopt) == time_.size());
       for (int i = 0; i < time_.size(); ++i) {
         wopt_[wname][i] = double_vector_safe_iget(wopt, i);
@@ -291,10 +393,11 @@ void ECLSummaryReader::initializeWellCumulatives() {
       wopt_[wname] = computeCumulativeFromRate(wopr_[wname]);
     }
 
+    // WWPT
     wwpt_[wname] = std::vector<double>(time_.size(), 0.0);
     if (hasWellVar(wname, "WWPT")) {
       int wwpt_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WWPT");
-      double_vector_type * wwpt = ecl_sum_alloc_data_vector(ecl_sum_, wwpt_index, true);
+      double_vector_type * wwpt = ecl_sum_alloc_data_vector(ecl_sum_, wwpt_index,true);
       assert(double_vector_size(wwpt) == time_.size());
       for (int i = 0; i < time_.size(); ++i) {
         wwpt_[wname][i] = double_vector_safe_iget(wwpt, i);
@@ -308,10 +411,11 @@ void ECLSummaryReader::initializeWellCumulatives() {
       wwpt_[wname] = computeCumulativeFromRate(wwpr_[wname]);
     }
 
+    // WGPT
     wgpt_[wname] = std::vector<double>(time_.size(), 0.0);
     if (hasWellVar(wname, "WGPT")) {
       int wgpt_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WGPT");
-      double_vector_type * wgpt = ecl_sum_alloc_data_vector(ecl_sum_, wgpt_index, true);
+      double_vector_type * wgpt = ecl_sum_alloc_data_vector(ecl_sum_, wgpt_index,true);
       assert(double_vector_size(wgpt) == time_.size());
       for (int i = 0; i < time_.size(); ++i) {
         wgpt_[wname][i] = double_vector_safe_iget(wgpt, i);
@@ -325,10 +429,11 @@ void ECLSummaryReader::initializeWellCumulatives() {
       wgpt_[wname] = computeCumulativeFromRate(wgpr_[wname]);
     }
 
+    // WWIT
     wwit_[wname] = std::vector<double>(time_.size(), 0.0);
     if (hasWellVar(wname, "WWIT")) {
       int wwit_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WWIT");
-      double_vector_type * wwit = ecl_sum_alloc_data_vector(ecl_sum_, wwit_index, true);
+      double_vector_type * wwit = ecl_sum_alloc_data_vector(ecl_sum_, wwit_index,true);
       assert(double_vector_size(wwit) == time_.size());
       for (int i = 0; i < time_.size(); ++i) {
         wwit_[wname][i] = double_vector_safe_iget(wwit, i);
@@ -342,10 +447,11 @@ void ECLSummaryReader::initializeWellCumulatives() {
       wwit_[wname] = computeCumulativeFromRate(wwir_[wname]);
     }
 
+    // WGIT
     wgit_[wname] = std::vector<double>(time_.size(), 0.0);
     if (hasWellVar(wname, "WGIT")) {
       int wgit_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WGIT");
-      double_vector_type * wgit = ecl_sum_alloc_data_vector(ecl_sum_, wgit_index, true);
+      double_vector_type * wgit = ecl_sum_alloc_data_vector(ecl_sum_, wgit_index,true);
       assert(double_vector_size(wgit) == time_.size());
       for (int i = 0; i < time_.size(); ++i) {
         wgit_[wname][i] = double_vector_safe_iget(wgit, i);
@@ -368,7 +474,9 @@ void ECLSummaryReader::initFieldRates() {
   fopr_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FOPR")) {
     int fopr_index = ecl_smspec_get_field_var_params_index(smspec, "FOPR");
-    double_vector_type * fopr = ecl_sum_alloc_data_vector(ecl_sum_, fopr_index, true);
+    double_vector_type * fopr = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fopr_index,
+                                                          true);
     assert(double_vector_size(fopr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fopr_[i] = double_vector_safe_iget(fopr, i);
@@ -387,7 +495,9 @@ void ECLSummaryReader::initFieldRates() {
   fwpr_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FWPR")) {
     int fwpr_index = ecl_smspec_get_field_var_params_index(smspec, "FWPR");
-    double_vector_type * fwpr = ecl_sum_alloc_data_vector(ecl_sum_, fwpr_index, true);
+    double_vector_type * fwpr = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fwpr_index,
+                                                          true);
     assert(double_vector_size(fwpr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fwpr_[i] = double_vector_safe_iget(fwpr, i);
@@ -406,7 +516,9 @@ void ECLSummaryReader::initFieldRates() {
   fgpr_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FGPR")) {
     int fgpr_index = ecl_smspec_get_field_var_params_index(smspec, "FGPR");
-    double_vector_type * fgpr = ecl_sum_alloc_data_vector(ecl_sum_, fgpr_index, true);
+    double_vector_type * fgpr = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fgpr_index,
+                                                          true);
     assert(double_vector_size(fgpr) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fgpr_[i] = double_vector_safe_iget(fgpr, i);
@@ -425,7 +537,9 @@ void ECLSummaryReader::initFieldRates() {
   fwir_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FWIR")) {
     int fwir_index = ecl_smspec_get_field_var_params_index(smspec, "FWIR");
-    double_vector_type * fwir = ecl_sum_alloc_data_vector(ecl_sum_, fwir_index, true);
+    double_vector_type * fwir = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fwir_index,
+                                                          true);
     assert(double_vector_size(fwir) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fwir_[i] = double_vector_safe_iget(fwir, i);
@@ -444,7 +558,9 @@ void ECLSummaryReader::initFieldRates() {
   fgir_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FGIR")) {
     int fgir_index = ecl_smspec_get_field_var_params_index(smspec, "FGIR");
-    double_vector_type * fgir = ecl_sum_alloc_data_vector(ecl_sum_, fgir_index, true);
+    double_vector_type * fgir = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fgir_index,
+                                                          true);
     assert(double_vector_size(fgir) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fgir_[i] = double_vector_safe_iget(fgir, i);
@@ -468,7 +584,9 @@ void ECLSummaryReader::initFieldTotals() {
   fopt_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FOPT")) {
     int fopt_index = ecl_smspec_get_field_var_params_index(smspec, "FOPT");
-    double_vector_type * fopt = ecl_sum_alloc_data_vector(ecl_sum_, fopt_index, true);
+    double_vector_type * fopt = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fopt_index,
+                                                          true);
     assert(double_vector_size(fopt) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fopt_[i] = double_vector_safe_iget(fopt, i);
@@ -487,7 +605,9 @@ void ECLSummaryReader::initFieldTotals() {
   fwpt_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FWPT")) {
     int fwpt_index = ecl_smspec_get_field_var_params_index(smspec, "FWPT");
-    double_vector_type * fwpt = ecl_sum_alloc_data_vector(ecl_sum_, fwpt_index, true);
+    double_vector_type * fwpt = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fwpt_index,
+                                                          true);
     assert(double_vector_size(fwpt) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fwpt_[i] = double_vector_safe_iget(fwpt, i);
@@ -506,7 +626,9 @@ void ECLSummaryReader::initFieldTotals() {
   fgpt_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FGPT")) {
     int fgpt_index = ecl_smspec_get_field_var_params_index(smspec, "FGPT");
-    double_vector_type * fgpt = ecl_sum_alloc_data_vector(ecl_sum_, fgpt_index, true);
+    double_vector_type * fgpt = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fgpt_index,
+                                                          true);
     assert(double_vector_size(fgpt) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fgpt_[i] = double_vector_safe_iget(fgpt, i);
@@ -525,7 +647,9 @@ void ECLSummaryReader::initFieldTotals() {
   fwit_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FWIT")) {
     int fwit_index = ecl_smspec_get_field_var_params_index(smspec, "FWIT");
-    double_vector_type * fwit = ecl_sum_alloc_data_vector(ecl_sum_, fwit_index, true);
+    double_vector_type * fwit = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fwit_index,
+                                                          true);
     assert(double_vector_size(fwit) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fwit_[i] = double_vector_safe_iget(fwit, i);
@@ -533,7 +657,7 @@ void ECLSummaryReader::initFieldTotals() {
     fwit_[0] = 0.0;
   } else {
     warnPropertyNotFound("FWIT");
-    for (auto wname : wells_) {
+    for (const auto& wname : wells_) {
       for (int i = 0; i < time_.size(); ++i) {
         fwit_[i] += wwit_[wname][i];
       }
@@ -544,7 +668,9 @@ void ECLSummaryReader::initFieldTotals() {
   fgit_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FGIT")) {
     int fgit_index = ecl_smspec_get_field_var_params_index(smspec, "FGIT");
-    double_vector_type * fgit = ecl_sum_alloc_data_vector(ecl_sum_, fgit_index, true);
+    double_vector_type * fgit = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          fgit_index,
+                                                          true);
     assert(double_vector_size(fgit) == time_.size());
     for (int i = 0; i < time_.size(); ++i) {
       fgit_[i] = double_vector_safe_iget(fgit, i);
@@ -552,7 +678,7 @@ void ECLSummaryReader::initFieldTotals() {
     fgit_[0] = 0.0;
   } else {
     warnPropertyNotFound("FGIT");
-    for (auto wname : wells_) {
+    for (const auto& wname : wells_) {
       for (int i = 0; i < time_.size(); ++i) {
         fgit_[i] += wgit_[wname][i];
       }
@@ -560,67 +686,80 @@ void ECLSummaryReader::initFieldTotals() {
   }
 }
 
-const std::vector<double> ECLSummaryReader::wopt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+std::vector<double> ECLSummaryReader::wopt(const string well_name) const {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "The well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
   if (wopt_.at(well_name).back() == 0.0)
     warnPropertyZero(well_name, "WOPT");
   return wopt_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wwpt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+std::vector<double> ECLSummaryReader::wwpt(const string well_name) const {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
   if (wwpt_.at(well_name).back() == 0.0)
     warnPropertyZero(well_name, "WWPT");
   return wwpt_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wgpt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+std::vector<double> ECLSummaryReader::wgpt(const string well_name) const {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
   if (wgpt_.at(well_name).back() == 0.0)
     warnPropertyZero(well_name, "WGPT");
   return wgpt_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wwit(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+std::vector<double> ECLSummaryReader::wwit(const string well_name) const {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
   if (wwit_.at(well_name).back() == 0.0)
     warnPropertyZero(well_name, "WWIT");
   return wwit_.at(well_name);
 }
 
-const std::vector<double> ECLSummaryReader::wgit(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+std::vector<double> ECLSummaryReader::wgit(const string& well_name) const {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "The well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
   if (wgit_.at(well_name).back() == 0.0)
     warnPropertyZero(well_name, "WGIT");
   return wgit_.at(well_name);
 }
 
-void ECLSummaryReader::warnPropertyZero(string wname, string propname) const {
+void ECLSummaryReader::warnPropertyZero(const string& wname, string propname) const {
   if (VERB_SIM >= 3) {
-    Printer::ext_warn("Returning cumulative vector with final value 0.0 for " + propname + " for well " + wname + ".",
-                      "Simulation", "ECLSummaryReader");
+    string wm = "Returning cumulative vector with final value 0.0 for ";
+    wm += propname + " for well " + wname + ".";
+    ext_warn(wm, md_, cl_, vp_.lnw);
   }
 }
 
-void ECLSummaryReader::warnPropertyNotFound(string propname) const {
+void ECLSummaryReader::warnPropertyNotFound(const string& propname) const {
   if (VERB_SIM >= 2) {
-    Printer::ext_warn("The property " + propname + " was not found in the summary. Calculating from corresponding well properties.",
-                      "Simulation", "ECLSummaryReader");
+    string wm = "Property " + propname + " was not found in the summary. ";
+    wm += "Calculating from corresponding well properties.";
+    ext_warn(wm, md_, cl_, vp_.lnw);
   }
 }
 
-void ECLSummaryReader::warnPropertyZero(string propname) const {
+void ECLSummaryReader::warnPropertyZero(const string& propname) const {
   if (VERB_SIM >= 3) {
-    Printer::ext_warn("Returning cumulative vector with final value 0.0 for " + propname + ".",
-                      "Simulation", "ECLSummaryReader");
+    string wm = "Returning cumulative vector with final value 0.0 for " + propname + ".";
+    ext_warn(wm, md_, cl_, vp_.lnw);
   }
 }
 
+// Field vectors (std::vector) -----------------------------
 const std::vector<double> &ECLSummaryReader::fopt() const {
   if (fopt_.back() == 0.0) { warnPropertyZero("FOPT"); }
   return fopt_;
@@ -671,18 +810,7 @@ const std::vector<double> &ECLSummaryReader::fgir() const {
   return fgir_;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+// Field vectors (VectorXd) --------------------------------
 const VectorXd &ECLSummaryReader::foptXd() const {
   if (foptXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPT"); }
   return foptXd_;
@@ -733,46 +861,34 @@ const VectorXd &ECLSummaryReader::fgirXd() const {
   return fgirXd_;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Well vectors (std::vector) ------------------------------
 std::vector<double> ECLSummaryReader::wopr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
   return wopr_.at(well_name);
 }
 
 std::vector<double> ECLSummaryReader::wwpr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
   return wwpr_.at(well_name);
 }
 
 std::vector<double> ECLSummaryReader::wgpr(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
   return wgpr_.at(well_name);
 }
 
 std::vector<double> ECLSummaryReader::wwir(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
   return wwir_.at(well_name);
 }
 
 std::vector<double> ECLSummaryReader::wgir(const string well_name) const {
   if (wells_.find(well_name) == wells_.end())
-    throw SummaryVariableDoesNotExistException("The well " + well_name + " was not found in the summary.");
+    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
   return wgir_.at(well_name);
 }
 vector<double> ECLSummaryReader::computeCumulativeFromRate(vector<double> rate) {
@@ -784,6 +900,218 @@ vector<double> ECLSummaryReader::computeCumulativeFromRate(vector<double> rate) 
   }
   return cumulative;
 }
+
+// Well segment rates --------------------------------------
+void ECLSummaryReader::initWellSegRates() {
+  const ecl_smspec_type *smspec = ecl_sum_get_smspec(ecl_sum_);
+  auto s_obj = settings_->optimizer()->objective();
+
+  if (s_obj.type == Settings::Optimizer::ObjectiveType::Augmented) {
+
+    // for each term, treat only terms with segment sections
+    for (int ii = 0; ii < s_obj.terms.size(); ++ii) {
+      if (!s_obj.terms[ii].segments.empty()) {
+
+        for (const auto& wname : wells_) {
+
+          // SOFR ------------------------------------------
+          for (const auto& seg_key : seg_sofr_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_sofr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_sofr_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_sofr_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int sofr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *sofr = ecl_sum_alloc_data_vector(ecl_sum_, sofr_index, true);
+                assert(double_vector_size(sofr) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_sofr_[wname].seg_data[jj][kk] = double_vector_safe_iget(sofr, kk);
+                }
+                seg_sofr_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(sofr);
+              }
+            }
+          }
+
+          // SWFR ------------------------------------------
+          for (const auto& seg_key : seg_swfr_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_swfr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_swfr_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_swfr_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int swfr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *swfr = ecl_sum_alloc_data_vector(ecl_sum_, swfr_index, true);
+                assert(double_vector_size(swfr) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_swfr_[wname].seg_data[jj][kk] = double_vector_safe_iget(swfr, kk);
+                }
+                seg_swfr_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(swfr);
+              }
+            }
+          }
+
+          // SPR ------------------------------------------
+          for (const auto& seg_key : seg_spr_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_spr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_spr_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_spr_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int spr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *spr = ecl_sum_alloc_data_vector(ecl_sum_, spr_index, true);
+                assert(double_vector_size(spr) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_spr_[wname].seg_data[jj][kk] = double_vector_safe_iget(spr, kk);
+                }
+                seg_spr_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(spr);
+              }
+            }
+          }
+
+          // SPRD ------------------------------------------
+          for (const auto& seg_key : seg_sprd_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_sprd_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_sprd_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_sprd_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int sprd_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *sprd = ecl_sum_alloc_data_vector(ecl_sum_, sprd_index, true);
+                assert(double_vector_size(sprd) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_sprd_[wname].seg_data[jj][kk] = double_vector_safe_iget(sprd, kk);
+                }
+                seg_sprd_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(sprd);
+              }
+            }
+          }
+
+          // SWCT ------------------------------------------
+          for (const auto& seg_key : seg_swct_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_swct_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_swct_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_swct_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int swct_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *swct = ecl_sum_alloc_data_vector(ecl_sum_, swct_index, true);
+                assert(double_vector_size(swct) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_swct_[wname].seg_data[jj][kk] = double_vector_safe_iget(swct, kk);
+                }
+                seg_swct_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(swct);
+              }
+            }
+          }
+
+          // SCSA ------------------------------------------
+          for (const auto& seg_key : seg_scsa_keys_) {
+
+            // check if key exists for current well
+            size_t fidx = seg_key.find(wname);
+            if (fidx != string::npos) {
+              // # of segments from settings
+              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+
+              // init segment data structure (segSet)
+              auto vseg = vector<double>(time_.size(), 0.0);
+              seg_scsa_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
+              seg_scsa_[wname].nsegs = s_seg.size();
+
+              // load data vector corr. to each specified segment
+              for (int jj=0; jj < seg_scsa_[wname].nsegs; ++jj) {
+                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
+                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+
+                int scsa_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
+                double_vector_type *scsa = ecl_sum_alloc_data_vector(ecl_sum_, scsa_index, true);
+                assert(double_vector_size(scsa) == time_.size());
+
+                for (int kk = 0; kk < time_.size(); ++kk) {
+                  seg_scsa_[wname].seg_data[jj][kk] = double_vector_safe_iget(scsa, kk);
+                }
+                seg_scsa_[wname].seg_data[jj][0] = 0.0;
+                double_vector_free(scsa);
+              }
+            }
+          }
+
+        } // wells
+      } // if segments section in terms
+    } // for each term
+  } // if augmented objf type
+}
+
 
 }
 }

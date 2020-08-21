@@ -54,7 +54,8 @@ class ECLSummaryReader
    * \param file_name Path to the eclipse summary, with or
    * without file suffix.
    */
-  explicit ECLSummaryReader(string file_name);
+  explicit ECLSummaryReader(const string& file_name,
+                            Settings::Settings *settings);
   ~ECLSummaryReader();
 
   /*!
@@ -80,7 +81,9 @@ class ECLSummaryReader
    * \param time_index The time index (0 and up).
    * \return The value of the variable at the specified time index.
    */
-  double GetWellVar(const string& well_name, string var_name, int time_index);
+  double GetWellVar(const string& well_name,
+                    string var_name,
+                    int time_index);
 
   //!< Get the last report step, i.e. the highest possible time index.
   int GetLastReportStep();
@@ -133,23 +136,24 @@ class ECLSummaryReader
   const VectorXd &fwirXd() const;
   const VectorXd &fgirXd() const;
 
-  const vector<double> wopt(const string well_name) const;
-  const vector<double> wwpt(const string well_name) const;
-  const vector<double> wgpt(const string well_name) const;
-  const vector<double> wwit(const string well_name) const;
-  const vector<double> wgit(const string well_name) const;
+  vector<double> wopt(string well_name) const;
+  vector<double> wwpt(string well_name) const;
+  vector<double> wgpt(string well_name) const;
+  vector<double> wwit(string well_name) const;
+  vector<double> wgit(const string& well_name) const;
 
-  vector<double> wopr(const string well_name) const;
-  vector<double> wwpr(const string well_name) const;
-  vector<double> wgpr(const string well_name) const;
-  vector<double> wwir(const string well_name) const;
-  vector<double> wgir(const string well_name) const;
-
-  Settings::VerbParams vp_;
-  string md_ = "ERTWrapper";
-  string cl_ = "ECLSummaryReader";
+  vector<double> wopr(string well_name) const;
+  vector<double> wwpr(string well_name) const;
+  vector<double> wgpr(string well_name) const;
+  vector<double> wwir(string well_name) const;
+  vector<double> wgir(string well_name) const;
 
  private:
+  Settings::Settings* settings_;
+  Settings::VerbParams vp_;
+  string md_ = "ERTWrapper";
+
+  string cl_ = "ECLSummaryReader";
   string file_name_;
 
   ecl_sum_type *ecl_sum_;
@@ -158,6 +162,15 @@ class ECLSummaryReader
   set<string> wells_; //!< List of all wells in smry.
   set<string> field_keys_; //!< List of all field keys in smry.
   set<string> well_keys_; //!< List of all well keys in smry.
+
+  set<string> seg_sofr_keys_;
+  set<string> seg_swfr_keys_;
+  set<string> seg_spr_keys_;
+  set<string> seg_sprd_keys_;
+  set<string> seg_swct_keys_;
+  set<string> seg_scsa_keys_;
+  set<string> comp_keys_;
+
 
   //!< Populate key lists using the ecl_sum_select_matching_general_var_list function.
   void populateKeyLists();
@@ -204,19 +217,33 @@ class ECLSummaryReader
   map<string, vector<double> > wwir_;
   map<string, vector<double> > wgir_;
 
+  struct segSet {
+    int nsegs = 0;
+    vector<vector<double>> seg_data;
+  };
+
+  map<string, segSet> seg_sofr_;
+  map<string, segSet> seg_swfr_;
+  map<string, segSet> seg_spr_;
+  map<string, segSet> seg_sprd_;
+  map<string, segSet> seg_swct_;
+  map<string, segSet> seg_scsa_;
+
   void initializeVectors();
   void initVectorsXd();
   void initializeTimeVector();
 
   void initializeWellRates();
-  void initializeWellCumulatives();
+  void initWellTotals();
 
   void initFieldTotals();
   void initFieldRates();
 
-  void warnPropertyZero(string wname, string propname) const;
-  void warnPropertyNotFound(string propname) const;
-  void warnPropertyZero(string propname) const;
+  void initWellSegRates();
+
+  void warnPropertyZero(const string& wname, string propname) const;
+  void warnPropertyNotFound(const string& propname) const;
+  void warnPropertyZero(const string& propname) const;
 
   bool hasWellVar(const string& well_name, string var_name);
   bool hasGroupVar(const string& group_name, string var_name);
