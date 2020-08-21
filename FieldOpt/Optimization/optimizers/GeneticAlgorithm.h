@@ -63,7 +63,7 @@ class GeneticAlgorithm : public Optimizer {
     Case *case_pointer;
     Chromosome(Case *c);
     Chromosome() {}
-    double ofv() { return case_pointer->objective_function_value(); }
+    double ofv() { return case_pointer->objf_value(); }
     void createNewCase();
   };
 

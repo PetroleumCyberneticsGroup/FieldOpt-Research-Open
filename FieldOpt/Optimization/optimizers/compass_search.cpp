@@ -58,7 +58,7 @@ namespace Optimization {
                     .arg(nr_queued_cases())
                     .arg(nr_recently_evaluated_cases())
                     .arg(GetTentativeBestCase()->id().toString())
-                    .arg(GetTentativeBestCase()->objective_function_value())
+                    .arg(GetTentativeBestCase()->objf_value())
                     .arg(step_lengths_[0]);
         }
 

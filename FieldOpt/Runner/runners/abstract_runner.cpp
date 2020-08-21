@@ -239,7 +239,7 @@ void AbstractRunner::InitializeBaseCase() {
     base_case_->set_objf_value(objective_function_->value());
 
     string tm = "Base case objective function value set to ";
-    tm += num2str(base_case_->objective_function_value(), 5);
+    tm += num2str(base_case_->objf_value(), 8, 1);
     if (vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
   }
 }

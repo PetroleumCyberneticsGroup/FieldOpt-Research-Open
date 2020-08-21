@@ -42,7 +42,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
   // Verify that the base case has been evaluated.
   try {
-    base_case->objective_function_value();
+    base_case->objf_value();
   } catch (ObjectiveFunctionException) {
     throw OptimizerInitializationException(
         "The objective function value of the base case "
@@ -91,7 +91,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
       initializeNormalizers();
 
       // penalize the base case
-      double org_ofv = tentative_best_case_->objective_function_value();
+      double org_ofv = tentative_best_case_->objf_value();
       double pen_ofv = PenalizedOFV(tentative_best_case_);
       tentative_best_case_->set_objf_value(pen_ofv);
       if (VERB_OPT >=1) {
@@ -134,7 +134,7 @@ void Optimizer::SubmitEvaluatedCase(Case *c)
     double penalized_ofv = PenalizedOFV(c);
     c->set_objf_value(penalized_ofv);
   }
-  case_handler_->UpdateCaseObjectiveFunctionValue(c->id(), c->objective_function_value());
+  case_handler_->UpdateCaseObjectiveFunctionValue(c->id(), c->objf_value());
   case_handler_->SetCaseState(c->id(), c->state, c->GetWICTime(), c->GetSimTime());
   case_handler_->SetCaseEvaluated(c->id());
   handleEvaluatedCase(case_handler_->GetCase(c->id()));
@@ -153,11 +153,11 @@ bool Optimizer::isImprovement(const Case *c) {
 
 bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   if (mode_ == Settings::Optimizer::OptimizerMode::Maximize) {
-    if (c1->objective_function_value() > c2->objective_function_value())
+    if (c1->objf_value() > c2->objf_value())
       return true;
   }
   else if (mode_ == Settings::Optimizer::OptimizerMode::Minimize) {
-    if (c1->objective_function_value() < c2->objective_function_value())
+    if (c1->objf_value() < c2->objf_value())
       return true;
   }
   return false;
@@ -182,7 +182,7 @@ QString Optimizer::GetStatusString() const
       .arg(nr_queued_cases())
       .arg(nr_recently_evaluated_cases())
       .arg(tentative_best_case_->id().toString())
-      .arg(tentative_best_case_->objective_function_value());
+      .arg(tentative_best_case_->objf_value());
 }
 
 void Optimizer::EnableConstraintLogging(QString output_directory_path) {
@@ -221,7 +221,7 @@ map<string, vector<double>> Optimizer::GetValues() {
   valmap["TimONr"] = vector<double>{case_handler_->NumberTimeout()};
   valmap["FailNr"] = vector<double>{case_handler_->NumberFailed()};
   valmap["InvlNr"] = vector<double>{case_handler_->NumberInvalid()};
-  valmap["CBOFnV"] = vector<double>{tentative_best_case_->objective_function_value()};
+  valmap["CBOFnV"] = vector<double>{tentative_best_case_->objf_value()};
   return valmap;
 }
 
@@ -244,7 +244,7 @@ map<string, string> Optimizer::Summary::GetState() {
   }
   statemap["bc Best case found in iter"] = boost::lexical_cast<string>(opt_->tentative_best_case_iteration_);
   statemap["bc UUID"] = opt_->tentative_best_case_->GetId().toString().toStdString();
-  statemap["bc Objective function value"] = boost::lexical_cast<string>(opt_->tentative_best_case_->objective_function_value());
+  statemap["bc Objective function value"] = boost::lexical_cast<string>(opt_->tentative_best_case_->objf_value());
   statemap["bc Constraint status"] = statemap["bc Constraint status"] = opt_->tentative_best_case_->GetState()["ConsSt"];
   statemap["bc Simulation time"] = timespan_string(opt_->tentative_best_case_->GetSimTime());
   return statemap;
@@ -281,7 +281,7 @@ void Optimizer::initializeOfvNormalizer() {
 
   vector<double> abs_ofvs;
   for (auto c : case_handler_->EvaluatedCases()) {
-    abs_ofvs.push_back(abs(c->objective_function_value()));
+    abs_ofvs.push_back(abs(c->objf_value()));
   }
   long double max_ofv = *max_element(abs_ofvs.begin(), abs_ofvs.end());
 
@@ -291,14 +291,14 @@ void Optimizer::initializeOfvNormalizer() {
 }
 
 double Optimizer::PenalizedOFV(Case *c) {
-    long double norm_ofv = normalizer_ofv_.normalize(c->objective_function_value());
+    long double norm_ofv = normalizer_ofv_.normalize(c->objf_value());
     long double penalty = constraint_handler_->GetWeightedNormalizedPenalties(c);
     long double norm_pen_ovf = norm_ofv - penalty;
     double denormalized_ofv = normalizer_ofv_.denormalize(norm_pen_ovf);
 
     if (VERB_OPT >= 2) {
         Printer::ext_info("Penalized case "     + c->id().toString().toStdString()                + ". "
-                "Initial OFV: "                 + Printer::num2str(c->objective_function_value()) + "; "
+                "Initial OFV: "                 + Printer::num2str(c->objf_value()) + "; "
                 "Normalized OFV :"              + Printer::num2str(norm_ofv)                      + "; "
                 "Normalized penalty: "          + Printer::num2str(penalty)                       + "; "
                 "Penalized, normalized OFV: "   + Printer::num2str(norm_pen_ovf)                  + "; "

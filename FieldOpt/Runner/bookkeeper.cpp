@@ -12,7 +12,7 @@ namespace Runner {
     {
         for (auto evaluated_c : case_handler_->EvaluatedCases()) {
             if (evaluated_c->Equals(c)) { // Case has been evaluated
-                if (set_obj) c->set_objf_value(evaluated_c->objective_function_value());
+                if (set_obj) c->set_objf_value(evaluated_c->objf_value());
                 return true;
             }
         }

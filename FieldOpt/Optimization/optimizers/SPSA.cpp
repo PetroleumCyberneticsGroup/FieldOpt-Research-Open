@@ -58,7 +58,7 @@ void SPSA::handleEvaluatedCase(Case *c)
     updateTentativeBestCase(c);
     if (VERB_OPT >= 2) {
       Printer::ext_info("Found new tentative best case in iteration " + Printer::num2str(iteration_)
-          + ": " + Printer::num2str(tentative_best_case_->objective_function_value()),
+          + ": " + Printer::num2str(tentative_best_case_->objf_value()),
             "Optimization", "SPSA");
     }
   }
@@ -231,8 +231,8 @@ void SPSA::createPerturbations(Case *first, Case *second)
 void SPSA::updateGradient()
 {
   if (VERB_OPT >= 3) Printer::ext_info("Updating gradient.", "Optimization", "SPSA");
-  double yplus = perturbations_.first->objective_function_value();
-  double yminus = perturbations_.second->objective_function_value();
+  double yplus = perturbations_.first->objf_value();
+  double yminus = perturbations_.second->objf_value();
   if (mode_ == Settings::Optimizer::OptimizerMode::Maximize) {
     yplus = yplus * -1;
     yminus = yminus * -1;

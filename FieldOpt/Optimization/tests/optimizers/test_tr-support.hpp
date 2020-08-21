@@ -173,7 +173,7 @@ void PrintCaseData(Optimization::Case &c) {
        << "---------------------------------------------------------" << END << endl;
   cout << ss.str() << "Case id: " << c.GetId().toString().toStdString() << END << endl;
   cout << ss.str() << "x: [" << c.GetRealVarVector().transpose() << "]" << END << endl;
-  cout << ss.str() << "f: [" << c.objective_function_value() << "]" << END << endl;
+  cout << ss.str() << "f: [" << c.objf_value() << "]" << END << endl;
 
 }
 

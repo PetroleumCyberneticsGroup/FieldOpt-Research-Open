@@ -99,7 +99,7 @@ void PSO::handleEvaluatedCase(Case *c) {
             stringstream ss;
             ss.precision(6);
             ss << scientific;
-            ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objective_function_value();
+            ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
             Printer::ext_info(ss.str(), "Optimization", "PSO");
         }
     }

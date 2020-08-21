@@ -78,7 +78,7 @@ TrustRegionModel::TrustRegionModel(VectorXd& lb,
   settings_ = settings;
 
   if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-    base_case_->set_objf_value(-base_case_->objective_function_value());
+    base_case_->set_objf_value(-base_case_->objf_value());
   }
 
   radius_ = settings_->parameters().tr_initial_radius;
@@ -286,9 +286,9 @@ void TrustRegionModel::submitTempInitCases() {
     points_abs_.col(ii) = c->GetRealVarVector();
 
     if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-      fvalues_(ii) = -c->objective_function_value();
+      fvalues_(ii) = -c->objf_value();
     } else {
-      fvalues_(ii) = c->objective_function_value();
+      fvalues_(ii) = c->objf_value();
     }
 
     ii++;
@@ -643,9 +643,9 @@ bool TrustRegionModel::improveModelNfp() {
                   nfp_new_point_abs_.col(ii) = c->GetRealVarVector();
 
                   if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-                    nfp_new_fvalues_(ii) = -c->objective_function_value();
+                    nfp_new_fvalues_(ii) = -c->objf_value();
                   } else {
-                    nfp_new_fvalues_(ii) = c->objective_function_value();
+                    nfp_new_fvalues_(ii) = c->objf_value();
                   }
 
                   std::map <string, string> stateMap = c->GetState();
@@ -1967,9 +1967,9 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
 
             if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-              repl_new_fvalues_(ii) = -c->objective_function_value();
+              repl_new_fvalues_(ii) = -c->objf_value();
             } else {
-              repl_new_fvalues_(ii) = c->objective_function_value();
+              repl_new_fvalues_(ii) = c->objf_value();
             }
 
             std::map<string, string> stateMap = c->GetState();

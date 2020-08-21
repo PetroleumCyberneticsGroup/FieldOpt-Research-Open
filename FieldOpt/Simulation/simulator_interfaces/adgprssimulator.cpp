@@ -32,12 +32,12 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Simulation {
 
-AdgprsSimulator::AdgprsSimulator(Settings::Settings *settings, Model::Model *model)
+AdgprsSimulator::AdgprsSimulator(Settings::Settings *settings,
+                                 Model::Model *model)
   : Simulator(settings) {
   verifyOriginalDriverFileDirectory();
-
   model_ = model;
-  results_ = new Simulation::Results::AdgprsResults(settings->simulator());
+  results_ = new Simulation::Results::AdgprsResults(settings);
   vp_ = settings_->global()->verbParams();
   driver_file_writer_ = new AdgprsDriverFileWriter(settings_, model_);
 }
@@ -45,8 +45,8 @@ AdgprsSimulator::AdgprsSimulator(Settings::Settings *settings, Model::Model *mod
 void AdgprsSimulator::Evaluate() {
   if (results_->isAvailable()) results()->DumpResults();
   copyDriverFiles();
-  driver_file_writer_->WriteDriverFile(QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR)));
-  ::Utilities::Unix::ExecShellScript(QString::fromStdString(paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE)), script_args_, vp_);
+  driver_file_writer_->WriteDriverFile(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
+  ::Utilities::Unix::ExecShellScript(paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE), script_args_, vp_);
   paths_.SetPath(Paths::SIM_HDF5_FILE,
                  paths_.GetPath(Paths::SIM_WORK_DIR) + "/"
                    + driver_file_name_.split(".").first().toStdString() + ".vars.h5"

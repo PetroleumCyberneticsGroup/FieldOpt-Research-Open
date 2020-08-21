@@ -397,9 +397,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
       double eta_1 = settings_->parameters().tr_eta_1;
 
       if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-        fval_trial_ = -c->objective_function_value();
+        fval_trial_ = -c->objf_value();
       } else {
-        fval_trial_ = c->objective_function_value();
+        fval_trial_ = c->objf_value();
       }
 
       //!<Actual reduction>

@@ -154,7 +154,7 @@ bool Case::Equals(const Case *other, double tolerance) const {
   return true; // All variable values are equal if we reach this point.
 }
 
-double Case::objective_function_value() const {
+double Case::objf_value() const {
   if (objective_function_value_ == std::numeric_limits<double>::max())
     throw ObjectiveFunctionException("The objective function value has not been set in this Case.");
   else

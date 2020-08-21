@@ -154,7 +154,7 @@ class Case : public Loggable
   void set_integer_variables(const QList<QPair<QUuid, int>> &integer_variables) { integer_variables_ = integer_variables; }
   void set_real_variables(const QList<QPair<QUuid, double>> &real_variables) { real_variables_ = real_variables; }
 
-  double objective_function_value() const; //!< Get the objective function value. Throws an exception if the value has not been defined.
+  double objf_value() const; //!< Get the objective function value. Throws an exception if the value has not been defined.
   void set_objf_value(double objective_function_value);
 
   //!< Set the value of an integer variable in the case.

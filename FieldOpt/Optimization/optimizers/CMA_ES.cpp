@@ -212,7 +212,7 @@ void CMA_ES::handleEvaluatedCase(Case *c) {
             ss.precision(6);
             ss << scientific;
             ss << "New best in population, iteration " << Printer::num2str(iteration_) << ": OFV "
-               << c->objective_function_value();
+               << c->objf_value();
             Printer::ext_info(ss.str(), "Optimization", "CMA_ES");
         }
     }

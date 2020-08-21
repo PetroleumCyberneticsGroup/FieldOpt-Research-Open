@@ -45,6 +45,7 @@ class Simulator
 
  public:
   Simulator(const QJsonObject& json_simulator, Paths &paths, VerbParams vp);
+
   enum SimulatorType { ECLIPSE, ADGPRS, Flow, INTERSECT };
   enum SimulatorFluidModel { BlackOil, DeadOil };
   enum FileStructType { Flat, Branched };

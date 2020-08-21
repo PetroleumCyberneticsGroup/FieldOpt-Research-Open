@@ -40,7 +40,7 @@ FlowSimulator::FlowSimulator(Settings::Settings *settings, Model::Model *model)
 
   verifyOriginalDriverFileDirectory();
 
-  results_ = new Results::ECLResults(settings->simulator());
+  results_ = new Results::ECLResults(settings);
   try {
     results()->ReadResults(driver_file_writer_->output_driver_file_name_);
   } catch (...) {} // At this stage we don't really care if the results can be read, we just want to set the path.
@@ -49,8 +49,8 @@ FlowSimulator::FlowSimulator(Settings::Settings *settings, Model::Model *model)
 void FlowSimulator::Evaluate() {
   if (results_->isAvailable()) results_->DumpResults();
   copyDriverFiles();
-  driver_file_writer_->WriteDriverFile(QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR )));
-  ::Utilities::Unix::ExecShellScript(QString::fromStdString(paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE)), script_args_, vp_);
+  driver_file_writer_->WriteDriverFile(paths_.GetPathQstr(Paths::SIM_WORK_DIR ));
+  ::Utilities::Unix::ExecShellScript(paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE), script_args_, vp_);
   results_->ReadResults(driver_file_writer_->output_driver_file_name_);
 }
 
@@ -64,11 +64,11 @@ void FlowSimulator::CleanUp() {
 }
 
 void FlowSimulator::verifyOriginalDriverFileDirectory() {
-  QStringList critical_files = {QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/compdat.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/controls.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/wells.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/welspecs.in"};
-  for (auto file : critical_files) {
+  QStringList critical_files = {paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/compdat.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/controls.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/wells.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/welspecs.in"};
+  for (const auto& file : critical_files) {
     if (!Utilities::FileHandling::FileExists(file, vp_))
       throw DriverFileDoesNotExistException(file);
   }
@@ -88,8 +88,8 @@ void FlowSimulator::copyDriverFiles() {
 }
 
 void FlowSimulator::UpdateFilePaths() {
-  script_args_ = (QStringList() << QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR ))
-                                << QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR ))
+  script_args_ = (QStringList() << paths_.GetPathQstr(Paths::SIM_WORK_DIR )
+                                << paths_.GetPathQstr(Paths::SIM_WORK_DIR )
                                   + "/" + driver_file_name_);
 }
 
@@ -99,10 +99,11 @@ bool FlowSimulator::Evaluate(int timeout, int threads) {
   if (timeout < 10) t = 10; // Always let simulations run for at least 10 seconds
   if (results_->isAvailable()) results()->DumpResults();
   copyDriverFiles();
-  driver_file_writer_->WriteDriverFile(QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR)));
+  driver_file_writer_->WriteDriverFile(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
+
   std::cout << "Starting monitored simulation with timeout " << timeout << std::endl;
   bool success = ::Utilities::Unix::ExecShellScriptTimeout(
-    QString::fromStdString(paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE)),
+    paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
     script_args_, t, vp_);
   if (success) {
     results_->ReadResults(driver_file_writer_->output_driver_file_name_);

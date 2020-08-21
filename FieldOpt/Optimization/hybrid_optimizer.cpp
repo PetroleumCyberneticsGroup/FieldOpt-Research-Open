@@ -99,7 +99,7 @@ void HybridOptimizer::handleEvaluatedCase(Case *c) {
                 std::stringstream ss;
                 ss << "Found better case. Passing to primary." << "|";
                 ss << " ID: " << c->id().toString().toStdString() << "|";
-                ss << "OFV: " << c->objective_function_value();
+                ss << "OFV: " << c->objf_value();
                 Printer::ext_info(ss.str(), "Optimization", "HybridOptimizer");
             }
             updateTentativeBestCase(c);
@@ -112,7 +112,7 @@ void HybridOptimizer::handleEvaluatedCase(Case *c) {
                 std::stringstream ss;
                 ss << "Found better case. Passing to secondary." << "|";
                 ss << " ID: " << c->id().toString().toStdString() << "|";
-                ss << "OFV: " << c->objective_function_value();
+                ss << "OFV: " << c->objf_value();
                 Printer::ext_info(ss.str(), "Optimization", "HybridOptimizer");
             }
             updateTentativeBestCase(c);

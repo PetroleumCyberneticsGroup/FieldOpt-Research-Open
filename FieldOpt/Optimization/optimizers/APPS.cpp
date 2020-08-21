@@ -138,7 +138,7 @@ void APPS::print_state(string header) {
     ss << "Evaluated cases:   " << evaluated_cases_ << "|";
     ss << "Queued cases:      " << case_handler_->QueuedCases().size() << "|";
     ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
-    ss << "OFV:               " << tentative_best_case_->objective_function_value();
+    ss << "OFV:               " << tentative_best_case_->objf_value();
     ss << "Step lengths  :    " << vec_to_str(vector<double>(step_lengths_.data(), step_lengths_.data() + step_lengths_.size())) << "|";
     Printer::ext_info(ss.str(), "Optimization", "APPS");
 }
