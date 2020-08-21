@@ -26,19 +26,16 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef FIELDOPT_TEST_RESOURCE_RUNNER_HPP_H
 #define FIELDOPT_TEST_RESOURCE_RUNNER_HPP_H
 
-// ---------------------------------------------------------
 #include "../runtime_settings.h"
 #include "../logger.h"
 #include "../../Settings/tests/test_resource_example_file_paths.hpp"
 
 namespace TestResources {
 
-//==========================================================
 class RunnerResources {
 
  private:
 
-  // -------------------------------------------------------
   // string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.apps-t01.npv";
   string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv";
   string en_5spot_dir = "../examples/ECLIPSE/5spot_c04_flow_en10_perm";
@@ -80,7 +77,6 @@ class RunnerResources {
       "-t", "1000", // sim-timeout
   };
 
-  // -------------------------------------------------------
   const int argc = 16;
   const char *argv[16] = {
       "FieldOpt",
@@ -104,12 +100,9 @@ class RunnerResources {
       new Runner::RuntimeSettings(argc_en_5spot, argv_en_5spot);
 
  protected:
-
-  // -------------------------------------------------------
   Logger *logger_ = new Logger(rts_, QString::fromStdString(
       TestResources::ExampleFilePaths::directory_output_), false);
 
-  // -------------------------------------------------------
   Logger *logger_norne_ = new Logger(rts_, QString::fromStdString(
       TestResources::ExampleFilePaths::norne_test_output_), false);
 

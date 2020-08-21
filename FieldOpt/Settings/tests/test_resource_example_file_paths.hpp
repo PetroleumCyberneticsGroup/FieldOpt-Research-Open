@@ -68,6 +68,11 @@ static std::string trajectories_             = base_path() + "/examples/ECLIPSE/
 static std::string cube_grid_                = base_path() + "/examples/ECLIPSE/cube_9x9/CUBE.EGRID";
 static std::string schedule_inset_           = base_path() + "/examples/ECLIPSE/schedule_inset.txt";
 
+static std::string olympr37_dir_    = base_path() + "/examples/ECLIPSE/olympr37";
+static std::string olympr37_egrid_  = olympr37_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
+static std::string olympr37_driver_ = olympr37_dir_ + "/fo-drv.r001.c02-olymr37.icd-opt.apps.aug.json";
+
+
 }
 }
 
