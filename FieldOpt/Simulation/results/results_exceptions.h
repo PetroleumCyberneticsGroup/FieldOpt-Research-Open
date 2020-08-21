@@ -36,9 +36,9 @@ using std::runtime_error;
 
 namespace Simulation { namespace Results {
 
-class ResultFileNotFoundException : public std::runtime_error {
+class RsltFileNotFoundExc : public std::runtime_error {
  public:
-  ResultFileNotFoundException(const string &path)
+  RsltFileNotFoundExc(const string &path)
     : runtime_error("No valid result file found at path" + path) {}
 };
 
@@ -60,7 +60,9 @@ class RsltPropKeyDoesNotExistExc : public std::runtime_error {
 class ResultTimeIndexInvalidException : public std::runtime_error {
  public:
   ResultTimeIndexInvalidException(const int index)
-    : runtime_error("Time index " + boost::lexical_cast<std::string>(index) + " is not valid for the current results.") {}
+    : runtime_error("Time index "
+    + boost::lexical_cast<std::string>(index)
+      + " is not valid for the current results.") {}
 };
 
 }}

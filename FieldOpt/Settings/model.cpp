@@ -391,9 +391,13 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
   for (int i = 0; i < json_controls.size(); ++i) {
     Well::ControlEntry control;
 
-    if (!controlTimeIsDeclared(json_controls.at(i).toObject()["TimeStep"].toInt()))
-      throw UnableToParseWellsModelSectionException("All time steps must be declared in the ControlTimes array. Inconsistency detected in Controls declaration.");
-    else control.time_step = json_controls.at(i).toObject()["TimeStep"].toInt();
+    if (!controlTimeIsDeclared(json_controls.at(i).toObject()["TimeStep"].toInt())) {
+      string em = "All time steps must be declared in the ControlTimes array. ";
+      em += "Inconsistency detected in Controls declaration.";
+      throw UnableToParseWellsModelSectionException(em);
+    } else {
+      control.time_step = json_controls.at(i).toObject()["TimeStep"].toInt();
+    }
 
     // State (Open or shut)
     if (json_controls[i].toObject().contains("State") && QString::compare("Shut", json_controls.at(i).toObject()["State"].toString()) == 0)

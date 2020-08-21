@@ -29,11 +29,13 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
+using RProp = Simulation::Results::Results::Property;
+
 class AdgprsResultsTest : public ::testing::Test,
                           public TestResources::TestResourceSettings {
  protected:
   AdgprsResultsTest() {
-    results_ = new Simulation::Results::AdgprsResults(settings_simulator_);
+    results_ = new Simulation::Results::AdgprsResults(settings_full_);
     auto fp = QString::fromStdString(TestResources::ExampleFilePaths::gprs_base_5spot_);
     results_->ReadResults(fp);
   }
@@ -47,27 +49,27 @@ TEST_F(AdgprsResultsTest, ReadFile) {
 }
 
 TEST_F(AdgprsResultsTest, Time) {
-  EXPECT_FLOAT_EQ(0.0, results_->GetValue(Simulation::Results::Results::Property::Time, 0));
-  EXPECT_FLOAT_EQ(100.0, results_->GetValue(Simulation::Results::Results::Property::Time));
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::Time).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValue(RProp::Time, 0));
+  EXPECT_FLOAT_EQ(100.0, results_->GetValue(RProp::Time));
+  EXPECT_EQ(8, results_->GetValueVector(RProp::Time).size());
 }
 
 TEST_F(AdgprsResultsTest, FOPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).front());
-  EXPECT_FLOAT_EQ(178150.12, results_->GetValueVector(Simulation::Results::Results::Property::FieldOilProdTotal).back());
+  EXPECT_EQ(8, results_->GetValueVector(RProp::FieldOilProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(RProp::FieldOilProdTotal).front());
+  EXPECT_FLOAT_EQ(178150.12, results_->GetValueVector(RProp::FieldOilProdTotal).back());
 }
 
 TEST_F(AdgprsResultsTest, FWPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).front());
-  EXPECT_FLOAT_EQ(305866.53, results_->GetValueVector(Simulation::Results::Results::Property::FieldWatProdTotal).back());
+  EXPECT_EQ(8, results_->GetValueVector(RProp::FieldWatProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(RProp::FieldWatProdTotal).front());
+  EXPECT_FLOAT_EQ(305866.53, results_->GetValueVector(RProp::FieldWatProdTotal).back());
 }
 
 TEST_F(AdgprsResultsTest, FGPT) {
-  EXPECT_EQ(8, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).size());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).front());
-  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(Simulation::Results::Results::Property::FieldGasProdTotal).back());
+  EXPECT_EQ(8, results_->GetValueVector(RProp::FieldGasProdTotal).size());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(RProp::FieldGasProdTotal).front());
+  EXPECT_FLOAT_EQ(0.0, results_->GetValueVector(RProp::FieldGasProdTotal).back());
 }
 
 }

@@ -26,12 +26,16 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "ERTWrapper/eclsummaryreader.h"
 #include "ERTWrapper/ertwrapper_exceptions.h"
 #include "Settings/tests/test_resource_example_file_paths.hpp"
+#include "Settings/tests/test_resource_settings.hpp"
 
 using namespace ERTWrapper::ECLSummary;
 
 namespace {
 
-class ECLSummaryReaderTest : public ::testing::Test {
+class ECLSummaryReaderTest :
+  public ::testing::Test,
+  public TestResources::TestResourceSettings {
+
  protected:
   ECLSummaryReaderTest() {
   }
@@ -46,10 +50,12 @@ class ECLSummaryReaderTest : public ::testing::Test {
 
   ECLSummaryReader *ecl_summary_reader_;
   std::string file_name_ = TestResources::ExampleFilePaths::grid_horzwel_;
+  // std::string olymr37_ = TestResources::ExampleFilePaths::grid_olymr37_;
 };
 
 TEST_F(ECLSummaryReaderTest, ReportSteps) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   EXPECT_EQ(0, ecl_summary_reader_->GetFirstReportStep());
   EXPECT_EQ(22, ecl_summary_reader_->GetLastReportStep());
   EXPECT_TRUE(ecl_summary_reader_->HasReportStep(10));
@@ -58,19 +64,21 @@ TEST_F(ECLSummaryReaderTest, ReportSteps) {
 }
 
 TEST_F(ECLSummaryReaderTest, MiscVar) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   EXPECT_NO_THROW(ecl_summary_reader_->GetMiscVar("TIME", 1));
-  EXPECT_THROW(ecl_summary_reader_->GetMiscVar("NOVAR", 1), ERTWrapper::SummaryVariableDoesNotExistException);
-  EXPECT_THROW(ecl_summary_reader_->GetMiscVar("TIME", 23), ERTWrapper::SummaryTimeStepDoesNotExistException);
+  EXPECT_THROW(ecl_summary_reader_->GetMiscVar("NOVAR", 1), ERTWrapper::SmryVarDoesNotExistExc);
+  EXPECT_THROW(ecl_summary_reader_->GetMiscVar("TIME", 23), ERTWrapper::SmryTimeStepDoesNotExistExc);
   EXPECT_FLOAT_EQ(200, ecl_summary_reader_->GetMiscVar("TIME", 22));
   EXPECT_FLOAT_EQ(0, ecl_summary_reader_->GetMiscVar("TIME", 0));
 }
 
 TEST_F(ECLSummaryReaderTest, FieldVar) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   EXPECT_NO_THROW(ecl_summary_reader_->GetFieldVar("FOPT", 0));
   EXPECT_THROW(ecl_summary_reader_->GetFieldVar("NOVAR", 1), std::runtime_error);
-  EXPECT_THROW(ecl_summary_reader_->GetFieldVar("FOPT", 32), ERTWrapper::SummaryTimeStepDoesNotExistException);
+  EXPECT_THROW(ecl_summary_reader_->GetFieldVar("FOPT", 32), ERTWrapper::SmryTimeStepDoesNotExistExc);
   EXPECT_FLOAT_EQ(0, ecl_summary_reader_->GetFieldVar("FOPT", 0));
   EXPECT_FLOAT_EQ(187866.44, ecl_summary_reader_->GetFieldVar("FOPT", 22));
 
@@ -83,24 +91,26 @@ TEST_F(ECLSummaryReaderTest, FieldVar) {
 }
 
 TEST_F(ECLSummaryReaderTest, WellVar) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   EXPECT_NO_THROW(ecl_summary_reader_->GetWellVar("PROD", "WOPR", 1));
-  EXPECT_THROW(ecl_summary_reader_->GetWellVar("NOWELL", "WOPR", 1), ERTWrapper::SummaryVariableDoesNotExistException);
-  EXPECT_THROW(ecl_summary_reader_->GetWellVar("PROD", "NOVAR", 1), ERTWrapper::SummaryVariableDoesNotExistException);
-  EXPECT_THROW(ecl_summary_reader_->GetWellVar("PROD", "WOPR", 32), ERTWrapper::SummaryTimeStepDoesNotExistException);
+  EXPECT_THROW(ecl_summary_reader_->GetWellVar("NOWELL", "WOPR", 1), ERTWrapper::SmryVarDoesNotExistExc);
+  EXPECT_THROW(ecl_summary_reader_->GetWellVar("PROD", "NOVAR", 1), ERTWrapper::SmryVarDoesNotExistExc);
+  EXPECT_THROW(ecl_summary_reader_->GetWellVar("PROD", "WOPR", 32), ERTWrapper::SmryTimeStepDoesNotExistExc);
   EXPECT_FLOAT_EQ(0, ecl_summary_reader_->GetWellVar("PROD", "WOPR", 0));
   EXPECT_FLOAT_EQ(628.987, ecl_summary_reader_->GetWellVar("PROD", "WOPR", 22));
 }
 
 TEST_F(ECLSummaryReaderTest, TimeVector) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_, settings_full_);
   EXPECT_EQ(21, ecl_summary_reader_->time().size());
   EXPECT_EQ(0, ecl_summary_reader_->time()[0]);
   EXPECT_EQ(200, ecl_summary_reader_->time().back());
 }
 
 TEST_F(ECLSummaryReaderTest, WellCumulativeVectors) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   EXPECT_EQ(21, ecl_summary_reader_->wopt("PROD").size());
   EXPECT_EQ(21, ecl_summary_reader_->wwpt("PROD").size());
   EXPECT_EQ(21, ecl_summary_reader_->wgpt("PROD").size());
@@ -111,7 +121,8 @@ TEST_F(ECLSummaryReaderTest, WellCumulativeVectors) {
 }
 
 TEST_F(ECLSummaryReaderTest, FieldCumulativeVectors) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   auto fopt = ecl_summary_reader_->fopt();
   auto fwpt = ecl_summary_reader_->fwpt();
   auto fgpt = ecl_summary_reader_->fgpt();
@@ -130,7 +141,8 @@ TEST_F(ECLSummaryReaderTest, FieldCumulativeVectors) {
 }
 
 TEST_F(ECLSummaryReaderTest, WellRateVectors) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_,
+                                             settings_full_);
   auto wopr = ecl_summary_reader_->wopr("PROD");
   EXPECT_EQ(21, wopr.size());
   EXPECT_FLOAT_EQ(0.0, wopr.front());
@@ -138,7 +150,7 @@ TEST_F(ECLSummaryReaderTest, WellRateVectors) {
 }
 
 TEST_F(ECLSummaryReaderTest, KeysAndWells) {
-  ecl_summary_reader_ = new ECLSummaryReader(file_name_);
+  ecl_summary_reader_ = new ECLSummaryReader(file_name_, settings_full_);
   EXPECT_EQ(1, ecl_summary_reader_->wells().size());
   EXPECT_EQ(1, ecl_summary_reader_->wells().count("PROD"));
   EXPECT_EQ(11, ecl_summary_reader_->keys().size());
