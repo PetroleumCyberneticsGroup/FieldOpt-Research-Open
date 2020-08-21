@@ -5,7 +5,8 @@ include(Sources.cmake)
 
 # Target lib ===============================================
 add_library(ertwrapper STATIC
-    ${ERTWRAPPER_HEADERS} ${ERTWRAPPER_SOURCES})
+    ${ERTWRAPPER_HEADERS}
+    ${ERTWRAPPER_SOURCES})
 
 add_library(fieldopt::ertwrapper ALIAS ${PROJECT_NAME})
 
@@ -35,6 +36,7 @@ if (BUILD_TESTING)
     add_executable(test_ertwrapper ${ERTWRAPPER_TESTS})
     target_link_libraries(test_ertwrapper
         fieldopt::ertwrapper
+        fieldopt::runner
         Qt5::Core
         ${Boost_LIBRARIES}
         ${gtest}

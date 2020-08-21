@@ -3,10 +3,10 @@ project(settings)
 
 include(Sources.cmake)
 
+# Target lib ===============================================
 add_library(settings STATIC
   ${SETTINGS_HEADERS}
-  ${SETTINGS_SOURCES}
-  )
+  ${SETTINGS_SOURCES})
 
 add_library(fieldopt::settings ALIAS ${PROJECT_NAME})
 
@@ -25,9 +25,9 @@ target_include_directories(settings PUBLIC
 
 add_compile_options(-std=c++11)
 
+# Test exec ================================================
 # Unit tests
 if (BUILD_TESTING)
-
   add_executable(test_settings ${SETTINGS_TESTS})
   target_link_libraries(test_settings
     fieldopt::settings
@@ -43,8 +43,8 @@ if (BUILD_TESTING)
     )
 endif()
 
+# Install ==================================================
 install(TARGETS settings
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib/static
-  )
+  ARCHIVE DESTINATION lib/static)

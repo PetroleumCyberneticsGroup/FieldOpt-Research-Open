@@ -22,8 +22,8 @@ target_include_directories(simulation PUBLIC
 add_compile_options(-std=c++11)
 
 # Test exec ================================================
+# Unit tests
 if (BUILD_TESTING)
-  # Unit tests
   add_executable(test_simulation ${SIMULATION_TESTS})
   target_link_libraries(test_simulation
       fieldopt::simulation
