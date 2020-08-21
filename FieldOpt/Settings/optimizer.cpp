@@ -802,13 +802,34 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
 
     } else if (QString::compare(objective_type, "Augmented") == 0) {
       obj.type = ObjectiveType::Augmented;
-      obj.terms = QList<Objective::AugTerms>();
+      obj.terms = vector<Objective::AugTerms>();
 
       QJsonArray terms = json_objective["Terms"].toArray();
+
       for (int ii = 0; ii < terms.size(); ++ii) {
         Objective::AugTerms term;
-        set_req_prop_double(term.coefficient, terms[ii].toObject(), "Coefficient");
-        set_req_prop_string(term.prop_name, terms[ii].toObject(), "Property");
+        auto json_term = terms[ii].toObject();
+        set_req_prop_double(term.coefficient, json_term, "Coefficient");
+        set_req_prop_string(term.prop_name, json_term, "PropName");
+
+        if (json_term.contains("Wells") && json_term.contains("Segments")) {
+          QJsonArray term_wells = json_term["Wells"].toArray();
+          for (auto wname : term_wells) {
+            term.wells.push_back(wname.toString().toStdString());
+          }
+
+          QJsonArray term_segs = json_term["Segments"].toArray();
+          for (int ii = 0; ii < term_segs.size(); ++ii) {
+            vector<int> segs_vec;
+            QJsonArray segs_array = term_segs.at(ii).toArray();
+            for (int jj = 0; jj < segs_array.size(); ++jj) {
+              segs_vec.push_back(segs_array.at(jj).toInt());
+            }
+            term.segments[term.wells[ii]] = segs_vec;
+          }
+        }
+        term.showTerms();
+        obj.terms.push_back(term);
       }
 
     } else {

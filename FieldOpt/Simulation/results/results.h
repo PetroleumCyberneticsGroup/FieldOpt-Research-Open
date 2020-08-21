@@ -73,6 +73,10 @@ class Results
     WellWatProdRate,
     WellWatInjRate,
     WellGasInjRate,
+    //
+    FieldTotal,
+    GnGFunction,
+    WellWatBrkTmTotal,
     AuxProp
 //    EclAjdGradients
   };
@@ -98,7 +102,13 @@ class Results
     else if (prop == WellWatProdRate)   pstr = "WellWatProdRate";
     else if (prop == WellWatInjRate)    pstr = "WellWatInjRate";
     else if (prop == WellGasInjRate)    pstr = "WellGasInjRate";
+
+    else if (prop == FieldTotal)        pstr = "FieldTotal";
+    else if (prop == GnGFunction)       pstr = "GnGFunction";
+    else if (prop == WellWatBrkTmTotal) pstr = "WellWatBrkTmTotal";
+    else if (prop == AuxProp)           pstr = "AuxProp";
     else throw RsltPropKeyDoesNotExistExc("", pstr);
+    return pstr;
   }
 
   static Property GetPropertyKey(QString prop) {
@@ -121,6 +131,11 @@ class Results
     else if (prop == "WellWatProdRate")   return WellWatProdRate;
     else if (prop == "WellWatInjRate")    return WellWatInjRate;
     else if (prop == "WellGasInjRate")    return WellGasInjRate;
+
+    else if (prop == "FieldTotal")        return FieldTotal;
+    else if (prop == "GnGFunction")       return GnGFunction;
+    else if (prop == "WellWatBrkTmTotal") return WellWatBrkTmTotal;
+    else if (prop == "AuxProp")           return AuxProp;
     else throw RsltPropKeyDoesNotExistExc("", prop.toStdString());
   }
 
@@ -211,9 +226,9 @@ class Results
    * not useful on its own; One of the subclasses' constructor
    * must be called.
    */
-  explicit Results(Settings::Simulator *settings) {
+  explicit Results(Settings::Settings *settings) {
     available_ = false;
-    vp_ = settings->verbParams();
+    vp_ = settings->global()->verbParams();
   }
 
   /*!

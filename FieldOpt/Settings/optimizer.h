@@ -33,6 +33,11 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using std::vector;
+using std::string;
+using std::map;
+using Printer::num2str;
+
 /*!
  * \brief The Optimizer class contains optimizer-specific
  * settings. Optimizer settings objects may _only_ be
@@ -186,6 +191,12 @@ class Optimizer
     int hybrid_max_iterations = 2;
   };
 
+ // private:
+ //  static string md_ = "Settings";
+ //  static string cl_ = "Optimizer";
+  VerbParams vp_;
+ // public:
+
   struct Objective {
     ObjectiveType type; //!< Objective function type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
@@ -207,17 +218,11 @@ class Optimizer
     //!< NPV component
     struct NPVComponent{
       double coefficient;
-      std::string property;
-      std::string interval = "";
+      string property;
+      string interval = "";
       bool usediscountfactor = false;
-      std::string well;
+      string well;
       double discount = 0.0;
-    };
-
-    //!< Augmented function term
-    struct AugTerms {
-      double coefficient;
-      std::string prop_name;
     };
 
     //!< Weighted sum formulation
@@ -226,8 +231,32 @@ class Optimizer
      //!< NPV formulation
     QList<NPVComponent> NPV_sum;
 
+    //!< Augmented function term
+    struct AugTerms {
+      string prop_name; // -> defines prop_type
+      double coefficient;
+      string prop_spec;
+      vector<string> wells;
+      map<string, vector<int>> segments;
+
+      void showTerms() {
+        stringstream ss;
+        ss << "prop_name: " << prop_name;
+        ss << ", coefficient: " << coefficient;
+        ss << ", prop_spec: " << prop_spec;
+        for(string w : wells) {
+          ss << segments[w].size() << ", well: " << w << " w/ segs: [ ";
+          for  (int ii=0; ii < segments[w].size(); ++ii) {
+            ss << num2str(segments[w][ii], 0) << " ";
+          }
+          ss << "]";
+        }
+        ext_info(ss.str(), "Settings", "Optimizer");
+      }
+    };
+
     //!< Augmented formulation
-    QList<AugTerms> terms;
+    vector<AugTerms> terms;
 
   };
 
@@ -280,13 +309,12 @@ class Optimizer
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
-  Constraint parseSingleConstraint(QJsonObject json_constraint);
+  static Constraint parseSingleConstraint(QJsonObject json_constraint);
   OptimizerMode parseMode(QJsonObject &json_optimizer);
   Parameters parseParameters(QJsonObject &json_parameters);
   Objective parseObjective(QJsonObject &json_objective);
   QList<HybridComponent> parseHybridComponents(QJsonObject &json_optimizer);
 
-  VerbParams vp_;
 };
 
 }

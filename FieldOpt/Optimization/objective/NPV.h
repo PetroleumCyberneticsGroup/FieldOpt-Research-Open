@@ -43,7 +43,7 @@ class NPV : public Objective {
       Simulation::Results::Results *results,
       Model::Model *model);
 
-  double value() const;
+  double value() const override;
 
  private:
 /*!

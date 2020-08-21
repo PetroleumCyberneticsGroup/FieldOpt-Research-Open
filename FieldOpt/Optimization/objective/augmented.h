@@ -47,14 +47,14 @@ class Augmented : public Objective {
             Model::Model *model);
 
   struct Term {
-    string prop_name;
-    Results::Property prop;
+    string prop_name_str;
+    Results::Property prop_name;
+    Results::Property prop_type;
+    Results::Property prop_spec;
     double coeff;
   };
 
   void setUpAugTerms();
-  void getRateProp(Results::Property &prop,
-                   Term *term) const;
 
   double value() const override;
 
