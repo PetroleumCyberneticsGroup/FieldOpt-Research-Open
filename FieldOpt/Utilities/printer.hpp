@@ -161,10 +161,14 @@ inline BoxSym bSym(int lw=60, bool dbg=false) {
  * @return String representation of num.
  */
 template<typename T>
-inline std::string num2str(const T num, int prc=2) {
+inline std::string num2str(const T num, int prc=2, int sci=0) {
   // return boost::lexical_cast<std::string>(num);
   std::ostringstream ss;
-  ss << std::fixed << std::setprecision(prc) << num;
+  if (sci > 0) {
+    ss << std::scientific << std::setprecision(prc) << num;
+  } else {
+    ss << std::fixed << std::setprecision(prc) << num;
+  }
   return ss.str();
 }
 
