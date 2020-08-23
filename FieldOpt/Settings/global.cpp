@@ -29,22 +29,25 @@ using namespace Utilities::FileHandling;
 namespace Settings {
 
 Global::Global(QJsonObject json_global) {
-
   name_ = json_global["Name"].toString().toStdString();
   bookkeeper_tol_ = json_global["BookkeeperTol"].toDouble();
   if (bookkeeper_tol_ < 0.0) {
-    throw UnableToParseGlobalSectionException(
-      "Bookkeeper tolerance must larger than zero.");
+    string em = "Bookkeeper tolerance must larger than zero.";
+    throw UnableToParseGlobalSectionException(em);
   }
 
-  QJsonObject json_verb = json_global["VerbConf"].toObject();
-  parseVerbParams(json_verb);
-  // showVerbParams();
+  if (json_global.contains("VerbConf")) {
+    QJsonObject json_verb = json_global["VerbConf"].toObject();
+    parseVerbParams(json_verb);
+  } else {
+    im_ = "JSON driver file contains no \"VerbConf\" parameter.";
+    im_ += "\"VerbConf\" parameter remain default:";
+    showVerbParams(im_); // def. values given in verbosity.hpp
+  }
 }
 
 VerbParams Global::parseVerbParams(QJsonObject json_verb) {
   verb_params_.lnw=json_verb["iBoxLineWidth"].toInt();
-
   verb_params_.vMOD=json_verb["Model"].toInt();
   verb_params_.vOPT=json_verb["Optim"].toInt();
   verb_params_.vWIC=json_verb["WICal"].toInt();
@@ -55,16 +58,19 @@ VerbParams Global::parseVerbParams(QJsonObject json_verb) {
   verb_params_.vUTI=json_verb["Utils"].toInt();
 }
 
-void Global::showVerbParams() {
-  cout << "lnw:" << verb_params_.lnw << endl;
-  cout << "vMOD:" << verb_params_.vMOD << endl;
-  cout << "vOPT:" << verb_params_.vOPT << endl;
-  cout << "vWIC:" << verb_params_.vWIC << endl;
-  cout << "vSIM:" << verb_params_.vSIM << endl;
-  cout << "vRUN:" << verb_params_.vRUN << endl;
-  cout << "vRES:" << verb_params_.vRES << endl;
-  cout << "vSET:" << verb_params_.vSET << endl;
-  cout << "vUTI:" << verb_params_.vUTI << endl;
+void Global::showVerbParams(string sin) {
+  stringstream ss;
+  if(!sin.empty()) { ss << sin << endl; }
+  ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;
+  ss << "[ vMOD: " << verb_params_.vMOD;
+  ss << ", vOPT: " << verb_params_.vOPT;
+  ss << ", vWIC: " << verb_params_.vWIC;
+  ss << ", vSIM: " << verb_params_.vSIM;
+  ss << ", vRUN: " << verb_params_.vRUN;
+  ss << ", vRES: " << verb_params_.vRES;
+  ss << ", vSET: " << verb_params_.vSET;
+  ss << ", vUTI: " << verb_params_.vUTI;
+  ss << ", lnw: " << verb_params_.lnw << "]" << endl;
 }
 
 }

@@ -32,6 +32,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace TestResources {
 namespace ExampleFilePaths {
 
+using std::string;
+
 inline std::string base_path() {
   char const* fieldopt_path = getenv("FIELDOPT_BUILD_ROOT");
   if (!is_env_var_set("FIELDOPT_BUILD_ROOT")) {
@@ -55,15 +57,19 @@ static std::string norne_sch_                = base_path() + "/examples/ECLIPSE/
 static std::string deck_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.DATA";
 static std::string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
 static std::string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
+
 static std::string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
 static std::string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
+
 static std::string grid_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.EGRID";
 static std::string deck_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.DATA";
+
 static std::string gprs_drv_5spot_           = base_path() + "/examples/ADGPRS/5spot/5SPOT.gprs";
 static std::string gprs_smry_json_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.json";
 static std::string gprs_smry_hdf5_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.vars.h5";
 static std::string gprs_base_5spot_          = base_path() + "/examples/ADGPRS/5spot/5SPOT";
 static std::string gprs_smry_gpt_hdf5_5spot_ = base_path() + "/examples/ADGPRS/5spot/5SPOT-gpt.vars.h5";
+
 static std::string trajectories_             = base_path() + "/examples/ECLIPSE/norne-simplified/trajectories";
 static std::string cube_grid_                = base_path() + "/examples/ECLIPSE/cube_9x9/CUBE.EGRID";
 static std::string schedule_inset_           = base_path() + "/examples/ECLIPSE/schedule_inset.txt";
@@ -71,7 +77,6 @@ static std::string schedule_inset_           = base_path() + "/examples/ECLIPSE/
 static std::string olympr37_dir_    = base_path() + "/examples/ECLIPSE/olympr37";
 static std::string olympr37_egrid_  = olympr37_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
 static std::string olympr37_driver_ = olympr37_dir_ + "/fo-drv.r001.c02-olymr37.icd-opt.apps.aug.json";
-
 
 }
 }

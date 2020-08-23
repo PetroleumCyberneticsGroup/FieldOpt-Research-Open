@@ -46,12 +46,12 @@ using Printer::ext_info;
 using Printer::num2str;
 using Printer::ext_warn;
 using std::string;
+using std::to_string;
 
 WellSpline::WellSpline(Settings::Model::Well well_settings,
                        Properties::VarPropContainer *variable_container,
                        Reservoir::Grid::Grid *grid,
                        Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
-
   vp_ = well_settings.verbParams();
   grid_ = grid;
   assert(grid_ != nullptr);
@@ -72,22 +72,22 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
     imported_wellblocks_ = well_settings.imported_wellblocks_;
   }
 
-  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
+  if (vp_.vMOD >= 2) {
     auto wn = well_settings.name.toStdString();
     auto sp = num2str(well_settings.spline_points.size());
     auto sn = well_settings.spline_points[0].name.toStdString();
-    ext_info("Init well spline for well " + wn + ". N points: " + sp
-               + "; First spline point name: " + sn, "Model", "WellSpline",
-             vp_.lnw);
+    im_ = "Init well spline for well " + wn + ". N points: " + sp;
+    im_ += "; First spline point name: " + sn;
+    ext_info(im_, md_, cl_,vp_.lnw);
   }
 
   for (auto point : well_settings.spline_points) {
-    if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
+    if (vp_.vMOD >= 2) {
       auto wn = well_settings.name.toStdString();
-      ext_info("Adding new spline point for well " + wn +
-                 ": " + num2str(point.x) + ", " + num2str(point.y) +
-                 ", " + num2str(point.z) + " (" + point.name.toStdString() + ")",
-               "Model", "WellSpline", vp_.lnw);
+      im_ = "Adding new spline point for well " + wn + ": ";
+      im_ += num2str(point.x) + ", " + num2str(point.y) + ", " + num2str(point.z);
+      im_ += " (" + point.name.toStdString() + ")";
+      ext_info(im_,md_, cl_, vp_.lnw);
     }
     SplinePoint *pt = new SplinePoint();
     pt->x = new ContinuousProperty(point.x);
@@ -148,7 +148,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
   assert(spline_points_.size() >= 2);
   assert(grid_ != nullptr && grid_ != 0);
 
-  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
+  if (vp_.vMOD >= 2) {
     std::string points_str = "";
     for (auto pt : spline_points_) {
       auto point = pt->ToEigenVector();
@@ -157,11 +157,10 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
       points_str += point_str.str();
     }
 
-    ext_info("Starting well index calculation. Points: "
-               + points_str + "Grid: " + grid_->GetGridFilePath(),
-             "WellSpline", "Model", vp_.lnw);
+    im_ = "Starting well index calculation. Points: ";
+    im_ += points_str + "Grid: " + grid_->GetGridFilePath();
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
-
 
   last_computed_grid_ = grid_->GetGridFilePath();
   last_computed_spline_ = create_spline_point_vector();
@@ -188,17 +187,16 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     );
   }
 
-
   auto start = QDateTime::currentDateTime();
   vector<IntersectedCell> block_data;
   if (imported_wellblocks_.empty() || is_variable_) {
     wic_->ComputeWellBlocks(block_data, welldef);
   }
   else {
-    if (VERB_MOD >= 1 || vp_.vMOD >= 1) {
-      ext_warn("Well index calculation for imported "
-               "paths is not properly implemented at this time.",
-               "Model", "WellSpline", vp_.lnw);
+    if (vp_.vMOD >= 1) {
+      wm_ = "Well index calculation for imported ";
+      wm_ += "paths is not properly implemented at this time.";
+      ext_warn(wm_, md_, cl_, vp_.lnw);
     }
     block_data = convertImportedWellblocksToIntersectedCells();
     for (int i = 0; i < block_data.size(); ++i) {
@@ -220,32 +218,34 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     throw WellBlocksNotDefined("WIC could not compute.");
   }
 
-  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
-    auto tm = boost::lexical_cast<string>(seconds_spent_in_compute_wellblocks_);
-    info("Done computing WIs after " + tm + " seconds", vp_.lnw);
+  if (vp_.vMOD >= 2) {
+    im_ = "Computation time for WIs [secs]: ";
+    im_ += to_string(seconds_spent_in_compute_wellblocks_);
+    info(im_, vp_.lnw);
   }
 
-  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
-    ext_info("Computed " + num2str(blocks->size()) + " well blocks from "
-               + num2str(block_data.size()) + " intersected cells for well "
-               + welldef.wellname,"Model", "WellSpline", vp_.lnw);
+  if (vp_.vMOD >= 2) {
+    im_ = "Computed " + num2str(blocks->size()) + " well blocks from ";
+    im_ += num2str(block_data.size()) + " intersected cells for well " + welldef.wellname;
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
   return blocks;
 
 }
 
-QList<WellBlock *> *WellSpline::GetWellBlocks()
-{
+QList<WellBlock *> *WellSpline::GetWellBlocks() {
   return computeWellBlocks();
 }
 
-WellBlock *WellSpline::getWellBlock(Reservoir::WellIndexCalculation::IntersectedCell block_data)
-{
-  if (VERB_MOD >= 2 || vp_.vMOD >= 2) {
-    info("Creating WellBlock for IC " + block_data.ijk_index().to_string()
-           + " with WI " + num2str(block_data.cell_well_index_matrix()),vp_.lnw);
+WellBlock *WellSpline::getWellBlock(Reservoir::WellIndexCalculation::IntersectedCell block_data) {
+  if (vp_.vMOD >= 2) {
+    im_ = "Creating WellBlock for IC " + block_data.ijk_index().to_string();
+    im_ += " with WI " + num2str(block_data.cell_well_index_matrix());
+    cout << im_ << endl;
   }
-  auto wb = new WellBlock(block_data.ijk_index().i()+1, block_data.ijk_index().j()+1, block_data.ijk_index().k()+1);
+  auto wb = new WellBlock(block_data.ijk_index().i()+1,
+                          block_data.ijk_index().j()+1,
+                          block_data.ijk_index().k()+1);
   auto comp = new Completions::Perforation();
   comp->setTransmissibility_factor(block_data.cell_well_index_matrix());
   wb->AddCompletion(comp);
@@ -261,11 +261,11 @@ std::vector<Eigen::Vector3d> WellSpline::create_spline_point_vector() const {
 }
 
 bool WellSpline::HasGridChanged() const {
-  return last_computed_grid_.size() == 0 || !boost::equals(last_computed_grid_, grid_->GetGridFilePath());
+  return last_computed_grid_.empty() || !boost::equals(last_computed_grid_, grid_->GetGridFilePath());
 }
 
 bool WellSpline::HasSplineChanged() const {
-  if (last_computed_spline_.size() == 0) {
+  if (last_computed_spline_.empty()) {
     return true;
   }
 
@@ -281,7 +281,9 @@ bool WellSpline::HasSplineChanged() const {
   }
   return point_difference_sum > 1e-7;
 }
-std::vector<Reservoir::WellIndexCalculation::IntersectedCell> WellSpline::convertImportedWellblocksToIntersectedCells() {
+
+std::vector<Reservoir::WellIndexCalculation::IntersectedCell>
+  WellSpline::convertImportedWellblocksToIntersectedCells() {
   auto intersected_cells = vector<IntersectedCell>();
   double md_in = 0;
   double md_out = 0;
@@ -309,8 +311,7 @@ void WellSpline::SplinePoint::FromEigenVector(const Eigen::Vector3d vec) {
 vector<Eigen::Vector3d> WellSpline::getPoints() const {
   if (use_bezier_spline_) {
     return convertToBezierSpline();
-  }
-  else {
+  } else {
     vector<Eigen::Vector3d> points;
     for (auto point : spline_points_) {
       points.push_back(point->ToEigenVector());
@@ -321,17 +322,24 @@ vector<Eigen::Vector3d> WellSpline::getPoints() const {
 
 vector<Eigen::Vector3d> WellSpline::convertToBezierSpline() const {
   if (VERB_MOD >= 2) {
-    Printer::ext_info("Generating bezier spline for well " + well_settings_.name.toStdString() + ". N original points: " + Printer::num2str(spline_points_.size()), "Model", "WellSpline");
+    string im = "Generating bezier spline for well ";
+    im += well_settings_.name.toStdString() + ". N original points: ";
+    im += Printer::num2str(spline_points_.size());
+    ext_info(im, md_, cl_, vp_.lnw);
   }
   assert(spline_points_.size() >= 4);
   Curve *curve = new Bezier();
   curve->set_steps(50);
   for (int j = 0; j < spline_points_.size(); ++j) {
-    curve->add_way_point(Vector(spline_points_[j]->x->value(), spline_points_[j]->y->value(), spline_points_[j]->z->value()));
+    curve->add_way_point(Vector(spline_points_[j]->x->value(),
+                                spline_points_[j]->y->value(),
+                                spline_points_[j]->z->value()));
   }
   vector<Eigen::Vector3d> bezier_points;
   for (int i = 0; i < curve->node_count(); ++i) {
-    bezier_points.push_back(Eigen::Vector3d(curve->node(i).x, curve->node(i).y, curve->node(i).z));
+    bezier_points.push_back(Eigen::Vector3d(curve->node(i).x,
+                                            curve->node(i).y,
+                                            curve->node(i).z));
   }
   delete curve;
   return bezier_points;

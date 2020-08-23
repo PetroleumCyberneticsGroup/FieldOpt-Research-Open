@@ -28,16 +28,22 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
-class AdgprsDriverFileWriterTest : public ::testing::Test, TestResources::TestResourceModel {
+using namespace TestResources::ExampleFilePaths;
+
+class AdgprsDriverFileWriterTest :
+  public ::testing::Test, TestResources::TestResourceModel {
  protected:
   AdgprsDriverFileWriterTest() {
-    settings_full_->paths().SetPath(Paths::BUILD_DIR, TestResources::ExampleFilePaths::bin_dir_);
-    settings_full_->paths().SetPath(Paths::SIM_DRIVER_FILE, TestResources::ExampleFilePaths::gprs_drv_5spot_);
-    settings_full_->paths().SetPath(Paths::SIM_DRIVER_DIR, GetParentDirPath(settings_full_->paths().GetPath(Paths::SIM_DRIVER_FILE)));
-    simulator_ = new Simulation::AdgprsSimulator(settings_full_, model_);
+    settings_full_->paths().SetPath(Paths::BUILD_DIR, bin_dir_);
+    settings_full_->paths().SetPath(Paths::SIM_DRIVER_FILE, gprs_drv_5spot_);
+
+    auto pth_str = GetParentDirPath(settings_full_->paths().GetPath(Paths::SIM_DRIVER_FILE));
+    settings_full_->paths().SetPath(Paths::SIM_DRIVER_DIR, pth_str);
+    simulator_ = new Simulation::AdgprsSimulator(settings_full_,
+                                                 model_);
   }
-  virtual ~AdgprsDriverFileWriterTest() {}
-  virtual void SetUp() {}
+  ~AdgprsDriverFileWriterTest() override = default;
+  void SetUp() override {}
   Simulation::AdgprsSimulator *simulator_;
 };
 

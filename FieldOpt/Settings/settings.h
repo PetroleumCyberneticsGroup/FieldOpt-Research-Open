@@ -59,14 +59,6 @@ class Settings {
   Settings() {}
   Settings(Paths &paths);
 
-  //!< Name to be used for the run. Output file
-  //!< and folder names are derived from this.
-  QString name() const { return name_; }
-
-  //!< Get the value for the bookkeeper tolerance.
-  //!< Used by the Bookkeeper in the Runner library.
-  double bookkeeper_tol() const { return bookkeeper_tol_; }
-
   Global *global() const { return global_; }
 
   //!< Object containing model specific settings.
@@ -93,12 +85,10 @@ class Settings {
  private:
   Paths paths_;
   QJsonObject *json_driver_;
-  QString name_;
 
   string md_ = "Settings";
   string cl_ = "Settings";
-
-  double bookkeeper_tol_;
+  VerbParams vp_;
 
   Global *global_;
   Model *model_;

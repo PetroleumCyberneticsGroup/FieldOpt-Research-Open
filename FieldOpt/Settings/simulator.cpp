@@ -33,6 +33,7 @@ namespace Settings {
 using namespace Utilities::FileHandling;
 using Printer::num2str;
 using Printer::info;
+using Printer::ext_warn;
 
 Simulator::Simulator(const QJsonObject& json_simulator,
                      Paths &paths, VerbParams vp) {
@@ -46,6 +47,7 @@ Simulator::Simulator(const QJsonObject& json_simulator,
 }
 
 void Simulator::setStructure(QJsonObject json_simulator) {
+  if(vp_.vSET >= 5) { info("Parsing FileStructure.", vp_.lnw); }
 
   if (json_simulator.contains("FileStructure")) {
     QString type = json_simulator["FileStructure"].toString();
@@ -65,13 +67,14 @@ void Simulator::setStructure(QJsonObject json_simulator) {
 }
 
 void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
+  if(vp_.vSET >= 5) { info("Setting paths.", vp_.lnw); }
 
   sched_file_name_ = json_simulator["ScheduleFile"].toString();
 
   if (!paths.IsSet(Paths::ENSEMBLE_FILE)) {
     is_ensemble_ = false;
 
-    if(vp_.vSET >= 3) { info("Setting SIM_DRIVER_FILE, SIM_DRIVER_DIR"); }
+    if(vp_.vSET >= 4) { info("Setting SIM_DRIVER_FILE, SIM_DRIVER_DIR", vp_.lnw); }
     if (!paths.IsSet(Paths::SIM_DRIVER_FILE)
         && json_simulator.contains("DriverPath")) {
       paths.SetPath(Paths::SIM_DRIVER_FILE,
@@ -81,7 +84,7 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
     QString sim_drvr_dir = GetParentDirPath(paths.GetPathQstr(Paths::SIM_DRIVER_FILE));
     paths.SetPath(Paths::SIM_DRIVER_DIR, sim_drvr_dir.toStdString());
 
-    if(vp_.vSET >= 3) { info("Setting CASE_DRVR_DIR, CASE_ROOT_DIR, SIM_SCH_FILE"); }
+    if(vp_.vSET >= 4) { info("Setting CASE_DRVR_DIR, CASE_ROOT_DIR, SIM_SCH_FILE", vp_.lnw); }
     QStringList parts = sim_drvr_dir.split("/");
     string root_drvr_path;
     for (int ii=parts.length() - file_structure_.levels_num_ ; ii < parts.length(); ii++) {
@@ -120,20 +123,25 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
 }
 
 void Simulator::setType(QJsonObject json_simulator) {
+  if(vp_.vSET >= 5) { info("Setting Simulator type.", vp_.lnw); }
+
   QString type = json_simulator["Type"].toString();
-  if (QString::compare(type, "ECLIPSE") == 0)
+  if (QString::compare(type, "ECLIPSE") == 0) {
     type_ = SimulatorType::ECLIPSE;
-  else if (QString::compare(type, "ADGPRS") == 0)
+  } else if (QString::compare(type, "ADGPRS") == 0) {
     type_ = SimulatorType::ADGPRS;
-  else if (QString::compare(type, "Flow", Qt::CaseInsensitive) == 0)
+  } else if (QString::compare(type, "Flow", Qt::CaseInsensitive) == 0) {
     type_ = SimulatorType::Flow;
-  else if (QString::compare(type, "IX", Qt::CaseInsensitive) == 0)
+  } else if (QString::compare(type, "IX", Qt::CaseInsensitive) == 0) {
     type_ = SimulatorType::INTERSECT;
-  else throw SimulatorTypeNotRecognizedException(
-        "Simulator type " + type.toStdString() + " not recognized.");
+  } else {
+    string em = "Simulator type " + type.toStdString() + " not recognized.";
+    throw SimulatorTypeNotRecognizedException(em);
+  }
 }
 
 void Simulator::setParams(QJsonObject json_simulator) {
+  if(vp_.vSET >= 5) { info("Setting Simulator parameters.", vp_.lnw); }
   set_opt_prop_int(max_minutes_, json_simulator, "MaxMinutes");
   set_opt_prop_bool(ecl_use_actionx_, json_simulator, "UseACTIONX");
   set_opt_prop_bool(use_post_sim_script_, json_simulator, "UsePostSimScript");
@@ -144,6 +152,7 @@ void Simulator::setParams(QJsonObject json_simulator) {
 }
 
 void Simulator::setCommands(QJsonObject json_simulator) {
+  if(vp_.vSET >= 5) { info("Setting Simulator commands.", vp_.lnw); }
   script_name_ = "";
   QJsonArray sim_exec_cmds = json_simulator["SimExecCmds"].toArray();
   QJsonArray pre_sim_args = json_simulator["PreSimArgs"].toArray();
@@ -151,9 +160,16 @@ void Simulator::setCommands(QJsonObject json_simulator) {
   string tm;
 
   // ExecScript
-  if (json_simulator.contains("ExecScript")
-      && json_simulator["ExecScript"].toString().size() > 0) {
+  if ((json_simulator.contains("ExecScript")
+    && json_simulator["ExecScript"].toString().size() > 0)) {
     script_name_ = json_simulator["ExecScript"].toString();
+    tm += "| ExecScript: " + script_name_.toStdString() + " ";
+  }
+
+  // ExecScript (backwards compatibility)
+  if ((json_simulator.contains("ExecutionScript")
+    && json_simulator["ExecutionScript"].toString().size() > 0)) {
+    script_name_ = json_simulator["ExecutionScript"].toString();
     tm += "| ExecScript: " + script_name_.toStdString() + " ";
   }
 
@@ -161,8 +177,8 @@ void Simulator::setCommands(QJsonObject json_simulator) {
   if (json_simulator.contains("SimExecCmds")
       && !sim_exec_cmds.isEmpty()) {
     sim_exec_cmds_ = new QStringList();
-    for (int i = 0; i < sim_exec_cmds.size(); ++i) {
-      sim_exec_cmds_->append(sim_exec_cmds[i].toString());
+    for (auto && sim_exec_cmd : sim_exec_cmds) {
+      sim_exec_cmds_->append(sim_exec_cmd.toString());
     }
     tm += "| SimExecCmds: " + sim_exec_cmds_->join(" ").toStdString() + " ";
   }
@@ -171,8 +187,8 @@ void Simulator::setCommands(QJsonObject json_simulator) {
   if (json_simulator.contains("PreSimArgs")
       && !pre_sim_args.isEmpty()) {
     pre_sim_args_ = new QStringList();
-    for (int i = 0; i < pre_sim_args.size(); ++i) {
-      pre_sim_args_->append("\"" + pre_sim_args[i].toString() + "\"");
+    for (auto && pre_sim_arg : pre_sim_args) {
+      pre_sim_args_->append("\"" + pre_sim_arg.toString() + "\"");
     }
     tm += "| PreSimArgs: " + pre_sim_args_->join(" ").toStdString() + " ";
   }
@@ -181,36 +197,39 @@ void Simulator::setCommands(QJsonObject json_simulator) {
   if (json_simulator.contains("PostSimArgs")
       && !post_sim_args.isEmpty()) {
     post_sim_args_ = new QStringList();
-    for (int i = 0; i < post_sim_args.size(); ++i) {
+    for (auto && post_sim_arg : post_sim_args) {
 
-      if(post_sim_args[i].toString().isEmpty()) {
-        post_sim_args_->append(QString::fromStdString(num2str(post_sim_args[i].toInt(),0)));
+      if(post_sim_arg.toString().isEmpty()) {
+        post_sim_args_->append(QString::fromStdString(num2str(post_sim_arg.toInt(),0)));
       } else {
-        post_sim_args_->append( "\""+ post_sim_args[i].toString() + "\"");
+        post_sim_args_->append( "\""+ post_sim_arg.toString() + "\"");
       }
     }
     tm += "| PostSimArgs: " + post_sim_args_->join(" ").toStdString() + " ";
   }
 
-  if (script_name_.length() == 0 && sim_exec_cmds.isEmpty()) {
-    Printer::ext_warn("No execution commands or scripts "
-                      "given in driver file. Relying on script "
-                      "path being passed as runtime argument.",
-                      "Settings", "Simulator");
+  if (script_name_.length() == 0 && sim_exec_cmds.isEmpty() && vp_.vSET >= 3) {
+    string wm = "No execution commands or scripts given in driver file. ";
+    wm += "Relying on script path being passed as runtime argument.";
+    ext_warn(wm,md_, cl_, vp_.lnw);
   }
 
-  if(vp_.vSET >= 3) { ext_info(tm, md_, cl_, vp_.lnw); }
+  if(vp_.vSET >= 3 && !tm.empty()) {
+    ext_info(tm, md_, cl_, vp_.lnw);
+  }
 }
 
 void Simulator::setFluidModel(QJsonObject json_simulator) {
   if (json_simulator.contains("FluidModel")) {
     QString fluid_model = json_simulator["FluidModel"].toString();
-    if (QString::compare(fluid_model, "DeadOil") == 0)
+    if (QString::compare(fluid_model, "DeadOil") == 0) {
       fluid_model_ = SimulatorFluidModel::DeadOil;
-    else if (QString::compare(fluid_model, "BlackOil") == 0)
+    } else if (QString::compare(fluid_model, "BlackOil") == 0) {
       fluid_model_ = SimulatorFluidModel::BlackOil;
+    }
+  } else {
+    fluid_model_ = SimulatorFluidModel::BlackOil;
   }
-  else fluid_model_ = SimulatorFluidModel::BlackOil;
 }
 
 }

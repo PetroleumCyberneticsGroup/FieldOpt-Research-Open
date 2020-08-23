@@ -60,9 +60,8 @@ class Optimizer
   enum OptimizerMode { Maximize, Minimize };
 
   enum ConstraintType { BHP, Rate, SplinePoints,
-    WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
-    CombinedWellSplineLengthInterwellDistance,
-    CombinedWellSplineLengthInterwellDistanceReservoirBoundary,
+    WSplineLength, WSplineInterwDist, WellSplineDomain,
+    MxWSplineLengthInterwDist, MxWSplineLengthInterwDistResBound,
     ReservoirBoundary, PseudoContBoundary2D, PolarXYZBoundary,
     ReservoirXYZBoundary, ReservoirBoundaryToe,
     PackerConstraint, ICVConstraint, PolarWellLength,
@@ -191,12 +190,6 @@ class Optimizer
     int hybrid_max_iterations = 2;
   };
 
- // private:
- //  static string md_ = "Settings";
- //  static string cl_ = "Optimizer";
-  VerbParams vp_;
- // public:
-
   struct Objective {
     ObjectiveType type; //!< Objective function type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
@@ -305,11 +298,17 @@ class Optimizer
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
-  OptimizerMode mode_ = OptimizerMode::Maximize; //!< Optimization mode (maximize or minimize). Default: Maximize
+
+  string md_ = "Settings";
+  string cl_ = "Optimizer";
+  VerbParams vp_;
+
+  //!< Optimization mode (maximize or minimize). Def: Maximize
+  OptimizerMode mode_ = OptimizerMode::Maximize;
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
-  static Constraint parseSingleConstraint(QJsonObject json_constraint);
+  Constraint parseSingleConstraint(QJsonObject json_constraint);
   OptimizerMode parseMode(QJsonObject &json_optimizer);
   Parameters parseParameters(QJsonObject &json_parameters);
   Objective parseObjective(QJsonObject &json_objective);

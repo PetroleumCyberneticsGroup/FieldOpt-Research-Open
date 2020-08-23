@@ -33,7 +33,7 @@ namespace {
         ContinuousProperty *realvar = new ContinuousProperty(2.0);
         EXPECT_TRUE(realvar->value() == 2.0);
         EXPECT_FALSE(realvar->IsLocked());
-        EXPECT_TRUE(realvar->type() == Property::Type::Continous);
+        EXPECT_TRUE(realvar->type() == Property::Type::Continuous);
     }
 
     TEST_F(PropertiesTest, Locking) {

@@ -243,6 +243,12 @@ class Results
    */
   void setUnavailable() { available_ = false; }
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
   string md_ = "Simulation";
   string cl_ = "results";

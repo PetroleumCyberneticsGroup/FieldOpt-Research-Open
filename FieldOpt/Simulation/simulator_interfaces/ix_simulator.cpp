@@ -33,6 +33,9 @@ namespace Simulation {
 
 using Printer::info;
 using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::error;
+using std::runtime_error;
 
 IXSimulator::IXSimulator(Settings::Settings *settings,
                          Model::Model *model)
@@ -40,6 +43,7 @@ IXSimulator::IXSimulator(Settings::Settings *settings,
   model_ = model;
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
+
   if (paths_.IsSet(Paths::ENSEMBLE_FILE)) {
     throw std::runtime_error("Multiple realization is not yet supported in the INTERSECT interface.");
   }
@@ -52,7 +56,7 @@ void IXSimulator::Evaluate() {
   copyDriverFiles();
   UpdateFilePaths();
   script_args_ = (QStringList() << paths_.GetPathQstr(Paths::SIM_WORK_DIR) << deck_name_);
-  auto driver_file_writer = IXDriverFileWriter(model_);
+  auto driver_file_writer = IXDriverFileWriter(settings_, model_);
   driver_file_writer.WriteDriverFile(paths_.GetPath(Paths::SIM_OUT_SCH_FILE));
 
   if (VERB_SIM >= 1) {
@@ -77,7 +81,7 @@ bool IXSimulator::Evaluate(int timeout, int threads) {
   copyDriverFiles();
   UpdateFilePaths();
   script_args_ = (QStringList() << QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR)) << deck_name_ << QString::number(threads));
-  auto driver_file_writer = IXDriverFileWriter(model_);
+  auto driver_file_writer = IXDriverFileWriter(settings_, model_);
   driver_file_writer.WriteDriverFile(paths_.GetPath(Paths::SIM_OUT_SCH_FILE));
   int t = timeout;
   if (timeout < 10) {
@@ -108,17 +112,17 @@ bool IXSimulator::Evaluate(int timeout, int threads) {
 
 bool IXSimulator::Evaluate(const Settings::Ensemble::Realization &realization,
                            int timeout, int threads) {
-  throw std::runtime_error("Multiple realization is not yet supported in the INTERSECT interface.");
+  throw runtime_error("Multiple realization is not yet supported in the INTERSECT interface.");
 }
 
 void IXSimulator::WriteDriverFilesOnly() {
   UpdateFilePaths();
-  auto driver_file_writer = IXDriverFileWriter(model_);
+  auto driver_file_writer = IXDriverFileWriter(settings_, model_);
   driver_file_writer.WriteDriverFile(paths_.GetPath(Paths::SIM_OUT_SCH_FILE));
 }
 
 void IXSimulator::CleanUp() {
-  Printer::ext_warn("CleanUp not yet implemented for IX interface.", "Simulation", "IXSimulator");
+  ext_warn("CleanUp not yet implemented for IX interface.", "Simulation", "IXSimulator");
 }
 
 void IXSimulator::UpdateFilePaths() {
@@ -134,8 +138,8 @@ void IXSimulator::copyDriverFiles() {
   std::string workdir = paths_.GetPath(Paths::OUTPUT_DIR) + "/" + driver_parent_dir_name_.toStdString();
 
   if (!DirExists(workdir, vp_, md_, cl_)) {
-    if (VERB_SIM >= 1) {
-      Printer::ext_info("Output deck directory not found. Copying input deck:"
+    if (vp_.vSIM >= 1) {
+      ext_info("Output deck directory not found. Copying input deck:"
                           + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir,
                         "Simulation", "IXSimulator" );
     }
@@ -144,8 +148,8 @@ void IXSimulator::copyDriverFiles() {
     if (paths_.IsSet(Paths::SIM_AUX_DIR)) {
       std::string auxdir = paths_.GetPath(Paths::OUTPUT_DIR) + "/" + FileName(paths_.GetPath(Paths::SIM_AUX_DIR));
       if (!DirExists(auxdir, vp_, md_, cl_)) {
-        if (VERB_SIM >= 1) {
-          Printer::ext_info("Copying simulation aux. directory:"
+        if (vp_.vSIM >= 1) {
+          ext_info("Copying simulation aux. directory:"
                               + paths_.GetPath(Paths::SIM_AUX_DIR) + " -> " + auxdir,
                             "Simulation", "IXSimulator" );
         }
@@ -155,7 +159,7 @@ void IXSimulator::copyDriverFiles() {
     }
   }
   paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
-  if (VERB_SIM >= 2) {
+  if (vp_.vSIM >= 2) {
     Printer::ext_info("Done copying directories. Set working directory to: " + workdir,
                       "Simulation", "IXSimulator");
   }
@@ -163,7 +167,7 @@ void IXSimulator::copyDriverFiles() {
 void IXSimulator::setResultPath() {
   QString result_dir = QString::fromStdString(paths_.GetPath(Paths::SIM_WORK_DIR));
   QString result_name;
-  if (VERB_SIM >= 2) Printer::ext_info("Setting simulator result path.", "Simulation", "IXSimulator");
+  if (vp_.vSIM >= 2) Printer::ext_info("Setting simulator result path.", "Simulation", "IXSimulator");
   if (FileExists(result_dir + "/SUMMARYVECS.SMSPEC", vp_)) {
     result_name = "/SUMMARYVECS.SMSPEC";
   }
@@ -171,11 +175,13 @@ void IXSimulator::setResultPath() {
     result_name = "/" + deck_name_ + "_SUMMARYVECS.SMSPEC";
   }
   else {
-    Printer::error("Unable to find summary file. Aborting.");
+    error("Unable to find summary file. Aborting.");
     exit(1);
   }
   result_path_ = result_dir + result_name;
-  if (VERB_SIM >= 2) Printer::ext_info("Set simulator result path to " + result_path_.toStdString(), "Simulation", "IXSimulator");
+  if (vp_.vSIM >= 2) {
+    ext_info("Set simulator result path to " + result_path_.toStdString(), md_, cl_);
+  }
 }
 
 }

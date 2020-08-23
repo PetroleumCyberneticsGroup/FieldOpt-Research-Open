@@ -164,7 +164,7 @@ void ModelSynchronizationObject::UpdateVariablePropertyIds(Model *model) {
     }
   }
 
-  // Continous variables
+  // Continuous variables
   if (vpc->ContinuousVariableSize() > 0) {
     for (int ii=0; ii < GetContinousVariableMap().size(); ii++) {
       auto var = GetContinousVariableMap().at(ii);

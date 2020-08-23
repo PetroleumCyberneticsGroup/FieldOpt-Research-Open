@@ -127,7 +127,7 @@ class Simulator {
 
   ::Simulation::Results::Results *results_;
   Settings::Settings *settings_;
-  Settings::VerbParams vp_;
+
 
   Model::Model *model_;
   QStringList script_args_;
@@ -135,8 +135,15 @@ class Simulator {
   QList<int> control_times_;
   virtual void UpdateFilePaths() = 0;
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  Settings::VerbParams vp_;
   string md_ = "Simulation::simulation_interfaces";
-  string cl_ = "simulator";
+  string cl_ = "Simulator";
 };
 
 }

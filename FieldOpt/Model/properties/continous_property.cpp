@@ -31,31 +31,29 @@ namespace Model {
 namespace Properties {
 
 ContinuousProperty::ContinuousProperty(double value)
-    : Property(Continous)
-{
-    value_ = value;
+  : Property(Continuous) {
+  value_ = value;
 }
 
-void ContinuousProperty::setValue(double value)
-{
-    if (IsLocked()) throw PropertyLockedException("Cant change locked real variable.");
-    else value_ = value;
+void ContinuousProperty::setValue(double value) {
+  if (IsLocked()) {
+    throw PropertyLockedException("Cant change locked real variable.");
+  }
+  else value_ = value;
 }
 
-void ContinuousProperty::Add(double d)
-{
-    if (IsLocked()) throw PropertyLockedException("Cant add to locked real variable");
-    else value_ += d;
+void ContinuousProperty::Add(double d) {
+  if (IsLocked()) throw PropertyLockedException("Cant add to locked real variable");
+  else value_ += d;
 }
 
-bool ContinuousProperty::Equals(const ContinuousProperty *other, double epsilon) const
-{
-    return std::abs(this->value() - other->value()) <= epsilon;
+bool ContinuousProperty::Equals(const ContinuousProperty *other,
+                                double epsilon) const {
+  return std::abs(this->value() - other->value()) <= epsilon;
 }
 
-QString ContinuousProperty::ToString() const
-{
-    return QString("Type:\tContinous\nUUID:\t%1\nName:\t%2\nValue:\t%3\n").arg(id().toString()).arg(name()).arg(value());
+QString ContinuousProperty::ToString() const {
+  return QString("Type:\tContinous\nUUID:\t%1\nName:\t%2\nValue:\t%3\n").arg(id().toString()).arg(name()).arg(value());
 }
 
 

@@ -33,16 +33,31 @@ namespace Settings {
 
 class Global {
   friend class Settings;
+  // Since Settings is friend of Global,
+  // Settings can access private members of Global
 
  public:
   Global(QJsonObject json_global);
-  VerbParams verbParams() { return verb_params_; };
-  void showVerbParams();
 
- private:
+  //!< Name to be used for the run. Output file
+  //!< and folder names are derived from this.
+  string name() const { return name_; }
+
+  //!< Get the value for the bookkeeper tolerance.
+  //!< Used by the Bookkeeper in the Runner library.
+  double bookkeeper_tol() const { return bookkeeper_tol_; }
+
+  VerbParams verbParams() { return verb_params_; };
+  void showVerbParams(string sin="");
+
+ protected:
   string name_;
   double bookkeeper_tol_;
 
+ private:
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Settings";
+  string cl_ = "Global";
   VerbParams verb_params_;
   VerbParams parseVerbParams(QJsonObject json_verb);
 };

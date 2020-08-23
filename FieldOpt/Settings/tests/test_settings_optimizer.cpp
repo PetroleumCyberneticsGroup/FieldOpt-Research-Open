@@ -44,11 +44,13 @@ class OptimizerSettingsTest :
 };
 
 TEST_F(OptimizerSettingsTest, Type) {
-  EXPECT_EQ(Optimizer::OptimizerType::Compass, settings_optimizer_->type());
+  EXPECT_EQ(Optimizer::OptimizerType::Compass,
+            settings_optimizer_->type());
 }
 
 TEST_F(OptimizerSettingsTest, Mode) {
-  EXPECT_EQ(Optimizer::OptimizerMode::Maximize, settings_optimizer_->mode());
+  EXPECT_EQ(Optimizer::OptimizerMode::Maximize,
+            settings_optimizer_->mode());
 }
 
 TEST_F(OptimizerSettingsTest, Parameters) {
@@ -78,11 +80,16 @@ TEST_F(OptimizerSettingsTest, Objective) {
 
 TEST_F(OptimizerSettingsTest, Constraints) {
   EXPECT_EQ(6, settings_optimizer_->constraints().length());
-  EXPECT_EQ(Optimizer::ConstraintType::BHP, settings_optimizer_->constraints()[0].type);
-  EXPECT_EQ(Optimizer::ConstraintType::WellSplineLength, settings_optimizer_->constraints()[1].type);
-  EXPECT_EQ(Optimizer::ConstraintType::Rate, settings_optimizer_->constraints()[2].type);
-  EXPECT_EQ(Optimizer::ConstraintType::WellSplineInterwellDistance, settings_optimizer_->constraints()[3].type);
-  EXPECT_EQ(Optimizer::ConstraintType::CombinedWellSplineLengthInterwellDistance, settings_optimizer_->constraints()[4].type);
+  EXPECT_EQ(Optimizer::ConstraintType::BHP,
+            settings_optimizer_->constraints()[0].type);
+  EXPECT_EQ(Optimizer::ConstraintType::WSplineLength,
+            settings_optimizer_->constraints()[1].type);
+  EXPECT_EQ(Optimizer::ConstraintType::Rate,
+            settings_optimizer_->constraints()[2].type);
+  EXPECT_EQ(Optimizer::ConstraintType::WSplineInterwDist,
+            settings_optimizer_->constraints()[3].type);
+  EXPECT_EQ(Optimizer::ConstraintType::MxWSplineLengthInterwDist,
+            settings_optimizer_->constraints()[4].type);
 }
 
 TEST_F(OptimizerSettingsTest, BHPConstraint) {
@@ -92,7 +99,7 @@ TEST_F(OptimizerSettingsTest, BHPConstraint) {
   EXPECT_FLOAT_EQ(90.0, constr.min);
 }
 
-TEST_F(OptimizerSettingsTest, WellSplineLengthConstraint) {
+TEST_F(OptimizerSettingsTest, WSplineLengthConstraint) {
   auto constr = settings_optimizer_->constraints()[1];
   EXPECT_STREQ("INJ", constr.well.toLatin1().constData());
   EXPECT_FLOAT_EQ(400, constr.min_length);
@@ -110,7 +117,7 @@ TEST_F(OptimizerSettingsTest, RateConstraint) {
 }
 
 
-TEST_F(OptimizerSettingsTest, InterwellDistanceConstraint) {
+TEST_F(OptimizerSettingsTest, InterwDistConstraint) {
   auto constr = settings_optimizer_->constraints()[3];
   EXPECT_EQ(2, constr.wells.length());
   EXPECT_STREQ("TESTW", constr.wells[1].toLatin1().constData());
@@ -118,7 +125,7 @@ TEST_F(OptimizerSettingsTest, InterwellDistanceConstraint) {
   EXPECT_FLOAT_EQ(100, constr.min_distance);
 }
 
-TEST_F(OptimizerSettingsTest, CombinedSplineLengthInterwellDistanceConstraint) {
+TEST_F(OptimizerSettingsTest, MxSplineLengthInterwDistConstraint) {
   auto constr = settings_optimizer_->constraints()[4];
   EXPECT_EQ(2, constr.wells.length());
   EXPECT_STREQ("TESTW", constr.wells[1].toLatin1().constData());
@@ -128,7 +135,7 @@ TEST_F(OptimizerSettingsTest, CombinedSplineLengthInterwellDistanceConstraint) {
   EXPECT_EQ(50, constr.max_iterations);
 }
 
-TEST_F(OptimizerSettingsTest, CombinedSplineLengthInterwellDistanceConstraintReservoirBoundary) {
+TEST_F(OptimizerSettingsTest, MxWSplineLengthInterwDistResBound) {
   auto constr = settings_optimizer_->constraints()[4];
   EXPECT_EQ(2, constr.wells.length());
   EXPECT_STREQ("TESTW", constr.wells[1].toLatin1().constData());
@@ -139,7 +146,8 @@ TEST_F(OptimizerSettingsTest, CombinedSplineLengthInterwellDistanceConstraintRes
 }
 
 TEST_F(OptimizerSettingsTest, HybridOptimizerSettings) {
-  EXPECT_EQ(Optimizer::OptimizerType::Hybrid, settings_hybridopt_optimizer_->type());
+  EXPECT_EQ(Optimizer::OptimizerType::Hybrid,
+            settings_hybridopt_optimizer_->type());
   EXPECT_EQ(2, settings_hybridopt_optimizer_->HybridComponents().size());
 
   // First component (GA)

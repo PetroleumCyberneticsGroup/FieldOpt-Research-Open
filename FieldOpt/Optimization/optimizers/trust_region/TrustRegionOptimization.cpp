@@ -506,6 +506,9 @@ void TrustRegionOptimization::computeInitialPoints() {
 
       second_point << (second_point.array() - 0.5);
       second_point *= settings_->parameters().tr_initial_radius;
+
+      cout << "initial_point: " << initial_point << endl;
+      cout << "second_point: " << second_point << endl;
       second_point << initial_point.array() + second_point.array();
       if(lb_.size()>0 && ub_.size() >0) {
         projectToBounds(&second_point);

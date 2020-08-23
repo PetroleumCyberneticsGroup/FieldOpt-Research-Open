@@ -24,9 +24,12 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include "compdat.h"
 #include <iostream>
+#include <utility>
 
 namespace Simulation {
 namespace ECLDriverParts {
+
+using Printer::ext_info;
 
 Compdat::Compdat(QList<Model::Wells::Well *> *wells) {
   initializeBaseEntryLine(13);
@@ -97,20 +100,27 @@ QStringList Compdat::createBlockEntry(QString well_name,
 
   // \note By default, this is set to X. This is primarily
   // relevant if the well passes diagonally through a block.
-  std::string tm = "Model library was unable to determine the direction of penetration.";
+  string tm = "Trajectory class (Model) was unable to determine ";
+  tm += "penetration dir for well: " + well_name.toStdString() + ".";
 
   block_entry[12] = "X";
   switch (well_block->directionOfPenetration()) {
-    case Model::Wells::Wellbore::WellBlock::DirectionOfPenetration::X:
+    case Model::Wells::Wellbore::WellBlock::DirOfPenetration::X:
       block_entry[12] = "X";
       break;
-    case Model::Wells::Wellbore::WellBlock::DirectionOfPenetration::Y:
+    case Model::Wells::Wellbore::WellBlock::DirOfPenetration::Y:
       block_entry[12] = "Y";
       break;
-    case Model::Wells::Wellbore::WellBlock::DirectionOfPenetration::Z:
+    case Model::Wells::Wellbore::WellBlock::DirOfPenetration::Z:
       block_entry[12] = "Z";
       break;
-    case Model::Wells::Wellbore::WellBlock::DirectionOfPenetration::W:
+    case Model::Wells::Wellbore::WellBlock::DirOfPenetration::D:
+      block_entry[12] = "X";
+      tm += " Well is exactly diagonal. Defaulting to \"X\"";
+      tm = "[mod: " + md_ +  "] [cls: " + cl_ + "]:\n" + tm;
+      cout << tm << endl;
+      break;
+    case Model::Wells::Wellbore::WellBlock::DirOfPenetration::W:
       throw std::runtime_error(tm);
     default:
       throw std::runtime_error(tm);

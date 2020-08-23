@@ -91,7 +91,6 @@ class TrustRegionTest : public ::testing::Test,
 
   void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
-
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
@@ -107,9 +106,9 @@ class TrustRegionTest : public ::testing::Test,
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-        QList<QPair<QUuid, bool>>(), QList<QPair<QUuid, int>>(),
+        QList<QPair<QUuid, bool>>(),
+        QList<QPair<QUuid, int>>(),
         varcont_tr_dfo_probs_->GetContVarValues());
-
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
 
@@ -120,7 +119,7 @@ class TrustRegionTest : public ::testing::Test,
     }
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
-    // Use initial point from Matlab data
+    // Use initial point (objf) from Matlab data
     test_case_tr_dfo_probs_->set_objf_value(tr_dfo_prob(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
@@ -133,7 +132,6 @@ class TrustRegionTest : public ::testing::Test,
 
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
                   double (*tr_dfo_prob)(VectorXd xs)){
-
     stringstream ss; ss << "[          ] " << FMAGENTA;
     double tol = 1e-06;
     int p_count = 0;
@@ -194,7 +192,6 @@ class TrustRegionTest : public ::testing::Test,
 
     return true;
   }
-
 };
 
 TEST_F(TrustRegionTest, trHS1) {

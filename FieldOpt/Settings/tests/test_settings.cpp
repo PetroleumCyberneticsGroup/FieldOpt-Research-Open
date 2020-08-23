@@ -29,6 +29,8 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
+using namespace TestResources::ExampleFilePaths;
+
 class SettingsTest : public ::testing::Test {
  protected:
   SettingsTest() {}
@@ -40,31 +42,19 @@ class SettingsTest : public ::testing::Test {
 
 TEST_F(SettingsTest, ConstructorAndTestFileValidity) {
   Paths paths;
-  paths.SetPath(Paths::DRIVER_FILE,
-      TestResources::ExampleFilePaths::driver_example_);
-
-  paths.SetPath(Paths::OUTPUT_DIR,
-      TestResources::ExampleFilePaths::directory_output_);
-
-  paths.SetPath(Paths::SIM_DRIVER_FILE,
-      TestResources::ExampleFilePaths::deck_horzwel_);
-
+  paths.SetPath(Paths::DRIVER_FILE, driver_example_);
+  paths.SetPath(Paths::OUTPUT_DIR, directory_output_);
+  paths.SetPath(Paths::SIM_DRIVER_FILE, deck_horzwel_);
   EXPECT_NO_THROW(auto settings = ::Settings::Settings(paths));
 }
 
 TEST_F(SettingsTest, GlobalSettings) {
   Paths paths;
-  paths.SetPath(Paths::DRIVER_FILE,
-      TestResources::ExampleFilePaths::driver_example_);
-
-  paths.SetPath(Paths::OUTPUT_DIR,
-      TestResources::ExampleFilePaths::directory_output_);
-
-  paths.SetPath(Paths::SIM_DRIVER_FILE,
-      TestResources::ExampleFilePaths::deck_horzwel_);
+  paths.SetPath(Paths::DRIVER_FILE, driver_example_);
+  paths.SetPath(Paths::OUTPUT_DIR, directory_output_);
+  paths.SetPath(Paths::SIM_DRIVER_FILE, deck_horzwel_);
   auto settings = ::Settings::Settings(paths);
-
-  EXPECT_STREQ("TestRun", settings.name().toLatin1().constData());
+  EXPECT_STREQ("TestRun", settings.global()->name().c_str());
 }
 
 }

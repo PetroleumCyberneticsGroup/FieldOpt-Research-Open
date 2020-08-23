@@ -45,12 +45,13 @@ namespace Wellbore {
 class WellSpline;
 
 /*!
- * \brief The Trajectory class describes the trajectory of the wellbore as a set of well blocks
- * in the reservoir grid.
+ * \brief The Trajectory class describes the trajectory of
+ * the wellbore as a set of well blocks in the reservoir grid.
  *
- * A trajectory may be described either as a set of well blocks directly, or as a spline which
- * a set of well blocks is calculated from. Either way it is always percieved as a set of blocks
- * from the outside.
+ * A trajectory may be described either as a set of well
+ * blocks directly, or as a spline which a set of well
+ * blocks is calculated from. Either way it is always
+ * perceived as a set of blocks from the outside.
  *
  * \todo Initialize ICDs.
  */
@@ -62,17 +63,33 @@ class Trajectory
              Reservoir::Grid::Grid *grid,
              Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
-  WellBlock *GetWellBlock(int i, int j, int k); //!< Get the well block at index (i,j,k).
-  QList<WellBlock *> *GetWellBlocks(); //!< Get a list containing all well blocks.
-  void UpdateWellBlocks(); //!< Update the well blocks, in particular the ones defined by a spline.
+  //!< Get the well block at index (i,j,k).
+  WellBlock *GetWellBlock(int i, int j, int k);
+
+  //!< Get a list containing all well blocks.
+  QList<WellBlock *> *GetWellBlocks();
+
+  //!< Update the well blocks, in particular the ones defined by a spline.
+  void UpdateWellBlocks();
   int GetTimeSpentInWic() const;
   Settings::Model::WellDefinitionType GetDefinitionType();
-  double GetLength() const; //!< Get the length of the wellbore (measured depth from the heel to the toe)
-  WellBlock *GetWellBlockByMd(double md) const; //!< Get the wellblock surrounding the given MD.
-  std::vector<WellBlock *> GetWellBlocksByMdRange(double start_md, double end_md) const;
-  double GetEntryMd(const WellBlock *wb) const; //!< Get the measured depth for the entry point to the block.
-  double GetExitMd(const WellBlock *wb) const; //!< Get the measured depth for the exit point from the block.
-  double GetSplineLength() const; //!< Get the length of the well trajectory (summed distance between defining points).
+
+  //!< Get length of the wellbore (measured depth from the heel to the toe)
+  double GetLength() const;
+
+  //!< Get the wellblock surrounding the given MD.
+  WellBlock * GetWellBlockByMd(double md);
+  std::vector<WellBlock *> GetWellBlocksByMdRange(double start_md,
+                                                  double end_md) const;
+
+  //!< Get the measured depth for the entry point to the block.
+  double GetEntryMd(const WellBlock *wb) const;
+
+  //!< Get the measured depth for the exit point from the block.
+  double GetExitMd(const WellBlock *wb) const;
+
+  //!< Get length of trajectory (summed distance b/e defining points).
+  double GetSplineLength() const;
   WellSpline *GetWellSpline() const { return well_spline_; }
 
 
@@ -80,28 +97,49 @@ class Trajectory
   Settings::Model::WellDefinitionType definition_type_;
   QList<WellBlock *> *well_blocks_;
 
-  WellSpline *well_spline_; //!< Used to defined trajectories with a spline. When used, this generates the well blocks.
-  PseudoContVert *pseudo_cont_vert_; //!< A pseudo-continuous vertical well.
+  //!< Used to defined trajectories with a spline.
+  //!< When used, this generates the well blocks.
+  WellSpline *well_spline_;
+
+  //!< A pseudo-continuous vertical well.
+  PseudoContVert *pseudo_cont_vert_;
 
   void initializeWellBlocks(Settings::Model::Well well,
                             Properties::VarPropContainer *variable_container);
 
-  void calculateDirectionOfPenetration(); // Calculate direction of penetration for all well blocks
+  // Calculate direction of penetration for all well blocks
+  void calculateDirectionOfPenetration();
 
   /*!
-   * Convert the list of well blocks in the well settings object to a well spline, with the
-   * number of spline points specified in the settings object (defaulting to 2).
+   * Convert the list of well blocks in the well settings
+   * object to a well spline, with the number of spline
+   * points specified in the settings object (defaulting to 2).
    *
-   * The spline points will be selected naively. E.g. for three spline points:
-   * the heel point will be the center of the first well block in the list;
-   * the center point will be the center of the middle well block in the list ( list[size/2] )
-   * and the toe point the center of the last well block;
+   * The spline points will be selected naively. E.g. for
+   * three spline points: the heel point will be the center
+   * of the first well block in the list; the center point
+   * will be the center of the middle well block in the list
+   * ( list[size/2] ) and the toe point the center of the
+   * last well block;
    */
-  void convertWellBlocksToWellSpline(Settings::Model::Well &well_settings, Reservoir::Grid::Grid *grid);
+  void convertWellBlocksToWellSpline(Settings::Model::Well &well_settings,
+                                     Reservoir::Grid::Grid *grid);
 
-  bool is_2d_; //!< Indicates if the well should only be able to vary in the x-y plane (z variables will not be created).
+  //!< Indicates if the well should only be able to vary
+  //!< in the x-y plane (z variables will not be created).
+  bool is_2d_;
 
   void printWellBlocks();
+
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Model/wells/wellbore";
+  string cl_ = "Trajectory";
+  Settings::VerbParams vp_;
 
 };
 

@@ -39,6 +39,9 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using std::runtime_error;
+using Printer::ext_warn;
+
 Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   vp_=vp;
 
@@ -78,7 +81,7 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
 Optimizer::Constraint
 Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
-  Constraint optimizer_constraint;
+  Constraint optimizer_constraint = Constraint();
 
   if (json_constraint.contains("Well")) {
     optimizer_constraint.well = json_constraint["Well"].toString();
@@ -97,9 +100,8 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     }
 
   } else {
-    throw std::runtime_error(
-        "A constraint must always specify "
-        "either the Well or the Wells property.");
+    string em = "A constraint must always specify either the Well or the Wells property.";
+    throw runtime_error(em);
   }
 
   // Penalty function weight for the constraint
@@ -130,10 +132,8 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optimizer_constraint.max = json_constraint["Max"].toDouble();
 
     if (optimizer_constraint.max >= 7.8540E-03) {
-      Printer::ext_warn(
-          "Maximum valve size is too big. Setting it to 7.8539-3.",
-          "dc_6Settings",
-          "Optimizer");
+      string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
+      ext_warn(wm, md_, cl_, vp_.lnw);
       optimizer_constraint.max = 7.8539E-3;
     }
     optimizer_constraint.min = json_constraint["Min"].toDouble();
@@ -186,16 +186,17 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
         QJsonObject well_spline_point_limit = well_spline_point_limits[i].toObject();
         QJsonArray min_array = well_spline_point_limit["Min"].toArray();
         QJsonArray max_array = well_spline_point_limit["Max"].toArray();
-        Constraint::RealCoordinate min;
+
+        Constraint::RealCoordinate min{};
         min.x = min_array[0].toDouble();
         min.y = min_array[1].toDouble();
         min.z = min_array[2].toDouble();
-        Constraint::RealCoordinate max;
+        Constraint::RealCoordinate max{};
         max.x = max_array[0].toDouble();
         max.y = max_array[1].toDouble();
         max.z = max_array[2].toDouble();
 
-        Constraint::RealMaxMinLimit limit;
+        Constraint::RealMaxMinLimit limit{};
         limit.min = min;
         limit.max = max;
         optimizer_constraint.spline_points_limits.append(limit);
@@ -210,7 +211,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
 
     if (constraint_type == "WSplineLength"){
-      optimizer_constraint.type = ConstraintType::WellSplineLength;
+      optimizer_constraint.type = ConstraintType::WSplineLength;
     } else {
       optimizer_constraint.type = ConstraintType::PolarWellLength;
     }
@@ -241,9 +242,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
           "MaxLength must be specified for well length constraints.");
     }
 
-  } else if (QString::compare(constraint_type, "WellSplineInterwellDistance") == 0) {
+  } else if (QString::compare(constraint_type, "WSplineInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::WellSplineInterwellDistance;
+    optimizer_constraint.type = ConstraintType::WSplineInterwDist;
 
     if (json_constraint.contains("Min")) {
       optimizer_constraint.min = json_constraint["Min"].toDouble();
@@ -256,7 +257,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     if (optimizer_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistance constraint needs"
+          "WSplineInterwDist constraint needs"
           " a Wells array with exactly two well names specified.");
     }
 
@@ -314,9 +315,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optimizer_constraint.box_xyz_zmax = json_constraint["zMax"].toDouble();
 
   } else if (QString::compare(constraint_type,
-      "CombinedWellSplineLengthInterwellDistance") == 0) {
+      "MxWSplineLengthInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::CombinedWellSplineLengthInterwellDistance;
+    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDist;
     optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
     optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
     optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
@@ -324,14 +325,14 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     if (optimizer_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistance constraint"
+          "WSplineInterwDist constraint"
           " needs a Wells array with exactly two well names specified.");
     }
 
   } else if (QString::compare(constraint_type,
-      "CombinedWellSplineLengthInterwellDistanceReservoirBoundary") == 0) {
+      "MxWSplineLengthInterwDistResBound") == 0) {
 
-    optimizer_constraint.type = ConstraintType::CombinedWellSplineLengthInterwellDistanceReservoirBoundary;
+    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDistResBound;
     optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
     optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
     optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
@@ -345,9 +346,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optimizer_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
 
     if (optimizer_constraint.wells.length() != 2) {
-      throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistanceReservoirBoundary constraint "
-          "needs a Wells array with exactly two well names specified.");
+      string em = "MxWSplineLengthInterwDistResBound constraint ";
+      em += "needs a Wells array with exactly two well names specified.";
+      throw UnableToParseOptimizerConstraintsSectionException(em);
     }
 
   } else {

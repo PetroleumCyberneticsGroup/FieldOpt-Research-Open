@@ -32,32 +32,39 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Simulation {
 
-AdgprsDriverFileWriter::AdgprsDriverFileWriter(Settings::Settings *settings, Model::Model *model) {
+using namespace Utilities::FileHandling;
+using namespace Utilities::FileHandling;
+using std::runtime_error;
+
+AdgprsDriverFileWriter::AdgprsDriverFileWriter(Settings::Settings *settings,
+                                               Model::Model *model) {
   model_ = model;
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
 }
 
-void AdgprsDriverFileWriter::WriteDriverFile(QString output_dir)
-{
+void AdgprsDriverFileWriter::WriteDriverFile(QString output_dir) {
   auto welspecs = ECLDriverParts::Welspecs(model_->wells());
   auto compdat = ECLDriverParts::Compdat(model_->wells());
   model_->SetCompdatString(compdat.GetPartString());
+
   auto wellstre = AdgprsDriverParts::Wellstre(model_->wells(), settings_->simulator()->fluid_model());
   auto wellcontrols = AdgprsDriverParts::WellControls(model_->wells(), settings_->model()->control_times());
 
-  if (!Utilities::FileHandling::FileExists(output_dir+"/include/wells.in", vp_))
-    throw std::runtime_error("Unable to find include/wells.in file to write to.");
-  else Utilities::FileHandling::WriteStringToFile(welspecs.GetPartString(), output_dir+"/include/welspecs.in");
+  if (!FileExists(output_dir+"/include/wells.in", vp_))
+    throw runtime_error("Unable to find include/wells.in file to write to.");
+  else WriteStringToFile(welspecs.GetPartString(), output_dir+"/include/welspecs.in");
 
-  if (!Utilities::FileHandling::FileExists(output_dir+"/include/compdat.in",vp_))
-    throw std::runtime_error("Unable to find include/compdat.in file to write to.");
-  else Utilities::FileHandling::WriteStringToFile(compdat.GetPartString(), output_dir+"/include/compdat.in");
+  if (!FileExists(output_dir+"/include/compdat.in",vp_))
+    throw runtime_error("Unable to find include/compdat.in file to write to.");
+  else WriteStringToFile(compdat.GetPartString(), output_dir+"/include/compdat.in");
 
-  if (!Utilities::FileHandling::FileExists(output_dir+"/include/controls.in", vp_))
-    throw std::runtime_error("Unable to find include/controls.in file to write to.");
-  else Utilities::FileHandling::WriteStringToFile(wellstre.GetPartString()
-                                                    +wellcontrols.GetPartString(), output_dir+"/include/controls.in");
+  if (!FileExists(output_dir+"/include/controls.in", vp_)) {
+    throw runtime_error("Unable to find include/controls.in file to write to.");
+  } else {
+    QString str = wellstre.GetPartString() + wellcontrols.GetPartString();
+    WriteStringToFile(str, output_dir+"/include/controls.in");
+  }
 
 }
 

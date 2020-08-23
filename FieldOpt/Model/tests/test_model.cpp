@@ -50,7 +50,7 @@ TEST_F(ModelTest, ChildObjects) {
 
 TEST_F(ModelTest, Variables) {
   // As of 2015.11.10, the variables are:
-  // 3 Continous variables (bhp at three time steps for the producer)
+  // 3 Continuous variables (bhp at three time steps for the producer)
   QList<Model::Properties::ContinuousProperty *> prod_cont_variables = model_->variables()->GetWellControlVariables("PROD");
   EXPECT_EQ(prod_cont_variables.size(), 3);
   EXPECT_STREQ("BHP#PROD#0", prod_cont_variables[0]->name().toLatin1().constData());

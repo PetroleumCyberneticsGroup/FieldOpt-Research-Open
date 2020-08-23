@@ -55,17 +55,17 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
     }
     catch (std::exception const &ex) {
       throw UnableToParseReservoirModelSectionException(
-          "Unable to parse reservoir model section: "
-              + std::string(ex.what()));
+        "Unable to parse reservoir model section: "
+          + std::string(ex.what()));
     }
   }
 
   // Control times
   if (!json_model.contains("ControlTimes")
-      || !json_model["ControlTimes"].isArray()) {
+    || !json_model["ControlTimes"].isArray()) {
     throw UnableToParseModelSectionException(
-        "The ControlTimes array must be defined "
-        "with at least one time for the model.");
+      "The ControlTimes array must be defined "
+      "with at least one time for the model.");
   }
 
   control_times_ = QList<int>();
@@ -77,7 +77,7 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
         }
       } else {
         throw UnableToParseModelSectionException(
-            "Unable to parse NPVYears");
+          "Unable to parse NPVYears");
       }
     } else if (json_model["NPVInterval"].toString().compare("Monthly") == 0) {
       if (json_model.contains("NPVMonths")) {
@@ -160,47 +160,51 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
     }
     catch (std::exception const &ex) {
       throw UnableToParseWellsModelSectionException(
-          "Unable to parse wells model section: " + std::string(ex.what()));
+        "Unable to parse wells model section: " + std::string(ex.what()));
     }
   }
 }
 
-void Model::readReservoir(QJsonObject json_reservoir, Paths &paths)
-{
+void Model::readReservoir(QJsonObject json_reservoir, Paths &paths) {
   // Reservoir grid path
   if (!paths.IsSet(Paths::GRID_FILE) && json_reservoir.contains("Path")) {
     paths.SetPath(Paths::GRID_FILE, json_reservoir["Path"].toString().toStdString());
   }
 }
 
-Model::Well Model::readSingleWell(QJsonObject json_well)
-{
+Model::Well Model::readSingleWell(QJsonObject json_well) {
   Well well;
 
   // Well name
   well.name = json_well["Name"].toString();
+  well.copyVerbParams(vp_);
 
   // Well Type
   QString type = json_well["Type"].toString();
 
   // Well group
-  if (json_well.contains("Group"))
+  if (json_well.contains("Group")) {
     well.group = json_well["Group"].toString();
-  else well.group = "";
+  } else {
+    well.group = "";
+  }
 
   if (QString::compare(type, "Producer") == 0)
     well.type = WellType::Producer;
   else if (QString::compare(type, "Injector") == 0)
     well.type = WellType::Injector;
-  else throw UnableToParseWellsModelSectionException("Well type " + type.toStdString() + " not recognized for well " + well.name.toStdString());
+  else {
+    string em = "Well type " + type.toStdString() + " not recognized for well " + well.name.toStdString();
+    throw UnableToParseWellsModelSectionException(em);
+  }
 
   if (json_well.contains("ICVs")) {
     auto json_icvs = json_well["ICVs"].toArray();
     parseICVs(json_icvs, well);
     if (json_well.contains("ICVCompartmentalization")) {
       if (!json_well["ICVCompartmentalization"].isArray()) {
-        Printer::ext_info("Well.ICVCompartmentalization must be an array of objects with the fields: CompName, ICVs.",
-                          "Settings", "Model");
+        string im = "Well.ICVCompartmentalization must be an array of objects with the fields: CompName, ICVs.";
+        ext_info(im, md_, cl_, vp_.lnw);
         throw std::runtime_error("Unable to parse ICVs.");
       }
       auto json_icv_compartmentalization = json_well["ICVCompartmentalization"].toArray();
@@ -328,7 +332,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
         well.spline_toe.is_variable = true;
       else well.spline_toe.is_variable = false;
       if ((well.spline_heel.is_variable && well.spline_toe.is_variable)
-          || (json_points.contains("IsVariable") && json_points["IsVariable"].toBool() == true)) {
+        || (json_points.contains("IsVariable") && json_points["IsVariable"].toBool() == true)) {
         well.is_variable_spline = true;
       }
       well.spline_heel.name = "SplinePoint#" + well.name + "#heel";
@@ -364,7 +368,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well)
   }
   else {
     ext_warn("Well definition type not recognized. Proceeding without defining a well trajectory.",
-                      md_, cl_, vp_.lnw);
+             md_, cl_, vp_.lnw);
     well.definition_type = UNDEFINED;
   }
 
@@ -526,15 +530,17 @@ bool Model::Well::ControlEntry::isDifferent(ControlEntry other) {
 }
 
 
-void Model::parseSegmentation(QJsonObject json_seg, Well &well) {
+void Model::parseSegmentation(const QJsonObject& json_seg, Well &well) {
   parseSegmentTubing(json_seg, well);
   parseSegmentAnnulus(json_seg, well);
   parseSegmentCompartments(json_seg, well);
 }
+
 void Model::parseSegmentTubing(const QJsonObject &json_seg, Model::Well &well) const {
-  if (VERB_SET >= 2) {
-    Printer::ext_info("Parsing Tubing ...", "Settings", "Model");
+  if (vp_.vSET >= 2) {
+    ext_info("Parsing Tubing ...", md_, cl_, vp_.lnw);
   }
+
   if (json_seg.contains("Tubing")) {
     try {
       well.seg_tubing.diameter = json_seg["Tubing"].toObject()["Diameter"].toDouble();
@@ -545,9 +551,10 @@ void Model::parseSegmentTubing(const QJsonObject &json_seg, Model::Well &well) c
     }
   }
   else {
-    if (VERB_SET >= 1) {
-      Printer::ext_info("Tubing keyword not found in Segmentation. Defaulting Diameter to 0.1 and "
-                        "Roughness to 1.52E-5.", "Settings", "Model");
+    if (vp_.vSET >= 1) {
+      string im = "Tubing keyword not found in Segmentation.";
+      im += " Defaulting Diameter to 0.1 and Roughness to 1.52E-5.";
+      ext_info(im, md_, cl_, vp_.lnw);
     }
     well.seg_tubing.diameter = 0.1;
     well.seg_tubing.roughness = 1.52E-5;
@@ -556,8 +563,8 @@ void Model::parseSegmentTubing(const QJsonObject &json_seg, Model::Well &well) c
 }
 
 void Model::parseSegmentAnnulus(const QJsonObject &json_seg, Model::Well &well) const {
-  if (VERB_SET >= 2) {
-    Printer::ext_info("Parsing Annulus ...", "Settings", "Model");
+  if (vp_.vSET >= 2) {
+    ext_info("Parsing Annulus ...", md_, cl_, vp_.lnw);
   }
   if (json_seg.contains("Annulus")) {
     try {
@@ -566,13 +573,15 @@ void Model::parseSegmentAnnulus(const QJsonObject &json_seg, Model::Well &well) 
       well.seg_annulus.cross_sect_area = json_seg["Annulus"].toObject()["CrossSectionArea"].toDouble();
     }
     catch ( ... ) {
-      throw std::runtime_error("For Annulus, both Diameter, CrossSectionArea and Roughness must be defined.");
+      string em = "For Annulus, both Diameter, CrossSectionArea and Roughness must be defined.";
+      throw std::runtime_error(em);
     }
   }
   else {
-    if (VERB_SET >= 1) {
-      Printer::ext_info("Annulus keyword not found in Segmentation. Defaulting Diameter to 0.04, "
-                        "Ac to 8.17E-3 and Roughness to 1.52E-5.", "Settings", "Model");
+    if (vp_.vSET >= 1) {
+      string im = "Annulus keyword not found in Segmentation. Defaulting ";
+      im += "Diameter to 0.04, Ac to 8.17E-3 and Roughness to 1.52E-5.";
+      ext_info(im, md_, cl_, vp_.lnw);
     }
     well.seg_annulus.diameter = 0.04;
     well.seg_annulus.roughness = 1.52E-5;
@@ -581,7 +590,7 @@ void Model::parseSegmentAnnulus(const QJsonObject &json_seg, Model::Well &well) 
 }
 
 void Model::parseSegmentCompartments(const QJsonObject &json_seg, Model::Well &well) const {
-  if (VERB_SET >= 2) {
+  if (vp_.vSET >= 2) {
     Printer::ext_info("Parsing Compartments ...", "Settings", "Model");
   }
   if (json_seg.contains("Compartments")) {
@@ -602,9 +611,9 @@ void Model::parseSegmentCompartments(const QJsonObject &json_seg, Model::Well &w
         well.seg_compartment_params.valve_size = json_compts["ICDValveSize"].toDouble();
       }
       else {
-        if (VERB_SET >= 1) {
-          Printer::ext_info("ICDValveSize keyword not found in Compartments. Defaulting to 7.85E-5.",
-                            "Settings", "Model");
+        if (vp_.vSET >= 1) {
+          string im = "ICDValveSize keyword not found in Compartments. Defaulting to 7.85E-5.";
+          ext_info(im, md_, cl_, vp_.lnw);
         }
         well.seg_compartment_params.valve_size = 7.85E-5;
       }
@@ -612,9 +621,9 @@ void Model::parseSegmentCompartments(const QJsonObject &json_seg, Model::Well &w
         well.seg_compartment_params.valve_flow_coeff = json_compts["ICDValveFlowCoeff"].toDouble();
       }
       else {
-        if (VERB_SET >= 1) {
-          Printer::ext_info("ICDValveFlowCoeff keyword not found in Compartments. Defaulting to 0.50.",
-                            "Settings", "Model");
+        if (vp_.vSET >= 1) {
+          string im = "ICDValveFlowCoeff keyword not found in Compartments. Defaulting to 0.50.";
+          ext_info(im, md_, cl_, vp_.lnw);
         }
         well.seg_compartment_params.valve_flow_coeff = 0.50;
       }
@@ -664,12 +673,12 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
     comp.name = "ICD#" + well.name;
     well.completions.push_back(comp);
     Printer::ext_info("Added ICV " + comp.name.toStdString() + " to " + well.name.toStdString()
-                          + " with valve size " + Printer::num2str(comp.valve_size)
-                          + " and flow coefficient " + Printer::num2str(comp.valve_flow_coeff)
-                          + " at segment idx. " + Printer::num2str(comp.segment_index), "Settings", "Model");
+                        + " with valve size " + Printer::num2str(comp.valve_size)
+                        + " and flow coefficient " + Printer::num2str(comp.valve_flow_coeff)
+                        + " at segment idx. " + Printer::num2str(comp.segment_index), "Settings", "Model");
     if (comp.is_variable) {
       Printer::ext_info("ICV " + comp.name.toStdString() + " set as variable with name "
-                            + comp.name.toStdString(), "Settings", "Model");
+                          + comp.name.toStdString(), "Settings", "Model");
     }
   }
 
@@ -687,9 +696,9 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization, W
     }
     set_req_prop_string(grp.icv_group_name, comp.toObject(), "CompName");
     set_req_prop_string_array(grp.icvs, comp.toObject(), "ICVs");
-	if (!set_opt_prop_double(grp.valve_size, comp.toObject(), "ValveSize")) {
-		grp.valve_size = well.completions[0].valve_size;
-	}
+    if (!set_opt_prop_double(grp.valve_size, comp.toObject(), "ValveSize")) {
+      grp.valve_size = well.completions[0].valve_size;
+    }
     grp.name = "ICD#" + well.name + "#" + QString::fromStdString(grp.icv_group_name);
     grp.min_valve_size = well.completions[0].min_valve_size;
     grp.max_valve_size = well.completions[0].max_valve_size;
@@ -701,7 +710,7 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization, W
         if (device_names[i] == name) {
           grp.segment_indexes.push_back(well.completions[0].segment_indexes[i]);
           Printer::ext_info("Added segment nr. " + Printer::num2str(grp.segment_indexes.back())
-                                + " for ICV " + name + " in group " + grp.icv_group_name, "Settings", "Model");
+                              + " for ICV " + name + " in group " + grp.icv_group_name, "Settings", "Model");
         }
       }
       if (std::find(std::begin(device_names), std::end(device_names), name) != std::end(device_names)) {

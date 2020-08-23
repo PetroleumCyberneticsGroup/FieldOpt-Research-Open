@@ -1,32 +1,55 @@
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include <gtest/gtest.h>
 #include "Model/tests/test_resource_model.h"
 #include "Simulation/simulator_interfaces/eclsimulator.h"
 #include <Settings/tests/test_resource_example_file_paths.hpp>
 #include "Utilities/stringhelpers.hpp"
 
-
 using namespace Simulation;
 using namespace TestResources;
 namespace {
 
 class ECLSimulatorTest : public testing::Test, TestResourceModel {
-protected:
-    ECLSimulatorTest() {
-        Paths paths;
-        paths.SetPath(Paths::DRIVER_FILE, ExampleFilePaths::norne_driver_example_);
-        paths.SetPath(Paths::OUTPUT_DIR, ExampleFilePaths::norne_test_output_);
-        paths.SetPath(Paths::GRID_FILE, ExampleFilePaths::norne_grid_);
-        paths.SetPath(Paths::BUILD_DIR, ExampleFilePaths::bin_dir_);
-        paths.SetPath(Paths::SIM_DRIVER_FILE, ExampleFilePaths::norne_deck_);
-        settings_norne_full_ = new Settings::Settings(paths);
-        settings_norne_optimizer_ = settings_norne_full_->optimizer();
-        settings_norne_simulator_ = settings_norne_full_->simulator();
-        settings_norne_model_ = settings_norne_full_->model();
-        norne_model_ = new Model::Model(*settings_norne_full_, logger_norne_);
-        simulator_ = new ECLSimulator(settings_norne_full_, norne_model_);
+ protected:
+  ECLSimulatorTest() {
+    Paths paths;
+    paths.SetPath(Paths::DRIVER_FILE, ExampleFilePaths::norne_driver_example_);
+    paths.SetPath(Paths::OUTPUT_DIR, ExampleFilePaths::norne_test_output_);
+    paths.SetPath(Paths::GRID_FILE, ExampleFilePaths::norne_grid_);
+    paths.SetPath(Paths::BUILD_DIR, ExampleFilePaths::bin_dir_);
+    paths.SetPath(Paths::SIM_DRIVER_FILE, ExampleFilePaths::norne_deck_);
 
-    }
-    Simulator *simulator_;
+    settings_norne_full_ = new Settings::Settings(paths);
+    settings_norne_optimizer_ = settings_norne_full_->optimizer();
+    settings_norne_simulator_ = settings_norne_full_->simulator();
+    settings_norne_model_ = settings_norne_full_->model();
+    norne_model_ = new Model::Model(*settings_norne_full_, logger_norne_);
+    simulator_ = new ECLSimulator(settings_norne_full_, norne_model_);
+  }
+  Simulator *simulator_;
   Settings::Settings *settings_norne_full_;
   Settings::Optimizer *settings_norne_optimizer_;
   Settings::Simulator *settings_norne_simulator_;
@@ -35,13 +58,14 @@ protected:
 };
 
 /*!
- * \note No more than one of these tests should be uncommented at a time
- * because running the deck parser more than once, for some reason, causes errors
- * in the OPM library. The deck parser is executed every time the ECLSimulatorTest
- * constructor is called, which is every time a test in this class is executed.
+ * \note No more than one of these tests should be uncommented
+ * at a time because running the deck parser more than once,
+ * for some reason, causes errors in the OPM library. The deck
+ * parser is executed every time the ECLSimulatorTest constructor
+ * is called, which is every time a test in this class is executed.
  */
 TEST_F(ECLSimulatorTest, Constructor) {
-    EXPECT_TRUE(true);
+  EXPECT_TRUE(true);
 }
 
 TEST_F(ECLSimulatorTest, Evaluate) {

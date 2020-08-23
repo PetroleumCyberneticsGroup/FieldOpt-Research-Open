@@ -32,15 +32,17 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Simulation {
 
-FlowSimulator::FlowSimulator(Settings::Settings *settings, Model::Model *model)
+FlowSimulator::FlowSimulator(Settings::Settings *settings,
+                             Model::Model *model)
   : Simulator(settings) {
   model_ = model;
-  driver_file_writer_ = new FlowDriverFileWriter(settings_, model_);
+  settings_ = settings;
   vp_ = settings_->global()->verbParams();
 
+  driver_file_writer_ = new FlowDriverFileWriter(settings_, model_);
   verifyOriginalDriverFileDirectory();
-
   results_ = new Results::ECLResults(settings);
+
   try {
     results()->ReadResults(driver_file_writer_->output_driver_file_name_);
   } catch (...) {} // At this stage we don't really care if the results can be read, we just want to set the path.
@@ -77,9 +79,10 @@ void FlowSimulator::verifyOriginalDriverFileDirectory() {
 void FlowSimulator::copyDriverFiles() {
   auto workdir = paths_.GetPath(Paths::OUTPUT_DIR) + driver_parent_dir_name_.toStdString();
   if (!DirExists(workdir, vp_, md_, cl_)) {
-    if (VERB_SIM >= 1) {
-      Printer::ext_info("Output deck directory not found. Copying input deck:"
-                          + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir, "Simulation", "FlowSimulator" );
+    if (vp_.vSIM >= 1) {
+      string im = "Output deck directory not found. Copying input deck:";
+      im += paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir;
+      ext_info(im, "Simulation", "FlowSimulator" );
     }
     CreateDir(workdir, vp_);
     CopyDir(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, true);

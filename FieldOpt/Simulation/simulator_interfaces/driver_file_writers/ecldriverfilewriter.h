@@ -47,16 +47,19 @@ class EclDriverFileWriter
 {
  private:
   friend class ::Simulation::ECLSimulator;
-  EclDriverFileWriter(::Settings::Settings *settings, Model::Model *model);
+  EclDriverFileWriter(::Settings::Settings *settings,
+                      Model::Model *model);
   void WriteDriverFile(QString schedule_file_path);
   std::string buildActionStrings();
 
   Model::Model *model_;
   ::Settings::Settings *settings_;
-  ::Settings::VerbParams vp_;
   ECLDriverParts::ScheduleInsets insets_;
   bool use_actionx_;
-  string md_ = "Simulation";
+
+  string im_ = "", wm_ = "", em_ = "";
+  ::Settings::VerbParams vp_;
+  string md_ = "Simulation::sim_interfaces::driver_file_writers";
   string cl_ = "EclDriverFileWriter";
 };
 

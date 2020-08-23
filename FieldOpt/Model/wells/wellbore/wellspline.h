@@ -76,12 +76,20 @@ class WellSpline
    */
   QList<SplinePoint *> GetSplinePoints() const { return spline_points_; }
 
-  Settings::VerbParams vp_;
-
  protected:
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
   Settings::Model::Well well_settings_;
+
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Model/wells/wellbore";
+  string cl_ = "WellSpline";
+  Settings::VerbParams vp_;
 
   //!< # of seconds spent in the ComputeWellBlocks() method.
   int seconds_spent_in_compute_wellblocks_;
@@ -111,13 +119,20 @@ class WellSpline
 
   QList<SplinePoint *> spline_points_;
 
-  std::string last_computed_grid_; //!< Contains the path to the last grid used by WIC.
-  std::vector<Eigen::Vector3d> last_computed_spline_; //!< Contains the last spline points used by WIC. Used to determine if the spline has changed.
+  //!< Contains the path to the last grid used by WIC.
+  std::string last_computed_grid_;
+
+  //!< Contains the last spline points used by WIC.
+  //!< Used to determine if the spline has changed.
+  std::vector<Eigen::Vector3d> last_computed_spline_;
 
   /*!
-   * \brief getWellBlock Convert the BlockData returned by the WIC to a WellBlock with a Perforation.
-   * \note The IJK indexes are incremented by on to account for the zero-inclusive indices used by
-   * the ERT library. This is necessary because ECL and ADGPRS both use zero-exclusive indices.
+   * \brief getWellBlock Convert the BlockData returned
+   * by the WIC to a WellBlock with a Perforation.
+   * \note The IJK indexes are incremented by on to account
+   * for the zero-inclusive indices used by the ERT library.
+   * This is necessary because ECL and ADGPRS both use
+   * zero-exclusive indices.
    * \param block_data
    * \return
    */

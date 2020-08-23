@@ -50,7 +50,10 @@ Simulator::Simulator(Settings::Settings *settings) {
   if (!paths_.IsSet(Paths::ENSEMBLE_FILE)) { // single realization
     driver_file_name_ = FileNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
     driver_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
-    case_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::CASE_ROOT_DIR));
+
+    if (paths_.IsSet(Paths::CASE_ROOT_DIR)) {
+      case_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::CASE_ROOT_DIR));
+    }
 
   } else { // multiple realizations
     driver_file_name_ = "";
@@ -60,10 +63,15 @@ Simulator::Simulator(Settings::Settings *settings) {
   // Use custom execution script if provided in runtime
   // settings, else use the one from json driver file
   if (!paths_.IsSet(Paths::SIM_EXEC_SCRIPT_FILE)) {
-    std::string exec_script_path = paths_.GetPath(Paths::BUILD_DIR)
-      + ExecutionScripts::GetScriptPath(settings->simulator()->script_name()).toStdString();
-    paths_.SetPath(Paths::SIM_EXEC_SCRIPT_FILE, exec_script_path);
-    paths_.SetPath(Paths::SIM_EXEC_DIR, GetParentDirPath(exec_script_path));
+    string exec_script_path = paths_.GetPath(Paths::BUILD_DIR);
+    auto sn = settings->simulator()->script_name();
+    if (sn.isEmpty()) {
+      E("No execution script given in JSON.");
+    } else {
+      exec_script_path += ExecutionScripts::GetScriptPath(sn).toStdString();
+      paths_.SetPath(Paths::SIM_EXEC_SCRIPT_FILE, exec_script_path);
+      paths_.SetPath(Paths::SIM_EXEC_DIR, GetParentDirPath(exec_script_path));
+    }
   }
 
   script_args_ = (QStringList() << paths_.GetPathQstr(Paths::OUTPUT_DIR)

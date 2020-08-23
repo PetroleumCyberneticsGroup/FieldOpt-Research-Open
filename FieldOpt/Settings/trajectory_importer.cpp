@@ -39,7 +39,7 @@ TrajectoryImporter::TrajectoryImporter(const std::string &traj_dir_path,
                                        const std::vector<std::string> &wells,
                                        VerbParams vp) {
   vp_ = vp;
-  info("Importing well trajectories ... ");
+  if(vp_.vSET >= 1) { info("Importing well trajectories ... ", vp_.lnw); }
   assert(DirExists(traj_dir_path, vp_, md_, cl_));
 
   traj_dir_path_ = GetAbsoluteFilePath(traj_dir_path);
@@ -51,7 +51,7 @@ TrajectoryImporter::TrajectoryImporter(const std::string &traj_dir_path,
       wname, parseFile(wname)
     ));
   }
-  std::cout << "Done importing well trajectories." << std::endl;
+  if(vp_.vSET >= 1) { info("Done importing well trajectories.", vp_.lnw); }
 }
 
 TrajectoryImporter::TrajectoryImporter() {}

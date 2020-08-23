@@ -52,7 +52,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         constraints_.append(new RateConstraint(constraint, variables, vp_));
         break;
       }
-      case Settings::Optimizer::ConstraintType::WellSplineLength: {
+      case Settings::Optimizer::ConstraintType::WSplineLength: {
         for (auto wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
@@ -115,19 +115,19 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         }
         break;
       }
-      case Settings::Optimizer::ConstraintType::WellSplineInterwellDistance: {
-        if (VERB_OPT >= 1) Printer::info("Adding WellSplineInterwellDistance constraint.");
+      case Settings::Optimizer::ConstraintType::WSplineInterwDist: {
+        if (VERB_OPT >= 1) Printer::info("Adding WSplineInterwDist constraint.");
         constraints_.append(new InterwDist(constraint, variables, vp_));
         break;
       }
-      case Settings::Optimizer::ConstraintType::CombinedWellSplineLengthInterwellDistance: {
-        if (VERB_OPT >= 1) Printer::info("Adding CombinedWellSplineLengthInterwellDistance constraint.");
+      case Settings::Optimizer::ConstraintType::MxWSplineLengthInterwDist: {
+        if (VERB_OPT >= 1) Printer::info("Adding MxWSplineLengthInterwDist constraint.");
         constraints_.append(new MxSplineLengthInterwDist(constraint, variables, vp_));
         break;
       }
       case Settings::Optimizer::ConstraintType::
-        CombinedWellSplineLengthInterwellDistanceReservoirBoundary: {
-        if (VERB_OPT >= 1) Printer::info("Adding CombinedWellSplineLengthInterwellDistanceReservoirBoundary constraint.");
+        MxWSplineLengthInterwDistResBound: {
+        if (VERB_OPT >= 1) Printer::info("Adding MxWSplineLengthInterwDistResBound constraint.");
         constraints_.append(new MxSplineLengthInterwDistResBound(constraint, variables, grid, vp_));
         break;
       }

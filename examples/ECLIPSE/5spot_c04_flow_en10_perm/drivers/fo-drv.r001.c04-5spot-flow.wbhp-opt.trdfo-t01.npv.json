@@ -1,7 +1,18 @@
 {
   "Global": {
     "Name": "c04-5spot-flow.wbhp-opt.trdfo-test",
-    "BookkeeperTolerance": 1e-12
+    "BookkeeperTolerance": 1e-12,
+    "VerbConf": {
+      "iBoxLineWidth": 140,
+      "Model": 1,
+      "Optim": 1,
+      "WICal": 1,
+      "Simul": 1,
+      "Runnr": 1,
+      "Resvr": 1,
+      "Setng": 1,
+      "Utils": 1
+    }
   },
   "Optimizer": {
     "Type": "TrustRegionOptimization",
@@ -21,21 +32,21 @@
         {
           "Comment": "Oil price: 60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
           "Coefficient": 377.3887,
-          "Property": "CumulativeOilProduction",
+          "Property": "FieldOilProdTotal",
           "TimeStep": -1,
           "IsWellProp": false
         },
         {
           "Comment": "Water production cost: 6 $/bbl * 6.289811 bbl/m^3 ",
           "Coefficient": -37.7388,
-          "Property": "CumulativeWaterProduction",
+          "Property": "FieldWatProdTotal",
           "TimeStep": -1,
           "IsWellProp": false
         },
         {
           "Comment": "Water injection cost: 2 $/bbl * 6.289811 bbl/m^3",
           "Coefficient": -12.5796,
-          "Property": "CumulativeWaterInjection",
+          "Property": "FieldWatInjTotal",
           "TimeStep": -1,
           "IsWellProp": false
         }
@@ -55,7 +66,7 @@
     "Type": "ECLIPSE",
     "FluidModel": "BlackOil",
     "ScheduleFile": "fo_edits.INC",
-    "ExecutionScript": "bash_flow",
+    "ExecScript": "bash_flow",
     "UseACTIONX": false,
     "SelectRealizations": 10,
     "MaxMinutes": 15

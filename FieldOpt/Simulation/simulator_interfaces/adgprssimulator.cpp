@@ -35,11 +35,14 @@ namespace Simulation {
 AdgprsSimulator::AdgprsSimulator(Settings::Settings *settings,
                                  Model::Model *model)
   : Simulator(settings) {
-  verifyOriginalDriverFileDirectory();
   model_ = model;
-  results_ = new Simulation::Results::AdgprsResults(settings);
+  settings_ = settings;
   vp_ = settings_->global()->verbParams();
-  driver_file_writer_ = new AdgprsDriverFileWriter(settings_, model_);
+
+  driver_file_writer_ = new AdgprsDriverFileWriter(settings_,
+                                                   model_);
+  verifyOriginalDriverFileDirectory();
+  results_ = new Simulation::Results::AdgprsResults(settings);
 }
 
 void AdgprsSimulator::Evaluate() {
@@ -62,9 +65,10 @@ void AdgprsSimulator::CleanUp() {
 void AdgprsSimulator::copyDriverFiles() {
   auto workdir = paths_.GetPath(Paths::OUTPUT_DIR) + driver_parent_dir_name_.toStdString();
   if (!DirExists(workdir, vp_)) {
-    if (VERB_SIM >= 1) {
-      Printer::ext_info("Output deck directory not found. Copying input deck:"
-                          + paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir, "Simulation", "ADGPRSSimulator" );
+    if (vp_.vSIM >= 1) {
+      string im = "Output deck directory not found. Copying input deck:";
+      im += paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir;
+      ext_info(im, "Simulation", "ADGPRSSimulator" );
     }
     CreateDir(workdir, vp_);
     CopyDir(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, true);
@@ -73,10 +77,10 @@ void AdgprsSimulator::copyDriverFiles() {
 }
 
 void AdgprsSimulator::verifyOriginalDriverFileDirectory() {
-  QStringList critical_files = {QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/compdat.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/controls.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/wells.in",
-                                QString::fromStdString(paths_.GetPath(Paths::SIM_DRIVER_DIR)) + "/include/welspecs.in"};
+  QStringList critical_files = {paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/compdat.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/controls.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/wells.in",
+                                paths_.GetPathQstr(Paths::SIM_DRIVER_DIR) + "/include/welspecs.in"};
   for (auto file : critical_files) {
     if (!Utilities::FileHandling::FileExists(file, vp_))
       throw DriverFileDoesNotExistException(file);

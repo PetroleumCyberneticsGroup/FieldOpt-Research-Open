@@ -174,8 +174,11 @@ inline std::vector<std::string> ReadFileToStdStringList(const std::string &filep
  * \param file_path Path to the file to write the string into.
  */
 inline void WriteStringToFile(QString string, QString file_path) {
-  if (!ParentDirExists(file_path))
-    throw std::runtime_error("File's parent directory not found: " + file_path.toStdString());
+  std::string em;
+  if (!ParentDirExists(file_path)) {
+    em = "File's parent directory not found: " + file_path.toStdString();
+    throw std::runtime_error(em);
+  }
 
   if (!string.endsWith("\n"))
     string.append("\n");

@@ -33,6 +33,7 @@ using std::stringstream;
 using std::runtime_error;
 
 using Printer::ext_warn;
+using Printer::error;
 
 Paths::Paths() {}
 
@@ -41,23 +42,21 @@ void Paths::SetPath(Paths::Path path, const string& path_string,
   vp_=vp;
 
   if (path >= 0 && !FileExists(path_string, vp_, md_, cl_) && ! skip_check) {
-
     stringstream ss;
-    ss << "Cannot set " << GetPathDesc(path)
-       << " path to non-existing file (" << path_string << ")";
-    Printer::error(ss.str());
-    throw runtime_error(
-      Paths::GetPathDesc(path)
-        + " not found at " + path_string);
+    ss << "Cannot set " << GetPathDesc(path);
+    ss << " path to non-existing file (" << path_string << ")";
+    error(ss.str());
+
+    string em = Paths::GetPathDesc(path) + " not found at " + path_string;
+    throw runtime_error(em);
 
   } else if (path < 0 && !DirExists(path_string, vp_, md_, cl_) && ! skip_check) {
+    cerr << "Cannot set " << GetPathDesc(path);
+    cerr << " path to non-existing directory (";
+    cerr << path_string << ")" << endl;
 
-    cerr << "Cannot set " << GetPathDesc(path)
-         << " path to non-existing directory (" << path_string
-         << ")" << endl;
-    throw runtime_error(
-      Paths::GetPathDesc(path)
-        + " not found at " + path_string);
+    string em = Paths::GetPathDesc(path) + " not found at " + path_string;
+    throw runtime_error(em);
 
   } else {
     paths_[path] = path_string;
@@ -70,9 +69,8 @@ bool Paths::IsSet(Paths::Path path) {
 
 string Paths::GetPath(Paths::Path path) {
   if (!IsSet(path)) {
-    ext_warn("Getting unset variable ("
-               + GetPathDesc(path) + ")", "Settings",
-             "Paths");
+    string wm = "Getting unset variable (" + GetPathDesc(path) + ")";
+    ext_warn(wm, md_, cl_, vp_.lnw);
     return "UNSET";
 
   } else {

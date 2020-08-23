@@ -28,13 +28,18 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
+using namespace TestResources::ExampleFilePaths;
+
 class AdgprsSimulatorTest : public ::testing::Test, public TestResources::TestResourceModel {
  protected:
   AdgprsSimulatorTest() {
-    settings_full_->paths().SetPath(Paths::DRIVER_FILE, TestResources::ExampleFilePaths::driver_5spot_);
-    settings_full_->paths().SetPath(Paths::SIM_DRIVER_FILE, TestResources::ExampleFilePaths::gprs_drv_5spot_);
-    settings_full_->paths().SetPath(Paths::SIM_DRIVER_DIR, GetParentDirPath(settings_full_->paths().GetPath(Paths::SIM_DRIVER_FILE)));
-    settings_full_->paths().SetPath(Paths::BUILD_DIR, TestResources::ExampleFilePaths::bin_dir_);
+    settings_full_->paths().SetPath(Paths::DRIVER_FILE, driver_5spot_);
+    settings_full_->paths().SetPath(Paths::SIM_DRIVER_FILE, gprs_drv_5spot_);
+
+    auto dir_path = GetParentDirPath(settings_full_->paths().GetPath(Paths::SIM_DRIVER_FILE));
+    settings_full_->paths().SetPath(Paths::SIM_DRIVER_DIR, dir_path);
+    settings_full_->paths().SetPath(Paths::BUILD_DIR, bin_dir_);
+
     simulator_ = new Simulation::AdgprsSimulator(settings_full_, model_);
   }
 

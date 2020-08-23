@@ -34,6 +34,8 @@ namespace TestResources {
 class TestResourceSettings {
  protected:
   TestResourceSettings() {
+    Settings::VerbParams vp_;
+
     paths_.SetPath(Paths::DRIVER_FILE,
                    ExampleFilePaths::driver_example_);
 
@@ -45,6 +47,12 @@ class TestResourceSettings {
 
     paths_.SetPath(Paths::GRID_FILE,
                    ExampleFilePaths::grid_5spot_);
+
+    if(vp_.vSET >= 5) {
+      string im = "test: settings_full_(";
+      im += paths_.GetPath(Paths::DRIVER_FILE) + ")";
+      info(im, vp_.lnw);
+    }
 
     settings_full_ = new Settings::Settings(paths_);
     settings_optimizer_ = settings_full_->optimizer();
@@ -63,6 +71,12 @@ class TestResourceSettings {
     paths_hybridopt_.SetPath(Paths::GRID_FILE,
                              ExampleFilePaths::grid_5spot_);
 
+    if(vp_.vSET >= 5) {
+      string im = "test: settings_hybridopt_full_(";
+      im += paths_hybridopt_.GetPath(Paths::DRIVER_FILE) + ")";
+      info(im, vp_.lnw);
+    }
+
     settings_hybridopt_full_ = new Settings::Settings(paths_hybridopt_);
     settings_hybridopt_optimizer_ = settings_hybridopt_full_->optimizer();
     settings_hybridopt_simulator_ = settings_hybridopt_full_->simulator();
@@ -70,8 +84,13 @@ class TestResourceSettings {
 
     runner_resources_ = new TestResources::RunnerResources();
 
-    settings_en_5spot_full_ = new Settings::Settings(
-      runner_resources_->rts_en_5spot_->paths());
+    auto en_paths = runner_resources_->rts_en_5spot_->paths();
+    if(vp_.vSET >= 5) {
+      string im = "test: settings_en_5spot_full_(";
+      im += en_paths.GetPath(Paths::DRIVER_FILE) + ")";
+      info(im, vp_.lnw);
+    }
+    settings_en_5spot_full_ = new Settings::Settings(en_paths);
   }
 
   TestResources::RunnerResources *runner_resources_;

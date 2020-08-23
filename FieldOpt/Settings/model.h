@@ -102,6 +102,7 @@ class Model
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
     };
+
     /*!
      * @brief A grouping of ICVs that make up a compartment
      */
@@ -109,6 +110,7 @@ class Model
       std::string icv_group_name;
       std::vector<std::string> icvs;
     };
+
     struct WellBlock {
       WellBlock(){}
       bool is_variable;
@@ -117,12 +119,14 @@ class Model
       QString name;
       int i, j, k;
     };
+
     struct SplinePoint {
       SplinePoint(){}
       QString name;
       double x, y, z;
       bool is_variable = false;
     };
+
     struct PolarSpline{
       SplinePoint midpoint;
       double azimuth=0;
@@ -205,7 +209,7 @@ class Model
   void setImportedWellDefaults(QJsonObject json_model);
   void parseImportedWellOverrides(QJsonArray json_wells);
 
-  void parseSegmentation(QJsonObject json_seg, Well &well);
+  void parseSegmentation(const QJsonObject& json_seg, Well &well);
   void parseSegmentTubing(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentAnnulus(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentCompartments(const QJsonObject &json_seg, Well &well) const;

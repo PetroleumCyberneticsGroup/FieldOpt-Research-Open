@@ -291,12 +291,13 @@ inline void ext_info(const std::string &text,
   std::stringstream ss;
   ss << FLGREEN;
 
-  auto width = floor(lw * 25/60);
+  // auto width = floor(lw * 25/60);
+  auto width = floor((lw-31) * 1/2) + 1;
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
   pad_text(class_name, width);
-  ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+  ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << "  │" << "\n";
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";
@@ -331,12 +332,13 @@ inline void ext_warn(const std::string &text,
   std::stringstream ss;
   ss << FLYELLOW;
 
-  auto width = floor(lw * 25/60);
+  // auto width = floor(lw * 25/60);
+  auto width = floor((lw-31) * 1/2) + 1;
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
   pad_text(class_name, width);
-  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
+  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << "  │" << "\n"; // #chars: 31
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";

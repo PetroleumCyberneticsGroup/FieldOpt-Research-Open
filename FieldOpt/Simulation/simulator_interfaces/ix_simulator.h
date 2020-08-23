@@ -47,7 +47,7 @@ class IXSimulator : public Simulator {
   QString deck_name_;
   QString result_path_;
 
-  string cl_ = "ixsimulator";
+  string cl_ = "IXSimulator";
 };
 
 }
