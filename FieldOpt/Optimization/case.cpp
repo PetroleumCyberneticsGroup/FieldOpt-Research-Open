@@ -69,14 +69,16 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
   real_variables_ = real_variables;
   objective_function_value_ = std::numeric_limits<double>::max();
 
-  // real_id_index_map_ = real_variables_.keys();
-  for(int ii=0; ii < binary_variables_.size(); ii++) {
-    real_id_index_map_.append(binary_variables_.at(ii).first);
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    real_id_index_map_.append(real_variables_.at(ii).first);
   }
 
-  // integer_id_index_map_ = integer_variables_.keys();
   for(int ii=0; ii < integer_variables_.size(); ii++) {
     integer_id_index_map_.append(integer_variables_.at(ii).first);
+  }
+
+  for(int ii=0; ii < binary_variables_.size(); ii++) {
+    binary_id_index_map_.append(binary_variables_.at(ii).first);
   }
 
   sim_time_sec_ = 0;
@@ -92,12 +94,15 @@ Case::Case(const Case *c) {
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
 
   objective_function_value_ = c->objective_function_value_;
+
   real_id_index_map_ = c->real_id_index_map_;
+  integer_id_index_map_ = c->integer_id_index_map_;
+  binary_id_index_map_ = c->binary_id_index_map_;
 
   // integer_id_index_map_ = c->integer_variables_.keys();
-  for(int ii=0; ii < integer_variables_.size(); ii++) {
-    integer_id_index_map_.append(integer_variables_.at(ii).first);
-  }
+  // for(int ii=0; ii < integer_variables_.size(); ii++) {
+  //   integer_id_index_map_.append(integer_variables_.at(ii).first);
+  // }
 
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;

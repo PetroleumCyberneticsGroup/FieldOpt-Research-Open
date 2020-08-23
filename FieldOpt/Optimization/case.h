@@ -350,6 +350,7 @@ class Case : public Loggable
 
   QList<QUuid> real_id_index_map_;
   QList<QUuid> integer_id_index_map_;
+  QList<QUuid> binary_id_index_map_;
 
   Case* parent_; //!< The parent of this trial point. Needed by the APPS algorithm.
   int direction_index_; //!< The direction index used to generate this trial point.
