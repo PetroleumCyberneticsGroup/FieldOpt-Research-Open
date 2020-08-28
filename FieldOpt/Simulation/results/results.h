@@ -28,6 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include "results_exceptions.h"
 #include <vector>
+#include <set>
 #include "Simulation/results/json_results.h"
 #include <Eigen/Core>
 
@@ -52,89 +53,155 @@ class Results
    */
   enum Property {
     FieldOilProdTotal,
-    FieldGasProdTotal,
     FieldWatProdTotal,
+    FieldGasProdTotal,
+    FieldLiqProdTotal,
     FieldWatInjTotal,
     FieldGasInjTotal,
+    //
     WellOilProdTotal,
     WellGasProdTotal,
     WellWatProdTotal,
+    WellLiqProdTotal,
     WellWatInjTotal,
     WellGasInjTotal,
+    //
     Time,
     Step,
+    //
+    WellBHP,
+    WellWaterCut,
+    //
     FieldOilProdRate,
     FieldGasProdRate,
     FieldWatProdRate,
+    FieldLiqProdRate,
     FieldWatInjRate,
     FieldGasInjRate,
+    //
     WellOilProdRate,
     WellGasProdRate,
     WellWatProdRate,
+    WellLiqProdRate,
     WellWatInjRate,
     WellGasInjRate,
     //
+    WellSegOilFlowRate,
+    WellSegWatFlowRate,
+    WellSegPress,
+    WellSegPressDrop,
+    WellSegWaterCut,
+    WellSegXSecArea,
+    //
+    WellSegGasFlowRate,
+    WellSegOilFlowTotal,
+    WellSegWatFlowTotal,
+    WellSegGasFlowTotal,
+    WellSegLiqFlowTotal,
+    //
+    // Types:
     FieldTotal,
     GnGFunction,
-    WellWatBrkTmTotal,
+    SegWCTstd,
+    WellWBTTotal,
     AuxProp
 //    EclAjdGradients
   };
 
   static string GetPropertyKey(Property prop) {
     string pstr = "???";
-    if (prop == FieldOilProdTotal)      pstr = "FieldOilProdTotal";
-    else if (prop == FieldGasProdTotal) pstr = "FieldGasProdTotal";
-    else if (prop == FieldWatProdTotal) pstr = "FieldWatProdTotal";
-    else if (prop == FieldWatInjTotal)  pstr = "FieldWatInjTotal";
-    else if (prop == WellOilProdTotal)  pstr = "WellOilProdTotal";
-    else if (prop == WellGasProdTotal)  pstr = "WellGasProdTotal";
-    else if (prop == WellWatProdTotal)  pstr = "WellWatProdTotal";
-    else if (prop == Time)              pstr = "Time";
-    else if (prop == Step)              pstr = "Step";
-    else if (prop == FieldOilProdRate)  pstr = "FieldOilProdRate";
-    else if (prop == FieldGasProdRate)  pstr = "FieldGasProdRate";
-    else if (prop == FieldWatProdRate)  pstr = "FieldWatProdRate";
-    else if (prop == FieldWatInjRate)   pstr = "FieldWatInjRate";
-    else if (prop == FieldGasInjRate)   pstr = "FieldGasInjRate";
-    else if (prop == WellOilProdRate)   pstr = "WellOilProdRate";
-    else if (prop == WellGasProdRate)   pstr = "WellGasProdRate";
-    else if (prop == WellWatProdRate)   pstr = "WellWatProdRate";
-    else if (prop == WellWatInjRate)    pstr = "WellWatInjRate";
-    else if (prop == WellGasInjRate)    pstr = "WellGasInjRate";
-
-    else if (prop == FieldTotal)        pstr = "FieldTotal";
-    else if (prop == GnGFunction)       pstr = "GnGFunction";
-    else if (prop == WellWatBrkTmTotal) pstr = "WellWatBrkTmTotal";
-    else if (prop == AuxProp)           pstr = "AuxProp";
+    if (prop == FieldOilProdTotal)       pstr = "FieldOilProdTotal";
+    else if (prop == FieldWatProdTotal)  pstr = "FieldWatProdTotal";
+    else if (prop == FieldGasProdTotal)  pstr = "FieldGasProdTotal";
+    else if (prop == FieldLiqProdTotal)  pstr = "FieldLiqProdTotal";
+    else if (prop == FieldWatInjTotal)   pstr = "FieldWatInjTotal";
+    else if (prop == FieldGasInjTotal)   pstr = "FieldGasInjTotal";
+      //
+    else if (prop == WellOilProdTotal)   pstr = "WellOilProdTotal";
+    else if (prop == WellWatProdTotal)   pstr = "WellWatProdTotal";
+    else if (prop == WellGasProdTotal)   pstr = "WellGasProdTotal";
+    else if (prop == WellLiqProdTotal)   pstr = "WellLiqProdTotal";
+    else if (prop == WellWatInjTotal)    pstr = "WellWatInjTotal";
+    else if (prop == WellGasInjTotal)    pstr = "WellGasInjTotal";
+      //
+    else if (prop == Time)               pstr = "Time";
+    else if (prop == Step)               pstr = "Step";
+      //
+    else if (prop == FieldOilProdRate)   pstr = "FieldOilProdRate";
+    else if (prop == FieldWatProdRate)   pstr = "FieldWatProdRate";
+    else if (prop == FieldGasProdRate)   pstr = "FieldGasProdRate";
+    else if (prop == FieldLiqProdRate)   pstr = "FieldLiqProdRate";
+    else if (prop == FieldWatInjRate)    pstr = "FieldWatInjRate";
+    else if (prop == FieldGasInjRate)    pstr = "FieldGasInjRate";
+      //
+    else if (prop == WellOilProdRate)    pstr = "WellOilProdRate";
+    else if (prop == WellWatProdRate)    pstr = "WellWatProdRate";
+    else if (prop == WellGasProdRate)    pstr = "WellGasProdRate";
+    else if (prop == WellLiqProdRate)    pstr = "WellLiqProdRate";
+    else if (prop == WellWatInjRate)     pstr = "WellWatInjRate";
+    else if (prop == WellGasInjRate)     pstr = "WellGasInjRate";
+      //
+    else if (prop == WellSegOilFlowRate) pstr = "WellSegOilFlowRate";
+    else if (prop == WellSegWatFlowRate) pstr = "WellSegWatFlowRate";
+    else if (prop == WellSegPress)       pstr = "WellSegPress";
+    else if (prop == WellSegPressDrop)   pstr = "WellSegPressDrop";
+    else if (prop == WellSegWaterCut)    pstr = "WellSegWaterCut";
+    else if (prop == WellSegXSecArea)    pstr = "WellSegXSecArea";
+      //
+      // Types:
+    else if (prop == FieldTotal)         pstr = "FieldTotal";
+    else if (prop == GnGFunction)        pstr = "GnGFunction";
+    else if (prop == SegWCTstd)          pstr = "SegWCTstd";
+    else if (prop == WellWBTTotal)       pstr = "WellWBTTotal";
+    else if (prop == AuxProp)            pstr = "AuxProp";
     else throw RsltPropKeyDoesNotExistExc("", pstr);
     return pstr;
   }
 
   static Property GetPropertyKey(QString prop) {
-    if (prop == "FieldOilProdTotal")      return FieldOilProdTotal;
-    else if (prop == "FieldGasProdTotal") return FieldGasProdTotal;
-    else if (prop == "FieldWatProdTotal") return FieldWatProdTotal;
-    else if (prop == "FieldWatInjTotal")  return FieldWatInjTotal;
+    if (prop == "FieldOilProdTotal")       return FieldOilProdTotal;
+    else if (prop == "FieldWatProdTotal")  return FieldWatProdTotal;
+    else if (prop == "FieldGasProdTotal")  return FieldGasProdTotal;
+    else if (prop == "FieldlLiqProdTotal") return FieldLiqProdTotal;
+    else if (prop == "FieldWatInjTotal")   return FieldWatInjTotal;
+    else if (prop == "FieldGasInjTotal")   return FieldGasInjTotal;
+    //
     else if (prop == "WellOilProdTotal")  return WellOilProdTotal;
-    else if (prop == "WellGasProdTotal")  return WellGasProdTotal;
     else if (prop == "WellWatProdTotal")  return WellWatProdTotal;
+    else if (prop == "WellGasProdTotal")  return WellGasProdTotal;
+    else if (prop == "WellLiqProdTotal")  return WellLiqProdTotal;
+    else if (prop == "WellWatInjTotal")   return WellWatInjTotal;
+    else if (prop == "WellGasInjTotal")   return WellGasInjTotal;
+    //
     else if (prop == "Time")              return Time;
     else if (prop == "Step")              return Step;
+    //
     else if (prop == "FieldOilProdRate")  return FieldOilProdRate;
-    else if (prop == "FieldGasProdRate")  return FieldGasProdRate;
     else if (prop == "FieldWatProdRate")  return FieldWatProdRate;
+    else if (prop == "FieldGasProdRate")  return FieldGasProdRate;
+    else if (prop == "FieldLiqProdRate")  return FieldLiqProdRate;
     else if (prop == "FieldWatInjRate")   return FieldWatInjRate;
     else if (prop == "FieldGasInjRate")   return FieldGasInjRate;
+    //
     else if (prop == "WellOilProdRate")   return WellOilProdRate;
-    else if (prop == "WellGasProdRate")   return WellGasProdRate;
     else if (prop == "WellWatProdRate")   return WellWatProdRate;
+    else if (prop == "WellGasProdRate")   return WellGasProdRate;
+    else if (prop == "WellLiqProdRate")   return WellLiqProdRate;
     else if (prop == "WellWatInjRate")    return WellWatInjRate;
     else if (prop == "WellGasInjRate")    return WellGasInjRate;
-
+      //
+    else if (prop == "WellSegOilFlowRate") return WellSegOilFlowRate;
+    else if (prop == "WellSegWatFlowRate") return WellSegWatFlowRate;
+    else if (prop == "WellSegPress")       return WellSegPress;
+    else if (prop == "WellSegPressDrop")   return WellSegPressDrop;
+    else if (prop == "WellSegWaterCut")    return WellSegWaterCut;
+    else if (prop == "WellSegXSecArea")    return WellSegXSecArea;
+    //
+    // Types:
     else if (prop == "FieldTotal")        return FieldTotal;
     else if (prop == "GnGFunction")       return GnGFunction;
-    else if (prop == "WellWatBrkTmTotal") return WellWatBrkTmTotal;
+    else if (prop == "SegWCTstd")         return SegWCTstd;
+    else if (prop == "WellWBTTotal")      return WellWBTTotal;
     else if (prop == "AuxProp")           return AuxProp;
     else throw RsltPropKeyDoesNotExistExc("", prop.toStdString());
   }
@@ -179,8 +246,17 @@ class Results
    * values for the specified property.
    * \param prop The property to be retrieved.
    */
-  virtual std::vector<double> GetValueVector(Property prop) = 0;
+  virtual vector<double> GetValueVector(Property prop) = 0;
   virtual VectorXd GetValueVectorXd(Property prop) = 0;
+
+  virtual vector<double> GetValueVector(Property prop, string wn) = 0;
+  virtual VectorXd GetValueVectorXd(Property prop, string wn) = 0;
+
+  virtual vector<vector<double>> GetValVectorSeg(Property prop, string wn) = 0;
+  virtual vector<VectorXd> GetValVectorSegXd(Property prop, string wn) = 0;
+
+  // std::set<string> getWells();
+  std::set<string> getWells() { return wells_; };
 
   /*!
    * \brief GetFinalValue Gets the value of the given property
@@ -256,6 +332,9 @@ class Results
  private:
   bool available_;
   JsonResults json_results_;
+
+ protected:
+  std::set<string> wells_;
 
 
 };

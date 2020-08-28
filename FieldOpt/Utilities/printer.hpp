@@ -62,10 +62,51 @@ using std::setprecision;
 using std::fixed;
 using std::setw;
 
+using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::Map;
 
 namespace Printer {
+
+inline string DBG_prntDbl(double argout,
+                              string fd="% 10.3e ",
+                              string fn="") {
+  stringstream ss;
+  char buffer [100];
+  sprintf(buffer, fd.c_str(), argout);
+  ss << buffer;
+  // if (fn != "") DBG_printToFile(fn, ss.str() + "\n");
+  return ss.str();
+}
+
+inline string DBG_prntVecXd(VectorXd vec, string mv="",
+                                string fv="% 10.3e ",
+                                string fn="") {
+  stringstream ss;
+  if ( vec.size() > 0 ) {
+    if (mv != "") ss << mv;
+    ss << "[";
+    for (int ii = 0; ii < vec.size() - 1; ii++) {
+      ss << DBG_prntDbl(vec(ii), fv);
+    }
+    ss << DBG_prntDbl(vec(vec.size() - 1)) << "]";
+  } else {
+    ss << "[ Empty ]";
+  }
+
+  // if (fn != "") DBG_printToFile(fn, ss.str() + "\n");
+  return ss.str();
+}
+
+inline string DBG_prntMatXd(MatrixXd mat, string mm="",
+                                string fm="% 10.3e ") {
+  stringstream ss;
+  for (int ii = 0; ii < mat.cols(); ii++) {
+    if (mm != "") ss << "\n" << mm << "#" << ii;
+    ss << DBG_prntVecXd(mat.col(ii), mm, fm);
+  }
+  return ss.str();
+}
 
 inline string RepStr(string str, int n) {
   std::ostringstream os;
@@ -161,13 +202,21 @@ inline BoxSym bSym(int lw=60, bool dbg=false) {
  * @return String representation of num.
  */
 template<typename T>
-inline std::string num2str(const T num, int prc=2, int sci=0) {
+inline std::string num2str(const T num, int prc=2, int sci=0, int wdt=0) {
   // return boost::lexical_cast<std::string>(num);
   std::ostringstream ss;
   if (sci > 0) {
-    ss << std::scientific << std::setprecision(prc) << num;
+    if (wdt > 0) {
+      ss << std::setw (wdt) << std::scientific << std::setprecision(prc) << num;
+    } else {
+      ss << std::scientific << std::setprecision(prc) << num;
+    }
   } else {
-    ss << std::fixed << std::setprecision(prc) << num;
+    if (wdt > 0) {
+      ss << std::setw (wdt) << std::fixed << std::setprecision(prc) << num;
+    } else {
+      ss << std::fixed << std::setprecision(prc) << num;
+    }
   }
   return ss.str();
 }
@@ -194,9 +243,9 @@ inline void truncate_text(string &text, const int &width=66) {
  * @param text Text to pad.
  * @param width Width to pad to.
  */
-inline void pad_text(string &text, const int &width=66) {
+inline void pad_text(string &text, const int &width=66, const char &ps=' ') {
   if (text.size() < width) {
-    text.insert(text.size(), width - text.size(), ' ');
+    text.insert(text.size(), width - text.size(), ps);
   }
 }
 
@@ -278,7 +327,8 @@ Example:
 inline void ext_info(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=165) {
+                     const int &lw=165,
+                     const int &lb=2) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 30);
@@ -286,7 +336,7 @@ inline void ext_info(const std::string &text,
   pad_text(module_name, 30);
   pad_text(class_name, 30);
 
-  auto lines = split_line(text, lw - 2);
+  auto lines = split_line(text, lw - lb);
 
   std::stringstream ss;
   ss << FLGREEN;
@@ -296,8 +346,8 @@ inline void ext_info(const std::string &text,
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
-  pad_text(class_name, width);
-  ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << "  │" << "\n";
+  pad_text(class_name, width+1);
+  ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";
@@ -337,8 +387,8 @@ inline void ext_warn(const std::string &text,
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
-  pad_text(class_name, width);
-  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << "  │" << "\n"; // #chars: 31
+  pad_text(class_name, width+1);
+  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n"; // #chars: 31
   for (auto line : lines) {
     pad_text(line, lw - 2);
     ss << "│ " << line << " │" << "\n";

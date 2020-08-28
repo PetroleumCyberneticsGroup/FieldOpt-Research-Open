@@ -52,13 +52,20 @@ class AdgprsResults : public Results
  public:
   void ReadResults(QString file_path);
   void DumpResults() override;
+
   double GetValue(Property prop) override;
   double GetValue(Property prop, QString well) override;
   double GetValue(Property prop, int time_index) override;
   double GetValue(Property prop, QString well, int time_index) override;
 
-  std::vector<double> GetValueVector(Property prop) override;
+  vector<double> GetValueVector(Property prop) override;
   VectorXd GetValueVectorXd(Property prop) override;
+
+  vector<vector<double>> GetValVectorSeg(Property prop, string wn) override {};
+  vector<VectorXd> GetValVectorSegXd(Property prop, string wn) override {};
+
+  vector<double> GetValueVector(Property prop, string wn) override {};
+  VectorXd GetValueVectorXd(Property prop, string wn) override {};
 
  private:
   QString file_path_;

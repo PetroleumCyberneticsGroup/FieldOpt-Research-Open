@@ -35,6 +35,8 @@ namespace ERTWrapper {
 namespace ECLSummary {
 
 using std::string;
+using std::modf;
+using Printer::info;
 using Printer::ext_info;
 using Printer::num2str;
 using Printer::ext_warn;
@@ -43,11 +45,12 @@ ECLSummaryReader::ECLSummaryReader(const string& file_name,
                                    Settings::Settings *settings) {
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
+  settings_->global()->showVerbParams();
 
   file_name_ = file_name;
   ecl_sum_ = ecl_sum_fread_alloc_case(file_name_.c_str(), "");
   if (ecl_sum_ == nullptr) {
-    throw SummaryFileNotFoundAtPathException(file_name);
+    throw SmryFileNotFoundAtPathExc(file_name);
   }
   populateKeyLists();
   initializeVectors();
@@ -154,6 +157,7 @@ void ECLSummaryReader::populateKeyLists() {
 
   stringlist_type * seg_sofr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SOFR*");
   stringlist_type * seg_swfr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SWFR*");
+  stringlist_type * seg_sgfr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SGFR*");
   stringlist_type * seg_spr_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SPR*");
   stringlist_type * seg_sprd_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SPRD*");
   stringlist_type * seg_swct_keys = ecl_sum_alloc_matching_general_var_list(ecl_sum_, "SWCT*");
@@ -168,8 +172,12 @@ void ECLSummaryReader::populateKeyLists() {
     seg_swfr_keys_.insert(stringlist_safe_iget(seg_swfr_keys, l));
   }
 
+  for (int l = 0; l < stringlist_get_size(seg_sgfr_keys); ++l) {
+    seg_sgfr_keys_.insert(stringlist_safe_iget(seg_sgfr_keys, l));
+  }
+
   for (int l = 0; l < stringlist_get_size(seg_spr_keys); ++l) {
-    seg_spr_keys_.insert(stringlist_safe_iget(seg_spr_keys, l));
+    seg_sprp_keys_.insert(stringlist_safe_iget(seg_spr_keys, l));
   }
 
   for (int l = 0; l < stringlist_get_size(seg_sprd_keys); ++l) {
@@ -188,7 +196,7 @@ void ECLSummaryReader::populateKeyLists() {
     comp_keys_.insert(stringlist_safe_iget(comp_keys, l));
   }
 
-  if (vp_.vSIM >= 3) {
+  if (vp_.vSIM >= 5) {
     std::stringstream skeys, sfield, swells, sseg, scomp;
     int ii = 0;
 
@@ -209,47 +217,73 @@ void ECLSummaryReader::populateKeyLists() {
     ext_info(swells.str(), md_, cl_, vp_.lnw);
 
     sseg << "Segment SOFR keys: ";
-    for (const auto& ckey : seg_sofr_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_sofr_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SWFR keys: ";
-    for (const auto& ckey : seg_swfr_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_swfr_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
+    ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    sseg.str("");
+
+    sseg << "Segment SGFR keys: ";
+    for (const auto& ckey : seg_sgfr_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SOFR keys: ";
-    for (const auto& ckey : seg_sofr_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_sofr_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SPR keys: ";
-    for (const auto& ckey : seg_spr_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_sprp_keys_) {
+      if(sseg.str().size() % 130 <= 20) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SPRD keys: ";
-    for (const auto& ckey : seg_sprd_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_sprd_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SWCT keys: ";
-    for (const auto& ckey : seg_swct_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_swct_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
     sseg << "Segment SCSA keys: ";
-    for (const auto& ckey : seg_scsa_keys_) { sseg << ckey << ", "; }
+    for (const auto& ckey : seg_scsa_keys_) {
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    // scomp << "Compartment keys: ";
-    ii = 0;
-    for (const auto& ckey : comp_keys_) {
-      scomp << ckey << ", "; ii++;
-      // if (ii % 7 == 0) { scomp << "\t\t"; }
-    }
-    ext_info(scomp.str(), md_, cl_, vp_.lnw);
+    // sseg << "Compartment keys: ";
+    // for (const auto& ckey : comp_keys_) {
+    //   if(sseg.str().size() % 130 <= 15) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+    // }
+    // ext_info(sseg.str(), md_, cl_, vp_.lnw);
+    // sseg.str("");
+  }
+
+  if (!seg_sofr_keys_.empty() && !seg_swfr_keys_.empty() && !seg_sgfr_keys_.empty()
+    && !seg_sprp_keys_.empty() && !seg_sprd_keys_.empty() && !seg_swct_keys_.empty()
+    && !seg_scsa_keys_.empty()) {
+    read_segments_ = true;
   }
 
   stringlist_free(keys);
@@ -265,26 +299,84 @@ void ECLSummaryReader::initializeVectors() {
   initFieldTotals();
   initFieldRates();
 
-  initWellSegRates();
-
   initVectorsXd();
+  if(read_segments_) {
+    initWellSegRates();
+    initVectorsSegXd();
+  }
 }
 
 void ECLSummaryReader::initVectorsXd() {
-  timeXd_ = Eigen::Map<VectorXd>(time_.data(), time_.size());
-  stepXd_ = Eigen::Map<VectorXd>(step_.data(), step_.size());
-
   foptXd_ = Eigen::Map<VectorXd>(fopt_.data(), fopt_.size());
   fwptXd_ = Eigen::Map<VectorXd>(fwpt_.data(), fwpt_.size());
   fgptXd_ = Eigen::Map<VectorXd>(fgpt_.data(), fgpt_.size());
+  flptXd_ = Eigen::Map<VectorXd>(flpt_.data(), flpt_.size());
   fwitXd_ = Eigen::Map<VectorXd>(fwit_.data(), fwit_.size());
   fgitXd_ = Eigen::Map<VectorXd>(fgit_.data(), fgit_.size());
+
+  for (const auto& wname : wells_) {
+    woptXd_[wname] = Eigen::Map<VectorXd>(wopt_[wname].data(), wopt_[wname].size());
+    wwptXd_[wname] = Eigen::Map<VectorXd>(wwpt_[wname].data(), wwpt_[wname].size());
+    wgptXd_[wname] = Eigen::Map<VectorXd>(wgpt_[wname].data(), wgpt_[wname].size());
+    wlptXd_[wname] = Eigen::Map<VectorXd>(wlpt_[wname].data(), wlpt_[wname].size());
+    wwitXd_[wname] = Eigen::Map<VectorXd>(wwit_[wname].data(), wwit_[wname].size());
+    wgitXd_[wname] = Eigen::Map<VectorXd>(wgit_[wname].data(), wgit_[wname].size());
+
+    // cout << "Well: " << wname << endl;
+    // cout << "wopt[wn].sz(): " << wopt_[wname].size() << " -- woptXd[wn].sz(): " << woptXd_[wname].size() << endl;
+    // cout << "wgpt[wn].sz(): " << wgpt_[wname].size() << " -- wgptXd[wn].sz(): " << wgptXd_[wname].size() << endl;
+    // cout << "wwpt[wn].sz(): " << wwpt_[wname].size() << " -- wwptXd[wn].sz(): " << wwptXd_[wname].size() << endl;
+    // cout << "wwit[wn].sz(): " << wwit_[wname].size() << " -- wwitXd[wn].sz(): " << wwitXd_[wname].size() << endl;
+    // cout << "wgit[wn].sz(): " << wgit_[wname].size() << " -- wgitXd[wn].sz(): " << wgitXd_[wname].size() << endl;
+  }
+
+  timeXd_ = Eigen::Map<VectorXd>(time_.data(), time_.size());
+  stepXd_ = Eigen::Map<VectorXd>(step_.data(), step_.size());
 
   foprXd_ = Eigen::Map<VectorXd>(fopr_.data(), fopr_.size());
   fwprXd_ = Eigen::Map<VectorXd>(fwpr_.data(), fwpr_.size());
   fgprXd_ = Eigen::Map<VectorXd>(fgpr_.data(), fgpr_.size());
+  flprXd_ = Eigen::Map<VectorXd>(flpr_.data(), flpr_.size());
   fwirXd_ = Eigen::Map<VectorXd>(fwir_.data(), fwir_.size());
   fgirXd_ = Eigen::Map<VectorXd>(fgir_.data(), fgir_.size());
+
+  for (const auto& wname : wells_) {
+    woprXd_[wname] = Eigen::Map<VectorXd>(wopr_[wname].data(), wopr_[wname].size());
+    wwprXd_[wname] = Eigen::Map<VectorXd>(wwpr_[wname].data(), wwpr_[wname].size());
+    wgprXd_[wname] = Eigen::Map<VectorXd>(wgpr_[wname].data(), wgpr_[wname].size());
+    wlprXd_[wname] = Eigen::Map<VectorXd>(wlpr_[wname].data(), wlpr_[wname].size());
+    wwirXd_[wname] = Eigen::Map<VectorXd>(wwir_[wname].data(), wwir_[wname].size());
+    wgirXd_[wname] = Eigen::Map<VectorXd>(wgir_[wname].data(), wgir_[wname].size());
+  }
+}
+
+void ECLSummaryReader::initVectorsSegXd() {
+  for (const auto& wname : wells_) {
+    for (int ii=0; ii < seg_sofr_[wname].size(); ++ii) {
+
+      if (!seg_sofr_[wname].empty() && !seg_swfr_[wname].empty()
+        &&!seg_sprp_[wname].empty() && !seg_sprd_[wname].empty()
+        &&!seg_swct_[wname].empty() && !seg_scsa_[wname].empty()) {
+
+        if (vp_.vSIM >= 5) { info("Init SegXd vectors -> Well:" + wname + ":Seg#" + num2str(ii, 0), vp_.lnw); }
+
+        seg_sofrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sofr_[wname][ii].data(), seg_sofr_[wname][ii].size()));
+        seg_swfrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swfr_[wname][ii].data(), seg_swfr_[wname][ii].size()));
+        seg_sprpXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sprp_[wname][ii].data(), seg_sprp_[wname][ii].size()));
+        seg_sprdXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sprd_[wname][ii].data(), seg_sprd_[wname][ii].size()));
+        seg_swctXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swct_[wname][ii].data(), seg_swct_[wname][ii].size()));
+        seg_scsaXd_[wname].push_back(Eigen::Map<VectorXd>(seg_scsa_[wname][ii].data(), seg_scsa_[wname][ii].size()));
+
+        seg_sgfrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sgfr_[wname][ii].data(), seg_sgfr_[wname][ii].size()));
+
+        seg_softXd_[wname].push_back(Eigen::Map<VectorXd>(seg_soft_[wname][ii].data(), seg_soft_[wname][ii].size()));
+        seg_swftXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swft_[wname][ii].data(), seg_swft_[wname][ii].size()));
+        seg_sgftXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sgft_[wname][ii].data(), seg_sgft_[wname][ii].size()));
+        seg_slftXd_[wname].push_back(Eigen::Map<VectorXd>(seg_slft_[wname][ii].data(), seg_slft_[wname][ii].size()));
+
+      }
+    }
+  }
 }
 
 void ECLSummaryReader::initializeTimeVector() {
@@ -341,6 +433,18 @@ void ECLSummaryReader::initializeWellRates() {
         wgpr_[wname][i] = double_vector_safe_iget(data, i);
       }
       wgpr_[wname][0] = GetWellVar(wname, "WGPR", 0);
+      double_vector_free(data);
+    }
+
+    wlpr_[wname] = std::vector<double>(time_.size(), 0.0);
+    if (hasWellVar(wname, "WLPR")) {
+      int index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WLPR");
+      auto * data = ecl_sum_alloc_data_vector(ecl_sum_, index, true);
+      assert(double_vector_size(data) == time_.size());
+      for (int i = 0; i < time_.size(); ++i) {
+        wlpr_[wname][i] = double_vector_safe_iget(data, i);
+      }
+      wlpr_[wname][0] = GetWellVar(wname, "WLPR", 0);
       double_vector_free(data);
     }
 
@@ -427,6 +531,24 @@ void ECLSummaryReader::initWellTotals() {
         ext_info("WGPT not found, computing from WGPR.", md_, cl_);
       }
       wgpt_[wname] = computeCumulativeFromRate(wgpr_[wname]);
+    }
+
+    // WLPT
+    wlpt_[wname] = std::vector<double>(time_.size(), 0.0);
+    if (hasWellVar(wname, "WLPT")) {
+      int wlpt_index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WLPT");
+      double_vector_type * wlpt = ecl_sum_alloc_data_vector(ecl_sum_, wlpt_index,true);
+      assert(double_vector_size(wlpt) == time_.size());
+      for (int i = 0; i < time_.size(); ++i) {
+        wlpt_[wname][i] = double_vector_safe_iget(wlpt, i);
+      }
+      wlpt_[wname][0] = 0.0;
+      double_vector_free(wlpt);
+    } else if (hasWellVar(wname, "WLPT")) {
+      if (VERB_SIM >= 2) {
+        ext_info("WLPT not found, computing from WLPT.", md_, cl_);
+      }
+      wlpt_[wname] = computeCumulativeFromRate(wlpr_[wname]);
     }
 
     // WWIT
@@ -529,6 +651,27 @@ void ECLSummaryReader::initFieldRates() {
     for (auto wname : wells_) {
       for (int i = 0; i < time_.size(); ++i) {
         fgpr_[i] += wgpr_[wname][i];
+      }
+    }
+  }
+
+  // FLPR
+  flpr_ = std::vector<double>(time_.size(), 0.0);
+  if (hasFieldVar("FLPR")) {
+    int flpr_index = ecl_smspec_get_field_var_params_index(smspec, "FLPR");
+    double_vector_type * flpr = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          flpr_index,
+                                                          true);
+    assert(double_vector_size(flpr) == time_.size());
+    for (int i = 0; i < time_.size(); ++i) {
+      flpr_[i] = double_vector_safe_iget(flpr, i);
+    }
+    flpr_[0] = 0.0;
+  } else {
+    warnPropertyNotFound("FLPR");
+    for (auto wname : wells_) {
+      for (int i = 0; i < time_.size(); ++i) {
+        flpr_[i] += wlpr_[wname][i];
       }
     }
   }
@@ -643,6 +786,27 @@ void ECLSummaryReader::initFieldTotals() {
     }
   }
 
+  // FLPT
+  flpt_ = std::vector<double>(time_.size(), 0.0);
+  if (hasFieldVar("FLPT")) {
+    int flpt_index = ecl_smspec_get_field_var_params_index(smspec, "FLPT");
+    double_vector_type * flpt = ecl_sum_alloc_data_vector(ecl_sum_,
+                                                          flpt_index,
+                                                          true);
+    assert(double_vector_size(flpt) == time_.size());
+    for (int i = 0; i < time_.size(); ++i) {
+      flpt_[i] = double_vector_safe_iget(flpt, i);
+    }
+    flpt_[0] = 0.0;
+  } else {
+    warnPropertyNotFound("FLPT");
+    for (auto wname : wells_) {
+      for (int i = 0; i < time_.size(); ++i) {
+        flpt_[i] += wlpt_[wname][i];
+      }
+    }
+  }
+
   // FWIT
   fwit_ = std::vector<double>(time_.size(), 0.0);
   if (hasFieldVar("FWIT")) {
@@ -686,104 +850,82 @@ void ECLSummaryReader::initFieldTotals() {
   }
 }
 
-std::vector<double> ECLSummaryReader::wopt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end()) {
-    string em = "The well " + well_name + " was not found in the summary.";
-    throw SmryVarDoesNotExistExc(em);
-  }
-  if (wopt_.at(well_name).back() == 0.0)
-    warnPropertyZero(well_name, "WOPT");
-  return wopt_.at(well_name);
-}
+// ===================================================== STD
 
-std::vector<double> ECLSummaryReader::wwpt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end()) {
-    string em = "Well " + well_name + " was not found in the summary.";
-    throw SmryVarDoesNotExistExc(em);
-  }
-  if (wwpt_.at(well_name).back() == 0.0)
-    warnPropertyZero(well_name, "WWPT");
-  return wwpt_.at(well_name);
-}
-
-std::vector<double> ECLSummaryReader::wgpt(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end()) {
-    string em = "Well " + well_name + " was not found in the summary.";
-    throw SmryVarDoesNotExistExc(em);
-  }
-  if (wgpt_.at(well_name).back() == 0.0)
-    warnPropertyZero(well_name, "WGPT");
-  return wgpt_.at(well_name);
-}
-
-std::vector<double> ECLSummaryReader::wwit(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end()) {
-    string em = "Well " + well_name + " was not found in the summary.";
-    throw SmryVarDoesNotExistExc(em);
-  }
-  if (wwit_.at(well_name).back() == 0.0)
-    warnPropertyZero(well_name, "WWIT");
-  return wwit_.at(well_name);
-}
-
-std::vector<double> ECLSummaryReader::wgit(const string& well_name) const {
-  if (wells_.find(well_name) == wells_.end()) {
-    string em = "The well " + well_name + " was not found in the summary.";
-    throw SmryVarDoesNotExistExc(em);
-  }
-  if (wgit_.at(well_name).back() == 0.0)
-    warnPropertyZero(well_name, "WGIT");
-  return wgit_.at(well_name);
-}
-
-void ECLSummaryReader::warnPropertyZero(const string& wname, string propname) const {
-  if (VERB_SIM >= 3) {
-    string wm = "Returning cumulative vector with final value 0.0 for ";
-    wm += propname + " for well " + wname + ".";
-    ext_warn(wm, md_, cl_, vp_.lnw);
-  }
-}
-
-void ECLSummaryReader::warnPropertyNotFound(const string& propname) const {
-  if (VERB_SIM >= 2) {
-    string wm = "Property " + propname + " was not found in the summary. ";
-    wm += "Calculating from corresponding well properties.";
-    ext_warn(wm, md_, cl_, vp_.lnw);
-  }
-}
-
-void ECLSummaryReader::warnPropertyZero(const string& propname) const {
-  if (VERB_SIM >= 3) {
-    string wm = "Returning cumulative vector with final value 0.0 for " + propname + ".";
-    ext_warn(wm, md_, cl_, vp_.lnw);
-  }
-}
-
-// Field vectors (std::vector) -----------------------------
-const std::vector<double> &ECLSummaryReader::fopt() const {
+// Field vectors TOTALS (std::vector) ----------------------
+const vector<double> &ECLSummaryReader::fopt() const {
   if (fopt_.back() == 0.0) { warnPropertyZero("FOPT"); }
   return fopt_;
 }
 
-const std::vector<double> &ECLSummaryReader::fwpt() const {
+const vector<double> &ECLSummaryReader::fwpt() const {
   if (fwpt_.back() == 0.0) { warnPropertyZero("FWPT"); }
   return fwpt_;
 }
 
-const std::vector<double> &ECLSummaryReader::fgpt() const {
+const vector<double> &ECLSummaryReader::fgpt() const {
   if (fgpt_.back() == 0.0) { warnPropertyZero("FGPT"); }
   return fgpt_;
 }
 
-const std::vector<double> &ECLSummaryReader::fwit() const {
+const vector<double> &ECLSummaryReader::flpt() const {
+  if (flpt_.back() == 0.0) { warnPropertyZero("FLPT"); }
+  return flpt_;
+}
+
+const vector<double> &ECLSummaryReader::fwit() const {
   if (fgpt_.back() == 0.0) { warnPropertyZero("FWIT"); }
   return fwit_;
 }
 
-const std::vector<double> &ECLSummaryReader::fgit() const {
+const vector<double> &ECLSummaryReader::fgit() const {
   if (fgit_.back() == 0.0) { warnPropertyZero("FGIT"); }
   return fgit_;
 }
+
+// Well vectors TOTALS (std::vector) -----------------------
+
+const vector<double> &ECLSummaryReader::wopt(string wname) {
+  if (wopt_[wname].back() == 0.0) { warnPropertyZero(wname, "WOPT"); }
+  return wopt_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wwpt(string wname) {
+  if (wwpt_[wname].back() == 0.0) { warnPropertyZero(wname, "WWPT"); }
+  return wwpt_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wgpt(string wname) {
+  if (wgpt_[wname].back() == 0.0) { warnPropertyZero(wname, "WGPT"); }
+  return wgpt_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wlpt(string wname) {
+  if (wlpt_[wname].back() == 0.0) { warnPropertyZero(wname, "WLPT"); }
+  return wlpt_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wwit(string wname) {
+  if (wwit_[wname].back() == 0.0) { warnPropertyZero(wname, "WWIT"); }
+  return wwit_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wgit(string wname) {
+  if (wgit_[wname].back() == 0.0) { warnPropertyZero(wname, "WGIT"); }
+  return wgit_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wbhp(string wname) {
+  if (wbhp_[wname].back() == 0.0) { warnPropertyZero(wname, "WBHP"); }
+  return wbhp_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wwct(string wname) {
+  if (wwct_[wname].back() == 0.0) { warnPropertyZero(wname, "WWCT"); }
+  return wwct_[wname];
+}
+
+// Field vectors RATES (std::vector) -----------------------
 
 const std::vector<double> &ECLSummaryReader::fopr() const {
   if (fopr_.back() == 0.0) { warnPropertyZero("FOPR"); }
@@ -800,6 +942,11 @@ const std::vector<double> &ECLSummaryReader::fgpr() const {
   return fgpr_;
 }
 
+const std::vector<double> &ECLSummaryReader::flpr() const {
+  if (flpr_.back() == 0.0) { warnPropertyZero("FLPR"); }
+  return flpr_;
+}
+
 const std::vector<double> &ECLSummaryReader::fwir() const {
   if (fgpr_.back() == 0.0) { warnPropertyZero("FWIR"); }
   return fwir_;
@@ -810,87 +957,449 @@ const std::vector<double> &ECLSummaryReader::fgir() const {
   return fgir_;
 }
 
-// Field vectors (VectorXd) --------------------------------
+// Field vectors RATES (std::vector) -----------------------
+
+const vector<double> &ECLSummaryReader::wopr(string wname) {
+  if (wopr_[wname].back() == 0.0) { warnPropertyZero(wname, "WOPR"); }
+  return wopr_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wwpr(string wname) {
+  if (wwpr_[wname].back() == 0.0) { warnPropertyZero(wname, "WWPR"); }
+  return wwpr_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wgpr(string wname) {
+  if (wgpr_[wname].back() == 0.0) { warnPropertyZero(wname, "WGPR"); }
+  return wgpr_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wlpr(string wname) {
+  if (wlpr_[wname].back() == 0.0) { warnPropertyZero(wname, "WLPR"); }
+  return wlpr_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wwir(string wname) {
+  if (wwir_[wname].back() == 0.0) { warnPropertyZero(wname, "WWIR"); }
+  return wwir_[wname];
+}
+
+const vector<double> &ECLSummaryReader::wgir(string wname) {
+  if (wgir_[wname].back() == 0.0) { warnPropertyZero(wname, "WGIR"); }
+  return wgir_[wname];
+}
+
+// Segment vectors RATES (std::vector) -----------------------
+
+const vector<vector<double> > &ECLSummaryReader::seg_sofr(string wname) {
+  for (int jj=0; jj < seg_sofr_[wname].size(); ++jj) {
+    if (seg_sofr_[wname][jj].empty()) {
+      warnPropertyZero("SOFR:" + wname + ":" + num2str(jj));
+    }
+  }
+  return seg_sofr_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_swfr(string wname) {
+  for (int ii=0; ii < seg_swfr_[wname].size(); ++ii) {
+    if (seg_swfr_[wname][ii].empty()) {
+      warnPropertyZero("SWFR:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_swfr_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_sgfr(string wname) {
+  for (int ii=0; ii < seg_sgfr_[wname].size(); ++ii) {
+    if (seg_sgfr_[wname][ii].empty()) {
+      warnPropertyZero("SGFR:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sgfr_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_sprp(string wname) {
+  for (int ii=0; ii < seg_sprp_[wname].size(); ++ii) {
+    if (seg_sprp_[wname][ii].empty()) {
+      warnPropertyZero("SPRP:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sprp_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_sprd(string wname) {
+  for (int ii=0; ii < seg_sprd_[wname].size(); ++ii) {
+    if (seg_sprd_[wname][ii].empty()) {
+      warnPropertyZero("SPRD:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sprd_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_swct(string wname) {
+  for (int ii=0; ii < seg_swct_[wname].size(); ++ii) {
+    if (seg_swct_[wname][ii].empty()) {
+      warnPropertyZero("SWCT:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_swct_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_scsa(string wname) {
+  for (int ii=0; ii < seg_scsa_[wname].size(); ++ii) {
+    if (seg_scsa_[wname][ii].empty()) {
+      warnPropertyZero("SCSA:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_scsa_[wname];
+}
+
+// Segment vectors TOTALS (std::vector) -----------------------
+const vector<vector<double> > &ECLSummaryReader::seg_soft(string wname) {
+  for (int jj=0; jj < seg_soft_[wname].size(); ++jj) {
+    if (seg_soft_[wname][jj].empty()) {
+      warnPropertyZero("SOFT:" + wname + ":" + num2str(jj));
+    }
+  }
+  return seg_soft_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_swft(string wname) {
+  for (int jj=0; jj < seg_swft_[wname].size(); ++jj) {
+    if (seg_swft_[wname][jj].empty()) {
+      warnPropertyZero("SWFT:" + wname + ":" + num2str(jj));
+    }
+  }
+  return seg_swft_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_sgft(string wname) {
+  for (int jj=0; jj < seg_sgft_[wname].size(); ++jj) {
+    if (seg_sgft_[wname][jj].empty()) {
+      warnPropertyZero("SGFT:" + wname + ":" + num2str(jj));
+    }
+  }
+  return seg_sgft_[wname];
+}
+
+const vector<vector<double> > &ECLSummaryReader::seg_slft(string wname) {
+  for (int jj=0; jj < seg_slft_[wname].size(); ++jj) {
+    if (seg_slft_[wname][jj].empty()) {
+      warnPropertyZero("SLFT:" + wname + ":" + num2str(jj));
+    }
+  }
+  return seg_slft_[wname];
+}
+
+// ================================================ VECTORXD
+
+// Field vectors TOTALS (VectorXd) -------------------------
 const VectorXd &ECLSummaryReader::foptXd() const {
-  if (foptXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPT"); }
+  if (foptXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPTXd"); }
   return foptXd_;
 }
 
 const VectorXd &ECLSummaryReader::fwptXd() const {
-  if (fwptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPT"); }
+  if (fwptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPTXd"); }
   return fwptXd_;
 }
 
 const VectorXd &ECLSummaryReader::fgptXd() const {
-  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPT"); }
+  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPTXd"); }
   return fgptXd_;
 }
 
+const VectorXd &ECLSummaryReader::flptXd() const {
+  if (flptXd_.tail(1).value() == 0.0) { warnPropertyZero("FLPTXd"); }
+  return flptXd_;
+}
+
 const VectorXd &ECLSummaryReader::fwitXd() const {
-  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWIT"); }
+  if (fgptXd_.tail(1).value() == 0.0) { warnPropertyZero("FWITXd"); }
   return fwitXd_;
 }
 
 const VectorXd &ECLSummaryReader::fgitXd() const {
-  if (fgitXd_.tail(1).value() == 0.0) { warnPropertyZero("FGIT"); }
+  if (fgitXd_.tail(1).value() == 0.0) { warnPropertyZero("FGITXd"); }
   return fgitXd_;
 }
 
+// Well vectors TOTALS (VectorXd) -------------------------
+
+const VectorXd &ECLSummaryReader::woptXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return woptXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wwptXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wwptXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wgptXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wgptXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wlptXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wlptXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wwitXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wwitXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wgitXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wgitXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wbhpXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wbhpXd_[wname];
+}
+
+const VectorXd &ECLSummaryReader::wwctXd(string wname) {
+  if (wells_.find(wname) == wells_.end()) {
+    string em = "Well " + wname + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wwctXd_[wname];
+}
+
+// Field vectors RATES (VectorXd) -------------------------
+
 const VectorXd &ECLSummaryReader::foprXd() const {
-  if (foprXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPR"); }
+  if (foprXd_.tail(1).value() == 0.0) { warnPropertyZero("FOPRXd"); }
   return foprXd_;
 }
 
 const VectorXd &ECLSummaryReader::fwprXd() const {
-  if (fwprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPR"); }
+  if (fwprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWPRXd"); }
   return fwprXd_;
 }
 
 const VectorXd &ECLSummaryReader::fgprXd() const {
-  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPR"); }
+  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FGPRXd"); }
   return fgprXd_;
 }
 
+const VectorXd &ECLSummaryReader::flprXd() const {
+  if (flprXd_.tail(1).value() == 0.0) { warnPropertyZero("FLPRXd"); }
+  return flprXd_;
+}
+
 const VectorXd &ECLSummaryReader::fwirXd() const {
-  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWIR"); }
+  if (fgprXd_.tail(1).value() == 0.0) { warnPropertyZero("FWIRXd"); }
   return fwirXd_;
 }
 
 const VectorXd &ECLSummaryReader::fgirXd() const {
-  if (fgirXd_.tail(1).value() == 0.0) { warnPropertyZero("FGIR"); }
+  if (fgirXd_.tail(1).value() == 0.0) { warnPropertyZero("FGIRXd"); }
   return fgirXd_;
 }
 
-// Well vectors (std::vector) ------------------------------
-std::vector<double> ECLSummaryReader::wopr(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
-  return wopr_.at(well_name);
+// Well vectors RATES (VectorXd) -------------------------
+
+const VectorXd &ECLSummaryReader::woprXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return woprXd_[well_name];
 }
 
-std::vector<double> ECLSummaryReader::wwpr(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
-  return wwpr_.at(well_name);
+const VectorXd &ECLSummaryReader::wwprXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "The well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wwprXd_[well_name];
 }
 
-std::vector<double> ECLSummaryReader::wgpr(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
-  return wgpr_.at(well_name);
+const VectorXd &ECLSummaryReader::wgprXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wgprXd_[well_name];
 }
 
-std::vector<double> ECLSummaryReader::wwir(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
-  return wwir_.at(well_name);
+const VectorXd &ECLSummaryReader::wlprXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wlprXd_[well_name];
 }
 
-std::vector<double> ECLSummaryReader::wgir(const string well_name) const {
-  if (wells_.find(well_name) == wells_.end())
-    throw SmryVarDoesNotExistExc("The well " + well_name + " was not found in the summary.");
-  return wgir_.at(well_name);
+const VectorXd &ECLSummaryReader::wwirXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wwirXd_[well_name];
 }
+
+const VectorXd &ECLSummaryReader::wgirXd(string well_name) {
+  if (wells_.find(well_name) == wells_.end()) {
+    string em = "Well " + well_name + " was not found in the summary.";
+    throw SmryVarDoesNotExistExc(em);
+  }
+  return wgirXd_[well_name];
+}
+
+// Segment vectors RATES (VectorXd) ------------------------
+
+const vector<VectorXd > &ECLSummaryReader::seg_sofrXd(string wname) {
+  for (int ii=0; ii < seg_sofrXd_[wname].size(); ++ii) {
+    if (seg_sofrXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SOFRXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sofrXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_swfrXd(string wname) {
+  for (int ii=0; ii < seg_swfrXd_[wname].size(); ++ii) {
+    if (seg_swfrXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SWFRXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_swfrXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_sgfrXd(string wname) {
+  for (int ii=0; ii < seg_sgfrXd_[wname].size(); ++ii) {
+    if (seg_sgfrXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SGFRXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sgfrXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_sprpXd(string wname) {
+  for (int ii=0; ii < seg_sprpXd_[wname].size(); ++ii) {
+    if (seg_sprpXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SPRPXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sprpXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_sprdXd(string wname) {
+  for (int ii=0; ii < seg_sprdXd_[wname].size(); ++ii) {
+    if (seg_sprdXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SPRDXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sprdXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_swctXd(string wname) {
+  for (int ii=0; ii < seg_swctXd_[wname].size(); ++ii) {
+    if (seg_swctXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SWCTXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_swctXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_scsaXd(string wname) {
+  for (int ii=0; ii < seg_scsaXd_[wname].size(); ++ii) {
+    if (seg_scsaXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SCSAXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_scsaXd_[wname];
+}
+
+// Segment vectors TOTALS (VectorXd) -----------------------
+
+const vector<VectorXd > &ECLSummaryReader::seg_softXd(string wname) {
+  for (int ii=0; ii < seg_softXd_[wname].size(); ++ii) {
+    if (seg_softXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SOFTXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_softXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_swftXd(string wname) {
+  for (int ii=0; ii < seg_swftXd_[wname].size(); ++ii) {
+    if (seg_swftXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SWFTXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_swftXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_sgftXd(string wname) {
+  for (int ii=0; ii < seg_sgftXd_[wname].size(); ++ii) {
+    if (seg_sgftXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SGFTXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_sgftXd_[wname];
+}
+
+const vector<VectorXd > &ECLSummaryReader::seg_slftXd(string wname) {
+  for (int ii=0; ii < seg_slftXd_[wname].size(); ++ii) {
+    if (seg_slftXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SLFTXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_slftXd_[wname];
+}
+
+// ---------------------------------------------------------
+
+void ECLSummaryReader::warnPropertyZero(const string& wname, string propname) const {
+  if (vp_.vSIM >= 3) {
+    string wm = "Returning cumulative vector with final value 0.0 for ";
+    wm += propname + " for well " + wname + ".";
+    ext_warn(wm, md_, cl_, vp_.lnw);
+  }
+}
+
+void ECLSummaryReader::warnPropertyNotFound(const string& propname) const {
+  if (vp_.vSIM >= 3) {
+    string wm = "Property " + propname + " was not found in the summary. ";
+    wm += "Calculating from corresponding well properties.";
+    ext_warn(wm, md_, cl_, vp_.lnw);
+  }
+}
+
+void ECLSummaryReader::warnPropertyZero(const string& propname) const {
+  if (vp_.vSIM >= 3) {
+    string wm = "Returning cumulative vector with final value 0.0 for " + propname + ".";
+    ext_warn(wm, md_, cl_, vp_.lnw);
+  }
+}
+
 vector<double> ECLSummaryReader::computeCumulativeFromRate(vector<double> rate) {
   assert(time_.size() == rate.size());
   auto cumulative = vector<double>(rate.size(), 0.0);
@@ -905,210 +1414,256 @@ vector<double> ECLSummaryReader::computeCumulativeFromRate(vector<double> rate) 
 void ECLSummaryReader::initWellSegRates() {
   const ecl_smspec_type *smspec = ecl_sum_get_smspec(ecl_sum_);
   auto s_obj = settings_->optimizer()->objective();
+  stringstream ss;
 
   if (s_obj.type == Settings::Optimizer::ObjectiveType::Augmented) {
 
-    // for each term, treat only terms with segment sections
+    // for each objf term, treat only terms with segment sections
     for (int ii = 0; ii < s_obj.terms.size(); ++ii) {
       if (!s_obj.terms[ii].segments.empty()) {
 
+        // init segment data structures
+        string seg_nm, pn, ln = "";
+        vector<double> rseg = vector<double>(time_.size(), 0.0);
+        vector<double> tseg = vector<double>(time_.size(), 0.0);
+        pn = "s_obj.terms[ii=" + num2str(ii,0) + "].prop_name:_" + s_obj.terms[ii].prop_name;
+        Printer::pad_text(pn, 42, '_');
+        Printer::pad_text(ln, 135, '-');
+
+        // -------------------------------------------------
         for (const auto& wname : wells_) {
 
-          // SOFR ------------------------------------------
-          for (const auto& seg_key : seg_sofr_keys_) {
+          // nseg = # of segments from settings
+          vector<int> nseg = s_obj.terms[ii].segments[wname];
+          vector<vector<double>> wseg = vector<vector<double>>(nseg.size(), rseg);
 
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
+          // loop through each specified segment
+          for (int jj=0; jj < nseg.size(); ++jj) {
 
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_sofr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_sofr_[wname].nsegs = s_seg.size();
+            // SOFR ----------------------------------------
+            seg_nm = "SOFR" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
 
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_sofr_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
+            // get index for SOFR
+            int sofr_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *sofr = ecl_sum_alloc_data_vector(ecl_sum_, sofr_index, true);
+            assert(double_vector_size(sofr) == time_.size());
 
-                int sofr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *sofr = ecl_sum_alloc_data_vector(ecl_sum_, sofr_index, true);
-                assert(double_vector_size(sofr) == time_.size());
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(sofr, kk);
+              tseg[kk] = rseg[kk] * step_[kk];
+            }
+            rseg[0] = 0.0;
+            seg_sofr_[wname].push_back(rseg);
+            seg_soft_[wname].push_back(tseg);
+            double_vector_free(sofr);
 
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_sofr_[wname].seg_data[jj][kk] = double_vector_safe_iget(sofr, kk);
-                }
-                seg_sofr_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(sofr);
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_sofr_[" << wname << "].sz():_" << seg_sofr_[wname].size()
+                 << "___seg_sofr_[" << wname << "].[jj].sz():_" << seg_sofr_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SWFR ----------------------------------------
+            seg_nm = "SWFR" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SWFR
+            int swfr_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *swfr = ecl_sum_alloc_data_vector(ecl_sum_, swfr_index, true);
+            assert(double_vector_size(swfr) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(swfr, kk);
+              tseg[kk] = rseg[kk] * step_[kk];
+            }
+            rseg[0] = 0.0;
+            seg_swfr_[wname].push_back(rseg);
+            seg_swft_[wname].push_back(tseg);
+            double_vector_free(swfr);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_swfr_[" << wname << "].sz():_" << seg_swfr_[wname].size()
+                 << "___seg_swfr_[" << wname << "].[jj].sz():_" << seg_swfr_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SGFR ----------------------------------------
+            seg_nm = "SGFR" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SGFR
+            int sgfr_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *sgfr = ecl_sum_alloc_data_vector(ecl_sum_, sgfr_index, true);
+            assert(double_vector_size(sgfr) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(sgfr, kk);
+              tseg[kk] = rseg[kk] * step_[kk];
+            }
+            rseg[0] = 0.0;
+            seg_sgfr_[wname].push_back(rseg);
+            seg_sgft_[wname].push_back(tseg);
+            double_vector_free(sgfr);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_sgfr_[" << wname << "].sz():_" << seg_sgfr_[wname].size()
+                 << "___seg_sgfr_[" << wname << "].[jj].sz():_" << seg_sgfr_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SLFR / SLFT ---------------------------------
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = seg_sofr_[wname][jj][kk] + seg_swfr_[wname][jj][kk];
+              tseg[kk] = seg_soft_[wname][jj][kk] + seg_swft_[wname][jj][kk];
+            }
+            seg_slfr_[wname].push_back(rseg);
+            seg_slft_[wname].push_back(tseg);
+
+            // SPRP ----------------------------------------
+            seg_nm = "SPR" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SPRP
+            int sprp_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *sprp = ecl_sum_alloc_data_vector(ecl_sum_, sprp_index, true);
+            assert(double_vector_size(sprp) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(sprp, kk);
+            }
+            rseg[0] = 0.0;
+            seg_sprp_[wname].push_back(rseg);
+            double_vector_free(sprp);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "____nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_sprp_[" << wname << "].sz():_" << seg_sprp_[wname].size()
+                 << "___seg_sprp_[" << wname << "].[jj].sz():_" << seg_sprp_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SPRD ----------------------------------------
+            seg_nm = "SPRD" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SPRD
+            int sprd_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *sprd = ecl_sum_alloc_data_vector(ecl_sum_, sprd_index, true);
+            assert(double_vector_size(sprd) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(sprd, kk);
+            }
+            rseg[0] = 0.0;
+            seg_sprd_[wname].push_back(rseg);
+            double_vector_free(sprd);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_sprd_[" << wname << "].sz():_" << seg_sprd_[wname].size()
+                 << "___seg_sprd_[" << wname << "].[jj].sz():_" << seg_sprd_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SWCT ----------------------------------------
+            seg_nm = "SWCT" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SWCT
+            int swct_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *swct = ecl_sum_alloc_data_vector(ecl_sum_, swct_index, true);
+            assert(double_vector_size(swct) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(swct, kk);
+            }
+            rseg[0] = 0.0;
+            seg_swct_[wname].push_back(rseg);
+            double_vector_free(swct);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_swct_[" << wname << "].sz():_" << seg_swct_[wname].size()
+                 << "___seg_swct_[" << wname << "].[jj].sz():_" << seg_swct_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+            }
+
+            // SCSA ----------------------------------------
+            seg_nm = "SCSA" + wname + num2str(nseg[jj], 0);
+            assert(ecl_sum_has_general_var(ecl_sum_ , seg_nm.c_str()));
+
+            // get index for SCSA
+            int scsa_index = ecl_smspec_get_general_var_params_index(smspec, seg_nm.c_str());
+            double_vector_type *scsa = ecl_sum_alloc_data_vector(ecl_sum_, scsa_index, true);
+            assert(double_vector_size(scsa) == time_.size());
+
+            // loop through time at current segment
+            for (int kk = 0; kk < time_.size(); ++kk) {
+              rseg[kk] = double_vector_safe_iget(scsa, kk);
+            }
+            rseg[0] = 0.0;
+            seg_scsa_[wname].push_back(rseg);
+            double_vector_free(scsa);
+
+            if (vp_.vSIM >= 5) {
+              ss << pn << "seg_nm:_" << seg_nm << "___nseg[" << jj << "]:_" << nseg[jj]
+                 << "___seg_scsa_[" << wname << "].sz():_" << seg_scsa_[wname].size()
+                 << "___seg_scsa_[" << wname << "].[jj].sz():_" << seg_scsa_[wname][jj].size() << " ";
+              // ext_info(ss.str(), md_, cl_, vp_.lnw); ss.str("");
+              ss << ln << " ";
+            }
+
+            // dbg -- 1
+            if (vp_.vSIM >= 6) {
+              cout << "[ECLSummaryReader::initWellSegRates() -- 1] Seg#" << jj << endl;
+              for (int kk = 0; kk < time_.size(); ++kk) {
+                cout <<   "sofr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sofr_[wname][jj][kk],3, 0, 7);
+                cout << "\tswfr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swfr_[wname][jj][kk],3, 0, 7);
+                cout << "\tsprp[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprp_[wname][jj][kk],3, 0, 7);
+                cout << "\tsprd[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprd_[wname][jj][kk],3, 0, 7);
+                cout << "\tswct[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swct_[wname][jj][kk],3, 0, 7);
+                cout << "\tscsa[j:" << jj << "|i:" << kk << "]: " << num2str(seg_scsa_[wname][jj][kk],3, 0, 7);
+                cout << endl;
+              }
+            }
+
+          } // for each segment
+          // ext_info(ss.str(), md_, cl_, 140, 2); ss.str("");
+
+        } // for each well
+        cout << ln << endl;
+
+        // dbg -- 2
+        if (vp_.vSIM >= 6) {
+          for (const auto &wname : wells_) {
+            for (int jj = 0; jj < seg_sofr_[wname].size(); ++jj) {
+              cout << "[ECLSummaryReader::initializeVectors() -- 2] Seg#" << jj << endl;
+              for (int kk = 0; kk < time_.size(); ++kk) {
+                cout << "sofr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sofr_[wname][jj][kk], 3, 0, 7);
+                cout << "\tswfr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swfr_[wname][jj][kk], 3, 0, 7);
+                cout << "\tsprp[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprp_[wname][jj][kk], 3, 0, 7);
+                cout << "\tsprd[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprd_[wname][jj][kk], 3, 0, 7);
+                cout << "\tswct[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swct_[wname][jj][kk], 3, 0, 7);
+                cout << "\tscsa[j:" << jj << "|i:" << kk << "]: " << num2str(seg_scsa_[wname][jj][kk], 3, 0, 7);
+                cout << endl;
               }
             }
           }
+          cout << ln << endl;
+        }
 
-          // SWFR ------------------------------------------
-          for (const auto& seg_key : seg_swfr_keys_) {
-
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
-
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_swfr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_swfr_[wname].nsegs = s_seg.size();
-
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_swfr_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
-
-                int swfr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *swfr = ecl_sum_alloc_data_vector(ecl_sum_, swfr_index, true);
-                assert(double_vector_size(swfr) == time_.size());
-
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_swfr_[wname].seg_data[jj][kk] = double_vector_safe_iget(swfr, kk);
-                }
-                seg_swfr_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(swfr);
-              }
-            }
-          }
-
-          // SPR ------------------------------------------
-          for (const auto& seg_key : seg_spr_keys_) {
-
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
-
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_spr_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_spr_[wname].nsegs = s_seg.size();
-
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_spr_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
-
-                int spr_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *spr = ecl_sum_alloc_data_vector(ecl_sum_, spr_index, true);
-                assert(double_vector_size(spr) == time_.size());
-
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_spr_[wname].seg_data[jj][kk] = double_vector_safe_iget(spr, kk);
-                }
-                seg_spr_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(spr);
-              }
-            }
-          }
-
-          // SPRD ------------------------------------------
-          for (const auto& seg_key : seg_sprd_keys_) {
-
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
-
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_sprd_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_sprd_[wname].nsegs = s_seg.size();
-
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_sprd_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
-
-                int sprd_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *sprd = ecl_sum_alloc_data_vector(ecl_sum_, sprd_index, true);
-                assert(double_vector_size(sprd) == time_.size());
-
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_sprd_[wname].seg_data[jj][kk] = double_vector_safe_iget(sprd, kk);
-                }
-                seg_sprd_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(sprd);
-              }
-            }
-          }
-
-          // SWCT ------------------------------------------
-          for (const auto& seg_key : seg_swct_keys_) {
-
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
-
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_swct_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_swct_[wname].nsegs = s_seg.size();
-
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_swct_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
-
-                int swct_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *swct = ecl_sum_alloc_data_vector(ecl_sum_, swct_index, true);
-                assert(double_vector_size(swct) == time_.size());
-
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_swct_[wname].seg_data[jj][kk] = double_vector_safe_iget(swct, kk);
-                }
-                seg_swct_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(swct);
-              }
-            }
-          }
-
-          // SCSA ------------------------------------------
-          for (const auto& seg_key : seg_scsa_keys_) {
-
-            // check if key exists for current well
-            size_t fidx = seg_key.find(wname);
-            if (fidx != string::npos) {
-              // # of segments from settings
-              vector<int> s_seg = s_obj.terms[ii].segments[wname];
-
-              // init segment data structure (segSet)
-              auto vseg = vector<double>(time_.size(), 0.0);
-              seg_scsa_[wname].seg_data = vector<vector<double>>(s_seg.size(), vseg);
-              seg_scsa_[wname].nsegs = s_seg.size();
-
-              // load data vector corr. to each specified segment
-              for (int jj=0; jj < seg_scsa_[wname].nsegs; ++jj) {
-                string seg_nm = seg_key.substr(0, 4) + wname + num2str(s_seg[jj],0);
-                assert(ecl_sum_has_general_var(ecl_sum_ , seg_key.c_str()));
-
-                int scsa_index = ecl_smspec_get_general_var_params_index(smspec, seg_key.c_str());
-                double_vector_type *scsa = ecl_sum_alloc_data_vector(ecl_sum_, scsa_index, true);
-                assert(double_vector_size(scsa) == time_.size());
-
-                for (int kk = 0; kk < time_.size(); ++kk) {
-                  seg_scsa_[wname].seg_data[jj][kk] = double_vector_safe_iget(scsa, kk);
-                }
-                seg_scsa_[wname].seg_data[jj][0] = 0.0;
-                double_vector_free(scsa);
-              }
-            }
-          }
-
-        } // wells
-      } // if segments section in terms
-    } // for each term
+      } // if segments
+    } // for each objf term
   } // if augmented objf type
 }
 

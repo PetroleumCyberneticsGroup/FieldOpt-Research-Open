@@ -34,25 +34,26 @@ If not, see <http://www.gnu.org/licenses/>.
 using std::string;
 using std::runtime_error;
 
-namespace Simulation { namespace Results {
+namespace Simulation {
+namespace Results {
 
 class RsltFileNotFoundExc : public std::runtime_error {
  public:
   RsltFileNotFoundExc(const string &path)
-    : runtime_error("No valid result file found at path" + path) {}
+    : runtime_error("[ECLResults] No valid result file found at path" + path) {}
 };
 
 class RsltsNotAvailExc : public std::runtime_error {
  public:
-  RsltsNotAvailExc()
-    : runtime_error("Results are not currently available.") {}
+  RsltsNotAvailExc(string err_src)
+    : runtime_error("[ECLResults] Results (" + err_src + ") are not currently available.") {}
 };
 
 class RsltPropKeyDoesNotExistExc : public std::runtime_error {
  public:
   explicit RsltPropKeyDoesNotExistExc(const string &simulator,
                                       const string &prop)
-    : runtime_error("Requested property key (" + prop
+    : runtime_error("[ECLResults] Requested property key (" + prop
                       + ") cannot be retrieved from " + simulator
                       + "summaries.") {}
 };
@@ -60,7 +61,7 @@ class RsltPropKeyDoesNotExistExc : public std::runtime_error {
 class ResultTimeIndexInvalidException : public std::runtime_error {
  public:
   ResultTimeIndexInvalidException(const int index)
-    : runtime_error("Time index "
+    : runtime_error("[ECLResults] Time index "
     + boost::lexical_cast<std::string>(index)
       + " is not valid for the current results.") {}
 };

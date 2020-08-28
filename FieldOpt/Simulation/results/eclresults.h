@@ -28,6 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "results.h"
 #include "ERTWrapper/eclsummaryreader.h"
 #include <QHash>
+#include <set>
 
 namespace Simulation {
 namespace Results {
@@ -46,24 +47,26 @@ class ECLResults : public Results
                           QString build_dir);
   void DumpResults() override;
 
-
   double GetValue(Property prop) override;
   double GetValue(Property prop, int time_index) override;
   double GetValue(Property prop, QString well) override;
   double GetValue(Property prop, QString well, int time_index) override;
-  std::vector<double> GetValueVector(Property prop) override;
-  std::vector<double> GetValueVector(Property prop,
-                                     QString well_name);
+
+  vector<double> GetValueVector(Property prop) override;
+  vector<double> GetValueVector(Property prop, string wn) override;
+  vector<vector<double>> GetValVectorSeg(Property prop, string wn);
 
   VectorXd GetValueVectorXd(Property prop) override;
-  VectorXd GetValueVectorXd(Property prop,
-                            QString well_name);
+  VectorXd GetValueVectorXd(Property prop, string wn);
+  vector<VectorXd> GetValVectorSegXd(Property prop, string wn);
 
  private:
   QString file_path_;
   ERTWrapper::ECLSummary::ECLSummaryReader *smry_reader_;
 
   Settings::Settings* settings_;
+
+  string im_ = "", wm_ = "", em_ = "";
   string cl_ = "eclresults";
 };
 

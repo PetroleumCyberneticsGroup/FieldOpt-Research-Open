@@ -36,6 +36,7 @@ class TestResourceSettings {
   TestResourceSettings() {
     Settings::VerbParams vp_;
 
+    // -----------------------------------------------------
     paths_.SetPath(Paths::DRIVER_FILE,
                    ExampleFilePaths::driver_example_);
 
@@ -59,6 +60,7 @@ class TestResourceSettings {
     settings_simulator_ = settings_full_->simulator();
     settings_model_ = settings_full_->model();
 
+    // -----------------------------------------------------
     paths_hybridopt_.SetPath(Paths::DRIVER_FILE,
                              ExampleFilePaths::hybridopt_driver_example_);
 
@@ -82,6 +84,7 @@ class TestResourceSettings {
     settings_hybridopt_simulator_ = settings_hybridopt_full_->simulator();
     settings_hybridopt_model_ = settings_hybridopt_full_->model();
 
+    // -----------------------------------------------------
     runner_resources_ = new TestResources::RunnerResources();
 
     auto en_paths = runner_resources_->rts_en_5spot_->paths();
@@ -91,6 +94,18 @@ class TestResourceSettings {
       info(im, vp_.lnw);
     }
     settings_en_5spot_full_ = new Settings::Settings(en_paths);
+
+    // -----------------------------------------------------
+    paths_olympr37_ = runner_resources_->rts_olympr37_T01_->paths();
+    if(vp_.vSET >= 5) {
+      string im = "test: paths_olympr37_full_(";
+      im += paths_olympr37_.GetPath(Paths::DRIVER_FILE) + ")";
+      info(im, vp_.lnw);
+    }
+    settings_olympr37_ = new Settings::Settings(paths_olympr37_);
+    settings_olympr37_opt_ = settings_olympr37_->optimizer();
+    settings_olympr37_sim_ = settings_olympr37_->simulator();
+    settings_olympr37_mod_ = settings_olympr37_->model();
   }
 
   TestResources::RunnerResources *runner_resources_;
@@ -108,7 +123,11 @@ class TestResourceSettings {
   Settings::Model *settings_hybridopt_model_;
   Paths paths_hybridopt_;
 
-  // Settings::Settings *settings_flow_5spot_;
+  Settings::Settings *settings_olympr37_;
+  Settings::Optimizer *settings_olympr37_opt_;
+  Settings::Simulator *settings_olympr37_sim_;
+  Settings::Model *settings_olympr37_mod_;
+  Paths paths_olympr37_;
 
 };
 

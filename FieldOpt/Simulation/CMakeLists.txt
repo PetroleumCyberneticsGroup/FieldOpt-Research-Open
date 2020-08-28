@@ -12,6 +12,7 @@ add_library(fieldopt::simulation ALIAS ${PROJECT_NAME})
 
 target_link_libraries(simulation
     PUBLIC fieldopt::model
+    PUBLIC fieldopt::settings
     PUBLIC ${Boost_LIBRARIES}
     PUBLIC fieldopt::hdf5summaryreader)
 
@@ -24,7 +25,7 @@ add_compile_options(-std=c++11)
 # Test exec ================================================
 # Unit tests
 if (BUILD_TESTING)
-  add_executable(test_simulation ${SIMULATION_TESTS})
+  add_executable(test_simulation ${SIMULATION_TESTS} tests/results/test_olympr37_data.hpp)
   target_link_libraries(test_simulation
       fieldopt::simulation
       ${gtest}

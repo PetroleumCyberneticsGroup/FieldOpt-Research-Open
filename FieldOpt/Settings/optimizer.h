@@ -244,7 +244,7 @@ class Optimizer
           }
           ss << "]";
         }
-        ext_info(ss.str(), "Settings", "Optimizer");
+        ext_info(ss.str(), "Settings", "Optimizer", 140);
       }
     };
 

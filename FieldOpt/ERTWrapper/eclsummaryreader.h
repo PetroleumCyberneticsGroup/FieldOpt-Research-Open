@@ -106,54 +106,121 @@ class ECLSummaryReader
   //!< Get the list of all well-level keys contained in the summary.
   const set<string> &well_keys() const { return well_keys_; }
 
+  // -------------------------------------------------------
+  const vector<double> &fopt() const; // FieldOilProdTotal
+  const vector<double> &fwpt() const; // FieldWatProdTotal
+  const vector<double> &fgpt() const; // FieldGasProdTotal
+  const vector<double> &flpt() const; // FieldLiqProdTotal
+  const vector<double> &fwit() const; // FieldWatInjTotal
+  const vector<double> &fgit() const; // FieldGasInjTotal
+
+  const vector<double> &wopt(string wn); // WellOilProdTotal
+  const vector<double> &wwpt(string wn); // WellWatProdTotal
+  const vector<double> &wgpt(string wn); // WellGasProdTotal
+  const vector<double> &wlpt(string wn); // WellLiqProdTotal
+  const vector<double> &wwit(string wn); // WellWatInjTotal
+  const vector<double> &wgit(string wn); // WellGasInjTotal
+
   //!< Get the time vector (days).
-  const vector<double> &time() const { return time_; }
-  const vector<double> &step() const { return step_; }
-  const VectorXd &timeXd() const { return timeXd_; }
-  const VectorXd &stepXd() const { return stepXd_; }
+  const vector<double> &time() const { return time_; } // Time
+  const vector<double> &step() const { return step_; } // Step
 
-  const vector<double> &fopt() const;
-  const vector<double> &fwpt() const;
-  const vector<double> &fgpt() const;
-  const vector<double> &fwit() const;
-  const vector<double> &fgit() const;
+  const vector<double> &wbhp(string wn); // WellBHP
+  const vector<double> &wwct(string wn); // WellWaterCut
 
-  const vector<double> &fopr() const;
-  const vector<double> &fwpr() const;
-  const vector<double> &fgpr() const;
-  const vector<double> &fwir() const;
-  const vector<double> &fgir() const;
+  const vector<double> &fopr() const; // FieldOilProdRate
+  const vector<double> &fwpr() const; // FieldWatProdRate
+  const vector<double> &fgpr() const; // FieldGasProdRate
+  const vector<double> &flpr() const; // FieldLiqProdRate
+  const vector<double> &fwir() const; // FieldWatInjRate
+  const vector<double> &fgir() const; // FieldGasInjRate
 
-  const VectorXd &foptXd() const;
-  const VectorXd &fwptXd() const;
-  const VectorXd &fgptXd() const;
-  const VectorXd &fwitXd() const;
-  const VectorXd &fgitXd() const;
+  const vector<double> &wopr(string wn); // WellOilProdRate
+  const vector<double> &wwpr(string wn); // WellWatProdRate
+  const vector<double> &wgpr(string wn); // WellGasProdRate
+  const vector<double> &wlpr(string wn); // WellLiqProdRate
+  const vector<double> &wwir(string wn); // WellWatInjRate
+  const vector<double> &wgir(string wn); // WellGasInjRate
 
-  const VectorXd &foprXd() const;
-  const VectorXd &fwprXd() const;
-  const VectorXd &fgprXd() const;
-  const VectorXd &fwirXd() const;
-  const VectorXd &fgirXd() const;
+  const vector<vector<double>> &seg_sofr(string wn); // WellSegOilFlowRate
+  const vector<vector<double>> &seg_swfr(string wn); // WellSegWatFlowRate
+  const vector<vector<double>> &seg_sprp(string wn); // WellSegPress
+  const vector<vector<double>> &seg_sprd(string wn); // WellSegPressDrop
+  const vector<vector<double>> &seg_swct(string wn); // WellSegWaterCut
+  const vector<vector<double>> &seg_scsa(string wn); // WellSegXSecArea
 
-  vector<double> wopt(string well_name) const;
-  vector<double> wwpt(string well_name) const;
-  vector<double> wgpt(string well_name) const;
-  vector<double> wwit(string well_name) const;
-  vector<double> wgit(const string& well_name) const;
+  const vector<vector<double>> &seg_sgfr(string wn); // WellSegGasFlowRate
 
-  vector<double> wopr(string well_name) const;
-  vector<double> wwpr(string well_name) const;
-  vector<double> wgpr(string well_name) const;
-  vector<double> wwir(string well_name) const;
-  vector<double> wgir(string well_name) const;
+  const vector<vector<double>> &seg_soft(string wn); // WellSegOilFlowTotal
+  const vector<vector<double>> &seg_swft(string wn); // WellSegWatFlowTotal
+  const vector<vector<double>> &seg_sgft(string wn); // WellSegGasFlowTotal
+  const vector<vector<double>> &seg_slft(string wn); // WellSegLiqFlowTotal
+
+  // -------------------------------------------------------
+
+  const VectorXd &foptXd() const; // Xd -> FieldOilProdTotal
+  const VectorXd &fwptXd() const; // Xd -> FieldWatProdTotal
+  const VectorXd &fgptXd() const; // Xd -> FieldGasProdTotal
+  const VectorXd &flptXd() const; // Xd -> FieldLiqProdTotal
+  const VectorXd &fwitXd() const; // Xd -> FieldWatInjTotal
+  const VectorXd &fgitXd() const; // Xd -> FieldGasInjTotal
+
+  const VectorXd &woptXd(string wn); // Xd -> WellOilProdTotal
+  const VectorXd &wwptXd(string wn); // Xd -> WellWatProdTotal
+  const VectorXd &wgptXd(string wn); // Xd -> WellGasProdTotal
+  const VectorXd &wlptXd(string wn); // Xd -> WellLiqProdTotal
+  const VectorXd &wwitXd(string wn); // Xd -> WellWatInjTotal
+  const VectorXd &wgitXd(string wn); // Xd -> WellGasInjTotal
+
+  const VectorXd &timeXd() const { return timeXd_; } // Xd -> Time
+  const VectorXd &stepXd() const { return stepXd_; } // Xd -> Step
+
+  const VectorXd &wbhpXd(string wn); // Xd -> WellBHP
+  const VectorXd &wwctXd(string wn); // Xd -> WellWaterCut
+
+  const VectorXd &foprXd() const; // Xd -> FieldOilProdRate
+  const VectorXd &fwprXd() const; // Xd -> FieldWatProdRate
+  const VectorXd &fgprXd() const; // Xd -> FieldGasProdRate
+  const VectorXd &flprXd() const; // Xd -> FieldLiqProdRate
+  const VectorXd &fwirXd() const; // Xd -> FieldWatInjRate
+  const VectorXd &fgirXd() const; // Xd -> FieldGasInjRate
+
+  const VectorXd &woprXd(string wn); // Xd -> WellOilProdRate
+  const VectorXd &wwprXd(string wn); // Xd -> WellWatProdRate
+  const VectorXd &wgprXd(string wn); // Xd -> WellGasProdRate
+  const VectorXd &wlprXd(string wn); // Xd -> WellLiqProdRate
+  const VectorXd &wwirXd(string wn); // Xd -> WellWatInjRate
+  const VectorXd &wgirXd(string wn); // Xd -> WellGasInjRate
+
+  const vector<VectorXd> &seg_sofrXd(string wn); // Xd -> WellSegOilFlowRate
+  const vector<VectorXd> &seg_swfrXd(string wn); // Xd -> WellSegWatFlowRate
+  const vector<VectorXd> &seg_sprpXd(string wn); // Xd -> WellSegPress
+  const vector<VectorXd> &seg_sprdXd(string wn); // Xd -> WellSegPressDrop
+  const vector<VectorXd> &seg_swctXd(string wn); // Xd -> WellSegWaterCut
+  const vector<VectorXd> &seg_scsaXd(string wn); // Xd -> WellSegXSecArea
+
+  const vector<VectorXd> &seg_sgfrXd(string wn); // WellSegGasFlowRate
+
+  const vector<VectorXd> &seg_softXd(string wn); // Xd -> WellSegOilFlowTotal
+  const vector<VectorXd> &seg_swftXd(string wn); // Xd -> WellSegWatFlowTotal
+  const vector<VectorXd> &seg_sgftXd(string wn); // Xd -> WellSegGasFlowTotal
+  const vector<VectorXd> &seg_slftXd(string wn); // Xd -> WellSegLiqFlowTotal
+
+  // -------------------------------------------------------
 
  private:
   Settings::Settings* settings_;
-  Settings::VerbParams vp_;
-  string md_ = "ERTWrapper";
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "ERTWrapper";
   string cl_ = "ECLSummaryReader";
+  Settings::VerbParams vp_;
+
   string file_name_;
 
   ecl_sum_type *ecl_sum_;
@@ -163,83 +230,135 @@ class ECLSummaryReader
   set<string> field_keys_; //!< List of all field keys in smry.
   set<string> well_keys_; //!< List of all well keys in smry.
 
+  bool read_segments_ = false;
   set<string> seg_sofr_keys_;
   set<string> seg_swfr_keys_;
-  set<string> seg_spr_keys_;
+  set<string> seg_sgfr_keys_;
+  set<string> seg_sprp_keys_;
   set<string> seg_sprd_keys_;
   set<string> seg_swct_keys_;
   set<string> seg_scsa_keys_;
   set<string> comp_keys_;
 
-
   //!< Populate key lists using the ecl_sum_select_matching_general_var_list function.
   void populateKeyLists();
 
-  vector<double> time_;
-  vector<double> step_;
+  // -------------------------------------------------------
 
-  vector<double> fopt_;
-  vector<double> fwpt_;
-  vector<double> fgpt_;
-  vector<double> fwit_;
-  vector<double> fgit_;
+  vector<double> fopt_; // FieldOilProdTotal
+  vector<double> fwpt_; // FieldWatProdTotal
+  vector<double> fgpt_; // FieldGasProdTotal
+  vector<double> flpt_; // FieldLiqProdTotal
+  vector<double> fwit_; // FieldWatInjTotal
+  vector<double> fgit_; // FieldGasInjTotal
 
-  vector<double> fopr_;
-  vector<double> fwpr_;
-  vector<double> fgpr_;
-  vector<double> fwir_;
-  vector<double> fgir_;
+  map<string, vector<double> > wopt_; // WellOilProdTotal
+  map<string, vector<double> > wwpt_; // WellWatProdTotal
+  map<string, vector<double> > wgpt_; // WellGasProdTotal
+  map<string, vector<double> > wlpt_; // WellLiqProdTotal
+  map<string, vector<double> > wwit_; // WellWatInjTotal
+  map<string, vector<double> > wgit_; // WellGasInjTotal
 
-  VectorXd timeXd_;
-  VectorXd stepXd_;
+  vector<double> time_; // Time
+  vector<double> step_; // Step
 
-  VectorXd foptXd_;
-  VectorXd fwptXd_;
-  VectorXd fgptXd_;
-  VectorXd fwitXd_;
-  VectorXd fgitXd_;
+  map<string, vector<double> > wbhp_; // WellBHP
+  map<string, vector<double> > wwct_; // WellBHP
 
-  VectorXd foprXd_;
-  VectorXd fwprXd_;
-  VectorXd fgprXd_;
-  VectorXd fwirXd_;
-  VectorXd fgirXd_;
+  vector<double> fopr_; // FieldOilProdRate
+  vector<double> fwpr_; // FieldWatProdRate
+  vector<double> fgpr_; // FieldGasProdRate
+  vector<double> flpr_; // FieldGasProdRate
+  vector<double> fwir_; // FieldWatInjRate
+  vector<double> fgir_; // FieldGasInjRate
 
-  map<string, vector<double> > wopt_;
-  map<string, vector<double> > wwpt_;
-  map<string, vector<double> > wgpt_;
-  map<string, vector<double> > wwit_;
-  map<string, vector<double> > wgit_;
+  map<string, vector<double> > wopr_; // WellOilProdRate
+  map<string, vector<double> > wwpr_; // WellWatProdRate
+  map<string, vector<double> > wgpr_; // WellGasProdRate
+  map<string, vector<double> > wlpr_; // WellLiqProdRate
+  map<string, vector<double> > wwir_; // WellWatInjRate
+  map<string, vector<double> > wgir_; // WellGasInjRate
 
-  map<string, vector<double> > wopr_;
-  map<string, vector<double> > wwpr_;
-  map<string, vector<double> > wgpr_;
-  map<string, vector<double> > wwir_;
-  map<string, vector<double> > wgir_;
+  map<string, vector<vector<double>> > seg_sofr_; // WellSegOilFlowRate
+  map<string, vector<vector<double>> > seg_swfr_; // WellSegWatFlowRate
+  map<string, vector<vector<double>> > seg_sgfr_; // WellSegWatFlowRate
+  map<string, vector<vector<double>> > seg_sprp_;  // WellSegPress
+  map<string, vector<vector<double>> > seg_sprd_; // WellSegPressDrop
+  map<string, vector<vector<double>> > seg_swct_; // WellSegWaterCut
+  map<string, vector<vector<double>> > seg_scsa_; // WellSegXSecArea
 
-  struct segSet {
-    int nsegs = 0;
-    vector<vector<double>> seg_data;
-  };
+  map<string, vector<vector<double>> > seg_slfr_; // WellSegLiqFlowRate
 
-  map<string, segSet> seg_sofr_;
-  map<string, segSet> seg_swfr_;
-  map<string, segSet> seg_spr_;
-  map<string, segSet> seg_sprd_;
-  map<string, segSet> seg_swct_;
-  map<string, segSet> seg_scsa_;
+  map<string, vector<vector<double>> > seg_soft_; // WellSegOilFlowTotals
+  map<string, vector<vector<double>> > seg_swft_; // WellSegWatFlowTotals
+  map<string, vector<vector<double>> > seg_sgft_; // WellSegGasFlowTotals
+  map<string, vector<vector<double>> > seg_slft_; // WellSegLiqFlowTotals
+
+  // -------------------------------------------------------
+
+  VectorXd foptXd_; // Xd -> FieldOilProdTotal
+  VectorXd fwptXd_; // Xd -> FieldWatProdTotal
+  VectorXd fgptXd_; // Xd -> FieldGasProdTotal
+  VectorXd flptXd_; // Xd -> FieldLiqProdTotal
+  VectorXd fwitXd_; // Xd -> FieldWatInjTotal
+  VectorXd fgitXd_; // Xd -> FieldGasInjTotal
+
+  map<string, VectorXd > woptXd_; // Xd -> WellOilProdTotal
+  map<string, VectorXd > wwptXd_; // Xd -> WellWatProdTotal
+  map<string, VectorXd > wgptXd_; // Xd -> WellGasProdTotal
+  map<string, VectorXd > wlptXd_; // Xd -> WellLiqProdTotal
+  map<string, VectorXd > wwitXd_; // Xd -> WellWatInjTotal
+  map<string, VectorXd > wgitXd_; // Xd -> WellGasInjTotal
+
+  VectorXd timeXd_; // Xd -> Time
+  VectorXd stepXd_; // Xd -> Step
+
+  map<string, VectorXd > wbhpXd_; // Xd -> WellBHP
+  map<string, VectorXd > wwctXd_; // Xd -> WellBHP
+
+  VectorXd foprXd_; // Xd -> FieldOilProdRate
+  VectorXd fwprXd_; // Xd -> FieldWatProdRate
+  VectorXd fgprXd_; // Xd -> FieldGasProdRate
+  VectorXd flprXd_; // Xd -> FieldLiqProdRate
+  VectorXd fwirXd_; // Xd -> FieldWatInjRate
+  VectorXd fgirXd_; // Xd -> FieldGasInjRate
+
+  map<string, VectorXd > woprXd_; // Xd -> WellOilProdRate
+  map<string, VectorXd > wwprXd_; // Xd -> WellWatProdRate
+  map<string, VectorXd > wgprXd_; // Xd -> WellGasProdRate
+  map<string, VectorXd > wlprXd_; // Xd -> WellLiqProdRate
+  map<string, VectorXd > wwirXd_; // Xd -> WellWatInjRate
+  map<string, VectorXd > wgirXd_; // Xd -> WellGasInjRate
+
+  map<string, vector<VectorXd> > seg_sofrXd_; // Xd -> WellSegOilFlowRate
+  map<string, vector<VectorXd> > seg_swfrXd_; // Xd -> WellSegWatFlowRate
+  map<string, vector<VectorXd> > seg_sgfrXd_; // Xd -> WellSegWatFlowRate
+  map<string, vector<VectorXd> > seg_sprpXd_;  // Xd -> WellSegPress
+  map<string, vector<VectorXd> > seg_sprdXd_; // Xd -> WellSegPressDrop
+  map<string, vector<VectorXd> > seg_swctXd_; // Xd -> WellSegWaterCut
+  map<string, vector<VectorXd> > seg_scsaXd_; // Xd -> WellSegXSecArea
+
+  map<string, vector<VectorXd> > seg_slfrXd_; // WellSegLiqFlowRate
+
+  map<string, vector<VectorXd> > seg_softXd_; // WellSegOilFlowTotals
+  map<string, vector<VectorXd> > seg_swftXd_; // WellSegWatFlowTotals
+  map<string, vector<VectorXd> > seg_sgftXd_; // WellSegGasFlowTotals
+  map<string, vector<VectorXd> > seg_slftXd_; // WellSegLiqFlowTotals
+
+  // -------------------------------------------------------
+  void initializeTimeVector();
 
   void initializeVectors();
   void initVectorsXd();
-  void initializeTimeVector();
+
+  void initVectorsSegXd();
+  void initWellSegRates();
 
   void initializeWellRates();
   void initWellTotals();
 
   void initFieldTotals();
   void initFieldRates();
-
-  void initWellSegRates();
 
   void warnPropertyZero(const string& wname, string propname) const;
   void warnPropertyNotFound(const string& propname) const;

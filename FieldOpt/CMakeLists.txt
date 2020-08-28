@@ -404,7 +404,7 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   set(DIRS
       norne_test
       en_5spot/fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv
-      olympr37_ex)
+      olympr37/fo-drv.r001.c02-olympr37.icd-opt.apps.aug)
 
   foreach(DIR ${DIRS})
     message(STATUS "DIR=${FO_OUTPUT_DIR}/${DIR}")

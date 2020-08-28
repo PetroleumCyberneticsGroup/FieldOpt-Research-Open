@@ -57,6 +57,19 @@ FGIP    -- SPACING ......................................
 FGIP    -- SPACING ......................................
 
 -- PAGE X --------------------------------------------------
+SGFR    -- segment water flow rate
+PRODX2 /
+/
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+
+-- PAGE X --------------------------------------------------
 SPR     -- segment pressure
 PRODX2 /
 /
@@ -100,58 +113,61 @@ FGIP    -- SPACING ......................................
 SCSA
 PRODX2 /
 /
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
 
 -- PAGE X --------------------------------------------------
-COPR    -- oil flow rate in lumped completion
-PRODX2 /
-/
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
+-- COPR    -- oil flow rate in lumped completion
+-- PRODX2 /
+-- /
+-- FGIP    -- SPACING ......................................
+-- FGIP    -- SPACING ......................................
 
-CWPR    -- water flow rate in lumped completion
-PRODX2 /
-/
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
+--CWPR    -- water flow rate in lumped completion
+--PRODX2 /
+--/
+--FGIP    -- SPACING ......................................
+--FGIP    -- SPACING ......................................
 
-CPR     -- connection pressure
-PRODX2 /
-/
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
-FGIP    -- SPACING ......................................
+--CPR     -- connection pressure
+--PRODX2 /
+--/
+--FGIP    -- SPACING ......................................
+--FGIP    -- SPACING ......................................
 
-CPI     -- productivity index of well's preferred phase
-PRODX2 /
-/
+--CPI     -- productivity index of well's preferred phase
+--PRODX2 /
+--/
+--FGIP    -- SPACING ......................................
+--FGIP    -- SPACING ......................................
 
-CTFAC   -- connection transmissibility factor
-PRODX2 /
-/
+--CTFAC   -- connection transmissibility factor
+--PRODX2 /
+--/
+--FGIP    -- SPACING ......................................
+--FGIP    -- SPACING ......................................
 
--- PAGE 2 --------------------------------------------------
+-- PAGE X --------------------------------------------------
+-- BHP | STATUS | CONTROL
+
+WBHP
+'PROD*' /
 
 WBHP
 'INJ*' /
 
+-- -------
 WSTAT
 'INJ*' /
 
 WMCTL
 'INJ*' /
-
--- PAGE 3+4 ------------------------------------------------
-
-WBHP
-'PROD*' /
 
 WSTAT
 'PROD*' /
@@ -159,50 +175,58 @@ WSTAT
 WMCTL
 'PROD*' /
 
--- PAGE 3 --------------------------------------------------
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
 
+-- PAGE X --------------------------------------------------
+-- FIELD TOTALS
 
+FOPT
 
--- STATES (WELLS)
+FWPT
 
-WSTAT
-'PROD*' /
+FGPT
 
+FLPT
 
+FWIT
 
+FGIT
 
-FMCTP
+FWCT
 
--- RATES (WELLS)
+FGOR
 
-WOPR
-'PROD*' /
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
 
-WWPR
-'PROD*' /
-
-WLPR
-'PROD*' /
-
-WGPR
-'PROD*' /
-
-WWIR
-'INJ*' /
-
--- RATES (FIELD)
+-- PAGE X --------------------------------------------------
+-- FIELD RATES
 
 FOPR
 
 FWPR
 
-FLPR
-
 FGPR
+
+FLPR
 
 FWIR
 
--- TOTALS (WELLS)
+FGIR
+
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+FGIP    -- SPACING ......................................
+
+-- PAGE X --------------------------------------------------
+-- WELL TOTALS
 
 WOPT
 'PROD*' /
@@ -210,36 +234,50 @@ WOPT
 WWPT
 'PROD*' /
 
-WLPT
-'PROD*' /
-
 WGPT
 'PROD*' /
 
+WLPT
+'PROD*' /
+
 WWIT
+'PROD*'
 'INJ*' /
 
--- TOTALS (FIELD)
-
-FOPT
-
-FWPT
-
-FLPT
-
-FGPT
-
-FWIT
-
+WGIT
+'PROD*'
+'INJ*' /
 
 -- RATIOS
 WWCT
 'PROD*' /
 
-FWCT
-
 WGOR
 'PROD*' /
 
-FGOR
+-- PAGE X --------------------------------------------------
+-- WELL RATES: PRODX
 
+WOPR
+'PROD*' /
+
+WWPR
+'PROD*' /
+
+WGPR
+'PROD*' /
+
+WLPR
+'PROD*' /
+
+WWIR
+'PROD*'
+'INJ*' /
+
+WGIR
+'PROD*'
+'INJ*' /
+
+FMCTP
+
+FGIP    -- SPACING ......................................

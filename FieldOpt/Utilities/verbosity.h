@@ -53,7 +53,7 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Settings {
 
 struct VerbParams {
-  int lnw = 140;
+  int lnw = 141;
   int vMOD = 0;
   int vOPT = 0;
   int vWIC = 0;

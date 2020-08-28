@@ -45,10 +45,10 @@ class InvalidIndexException : public runtime_error {
     : runtime_error(message) {}
 };
 
-class SummaryFileNotFoundAtPathException : public runtime_error {
+class SmryFileNotFoundAtPathExc : public runtime_error {
  public:
-  explicit SummaryFileNotFoundAtPathException(const string &path)
-    : runtime_error("No valid simulation case found at path " + path) {}
+  explicit SmryFileNotFoundAtPathExc(const string &path)
+    : runtime_error("No valid simulation case found at path  " + path) {}
 };
 
 class SmryVarDoesNotExistExc : public runtime_error {

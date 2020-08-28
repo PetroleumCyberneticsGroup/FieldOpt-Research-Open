@@ -62,9 +62,9 @@ SET(SIMULATION_SOURCES
 		)
 
 SET(SIMULATION_TESTS
-#		tests/test_resource_results.h
+		tests/test_resource_results.h
 #		tests/results/test_adgprsresults.cpp
-#		tests/results/test_eclresults.cpp
+		tests/results/test_eclresults.cpp
 #		tests/simulator_interfaces/driver_file_writers/adgprs_driver_file_writer.cpp
 #		tests/simulator_interfaces/driver_file_writers/driver_parts/ecl_driver_parts/test_compdat.cpp
 #		tests/simulator_interfaces/driver_file_writers/driver_parts/ecl_driver_parts/test_schedule_section.cpp
@@ -74,5 +74,5 @@ SET(SIMULATION_TESTS
 #		tests/simulator_interfaces/driver_file_writers/flow_driver_file_writer.cpp
 #		tests/simulator_interfaces/test_adgprssimulator.cpp
 #		tests/simulator_interfaces/test_eclsimulator.cpp
-		tests/simulator_interfaces/test_ix_simulator.cpp
+#		tests/simulator_interfaces/test_ix_simulator.cpp
 		)

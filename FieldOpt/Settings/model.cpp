@@ -43,6 +43,7 @@ namespace Settings {
 using Printer::ext_warn;
 using Printer::ext_info;
 using Printer::info;
+using Printer::num2str;
 
 Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
   vp_ = vp;
@@ -591,7 +592,7 @@ void Model::parseSegmentAnnulus(const QJsonObject &json_seg, Model::Well &well) 
 
 void Model::parseSegmentCompartments(const QJsonObject &json_seg, Model::Well &well) const {
   if (vp_.vSET >= 2) {
-    Printer::ext_info("Parsing Compartments ...", "Settings", "Model");
+    ext_info("Parsing Compartments ...", md_, cl_, vp_.lnw);
   }
   if (json_seg.contains("Compartments")) {
     auto json_compts = json_seg["Compartments"].toObject();
@@ -672,13 +673,16 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
 
     comp.name = "ICD#" + well.name;
     well.completions.push_back(comp);
-    Printer::ext_info("Added ICV " + comp.name.toStdString() + " to " + well.name.toStdString()
-                        + " with valve size " + Printer::num2str(comp.valve_size)
-                        + " and flow coefficient " + Printer::num2str(comp.valve_flow_coeff)
-                        + " at segment idx. " + Printer::num2str(comp.segment_index), "Settings", "Model");
+
+    string im = "Added ICV " + comp.name.toStdString() + " to " + well.name.toStdString();
+    im += " with valve size " + num2str(comp.valve_size, 5);
+    im += " and flow coefficient " + num2str(comp.valve_flow_coeff, 5);
+    im += " at segment idx. " + num2str(comp.segment_index);
+    ext_info(im, md_, cl_, vp_.lnw);
+
     if (comp.is_variable) {
-      Printer::ext_info("ICV " + comp.name.toStdString() + " set as variable with name "
-                          + comp.name.toStdString(), "Settings", "Model");
+      ext_info("ICV " + comp.name.toStdString() + " set as variable with name "
+                          + comp.name.toStdString(), md_, cl_, vp_.lnw);
     }
   }
 
@@ -709,8 +713,8 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization, W
       for (int i = 0; i < device_names.size(); i++) {
         if (device_names[i] == name) {
           grp.segment_indexes.push_back(well.completions[0].segment_indexes[i]);
-          Printer::ext_info("Added segment nr. " + Printer::num2str(grp.segment_indexes.back())
-                              + " for ICV " + name + " in group " + grp.icv_group_name, "Settings", "Model");
+          ext_info("Added segment nr. " + Printer::num2str(grp.segment_indexes.back())
+                              + " for ICV " + name + " in group " + grp.icv_group_name, md_, cl_, vp_.lnw);
         }
       }
       if (std::find(std::begin(device_names), std::end(device_names), name) != std::end(device_names)) {

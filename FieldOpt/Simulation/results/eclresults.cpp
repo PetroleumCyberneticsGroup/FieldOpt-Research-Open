@@ -41,22 +41,25 @@ ECLResults::ECLResults(Settings::Settings *settings)
   : Results(settings) {
   smry_reader_ = nullptr;
   settings_ = settings;
+  vp_ = settings_->global()->verbParams();
+  settings_->global()->showVerbParams();
 }
 
 void ECLResults::ReadResults(QString file_path) {
   file_path_ = file_path;
   auto fp = file_path_.toStdString();
   if (vp_.vSIM >= 2) {
-    ext_info("Reading results from " + fp, md_, cl_);
+    ext_info("[ECLResults::ReadResults] Reading results from " + fp,
+      md_, cl_, vp_.lnw);
   }
 
   if (smry_reader_ != nullptr) delete smry_reader_;
   try {
     smry_reader_ = new ERTWrapper::ECLSummary::ECLSummaryReader(fp, settings_);
-  } catch (ERTWrapper::SummaryFileNotFoundAtPathException &e) {
+    wells_ = smry_reader_->wells();
+  } catch (ERTWrapper::SmryFileNotFoundAtPathExc &e) {
     throw RsltFileNotFoundExc(file_path.toLatin1().constData());
   }
-
   setAvailable();
 }
 
@@ -70,94 +73,193 @@ void ECLResults::DumpResults() {
 }
 
 double ECLResults::GetValue(Results::Property prop) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   return GetValueVector(prop).back();
 }
 
 double ECLResults::GetValue(Results::Property prop, int time_index) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
 
   if (time_index < 0 || time_index >= smry_reader_->time().size()) {
-    string em = "Time index " + to_string(time_index);
-    em += " is outside the range of the summary.";
-    throw runtime_error(em);
+    E("Time index " + to_string(time_index) + " is outside range of smry.");
   }
   return GetValueVector(prop)[time_index];
 }
 
 double ECLResults::GetValue(Results::Property prop, QString well) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
-  return GetValueVector(prop, well).back();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  return GetValueVector(prop, well.toStdString()).back();
 }
 
 double ECLResults::GetValue(Results::Property prop, QString well, int time_index) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   if (time_index < 0 || time_index >= smry_reader_->time().size()) {
-    string em = "Time index " + to_string(time_index);
-    em += " is outside the range of the summary.";
-    throw runtime_error(em);
+    E("Time index " + to_string(time_index) + " is outside range of smry.");
   }
-  return GetValueVector(prop, well)[time_index];
+  return GetValueVector(prop, well.toStdString())[time_index];
 }
 
 std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch (prop) {
+
     case FieldOilProdTotal: return smry_reader_->fopt();
-    case FieldGasProdTotal: return smry_reader_->fgpt();
     case FieldWatProdTotal: return smry_reader_->fwpt();
+    case FieldGasProdTotal: return smry_reader_->fgpt();
+    case FieldLiqProdTotal: return smry_reader_->flpt();
     case FieldWatInjTotal:  return smry_reader_->fwit();
     case FieldGasInjTotal:  return smry_reader_->fgit();
+
     case Time:              return smry_reader_->time();
     case Step:              return smry_reader_->step();
 
     case FieldOilProdRate: return smry_reader_->fopr();
-    case FieldGasProdRate: return smry_reader_->fgpr();
     case FieldWatProdRate: return smry_reader_->fwpr();
+    case FieldGasProdRate: return smry_reader_->fgpr();
+    case FieldLiqProdRate: return smry_reader_->flpr();
     case FieldWatInjRate:  return smry_reader_->fwir();
     case FieldGasInjRate:  return smry_reader_->fgir();
 
     default: {
-      string em = "[ECLResults] requested property is not a field or misc property.";
-      throw std::runtime_error(em);
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property" + p + " is not a field or misc property.");
     }
   }
 }
 
-std::vector<double> ECLResults::GetValueVector(Results::Property prop,
-                                               QString well_name) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+vector<double> ECLResults::GetValueVector(Results::Property prop,
+                                          string wn) {
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch (prop) {
-    case WellOilProdTotal: return smry_reader_->wopt(well_name.toStdString());
-    case WellGasProdTotal: return smry_reader_->wgpt(well_name.toStdString());
-    case WellWatProdTotal: return smry_reader_->wwpt(well_name.toStdString());
-    case WellWatInjTotal:  return smry_reader_->wwit(well_name.toStdString());
-    case WellGasInjTotal:  return smry_reader_->wgit(well_name.toStdString());
+    case WellOilProdTotal: return smry_reader_->wopt(wn);
+    case WellWatProdTotal: return smry_reader_->wwpt(wn);
+    case WellGasProdTotal: return smry_reader_->wgpt(wn);
+    case WellLiqProdTotal: return smry_reader_->wlpt(wn);
+    case WellWatInjTotal:  return smry_reader_->wwit(wn);
+    case WellGasInjTotal:  return smry_reader_->wgit(wn);
+
+    case WellOilProdRate: return smry_reader_->wopr(wn);
+    case WellWatProdRate: return smry_reader_->wwpr(wn);
+    case WellGasProdRate: return smry_reader_->wgpr(wn);
+    case WellLiqProdRate: return smry_reader_->wlpr(wn);
+    case WellWatInjRate:  return smry_reader_->wwir(wn);
+    case WellGasInjRate:  return smry_reader_->wgir(wn);
+
+    // case WellBHP:         return smry_reader_->wbhp(wn);
+    // case WellWaterCut:    return smry_reader_->wwct(wn);
+
     default: {
-      throw runtime_error("In ECLResults: The requested property is not a well property.");
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property " + p + "is not a well property.");
     }
   }
 }
 
 VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch (prop) {
+
     case FieldOilProdTotal: return smry_reader_->foptXd();
-    case FieldGasProdTotal: return smry_reader_->fgptXd();
     case FieldWatProdTotal: return smry_reader_->fwptXd();
+    case FieldGasProdTotal: return smry_reader_->fgptXd();
+    case FieldLiqProdTotal: return smry_reader_->flptXd();
     case FieldWatInjTotal:  return smry_reader_->fwitXd();
     case FieldGasInjTotal:  return smry_reader_->fgitXd();
+
     case Time:              return smry_reader_->timeXd();
     case Step:              return smry_reader_->stepXd();
 
     case FieldOilProdRate: return smry_reader_->foprXd();
-    case FieldGasProdRate: return smry_reader_->fgprXd();
     case FieldWatProdRate: return smry_reader_->fwprXd();
+    case FieldGasProdRate: return smry_reader_->fgprXd();
+    case FieldLiqProdRate: return smry_reader_->flprXd();
     case FieldWatInjRate:  return smry_reader_->fwirXd();
     case FieldGasInjRate:  return smry_reader_->fgirXd();
 
     default: {
-      throw std::runtime_error("ECLResults: Requested property is not a field or misc property.");
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property " + p + "is not a field or misc property.");
+    }
+  }
+}
+
+VectorXd ECLResults::GetValueVectorXd(Results::Property prop,
+                                      string wn) {
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  switch (prop) {
+
+    case WellOilProdTotal: return smry_reader_->woptXd(wn);
+    case WellWatProdTotal: return smry_reader_->wwptXd(wn);
+    case WellGasProdTotal: return smry_reader_->wgptXd(wn);
+    case WellLiqProdTotal: return smry_reader_->wlptXd(wn);
+    case WellWatInjTotal:  return smry_reader_->wwitXd(wn);
+    case WellGasInjTotal:  return smry_reader_->wgitXd(wn);
+
+    case WellOilProdRate: return smry_reader_->woprXd(wn);
+    case WellWatProdRate: return smry_reader_->wwprXd(wn);
+    case WellGasProdRate: return smry_reader_->wgprXd(wn);
+    case WellLiqProdRate: return smry_reader_->wlprXd(wn);
+    case WellWatInjRate:  return smry_reader_->wwirXd(wn);
+    case WellGasInjRate:  return smry_reader_->wgirXd(wn);
+
+    // case WellBHPXd:       return smry_reader_->wbhpXd(wn);
+    // case WellWaterCutXd:  return smry_reader_->wwctXd(wn);
+
+    default: {
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property " + p + "is not a field or misc property.");
+    }
+  }
+}
+
+vector<vector<double>> ECLResults::GetValVectorSeg(Results::Property prop,
+                                                   string wn) {
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  switch (prop) {
+
+    case WellSegOilFlowRate: return smry_reader_->seg_sofr(wn);
+    case WellSegWatFlowRate: return smry_reader_->seg_swfr(wn);
+    case WellSegPress:       return smry_reader_->seg_sprp(wn);
+    case WellSegPressDrop:   return smry_reader_->seg_sprd(wn);
+    case WellSegWaterCut:    return smry_reader_->seg_swct(wn);
+    case WellSegXSecArea:    return smry_reader_->seg_scsa(wn);
+
+    case WellSegGasFlowRate: return smry_reader_->seg_sgfr(wn);
+
+    case WellSegOilFlowTotal: return smry_reader_->seg_sgfr(wn);
+    case WellSegWatFlowTotal: return smry_reader_->seg_sgfr(wn);
+    case WellSegGasFlowTotal: return smry_reader_->seg_sgfr(wn);
+    case WellSegLiqFlowTotal: return smry_reader_->seg_sgfr(wn);
+
+    default: {
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property " + p + "is not a well segment property.");
+    }
+  }
+}
+
+vector<VectorXd> ECLResults::GetValVectorSegXd(Results::Property prop,
+                                               string wn) {
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  switch (prop) {
+
+    case WellSegOilFlowRate: return smry_reader_->seg_sofrXd(wn);
+    case WellSegWatFlowRate: return smry_reader_->seg_swfrXd(wn);
+    case WellSegPress:       return smry_reader_->seg_sprpXd(wn);
+    case WellSegPressDrop:   return smry_reader_->seg_sprdXd(wn);
+    case WellSegWaterCut:    return smry_reader_->seg_swctXd(wn);
+    case WellSegXSecArea:    return smry_reader_->seg_scsaXd(wn);
+
+    case WellSegGasFlowRate: return smry_reader_->seg_sgfrXd(wn);
+
+    case WellSegOilFlowTotal: return smry_reader_->seg_sgfrXd(wn);
+    case WellSegWatFlowTotal: return smry_reader_->seg_sgfrXd(wn);
+    case WellSegGasFlowTotal: return smry_reader_->seg_sgfrXd(wn);
+    case WellSegLiqFlowTotal: return smry_reader_->seg_sgfrXd(wn);
+
+    default: {
+      string p = GetPropertyKey(prop);
+      E("[ECLResults] Requested property " + p + "is not a well segment property.");
     }
   }
 }

@@ -44,39 +44,40 @@ inline std::string base_path() {
   }
 }
 
-static std::string bin_dir_                  = base_path() + "/bin/";
-static std::string driver_example_           = base_path() + "/examples/driver.json";
-static std::string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
-static std::string directory_output_         = base_path() + "/fieldopt-output";
-static std::string norne_test_output_        = base_path() + "/fieldopt-output/norne_test";
-static std::string norne_driver_example_     = base_path() + "/examples/ECLIPSE/norne-simplified/fo_driver.1_rate.cs.json";
-static std::string norne_grid_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.EGRID";
-static std::string norne_atw_grid_           = base_path() + "/examples/Flow/norne/NORNE_ATW2013.EGRID";
-static std::string norne_deck_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.DATA";
-static std::string norne_sch_                = base_path() + "/examples/ECLIPSE/norne-simplified/INCLUDE/BC0407_HIST01122006.SCH";
-static std::string deck_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.DATA";
-static std::string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
-static std::string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
+static string bin_dir_                  = base_path() + "/bin/";
+static string driver_example_           = base_path() + "/examples/driver.json";
+static string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
+static string directory_output_         = base_path() + "/fieldopt-output";
+static string norne_test_output_        = base_path() + "/fieldopt-output/norne_test";
+static string norne_driver_example_     = base_path() + "/examples/ECLIPSE/norne-simplified/fo_driver.1_rate.cs.json";
+static string norne_grid_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.EGRID";
+static string norne_atw_grid_           = base_path() + "/examples/Flow/norne/NORNE_ATW2013.EGRID";
+static string norne_deck_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.DATA";
+static string norne_sch_                = base_path() + "/examples/ECLIPSE/norne-simplified/INCLUDE/BC0407_HIST01122006.SCH";
+static string deck_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.DATA";
+static string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
+static string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
 
-static std::string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
-static std::string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
+static string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
+static string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
 
-static std::string grid_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.EGRID";
-static std::string deck_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.DATA";
+static string grid_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.EGRID";
+static string deck_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.DATA";
 
-static std::string gprs_drv_5spot_           = base_path() + "/examples/ADGPRS/5spot/5SPOT.gprs";
-static std::string gprs_smry_json_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.json";
-static std::string gprs_smry_hdf5_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.vars.h5";
-static std::string gprs_base_5spot_          = base_path() + "/examples/ADGPRS/5spot/5SPOT";
-static std::string gprs_smry_gpt_hdf5_5spot_ = base_path() + "/examples/ADGPRS/5spot/5SPOT-gpt.vars.h5";
+static string gprs_drv_5spot_           = base_path() + "/examples/ADGPRS/5spot/5SPOT.gprs";
+static string gprs_smry_json_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.json";
+static string gprs_smry_hdf5_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.vars.h5";
+static string gprs_base_5spot_          = base_path() + "/examples/ADGPRS/5spot/5SPOT";
+static string gprs_smry_gpt_hdf5_5spot_ = base_path() + "/examples/ADGPRS/5spot/5SPOT-gpt.vars.h5";
 
-static std::string trajectories_             = base_path() + "/examples/ECLIPSE/norne-simplified/trajectories";
-static std::string cube_grid_                = base_path() + "/examples/ECLIPSE/cube_9x9/CUBE.EGRID";
-static std::string schedule_inset_           = base_path() + "/examples/ECLIPSE/schedule_inset.txt";
+static string trajectories_             = base_path() + "/examples/ECLIPSE/norne-simplified/trajectories";
+static string cube_grid_                = base_path() + "/examples/ECLIPSE/cube_9x9/CUBE.EGRID";
+static string schedule_inset_           = base_path() + "/examples/ECLIPSE/schedule_inset.txt";
 
-static std::string olympr37_dir_    = base_path() + "/examples/ECLIPSE/olympr37";
-static std::string olympr37_egrid_  = olympr37_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
-static std::string olympr37_driver_ = olympr37_dir_ + "/fo-drv.r001.c02-olymr37.icd-opt.apps.aug.json";
+static string olympr37_dir_    = base_path() + "/examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T01";
+static string olympr37_base_  = olympr37_dir_ + "/OLPZ_BCXX_R37_F37_W01";
+static string olympr37_egrid_  = olympr37_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
+static string olympr37_driver_ = olympr37_dir_ + "../drivers/fo-drv.r001.c02-olympr37.icd-opt.apps.aug.json";
 
 }
 }

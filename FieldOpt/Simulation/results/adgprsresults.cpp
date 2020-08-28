@@ -57,7 +57,7 @@ void AdgprsResults::DumpResults() {
 }
 
 double AdgprsResults::GetValue(Results::Property prop) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch(prop) {
     case FieldOilProdTotal : return smry_reader_->field_oil_prod_total_sc().back();
     case FieldGasProdTotal : return smry_reader_->field_gas_prod_total_sc().back();
@@ -72,7 +72,7 @@ double AdgprsResults::GetValue(Results::Property prop, QString well) {
 }
 
 double AdgprsResults::GetValue(Results::Property prop, int time_index) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch(prop) {
     case FieldOilProdTotal : return smry_reader_->field_oil_prod_total_sc()[time_index];
     case FieldGasProdTotal : return smry_reader_->field_gas_prod_total_sc()[time_index];
@@ -87,7 +87,7 @@ double AdgprsResults::GetValue(Results::Property prop, QString well, int time_in
 }
 
 std::vector<double> AdgprsResults::GetValueVector(Results::Property prop) {
-  if (!isAvailable()) throw RsltsNotAvailExc();
+  if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch(prop) {
     case FieldOilProdTotal : return smry_reader_->field_oil_prod_total_sc();
     case FieldGasProdTotal : return smry_reader_->field_gas_prod_total_sc();
