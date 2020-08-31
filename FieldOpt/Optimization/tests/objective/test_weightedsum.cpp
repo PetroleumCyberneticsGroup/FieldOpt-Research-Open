@@ -26,35 +26,35 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include "Optimization/objective/weightedsum.h"
 #include "Simulation/tests/test_resource_results.h"
-#include "Settings/tests/test_resource_settings.hpp"
-#include "Model/tests/test_resource_model.h"
-
 
 using namespace Optimization::Objective;
 using namespace Simulation::Results;
-using namespace Settings;
 
-namespace {
+namespace TestResources {
 
-class WeightedSumTest :
-  public ::testing::Test, public TestResources::TestResourceResults,
-  public TestResources::TestResourceModel {
+class WeightedSumTest : public TestResources::TestResourceResults,
+                        public TestResources::RunnerResources {
 
  protected:
-  WeightedSumTest() { }
+  WeightedSumTest() = default;
 
-  virtual ~WeightedSumTest() { }
+  ~WeightedSumTest() override = default;
 
-  virtual void SetUp() { }
+  void SetUp() override { }
 
-  virtual void TearDown() { }
+  void TearDown() override { }
+
+  Model::Model *model_ = new Model::Model(*settings_full_,
+                                          logger_);
 
 };
 
 TEST_F(WeightedSumTest, Value) {
-  auto *obj = new WeightedSum(settings_optimizer_, results_ecl_horzwell_, model_);
-  float wwpt = results_ecl_horzwell_->GetValue(Results::Property::CumulativeWellWaterProduction, "PROD", 10);
-  float fopt = results_ecl_horzwell_->GetValue(Results::Property::CumulativeOilProduction);
+  auto *obj = new WeightedSum(settings_optimizer_,
+                              results_ecl_horzwell_,
+                              model_);
+  auto wwpt = results_ecl_horzwell_->GetValue(Results::Property::WellWatProdTotal, "PROD", 10);
+  auto fopt = results_ecl_horzwell_->GetValue(Results::Property::FieldOilProdTotal);
   EXPECT_FLOAT_EQ(100.0, results_ecl_horzwell_->GetValue(Results::Property::Time, 10));
   EXPECT_FLOAT_EQ(wwpt, 524.5061);
   EXPECT_FLOAT_EQ(fopt, 187866.44);

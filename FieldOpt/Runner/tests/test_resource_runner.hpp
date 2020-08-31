@@ -163,6 +163,10 @@ class RunnerResources {
                                      QString::fromStdString(norne_test_output_),
                                      false);
 
+  Logger *logger_olympr37_T01_ = new Logger(rts_olympr37_T01_,
+                                     QString::fromStdString(olympr37_T01_test_out_),
+                                     false);
+
 };
 
 }

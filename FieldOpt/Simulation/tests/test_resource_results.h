@@ -25,32 +25,42 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef FIELDOPT_TEST_RESOURCE_RESULTS_H
 #define FIELDOPT_TEST_RESOURCE_RESULTS_H
 
+#include <gtest/gtest.h>
+
 #include "Settings/tests/test_resource_example_file_paths.hpp"
+#include "Settings/tests/test_resource_settings.hpp"
 #include "Simulation/results/eclresults.h"
 #include "Simulation/results/adgprsresults.h"
 
 namespace TestResources {
 
-class TestResourceResults {
+class TestResourceResults : public ::testing::Test,
+                            public TestResourceSettings {
 
  protected:
   TestResourceResults() {
-    results_ecl_horzwell_ = new Simulation::Results::ECLResults();
+    results_ecl_horzwell_ = new Simulation::Results::ECLResults(settings_full_);
     results_ecl_horzwell_->ReadResults(QString::fromStdString(ExampleFilePaths::ecl_base_horzwell));
 
-    results_adgprs_5spot_ = new Simulation::Results::AdgprsResults();
+    results_adgprs_5spot_ = new Simulation::Results::AdgprsResults(settings_full_);
     results_adgprs_5spot_->ReadResults(QString::fromStdString(ExampleFilePaths::gprs_smry_hdf5_5spot_));
+
+    results_olympr37_ = new Simulation::Results::ECLResults(settings_olympr37_);
+    results_olympr37_->ReadResults(QString::fromStdString(olympr37_T01_base_));
   }
 
-  virtual ~TestResourceResults() {
+  ~TestResourceResults() override {
     results_ecl_horzwell_->DumpResults();
     results_adgprs_5spot_->DumpResults();
+    results_olympr37_->DumpResults();
   }
 
  protected:
   Simulation::Results::ECLResults *results_ecl_horzwell_;
   Simulation::Results::AdgprsResults *results_adgprs_5spot_;
+  Simulation::Results::ECLResults *results_olympr37_;
 };
+
 }
 
 #endif //FIELDOPT_TEST_RESOURCE_RESULTS_H

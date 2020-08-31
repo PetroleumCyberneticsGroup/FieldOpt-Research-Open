@@ -30,20 +30,22 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/tests/test_resource_example_file_paths.hpp"
 #include "Settings/tests/test_resource_settings.hpp"
 
+#include "Simulation/tests/test_resource_results.h"
+
 using namespace Simulation::Results;
 using namespace TestResources::ExampleFilePaths;
-using ECLProp = Simulation::Results::ECLResults::Property;
 using namespace Printer;
 
 namespace {
 
-class ECLResultsTest : public ::testing::Test,
-                       public TestResources::TestResourceSettings {
+using ECLProp = Simulation::Results::ECLResults::Property;
+
+class ECLResultsTest : public TestResources::TestResourceResults {
  protected:
 
   ECLResultsTest() {
     results_ = new ECLResults(settings_full_);
-    results_olympr37_ = new ECLResults(settings_olympr37_);
+    // results_olympr37_ = new ECLResults(settings_olympr37_);
   }
 
   virtual ~ECLResultsTest() { }
@@ -54,18 +56,8 @@ class ECLResultsTest : public ::testing::Test,
     results_->DumpResults();
   }
 
-  void VectorXdstdInitResize(VectorXd &vXd, vector<double> &vstd, MatrixXd &data, vector<double> t) {
-    // TIME VectorXd <-> std
-    vXd.conservativeResize(t.size());
-    vXd(0) = 0.0;
-    vXd.block(1, 0, t.size()-1 , 1) =
-      data.block(0, 0, t.size()-1 , 1);
-    vstd.resize(vXd.size());
-    VectorXd::Map(&vstd[0], vXd.size()) = vXd;
-  }
-
   Results *results_;
-  Results *results_olympr37_;
+  // Results *results_olympr37_;
 };
 
 // TEST_F(ECLResultsTest, ReadSummary) {
@@ -130,8 +122,8 @@ class ECLResultsTest : public ::testing::Test,
 // }
 
 TEST_F(ECLResultsTest, ReadFieldWellSegData) {
-  auto fp = QString::fromStdString(olympr37_base_);
-  results_olympr37_->ReadResults(fp);
+  // auto fp = QString::fromStdString(olympr37_T01_base_);
+  // results_olympr37_->ReadResults(fp);
 
   string ln;
   Printer::pad_text(ln, 135, '-');
@@ -336,8 +328,8 @@ TEST_F(ECLResultsTest, ReadFieldWellSegData) {
 }
 
 TEST_F(ECLResultsTest, MatchRMSDataField) {
-  auto fp = QString::fromStdString(olympr37_base_);
-  results_olympr37_->ReadResults(fp);
+  // auto fp = QString::fromStdString(olympr37_T01_base_);
+  // results_olympr37_->ReadResults(fp);
 
   auto time = results_olympr37_->GetValueVector(ECLProp::Time);
   // auto step = results_olympr37_->GetValueVector(ECLProp::Step);
@@ -452,7 +444,7 @@ TEST_F(ECLResultsTest, MatchRMSDataField) {
 }
 
 TEST_F(ECLResultsTest, MatchRMSDataWells) {
-  auto fp = QString::fromStdString(olympr37_base_);
+  auto fp = QString::fromStdString(olympr37_T01_base_);
   results_olympr37_->ReadResults(fp);
 
   auto time = results_olympr37_->GetValueVector(ECLProp::Time);
@@ -551,8 +543,8 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
 }
 
 TEST_F(ECLResultsTest, MatchRMSDataSegs) {
-  auto fp = QString::fromStdString(olympr37_base_);
-  results_olympr37_->ReadResults(fp);
+  // auto fp = QString::fromStdString(olympr37_T01_base_);
+  // results_olympr37_->ReadResults(fp);
 
   auto time = results_olympr37_->GetValueVector(ECLProp::Time);
 
@@ -592,24 +584,26 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
   for (const auto& wn : results_olympr37_->getWells()) {
     auto sofr = results_olympr37_->GetValVectorSeg(ECLProp::WellSegOilFlowRate, wn);
     auto swfr = results_olympr37_->GetValVectorSeg(ECLProp::WellSegWatFlowRate, wn);
+    auto sgfr = results_olympr37_->GetValVectorSeg(ECLProp::WellSegGasFlowRate, wn);
+    auto slfr = results_olympr37_->GetValVectorSeg(ECLProp::WellSegLiqFlowRate, wn);
+
     auto sprp = results_olympr37_->GetValVectorSeg(ECLProp::WellSegPress, wn);
     auto sprd = results_olympr37_->GetValVectorSeg(ECLProp::WellSegPressDrop, wn);
     auto swct = results_olympr37_->GetValVectorSeg(ECLProp::WellSegWaterCut, wn);
     auto scsa = results_olympr37_->GetValVectorSeg(ECLProp::WellSegXSecArea, wn);
 
-    auto sgfr = results_olympr37_->GetValVectorSeg(ECLProp::WellSegGasFlowRate, wn);
-
     auto sofrXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegOilFlowRate, wn);
     auto swfrXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegWatFlowRate, wn);
+    auto sgfrXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegGasFlowRate, wn);
+    auto slfrXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegLiqFlowRate, wn);
+
     auto sprpXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegPress, wn);
     auto sprdXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegPressDrop, wn);
     auto swctXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegWaterCut, wn);
     auto scsaXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegXSecArea, wn);
 
-    auto sgfrXd = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegGasFlowRate, wn);
-
     for (int jj = 0; jj < sofr.size(); ++jj) {
-      // cout << "[ECLResultsTest] Seg#" << jj << endl;
+      cout << "[ECLResultsTest] Seg#" << jj << " [nsegs=" << sofr.size() << "] " << endl;
 
       rms.getRMSVectors(ECLProp::WellSegOilFlowRate, wn, jj, RMSsofrXd, RMSsofr, data, time);
       rms.getRMSVectors(ECLProp::WellSegWatFlowRate, wn, jj, RMSswfrXd, RMSswfr, data, time);
@@ -643,5 +637,55 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
     }
   }
 }
+
+TEST_F(ECLResultsTest, TestTotalComputation) {
+  auto fp = QString::fromStdString(olympr37_T01_base_);
+  results_olympr37_->ReadResults(fp);
+
+  string wn = "PRODX2";
+  auto time = results_olympr37_->GetValueVectorXd(ECLProp::Time);
+  auto step = results_olympr37_->GetValueVectorXd(ECLProp::Step);
+  auto wopr = results_olympr37_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
+  auto wopt = results_olympr37_->GetValueVectorXd(ECLProp::WellOilProdTotal, wn);
+
+  vector<double> rseg = vector<double>(time.size(), 0.0);
+  vector<double> tseg = vector<double>(time.size(), 0.0);
+
+  // loop through time at current segment
+  for (int kk = 0; kk < time.size(); ++kk) {
+    rseg[kk] = wopr(kk);
+  }
+  rseg[0] = 0.0;
+  tseg[0] = rseg[0] * step[0];
+  for (int kk = 1; kk < time.size(); ++kk) {
+    tseg[kk] = tseg[kk-1] + rseg[kk] * step[kk];
+  }
+
+  for (int kk = 1; kk < wopt.size(); ++kk) { // skip first component b/c set to 0
+    cout << "kk: " << kk << " (wopt(kk)-tseg[kk])/wopt(kk) = " << num2str((wopt(kk)-tseg[kk])/wopt(kk),2) << endl;
+    if (kk < 11) {
+      EXPECT_LT((wopt(kk)-tseg[kk])/wopt(kk), 0.40);
+    } else {
+      EXPECT_LT((wopt(kk)-tseg[kk])/wopt(kk), 0.10);
+    }
+  }
+}
+
+// TEST_F(ECLResultsTest, TestFieldValue) {
+//   auto time = results_olympr37_->GetValueVectorXd(ECLProp::Time);
+//   auto step = results_olympr37_->GetValueVectorXd(ECLProp::Step);
+//
+//   string wn = "PRODX2";
+//   auto sofr = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegOilFlowRate, wn);
+//   auto swfr = results_olympr37_->GetValVectorSegXd(ECLProp::WellSegWatFlowRate, wn);
+//
+//   auto wopr = results_olympr37_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
+//   auto wopt = results_olympr37_->GetValueVectorXd(ECLProp::WellOilProdTotal, wn);
+//
+//   for (int jj = 0; jj < time.size(); ++jj) {
+//
+//   }
+//
+// }
 
 }
