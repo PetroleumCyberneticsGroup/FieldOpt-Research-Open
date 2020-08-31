@@ -145,12 +145,12 @@ vector<double> ECLResults::GetValueVector(Results::Property prop,
     case WellWatInjRate:  return smry_reader_->wwir(wn);
     case WellGasInjRate:  return smry_reader_->wgir(wn);
 
-    // case WellBHP:         return smry_reader_->wbhp(wn);
-    // case WellWaterCut:    return smry_reader_->wwct(wn);
+    case WellBHP:         return smry_reader_->wbhp(wn);
+    case WellWaterCut:    return smry_reader_->wwct(wn);
 
     default: {
       string p = GetPropertyKey(prop);
-      E("[ECLResults] Requested property " + p + "is not a well property.");
+      E("[ECLResults->GetValueVector] Req. prop. " + p + " is not a well property.");
     }
   }
 }
@@ -178,7 +178,7 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
 
     default: {
       string p = GetPropertyKey(prop);
-      E("[ECLResults] Requested property " + p + "is not a field or misc property.");
+      E("[ECLResults->GetValueVectorXd] Requ. prop " + p + " is not a field or misc property.");
     }
   }
 }
@@ -202,12 +202,12 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop,
     case WellWatInjRate:  return smry_reader_->wwirXd(wn);
     case WellGasInjRate:  return smry_reader_->wgirXd(wn);
 
-    // case WellBHPXd:       return smry_reader_->wbhpXd(wn);
-    // case WellWaterCutXd:  return smry_reader_->wwctXd(wn);
+    case WellBHP:         return smry_reader_->wbhpXd(wn);
+    case WellWaterCut:    return smry_reader_->wwctXd(wn);
 
     default: {
       string p = GetPropertyKey(prop);
-      E("[ECLResults] Requested property " + p + "is not a field or misc property.");
+      E("[ECLResults->GetValueVectorXd] Req. prop. " + p + " is not a field or misc property.");
     }
   }
 }
@@ -219,21 +219,22 @@ vector<vector<double>> ECLResults::GetValVectorSeg(Results::Property prop,
 
     case WellSegOilFlowRate: return smry_reader_->seg_sofr(wn);
     case WellSegWatFlowRate: return smry_reader_->seg_swfr(wn);
+    case WellSegGasFlowRate: return smry_reader_->seg_sgfr(wn);
+    case WellSegLiqFlowRate: return smry_reader_->seg_slfr(wn);
+
     case WellSegPress:       return smry_reader_->seg_sprp(wn);
     case WellSegPressDrop:   return smry_reader_->seg_sprd(wn);
     case WellSegWaterCut:    return smry_reader_->seg_swct(wn);
     case WellSegXSecArea:    return smry_reader_->seg_scsa(wn);
 
-    case WellSegGasFlowRate: return smry_reader_->seg_sgfr(wn);
-
-    case WellSegOilFlowTotal: return smry_reader_->seg_sgfr(wn);
-    case WellSegWatFlowTotal: return smry_reader_->seg_sgfr(wn);
-    case WellSegGasFlowTotal: return smry_reader_->seg_sgfr(wn);
-    case WellSegLiqFlowTotal: return smry_reader_->seg_sgfr(wn);
+    case WellSegOilFlowTotal: return smry_reader_->seg_soft(wn);
+    case WellSegWatFlowTotal: return smry_reader_->seg_swft(wn);
+    case WellSegGasFlowTotal: return smry_reader_->seg_sgft(wn);
+    case WellSegLiqFlowTotal: return smry_reader_->seg_slft(wn);
 
     default: {
       string p = GetPropertyKey(prop);
-      E("[ECLResults] Requested property " + p + "is not a well segment property.");
+      E("[ECLResults->GetValVectorSeg] Req. pro " + p + " is not a well segment property.");
     }
   }
 }
@@ -245,21 +246,22 @@ vector<VectorXd> ECLResults::GetValVectorSegXd(Results::Property prop,
 
     case WellSegOilFlowRate: return smry_reader_->seg_sofrXd(wn);
     case WellSegWatFlowRate: return smry_reader_->seg_swfrXd(wn);
+    case WellSegGasFlowRate: return smry_reader_->seg_sgfrXd(wn);
+    case WellSegLiqFlowRate: return smry_reader_->seg_slfrXd(wn);
+
     case WellSegPress:       return smry_reader_->seg_sprpXd(wn);
     case WellSegPressDrop:   return smry_reader_->seg_sprdXd(wn);
     case WellSegWaterCut:    return smry_reader_->seg_swctXd(wn);
     case WellSegXSecArea:    return smry_reader_->seg_scsaXd(wn);
 
-    case WellSegGasFlowRate: return smry_reader_->seg_sgfrXd(wn);
-
-    case WellSegOilFlowTotal: return smry_reader_->seg_sgfrXd(wn);
-    case WellSegWatFlowTotal: return smry_reader_->seg_sgfrXd(wn);
-    case WellSegGasFlowTotal: return smry_reader_->seg_sgfrXd(wn);
-    case WellSegLiqFlowTotal: return smry_reader_->seg_sgfrXd(wn);
+    case WellSegOilFlowTotal: return smry_reader_->seg_softXd(wn);
+    case WellSegWatFlowTotal: return smry_reader_->seg_swftXd(wn);
+    case WellSegGasFlowTotal: return smry_reader_->seg_sgftXd(wn);
+    case WellSegLiqFlowTotal: return smry_reader_->seg_slftXd(wn);
 
     default: {
       string p = GetPropertyKey(prop);
-      E("[ECLResults] Requested property " + p + "is not a well segment property.");
+      E("[ECLResults] Requested property " + p + " is not a well segment property.");
     }
   }
 }
