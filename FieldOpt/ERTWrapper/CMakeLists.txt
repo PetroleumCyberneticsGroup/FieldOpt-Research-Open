@@ -34,9 +34,10 @@ endif()
 # Unit tests
 if (BUILD_TESTING)
     add_executable(test_ertwrapper ${ERTWRAPPER_TESTS})
+
     target_link_libraries(test_ertwrapper
-        fieldopt::ertwrapper
-        fieldopt::runner
+        PUBLIC fieldopt::ertwrapper
+        PUBLIC fieldopt::runner
         Qt5::Core
         ${Boost_LIBRARIES}
         ${gtest}
@@ -46,8 +47,13 @@ if (BUILD_TESTING)
     set_target_properties(test_ertwrapper
         PROPERTIES COMPILE_FLAGS "-fPIC")
 
+    target_include_directories(test_ertwrapper PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>)
+
     add_test(NAME test_ertwrapper
         COMMAND $<TARGET_FILE:test_ertwrapper>)
+
 endif()
 
 # Install ==================================================

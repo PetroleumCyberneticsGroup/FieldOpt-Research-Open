@@ -31,6 +31,7 @@ add_compile_options(-std=c++11)
 # Unit tests
 if (BUILD_TESTING)
 	add_executable(test_model ${MODEL_TESTS})
+
 	target_link_libraries(test_model
 			fieldopt::model
 			fieldopt::reservoir
@@ -43,7 +44,7 @@ if (BUILD_TESTING)
 endif()
 
 # Install ==================================================
-install( TARGETS model
+install(TARGETS model
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib/static)
