@@ -184,6 +184,10 @@ class RMSData {
                      Eigen::MatrixXd &data,
                      vector<double> t) {
     auto block_idx = getIdx(prop, wn, sn);
+
+    // cout << "--well name: " << wn << endl;
+    // cout << "--block_idx = [" << block_idx[0] << ", " << block_idx[1] << "]" << endl;
+
     vXd.conservativeResize(t.size());
     vXd(0) = 0.0;
     vXd.block(1, 0, t.size()-1 , 1) =

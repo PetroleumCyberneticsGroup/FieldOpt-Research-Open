@@ -6,9 +6,9 @@
     "VerbConf": {
         "iBoxLineWidth": 140,
         "Model": 1,
-        "Optim": 1,
+        "Optim": 4,
         "WICal": 1,
-        "Simul": 2,
+        "Simul": 6,
         "Runnr": 1,
         "Resvr": 1,
         "Setng": 1,
@@ -49,7 +49,16 @@
         },
         {
           "Comment": "",
-          "PropName": "GnGFunction",
+          "PropName": "SegWCTstd",
+          "Coefficient": -377.3887e-0,
+          "Wells": ["PRODX2"],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9]
+          ]
+        },
+        {
+          "Comment": "",
+          "PropName": "WellWBTTotal",
           "Coefficient": -377.3887e-0,
           "Wells": ["PRODX2"],
           "Segments": [
