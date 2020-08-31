@@ -1018,6 +1018,15 @@ const vector<vector<double> > &ECLSummaryReader::seg_sgfr(string wname) {
   return seg_sgfr_[wname];
 }
 
+const vector<vector<double> > &ECLSummaryReader::seg_slfr(string wname) {
+  for (int ii=0; ii < seg_slfr_[wname].size(); ++ii) {
+    if (seg_slfr_[wname][ii].empty()) {
+      warnPropertyZero("SLFR:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_slfr_[wname];
+}
+
 const vector<vector<double> > &ECLSummaryReader::seg_sprp(string wname) {
   for (int ii=0; ii < seg_sprp_[wname].size(); ++ii) {
     if (seg_sprp_[wname][ii].empty()) {
@@ -1301,6 +1310,15 @@ const vector<VectorXd > &ECLSummaryReader::seg_sgfrXd(string wname) {
   return seg_sgfrXd_[wname];
 }
 
+const vector<VectorXd > &ECLSummaryReader::seg_slfrXd(string wname) {
+  for (int ii=0; ii < seg_slfrXd_[wname].size(); ++ii) {
+    if (seg_slfrXd_[wname][ii].size() == 0) {
+      warnPropertyZero("SLFRXd:" + wname + ":" + num2str(ii));
+    }
+  }
+  return seg_slfrXd_[wname];
+}
+
 const vector<VectorXd > &ECLSummaryReader::seg_sprpXd(string wname) {
   for (int ii=0; ii < seg_sprpXd_[wname].size(); ++ii) {
     if (seg_sprpXd_[wname][ii].size() == 0) {
@@ -1452,9 +1470,12 @@ void ECLSummaryReader::initWellSegRates() {
             // loop through time at current segment
             for (int kk = 0; kk < time_.size(); ++kk) {
               rseg[kk] = double_vector_safe_iget(sofr, kk);
-              tseg[kk] = rseg[kk] * step_[kk];
             }
             rseg[0] = 0.0;
+            tseg[0] = rseg[0] * step_[0];
+            for (int kk = 1; kk < time_.size(); ++kk) {
+              tseg[kk] = tseg[kk-1] + rseg[kk] * step_[kk];
+            }
             seg_sofr_[wname].push_back(rseg);
             seg_soft_[wname].push_back(tseg);
             double_vector_free(sofr);
@@ -1478,9 +1499,12 @@ void ECLSummaryReader::initWellSegRates() {
             // loop through time at current segment
             for (int kk = 0; kk < time_.size(); ++kk) {
               rseg[kk] = double_vector_safe_iget(swfr, kk);
-              tseg[kk] = rseg[kk] * step_[kk];
             }
             rseg[0] = 0.0;
+            tseg[0] = rseg[0] * step_[0];
+            for (int kk = 1; kk < time_.size(); ++kk) {
+              tseg[kk] = tseg[kk-1] + rseg[kk] * step_[kk];
+            }
             seg_swfr_[wname].push_back(rseg);
             seg_swft_[wname].push_back(tseg);
             double_vector_free(swfr);
@@ -1504,9 +1528,13 @@ void ECLSummaryReader::initWellSegRates() {
             // loop through time at current segment
             for (int kk = 0; kk < time_.size(); ++kk) {
               rseg[kk] = double_vector_safe_iget(sgfr, kk);
-              tseg[kk] = rseg[kk] * step_[kk];
             }
             rseg[0] = 0.0;
+            tseg[0] = rseg[0] * step_[0];
+            for (int kk = 1; kk < time_.size(); ++kk) {
+              tseg[kk] = tseg[kk-1] + rseg[kk] * step_[kk];
+            }
+
             seg_sgfr_[wname].push_back(rseg);
             seg_sgft_[wname].push_back(tseg);
             double_vector_free(sgfr);
@@ -1641,10 +1669,10 @@ void ECLSummaryReader::initWellSegRates() {
           // ext_info(ss.str(), md_, cl_, 140, 2); ss.str("");
 
         } // for each well
-        cout << ln << endl;
 
         // dbg -- 2
         if (vp_.vSIM >= 6) {
+          cout << ln << endl;
           for (const auto &wname : wells_) {
             for (int jj = 0; jj < seg_sofr_[wname].size(); ++jj) {
               cout << "[ECLSummaryReader::initializeVectors() -- 2] Seg#" << jj << endl;
@@ -1662,6 +1690,7 @@ void ECLSummaryReader::initWellSegRates() {
           cout << ln << endl;
         }
 
+        return;
       } // if segments
     } // for each objf term
   } // if augmented objf type

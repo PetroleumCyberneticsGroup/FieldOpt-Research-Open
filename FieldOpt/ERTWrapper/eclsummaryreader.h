@@ -150,6 +150,7 @@ class ECLSummaryReader
   const vector<vector<double>> &seg_scsa(string wn); // WellSegXSecArea
 
   const vector<vector<double>> &seg_sgfr(string wn); // WellSegGasFlowRate
+  const vector<vector<double>> &seg_slfr(string wn); // WellSegLiqFlowRate
 
   const vector<vector<double>> &seg_soft(string wn); // WellSegOilFlowTotal
   const vector<vector<double>> &seg_swft(string wn); // WellSegWatFlowTotal
@@ -199,7 +200,8 @@ class ECLSummaryReader
   const vector<VectorXd> &seg_swctXd(string wn); // Xd -> WellSegWaterCut
   const vector<VectorXd> &seg_scsaXd(string wn); // Xd -> WellSegXSecArea
 
-  const vector<VectorXd> &seg_sgfrXd(string wn); // WellSegGasFlowRate
+  const vector<VectorXd> &seg_sgfrXd(string wn); // Xd -> WellSegGasFlowRate
+  const vector<VectorXd> &seg_slfrXd(string wn); // Xd -> WellSegLiqFlowRate
 
   const vector<VectorXd> &seg_softXd(string wn); // Xd -> WellSegOilFlowTotal
   const vector<VectorXd> &seg_swftXd(string wn); // Xd -> WellSegWatFlowTotal
