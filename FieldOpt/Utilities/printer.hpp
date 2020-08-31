@@ -69,7 +69,7 @@ using Eigen::Map;
 namespace Printer {
 
 inline string DBG_prntDbl(double argout,
-                              string fd="% 10.3e ",
+                              const string& fd="% 10.3e ",
                               string fn="") {
   stringstream ss;
   char buffer [100];
@@ -79,8 +79,8 @@ inline string DBG_prntDbl(double argout,
   return ss.str();
 }
 
-inline string DBG_prntVecXd(VectorXd vec, string mv="",
-                                string fv="% 10.3e ",
+inline string DBG_prntVecXd(VectorXd vec, const string& mv="",
+                                const string& fv="% 10.3e ",
                                 string fn="") {
   stringstream ss;
   if ( vec.size() > 0 ) {
@@ -89,7 +89,7 @@ inline string DBG_prntVecXd(VectorXd vec, string mv="",
     for (int ii = 0; ii < vec.size() - 1; ii++) {
       ss << DBG_prntDbl(vec(ii), fv);
     }
-    ss << DBG_prntDbl(vec(vec.size() - 1)) << "]";
+    ss << DBG_prntDbl(vec(vec.size() - 1), fv) << "]";
   } else {
     ss << "[ Empty ]";
   }

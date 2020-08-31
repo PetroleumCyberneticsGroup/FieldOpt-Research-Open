@@ -34,6 +34,7 @@ WeightedSum::WeightedSum(Settings::Optimizer *settings,
                          Simulation::Results::Results *results,
                          Model::Model *model) : Objective(settings) {
   results_ = results;
+  settings_ = settings;
   components_ = new QList<WeightedSum::Component *>();
 
   for (int i = 0; i < settings->objective().weighted_sum.size(); ++i) {

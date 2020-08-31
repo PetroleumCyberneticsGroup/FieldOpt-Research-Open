@@ -46,21 +46,24 @@ class Augmented : public Objective {
             Simulation::Results::Results *results,
             Model::Model *model);
 
+  double value() const override;
+
+ private:
+  void setUpAugTerms();
+
   struct Term {
     string prop_name_str;
     Results::Property prop_name;
     Results::Property prop_type;
     Results::Property prop_spec;
     double coeff;
+    vector<string> wells;
+    map<string, vector<int>> segments;
   };
 
-  void setUpAugTerms();
-
-  double value() const override;
-
- private:
   Simulation::Results::Results *results_;
   Settings::Optimizer *settings_;
+  Model::Model *model_;
 
   vector<Augmented::Term*> terms_;
 
