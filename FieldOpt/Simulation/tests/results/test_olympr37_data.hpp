@@ -114,6 +114,14 @@ class RMSData {
       } else if (wn == "INJD-16") {
         block_idx = {144, 3};
       }
+    } else if (prop == ECLProp::WellWaterCut) {
+      if (wn == "PRODX2") {
+        block_idx = {156, 11};
+      } else if (wn == "INJD-15") { // def.0
+        block_idx = {160, 11};
+      } else if (wn == "INJD-16") { // def.0
+        block_idx = {160, 11};
+      }
     } else if (prop == ECLProp::WellSegOilFlowRate) {
       if (wn == "PRODX2") {
         block_idx = {4, sn+1};
@@ -184,14 +192,17 @@ class RMSData {
                      Eigen::MatrixXd &data,
                      vector<double> t) {
     auto block_idx = getIdx(prop, wn, sn);
-
-    // cout << "--well name: " << wn << endl;
-    // cout << "--block_idx = [" << block_idx[0] << ", " << block_idx[1] << "]" << endl;
-
     vXd.conservativeResize(t.size());
-    vXd(0) = 0.0;
+
+    if (prop == ECLProp::WellBHP || prop == ECLProp::WellWaterCut)  {
+      vXd.block(0, 0, 1 , 1) =
+        data.block(block_idx[0], block_idx[1], 1 , 1);
+    } else {
+      vXd(0) = 0.0;
+    }
     vXd.block(1, 0, t.size()-1 , 1) =
       data.block(block_idx[0], block_idx[1], t.size()-1 , 1);
+
     vstd.resize(vXd.size());
     VectorXd::Map(&vstd[0], vXd.size()) = vXd;
   }

@@ -138,15 +138,15 @@ vector<double> ECLResults::GetValueVector(Results::Property prop,
     case WellWatInjTotal:  return smry_reader_->wwit(wn);
     case WellGasInjTotal:  return smry_reader_->wgit(wn);
 
+    case WellBHP:         return smry_reader_->wbhp(wn);
+    case WellWaterCut:    return smry_reader_->wwct(wn);
+
     case WellOilProdRate: return smry_reader_->wopr(wn);
     case WellWatProdRate: return smry_reader_->wwpr(wn);
     case WellGasProdRate: return smry_reader_->wgpr(wn);
     case WellLiqProdRate: return smry_reader_->wlpr(wn);
     case WellWatInjRate:  return smry_reader_->wwir(wn);
     case WellGasInjRate:  return smry_reader_->wgir(wn);
-
-    case WellBHP:         return smry_reader_->wbhp(wn);
-    case WellWaterCut:    return smry_reader_->wwct(wn);
 
     default: {
       string p = GetPropertyKey(prop);
@@ -183,8 +183,7 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
   }
 }
 
-VectorXd ECLResults::GetValueVectorXd(Results::Property prop,
-                                      string wn) {
+VectorXd ECLResults::GetValueVectorXd(Results::Property prop, string wn) {
   if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   switch (prop) {
 
@@ -195,15 +194,15 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop,
     case WellWatInjTotal:  return smry_reader_->wwitXd(wn);
     case WellGasInjTotal:  return smry_reader_->wgitXd(wn);
 
+    case WellBHP:         return smry_reader_->wbhpXd(wn);
+    case WellWaterCut:    return smry_reader_->wwctXd(wn);
+
     case WellOilProdRate: return smry_reader_->woprXd(wn);
     case WellWatProdRate: return smry_reader_->wwprXd(wn);
     case WellGasProdRate: return smry_reader_->wgprXd(wn);
     case WellLiqProdRate: return smry_reader_->wlprXd(wn);
     case WellWatInjRate:  return smry_reader_->wwirXd(wn);
     case WellGasInjRate:  return smry_reader_->wgirXd(wn);
-
-    case WellBHP:         return smry_reader_->wbhpXd(wn);
-    case WellWaterCut:    return smry_reader_->wwctXd(wn);
 
     default: {
       string p = GetPropertyKey(prop);

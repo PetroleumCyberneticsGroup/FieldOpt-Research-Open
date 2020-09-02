@@ -347,6 +347,9 @@ void ECLSummaryReader::initVectorsXd() {
     wlprXd_[wname] = Eigen::Map<VectorXd>(wlpr_[wname].data(), wlpr_[wname].size());
     wwirXd_[wname] = Eigen::Map<VectorXd>(wwir_[wname].data(), wwir_[wname].size());
     wgirXd_[wname] = Eigen::Map<VectorXd>(wgir_[wname].data(), wgir_[wname].size());
+
+    wbhpXd_[wname] = Eigen::Map<VectorXd>(wbhp_[wname].data(), wbhp_[wname].size());
+    wwctXd_[wname] = Eigen::Map<VectorXd>(wwct_[wname].data(), wwct_[wname].size());
   }
 }
 
@@ -362,12 +365,11 @@ void ECLSummaryReader::initVectorsSegXd() {
 
         seg_sofrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sofr_[wname][ii].data(), seg_sofr_[wname][ii].size()));
         seg_swfrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swfr_[wname][ii].data(), seg_swfr_[wname][ii].size()));
+        seg_sgfrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sgfr_[wname][ii].data(), seg_sgfr_[wname][ii].size()));
         seg_sprpXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sprp_[wname][ii].data(), seg_sprp_[wname][ii].size()));
         seg_sprdXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sprd_[wname][ii].data(), seg_sprd_[wname][ii].size()));
         seg_swctXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swct_[wname][ii].data(), seg_swct_[wname][ii].size()));
         seg_scsaXd_[wname].push_back(Eigen::Map<VectorXd>(seg_scsa_[wname][ii].data(), seg_scsa_[wname][ii].size()));
-
-        seg_sgfrXd_[wname].push_back(Eigen::Map<VectorXd>(seg_sgfr_[wname][ii].data(), seg_sgfr_[wname][ii].size()));
 
         seg_softXd_[wname].push_back(Eigen::Map<VectorXd>(seg_soft_[wname][ii].data(), seg_soft_[wname][ii].size()));
         seg_swftXd_[wname].push_back(Eigen::Map<VectorXd>(seg_swft_[wname][ii].data(), seg_swft_[wname][ii].size()));
@@ -471,6 +473,31 @@ void ECLSummaryReader::initializeWellRates() {
       wgir_[wname][0] = GetWellVar(wname, "WGIR", 0);
       double_vector_free(data);
     }
+
+    wbhp_[wname] = std::vector<double>(time_.size(), 0.0);
+    if (hasWellVar(wname, "WBHP")) {
+      int index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WBHP");
+      auto * data = ecl_sum_alloc_data_vector(ecl_sum_, index, true);
+      assert(double_vector_size(data) == time_.size());
+      for (int i = 0; i < time_.size(); ++i) {
+        wbhp_[wname][i] = double_vector_safe_iget(data, i);
+      }
+      wbhp_[wname][0] = GetWellVar(wname, "WBHP", 0);
+      double_vector_free(data);
+    }
+
+    wwct_[wname] = std::vector<double>(time_.size(), 0.0);
+    if (hasWellVar(wname, "WWCT")) {
+      int index = ecl_smspec_get_well_var_params_index(smspec, wname.c_str(), "WWCT");
+      auto * data = ecl_sum_alloc_data_vector(ecl_sum_, index, true);
+      assert(double_vector_size(data) == time_.size());
+      for (int i = 0; i < time_.size(); ++i) {
+        wwct_[wname][i] = double_vector_safe_iget(data, i);
+      }
+      wwct_[wname][0] = GetWellVar(wname, "WWCT", 0);
+      double_vector_free(data);
+    }
+
   }
 }
 

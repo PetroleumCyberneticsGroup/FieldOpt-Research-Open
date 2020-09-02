@@ -452,18 +452,17 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
   // -------------------------------------------------------
   RMSData rms = RMSData();
   auto data = rms.olympr37_.data;
-  string wn = "";
   int sn = 0;
 
   // Time
   VectorXd RMStimeXd;
   vector<double> RMStime;
-  rms.getRMSVectors(ECLProp::Time, wn, sn, RMStimeXd, RMStime, data, time);
+  rms.getRMSVectors(ECLProp::Time, "", sn, RMStimeXd, RMStime, data, time);
 
   // Step
   VectorXd RMSstepXd;
   vector<double> RMSstep;
-  rms.getRMSVectors(ECLProp::Step, wn, sn, RMSstepXd, RMSstep, data, time);
+  rms.getRMSVectors(ECLProp::Step, "", sn, RMSstepXd, RMSstep, data, time);
 
   // -------------------------------------------------------
   VectorXd RMSwoptXd;
@@ -479,9 +478,14 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
   VectorXd RMSwgitXd;
   vector<double> RMSwgit;
 
+  VectorXd RMSwbhpXd;
+  vector<double> RMSwbhp;
+  VectorXd RMSwwctXd;
+  vector<double> RMSwwct;
+
   for (const auto &wn : results_olympr37_->getWells()) {
 
-    auto time = results_olympr37_->GetValueVector(ECLProp::Time);
+    // auto time = results_olympr37_->GetValueVector(ECLProp::Time);
     // auto step = results_olympr37_->GetValueVector(ECLProp::Step);
 
     auto wopt = results_olympr37_->GetValueVector(ECLProp::WellOilProdTotal, wn);
@@ -497,6 +501,9 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
     auto wlpr = results_olympr37_->GetValueVector(ECLProp::WellLiqProdRate, wn);
     auto wwir = results_olympr37_->GetValueVector(ECLProp::WellWatInjRate, wn);
     auto wgir = results_olympr37_->GetValueVector(ECLProp::WellGasInjRate, wn);
+
+    auto wbhp = results_olympr37_->GetValueVector(ECLProp::WellBHP, wn);
+    auto wwct = results_olympr37_->GetValueVector(ECLProp::WellWaterCut, wn);
 
     auto timeXd = results_olympr37_->GetValueVector(ECLProp::Time);
     // auto stepXd = results_olympr37_->GetValueVector(ECLProp::Step);
@@ -515,12 +522,18 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
     auto wwirXd = results_olympr37_->GetValueVectorXd(ECLProp::WellWatInjRate, wn);
     auto wgirXd = results_olympr37_->GetValueVectorXd(ECLProp::WellGasInjRate, wn);
 
+    auto wbhpXd = results_olympr37_->GetValueVectorXd(ECLProp::WellBHP, wn);
+    auto wwctXd = results_olympr37_->GetValueVectorXd(ECLProp::WellWaterCut, wn);
+
     rms.getRMSVectors(ECLProp::WellOilProdTotal, wn, sn, RMSwoptXd, RMSwopt, data, time);
     rms.getRMSVectors(ECLProp::WellWatProdTotal, wn, sn, RMSwwptXd, RMSwwpt, data, time);
     rms.getRMSVectors(ECLProp::WellGasProdTotal, wn, sn, RMSwgptXd, RMSwgpt, data, time);
     rms.getRMSVectors(ECLProp::WellLiqProdTotal, wn, sn, RMSwlptXd, RMSwlpt, data, time);
     rms.getRMSVectors(ECLProp::WellWatInjTotal, wn, sn, RMSwwitXd, RMSwwit, data, time);
     rms.getRMSVectors(ECLProp::WellGasInjTotal, wn, sn, RMSwgitXd, RMSwgit, data, time);
+
+    rms.getRMSVectors(ECLProp::WellBHP, wn, sn, RMSwbhpXd, RMSwbhp, data, time);
+    rms.getRMSVectors(ECLProp::WellWaterCut, wn, sn, RMSwwctXd, RMSwwct, data, time);
 
     for (int ii = 0; ii < time.size(); ++ii) {
       // VectorXd data
@@ -531,6 +544,9 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
       EXPECT_FLOAT_EQ(wwitXd(ii), RMSwwitXd(ii));
       EXPECT_FLOAT_EQ(wgitXd(ii), RMSwgitXd(ii));
 
+      EXPECT_FLOAT_EQ(wbhpXd(ii), RMSwbhpXd(ii));
+      EXPECT_NEAR(wwctXd(ii), RMSwwctXd(ii), 1E-6);
+
       // std data
       EXPECT_FLOAT_EQ(wopt[ii], RMSwopt[ii]);
       EXPECT_FLOAT_EQ(wwpt[ii], RMSwwpt[ii]);
@@ -538,6 +554,9 @@ TEST_F(ECLResultsTest, MatchRMSDataWells) {
       EXPECT_FLOAT_EQ(wlpt[ii], RMSwlpt[ii]);
       EXPECT_FLOAT_EQ(wwit[ii], RMSwwit[ii]);
       EXPECT_FLOAT_EQ(wgit[ii], RMSwgit[ii]);
+
+      EXPECT_FLOAT_EQ(wbhp[ii], RMSwbhp[ii]);
+      EXPECT_NEAR(wwct[ii], RMSwwct[ii], 1E-6);
     }
   }
 }
@@ -551,18 +570,18 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
   // -------------------------------------------------------
   RMSData rms = RMSData();
   auto data = rms.olympr37_.data;
-  string wn = "";
+  // string wn = "";
   int sn = 0;
 
   // Time
   VectorXd RMStimeXd;
   vector<double> RMStime;
-  rms.getRMSVectors(ECLProp::Time, wn, sn, RMStimeXd, RMStime, data, time);
+  rms.getRMSVectors(ECLProp::Time, "", sn, RMStimeXd, RMStime, data, time);
 
   // Step
   VectorXd RMSstepXd;
   vector<double> RMSstep;
-  rms.getRMSVectors(ECLProp::Step, wn, sn, RMSstepXd, RMSstep, data, time);
+  rms.getRMSVectors(ECLProp::Step, "", sn, RMSstepXd, RMSstep, data, time);
 
   // -------------------------------------------------------
   VectorXd RMSsofrXd;
@@ -607,12 +626,11 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
 
       rms.getRMSVectors(ECLProp::WellSegOilFlowRate, wn, jj, RMSsofrXd, RMSsofr, data, time);
       rms.getRMSVectors(ECLProp::WellSegWatFlowRate, wn, jj, RMSswfrXd, RMSswfr, data, time);
+      rms.getRMSVectors(ECLProp::WellSegGasFlowRate, wn, jj, RMSsgfrXd, RMSsgfr, data, time);
       rms.getRMSVectors(ECLProp::WellSegPress, wn, jj, RMSsprpXd, RMSsprp, data, time);
       rms.getRMSVectors(ECLProp::WellSegPressDrop, wn, jj, RMSsprdXd, RMSsprd, data, time);
       rms.getRMSVectors(ECLProp::WellSegWaterCut, wn, jj, RMSwwctXd, RMSwwct, data, time);
       rms.getRMSVectors(ECLProp::WellSegXSecArea, wn, jj, RMSscsaXd, RMSscsa, data, time);
-
-      rms.getRMSVectors(ECLProp::WellSegGasFlowRate, wn, jj, RMSsgfrXd, RMSsgfr, data, time);
 
       for (int ii = 0; ii < time.size(); ++ii) {
 
@@ -626,12 +644,11 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
 
         EXPECT_FLOAT_EQ(sofr[jj][ii], sofrXd[jj](ii));
         EXPECT_FLOAT_EQ(swfr[jj][ii], swfrXd[jj](ii));
+        EXPECT_FLOAT_EQ(sgfr[jj][ii], sgfrXd[jj](ii));
         EXPECT_FLOAT_EQ(sprp[jj][ii], sprpXd[jj](ii));
         EXPECT_FLOAT_EQ(sprd[jj][ii], sprdXd[jj](ii));
         EXPECT_FLOAT_EQ(swct[jj][ii], swctXd[jj](ii));
         EXPECT_FLOAT_EQ(scsa[jj][ii], scsaXd[jj](ii));
-
-        EXPECT_FLOAT_EQ(sgfr[jj][ii], sgfrXd[jj](ii));
       }
       // cout << endl;
     }
