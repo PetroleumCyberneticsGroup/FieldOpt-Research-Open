@@ -68,6 +68,13 @@ using Eigen::Map;
 
 namespace Printer {
 
+inline void DBG_prntToFile(string fn, string sout, const string mod="a") {
+  FILE * pFile;
+  pFile = std::fopen(fn.c_str(), mod.c_str());
+  std::fprintf(pFile, "%s", sout.c_str());
+  fclose (pFile);
+}
+
 inline string DBG_prntDbl(double argout,
                               const string& fd="% 10.3e ",
                               string fn="") {
@@ -84,17 +91,18 @@ inline string DBG_prntVecXd(VectorXd vec, const string& mv="",
                                 string fn="") {
   stringstream ss;
   if ( vec.size() > 0 ) {
-    if (mv != "") ss << mv;
+    if (mv != "" && mv != ",") ss << mv;
     ss << "[";
     for (int ii = 0; ii < vec.size() - 1; ii++) {
       ss << DBG_prntDbl(vec(ii), fv);
+      if (mv == ",") ss << mv;
     }
     ss << DBG_prntDbl(vec(vec.size() - 1), fv) << "]";
   } else {
     ss << "[ Empty ]";
   }
 
-  // if (fn != "") DBG_printToFile(fn, ss.str() + "\n");
+  // if (fn != "") DBG_prntToFile(fn, ss.str() + "\n");
   return ss.str();
 }
 

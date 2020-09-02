@@ -77,12 +77,14 @@ static string schedule_inset_           = base_path() + "/examples/ECLIPSE/sched
 static string olympr37_T01_dir_      = base_path() + "/examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T01";
 static string olympr37_T01_base_     = olympr37_T01_dir_ + "/OLPZ_BCXX_R37_F37_W01";
 static string olympr37_T01_egrid_    = olympr37_T01_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
-static string olympr37_T01_driver_   = olympr37_T01_dir_ + "../drivers/fo-drv.r001.c02-olympr37.icd-opt.apps.aug.json";
 static string olympr37_T01_test_out_ = base_path() + "/fieldopt-output/olympr37_T01_test";
+
+static string olympr37_T01_driver_   = olympr37_T01_dir_ + "../drivers/fo-drv.r001.c02-olympr37.icd-opt.apps.aug.json";
 
 static string olympr37_T02_dir_      = base_path() + "/examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T02";
 static string olympr37_T02_base_     = olympr37_T02_dir_ + "/OLPZ_BCXX_R37_F37_W01";
 static string olympr37_T02_egrid_    = olympr37_T02_dir_ + "/OLPZ_BCXX_R37_F37_W01.EGRID";
+static string olympr37_T02_test_out_ = base_path() + "/fieldopt-output/olympr37_T02_test";
 
 }
 }

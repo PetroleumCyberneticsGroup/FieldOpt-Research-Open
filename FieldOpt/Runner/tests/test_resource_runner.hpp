@@ -92,6 +92,31 @@ class RunnerResources {
   };
 
   // -----------------------------------------------------
+  string olympr37_T02_driver_nm = "fo-drv.r001.c02-olympr37.icd-opt.apps.aug"; // same as T01!
+  string olympr37_T02_dir = "../examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T02/";
+  string olympr37_T02_driver = olympr37_T02_dir + "../../drivers/" + olympr37_T02_driver_nm + ".json";
+
+  string olympr37_T02_simexe = olympr37_T02_dir + "../../drivers/bash_e300_slbs.sh";
+  string olympr37_T02_xdir = "../fieldopt-output/olympr37/" + olympr37_T02_driver_nm;
+
+  string olympr37_T02_egrid = olympr37_T02_dir + "/OLPZ_BCXX_R37_F37_W01.EGRID";
+  string olympr37_T02_data = olympr37_T02_dir + "/OLPZ_BCXX_R37_F37_W01.DATA";
+
+  int argc_olympr37_T02 = 18;
+  const char *argv_olympr37_T02[18] = {
+    "FieldOpt", olympr37_T02_driver.c_str(),
+    olympr37_T02_xdir.c_str(),
+    "-r", "serial",
+    "-g", olympr37_T02_egrid.c_str(),
+    "-s", olympr37_T02_data.c_str(),
+    "-f",
+    "-e", olympr37_T02_simexe.c_str(),
+    "-v", "0",
+    "-n", "1", // threads-per-sim
+    "-t", "1000", // sim-timeout
+  };
+
+  // -----------------------------------------------------
   // string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.apps-t01.npv";
   string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv";
   string en_5spot_dir = "../examples/ECLIPSE/5spot_c04_flow_en10_perm";
@@ -154,6 +179,9 @@ class RunnerResources {
   Runner::RuntimeSettings *rts_olympr37_T01_ =
     new Runner::RuntimeSettings(argc_olympr37_T01, argv_olympr37_T01);
 
+  Runner::RuntimeSettings *rts_olympr37_T02_ =
+    new Runner::RuntimeSettings(argc_olympr37_T02, argv_olympr37_T02);
+
  protected:
   Logger *logger_ = new Logger(rts_,
                                QString::fromStdString(directory_output_),
@@ -166,6 +194,11 @@ class RunnerResources {
   Logger *logger_olympr37_T01_ = new Logger(rts_olympr37_T01_,
                                      QString::fromStdString(olympr37_T01_test_out_),
                                      false);
+
+  Logger *logger_olympr37_T02_ = new Logger(rts_olympr37_T02_,
+                                            QString::fromStdString(olympr37_T02_test_out_),
+                                            false);
+
 
 };
 

@@ -47,6 +47,9 @@ class TestResourceResults : public ::testing::Test,
 
     results_olympr37_ = new Simulation::Results::ECLResults(settings_olympr37_);
     results_olympr37_->ReadResults(QString::fromStdString(olympr37_T01_base_));
+
+    results_olympr37_ext_ = new Simulation::Results::ECLResults(settings_olympr37_);
+    results_olympr37_ext_->ReadResults(QString::fromStdString(olympr37_T02_base_));
   }
 
   ~TestResourceResults() override {
@@ -59,6 +62,7 @@ class TestResourceResults : public ::testing::Test,
   Simulation::Results::ECLResults *results_ecl_horzwell_;
   Simulation::Results::AdgprsResults *results_adgprs_5spot_;
   Simulation::Results::ECLResults *results_olympr37_;
+  Simulation::Results::ECLResults *results_olympr37_ext_;
 };
 
 }
