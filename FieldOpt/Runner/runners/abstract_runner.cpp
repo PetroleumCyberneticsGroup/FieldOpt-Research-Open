@@ -58,7 +58,7 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
   settings_ = nullptr;
   model_ = nullptr;
   simulator_ = nullptr;
-  objective_function_ = nullptr;
+  objf_ = nullptr;
   base_case_ = nullptr;
   optimizer_ = nullptr;
   bookkeeper_ = nullptr;
@@ -184,7 +184,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
     case Settings::Optimizer::ObjectiveType::WeightedSum: {
       auto tm = "Using WeightedSum-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objective_function_ =
+      objf_ =
         new Optimization::Objective::WeightedSum(settings_->optimizer(),
                                                  simulator_->results(),
                                                  model_);
@@ -194,7 +194,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
     case Settings::Optimizer::ObjectiveType::NPV: {
       auto tm = "Using NPV-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objective_function_ =
+      objf_ =
         new Optimization::Objective::NPV(settings_->optimizer(),
                                          simulator_->results(),
                                          model_);
@@ -204,7 +204,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
     case Settings::Optimizer::ObjectiveType::Augmented: {
       auto tm = "Using Augmented objective.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objective_function_ =
+      objf_ =
         new Optimization::Objective::Augmented(settings_->optimizer(),
                                                simulator_->results(),
                                                model_);
@@ -219,7 +219,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
 }
 
 void AbstractRunner::InitializeBaseCase() {
-  if (objective_function_ == nullptr || model_ == nullptr) {
+  if (objf_ == nullptr || model_ == nullptr) {
     string em = "ObjectiveFunction and Model must be initialized before BaseCase.";
     throw runtime_error(em);
   }
@@ -236,7 +236,11 @@ void AbstractRunner::InitializeBaseCase() {
 
   } else {
     model_->wellCost(settings_->optimizer());
-    base_case_->set_objf_value(objective_function_->value());
+    if (settings_->optimizer()->objective().type == Settings::Optimizer::ObjectiveType::Augmented) {
+      base_case_->set_objf_value(objf_->value(true));
+    } else {
+      base_case_->set_objf_value(objf_->value());
+    }
 
     string tm = "Base case objective function value set to ";
     tm += num2str(base_case_->objf_value(), 8, 1);

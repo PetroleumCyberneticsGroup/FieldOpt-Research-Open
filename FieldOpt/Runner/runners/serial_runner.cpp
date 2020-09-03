@@ -104,7 +104,7 @@ void SerialRunner::Execute()
                 int sim_time = time_span_seconds(start, end);
                 if (simulation_success) {
                     model_->wellCost(settings_->optimizer());
-                  new_case->set_objf_value(objective_function_->value());
+                  new_case->set_objf_value(objf_->value());
                     new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
                     new_case->SetSimTime(sim_time);
                     simulation_times_.push_back((sim_time));

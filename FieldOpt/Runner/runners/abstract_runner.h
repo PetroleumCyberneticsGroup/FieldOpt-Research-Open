@@ -67,10 +67,14 @@ class AbstractRunner
  private:
 
   /*!
-   * \brief Execute starts the actual optimization run and should not return until the optimization is done.
+   * \brief Execute starts the actual optimization run
+   * and should not return until the optimization is done.
    */
   virtual void Execute() = 0;
-  const double sentinel_value_ = 0.0001; //!< Value to be used as a sentinel value for the objective function of cases that cannot be evaluated.
+
+  //!< Value to be used as a sentinel value for the
+  //!< objective function of cases that cannot be evaluated.
+  const double sentinel_value_ = 0.0001;
 
   string md_ = "Runner";
   string cl_ = "AbstractRunner";
@@ -84,8 +88,9 @@ class AbstractRunner
   Settings::Settings *settings_;
   RuntimeSettings *runtime_settings_;
   Optimization::Case *base_case_;
+
   Optimization::Optimizer *optimizer_;
-  Optimization::Objective::Objective *objective_function_;
+  Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;
   std::vector<int> simulation_times_;
@@ -105,11 +110,14 @@ class AbstractRunner
   double sentinelValue() const;
 
   /*!
-   * @brief Get the timeout value to be used when starting simulations. It is calculated from the recorded
-   * (successful) simulation times and the timeout value provided as an argument when running the program.
+   * @brief Get timeout value to be used when starting
+   * simulations. It is calculated from the recorded
+   * (successful) simulation times and the timeout value
+   * provided as an argument when running the program.
    *
-   * If there either have not been any recorded simulation times or the timeout argument was not provided, 10,000 will
-   * be returned.
+   * If there either have not been any recorded simulation
+   * times or the timeout argument was not provided, 10,000
+   * will be returned.
    * @return
    */
   int timeoutValue() const;
@@ -122,12 +130,17 @@ class AbstractRunner
   void InitializeBaseCase();
   void InitializeOptimizer();
   void InitializeBookkeeper();
-  void FinalizeInitialization(bool write_logs); //!< Write the pre-run summary
-  void FinalizeRun(bool write_logs); //!< Finalize the run, writing data to the summary log.
+
+  //!< Write the pre-run summary
+  void FinalizeInitialization(bool write_logs);
+
+  //!< Finalize the run, writing data to the summary log.
+  void FinalizeRun(bool write_logs);
 
   /*!
    * @brief Initialize the logger.
-   * @param output_subdir Optional subdir in the output dir to write the logs in.
+   * @param output_subdir Optional subdir in
+   * the output dir to write the logs in.
    */
   void InitializeLogger(QString output_subdir="", bool write_logs=true);
 };

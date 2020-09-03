@@ -37,6 +37,7 @@ using Printer::num2str;
 using Printer::DBG_prntDbl;
 using Printer::DBG_prntVecXd;
 using Printer::DBG_prntMatXd;
+using Printer::DBG_prntToFile;
 
 using ECLProp = Simulation::Results::Results::Property;
 
@@ -49,18 +50,13 @@ Augmented::Augmented(Settings::Optimizer *settings,
   setUpAugTerms();
 }
 
-// ECLProp::WellSegOilFlowRate
-// ECLProp::WellSegWatFlowRate
-// ECLProp::WellSegPress
-// ECLProp::WellSegPressDrop
-// ECLProp::WellSegWaterCut
-// ECLProp::WellSegXSecArea
-
 double Augmented::value() const {
   stringstream ss;
-  // auto timeXd_ = results_->GetValueVectorXd(results_->Time);
-  auto stepXd_ = results_->GetValueVectorXd(results_->Step);
-  auto ntstep = stepXd_.size();
+  auto timeXd = results_->GetValueVectorXd(results_->Time);
+  auto stepXd = results_->GetValueVectorXd(results_->Step);
+  auto ntstep = stepXd.size();
+
+  auto vstep = VectorXd::LinSpaced(ntstep, 1, ntstep);
   double value = 0.0;
 
   try {
@@ -69,12 +65,15 @@ double Augmented::value() const {
 
       if (term->prop_type == ECLProp::FieldTotal) {
         auto rate_vec = results_->GetValueVectorXd(term->prop_spec);
-        assert(stepXd_.size() == rate_vec.size());
-        t_val = term->coeff * (stepXd_.cwiseProduct(rate_vec)).sum();
+        assert(stepXd.size() == rate_vec.size());
+        t_val = term->coeff * (stepXd.cwiseProduct(rate_vec)).sum();
 
       } else if (term->prop_type == ECLProp::GnGFunction) {
-        if (term->prop_spec == ECLProp::SegWCTstd) {
+        if (term->prop_spec == ECLProp::SegWCTStdEnd || term->prop_spec == ECLProp::SegWCTStdWbt) {
           for (const auto& wn : term->wells) {
+
+            int nsegs = term->segments[wn].size();
+            VectorXd vsegs = VectorXd::LinSpaced(nsegs, 1, nsegs);
 
             // computing alternative well-liq-flow-total (wlft_s) as sum of segment-liquid-flow-totals (slft)
             // instead of using original wlft since wlft is computed using time-steps while slft's are computed
@@ -84,59 +83,76 @@ double Augmented::value() const {
 
             // computing wlft_s:
             double wlft_s = 0.0;
-            for (int jj=0; jj < term->segments[wn].size(); ++jj) {
+            for (int jj=0; jj < nsegs; ++jj) {
               wlft_s += slft[jj](ntstep-1);
             }
 
             // computing weight segment flow total (w_slft)
-            VectorXd w_slft(term->segments[wn].size(), 1);
-            for (int jj=0; jj < term->segments[wn].size(); ++jj) {
+            VectorXd w_slft(nsegs, 1);
+            for (int jj=0; jj < nsegs; ++jj) {
               w_slft(jj) = slft[jj](ntstep-1) / wlft_s;
             }
+            dbg(0, w_slft);
 
-            ss << "weight segment flow total (w_slft): " + DBG_prntVecXd(w_slft, "", "% 4.3f");
-            ss << "; sum: " + num2str(w_slft.sum(),3,0);
+            // segment/well-water-cut
+            vector<VectorXd> swct = results_->GetValVectorSegXd(ECLProp::WellSegWaterCut, wn);
+            VectorXd wwct = results_->GetValueVectorXd(ECLProp::WellWaterCut, wn);
+
+            // (relative) standard deviation at each report time
+            VectorXd vec(nsegs), sd_vec(ntstep), rsd_vec(ntstep);
+            vec.fill(0); sd_vec.fill(0); rsd_vec.fill(0);
+            for (int ii=0; ii < ntstep; ++ii) {
+              for (int jj=0; jj < nsegs; ++jj) {
+                vec(jj) = (w_slft(jj) * swct[jj](ii));
+              }
+              // sample standard deviation, i.e., x.sum()/(N-1)
+              sd_vec(ii) = std::sqrt((vec.array() - vec.mean()).square().sum()/(nsegs-1));
+              rsd_vec(ii) = sd_vec(ii) * 100 / vec.mean();
+              dbg(1, vec);
+            }
+            dbg(2, timeXd, sd_vec, rsd_vec);
+
+            // compute splines that approximate sd over time
+            // (typically, sd will increase with time)
+            int const spl_dim = 1;
+            const vector<int> spl_deg = {1, 2};
+            Spline<double, spl_dim> spline_l, spline_q;
+
+            spline_l = SplineFitting< Spline<double, 1> >::Interpolate(
+              sd_vec.transpose(), spl_deg[0], timeXd);
+
+            spline_q = SplineFitting< Spline<double, 1> >::Interpolate(
+              sd_vec.transpose(), spl_deg[1], timeXd);
+
+            VectorXd sd_vec_spline_l(ntstep), sd_vec_spline_q(ntstep);
+            for (int jj = 0; jj < timeXd.size(); ++jj) {
+              sd_vec_spline_l(jj) = spline_l(timeXd(jj)).value();
+              sd_vec_spline_q(jj) = spline_q(timeXd(jj)).value();
+            }
+            dbg(3, sd_vec_spline_l, sd_vec_spline_q);
+
+            // select time point (@end or @wbt)
+            int wbt_idx = 0;
+            wbt_idx = (int)wwct.rows() - 1;
+
+            if (term->prop_spec == ECLProp::SegWCTStdWbt) {
+              for (int ii=0; ii < wwct.size(); ++ii) {
+                if (wwct(ii) > .45) {
+                  wbt_idx = ii;
+                  break;
+                }
+              }
+            }
+
+            ss << "[ECLProp::SegWCTStdWbt] wbt_idx = " << wbt_idx << "; sd_vec(wbt_idx) = " << sd_vec(wbt_idx) << endl;
+            t_val = sd_vec(wbt_idx);
             info(ss.str(), vp_.lnw); ss.str("");
 
-            // segment-water-cut
-            vector<VectorXd> swct = results_->GetValVectorSegXd(ECLProp::WellSegWaterCut, wn);
-
-            //
-            VectorXd wlfr = results_->GetValueVectorXd(ECLProp::WellLiqProdRate, wn);
-
-
-
-
-
-            // VectorXd wlft = stepXd_.cwiseProduct(wlfr));
-            //
-            // vector<VectorXd> sofr = results_->GetValVectorSegXd(ECLProp::WellSegOilFlowRate, wn);
-            // vector<VectorXd> swfr = results_->GetValVectorSegXd(ECLProp::WellSegWatFlowRate, wn);
-
-            // vector<VectorXd> slfr, slft, soft, swft;
-
-
-            //
-
-            //   slfr.push_back(sofr[ii] + swfr[ii]);
-            //
-            //   soft.push_back(stepXd_.cwiseProduct(sofr[ii]));
-            //   swft.push_back(stepXd_.cwiseProduct(swfr[ii]));
-            //   slft.push_back(soft[ii] + swft[ii]);
-            //
-            //   sftw(ii) = lrate.cwiseQuotient(wlfr).norm();
-            // }
-
+            // dbg(4, VectorXd(t_val));
           }
         }
 
-        //   // compute segment rate ratio
-
-
-
       } else if (term->prop_spec == ECLProp::WellWBTTotal) {
-
-
 
       }
 
@@ -183,9 +199,13 @@ void Augmented::setUpAugTerms() {
       term->prop_type = ECLProp::FieldTotal;
       term->prop_spec = ECLProp::FieldWatInjRate;
 
-    } else if (term->prop_name == ECLProp::SegWCTstd) {
+    } else if (term->prop_name == ECLProp::SegWCTStdEnd) {
       term->prop_type = ECLProp::GnGFunction;
-      term->prop_spec = ECLProp::SegWCTstd;
+      term->prop_spec = ECLProp::SegWCTStdEnd;
+
+    } else if (term->prop_name == ECLProp::SegWCTStdWbt) {
+      term->prop_type = ECLProp::GnGFunction;
+      term->prop_spec = ECLProp::SegWCTStdWbt;
 
     } else if (term->prop_name == ECLProp::WellWBTTotal) {
       term->prop_type = ECLProp::GnGFunction;
@@ -203,6 +223,59 @@ void Augmented::setUpAugTerms() {
       im += ", prop_spec: " + results_->GetPropertyKey(term->prop_spec);
       info(im, vp_.lnw);
     }
+  }
+}
+
+void Augmented::dbg(int dm,
+                    const VectorXd& v0,
+                    const VectorXd& v1,
+                    const VectorXd& v2,
+                    const VectorXd& v3) const {
+  stringstream ss;
+
+  // dbg(0, w_slft);
+  if (dm==0 && vp_.vOPT >= 4) {
+    // weights liq seg flow total
+    ss << "weights_slft    = " + DBG_prntVecXd(v0, ",", "% 5.3f");
+    ss << " # sum = " + num2str(v0.sum(), 3, 0);
+    DBG_prntToFile(fl_, ss.str() + "\n", "w");
+    info(ss.str(), vp_.lnw); ss.str("");
+  }
+
+  // dbg(2, timeXd, sd_vec, rsd_vec);
+  if (dm==1 && vp_.vOPT >= 5) {
+    ss << "weighted_swct   = " + DBG_prntVecXd(v0, ",", "% 8.6f");
+    DBG_prntToFile(fl_, ss.str() + "\n");
+    info(ss.str(), vp_.lnw); ss.str("");
+  }
+
+  // dbg(2, timeXd, sd_vec, rsd_vec);
+  if (dm==2 && vp_.vOPT >= 4) {
+    if (vp_.vOPT >= 5) {
+      ss << "time            = " + DBG_prntVecXd(v0, ",", "% 5.3f");
+      DBG_prntToFile(fl_, ss.str()+ "\n");
+      info(ss.str(), vp_.lnw); ss.str("");
+    }
+    ss << "sd_vec_data     = " + DBG_prntVecXd(v1, ",", "% 5.3f");
+    ss << " # sum: " + num2str(v1.sum(),3,0);
+    ss << " mean: " + num2str(v1.mean(),3,0);
+    if (vp_.vOPT >= 5) DBG_prntToFile(fl_, ss.str() + "\n");
+    info(ss.str(), vp_.lnw); ss.str("");
+
+    ss << "rsd_vec_data    = " + DBG_prntVecXd(v2, ",", "% 5.3f");
+    info(ss.str(), vp_.lnw); ss.str("");
+  }
+
+  // dbg(3, sd_vec_spline_l, sd_vec_spline_q);
+  if (dm==3 && vp_.vOPT >= 4) {
+    ss << "sd_vec_spline_l = " + DBG_prntVecXd(v0, ",", "% 5.3f");
+    DBG_prntToFile(fl_, ss.str() + "\n"); info(ss.str(), vp_.lnw); ss.str("");
+    ss << "sd_vec_spline_q = " + DBG_prntVecXd(v1, ",", "% 5.3f");
+    DBG_prntToFile(fl_, ss.str() + "\n"); info(ss.str(), vp_.lnw); ss.str("");
+  }
+
+  if (dm==4 && vp_.vOPT >= 4) {
+
   }
 }
 

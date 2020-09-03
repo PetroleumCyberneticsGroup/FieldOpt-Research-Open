@@ -222,7 +222,7 @@ void SynchronousMPIRunner::Execute() {
                     tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS;
                     printMessage("Setting objective function value.", 2);
                     model_->wellCost(settings_->optimizer());
-                  worker_->GetCurrentCase()->set_objf_value(objective_function_->value());
+                  worker_->GetCurrentCase()->set_objf_value(objf_->value());
                     worker_->GetCurrentCase()->SetSimTime(sim_time);
                     worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
                     simulation_times_.push_back(sim_time);

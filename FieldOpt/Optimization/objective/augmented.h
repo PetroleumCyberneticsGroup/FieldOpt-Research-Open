@@ -27,6 +27,9 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "objective.h"
 #include "Settings/model.h"
 #include "Simulation/results/results.h"
+#include "Utilities/verbosity.h"
+
+#include <unsupported/Eigen/Splines>
 
 namespace Optimization {
 namespace Objective {
@@ -47,9 +50,15 @@ class Augmented : public Objective {
             Model::Model *model);
 
   double value() const override;
+  void setDbgFileName(string fl) { fl_ = fl; }
 
  private:
   void setUpAugTerms();
+  void dbg(const int dm=0,
+           const VectorXd& v0 = VectorXd::Zero(0),
+           const VectorXd& v1 = VectorXd::Zero(0),
+           const VectorXd& v2 = VectorXd::Zero(0),
+           const VectorXd& v3 = VectorXd::Zero(0)) const;
 
   struct Term {
     string prop_name_str;
@@ -68,6 +77,11 @@ class Augmented : public Objective {
   vector<Augmented::Term*> terms_;
 
   string cl_ = "Augmented";
+
+  string fl_ = "dbg_aug_obj.py";
+  VectorXd vd_ = VectorXd::Zero(0);
+
+  // string fl_ = string(BINDIR) + "/bin/dbg_aug_obj.txt";
 
 };
 
