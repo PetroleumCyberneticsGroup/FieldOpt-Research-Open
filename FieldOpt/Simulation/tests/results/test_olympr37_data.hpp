@@ -179,7 +179,7 @@ class RMSData {
         block_idx = {160, 11};
       }
     } else {
-      std::runtime_error("No idx!!");
+      throw std::runtime_error("No idx!!");
     }
     return block_idx;
   }

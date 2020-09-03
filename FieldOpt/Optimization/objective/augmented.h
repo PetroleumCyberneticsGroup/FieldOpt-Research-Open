@@ -36,6 +36,7 @@ namespace Objective {
 
 using std::string;
 using std::vector;
+using std::accumulate;
 using namespace Simulation::Results;
 
 class Augmented : public Objective {
@@ -49,16 +50,21 @@ class Augmented : public Objective {
             Simulation::Results::Results *results,
             Model::Model *model);
 
-  double value() const override;
+  double value() const override {};
+  double value(bool base_case = false) override;
+
   void setDbgFileName(string fl) { fl_ = fl; }
 
  private:
   void setUpAugTerms();
+  void setUpWaterCutLimit();
+
   void dbg(const int dm=0,
            const VectorXd& v0 = VectorXd::Zero(0),
            const VectorXd& v1 = VectorXd::Zero(0),
            const VectorXd& v2 = VectorXd::Zero(0),
-           const VectorXd& v3 = VectorXd::Zero(0)) const;
+           const VectorXd& v3 = VectorXd::Zero(0),
+           const double& d0 = 0.0) const;
 
   struct Term {
     string prop_name_str;
@@ -66,6 +72,8 @@ class Augmented : public Objective {
     Results::Property prop_type;
     Results::Property prop_spec;
     double coeff;
+    bool active;
+    string scaling;
     vector<string> wells;
     map<string, vector<int>> segments;
   };
@@ -75,14 +83,17 @@ class Augmented : public Objective {
   Model::Model *model_;
 
   vector<Augmented::Term*> terms_;
+  vector<double> npv_coeffs_ = {0.0, 0.0, 0.0};
+  double wcut_limit_ = 1.0;
+  double wbreakthrough_ = 0.1;
+  vector<double>  objf_scal_;
 
+  string im_ = "", wm_ = "", em_ = "";
   string cl_ = "Augmented";
+  string md_ = "Optimization::Objective";
 
-  string fl_ = "dbg_aug_obj.py";
   VectorXd vd_ = VectorXd::Zero(0);
-
-  // string fl_ = string(BINDIR) + "/bin/dbg_aug_obj.txt";
-
+  string fl_ = "dbg_aug_obj.py";
 };
 
 }

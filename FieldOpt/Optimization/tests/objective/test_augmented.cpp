@@ -44,20 +44,20 @@ class AugmentedObjTest : public TestResources::TestResourceResults,
 
  protected:
   AugmentedObjTest() {
-    obj_olympr37_ = new Augmented(settings_olympr37_opt_,
-                                  results_olympr37_,
-                                  model_olympr37_);
 
     model_olympr37_ = new Model::Model(*settings_olympr37_,
                                        logger_olympr37_T01_);
 
+    obj_olympr37_ = new Augmented(settings_olympr37_opt_,
+                                  results_olympr37_,
+                                  model_olympr37_);
+
+    model_olympr37_ext_ = new Model::Model(*settings_olympr37_,
+                                           logger_olympr37_T02_);
+
     obj_olympr37_ext_ = new Augmented(settings_olympr37_opt_,
                                   results_olympr37_ext_,
                                   model_olympr37_ext_);
-
-    model_olympr37_ext_ = new Model::Model(*settings_olympr37_,
-                                       logger_olympr37_T02_);
-
   }
 
   ~AugmentedObjTest() override = default;
@@ -72,12 +72,12 @@ class AugmentedObjTest : public TestResources::TestResourceResults,
 
 TEST_F(AugmentedObjTest, Value) {
   obj_olympr37_->setDbgFileName("dbg_aug_obj.py");
-  obj_olympr37_->value();
+  obj_olympr37_->value(true);
 }
 
 TEST_F(AugmentedObjTest, ValueExt) {
   obj_olympr37_ext_->setDbgFileName("dbg_aug_obj_ext.py");
-  obj_olympr37_ext_->value();
+  obj_olympr37_ext_->value(true);
 }
 
 }

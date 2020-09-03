@@ -31,7 +31,7 @@ namespace Objective {
 using Printer::ext_warn;
 using Printer::ext_info;
 using Printer::info;
-using Printer::error;
+using Printer::ext_error;
 using Printer::num2str;
 
 using Printer::DBG_prntDbl;
@@ -41,16 +41,22 @@ using Printer::DBG_prntToFile;
 
 using ECLProp = Simulation::Results::Results::Property;
 
+using std::runtime_error;
+
 Augmented::Augmented(Settings::Optimizer *settings,
                      Simulation::Results::Results *results,
                      Model::Model *model) : Objective(settings) {
   settings_ = settings;
   results_ = results;
   model_ = model;
+  if (model_ == nullptr)
+    ext_error("Initialize model", md_, cl_, vp_.lnw);
+
   setUpAugTerms();
+  setUpWaterCutLimit();
 }
 
-double Augmented::value() const {
+double Augmented::value(bool base_case) {
   stringstream ss;
   auto timeXd = results_->GetValueVectorXd(results_->Time);
   auto stepXd = results_->GetValueVectorXd(results_->Step);
@@ -63,13 +69,15 @@ double Augmented::value() const {
     for (auto term : terms_) {
       double t_val = 0.0;
 
-      if (term->prop_type == ECLProp::FieldTotal) {
+      if (term->prop_type == ECLProp::FieldTotal && term->active) {
         auto rate_vec = results_->GetValueVectorXd(term->prop_spec);
         assert(stepXd.size() == rate_vec.size());
         t_val = term->coeff * (stepXd.cwiseProduct(rate_vec)).sum();
 
-      } else if (term->prop_type == ECLProp::GnGFunction) {
-        if (term->prop_spec == ECLProp::SegWCTStdEnd || term->prop_spec == ECLProp::SegWCTStdWbt) {
+      } else if (term->prop_type == ECLProp::GnGFunction && term->active) {
+        if (term->prop_spec == ECLProp::SegWCTStdEnd
+          || term->prop_spec == ECLProp::SegWCTStdWcl
+          || term->prop_spec == ECLProp::SegWCTStdWbt) {
           for (const auto& wn : term->wells) {
 
             int nsegs = term->segments[wn].size();
@@ -131,29 +139,80 @@ double Augmented::value() const {
             }
             dbg(3, sd_vec_spline_l, sd_vec_spline_q);
 
-            // select time point (@end or @wbt)
-            int wbt_idx = 0;
-            wbt_idx = (int)wwct.rows() - 1;
+            // select time point (@end, @wcl or @wbt), def = @end
+            int lim_idx = (int)wwct.rows() - 1;
+            double limit = 1.0; // SegWCTStdEnd
 
-            if (term->prop_spec == ECLProp::SegWCTStdWbt) {
+            if (term->prop_spec == ECLProp::SegWCTStdWcl
+              || term->prop_spec == ECLProp::SegWCTStdWbt) {
+
+              if (term->prop_spec == ECLProp::SegWCTStdWcl) {
+                limit = wcut_limit_;
+              } else if (term->prop_spec == ECLProp::SegWCTStdWbt) {
+                limit = wbreakthrough_;
+              }
+
               for (int ii=0; ii < wwct.size(); ++ii) {
-                if (wwct(ii) > .45) {
-                  wbt_idx = ii;
+                if (wwct(ii) > limit) {
+                  lim_idx = ii;
                   break;
                 }
               }
             }
 
-            ss << "[ECLProp::SegWCTStdWbt] wbt_idx = " << wbt_idx << "; sd_vec(wbt_idx) = " << sd_vec(wbt_idx) << endl;
-            t_val = sd_vec(wbt_idx);
-            info(ss.str(), vp_.lnw); ss.str("");
+            // function definition
+            t_val = (1 / sqrt(sd_vec(lim_idx)) - sqrt(2));
+            VectorXd vdbg(3); vdbg << lim_idx, sd_vec(lim_idx), t_val;
+            dbg(4, vdbg);
 
-            // dbg(4, VectorXd(t_val));
+            // scaling
+            double objf_scal = 1.0;
+            if (term->scaling == "None") {
+              ss << "None";
+
+            } else if (term->scaling == "NPV0" && model_->getObjfScalSz() == 3) {
+              objf_scal = model_->getObjfScalVal();
+
+            } else if (term->scaling == "wellNPV" && model_->getObjfScalSz() == 3) {
+              // npv measure for the production up to lim_idx
+              VectorXd wopr = results_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
+              VectorXd wwpr = results_->GetValueVectorXd(ECLProp::WellWatProdRate, wn);
+              VectorXd wwir = results_->GetValueVectorXd(ECLProp::WellWatInjRate, wn);
+
+              auto step = stepXd.block(0,0, lim_idx,1);
+              auto opr = wopr.block(0,0, lim_idx,1);
+              auto wpr = wwpr.block(0,0, lim_idx,1);
+              auto wir = wwir.block(0,0, lim_idx,1);
+
+              auto wopt = (step.cwiseProduct(opr)).sum();
+              auto wwpt = (step.cwiseProduct(wpr)).sum();
+              auto wwit = (step.cwiseProduct(wir)).sum();
+
+              // well npv weighted
+              objf_scal = npv_coeffs_[0] * wopt + npv_coeffs_[1] * wwpt + npv_coeffs_[2] * wwit;
+            }
+
+            t_val *= objf_scal;
+            ss << "scal.type: " << term->scaling << " -- ";
+            ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
+            ss << "t_val (scaled) = " << num2str(t_val, 8, 1);
+            info(ss.str(), vp_.lnw); ss.str("");
           }
         }
 
-      } else if (term->prop_spec == ECLProp::WellWBTTotal) {
+      } else if (term->prop_spec == ECLProp::WellWBTTotal && term->active) {
 
+      }
+
+      // save base case terms
+      if (term->prop_name == ECLProp::FieldOilProdTotal
+        || term->prop_name == ECLProp::FieldWatProdTotal
+        || term->prop_name == ECLProp::FieldWatInjTotal) {
+        objf_scal_.push_back(t_val);
+      }
+
+      if (base_case && objf_scal_.size() == 3) {
+        model_->setObjfScaler(objf_scal_);
       }
 
       if (vp_.vOPT >= 3) {
@@ -163,14 +222,41 @@ double Augmented::value() const {
         im += ", term value: " + num2str(t_val, 5, 1);
         info(im, vp_.lnw);
       }
+
       value += t_val;
     }
 
   } catch (std::exception const &ex) {
-    error("Failed to compute Augmented function "
-            + string(ex.what()) + " Returning 0.0");
+    em_ = "Failed to compute Augmented function " + string(ex.what()) + " Returning 0.0";
+    ext_error(em_, md_, cl_, vp_.lnw);
   }
   return value;
+}
+
+void Augmented::setUpWaterCutLimit() {
+  for (auto term : terms_) {
+    if (term->prop_name == ECLProp::FieldOilProdTotal) {
+      npv_coeffs_[0] = term->coeff;
+
+    } else if (term->prop_name == ECLProp::FieldWatProdTotal) {
+      npv_coeffs_[1] = term->coeff;
+
+    } else if (term->prop_name == ECLProp::FieldWatInjTotal) {
+      npv_coeffs_[2] = term->coeff;
+    }
+  }
+
+  if (npv_coeffs_[0] != 0.0 && npv_coeffs_[1] != 0.0) {
+    auto po_cwp = npv_coeffs_[0] / npv_coeffs_[1];
+    wcut_limit_ = abs(po_cwp) / (abs(po_cwp) + 1);
+    im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
+    info(im_, vp_.lnw);
+
+  } else {
+    im_ = "Water cut limit not computed (def: 1.0)";
+    ext_warn(im_, md_, cl_, vp_.lnw);
+  }
+
 }
 
 void Augmented::setUpAugTerms() {
@@ -178,7 +264,11 @@ void Augmented::setUpAugTerms() {
     auto *term = new Augmented::Term();
     term->prop_name_str = settings_->objective().terms.at(ii).prop_name;
     term->prop_name = results_->GetPropertyKey(term->prop_name_str);
+
     term->coeff = settings_->objective().terms.at(ii).coefficient;
+    term->scaling = settings_->objective().terms.at(ii).scaling;
+    term->active = settings_->objective().terms.at(ii).active;
+
     term->wells = settings_->objective().terms.at(ii).wells;
     term->segments = settings_->objective().terms.at(ii).segments;
     terms_.push_back(term);
@@ -202,6 +292,10 @@ void Augmented::setUpAugTerms() {
     } else if (term->prop_name == ECLProp::SegWCTStdEnd) {
       term->prop_type = ECLProp::GnGFunction;
       term->prop_spec = ECLProp::SegWCTStdEnd;
+
+    } else if (term->prop_name == ECLProp::SegWCTStdWcl) {
+      term->prop_type = ECLProp::GnGFunction;
+      term->prop_spec = ECLProp::SegWCTStdWcl;
 
     } else if (term->prop_name == ECLProp::SegWCTStdWbt) {
       term->prop_type = ECLProp::GnGFunction;
@@ -230,7 +324,8 @@ void Augmented::dbg(int dm,
                     const VectorXd& v0,
                     const VectorXd& v1,
                     const VectorXd& v2,
-                    const VectorXd& v3) const {
+                    const VectorXd& v3,
+                    const double& d0) const {
   stringstream ss;
 
   // dbg(0, w_slft);
@@ -274,8 +369,11 @@ void Augmented::dbg(int dm,
     DBG_prntToFile(fl_, ss.str() + "\n"); info(ss.str(), vp_.lnw); ss.str("");
   }
 
-  if (dm==4 && vp_.vOPT >= 4) {
-
+  if (dm==4 && vp_.vOPT >= 3) {
+    ss << "sd_vec(lim_idx=" + num2str(v0(0), 0, 0);
+    ss << ") = " + num2str(v0(1), 3, 0);
+    ss << " -- t_val (nonscal) = " + num2str(v0(2),3,0);
+    info(ss.str(), vp_.lnw); ss.str("");
   }
 }
 

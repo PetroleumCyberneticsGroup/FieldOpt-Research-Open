@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/model.h"
 #include "Model/model.h"
 
+
 namespace Optimization {
 namespace Objective {
 
@@ -47,6 +48,8 @@ class Objective
    * \brief value Get evaluated value for objective function.
    */
   virtual double value() const = 0;
+
+  virtual double value(bool base_case) = 0;
 
  protected:
   Objective(Settings::Optimizer *settings);

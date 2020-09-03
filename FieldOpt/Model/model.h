@@ -152,6 +152,24 @@ class Model : public Loggable
   void wellCost(Settings::Optimizer *settings);
   Economy* wellCostConstructor();
 
+ private:
+  vector<double> objf_scal_;
+
+ public:
+  void setObjfScaler(vector<double> objf_scal) { objf_scal_ = objf_scal; }
+  int getObjfScalSz() { return objf_scal_.size(); }
+
+  double getObjfScalVal() {
+    auto eps = std::numeric_limits<double>::epsilon();
+    double scal = accumulate(objf_scal_.begin(), objf_scal_.end(), 0.0);
+
+    if (scal >= -eps && scal <= eps) {
+      return scal + 1.0;
+    } else {
+      return scal;
+    }
+  }
+
 };
 
 }
