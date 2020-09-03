@@ -432,6 +432,38 @@ inline void error(const std::string &text, const int &lw=165) {
   std::cout << ss.str();
 }
 
+inline void ext_error(const std::string &text,
+                      const std::string &modulen="",
+                      const std::string &classn="",
+                      const int &lw=165) {
+  std::string module_name = modulen;
+  std::string class_name = classn;
+  truncate_text(module_name, 30);
+  truncate_text(class_name, 30);
+  pad_text(module_name, 30);
+  pad_text(class_name, 30);
+
+  auto lines = split_line(text, lw - 2);
+  std::stringstream ss;
+  ss << FRED;
+
+  // auto width = floor(lw * 25/60);
+  auto width = floor((lw-31) * 1/2) + 1;
+  BoxSym bS = bSym(lw);
+  ss << bS.ulnl;
+  pad_text(module_name, width);
+  pad_text(class_name, width+1);
+  ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n"; // #chars: 31
+  for (auto line : lines) {
+    pad_text(line, lw - 2);
+    ss << "│ " << line << " │" << "\n";
+  }
+  ss << bS.llnl;
+  ss << "\n";
+  ss << AEND;
+  std::cout << ss.str();
+}
+
 }
 
 
