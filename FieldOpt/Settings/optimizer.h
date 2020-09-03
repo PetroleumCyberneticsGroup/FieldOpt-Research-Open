@@ -231,11 +231,14 @@ class Optimizer
       string prop_spec;
       vector<string> wells;
       map<string, vector<int>> segments;
+      bool active;
+      string scaling;
 
       void showTerms() {
         stringstream ss;
         ss << "prop_name: " << prop_name;
         ss << ", coefficient: " << coefficient;
+        ss << ", active: " << active;
         ss << ", prop_spec: " << prop_spec;
         for(string w : wells) {
           ss << segments[w].size() << ", well: " << w << " w/ segs: [ ";

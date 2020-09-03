@@ -104,7 +104,9 @@ class Results
     // Types:
       FieldTotal,
     GnGFunction,
-    SegWCTstd,
+    SegWCTStdEnd,
+    SegWCTStdWcl,
+    SegWCTStdWbt,
     WellWBTTotal,
     AuxProp
 //    EclAjdGradients
@@ -129,6 +131,9 @@ class Results
     else if (prop == Time)               pstr = "Time";
     else if (prop == Step)               pstr = "Step";
       //
+    else if (prop == WellBHP)            pstr = "WellBHP";
+    else if (prop == WellWaterCut)       pstr = "WellWaterCut";
+      //
     else if (prop == FieldOilProdRate)   pstr = "FieldOilProdRate";
     else if (prop == FieldWatProdRate)   pstr = "FieldWatProdRate";
     else if (prop == FieldGasProdRate)   pstr = "FieldGasProdRate";
@@ -143,6 +148,7 @@ class Results
     else if (prop == WellWatInjRate)     pstr = "WellWatInjRate";
     else if (prop == WellGasInjRate)     pstr = "WellGasInjRate";
       //
+      // Segment data:
     else if (prop == WellSegOilFlowRate) pstr = "WellSegOilFlowRate";
     else if (prop == WellSegWatFlowRate) pstr = "WellSegWatFlowRate";
     else if (prop == WellSegGasFlowRate) pstr = "WellSegGasFlowRate";
@@ -157,10 +163,13 @@ class Results
     else if (prop == WellSegWatFlowTotal) pstr = "WellSegWatFlowTotal";
     else if (prop == WellSegGasFlowTotal) pstr = "WellSegGasFlowTotal";
     else if (prop == WellSegLiqFlowTotal) pstr = "WellSegLiqFlowTotal";
+      //
       // Types:
     else if (prop == FieldTotal)         pstr = "FieldTotal";
     else if (prop == GnGFunction)        pstr = "GnGFunction";
-    else if (prop == SegWCTstd)          pstr = "SegWCTstd";
+    else if (prop == SegWCTStdEnd)       pstr = "SegWCTStdEnd";
+    else if (prop == SegWCTStdWcl)       pstr = "SegWCTStdWcl";
+    else if (prop == SegWCTStdWbt)       pstr = "SegWCTStdWbt";
     else if (prop == WellWBTTotal)       pstr = "WellWBTTotal";
     else if (prop == AuxProp)            pstr = "AuxProp";
     else throw RsltPropKeyDoesNotExistExc("", pstr);
@@ -185,6 +194,9 @@ class Results
     else if (prop == "Time")              return Time;
     else if (prop == "Step")              return Step;
       //
+    else if (prop == "WellBHP")           return WellBHP;
+    else if (prop == "WellWaterCut")      return WellWaterCut;
+      //
     else if (prop == "FieldOilProdRate")  return FieldOilProdRate;
     else if (prop == "FieldWatProdRate")  return FieldWatProdRate;
     else if (prop == "FieldGasProdRate")  return FieldGasProdRate;
@@ -199,6 +211,7 @@ class Results
     else if (prop == "WellWatInjRate")    return WellWatInjRate;
     else if (prop == "WellGasInjRate")    return WellGasInjRate;
       //
+      // Segment data:
     else if (prop == "WellSegOilFlowRate") return WellSegOilFlowRate;
     else if (prop == "WellSegWatFlowRate") return WellSegWatFlowRate;
     else if (prop == "WellSegGasFlowRate") return WellSegGasFlowRate;
@@ -215,11 +228,13 @@ class Results
     else if (prop == "WellSegLiqFlowTotal") return WellSegLiqFlowTotal;
       //
       // Types:
-    else if (prop == "FieldTotal")        return FieldTotal;
-    else if (prop == "GnGFunction")       return GnGFunction;
-    else if (prop == "SegWCTstd")         return SegWCTstd;
-    else if (prop == "WellWBTTotal")      return WellWBTTotal;
-    else if (prop == "AuxProp")           return AuxProp;
+    else if (prop == "FieldTotal")         return FieldTotal;
+    else if (prop == "GnGFunction")        return GnGFunction;
+    else if (prop == "SegWCTStdEnd")       return SegWCTStdEnd;
+    else if (prop == "SegWCTStdWcl")       return SegWCTStdWcl;
+    else if (prop == "SegWCTStdWbt")       return SegWCTStdWbt;
+    else if (prop == "WellWBTTotal")       return WellWBTTotal;
+    else if (prop == "AuxProp")            return AuxProp;
     else throw RsltPropKeyDoesNotExistExc("", prop.toStdString());
   }
 

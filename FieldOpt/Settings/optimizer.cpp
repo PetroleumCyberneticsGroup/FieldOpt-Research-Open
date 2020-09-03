@@ -811,7 +811,12 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
         Objective::AugTerms term;
         auto json_term = terms[ii].toObject();
         set_req_prop_double(term.coefficient, json_term, "Coefficient");
+        set_req_prop_bool(term.active, json_term, "Active");
         set_req_prop_string(term.prop_name, json_term, "PropName");
+
+        if (!set_opt_prop_string(term.scaling, json_term, "Scaling")) {
+          term.scaling = "None";
+        }
 
         if (json_term.contains("Wells") && json_term.contains("Segments")) {
           QJsonArray term_wells = json_term["Wells"].toArray();
