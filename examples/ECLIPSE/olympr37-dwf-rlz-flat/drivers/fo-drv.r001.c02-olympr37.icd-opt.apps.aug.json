@@ -6,9 +6,9 @@
     "VerbConf": {
         "iBoxLineWidth": 140,
         "Model": 1,
-        "Optim": 4,
+        "Optim": 3,
         "WICal": 1,
-        "Simul": 6,
+        "Simul": 1,
         "Runnr": 1,
         "Resvr": 1,
         "Setng": 1,
@@ -35,22 +35,49 @@
           "Comment": "Oil price: 45 $/bbl * 6.289811 bbl/m^3 = 283.0414",
           "Comment": "Oil price: 60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
           "PropName": "FieldOilProdTotal",
-          "Coefficient": 377.3887e-0
+          "Coefficient": 377.3887e-0,
+          "Active": true
         },
         {
           "Comment": "Water production cost: 6 $/bbl * 6.289811 bbl/m^3 ",
           "PropName": "FieldWatProdTotal",
-          "Coefficient": -37.7388e-0
+          "Coefficient": -37.7388e-0,
+          "Active": true
         },
         {
           "Comment": "Water injection cost: 2 $/bbl * 6.289811 bbl/m^3",
           "PropName": "FieldWatInjTotal",
-          "Coefficient": -12.5796e-0
+          "Coefficient": -12.5796e-0,
+          "Active": true
         },
         {
           "Comment": "",
-          "PropName": "SegWCTstd",
+          "PropName": "SegWCTStdEnd",
           "Coefficient": -377.3887e-0,
+          "Active": true,
+          "Scaling": "NPV0",
+          "Wells": ["PRODX2"],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9]
+          ]
+        },
+        {
+          "Comment": "",
+          "PropName": "SegWCTStdWcl",
+          "Coefficient": -377.3887e-0,
+          "Active": true,
+          "Scaling": "NPV0",
+          "Wells": ["PRODX2"],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9]
+          ]
+        },
+        {
+          "Comment": "",
+          "PropName": "SegWCTStdWcl",
+          "Coefficient": -377.3887e-0,
+          "Active": true,
+          "Scaling": "wellNPV",
           "Wells": ["PRODX2"],
           "Segments": [
             [ 2, 3, 4, 5, 6, 7, 8, 9]
@@ -60,6 +87,7 @@
           "Comment": "",
           "PropName": "WellWBTTotal",
           "Coefficient": -377.3887e-0,
+          "Active": false,
           "Wells": ["PRODX2"],
           "Segments": [
             [ 2, 3, 4, 5, 6, 7, 8, 9]
