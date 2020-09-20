@@ -184,9 +184,11 @@ class Model
 
       enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
       enum ModelType: int {TrueModel=1, Surrogate=2};
+      enum Execution: int {Serial=1, Parallel=2};
 
       QMap<int, DrillingOperation> drilling_operations;
       QMap<int, ModelType> model_types;
+      QMap<int, Execution> execution_modes;
       QMap<int, bool> is_variable_drilling_points;
       QMap<int, bool> is_variable_completions;
       QMap<int, bool> is_model_updates;

@@ -44,6 +44,7 @@ static std::string driver_ECL_5pot_          = base_path() + "/examples/ECLIPSE/
 static std::string deck_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA";
 static std::string grid_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA__R001.EGRID";
 static std::string driver_5pot_icds_         = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps.json";
+static std::string driver_5pot_icds_drilling = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling.json";
 
 static std::string deck_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.DATA ";
 static std::string grid_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.EGRID";

@@ -500,6 +500,14 @@ void Model::readDrilling(QJsonObject json_drilling) {
             drilling_schedule.drilling_operations.insert(i, Drilling::DrillingSchedule::DrillingOperation::PullingOutOfHole);
         }
 
+        if (json_drilling_step.contains("Execution")) {
+          if (QString::compare("Serial", json_drilling_step["Execution"].toString()) == 0)
+            drilling_schedule.execution_modes.insert(i, Drilling::DrillingSchedule::Execution::Serial);
+
+          if (QString::compare("Parallel", json_drilling_step["Execution"].toString()) == 0)
+            drilling_schedule.execution_modes.insert(i,  Drilling::DrillingSchedule::Execution ::Parallel);
+        }
+
         if (json_drilling_step.contains("DrillingPoints")) {
           QJsonObject json_drilling_points = json_drilling_step["DrillingPoints"].toObject();
 

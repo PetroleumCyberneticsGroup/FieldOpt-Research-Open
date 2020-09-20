@@ -24,6 +24,7 @@
 #include "Optimization/tests/test_resource_optimizer.h"
 #include "Optimization/tests/test_resource_test_functions.h"
 #include "serial_runner.h"
+#include "drilling_runner.h"
 
 namespace {
 
@@ -250,7 +251,25 @@ TEST_F(DrillingTest, DrillingRunner) {
   EXPECT_TRUE(is_drilling_workflow_completed);
 }
 
+TEST_F(DrillingTest, DrillingRunnerWorkflow) {
+  int argc = 16;
+  const char *argv[16] = {"FieldOpt",
+                          TestResources::ExampleFilePaths::driver_5pot_icds_drilling.c_str(),
+                          TestResources::ExampleFilePaths::directory_output_icds_.c_str(),
+                          "-g", TestResources::ExampleFilePaths::grid_5spot_icds_.c_str(),
+                          "-s", TestResources::ExampleFilePaths::deck_5spot_icds_.c_str(),
+                          "-b", "./",
+                          "-r", "drillingWorkflow",
+                          "-f",
+                          "-v", "0",
+                          "-t", "1000"};
 
+
+  Runner::RuntimeSettings* rts = new Runner::RuntimeSettings(argc, argv);
+  Runner::DrillingRunner* drilling_runner = new Runner::DrillingRunner(rts);
+
+  drilling_runner->Execute();
+}
 
 
 }

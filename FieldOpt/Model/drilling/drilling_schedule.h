@@ -41,6 +41,7 @@ class DrillingSchedule {
 
   enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
   enum ModelType: int {TrueModel=1, Surrogate=2};
+  enum Execution: int {Serial=1, Parallel=2};
 
   DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
 
@@ -49,6 +50,7 @@ class DrillingSchedule {
   QMap<int, QList<DrillingPoint>> getDrillingPoints() { return drilling_points_; }
   QMap<int, DrillingOperation> getDrillingOperations() { return drilling_operations_; }
   QMap<int, ModelType> getModelTypes() { return model_types_; }
+  QMap<int, Execution> getExecutionModes() { return execution_modes_; }
   QMap<int, bool> isVariableDrillingPoints() { return is_variable_drilling_points_; }
   QMap<int, bool> isVariableCompletions() { return is_variable_completions_; }
   QMap<int, bool> isModelUpdates() { return is_model_updates_;}
@@ -60,6 +62,7 @@ class DrillingSchedule {
 
   QMap<int, DrillingOperation> drilling_operations_; //!< Indexed by the drilling steps
   QMap<int, ModelType> model_types_;                 //!< Indexed by the drilling steps
+  QMap<int, Execution> execution_modes_;                 //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_drilling_points_;      //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
   QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps

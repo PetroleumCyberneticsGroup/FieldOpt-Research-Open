@@ -29,9 +29,9 @@ DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::Variab
   drilling_steps_ = settings->drilling().drilling_schedule.drilling_steps;
   time_steps_ = settings->drilling().drilling_schedule.time_steps;
 
-
   for (int i: drilling_steps_) {
     model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(i));
+    execution_modes_.insert(i, (Execution) settings->drilling().drilling_schedule.execution_modes.value(i));
     drilling_operations_.insert(i, (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(i));
     is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
     is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
