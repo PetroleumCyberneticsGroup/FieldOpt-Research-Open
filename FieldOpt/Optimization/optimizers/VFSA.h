@@ -43,7 +43,7 @@ class VFSA : public Optimizer {
  public:
   VFSA(Settings::Optimizer *settings,
        Case *base_case,
-       Model::Properties::VariablePropertyContainer *variables,
+       Model::Properties::VarPropContainer *variables,
        Reservoir::Grid::Grid *grid,
        Logger *logger,
        CaseHandler *case_handler=0,

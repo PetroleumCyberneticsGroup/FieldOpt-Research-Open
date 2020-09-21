@@ -137,7 +137,7 @@ void EnsembleHelper::SubmitEvaluatedRealization(Optimization::Case *c) {
 
     current_case_->SetRealizationOfv(
         c->GetEnsembleRealization(),
-        c->objective_function_value());
+        c->objf_value());
 
   } else {
     std::cout << "WARNING: Ensemble realization case "
@@ -160,12 +160,12 @@ Optimization::Case *EnsembleHelper::GetEvaluatedCase() {
   rzn_queue_ = std::vector<std::string>();
   rzn_busy_ = std::vector<std::string>();
 
-  current_case_->set_objective_function_value(
-      current_case_->GetEnsembleAverageOfv());
+  current_case_->set_objf_value(
+    current_case_->GetEnsembleAverageOfv());
 
   if ( VERB_OPT >= 3 ) {
     cout << "submitting evaluated ensemble case; objf = "
-         << current_case_->objective_function_value() << endl;
+         << current_case_->objf_value() << endl;
   }
 
   // -------------------------------------------------------

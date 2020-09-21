@@ -36,6 +36,7 @@ if (BUILD_TESTING)
 
   target_link_libraries(test_optimization
       PUBLIC fieldopt::optimization
+      PUBLIC fieldopt::settings
       PUBLIC fieldopt::runner
       ${gtest}
       ${gtest_main}
@@ -50,6 +51,24 @@ if (BUILD_TESTING)
 
   add_test(NAME test_optimization
       COMMAND $<TARGET_FILE:test_optimization>)
+
+  #  -------------------------------------------------------
+  add_executable(test_objective ${OBJECTIVE_TESTS})
+
+  target_link_libraries(test_objective
+      PUBLIC fieldopt::optimization
+      PUBLIC fieldopt::runner
+      ${gtest}
+      ${gtest_main}
+      ${CMAKE_THREAD_LIBS_INIT})
+
+  target_include_directories(test_objective PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>)
+
+  add_test(NAME test_objective
+      COMMAND $<TARGET_FILE:test_objective>)
+
 endif()
 
 # Install ==================================================

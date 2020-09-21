@@ -32,7 +32,7 @@ Compartment::Compartment(const double start_md,
                          const double end_tvd,
                          const double well_length,
                          const Settings::Model::Well &well_settings,
-                         Properties::VariablePropertyContainer *variable_container,
+                         Properties::VarPropContainer *variable_container,
                          std::vector<Compartment> &compartments_) {
     Settings::Model::Well::Completion comp_settings;
     if (compartments_.size() == 0) {

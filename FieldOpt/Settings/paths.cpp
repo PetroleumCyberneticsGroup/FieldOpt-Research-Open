@@ -32,29 +32,32 @@ using std::endl;
 using std::stringstream;
 using std::runtime_error;
 
+using Printer::ext_warn;
+using Printer::error;
+
 Paths::Paths() {}
 
-// =========================================================
-void Paths::SetPath(Paths::Path path, string path_string) {
-  
-  if (path >= 0 && !FileExists(path_string)) {
-    
+void Paths::SetPath(Paths::Path path, const string& path_string,
+                    bool skip_check, Settings::VerbParams vp) {
+  vp_=vp;
+
+  if (path >= 0 && !FileExists(path_string, vp_, md_, cl_) && ! skip_check) {
     stringstream ss;
-    ss << "ERROR: Cannot set " << GetPathDescription(path)
-       << " path to non-existing file (" << path_string << ")";
-    Printer::error(ss.str());
-    throw runtime_error(
-        Paths::GetPathDescription(path)
-        + " not found at " + path_string);
-    
-  } else if (path < 0 && !DirectoryExists(path_string)) {
-    cerr << "ERROR: Cannot set " << GetPathDescription(path)
-    << " path to non-existing directory (" << path_string
-    << ")" << endl;
-    throw runtime_error(
-        Paths::GetPathDescription(path)
-        + " not found at " + path_string);
-    
+    ss << "Cannot set " << GetPathDesc(path);
+    ss << " path to non-existing file (" << path_string << ")";
+    error(ss.str());
+
+    string em = Paths::GetPathDesc(path) + " not found at " + path_string;
+    throw runtime_error(em);
+
+  } else if (path < 0 && !DirExists(path_string, vp_, md_, cl_) && ! skip_check) {
+    cerr << "Cannot set " << GetPathDesc(path);
+    cerr << " path to non-existing directory (";
+    cerr << path_string << ")" << endl;
+
+    string em = Paths::GetPathDesc(path) + " not found at " + path_string;
+    throw runtime_error(em);
+
   } else {
     paths_[path] = path_string;
   }
@@ -66,25 +69,28 @@ bool Paths::IsSet(Paths::Path path) {
 
 string Paths::GetPath(Paths::Path path) {
   if (!IsSet(path)) {
-   Printer::ext_warn("Getting unset variable ("
-       + GetPathDescription(path) + ")","Settings",
-       "Paths");
+    string wm = "Getting unset variable (" + GetPathDesc(path) + ")";
+    ext_warn(wm, md_, cl_, vp_.lnw);
     return "UNSET";
-    
+
   } else {
     return paths_[path];
   }
 }
 
+QString Paths::GetPathQstr(Paths::Path path) {
+  return QString::fromStdString(GetPath(path));
+}
+
 void Paths::ShowPaths() {
-  for (auto it = paths_.begin(); it != paths_.end(); it++) {
-    string pth = Paths::GetPathDescription(it->first);
+  for (auto & path : paths_) {
+    string pth = Paths::GetPathDesc(path.first);
     Printer::pad_text(pth, 30);
     cout << FYELLOW <<  pth << ": " << AEND
-    << it->second << endl;
+         << path.second << endl;
   }
 }
 
-const string &Paths::GetPathDescription(Paths::Path path) const {
+const string &Paths::GetPathDesc(Paths::Path path) const {
   return path_descriptions.at(path);
 }

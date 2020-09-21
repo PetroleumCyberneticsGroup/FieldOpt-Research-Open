@@ -39,7 +39,11 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
-Optimizer::Optimizer(QJsonObject json_optimizer) {
+using std::runtime_error;
+using Printer::ext_warn;
+
+Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
+  vp_=vp;
 
   // Get the root objects.
   QJsonObject json_parameters = json_optimizer["Parameters"].toObject();
@@ -77,7 +81,7 @@ Optimizer::Optimizer(QJsonObject json_optimizer) {
 Optimizer::Constraint
 Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
-  Constraint optimizer_constraint;
+  Constraint optimizer_constraint = Constraint();
 
   if (json_constraint.contains("Well")) {
     optimizer_constraint.well = json_constraint["Well"].toString();
@@ -96,9 +100,8 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     }
 
   } else {
-    throw std::runtime_error(
-        "A constraint must always specify "
-        "either the Well or the Wells property.");
+    string em = "A constraint must always specify either the Well or the Wells property.";
+    throw runtime_error(em);
   }
 
   // Penalty function weight for the constraint
@@ -116,26 +119,24 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     optimizer_constraint.type = ConstraintType::BHP;
     if (json_constraint.contains("Max")) {
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
+      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
     }
     if (json_constraint.contains("Min")) {
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
+      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
     }
 
     // Packer- and ICV Constraints
   } else if (QString::compare(constraint_type, "ICVConstraint") == 0) {
 
     optimizer_constraint.type = ConstraintType::ICVConstraint;
-    optimizer_constraint.max = json_constraint["Max"].toDouble();
+    set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
 
     if (optimizer_constraint.max >= 7.8540E-03) {
-      Printer::ext_warn(
-          "Maximum valve size is too big. Setting it to 7.8539-3.",
-          "dc_6Settings",
-          "Optimizer");
+      string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
+      ext_warn(wm, md_, cl_, vp_.lnw);
       optimizer_constraint.max = 7.8539E-3;
     }
-    optimizer_constraint.min = json_constraint["Min"].toDouble();
+    set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
 
   } else if (QString::compare(constraint_type, "PackerConstraint") == 0) {
     optimizer_constraint.type = ConstraintType::PackerConstraint;
@@ -143,17 +144,17 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
   } else if (QString::compare(constraint_type, "Rate") == 0) {
     optimizer_constraint.type = ConstraintType::Rate;
     if (json_constraint.contains("Max"))
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
+      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
     if (json_constraint.contains("Min"))
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
+      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
 
   } else if (QString::compare(constraint_type, "Boundary2D") == 0) {
 
     optimizer_constraint.type = ConstraintType::PseudoContBoundary2D;
-    optimizer_constraint.box_imin = json_constraint["Imin"].toDouble();
-    optimizer_constraint.box_imax = json_constraint["Imax"].toDouble();
-    optimizer_constraint.box_jmin = json_constraint["Jmin"].toDouble();
-    optimizer_constraint.box_jmax = json_constraint["Jmax"].toDouble();
+    set_opt_prop_double(optimizer_constraint.box_imin, json_constraint, "Imin");
+    set_opt_prop_double(optimizer_constraint.box_imax, json_constraint, "Imax");
+    set_opt_prop_double(optimizer_constraint.box_jmin, json_constraint, "Jmin");
+    set_opt_prop_double(optimizer_constraint.box_jmax, json_constraint, "Jmax");
 
     // Constraint type Well Spline Points
   } else if (QString::compare(constraint_type, "WellSplinePoints") == 0) {
@@ -185,16 +186,17 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
         QJsonObject well_spline_point_limit = well_spline_point_limits[i].toObject();
         QJsonArray min_array = well_spline_point_limit["Min"].toArray();
         QJsonArray max_array = well_spline_point_limit["Max"].toArray();
-        Constraint::RealCoordinate min;
+
+        Constraint::RealCoordinate min{};
         min.x = min_array[0].toDouble();
         min.y = min_array[1].toDouble();
         min.z = min_array[2].toDouble();
-        Constraint::RealCoordinate max;
+        Constraint::RealCoordinate max{};
         max.x = max_array[0].toDouble();
         max.y = max_array[1].toDouble();
         max.z = max_array[2].toDouble();
 
-        Constraint::RealMaxMinLimit limit;
+        Constraint::RealMaxMinLimit limit{};
         limit.min = min;
         limit.max = max;
         optimizer_constraint.spline_points_limits.append(limit);
@@ -205,11 +207,11 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
           "Well spline constraint type not recognized.");
     }
 
-  } else if (QString::compare(constraint_type, "WellSplineLength") == 0
+  } else if (QString::compare(constraint_type, "WSplineLength") == 0
       || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
 
-    if (constraint_type == "WellSplineLength"){
-      optimizer_constraint.type = ConstraintType::WellSplineLength;
+    if (constraint_type == "WSplineLength"){
+      optimizer_constraint.type = ConstraintType::WSplineLength;
     } else {
       optimizer_constraint.type = ConstraintType::PolarWellLength;
     }
@@ -240,9 +242,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
           "MaxLength must be specified for well length constraints.");
     }
 
-  } else if (QString::compare(constraint_type, "WellSplineInterwellDistance") == 0) {
+  } else if (QString::compare(constraint_type, "WSplineInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::WellSplineInterwellDistance;
+    optimizer_constraint.type = ConstraintType::WSplineInterwDist;
 
     if (json_constraint.contains("Min")) {
       optimizer_constraint.min = json_constraint["Min"].toDouble();
@@ -255,7 +257,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     if (optimizer_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistance constraint needs"
+          "WSplineInterwDist constraint needs"
           " a Wells array with exactly two well names specified.");
     }
 
@@ -274,11 +276,11 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       optimizer_constraint.min = json_constraint["Min"].toDouble();
     }
 
-  } else if (QString::compare(constraint_type, "ReservoirBoundary") == 0
+  } else if (QString::compare(constraint_type, "ResBoundary") == 0
       || QString::compare(constraint_type, "PolarSplineBoundary") == 0
       || QString::compare(constraint_type, "ReservoirBoundaryToe") == 0) {
 
-    if (QString::compare(constraint_type, "ReservoirBoundary") == 0){
+    if (QString::compare(constraint_type, "ResBoundary") == 0){
       optimizer_constraint.type = ConstraintType::ReservoirBoundary;
 
     } else if (QString::compare(constraint_type, "PolarSplineBoundary") == 0){
@@ -313,9 +315,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optimizer_constraint.box_xyz_zmax = json_constraint["zMax"].toDouble();
 
   } else if (QString::compare(constraint_type,
-      "CombinedWellSplineLengthInterwellDistance") == 0) {
+      "MxWSplineLengthInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::CombinedWellSplineLengthInterwellDistance;
+    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDist;
     optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
     optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
     optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
@@ -323,14 +325,14 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     if (optimizer_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistance constraint"
+          "WSplineInterwDist constraint"
           " needs a Wells array with exactly two well names specified.");
     }
 
   } else if (QString::compare(constraint_type,
-      "CombinedWellSplineLengthInterwellDistanceReservoirBoundary") == 0) {
+      "MxWSplineLengthInterwDistResBound") == 0) {
 
-    optimizer_constraint.type = ConstraintType::CombinedWellSplineLengthInterwellDistanceReservoirBoundary;
+    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDistResBound;
     optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
     optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
     optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
@@ -344,9 +346,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optimizer_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
 
     if (optimizer_constraint.wells.length() != 2) {
-      throw UnableToParseOptimizerConstraintsSectionException(
-          "WellSplineInterwellDistanceReservoirBoundary constraint "
-          "needs a Wells array with exactly two well names specified.");
+      string em = "MxWSplineLengthInterwDistResBound constraint ";
+      em += "needs a Wells array with exactly two well names specified.";
+      throw UnableToParseOptimizerConstraintsSectionException(em);
     }
 
   } else {
@@ -400,12 +402,14 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
       params.auto_step_conv_scale = json_parameters["AutoStepConvScale"].toDouble();
 
     // GSS parameters :: InitialStepLength
-    if (json_parameters.contains("InitialStepLength"))
-      params.initial_step_length = json_parameters["InitialStepLength"].toDouble();
+    if (json_parameters.contains("InitialStepLength")) {
+      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength");
+    }
 
     // GSS parameters :: MinimumStepLength
-    if (json_parameters.contains("MinimumStepLength"))
-      params.minimum_step_length = json_parameters["MinimumStepLength"].toDouble();
+    if (json_parameters.contains("MinimumStepLength")) {
+      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength");
+    }
 
     // GSS parameters :: ContractionFactor
     if (json_parameters.contains("ContractionFactor"))
@@ -797,6 +801,43 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
         set_req_prop_string(component.interval, json_components[i].toObject(), "Interval");
         set_opt_prop_bool(component.usediscountfactor, json_components[i].toObject(), "UseDiscountFactor");
         obj.NPV_sum.append(component);
+      }
+
+    } else if (QString::compare(objective_type, "Augmented") == 0) {
+      obj.type = ObjectiveType::Augmented;
+      obj.terms = vector<Objective::AugTerms>();
+
+      QJsonArray terms = json_objective["Terms"].toArray();
+
+      for (int ii = 0; ii < terms.size(); ++ii) {
+        Objective::AugTerms term;
+        auto json_term = terms[ii].toObject();
+        set_req_prop_double(term.coefficient, json_term, "Coefficient");
+        set_req_prop_bool(term.active, json_term, "Active");
+        set_req_prop_string(term.prop_name, json_term, "PropName");
+
+        if (!set_opt_prop_string(term.scaling, json_term, "Scaling")) {
+          term.scaling = "None";
+        }
+
+        if (json_term.contains("Wells") && json_term.contains("Segments")) {
+          QJsonArray term_wells = json_term["Wells"].toArray();
+          for (auto wname : term_wells) {
+            term.wells.push_back(wname.toString().toStdString());
+          }
+
+          QJsonArray term_segs = json_term["Segments"].toArray();
+          for (int ii = 0; ii < term_segs.size(); ++ii) {
+            vector<int> segs_vec;
+            QJsonArray segs_array = term_segs.at(ii).toArray();
+            for (int jj = 0; jj < segs_array.size(); ++jj) {
+              segs_vec.push_back(segs_array.at(jj).toInt());
+            }
+            term.segments[term.wells[ii]] = segs_vec;
+          }
+        }
+        term.showTerms();
+        obj.terms.push_back(term);
       }
 
     } else {

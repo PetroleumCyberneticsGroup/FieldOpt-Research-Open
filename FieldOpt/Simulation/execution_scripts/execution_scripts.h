@@ -30,7 +30,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QMap>
 #include "Utilities/filehandling.hpp"
 
-namespace Simulation { namespace ExecutionScripts {
+namespace Simulation {
+namespace ExecutionScripts {
 
 /*!
  * \brief The DefaultScripts enum lists the available scripts.
@@ -43,22 +44,29 @@ enum Script {
 };
 
 static QMap<Script, QString> DefaultScripts {
-    {Script::csh_eclrun, QString("execution_scripts/csh_eclrun.sh")},
-    {Script::bash_ecl, QString("execution_scripts/bash_ecl.sh")},
-    {Script::bash_adgprs, QString("execution_scripts/bash_adgprs.sh")},
-    {Script::bash_flow, QString("execution_scripts/bash_flow.sh")}
+  {Script::csh_eclrun, QString("execution_scripts/csh_eclrun.sh")},
+  {Script::bash_ecl, QString("execution_scripts/bash_ecl.sh")},
+  {Script::bash_adgprs, QString("execution_scripts/bash_adgprs.sh")},
+  {Script::bash_flow, QString("execution_scripts/bash_flow.sh")}
 };
 
 static Script GetScript(QString name) {
-  if (QString::compare(name, "csh_eclrun") == 0)
+  if (QString::compare(name, "csh_eclrun") == 0) {
     return Script::csh_eclrun;
-  if (QString::compare(name, "bash_ecl") == 0)
+  }
+
+  if (QString::compare(name, "bash_ecl") == 0) {
     return Script::bash_ecl;
-  else if (QString::compare(name, "bash_adgprs") == 0)
+  } else if (QString::compare(name, "bash_adgprs") == 0) {
     return Script::bash_adgprs;
-  else if (QString::compare(name, "bash_flow") == 0)
+  } else if (QString::compare(name, "bash_flow") == 0) {
     return Script::bash_flow;
-  else throw std::runtime_error("Script " + name.toStdString() + " not recognized.");
+  } else {
+    string em = "[execution_scripts.h]";
+    em += "Script " + name.toStdString() + " not recognized.";
+    em += "No execution script given in JSON or as runtime arg.";
+    throw std::runtime_error(em);
+  }
 }
 
 static QString GetScriptPath(QString name) {

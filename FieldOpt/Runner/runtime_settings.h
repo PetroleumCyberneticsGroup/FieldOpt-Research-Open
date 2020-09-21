@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef RUNTIMESETTINGS_H
 #define RUNTIMESETTINGS_H
 
@@ -26,6 +32,7 @@
 #include <QPair>
 #include <stdexcept>
 #include "Utilities/filehandling.hpp"
+#include "Utilities/verbosity.h"
 #include "loggable.hpp"
 #include "Settings/paths.h"
 
@@ -76,6 +83,8 @@ class RuntimeSettings : public Loggable
   RunnerType runner_type_; //!< The type of runner to be used (e.g. serial or parallel).
   QPair<QVector<double>, QVector<double>> prod_coords_; //!< The spline coordinates for the production well
   QPair<QVector<double>, QVector<double>> inje_coords_; //!< The spline coordinates for the injection well
+
+  Settings::VerbParams vp_;
 
   QString runnerTypeString() const; //!< Get a string representation of the runner type (used when printing settings to the terminal).
   QString wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const;

@@ -1,25 +1,24 @@
 /***********************************************************
- Created by bellout on 2/10/18 from SNOPT template
+Created by bellout on 2/10/18 from SNOPT template
 
- Copyright (C) 2017-2019 Mathias Bellout
- <mathias.bellout@petroleumcyberneticsgroup.no>
- <chakibbb-pcg@gmail.com>
+Copyright (C) 2017-2019 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation, either version
- 3 of the License, or (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty
- of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
- the GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the
- GNU General Public License along with FieldOpt.
- If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 #ifndef FIELDOPT_SNOPTHANDLER_H
@@ -28,12 +27,12 @@
 #include "../../snopt/include/snopt/snopt.hpp"
 // #include "uc_1ThirdParty/snopt/include/snopt/snopt.hpp"
 // #include "uc_1ThirdParty/snopt/include/snopt-7.2.12/snopt.hpp"
+#include "../../../Utilities/verbosity.h"
 
 #include <cstdio>
 #include <vector>
 #include <iostream>
 #include <string>
-
 
 using std::cout;
 using std::endl;
@@ -150,6 +149,9 @@ class SNOPTHandler {
 
   bool has_snopt_option_file;
 
+  string md_ = "ThirdParty::snopt::handlers";
+  string cl_ = "SNOPTHandler";
+  Settings::VerbParams vp_;
 
   // Functions that set up the problem data:
   void setProblemSize(integer n,

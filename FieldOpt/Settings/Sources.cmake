@@ -1,5 +1,6 @@
 SET(SETTINGS_HEADERS
 	ensemble.h
+	global.h
 	model.h
 	optimizer.h
 	paths.h
@@ -12,6 +13,7 @@ SET(SETTINGS_HEADERS
 
 SET(SETTINGS_SOURCES
 	ensemble.cpp
+	global.cpp
 	model.cpp
 	optimizer.cpp
 	paths.cpp

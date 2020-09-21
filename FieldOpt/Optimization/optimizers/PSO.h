@@ -37,7 +37,7 @@ class PSO : public Optimizer {
  public:
   PSO(Settings::Optimizer *settings,
       Case *base_case,
-      Model::Properties::VariablePropertyContainer *variables,
+      Model::Properties::VarPropContainer *variables,
       Reservoir::Grid::Grid *grid,
       Logger *logger,
       CaseHandler *case_handler=0,
@@ -56,7 +56,7 @@ class PSO : public Optimizer {
     Particle(Optimization::Case *c, boost::random::mt19937 &gen, Eigen::VectorXd v_max, int n_vars);
     Particle(){}
     void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars);
-    double ofv() { return case_pointer->objective_function_value(); }
+    double ofv() { return case_pointer->objf_value(); }
   };
 
   /*!

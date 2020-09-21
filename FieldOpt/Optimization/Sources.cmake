@@ -4,6 +4,7 @@ SET(OPTIMIZATION_HEADERS
 		objective/NPV.h
 		objective/objective.h
 		objective/weightedsum.h
+		objective/augmented.h
 		#
 		# case
 		case.h
@@ -19,10 +20,10 @@ SET(OPTIMIZATION_HEADERS
 		constraints/constraint.h
 		constraints/bhp_constraint.h
 		constraints/rate_constraint.h
-		constraints/combined_spline_length_interwell_distance.h
-		constraints/combined_spline_length_interwell_distance_reservoir_boundary.h
+		constraints/mx_spline_length_interw_dist.h
+		constraints/mx_spline_length_interw_dist_res_bound.h
 		constraints/reservoir_boundary.h
-		constraints/interwell_distance.h
+		constraints/interw_dist.h
 		constraints/well_spline_length.h
 		constraints/well_spline_constraint.h
 		#
@@ -80,6 +81,7 @@ SET(OPTIMIZATION_SOURCES
 		objective/NPV.cpp
 		objective/objective.cpp
 		objective/weightedsum.cpp
+		objective/augmented.cpp
 		#
 		# case
 		case.cpp
@@ -94,10 +96,10 @@ SET(OPTIMIZATION_SOURCES
 		constraints/constraint.cpp
 		constraints/bhp_constraint.cpp
 		constraints/rate_constraint.cpp
-		constraints/combined_spline_length_interwell_distance.cpp
-		constraints/combined_spline_length_interwell_distance_reservoir_boundary.cpp
+		constraints/mx_spline_length_interw_dist.cpp
+		constraints/mx_spline_length_interw_dist_res_bound.cpp
 		constraints/reservoir_boundary.cpp
-		constraints/interwell_distance.cpp
+		constraints/interw_dist.cpp
 		constraints/well_spline_length.cpp
 		constraints/well_spline_constraint.cpp
 		#
@@ -151,20 +153,29 @@ SET(OPTIMIZATION_SOURCES
 		solvers/SNOPTSolver.cpp
 		)
 
+SET(OBJECTIVE_TESTS
+		tests/test_resource_cases.h
+		tests/test_resource_optimizer.h
+		tests/objective/test_augmented.cpp
+		)
+
 SET(OPTIMIZATION_TESTS
 		# resources
 		tests/test_resource_cases.h
 		tests/test_resource_optimizer.h
 		tests/test_resource_test_functions.h
 		#
-		# objective / case / optimizer
-		# tests/objective/test_weightedsum.cpp
+		# objective
+		tests/objective/test_weightedsum.cpp
+#		tests/objective/test_augmented.cpp
+		#
+		# case, case-handling
 		# tests/test_case.cpp
 		# tests/test_case_handler.cpp
 		# tests/test_case_transfer_object.cpp
 		# tests/test_normalizer.cpp
-		# #
-		# # constraints / constraint-handling
+		#
+		# constraints, constraint-handling
 		# tests/constraints/test_bhp_constraint.cpp
 		# tests/constraints/test_rate_constraint.cpp
 		# tests/constraints/test_reservoir_boundary.cpp
@@ -173,7 +184,7 @@ SET(OPTIMIZATION_TESTS
 		# tests/constraints/test_pseudo_cont_boundary_2d.cpp
 		# tests/constraints/test_constraint_handler.cpp
 		#
-		# algorithms: pattern, stochastic
+		# optimizers: pattern, stochastic
 		# tests/optimizers/test_compass_search.cpp
 		# tests/optimizers/test_apps.cpp
 		# tests/optimizers/test_ga.cpp
@@ -186,9 +197,9 @@ SET(OPTIMIZATION_TESTS
 		# tests/optimizers/test_ego.cpp
 		#
 		# algorithms: df-tr
-		tests/optimizers/test_tr-dfo.cpp
-		# tests/optimizers/test_en-tr-dfo.cpp
-		tests/optimizers/test_tr-dfo_exp-value.cpp
-		tests/optimizers/test_tr-model-data.hpp
-		tests/optimizers/test_tr-support.hpp
+		# tests/optimizers/test_tr-dfo.cpp
+		#### tests/optimizers/test_en-tr-dfo.cpp (warn: may be mutually exclusive with test_tr-dfo.cpp)
+#		tests/optimizers/test_tr-dfo_exp-value.cpp
+#		tests/optimizers/test_tr-model-data.hpp
+#		tests/optimizers/test_tr-support.hpp
 		)

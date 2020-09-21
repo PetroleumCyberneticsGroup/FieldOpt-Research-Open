@@ -46,7 +46,7 @@ class CMA_ES : public Optimizer {
 public:
     CMA_ES(Settings::Optimizer *settings,
            Case *base_case,
-           Model::Properties::VariablePropertyContainer *variables,
+           Model::Properties::VarPropContainer *variables,
            Reservoir::Grid::Grid *grid,
            Logger *logger,
            CaseHandler *case_handler=0,
@@ -65,7 +65,7 @@ public:
         int index_; //!< index
         Individual(Optimization::Case *c, boost::random::mt19937 &gen, int index, Eigen::VectorXd erands_norm, double penalty_dist);
         Individual(){}
-        double ofv() { return case_pointer_->objective_function_value(); }
+        double ofv() { return case_pointer_->objf_value(); }
     };
 
 private:

@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #define OPTIMIZER_H
 
 #include "Settings/optimizer.h"
+
 #include "case.h"
 #include "case_handler.h"
 #include "normalizer.h"
@@ -37,7 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Optimization/objective/objective.h"
 
 #include "Model/model.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 #include "Runner/loggable.hpp"
 #include "Runner/logger.h"
@@ -48,7 +49,7 @@ using Eigen::VectorXd;
 using Eigen::MatrixXd;
 
 namespace Simulation {
-    class Simulator;
+class Simulator;
 }
 
 class Logger;
@@ -79,7 +80,7 @@ class Optimizer : public Loggable
   Case *GetCaseForEvaluation();
 
   /*!
-   * \brief SubmitEvaluatedCase Submit an already evaluated 
+   * \brief SubmitEvaluatedCase Submit an already evaluated
    case to the optimizer.
    *
    * Submitted case is marked "recently evaluated" in CaseHandler.
@@ -95,7 +96,7 @@ class Optimizer : public Loggable
   Case *GetTentativeBestCase() const;
 
   /*!
-   * \brief case_handler Get the case handler. 
+   * \brief case_handler Get the case handler.
    Used by the bookkeeper in the runner lib.
    */
   CaseHandler *case_handler() const { return case_handler_; }
@@ -116,7 +117,7 @@ class Optimizer : public Loggable
   // ending the opt runs. Returned by IsFinished method.
   enum TerminationCondition : int {NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
-    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4, 
+    MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4,
     TR_MIN_RADIUS_REACHED=5
   };
 
@@ -133,7 +134,9 @@ class Optimizer : public Loggable
   virtual QString GetStatusStringHeader() const; //!< Get the CSV header for the status string.
   virtual QString GetStatusString() const; //!< Get a CSV string describing the current state of the optimizer.
   void EnableConstraintLogging(QString output_directory_path); //!< Enable writing a text log for the constraint operations.
-  void SetVerbosityLevel(int level);
+
+//  void SetVerbosityLevel(int level);
+
   bool IsAsync() const { return is_async_; } //!< Check if the optimizer is asynchronous.
 
   /*!
@@ -145,18 +148,20 @@ class Optimizer : public Loggable
 
  protected:
   /*!
-   * \brief Base constructor for optimizers. Initializes constraints and sets some member values.
-   * \param settings Settings for the optimizer.
-   * \param base_case The base case for optimizer. Must already have been evaluated (i.e. have an objective function value).
+   * \brief Base constructor for optimizers.
+   * Initializes constraints and sets some member values.
+   * \param opt_settings Settings for the optimizer.
+   * \param base_case Base case for optimizer. Must already
+   * have been evaluated (i.e., have an objective function value).
    * \param variables The variable property container from the Model (needed for initialization of constriants).
    * \param grid The grid to be used (needed for initializtion of some constraints).
    * \param logger Logger object passed from runner.
    * \param case_handler CaseHandler object. This is passed from the HybridOptimizer; defaults to 0, in which case a new one will be created.
    * \param constraint_handler ConstraintHandler object. This is passed from the HybridOptimizer; defaults to 0, in which case a new one will be created.
    */
-  Optimizer(::Settings::Optimizer *settings,
+  Optimizer(::Settings::Optimizer *opt_settings,
             Case *base_case,
-            Model::Properties::VariablePropertyContainer *variables,
+            Model::Properties::VarPropContainer *variables,
             Reservoir::Grid::Grid *grid,
             Logger *logger,
             CaseHandler *case_handler=0,
@@ -254,11 +259,11 @@ class Optimizer : public Loggable
     MatrixXd getTrH() { return tr_H_; }
 
     VectorXd getXSol() {
-        return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
+      return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
     }
 
     VectorXd getFSol() {
-        return Eigen::Map<VectorXd>(fsol_.data(), fsol_.size());
+      return Eigen::Map<VectorXd>(fsol_.data(), fsol_.size());
     }
 
     int getSNOPTExitCode() { return SNOPT_exit_code_ ; }

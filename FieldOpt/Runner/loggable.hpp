@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 4/3/17.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 4/3/17.
+Copyright (C) 2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_LOGGABLE_H
 #define FIELDOPT_LOGGABLE_H
 
@@ -27,8 +33,9 @@
 using namespace std;
 
 /*!
- * @brief The abstract Loggable class specifies the methods that must
- * be implemented by all classes that are to be logged by the Logger class.
+ * @brief The abstract Loggable class specifies the methods
+ * that must be implemented by all classes that are to be
+ * logged by the Logger class.
  */
 class Loggable {
 
@@ -44,6 +51,8 @@ class Loggable {
    * STATE_RUNNER - A temporary log for debugging purposes. This log is frequently deleted as it only descibes the current state.
    */
   enum LogTarget {LOG_CASE, LOG_OPTIMIZER, LOG_EXTENDED, LOG_SUMMARY, STATE_RUNNER};
+
+  string src;
 
   /*!
    * @brief Get the target log for the object. E.g. if LOG_CASE is returned,

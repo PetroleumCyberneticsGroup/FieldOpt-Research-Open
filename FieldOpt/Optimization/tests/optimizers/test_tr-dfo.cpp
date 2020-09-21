@@ -74,7 +74,7 @@ class TrustRegionTest : public ::testing::Test,
 
   TrustRegionOptimization *tr_dfo_;
   Optimization::Case *test_case_tr_dfo_probs_;
-  VariablePropertyContainer *varcont_tr_dfo_probs_;
+  VarPropContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
   Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
@@ -91,25 +91,24 @@ class TrustRegionTest : public ::testing::Test,
 
   void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
-
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VariablePropertyContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer();
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {
       // Use initial point values to construct container
-      auto *prop = new ContinousProperty(x0(i));
+      auto *prop = new ContinuousProperty(x0(i));
       prop->setName(base_varname + QString::number(i));
       varcont_tr_dfo_probs_->AddVariable(prop);
     }
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-        QHash<QUuid, bool>(), QHash<QUuid, int>(),
-        varcont_tr_dfo_probs_->GetContinousVariableValues());
-
+        QList<QPair<QUuid, bool>>(),
+        QList<QPair<QUuid, int>>(),
+        varcont_tr_dfo_probs_->GetContVarValues());
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
 
@@ -120,8 +119,8 @@ class TrustRegionTest : public ::testing::Test,
     }
     test_case_tr_dfo_probs_->SetRealVarValues(ordered_vec);
 
-    // Use initial point from Matlab data
-    test_case_tr_dfo_probs_->set_objective_function_value(tr_dfo_prob(x0));
+    // Use initial point (objf) from Matlab data
+    test_case_tr_dfo_probs_->set_objf_value(tr_dfo_prob(x0));
 
     tr_dfo_ = new TrustRegionOptimization(
         settings_tr_opt_max_,
@@ -133,7 +132,6 @@ class TrustRegionTest : public ::testing::Test,
 
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
                   double (*tr_dfo_prob)(VectorXd xs)){
-
     stringstream ss; ss << "[          ] " << FMAGENTA;
     double tol = 1e-06;
     int p_count = 0;
@@ -155,8 +153,8 @@ class TrustRegionTest : public ::testing::Test,
       }
 
       // Compute obj.function value for case
-      next_case->set_objective_function_value(
-          tr_dfo_prob(next_case->GetRealVarVector()));
+      next_case->set_objf_value(
+        tr_dfo_prob(next_case->GetRealVarVector()));
 
       // Override 2nd point
       if (p_count == 1 && prob.xm.cols() > 1) {
@@ -194,7 +192,6 @@ class TrustRegionTest : public ::testing::Test,
 
     return true;
   }
-
 };
 
 TEST_F(TrustRegionTest, trHS1) {

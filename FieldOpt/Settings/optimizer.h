@@ -33,6 +33,11 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using std::vector;
+using std::string;
+using std::map;
+using Printer::num2str;
+
 /*!
  * \brief The Optimizer class contains optimizer-specific
  * settings. Optimizer settings objects may _only_ be
@@ -45,7 +50,7 @@ class Optimizer
 
  public:
   Optimizer(){}
-  Optimizer(QJsonObject json_optimizer);
+  Optimizer(QJsonObject json_optimizer, VerbParams vp);
 
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
@@ -55,16 +60,16 @@ class Optimizer
   enum OptimizerMode { Maximize, Minimize };
 
   enum ConstraintType { BHP, Rate, SplinePoints,
-    WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
-    CombinedWellSplineLengthInterwellDistance,
-    CombinedWellSplineLengthInterwellDistanceReservoirBoundary,
+    WSplineLength, WSplineInterwDist, WellSplineDomain,
+    MxWSplineLengthInterwDist, MxWSplineLengthInterwDistResBound,
     ReservoirBoundary, PseudoContBoundary2D, PolarXYZBoundary,
     ReservoirXYZBoundary, ReservoirBoundaryToe,
     PackerConstraint, ICVConstraint, PolarWellLength,
     PolarAzimuth, PolarElevation, PolarSplineBoundary
   };
+
   enum ConstraintWellSplinePointsType { MaxMin, Function};
-  enum ObjectiveType { WeightedSum, NPV};
+  enum ObjectiveType { WeightedSum, NPV, Augmented};
 
   struct Parameters {
     // Common parameters
@@ -186,31 +191,68 @@ class Optimizer
   };
 
   struct Objective {
-    ObjectiveType type; //!< The objective definition type (e.g. WeightedSum, NPV)
+    ObjectiveType type; //!< Objective function type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
     bool use_well_cost; //!<Whether or not to use costs associated to wells in calculation of the objective.
     bool separatehorizontalandvertical; //!<Whether or not to use different values in the horizontal or vertical direction
     double wellCostXY; //!<Cost associated with drilling in the horizontal plane [$/m]
     double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
+
+    //!< Weighted sum component
     struct WeightedSumComponent {
-      double coefficient; 
-      QString property; 
+      double coefficient;
+      QString property;
       int time_step;
-      bool is_well_prop; 
-      QString well; 
-    }; //!< A component of a weighted sum objective function
+      bool is_well_prop;
+      QString well;
+    };
+
+    //!< NPV component
     struct NPVComponent{
       double coefficient;
-      std::string property;
-      std::string interval = "";
+      string property;
+      string interval = "";
       bool usediscountfactor = false;
-      std::string well;
+      string well;
       double discount = 0.0;
     };
 
-    QList<WeightedSumComponent> weighted_sum; //!< The expression for the Objective function formulated as a weighted sum
-    QList<NPVComponent> NPV_sum;  //!< The expression for the Objective function formulated as an NPV
+    //!< Weighted sum formulation
+    QList<WeightedSumComponent> weighted_sum;
+
+     //!< NPV formulation
+    QList<NPVComponent> NPV_sum;
+
+    //!< Augmented function term
+    struct AugTerms {
+      string prop_name; // -> defines prop_type
+      double coefficient;
+      string prop_spec;
+      vector<string> wells;
+      map<string, vector<int>> segments;
+      bool active;
+      string scaling;
+
+      void showTerms() {
+        stringstream ss;
+        ss << "prop_name: " << prop_name;
+        ss << ", coefficient: " << coefficient;
+        ss << ", active: " << active;
+        ss << ", prop_spec: " << prop_spec;
+        for(string w : wells) {
+          ss << segments[w].size() << ", well: " << w << " w/ segs: [ ";
+          for  (int ii=0; ii < segments[w].size(); ++ii) {
+            ss << num2str(segments[w][ii], 0) << " ";
+          }
+          ss << "]";
+        }
+        ext_info(ss.str(), "Settings", "Optimizer", 140);
+      }
+    };
+
+    //!< Augmented formulation
+    vector<AugTerms> terms;
 
   };
 
@@ -252,13 +294,20 @@ class Optimizer
   void SetRngSeed(const int seed) { parameters_.rng_seed = seed; } //!< Change the RNG seed (used by HybridOptimizer).
 
   void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
+  VerbParams verbParams() { return vp_; };
 
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
-  OptimizerMode mode_ = OptimizerMode::Maximize; //!< Optimization mode (maximize or minimize). Default: Maximize
+
+  string md_ = "Settings";
+  string cl_ = "Optimizer";
+  VerbParams vp_;
+
+  //!< Optimization mode (maximize or minimize). Def: Maximize
+  OptimizerMode mode_ = OptimizerMode::Maximize;
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
@@ -267,6 +316,7 @@ class Optimizer
   Parameters parseParameters(QJsonObject &json_parameters);
   Objective parseObjective(QJsonObject &json_objective);
   QList<HybridComponent> parseHybridComponents(QJsonObject &json_optimizer);
+
 };
 
 }

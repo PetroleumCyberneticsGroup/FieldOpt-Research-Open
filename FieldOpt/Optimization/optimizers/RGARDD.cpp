@@ -26,7 +26,7 @@ namespace Optimizers {
 
 RGARDD::RGARDD(Settings::Optimizer *settings,
                Optimization::Case *base_case,
-               Model::Properties::VariablePropertyContainer *variables,
+               Model::Properties::VarPropContainer *variables,
                Reservoir::Grid::Grid *grid,
                Logger *logger,
                CaseHandler *case_handler,
@@ -113,7 +113,7 @@ void RGARDD::handleEvaluatedCase(Case *c) {
             }
             if (VERB_OPT >= 1) {
                 Printer::ext_info("New best in generation " + Printer::num2str(iteration_) + ": "
-                + Printer::num2str(GetTentativeBestCase()->objective_function_value()), "RGARDD", "Optimization");
+                + Printer::num2str(GetTentativeBestCase()->objf_value()), "RGARDD", "Optimization");
             }
         }
     }
@@ -231,7 +231,7 @@ void RGARDD::print_state(string header) {
     ss << header << "|";
     ss << "Iteration: " << iteration_ << "|";
     ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
-    ss << "              OFV: " << tentative_best_case_->objective_function_value() << "|";
+    ss << "              OFV: " << tentative_best_case_->objf_value() << "|";
     Printer::ext_info(ss.str(), "Optimization", "RGARDD");
 }
 }

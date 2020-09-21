@@ -33,7 +33,7 @@ namespace BayesianOptimization {
 
 EGO::EGO(Settings::Optimizer *settings,
          Case *base_case,
-         Model::Properties::VariablePropertyContainer *variables,
+         Model::Properties::VarPropContainer *variables,
          Reservoir::Grid::Grid *grid,
          Logger *logger,
          CaseHandler *case_handler,
@@ -48,9 +48,9 @@ EGO::EGO(Settings::Optimizer *settings,
     
     // penalize the base case
     if (penalize_) {
-        double org_ofv = tentative_best_case_->objective_function_value();
+        double org_ofv = tentative_best_case_->objf_value();
         double pen_ofv = PenalizedOFV(tentative_best_case_);
-        tentative_best_case_->set_objective_function_value(pen_ofv);
+      tentative_best_case_->set_objf_value(pen_ofv);
         if (VERB_OPT >=1) {
             Printer::ext_info("Penalized base case. " 
                     "Original value: " + Printer::num2str(org_ofv) + "; "
@@ -58,7 +58,7 @@ EGO::EGO(Settings::Optimizer *settings,
         }
     }
 
-    int n_cont_vars = variables->ContinousVariableSize();
+    int n_cont_vars = variables->ContinuousVariableSize();
 
     if (constraint_handler_->HasBoundaryConstraints()) {
         lb_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
@@ -163,10 +163,10 @@ Optimization::Optimizer::TerminationCondition EGO::IsFinished() {
     return tc;
 }
 void EGO::handleEvaluatedCase(Case *c) {
-    gp_->add_pattern(c->GetRealVarVector().data(), normalizer_ofv_.normalize(c->objective_function_value()));
+    gp_->add_pattern(c->GetRealVarVector().data(), normalizer_ofv_.normalize(c->objf_value()));
     if (isImprovement(c)) {
         updateTentativeBestCase(c);
-        Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objective_function_value()), "Optimization", "EGO");
+        Printer::ext_info("Found new tentative best case: " + Printer::num2str(c->objf_value()), "Optimization", "EGO");
     }
 }
 void EGO::iterate() {
@@ -192,7 +192,7 @@ void EGO::iterate() {
     start = QDateTime::currentDateTime();
     VectorXd new_position = af_opt_.Optimize(
         gp_, af_,
-        normalizer_ofv_.normalize(GetTentativeBestCase()->objective_function_value())
+        normalizer_ofv_.normalize(GetTentativeBestCase()->objf_value())
     );
     end = QDateTime::currentDateTime();
     time_af_opt_ += time_span_seconds(start, end);

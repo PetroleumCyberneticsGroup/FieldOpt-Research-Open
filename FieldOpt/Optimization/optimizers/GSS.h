@@ -1,24 +1,31 @@
-/******************************************************************************
-   Created by einar on 11/3/16.
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 11/3/16.
+Copyright (C) 2015-2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   Modified by Einar J. M. Baumann <einar.baumann@gmail.com> 02/19/19.
+Modified 02/19/19 Einar J. M. Baumann
+<einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_GSS_H
 #define FIELDOPT_GSS_H
 
@@ -63,7 +70,7 @@ class GSS : public Optimizer {
    */
   GSS(Settings::Optimizer *settings,
       Case *base_case,
-      Model::Properties::VariablePropertyContainer *variables,
+      Model::Properties::VarPropContainer *variables,
       Reservoir::Grid::Grid *grid,
       Logger *logger,
       CaseHandler *case_handler=0,
@@ -154,6 +161,15 @@ class GSS : public Optimizer {
    */
   template <typename T>
   Matrix<T, Dynamic, 1> perturb(Matrix<T, Dynamic, 1> base, int dir);
+
+  string im_ = "", wm_ = "", em_ = "";
+  string cl_ = "GSS";
+  string md_ = "Optimization::Optimizers";
+
+  Settings::VerbParams vp_;
+  VectorXd vd_ = VectorXd::Zero(0);
+  string fl_ = "dbg_aug_obj.py";
+
 };
 
 }

@@ -41,73 +41,75 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace TestResources {
 class TestResourceOptimizer :
-    public TestResourceModel, public TestResourceCases {
+  public TestResourceModel, public TestResourceCases {
 
  protected:
 
   TestResourceOptimizer() {
     base_case_ = new Optimization::Case(
-        model_->variables()->GetBinaryVariableValues(),
-        model_->variables()->GetDiscreteVariableValues(),
-        model_->variables()->GetContinousVariableValues());
+      model_->variables()->GetBinVarValues(),
+      model_->variables()->GetDiscVarValues(),
+      model_->variables()->GetContVarValues());
 
-    base_case_->set_objective_function_value(1000.0);
+    base_case_->set_objf_value(1000.0);
+
+    auto vp = settings_full_->global()->verbParams();
 
     settings_compass_search_min_unconstr_ =
-        new Settings::Optimizer(
-            get_json_settings_compass_search_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_compass_search_minimize_, vp);
 
     settings_compass_search_max_unconstr_ =
-        new Settings::Optimizer(
-            get_json_settings_compass_search_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_compass_search_maximize_, vp);
 
     settings_apps_min_unconstr_ =
-        new Settings::Optimizer(
-            get_json_settings_apps_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_apps_minimize_, vp);
 
     settings_apps_max_unconstr_ =
-        new Settings::Optimizer(
-            get_json_settings_apps_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_apps_maximize_, vp);
 
     settings_cma_es_min_ =
-        new Settings::Optimizer(
-            get_json_settings_cma_es_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_cma_es_minimize_, vp);
 
     settings_ga_min_ =
-        new Settings::Optimizer(
-            get_json_settings_ga_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_ga_minimize_, vp);
 
     settings_ga_max_ =
-        new Settings::Optimizer(
-            get_json_settings_ga_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_ga_maximize_, vp);
 
     settings_ego_max_ = new
-        Settings::Optimizer(
-            get_json_settings_ego_maximize_);
+      Settings::Optimizer(
+      get_json_settings_ego_maximize_, vp);
 
     settings_pso_min_ =
-        new Settings::Optimizer(
-            get_json_settings_pso_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_pso_minimize_, vp);
 
     settings_vfsa_min_ =
-        new Settings::Optimizer(
-            get_json_settings_vfsa_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_vfsa_minimize_, vp);
 
     settings_vfsa_max_ =
-        new Settings::Optimizer(
-            get_json_settings_vfsa_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_vfsa_maximize_, vp);
 
     settings_spsa_min_ =
-        new Settings::Optimizer(
-            get_json_settings_spsa_minimize_);
+      new Settings::Optimizer(
+        get_json_settings_spsa_minimize_, vp);
 
     settings_spsa_max_ =
-        new Settings::Optimizer(
-            get_json_settings_spsa_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_spsa_maximize_, vp);
 
     settings_tr_opt_max_ =
-        new Settings::Optimizer(
-            get_json_settings_tr_opt_maximize_);
+      new Settings::Optimizer(
+        get_json_settings_tr_opt_maximize_, vp);
   }
 
   Optimization::Case *base_case_;
@@ -128,212 +130,212 @@ class TestResourceOptimizer :
 
  private:
   QJsonObject obj_fun_{
-      {"Type", "WeightedSum"},
-      {"WeightedSumComponents", QJsonArray{
-          QJsonObject{
-              {"Coefficient", 1.0},
-              {"Property", "CumulativeOilProduction"},
-              {"TimeStep", -1},
-              {"IsWellProp", false}
-          },
-          QJsonObject{
-              {"Coefficient", 0.0},
-              {"Property", "CumulativeWaterProduction"},
-              {"TimeStep", -1},
-              {"IsWellProp", false}
-          }
-      }}
+    {"Type", "WeightedSum"},
+    {"WeightedSumComponents", QJsonArray{
+      QJsonObject{
+        {"Coefficient", 1.0},
+        {"Property", "FieldOilProdTotal"},
+        {"TimeStep", -1},
+        {"IsWellProp", false}
+      },
+      QJsonObject{
+        {"Coefficient", 0.0},
+        {"Property", "FieldWatProdTotal"},
+        {"TimeStep", -1},
+        {"IsWellProp", false}
+      }
+    }}
   };
   QJsonObject get_json_settings_compass_search_minimize_{
-      {"Type", "Compass"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxEvaluations", 100},
-          {"InitialStepLength", 0.25},
-          {"MinimumStepLength", 0.01}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "Compass"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 100},
+      {"InitialStepLength", 0.25},
+      {"MinimumStepLength", 0.01}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_compass_search_maximize_{
-      {"Type", "Compass"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"MaxEvaluations", 100},
-          {"InitialStepLength", 8},
-          {"MinimumStepLength", 1}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "Compass"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 100},
+      {"InitialStepLength", 8},
+      {"MinimumStepLength", 1}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_apps_minimize_{
-      {"Type", "APPS"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxEvaluations", 500},
-          {"InitialStepLength", 0.64},
-          {"MinimumStepLength", 0.005}
-      }},
-      {"Objective", obj_fun_},
-      // {"Constraints", QJsonArray{
-      //    QJsonObject{
-      //        {"Type", "BHP"},
-      //        {"Wells", QJsonArray{"PRODUCER"}},
-      //        {"Min", 0},
-      //        {"Max", 4}
-      //    }
-      // }}
+    {"Type", "APPS"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 500},
+      {"InitialStepLength", 0.64},
+      {"MinimumStepLength", 0.005}
+    }},
+    {"Objective", obj_fun_},
+    // {"Constraints", QJsonArray{
+    //    QJsonObject{
+    //        {"Type", "BHP"},
+    //        {"Wells", QJsonArray{"PRODUCER"}},
+    //        {"Min", 0},
+    //        {"Max", 4}
+    //    }
+    // }}
   };
 
   QJsonObject get_json_settings_apps_maximize_{
-      {"Type", "APPS"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"MaxEvaluations", 500},
-          {"InitialStepLength", 8},
-          {"MinimumStepLength", 1}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "APPS"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 500},
+      {"InitialStepLength", 8},
+      {"MinimumStepLength", 1}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_ga_maximize_{
-      {"Type", "GeneticAlgorithm"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"MaxGenerations", 100},
-          {"PopulationSize", 20},
-          {"CrossoverProbability", 0.8},
-          {"MutationProbability", 0.05},
-          {"CrossoverScaleInt", 0.15},
-          {"CrossoverScaleReal", 0.25},
-          {"MutationPowerInt", 5.0},
-          {"MutationPowerReal", 2.0},
-          {"LowerBoundInt", 0.0},
-          {"UpperBoundInt", 10.0},
-          {"LowerBoundReal", 0.0},
-          {"UpperBoundReal", 100.0}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "GeneticAlgorithm"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"MaxGenerations", 100},
+      {"PopulationSize", 20},
+      {"CrossoverProbability", 0.8},
+      {"MutationProbability", 0.05},
+      {"CrossoverScaleInt", 0.15},
+      {"CrossoverScaleReal", 0.25},
+      {"MutationPowerInt", 5.0},
+      {"MutationPowerReal", 2.0},
+      {"LowerBoundInt", 0.0},
+      {"UpperBoundInt", 10.0},
+      {"LowerBoundReal", 0.0},
+      {"UpperBoundReal", 100.0}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_ga_minimize_{
-      {"Type", "GeneticAlgorithm"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxGenerations",        700},
-          {"PopulationSize",        60},
-          {"CrossoverProbability",  0.1},
-          {"DecayRate",             4.0},
-          {"MutationStrength",      0.25},
-          {"StagnationLimit",       1e-10},
-          {"LowerBound",            -10.0},
-          {"UpperBound",            10.0}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "GeneticAlgorithm"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxGenerations",        700},
+      {"PopulationSize",        60},
+      {"CrossoverProbability",  0.1},
+      {"DecayRate",             4.0},
+      {"MutationStrength",      0.25},
+      {"StagnationLimit",       1e-10},
+      {"LowerBound",            -10.0},
+      {"UpperBound",            10.0}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_vfsa_minimize_{
-      {"Type", "VFSA"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"VFSA-MaxIterations",    1000},
-          {"VFSA-EvalsPrIteration",   10},
-          {"VFSA-Parallel",       false},
-          {"VFSA-InitTemp",        1E-7},
-          {"VFSA-TempScale",        1.0},
-          {"LowerBoundReal",       -5.0},
-          {"UpperBoundReal",        5.0}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "VFSA"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"VFSA-MaxIterations",    1000},
+      {"VFSA-EvalsPrIteration",   10},
+      {"VFSA-Parallel",       false},
+      {"VFSA-InitTemp",        1E-7},
+      {"VFSA-TempScale",        1.0},
+      {"LowerBoundReal",       -5.0},
+      {"UpperBoundReal",        5.0}
+    }},
+    {"Objective", obj_fun_}
   };
 
 
   QJsonObject get_json_settings_vfsa_maximize_{
-      {"Type", "VFSA"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"VFSA-MaxIterations",        6000},
-          {"VFSA-EvalsPrIteration",       10},
-          {"VFSA-Parallel",            true},
-          {"VFSA-InitTemp",             1E-6},
-          {"VFSA-TempScale",             1.0},
-          {"LowerBoundReal",            -5.0},
-          {"UpperBoundReal",             5.0}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "VFSA"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"VFSA-MaxIterations",        6000},
+      {"VFSA-EvalsPrIteration",       10},
+      {"VFSA-Parallel",            true},
+      {"VFSA-InitTemp",             1E-6},
+      {"VFSA-TempScale",             1.0},
+      {"LowerBoundReal",            -5.0},
+      {"UpperBoundReal",             5.0}
+    }},
+    {"Objective", obj_fun_}
   };
 
 
   QJsonObject get_json_settings_spsa_minimize_{
-      {"Type", "SPSA"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"SPSA-MaxIterations",         400},
-          //{"SPSA-alpha",                  0.602},
-          //{"SPSA-gamma",                  0.101},
-          {"SPSA-c",                    0.05},
-          //{"SPSA-A",                     10},
-          //{"SPSA_a",                      1.0},
-          {"SPSA-InitStepMagnitude",     0.1}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "SPSA"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"SPSA-MaxIterations",         400},
+      //{"SPSA-alpha",                  0.602},
+      //{"SPSA-gamma",                  0.101},
+      {"SPSA-c",                    0.05},
+      //{"SPSA-A",                     10},
+      //{"SPSA_a",                      1.0},
+      {"SPSA-InitStepMagnitude",     0.1}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_spsa_maximize_{
-      {"Type", "SPSA"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"SPSA-MaxIterations",         400},
-          //{"SPSA-alpha",                  0.602},
-          //{"SPSA-gamma",                  0.101},
-          {"SPSA-c",                    0.05},
-          //{"SPSA-A",                     10},
-          //{"SPSA_a",                      1.0},
-          {"SPSA-InitStepMagnitude",     0.1}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "SPSA"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"SPSA-MaxIterations",         400},
+      //{"SPSA-alpha",                  0.602},
+      //{"SPSA-gamma",                  0.101},
+      {"SPSA-c",                    0.05},
+      //{"SPSA-A",                     10},
+      //{"SPSA_a",                      1.0},
+      {"SPSA-InitStepMagnitude",     0.1}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_pso_minimize_{
-      {"Type", "PSO"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxGenerations",        700},
-          {"PSO-SwarmSize",          10},
-          {"PSO-LearningFactor1",    2.2},
-          {"PSO-LearningFactor2",    1.8},
-          {"PSO-VelocityScale",      0.025},
-          {"LowerBound",            -5.0},
-          {"UpperBound",             5.0}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "PSO"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxGenerations",        700},
+      {"PSO-SwarmSize",          10},
+      {"PSO-LearningFactor1",    2.2},
+      {"PSO-LearningFactor2",    1.8},
+      {"PSO-VelocityScale",      0.025},
+      {"LowerBound",            -5.0},
+      {"UpperBound",             5.0}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_cma_es_minimize_{
-          {"Type", "CMA_ES"},
-          {"Mode", "Minimize"},
-          {"Parameters", QJsonObject{
-                  {"MaxGenerations",        200},
-                  {"LowerBound",             -1},
-                  {"UpperBound",             1},
-                  {"ImproveBaseCase", false}
-                  //{"PopulationSize", 40}
-      }},
-      {"Objective", obj_fun_}
+    {"Type", "CMA_ES"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxGenerations",        200},
+      {"LowerBound",             -1},
+      {"UpperBound",             1},
+      {"ImproveBaseCase", false}
+      //{"PopulationSize", 40}
+    }},
+    {"Objective", obj_fun_}
   };
 
   QJsonObject get_json_settings_ego_maximize_{
-      {"Type", "EGO"},
-      {"Mode", "Maximize"},
-      {"Parameters", QJsonObject{
-          {"LowerBound", -1},
-          {"UpperBound", 1},
-          {"MaxEvaluations", 50}
-      }},
-      {"Objective", obj_fun_},
+    {"Type", "EGO"},
+    {"Mode", "Maximize"},
+    {"Parameters", QJsonObject{
+      {"LowerBound", -1},
+      {"UpperBound", 1},
+      {"MaxEvaluations", 50}
+    }},
+    {"Objective", obj_fun_},
 //      {"Constraints", QJsonArray{
 //          QJsonObject{
-//              {"Type", "ReservoirBoundary"},
+//              {"Type", "ResBoundary"},
 //              {"Wells", QJsonArray{"INJECTOR", "PRODUCER"}},
 //              {"PenaltyWeight", 0.01},
 //              {"BoxImin", 8},
@@ -347,22 +349,22 @@ class TestResourceOptimizer :
   };
 
   QJsonObject get_json_settings_tr_opt_maximize_{
-      {"Type", "TrustRegionOptimization"},
-      {"Mode", "Minimize"},
-      {"Parameters", QJsonObject{
-          {"MaxEvaluations", 3},
-          {"InitialTrustRegionRadius", 1},
-          // {"TrustRegionLowerBound", -1e3},
-          // {"TrustRegionUpperBound", 1e3},
-          {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
-          {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
-          {"RNGSeed", 25},
-          {"CriticalityMu", 100},
-          {"CriticalityOmega", 0.5},
-          {"CriticalityBeta", 10},
-          {"ProblemName", "prob0"}
-      }},
-      {"Objective", obj_fun_},
+    {"Type", "TrustRegionOptimization"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 3},
+      {"InitialTrustRegionRadius", 1},
+      // {"TrustRegionLowerBound", -1e3},
+      // {"TrustRegionUpperBound", 1e3},
+      {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
+      {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
+      {"RNGSeed", 25},
+      {"CriticalityMu", 100},
+      {"CriticalityOmega", 0.5},
+      {"CriticalityBeta", 10},
+      {"ProblemName", "prob0"}
+    }},
+    {"Objective", obj_fun_},
   };
 };
 }

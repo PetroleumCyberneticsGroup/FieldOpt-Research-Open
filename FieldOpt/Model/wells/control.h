@@ -25,7 +25,7 @@
 #include "Model/properties/discrete_property.h"
 #include "Model/properties/continous_property.h"
 #include "Model/properties/binary_property.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 namespace Model {
 namespace Wells {
@@ -45,7 +45,7 @@ class Control
    */
   Control(::Settings::Model::Well::ControlEntry entry,
           ::Settings::Model::Well well,
-          ::Model::Properties::VariablePropertyContainer *variables);
+          ::Model::Properties::VarPropContainer *variables);
 
   /*!
    * Copy constructor.
@@ -83,12 +83,12 @@ class Control
  private:
   Properties::DiscreteProperty *time_step_;
   Properties::BinaryProperty *open_;
-  Properties::ContinousProperty *bhp_;
-  Properties::ContinousProperty *liq_rate_;
-  Properties::ContinousProperty *oil_rate_;
-  Properties::ContinousProperty *gas_rate_;
-  Properties::ContinousProperty *wat_rate_;
-  Properties::ContinousProperty *res_rate_;
+  Properties::ContinuousProperty *bhp_;
+  Properties::ContinuousProperty *liq_rate_;
+  Properties::ContinuousProperty *oil_rate_;
+  Properties::ContinuousProperty *gas_rate_;
+  Properties::ContinuousProperty *wat_rate_;
+  Properties::ContinuousProperty *res_rate_;
   ::Settings::Model::ControlMode mode_;
   ::Settings::Model::InjectionType injection_fluid_;
 };

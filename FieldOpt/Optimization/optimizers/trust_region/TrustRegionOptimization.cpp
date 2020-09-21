@@ -35,7 +35,7 @@ namespace Optimizers {
 TrustRegionOptimization::TrustRegionOptimization(
     Settings::Optimizer *settings,
     Case *base_case,
-    Model::Properties::VariablePropertyContainer *variables,
+    Model::Properties::VarPropContainer *variables,
     Reservoir::Grid::Grid *grid,
     Logger *logger,
     CaseHandler *case_handler,
@@ -45,6 +45,7 @@ TrustRegionOptimization::TrustRegionOptimization(
   settings_ = settings;
   variables_ = variables;
   base_case_ = base_case;
+  vp_ = settings_->verbParams();
 
   setLowerUpperBounds();
 
@@ -296,13 +297,13 @@ void TrustRegionOptimization::iterate() {
 void TrustRegionOptimization::createLogFile() {
   QString output_dir = logger_->getOutputDir();
   if (output_dir.length() > 0) {
-    Utilities::FileHandling::CreateDirectory(output_dir);
+    Utilities::FileHandling::CreateDir(output_dir, vp_);
   }
   tr_log_path_ = output_dir + "/log_trust_region.csv";
 
   // Delete existing logs if --force flag is on
-  if (Utilities::FileHandling::FileExists(tr_log_path_)) {
-    Utilities::FileHandling::DeleteFile(tr_log_path_);
+  if (Utilities::FileHandling::FileExists(tr_log_path_, vp_)) {
+    Utilities::FileHandling::DeleteFile(tr_log_path_, vp_);
   }
 
   const QString tr_log_header = "iter        fval         rho      radius  pts";
@@ -396,9 +397,9 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
       double eta_1 = settings_->parameters().tr_eta_1;
 
       if (settings_->mode() == Settings::Optimizer::OptimizerMode::Maximize) {
-        fval_trial_ = -c->objective_function_value();
+        fval_trial_ = -c->objf_value();
       } else {
-        fval_trial_ = c->objective_function_value();
+        fval_trial_ = c->objf_value();
       }
 
       //!<Actual reduction>
@@ -477,7 +478,7 @@ void TrustRegionOptimization::updateRadius() {
 
 void TrustRegionOptimization::computeInitialPoints() {
 
-  tr_model_->setXDim(variables_->ContinousVariableSize());
+  tr_model_->setXDim(variables_->ContinuousVariableSize());
   int n_cont_vars = tr_model_->getXDim();
 
   auto initial_point = base_case_->GetRealVarVector();
@@ -505,6 +506,9 @@ void TrustRegionOptimization::computeInitialPoints() {
 
       second_point << (second_point.array() - 0.5);
       second_point *= settings_->parameters().tr_initial_radius;
+
+      cout << "initial_point: " << initial_point << endl;
+      cout << "second_point: " << second_point << endl;
       second_point << initial_point.array() + second_point.array();
       if(lb_.size()>0 && ub_.size() >0) {
         projectToBounds(&second_point);

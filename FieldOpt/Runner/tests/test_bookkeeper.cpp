@@ -31,7 +31,7 @@ class BookkeeperTest : public ::testing::Test,
 {
  protected:
   BookkeeperTest() {
-      test_case_2r_->set_objective_function_value(100.0);
+    test_case_2r_->set_objf_value(100.0);
       compass_search_ = new ::Optimization::Optimizers::CompassSearch(settings_compass_search_max_unconstr_,
                                                                       test_case_2r_,
                                                                       model_->variables(),
@@ -63,7 +63,7 @@ TEST_F(BookkeeperTest, Bookkeeping) {
     EXPECT_FALSE(bookkeeper_->IsEvaluated(c2));
     EXPECT_FALSE(bookkeeper_->IsEvaluated(c3));
 
-    c1->set_objective_function_value(100);
+  c1->set_objf_value(100);
     compass_search_->SubmitEvaluatedCase(c1);
     EXPECT_TRUE(bookkeeper_->IsEvaluated(c1));
 }

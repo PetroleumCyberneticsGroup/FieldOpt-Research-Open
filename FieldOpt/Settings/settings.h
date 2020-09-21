@@ -29,6 +29,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include <QJsonObject>
 
+#include "Utilities/verbosity.h"
+#include "global.h"
 #include "simulator.h"
 #include "optimizer.h"
 #include "model.h"
@@ -36,6 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+class Global;
 class Simulator;
 class Model;
 class Optimizer;
@@ -56,24 +59,8 @@ class Settings {
   Settings() {}
   Settings(Paths &paths);
 
-  //!< Name to be used for the run. Output file
-  //!< and folder names are derived from this.
-  QString name() const { return name_; }
+  Global *global() const { return global_; }
 
-  // To be removed:
-  //!< Verbose mode (with or without debug printing).
-  bool verbose() const { return verbose_; }
-  void set_verbosity(const bool verbosity) {
-    verbose_ = verbosity;
-  }
-
-  //!< Get the value for the bookkeeper tolerance.
-  //!< Used by the Bookkeeper in the Runner library.
-  double bookkeeper_tolerance() const {
-    return bookkeeper_tolerance_;
-  }
-
-  // -------------------------------------------------------
   //!< Object containing model specific settings.
   Model *model() const { return model_; }
 
@@ -89,28 +76,21 @@ class Settings {
 
   Paths &paths() { return paths_; }
 
-  // -------------------------------------------------------
-  void setOptimizer(Optimizer *opt) {
-    optimizer_ = opt;
-  }
+  void setOptimizer(Optimizer *opt) { optimizer_ = opt; }
 
-  void setSimulator(Simulator *sim) {
-    simulator_ = sim;
-  }
+  void setSimulator(Simulator *sim) { simulator_ = sim; }
 
-  void setModel(Model *mod) {
-    model_ = mod;
-  }
+  void setModel(Model *mod) { model_ = mod; }
 
-  // -------------------------------------------------------
  private:
   Paths paths_;
   QJsonObject *json_driver_;
-  QString name_;
 
-  double bookkeeper_tolerance_;
-  bool verbose_ = false;
+  string md_ = "Settings";
+  string cl_ = "Settings";
+  VerbParams vp_;
 
+  Global *global_;
   Model *model_;
   Optimizer *optimizer_;
   Simulator *simulator_;

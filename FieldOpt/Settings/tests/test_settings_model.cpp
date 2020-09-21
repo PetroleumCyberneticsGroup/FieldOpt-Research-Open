@@ -40,6 +40,7 @@ class ModelSettingsTest : public ::testing::Test,
   
   virtual void SetUp() {}
   virtual void TearDown() {}
+  Settings::VerbParams vp_ = {};
 };
 
 TEST_F(ModelSettingsTest, ControlTimes) {
@@ -158,7 +159,7 @@ TEST_F(ModelSettingsTest, MultisplineWell) {
   // sim_json_ = partial_deck["Simulator"].toObject();
   mod_json_ = partial_deck["Model"].toObject();
   // auto sim_settings = dc_6Settings::Simulator(sim_json_, paths_);
-  auto mod_settings = Settings::Model(mod_json_, paths_);
+  auto mod_settings = Settings::Model(mod_json_, paths_, vp_);
 }
 
 }

@@ -28,7 +28,7 @@ namespace Wellbore {
 
 
 PolarSpline::PolarSpline(::Settings::Model::Well well_settings,
-         Properties::VariablePropertyContainer *variable_container,
+         Properties::VarPropContainer *variable_container,
          Reservoir::Grid::Grid *grid,
          Reservoir::WellIndexCalculation::wicalc_rixx *wic )
 {
@@ -50,13 +50,13 @@ PolarSpline::PolarSpline(::Settings::Model::Well well_settings,
 
     bool variable = well_settings.polar_spline.is_variable;
     midpoint_ = new SplinePoint();
-    midpoint_->x = new Properties::ContinousProperty(well_settings.polar_spline.midpoint.x);
-    midpoint_->y = new Properties::ContinousProperty(well_settings.polar_spline.midpoint.y);
-    midpoint_->z = new Properties::ContinousProperty(well_settings.polar_spline.midpoint.z);
+    midpoint_->x = new Properties::ContinuousProperty(well_settings.polar_spline.midpoint.x);
+    midpoint_->y = new Properties::ContinuousProperty(well_settings.polar_spline.midpoint.y);
+    midpoint_->z = new Properties::ContinuousProperty(well_settings.polar_spline.midpoint.z);
 
-    length_ = new Properties::ContinousProperty(well_settings.polar_spline.length);
-    azimuth_ = new Properties::ContinousProperty(well_settings.polar_spline.azimuth);
-    elevation_ = new Properties::ContinousProperty(well_settings.polar_spline.elevation);
+    length_ = new Properties::ContinuousProperty(well_settings.polar_spline.length);
+    azimuth_ = new Properties::ContinuousProperty(well_settings.polar_spline.azimuth);
+    elevation_ = new Properties::ContinuousProperty(well_settings.polar_spline.elevation);
 
     QString base_name = "PolarSpline#" + well_settings.name + "#";
     if (variable) {
@@ -101,13 +101,13 @@ void PolarSpline::computePoints() {
 
     if (spline_points_.size() == 0) {
         SplinePoint *sp1 = new SplinePoint();
-        sp1->x = new Properties::ContinousProperty(p1.x());
-        sp1->y = new Properties::ContinousProperty(p1.y());
-        sp1->z = new Properties::ContinousProperty(p1.z());
+        sp1->x = new Properties::ContinuousProperty(p1.x());
+        sp1->y = new Properties::ContinuousProperty(p1.y());
+        sp1->z = new Properties::ContinuousProperty(p1.z());
         SplinePoint *sp2 = new SplinePoint();
-        sp2->x = new Properties::ContinousProperty(p2.x());
-        sp2->y = new Properties::ContinousProperty(p2.y());
-        sp2->z = new Properties::ContinousProperty(p2.z());
+        sp2->x = new Properties::ContinuousProperty(p2.x());
+        sp2->y = new Properties::ContinuousProperty(p2.y());
+        sp2->z = new Properties::ContinuousProperty(p2.z());
 
         spline_points_.append(sp1);
         spline_points_.append(midpoint_);

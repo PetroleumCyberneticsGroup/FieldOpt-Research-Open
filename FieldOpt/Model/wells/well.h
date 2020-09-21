@@ -29,7 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/model.h"
 #include "Model/wells/wellbore/completions/completion.h"
 #include "Model/wells/wellbore/completions/perforation.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/wells/control.h"
 #include "Model/wells/wellbore/trajectory.h"
@@ -57,12 +57,11 @@ class Well
    * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
    * \param variables The variables object to add all new variable variables to.
    */
-  Well(Settings::Model settings,
+  Well(const Settings::Model& model_settings,
        int well_number,
-       ::Model::Properties::VariablePropertyContainer *variable_container,
+       ::Model::Properties::VarPropContainer *variable_container,
        ::Reservoir::Grid::Grid *grid,
-       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic
-  );
+       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
   struct Heel { int i; int j; int k; };
 
@@ -103,16 +102,21 @@ class Well
   ::Settings::Model::WellType type_;
   QString group_;
   ::Settings::Model::PreferredPhase preferred_phase_;
-  Properties::ContinousProperty *wellbore_radius_;
+  Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
-  bool trajectory_defined_ = true; //!< Whether the trajectory is defined. It does not need to be for, e.g., control optimization.
+
+  Settings::VerbParams vp_;
+
+  //!< Whether the trajectory is defined. It does not
+  //!< need to be for, e.g., control optimization.
+  bool trajectory_defined_ = true;
 
   Heel heel_;
   QList<Control *> *controls_;
 
   // Fields for segmented wells
   bool is_segmented_ = false;
-  void initializeSegmentedWell(Properties::VariablePropertyContainer *variable_container);
+  void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
   double tub_cross_sect_area_; //!< Tubing cross section area.

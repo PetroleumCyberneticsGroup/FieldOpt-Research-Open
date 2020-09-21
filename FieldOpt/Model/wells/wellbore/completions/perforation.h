@@ -22,7 +22,7 @@
 
 #include "completion.h"
 #include "Model/properties/continous_property.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 
 namespace Model {
 namespace Wells {
@@ -36,7 +36,7 @@ class Perforation : public Completion
 {
  public:
   Perforation(::Settings::Model::Well::Completion completion_settings,
-              Properties::VariablePropertyContainer *variable_container);
+              Properties::VarPropContainer *variable_container);
 
   Perforation();
 
@@ -44,7 +44,7 @@ class Perforation : public Completion
   void setTransmissibility_factor(double value) { transmissibility_factor_->setValue(value); }
 
  private:
-  Properties::ContinousProperty *transmissibility_factor_;
+  Properties::ContinuousProperty *transmissibility_factor_;
 };
 
 }

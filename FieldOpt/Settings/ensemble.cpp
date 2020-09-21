@@ -41,11 +41,12 @@ using namespace Utilities::FileHandling;
 
 Ensemble::Ensemble() {}
 
-Ensemble::Ensemble(const std::string &ens_path) {
+Ensemble::Ensemble(const std::string &ens_path, VerbParams vp) {
+  vp_=vp;
 
-  ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirectoryPath(ens_path));
-  assert(FileExists(ens_path, false));
-  assert(DirectoryExists(Ensemble::ensemble_parent_dir_, false));
+  ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirPath(ens_path));
+  assert(FileExists(ens_path, vp_));
+  assert(DirExists(Ensemble::ensemble_parent_dir_, vp_, md_, cl_));
 
   vector<string> file_contents = ReadFileToStdStringList(ens_path);
   for (auto line : file_contents) {
@@ -66,14 +67,14 @@ Ensemble::Ensemble(const std::string &ens_path) {
 
     string alias = entries[0];
     string data = ensemble_parent_dir_ + "/" + entries[1];
-    string schedule = GetParentDirectoryPath(data) + "/" + entries[2];
-    string grid = GetParentDirectoryPath(data) + "/" + entries[3];
+    string schedule = GetParentDirPath(data) + "/" + entries[2];
+    string grid = GetParentDirPath(data) + "/" + entries[3];
 
     // Check that the alias has not already been used.
     assert(realizations_.count(entries[0]) == 0);
-    assert(FileExists(data, false));
-    assert(FileExists(schedule, false));
-    assert(FileExists(grid, false));
+    assert(FileExists(data, vp_));
+    assert(FileExists(schedule, vp_));
+    assert(FileExists(grid, vp_));
 
     realizations_.insert(
         pair<string, Realization>

@@ -22,7 +22,7 @@
 
 #include "Settings/model.h"
 #include "Reservoir/grid/grid.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "wellblock.h"
 
 namespace Model {
@@ -49,7 +49,7 @@ namespace Wellbore {
 class PseudoContVert {
  public:
   PseudoContVert(Settings::Model::Well well_settings,
-                 Properties::VariablePropertyContainer *variable_container,
+                 Properties::VarPropContainer *variable_container,
                  Reservoir::Grid::Grid *grid);
 
   /*!
@@ -60,8 +60,8 @@ class PseudoContVert {
  private:
   Reservoir::Grid::Grid *grid_;
   double z_pos_;
-  Properties::ContinousProperty *x_pos_;
-  Properties::ContinousProperty *y_pos_;
+  Properties::ContinuousProperty *x_pos_;
+  Properties::ContinuousProperty *y_pos_;
 };
 
 }

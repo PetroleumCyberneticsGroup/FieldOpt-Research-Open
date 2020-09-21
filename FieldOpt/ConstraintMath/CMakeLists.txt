@@ -5,6 +5,7 @@ include(Sources.cmake)
 
 include_directories(${CMAKE_BINARY_DIR}/libraries/include/)
 
+# Target lib ===============================================
 add_library(constraintmath STATIC ${CONSTRAINTMATH_HEADERS} ${CONSTRAINTMATH_SOURCES})
 add_library(fieldopt::constraintmath ALIAS ${PROJECT_NAME})
 
@@ -20,10 +21,11 @@ target_include_directories(constraintmath PUBLIC
 
 add_compile_options(-std=c++11)
 
+# Test exec ================================================
 if (BUILD_TESTING)
     # Unit tests
     include_directories(${EIGEN3_INCLUDE_DIR})
-	add_executable(test_constraintmath ${CONSTRAINTMATH_TESTS})
+    add_executable(test_constraintmath ${CONSTRAINTMATH_TESTS})
     target_link_libraries(test_constraintmath
             fieldopt::constraintmath
             ${gtest}
@@ -33,8 +35,8 @@ if (BUILD_TESTING)
     add_test(NAME test_constraintmath COMMAND $<TARGET_FILE:test_constraintmath>)
 endif()
 
+# Install ==================================================
 install( TARGETS constraintmath
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static
-        )
+        ARCHIVE DESTINATION lib/static)

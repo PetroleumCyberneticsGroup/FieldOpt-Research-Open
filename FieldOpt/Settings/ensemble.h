@@ -29,6 +29,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include "string"
 
+#include <Utilities/verbosity.h>
+
 using std::string;
 using std::vector;
 using std::map;
@@ -77,7 +79,7 @@ class Ensemble {
    *
    * @param ens_path
    */
-  Ensemble(const string &ens_path);
+  Ensemble(const string &ens_path, VerbParams vp);
 
   Ensemble();
 
@@ -112,6 +114,10 @@ class Ensemble {
   int n_select_;
   string ensemble_parent_dir_;
   map<string, Realization> realizations_;
+
+  string md_ = "Settings";
+  string cl_ = "ensemble";
+  VerbParams vp_;
 
 
 };

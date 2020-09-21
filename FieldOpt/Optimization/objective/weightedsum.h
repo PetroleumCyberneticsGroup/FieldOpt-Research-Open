@@ -68,6 +68,7 @@ class WeightedSum : public Objective {
               Model::Model *model);
 
   double value() const;
+  double value(bool base_case = false) override {};
 
  private:
   /*!
