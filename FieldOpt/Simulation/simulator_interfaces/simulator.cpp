@@ -103,11 +103,18 @@ void Simulator::PostSimWork() {
 
     ext_info("Executing postsim script", md_, cl_, vp_.lnw);
     QString expected_script_path = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_POSTSIM.sh";
-    post_sim_args_ = settings_->simulator()->post_sim_args();
-    post_sim_args_->prepend(sim_wrk_dir_);
+    QStringList post_sim_args = *settings_->simulator()->post_sim_args();
+    post_sim_args.prepend(sim_wrk_dir_);
 
-    if (FileExists(expected_script_path, vp_, md_, cl_)) {
-      ExecShellScript(expected_script_path, *post_sim_args_, vp_);
+    if (vp_.vSIM >= 3) {
+      stringstream ss; ss << "post_sim_args: ";
+      for (int ii=0; ii < post_sim_args.size(); ++ii) {
+        ss << post_sim_args.at(ii).toStdString() + " ";
+      }
+    }
+
+    if (FileExists(expected_script_path, vp_, md_, cl_)) { //  && post_sim_args->size() > 2
+      ExecShellScript(expected_script_path, post_sim_args, vp_);
     } else {
       ext_warn("Postsim script not found.", md_, cl_, vp_.lnw);
     }

@@ -131,7 +131,6 @@ class Simulator {
 
   Model::Model *model_;
   QStringList script_args_;
-  QStringList *post_sim_args_;
   QList<int> control_times_;
   virtual void UpdateFilePaths() = 0;
 
