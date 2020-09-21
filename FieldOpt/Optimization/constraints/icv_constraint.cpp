@@ -34,6 +34,9 @@ using namespace Model::Properties;
 using Printer::info;
 using Printer::ext_info;
 using Printer::num2str;
+using Printer::DBG_prntVecXd;
+using Printer::DBG_prntDbl;
+using Printer::pad_text;
 
 ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
                              Model::Properties::VarPropContainer *variables,
@@ -68,21 +71,29 @@ bool ICVConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
 }
 
 void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
-  if (vp_.vOPT >= 1) {
-    string tm = "Checking case with vars { " + eigenvec_to_str(c->GetRealVarVector()) + " } ";
-    tm += "against constraint [" + num2str(min_, 5) + ", " + num2str(max_, 5) + "]";
+  string tm;
+  if (vp_.vOPT >= 4) {
+    tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm += "for case: " + c->id_stdstr();
+    Printer::pad_text(tm, vp_.lnw );
+    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 
   for (auto id : affected_variables_) {
     if (c->get_real_variable_value(id) > max_) {
       c->set_real_variable_value(id, max_);
-      if (vp_.vOPT >= 1) { ext_info("Snapped value to upper bound.", md_, cl_, vp_.lnw); }
-
+      tm = "Upper bound active";
     } else if (c->get_real_variable_value(id) < min_) {
       c->set_real_variable_value(id, min_);
-      if (vp_.vOPT >= 1) { ext_info("Snapped value to lower bound.", md_, cl_, vp_.lnw); }
+      tm = "Lower bound active";
     }
+  }
+
+  if (vp_.vOPT >= 4) {
+    Printer::pad_text(tm, vp_.lnw );
+    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    ext_info(tm, md_, cl_, vp_.lnw);
   }
 }
 

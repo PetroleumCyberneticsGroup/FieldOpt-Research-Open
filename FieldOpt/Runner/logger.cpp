@@ -33,7 +33,7 @@ Logger::Logger(Runner::RuntimeSettings *rts, QString output_subdir,
   vp_=vp;
   write_logs_ = write_logs;
   is_worker_ = output_subdir.length() > 0;
-  output_dir_ = QString::fromStdString(rts->paths().GetPath(Paths::OUTPUT_DIR));
+  output_dir_ = rts->paths().GetPathQstr(Paths::OUTPUT_DIR);
   if (output_subdir.length() > 0) {
     output_dir_ = output_dir_ + "/" + output_subdir + "/";
     Utilities::FileHandling::CreateDir(output_dir_, vp_);
@@ -98,6 +98,7 @@ void Logger::logRunnerState(Loggable *obj) {
   st << "Last update: " << obj->GetState()["last-update"];
   Utilities::FileHandling::WriteStringToFile(QString::fromStdString(st.str()), run_state_path_);
 }
+
 void Logger::logCase(Loggable *obj) {
   if (!write_logs_ || is_worker_)
     return;
@@ -116,8 +117,8 @@ void Logger::logCase(Loggable *obj) {
   }
   string str = entry.str();
   Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), cas_log_path_);
-  return;
 }
+
 void Logger::logOptimizer(Loggable *obj) {
   if (!write_logs_ || is_worker_) return;
   stringstream entry;
@@ -138,8 +139,8 @@ void Logger::logOptimizer(Loggable *obj) {
   entry << obj->GetId().toString().toStdString();
   string str = entry.str();
   Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), opt_log_path_);
-  return;
 }
+
 void Logger::logExtended(Loggable *obj) {
   if (!write_logs_) return;
   QJsonObject new_entry;
@@ -214,7 +215,6 @@ void Logger::logExtended(Loggable *obj) {
   QJsonDocument json_doc = QJsonDocument(json_obj);
   json_file.write(json_doc.toJson(QJsonDocument::Indented));
   json_file.close();
-  return;
 }
 
 void Logger::collectExtendedLogs() {
@@ -259,7 +259,6 @@ void Logger::collectExtendedLogs() {
   QJsonDocument json_doc = QJsonDocument(json_obj);
   json_file.write(json_doc.toJson(QJsonDocument::Indented));
   json_file.close();
-  return;
 }
 
 void Logger::logSummary(Loggable *obj) {

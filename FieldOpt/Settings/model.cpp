@@ -637,6 +637,7 @@ void Model::parseSegmentCompartments(const QJsonObject &json_seg, Model::Well &w
     throw std::runtime_error("The Compartments keyword must be specified when using the Segmentation keyword.");
   }
 }
+
 void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
   for (int i = 0; i < json_icvs.size(); ++i) {
     Well::Completion comp;
@@ -685,7 +686,6 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
                           + comp.name.toStdString(), md_, cl_, vp_.lnw);
     }
   }
-
 }
 
 void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization, Well& well) {

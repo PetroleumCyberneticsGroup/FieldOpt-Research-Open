@@ -41,7 +41,7 @@ Global::Global(QJsonObject json_global) {
     parseVerbParams(json_verb);
   } else {
     im_ = "JSON driver file contains no \"VerbConf\" parameter.";
-    im_ += "\"VerbConf\" parameter remain default:";
+    im_ += "\"VerbConf\" parameter set to default:";
     showVerbParams(im_); // def. values given in verbosity.hpp
   }
 }
@@ -61,7 +61,7 @@ VerbParams Global::parseVerbParams(QJsonObject json_verb) {
 void Global::showVerbParams(string sin) {
   stringstream ss;
   if(!sin.empty()) { ss << sin << endl; }
-  ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;
+  // ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;
   ss << "[ vMOD: " << verb_params_.vMOD;
   ss << ", vOPT: " << verb_params_.vOPT;
   ss << ", vWIC: " << verb_params_.vWIC;
@@ -71,6 +71,23 @@ void Global::showVerbParams(string sin) {
   ss << ", vSET: " << verb_params_.vSET;
   ss << ", vUTI: " << verb_params_.vUTI;
   ss << ", lnw: " << verb_params_.lnw << "]" << endl;
+  cout << ss.str();
+}
+
+void Global::showVerbParams(VerbParams &vp, string sin) {
+  stringstream ss;
+  if(!sin.empty()) { ss << sin << endl; }
+  // ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;
+  ss << "[ vMOD: " << verb_params_.vMOD;
+  ss << ", vOPT: " << verb_params_.vOPT;
+  ss << ", vWIC: " << verb_params_.vWIC;
+  ss << ", vSIM: " << verb_params_.vSIM;
+  ss << ", vRUN: " << verb_params_.vRUN;
+  ss << ", vRES: " << verb_params_.vRES;
+  ss << ", vSET: " << verb_params_.vSET;
+  ss << ", vUTI: " << verb_params_.vUTI;
+  ss << ", lnw: " << verb_params_.lnw << "]" << endl;
+  cout << ss.str();
 }
 
 }

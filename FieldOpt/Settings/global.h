@@ -49,6 +49,7 @@ class Global {
 
   VerbParams verbParams() { return verb_params_; };
   void showVerbParams(string sin="");
+  void showVerbParams(VerbParams &vp, string sin="");
 
  protected:
   string name_;

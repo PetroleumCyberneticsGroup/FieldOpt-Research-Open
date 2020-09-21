@@ -252,7 +252,7 @@ namespace Optzr = Optimization::Optimizers;
 
 void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
-    string em = "The Base Case and the Model must be initialized before the Optimizer";
+    string em = "Base Case and Model must be initialized before the Optimizer";
     throw runtime_error(em);
   }
 

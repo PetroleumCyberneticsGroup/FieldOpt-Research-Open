@@ -45,7 +45,7 @@ ECLSummaryReader::ECLSummaryReader(const string& file_name,
                                    Settings::Settings *settings) {
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
-  settings_->global()->showVerbParams();
+  // settings_->global()->showVerbParams(vp_, "[ @ECLSummaryReader ]");
 
   file_name_ = file_name;
   ecl_sum_ = ecl_sum_fread_alloc_case(file_name_.c_str(), "");
@@ -284,6 +284,8 @@ void ECLSummaryReader::populateKeyLists() {
     && !seg_sprp_keys_.empty() && !seg_sprd_keys_.empty() && !seg_swct_keys_.empty()
     && !seg_scsa_keys_.empty()) {
     read_segments_ = true;
+  } else {
+    ext_warn("Not reading all segment data!", md_, cl_);
   }
 
   stringlist_free(keys);
@@ -1473,7 +1475,7 @@ void ECLSummaryReader::initWellSegRates() {
         vector<double> tseg = vector<double>(time_.size(), 0.0);
         pn = "s_obj.terms[ii=" + num2str(ii,0) + "].prop_name:_" + s_obj.terms[ii].prop_name;
         Printer::pad_text(pn, 42, '_');
-        Printer::pad_text(ln, 135, '-');
+        Printer::pad_text(ln, 138, '-');
 
         // -------------------------------------------------
         for (const auto& wname : wells_) {
@@ -1682,12 +1684,14 @@ void ECLSummaryReader::initWellSegRates() {
             if (vp_.vSIM >= 6) {
               cout << "[ECLSummaryReader::initWellSegRates() -- 1] Seg#" << jj << endl;
               for (int kk = 0; kk < time_.size(); ++kk) {
-                cout <<   "sofr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sofr_[wname][jj][kk],3, 0, 7);
-                cout << "\tswfr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swfr_[wname][jj][kk],3, 0, 7);
-                cout << "\tsprp[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprp_[wname][jj][kk],3, 0, 7);
-                cout << "\tsprd[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprd_[wname][jj][kk],3, 0, 7);
-                cout << "\tswct[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swct_[wname][jj][kk],3, 0, 7);
-                cout << "\tscsa[j:" << jj << "|i:" << kk << "]: " << num2str(seg_scsa_[wname][jj][kk],3, 0, 7);
+                cout <<   "[j:" << num2str(jj, 0, 0, 2);
+                cout << "|i:" << num2str(kk, 0, 0, 3) << "] ";
+                cout <<  " -- [ sofr: " << num2str(seg_sofr_[wname][jj][kk],3, 0, 8);
+                cout << "] -- [ swfr: " << num2str(seg_swfr_[wname][jj][kk],3, 0, 8);
+                cout << "] -- [ sprp: " << num2str(seg_sprp_[wname][jj][kk],3, 0, 8);
+                cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk],3, 0, 8);
+                cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk],3, 0, 8);
+                cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk],3, 1, 8);
                 cout << endl;
               }
             }
@@ -1704,12 +1708,14 @@ void ECLSummaryReader::initWellSegRates() {
             for (int jj = 0; jj < seg_sofr_[wname].size(); ++jj) {
               cout << "[ECLSummaryReader::initializeVectors() -- 2] Seg#" << jj << endl;
               for (int kk = 0; kk < time_.size(); ++kk) {
-                cout << "sofr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sofr_[wname][jj][kk], 3, 0, 7);
-                cout << "\tswfr[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swfr_[wname][jj][kk], 3, 0, 7);
-                cout << "\tsprp[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprp_[wname][jj][kk], 3, 0, 7);
-                cout << "\tsprd[j:" << jj << "|i:" << kk << "]: " << num2str(seg_sprd_[wname][jj][kk], 3, 0, 7);
-                cout << "\tswct[j:" << jj << "|i:" << kk << "]: " << num2str(seg_swct_[wname][jj][kk], 3, 0, 7);
-                cout << "\tscsa[j:" << jj << "|i:" << kk << "]: " << num2str(seg_scsa_[wname][jj][kk], 3, 0, 7);
+                cout <<   "[j:" << num2str(jj, 0, 0, 2);
+                cout << "|i:" << num2str(kk, 0, 0, 3) << "] ";
+                cout <<  " -- [ sofr: " << num2str(seg_sofr_[wname][jj][kk], 3, 0, 8);
+                cout << "] -- [ swfr: " << num2str(seg_swfr_[wname][jj][kk], 3, 0, 8);
+                cout << "] -- [ sprp: " << num2str(seg_sprp_[wname][jj][kk], 3, 0, 8);
+                cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk], 3, 0, 8);
+                cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk], 3, 0, 8);
+                cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk], 3, 1, 8);
                 cout << endl;
               }
             }

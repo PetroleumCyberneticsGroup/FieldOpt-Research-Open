@@ -37,7 +37,7 @@ IXDriverFileWriter::IXDriverFileWriter(Settings::Settings *settings,
   model_ = model;
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
-  settings_->global()->showVerbParams();
+  // settings_->global()->showVerbParams("[ @IXDriverFileWriter ]");
 }
 
 void IXDriverFileWriter::WriteDriverFile(std::string fm_edits_path) {

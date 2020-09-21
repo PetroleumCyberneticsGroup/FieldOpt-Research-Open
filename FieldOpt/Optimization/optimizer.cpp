@@ -127,8 +127,7 @@ Case *Optimizer::GetCaseForEvaluation() {
   return case_handler_->GetNextCaseForEvaluation();
 }
 
-void Optimizer::SubmitEvaluatedCase(Case *c)
-{
+void Optimizer::SubmitEvaluatedCase(Case *c) {
   evaluated_cases_++;
   if (penalize_ && iteration_ > 0) {
     double penalized_ofv = PenalizedOFV(c);
@@ -163,8 +162,7 @@ bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   return false;
 }
 
-QString Optimizer::GetStatusStringHeader() const
-{
+QString Optimizer::GetStatusStringHeader() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
       .arg("Iteration")
       .arg("EvaluatedCases")
@@ -174,8 +172,7 @@ QString Optimizer::GetStatusStringHeader() const
       .arg("TentativeBestCaseOFValue");
 }
 
-QString Optimizer::GetStatusString() const
-{
+QString Optimizer::GetStatusString() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
       .arg(iteration_)
       .arg(nr_evaluated_cases())

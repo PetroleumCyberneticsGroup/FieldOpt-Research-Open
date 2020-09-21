@@ -42,7 +42,7 @@ ECLResults::ECLResults(Settings::Settings *settings)
   smry_reader_ = nullptr;
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
-  settings_->global()->showVerbParams();
+  // settings_->global()->showVerbParams("[ @ECLResults ]");
 }
 
 void ECLResults::ReadResults(QString file_path) {
