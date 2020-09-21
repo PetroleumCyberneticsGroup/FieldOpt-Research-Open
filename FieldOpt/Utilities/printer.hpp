@@ -88,7 +88,7 @@ inline string DBG_prntDbl(double argout,
 
 inline string DBG_prntVecXd(VectorXd vec, const string& mv="",
                                 const string& fv="% 10.3e ",
-                                string fn="") {
+                                string fn="", int sz=0) {
   stringstream ss;
   if ( vec.size() > 0 ) {
     if (mv != "" && mv != ",") ss << mv;
@@ -98,12 +98,21 @@ inline string DBG_prntVecXd(VectorXd vec, const string& mv="",
       if (mv == ",") ss << mv;
     }
     ss << DBG_prntDbl(vec(vec.size() - 1), fv) << "]";
+    if (sz > 0) {
+      ss << " [sz:" << DBG_prntDbl(vec.size(), "%2.0f") << "]";
+    }
   } else {
     ss << "[ Empty ]";
   }
 
   // if (fn != "") DBG_prntToFile(fn, ss.str() + "\n");
   return ss.str();
+}
+
+inline string DBG_prntVecXdSz(VectorXd vec, const string& mv="",
+                              const string& fv="% 10.3e ",
+                              string fn="") {
+  return DBG_prntVecXd(vec, mv, fv, fn, 1);
 }
 
 inline string DBG_prntMatXd(MatrixXd mat, string mm="",
@@ -354,7 +363,14 @@ inline void ext_info(const std::string &text,
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
-  pad_text(class_name, width+1);
+  if (lw == 165) {
+    pad_text(class_name, width);
+  } else if (lw == 144) {
+    pad_text(class_name, width+1);
+  } else {
+    pad_text(class_name, width+1);
+  }
+
   ss << "│ ■ INFO │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n";
   for (auto line : lines) {
     pad_text(line, lw - 2);
