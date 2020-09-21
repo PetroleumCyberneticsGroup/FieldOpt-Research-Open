@@ -119,24 +119,24 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     optimizer_constraint.type = ConstraintType::BHP;
     if (json_constraint.contains("Max")) {
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
+      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
     }
     if (json_constraint.contains("Min")) {
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
+      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
     }
 
     // Packer- and ICV Constraints
   } else if (QString::compare(constraint_type, "ICVConstraint") == 0) {
 
     optimizer_constraint.type = ConstraintType::ICVConstraint;
-    optimizer_constraint.max = json_constraint["Max"].toDouble();
+    set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
 
     if (optimizer_constraint.max >= 7.8540E-03) {
       string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
       ext_warn(wm, md_, cl_, vp_.lnw);
       optimizer_constraint.max = 7.8539E-3;
     }
-    optimizer_constraint.min = json_constraint["Min"].toDouble();
+    set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
 
   } else if (QString::compare(constraint_type, "PackerConstraint") == 0) {
     optimizer_constraint.type = ConstraintType::PackerConstraint;
@@ -144,17 +144,17 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
   } else if (QString::compare(constraint_type, "Rate") == 0) {
     optimizer_constraint.type = ConstraintType::Rate;
     if (json_constraint.contains("Max"))
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
+      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
     if (json_constraint.contains("Min"))
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
+      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
 
   } else if (QString::compare(constraint_type, "Boundary2D") == 0) {
 
     optimizer_constraint.type = ConstraintType::PseudoContBoundary2D;
-    optimizer_constraint.box_imin = json_constraint["Imin"].toDouble();
-    optimizer_constraint.box_imax = json_constraint["Imax"].toDouble();
-    optimizer_constraint.box_jmin = json_constraint["Jmin"].toDouble();
-    optimizer_constraint.box_jmax = json_constraint["Jmax"].toDouble();
+    set_opt_prop_double(optimizer_constraint.box_imin, json_constraint, "Imin");
+    set_opt_prop_double(optimizer_constraint.box_imax, json_constraint, "Imax");
+    set_opt_prop_double(optimizer_constraint.box_jmin, json_constraint, "Jmin");
+    set_opt_prop_double(optimizer_constraint.box_jmax, json_constraint, "Jmax");
 
     // Constraint type Well Spline Points
   } else if (QString::compare(constraint_type, "WellSplinePoints") == 0) {
@@ -402,12 +402,14 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
       params.auto_step_conv_scale = json_parameters["AutoStepConvScale"].toDouble();
 
     // GSS parameters :: InitialStepLength
-    if (json_parameters.contains("InitialStepLength"))
-      params.initial_step_length = json_parameters["InitialStepLength"].toDouble();
+    if (json_parameters.contains("InitialStepLength")) {
+      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength");
+    }
 
     // GSS parameters :: MinimumStepLength
-    if (json_parameters.contains("MinimumStepLength"))
-      params.minimum_step_length = json_parameters["MinimumStepLength"].toDouble();
+    if (json_parameters.contains("MinimumStepLength")) {
+      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength");
+    }
 
     // GSS parameters :: ContractionFactor
     if (json_parameters.contains("ContractionFactor"))

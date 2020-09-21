@@ -34,6 +34,10 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::num2str;
+
 /*!
  * @brief Check if container property is to be variable.
  *
@@ -59,16 +63,23 @@ inline bool is_prop_variable(const QJsonObject &container) {
 * @param prop_name Name of property to find in the container.
 */
 inline bool set_opt_prop_double(double &prop,
-                                const QJsonObject &container, const QString &prop_name) {
+                                const QJsonObject &container,
+                                const QString &prop_name) {
 
-  if (container.contains(prop_name)
-    && (container[prop_name].isDouble())) {
+  if (container.contains(prop_name) && (container[prop_name].isDouble())) {
     prop = container[prop_name].toDouble();
+    return true;
+
+  } else if (container.contains(prop_name) && (container[prop_name].isString())) {
+    if (VERB_SET >= 2) {
+      ext_info(prop_name.toStdString() + "given as string.", "Settings", "Helpers");
+    }
+    prop = std::stod(container[prop_name].toString().toStdString());
     return true;
 
   } else {
     if (VERB_SET >= 2) {
-      Printer::ext_info("Property " + prop_name.toStdString()
+      ext_info("Property " + prop_name.toStdString()
                           + " not found. Using default ("+ Printer::num2str(prop) + ").",
                         "Settings", "Helpers");
     }
