@@ -88,6 +88,10 @@ double Augmented::value(bool base_case) {
             // using report-steps (not read-in from UNRST), therefore the sum of slft does not match wlft
             // VectorXd wlft = results_->GetValueVectorXd(ECLProp::WellLiqProdTotal, wn); // not used, keep-for-ref
             vector<VectorXd> slft = results_->GetValVectorSegXd(ECLProp::WellSegLiqFlowTotal, wn);
+            if (slft.size() == 0) {
+              ext_error("One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.", md_, cl_);
+              assert(slft.size() > 0);
+            }
 
             // computing wlft_s:
             double wlft_s = 0.0;
@@ -173,7 +177,7 @@ double Augmented::value(bool base_case) {
             } else if (term->scaling == "NPV0" && model_->getObjfScalSz() == 3) {
               objf_scal = model_->getObjfScalVal();
 
-            } else if (term->scaling == "wellNPV" && model_->getObjfScalSz() == 3) {
+            } else if (term->scaling == "WellNPV" && model_->getObjfScalSz() == 3) {
               // npv measure for the production up to lim_idx
               VectorXd wopr = results_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
               VectorXd wwpr = results_->GetValueVectorXd(ECLProp::WellWatProdRate, wn);
@@ -256,7 +260,6 @@ void Augmented::setUpWaterCutLimit() {
     im_ = "Water cut limit not computed (def: 1.0)";
     ext_warn(im_, md_, cl_, vp_.lnw);
   }
-
 }
 
 void Augmented::setUpAugTerms() {
