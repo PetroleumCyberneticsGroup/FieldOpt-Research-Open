@@ -56,6 +56,7 @@ class TestResourceResults : public ::testing::Test,
     results_ecl_horzwell_->DumpResults();
     results_adgprs_5spot_->DumpResults();
     results_olympr37_->DumpResults();
+    results_olympr37_ext_->DumpResults();
   }
 
  protected:

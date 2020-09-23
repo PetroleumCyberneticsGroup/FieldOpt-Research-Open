@@ -6,9 +6,9 @@
     "VerbConf": {
         "iBoxLineWidth": 140,
         "Model": 1,
-        "Optim": 3,
+        "Optim": 1,
         "WICal": 1,
-        "Simul": 6,
+        "Simul": 1,
         "Runnr": 1,
         "Resvr": 1,
         "Setng": 1,

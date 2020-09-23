@@ -34,6 +34,7 @@ namespace Results {
 
 using namespace Eigen;
 using Printer::ext_info;
+using Printer::num2str;
 using std::runtime_error;
 using std::to_string;
 
@@ -74,6 +75,9 @@ void ECLResults::DumpResults() {
 
 double ECLResults::GetValue(Results::Property prop) {
   if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  if (vp_.vSIM >= 3) {
+    ext_info("prop: "+ GetPropertyKey(prop), md_, cl_, vp_.lnw);
+  }
   return GetValueVector(prop).back();
 }
 
@@ -83,11 +87,19 @@ double ECLResults::GetValue(Results::Property prop, int time_index) {
   if (time_index < 0 || time_index >= smry_reader_->time().size()) {
     E("Time index " + to_string(time_index) + " is outside range of smry.");
   }
+  if (vp_.vSIM >= 3) {
+    string im = "prop: "+ GetPropertyKey(prop) + ", time_index: " + num2str(time_index);
+    ext_info(im, md_, cl_, vp_.lnw);
+  }
   return GetValueVector(prop)[time_index];
 }
 
 double ECLResults::GetValue(Results::Property prop, QString well) {
   if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
+  if (vp_.vSIM >= 3) {
+    string im = "prop: "+ GetPropertyKey(prop) + ", well: " + well.toStdString();
+    ext_info(im, md_, cl_, vp_.lnw);
+  }
   return GetValueVector(prop, well.toStdString()).back();
 }
 
@@ -95,6 +107,11 @@ double ECLResults::GetValue(Results::Property prop, QString well, int time_index
   if (!isAvailable()) throw RsltsNotAvailExc(GetPropertyKey(prop));
   if (time_index < 0 || time_index >= smry_reader_->time().size()) {
     E("Time index " + to_string(time_index) + " is outside range of smry.");
+  }
+  if (vp_.vSIM >= 3) {
+    string im = "prop: "+ GetPropertyKey(prop) + ", well: " + well.toStdString();
+    im += ", time_index: " + num2str(time_index);
+    ext_info(im, md_, cl_, vp_.lnw);
   }
   return GetValueVector(prop, well.toStdString())[time_index];
 }

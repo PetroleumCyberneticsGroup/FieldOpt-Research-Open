@@ -187,7 +187,7 @@ class TrustRegionTest : public ::testing::Test,
        << "---------------------------------------------" << endl
        << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
        << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
-       << "tc: " << cc.c_str();
+       << "tc: " << cc.c_str() << endl;
     cout << sx.str();
 
     return true;

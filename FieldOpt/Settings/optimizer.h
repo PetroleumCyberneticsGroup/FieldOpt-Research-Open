@@ -234,7 +234,7 @@ class Optimizer
       bool active;
       string scaling;
 
-      void showTerms() {
+      void showTerms(int vSET) {
         stringstream ss;
         ss << "prop_name: " << prop_name;
         ss << ", coefficient: " << coefficient;
@@ -247,7 +247,9 @@ class Optimizer
           }
           ss << "]";
         }
-        ext_info(ss.str(), "Settings", "Optimizer", 140);
+        if (vSET > 1) {
+          ext_info(ss.str(), "Settings", "Optimizer", 140);
+        }
       }
     };
 

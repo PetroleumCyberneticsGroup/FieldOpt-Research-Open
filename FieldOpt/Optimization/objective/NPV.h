@@ -44,7 +44,7 @@ class NPV : public Objective {
       Model::Model *model);
 
   double value() const override;
-  double value(bool base_case = false) override {};
+  double value(bool base_case) override {};
 
  private:
 /*!

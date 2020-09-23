@@ -507,8 +507,10 @@ void TrustRegionOptimization::computeInitialPoints() {
       second_point << (second_point.array() - 0.5);
       second_point *= settings_->parameters().tr_initial_radius;
 
-      cout << "initial_point: " << initial_point << endl;
-      cout << "second_point: " << second_point << endl;
+      if(vp_.vOPT >= 2) {
+        cout << "initial_point: " << Printer::DBG_prntVecXd(initial_point, "", "% 10.2f ") << endl;
+        cout << "second_point: " << Printer::DBG_prntVecXd(second_point, "", "% 10.2f ") << endl;
+      }
       second_point << initial_point.array() + second_point.array();
       if(lb_.size()>0 && ub_.size() >0) {
         projectToBounds(&second_point);

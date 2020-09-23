@@ -836,7 +836,7 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
             term.segments[term.wells[ii]] = segs_vec;
           }
         }
-        term.showTerms();
+        term.showTerms(vp_.vSET);
         obj.terms.push_back(term);
       }
 

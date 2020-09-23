@@ -368,8 +368,10 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     else well.spline_heel.is_variable = false;
   }
   else {
-    ext_warn("Well definition type not recognized. Proceeding without defining a well trajectory.",
-             md_, cl_, vp_.lnw);
+    if (vp_.vSET > 1) {
+      string im = "Well definition type not recognized. Proceeding without defining a well trajectory.";
+      ext_warn(im, md_, cl_, vp_.lnw);
+    }
     well.definition_type = UNDEFINED;
   }
 
@@ -377,7 +379,10 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   if (json_well.contains("WellboreRadius"))
     well.wellbore_radius = json_well["WellboreRadius"].toDouble();
   else {
-    ext_warn("WellBoreRadius not set. Defaulting to 0.01905", md_, cl_, vp_.lnw);
+    if (vp_.vSET > 1) {
+      string im = "WellBoreRadius not set. Defaulting to 0.01905";
+      ext_warn(im, md_, cl_, vp_.lnw);
+    }
     well.wellbore_radius = 0.1905;
   }
 
@@ -679,9 +684,12 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
     im += " with valve size " + num2str(comp.valve_size, 5);
     im += " and flow coefficient " + num2str(comp.valve_flow_coeff, 5);
     im += " at segment idx. " + num2str(comp.segment_index);
-    ext_info(im, md_, cl_, vp_.lnw);
 
-    if (comp.is_variable) {
+    if (vp_.vSET > 1) {
+      ext_info(im, md_, cl_, vp_.lnw);
+    }
+
+    if (comp.is_variable && vp_.vSET > 1) {
       ext_info("ICV " + comp.name.toStdString() + " set as variable with name "
                           + comp.name.toStdString(), md_, cl_, vp_.lnw);
     }

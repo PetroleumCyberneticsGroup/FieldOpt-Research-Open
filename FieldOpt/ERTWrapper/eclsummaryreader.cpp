@@ -284,8 +284,8 @@ void ECLSummaryReader::populateKeyLists() {
     && !seg_sprp_keys_.empty() && !seg_sprd_keys_.empty() && !seg_swct_keys_.empty()
     && !seg_scsa_keys_.empty()) {
     read_segments_ = true;
-  } else {
-    ext_warn("Not reading all segment data!", md_, cl_);
+  } else if (vp_.vSIM > 1) {
+    ext_warn("Not reading all segment data!", md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);

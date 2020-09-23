@@ -197,10 +197,13 @@ double Augmented::value(bool base_case) {
             }
 
             t_val *= objf_scal;
-            ss << "scal.type: " << term->scaling << " -- ";
-            ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
-            ss << "t_val (scaled) = " << num2str(t_val, 8, 1);
-            info(ss.str(), vp_.lnw); ss.str("");
+            if (vp_.vOPT >= 3) {
+              ss << "scal.type: " << term->scaling << " -- ";
+              ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
+              ss << "t_val (scaled) = " << num2str(t_val, 8, 1);
+              info(ss.str(), vp_.lnw);
+              ss.str("");
+            }
           }
         }
 
@@ -253,10 +256,12 @@ void Augmented::setUpWaterCutLimit() {
   if (npv_coeffs_[0] != 0.0 && npv_coeffs_[1] != 0.0) {
     auto po_cwp = npv_coeffs_[0] / npv_coeffs_[1];
     wcut_limit_ = abs(po_cwp) / (abs(po_cwp) + 1);
-    im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
-    info(im_, vp_.lnw);
+    if (vp_.vOPT >= 3) {
+      im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
+      info(im_, vp_.lnw);
+    }
 
-  } else {
+  } else if (vp_.vOPT >= 3) {
     im_ = "Water cut limit not computed (def: 1.0)";
     ext_warn(im_, md_, cl_, vp_.lnw);
   }

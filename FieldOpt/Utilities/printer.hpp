@@ -315,7 +315,7 @@ inline vector<string> split_line(const string text,
  │ This is a compact info box                                         │
  └─────────────────────────────────────────────────────────────────────┘
  */
-inline void info(const std::string &text, int lw=165) {
+inline void info(const std::string &text, int lw=163) {
   std::stringstream ss;
   ss << FLGREEN;
   std::string content = text;
@@ -344,7 +344,7 @@ Example:
 inline void ext_info(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=165,
+                     const int &lw=163,
                      const int &lb=2) {
   std::string module_name = modulen;
   std::string class_name = classn;
@@ -363,7 +363,7 @@ inline void ext_info(const std::string &text,
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
-  if (lw == 165) {
+  if (lw == 163) {
     pad_text(class_name, width);
   } else if (lw == 144) {
     pad_text(class_name, width+1);
@@ -394,7 +394,7 @@ Example:
 inline void ext_warn(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=165) {
+                     const int &lw=163) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 30);
@@ -429,7 +429,7 @@ Example:
  ║ ERROR: This is an error message.                                   ║
  ╚═════════════════════════════════════════════════════════════════════╝
  */
-inline void error(const std::string &text, const int &lw=165) {
+inline void error(const std::string &text, const int &lw=163) {
   std::string content = text;
 
   auto lines = split_line(content, lw - 11);
@@ -451,7 +451,7 @@ inline void error(const std::string &text, const int &lw=165) {
 inline void ext_error(const std::string &text,
                       const std::string &modulen="",
                       const std::string &classn="",
-                      const int &lw=165) {
+                      const int &lw=163) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 30);
