@@ -347,7 +347,7 @@ class Optimizer : public Loggable
   int tentative_best_case_iteration_;
 
   // Indicates this object is a hybrid optimization component.
-  bool is_hybrid_component_;
+  bool is_hybrid_component_ = false;
 
   // Normalizer for objective function values.
   Normalizer normalizer_ofv_;
