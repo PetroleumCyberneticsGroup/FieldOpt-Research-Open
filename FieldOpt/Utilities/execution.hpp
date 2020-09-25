@@ -80,6 +80,22 @@ inline void ExecShellScript(QString script_path, QStringList args,
   system(command.toLatin1().constData());
 }
 
+/*!
+ * https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+ */
+inline std::string ExecStr(const char* cmd) {
+  std::array<char, 128> buffer;
+  std::string result;
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+  if (!pipe) {
+    throw std::runtime_error("popen() failed!");
+  }
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    result += buffer.data();
+  }
+  return result;
+}
+
 namespace helpers {
 /*!
  * Create a child-process and execute the given script with the given arguments in it.

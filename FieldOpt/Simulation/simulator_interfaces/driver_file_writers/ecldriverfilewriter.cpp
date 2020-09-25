@@ -38,6 +38,7 @@ using namespace ECLDriverParts;
 using namespace Utilities::FileHandling;
 using Printer::ext_info;
 using Printer::info;
+using Printer::num2str;
 
 EclDriverFileWriter::EclDriverFileWriter(Settings::Settings *settings,
                                          Model::Model *model) {
@@ -59,7 +60,11 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
   assert(FileExists(schedule_file_path, vp_, md_, cl_));
 
   if (!use_actionx_) {
-    Schedule schedule = ECLDriverParts::Schedule(model_->wells(), settings_->model()->control_times(), insets_);
+    Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
+                                                 settings_->model()->control_times(),
+                                                 settings_->model()->start_date(),
+                                                 insets_,
+                                                 settings_);
     model_->SetCompdatString(schedule.GetPartString());
     Utilities::FileHandling::WriteStringToFile(schedule.GetPartString(), schedule_file_path);
   }
@@ -87,16 +92,26 @@ std::string EclDriverFileWriter::buildActionStrings() {
 
   std::string ctrl_actions = "";
   if (model_->wells()->first()->controls()->size() > 0) {
-    Schedule schedule = ECLDriverParts::Schedule(model_->wells(), settings_->model()->control_times(), insets_);
+    Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
+                                                 settings_->model()->control_times(),
+                                                 settings_->model()->start_date(),
+                                                 insets_,
+                                                 settings_);
+
     auto schedule_time_entries = schedule.GetScheduleTimeEntries();
     for (auto entry : schedule_time_entries) {
       int ctrl_time = 0;
       entry.control_time == 0 ? ctrl_time = 1 : ctrl_time = entry.control_time;
       for (QString entry_part : entry.well_controls.GetWellEntryList()) {
-        ctrl_actions += ActionX::ACTIONX("CTR_" + Printer::num2str(entry.control_time),
+
+        ctrl_actions += ActionX::ACTIONX("CTR_" + num2str(entry.control_time, 0),
                                          ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
                                          ECLDriverParts::ActionX::ACTX_Operator::GE,
-                                         ctrl_time,
+                                         ECLDriverParts::ActionX::ACTX_LHQuantity::Month,
+                                         ECLDriverParts::ActionX::ACTX_Operator::EQ,
+                                         ECLDriverParts::ActionX::ACTX_LHQuantity::Year,
+                                         ECLDriverParts::ActionX::ACTX_Operator::EQ,
+                                         entry.control_time_DMY,
                                          entry_part.toStdString()
         );
         ctrl_actions += "\n";
@@ -107,8 +122,11 @@ std::string EclDriverFileWriter::buildActionStrings() {
     Printer::ext_warn("First well did not have controls; assuming none do.", "Simulation", "ECLDriverFileWriter");
   }
 
-  actions += ActionX::ACTIONX("ICVS_T0", ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
-                              ECLDriverParts::ActionX::ACTX_Operator::GE, 0, icv_actions);
+  actions += ActionX::ACTIONX("ICVS_T0",
+                              ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
+                              ECLDriverParts::ActionX::ACTX_Operator::GE,
+                              0,
+                              icv_actions);
   actions += ctrl_actions;
   return actions;
 }

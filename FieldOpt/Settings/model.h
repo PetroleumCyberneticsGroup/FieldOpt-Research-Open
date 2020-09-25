@@ -193,6 +193,7 @@ class Model
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
+  QList<int> start_date() const { return start_date_; }
 
   VerbParams vp_;
   VerbParams verbParams() { return vp_; };
@@ -200,6 +201,7 @@ class Model
  private:
   QList<Well> wells_;
   QList<int> control_times_;
+  QList<int> start_date_;
 
   string md_ = "Settings";
   string cl_ = "Model";

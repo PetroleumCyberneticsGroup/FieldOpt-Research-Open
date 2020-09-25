@@ -61,6 +61,16 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
     }
   }
 
+  start_date_ = QList<int>();
+  if (json_model.contains("StartDate")) {
+    QJsonArray json_start_date = json_model["StartDate"].toArray();
+    for (int i = 0; i < json_start_date.size(); ++i) {
+      start_date_.append(json_start_date.at(i).toInt());
+    }
+  } else {
+    throw UnableToParseModelSectionException("StartDate must be specified.");
+  }
+
   // Control times
   if (!json_model.contains("ControlTimes")
     || !json_model["ControlTimes"].isArray()) {
