@@ -193,17 +193,17 @@ else()
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
       REQUIRED)
 
-  find_library(snopt NAMES snopt-7.2.12.2
-      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      REQUIRED)
+#  find_library(snopt NAMES snopt-7.2.12.2
+#      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+#      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+#      REQUIRED)
 
   message(STATUS "ecl_LIBRARIES: ${ecl_LIBRARIES}")
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
   message(STATUS "HDF5: ${HDF5}")
-  message(STATUS "snopt: ${snopt}")
+#  message(STATUS "snopt: ${snopt}")
 
 endif()
 
@@ -342,8 +342,8 @@ include_directories(${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
 # ----------------------------------------------------------
 
 ## SNOPT ===================================================
-include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/include/snopt)
-include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/handlers)
+#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/include/snopt)
+#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/snopt/handlers)
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗╔═╗
