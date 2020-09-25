@@ -47,31 +47,38 @@ class Loggable {
    * LOG_CASE - The case log (log_cases.csv)
    * LOG_OPTIMIZER - The optimizer log (log_optimization.csv)
    * LOG_EXTENDED - The extended log (log_extended.json)
-   * LOG_SUMMARY - Markdown-formatted summaries printed at the beginning and the end (summary_(pre/post)run.md)
-   * STATE_RUNNER - A temporary log for debugging purposes. This log is frequently deleted as it only descibes the current state.
+   * LOG_SUMMARY - Markdown-formatted summaries printed at
+   * the beginning and the end (summary_(pre/post)run.md)
+   * STATE_RUNNER - A temporary log for debugging purposes.
+   * This log is frequently deleted as it only descibes the
+   * current state.
    */
   enum LogTarget {LOG_CASE, LOG_OPTIMIZER, LOG_EXTENDED, LOG_SUMMARY, STATE_RUNNER};
 
   string src;
 
   /*!
-   * @brief Get the target log for the object. E.g. if LOG_CASE is returned,
-   * an entry will be written to the case log when NotifyLogger is called.
+   * @brief Get the target log for the object. E.g. if LOG_CASE
+   * is returned, an entry will be written to the case log when
+   * NotifyLogger is called.
    * @return The target log.
    */
   virtual LogTarget GetLogTarget() = 0;
 
   /*!
-   * @brief Get a string-string map describing the state of the loggable object.
+   * @brief Get a string-string map describing the state of
+   * the loggable object.
    *
-   * The keys should be the corresponding column headers (or JSON keys) in
-   * the log, an the value should be the four-character code, e.g.
+   * The keys should be the corresponding column headers
+   * (or JSON keys) in the log, an the value should be the
+   * four-character code, e.g.
    *
    *    "EvalSt": "OKAY"
    *
    * Whitespace padding will be added by the logger.
    *
-   * @return A string-string map of column headers and state indicators.
+   * @return A string-string map of column headers and state
+   * indicators.
    */
   virtual map<string, string> GetState() { return map<string, string>(); }
 
@@ -83,23 +90,28 @@ class Loggable {
   /*!
    * @brief Get a string-vector map containing values to be logged.
    *
-   * The keys should be the column headers (or JSON keys) in the corresponding log,
-   * and the values should be vectors containing the value(s) to be logged.
+   * The keys should be the column headers (or JSON keys) in
+   * the corresponding log, and the values should be vectors
+   * containing the value(s) to be logged.
    *
-   * For case logging, string should be the OFnVal vector should be of length one
-   * and contain the objective function value; it should also contain the evaluation
-   * duration in second, e.g.
+   * For case logging, string should be the OFnVal vector should
+   * be of length one and contain the objective function value;
+   * it should also contain the evaluation duration in second,
+   * e.g.
    *    "OFnVal": [1422.0]
    *    "SimDur": [122.1]
-   * The logger will take care of converting the UUID to the name of the varible.
+   * The logger will take care of converting the UUID to the
+   * name of the varible.
    *
-   * For production data logs, the key should be the name of the vector, prepended
-   * with "Res#" and the vector should contain the production data, e.g.
+   * For production data logs, the key should be the name of
+   * the vector, prepended with "Res#" and the vector should
+   * contain the production data, e.g.
    *    "Res#CumulativeOilProductionTotal": [0.0, 200.0, 240.0]
    *
-   * For variable values (from the Model to the extended log), the key should be
-   * the variable name prepended with "Var#", and the value should be a vector of
-   * length one containing the variable value:
+   * For variable values (from the Model to the extended log),
+   * the key should be the variable name prepended with "Var#",
+   * and the value should be a vector of length one containing
+   * the variable value:
    *    "Var#PROD#BHP#1": [204.1]
    * @return A string-vector map of values.
    */
@@ -110,12 +122,12 @@ class Loggable {
    */
   struct SplineDescription {
     bool is_variable;
-    double heel_x;
-    double heel_y;
-    double heel_z;
-    double toe_x;
-    double toe_y;
-    double toe_z;
+    double heel_x = 0;
+    double heel_y = 0;
+    double heel_z = 0;
+    double toe_x = 0;
+    double toe_y = 0;
+    double toe_z = 0;
   };
 
   /*!
