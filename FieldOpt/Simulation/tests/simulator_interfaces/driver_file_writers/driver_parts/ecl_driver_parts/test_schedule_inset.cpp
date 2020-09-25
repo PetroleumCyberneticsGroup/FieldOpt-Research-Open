@@ -35,7 +35,11 @@ class DriverPartScheduleInsetTest : public ::testing::Test, public TestResources
  protected:
   DriverPartScheduleInsetTest(){
     insets_ = ScheduleInsets(TestResources::ExampleFilePaths::schedule_inset_, vp_);
-    schedule_ = new Schedule(model_->wells(), settings_model_->control_times(), insets_);
+    schedule_ = new Schedule(model_->wells(),
+                             settings_model_->control_times(),
+                             settings_model_->start_date(),
+                             insets_,
+                             settings_full_);
   }
   virtual ~DriverPartScheduleInsetTest(){}
 

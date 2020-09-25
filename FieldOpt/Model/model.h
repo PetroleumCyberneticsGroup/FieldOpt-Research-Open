@@ -76,7 +76,8 @@ class Model : public Loggable
   QList<Wells::Well *> *wells() const { return wells_; }
 
   /*!
-   * \brief ApplyCase Applies the variable values from a case to the variables in the model.
+   * \brief ApplyCase Applies the variable values
+   * from a case to the variables in the model.
    * \param c Case to apply the variable values of.
    */
   void ApplyCase(Optimization::Case *c);
@@ -92,8 +93,8 @@ class Model : public Loggable
   void SetResult(const std::string key, std::vector<double> vec);
 
   /*!
-   * @brief Should be called at the end of the optimization run. Writes the last case
-   * to the extended log.
+   * @brief Should be called at the end of the optimization
+   * run. Writes the last case to the extended log.
    */
   void Finalize();
 
@@ -103,7 +104,9 @@ class Model : public Loggable
   Properties::VarPropContainer *variable_container_;
 
   QList<Wells::Well *> *wells_;
-  void verify(); //!< Verify the model. Throws an exception if it is not.
+
+  //!< Verify the model. Throws an exception if it is not.
+  void verify();
 
   void verifyWells();
   void verifyWellTrajectory(Wells::Well *w);
@@ -112,9 +115,18 @@ class Model : public Loggable
 
   Logger *logger_;
   QUuid current_case_id_;
-  Optimization::Case *current_case_; //!< Pointer to current case. Kept for logging purposes.
-  QString compdat_; //!< The compdat generated from the list of well blocks corresponding to the current case. This is set by the simulator library.
-  std::map<std::string, std::vector<double>> results_; //!< The results of the last simulation (i.e. the one performed with the current case).
+
+  //!< Pointer to current case. Kept for logging purposes.
+  Optimization::Case *current_case_;
+
+  //!< The compdat generated from the list of well blocks
+  //!< corresponding to the current case. This is set by
+  //!< the simulator library.
+  QString compdat_;
+
+  //!< The results of the last simulation (i.e.
+  //!< the one performed with the current case).
+  std::map<std::string, std::vector<double>> results_;
 
   QHash<QString, double> realization_ofv_map_;
   double ensemble_ofv_st_dev_;
@@ -132,8 +144,9 @@ class Model : public Loggable
     Model *model_;
   };
 
-  /*! The Economy struct is intended for use in calculations for drilling costs.
-   *  The costs are represented in [$/m] if used in tandem with NPV
+  /*! The Economy struct is intended for use in calculations
+   * for drilling costs. The costs are represented in [$/m]
+   * if used in tandem with NPV
    */
  public:
   struct Economy{

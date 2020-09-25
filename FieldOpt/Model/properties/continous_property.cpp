@@ -37,13 +37,13 @@ ContinuousProperty::ContinuousProperty(double value)
 
 void ContinuousProperty::setValue(double value) {
   if (IsLocked()) {
-    throw PropertyLockedException("Cant change locked real variable.");
+    throw PropertyLockedException("Can't change locked real variable.");
   }
   else value_ = value;
 }
 
 void ContinuousProperty::Add(double d) {
-  if (IsLocked()) throw PropertyLockedException("Cant add to locked real variable");
+  if (IsLocked()) throw PropertyLockedException("Can't add to locked real variable");
   else value_ += d;
 }
 

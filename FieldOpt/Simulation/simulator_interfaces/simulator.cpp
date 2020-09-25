@@ -123,7 +123,7 @@ void Simulator::PostSimWork() {
   if (settings_->simulator()->read_external_json_results()) {
     std::string ext_file = paths_.GetPath(Paths::SIM_WORK_DIR) + "/FO_EXT_RESULTS.json";
 
-    if (vp_.vSIM >= 2) { ext_info("Reading external JSON results: " + ext_file, md_, cl_); }
+    if (vp_.vSIM >= 3) { ext_info("Reading external JSON results: " + ext_file, md_, cl_); }
     auto json_results = Simulation::Results::JsonResults(ext_file, *settings_->simulator());
     results_->SetJsonResults(json_results);
   }
@@ -131,7 +131,7 @@ void Simulator::PostSimWork() {
   if(settings_->simulator()->read_adj_grad_data()) {
     string adjg_json = sim_wrk_dir_.toStdString() + "/" + FileNameRoot(driver_file_name_.toStdString()) + ".JSON";
 
-    if (vp_.vSIM >= 2) { ext_info("Reading adj grad data: " + adjg_json, md_, cl_); }
+    if (vp_.vSIM >= 3) { ext_info("Reading adj grad data: " + adjg_json, md_, cl_); }
     auto grad_data = Simulation::Results::JsonResults(adjg_json, *settings_->simulator());
     results_->SetJsonResults(grad_data);
   }

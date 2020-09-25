@@ -57,16 +57,22 @@ class Simulator {
   ::Simulation::Results::Results *results();
 
   /*!
-   * \brief Evaluate Writes the driver file and executes a simulation of the model.
+   * \brief Evaluate Writes the driver file
+   * and executes a simulation of the model.
    */
   virtual void Evaluate() = 0;
 
   /*!
-   * \brief Evaluate Writes the driver file and executes a simulation of the model. The simulation
-   * is terminated after the amount of seconds provided in the timeout argument.
-   * @param timeout Number of seconds before the simulation should be terminated.
-   * @param threads Number of threads to be used by the simulator. Only works for AD-GPRS.
-   * @return True if the simuation completes before the set timeout, otherwise false.
+   * \brief Evaluate Writes the driver file and executes a
+   * simulation of the model. The simulation is terminated
+   * after the amount of seconds provided in the timeout
+   * argument.
+   * @param timeout Number of seconds before the simulation
+   * should be terminated.
+   * @param threads # of threads to be used by the simulator.
+   * Only works for AD-GPRS.
+   * @return True if the simuation completes before the set
+   * timeout, otherwise false.
    */
   virtual bool Evaluate(int timeout, int threads=1) = 0;
 

@@ -49,6 +49,7 @@ class EclDriverFileWriter
   friend class ::Simulation::ECLSimulator;
   EclDriverFileWriter(::Settings::Settings *settings,
                       Model::Model *model);
+
   void WriteDriverFile(QString schedule_file_path);
   std::string buildActionStrings();
 

@@ -169,7 +169,6 @@ void AbstractRunner::EvaluateBaseModel() {
   } else if (!simulator_->results()->isAvailable()) {
     auto tm = "Simulating base case.";
     if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-
     simulator_->Evaluate();
   }
 }

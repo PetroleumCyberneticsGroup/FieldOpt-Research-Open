@@ -78,7 +78,6 @@ class AbstractRunner
 
   string md_ = "Runner";
   string cl_ = "AbstractRunner";
-  Settings::VerbParams vp_;
 
  protected:
   AbstractRunner(RuntimeSettings *runtime_settings);
@@ -96,6 +95,8 @@ class AbstractRunner
   std::vector<int> simulation_times_;
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
+
+  Settings::VerbParams vp_;
 
   void PrintCompletionMessage() const;
 
