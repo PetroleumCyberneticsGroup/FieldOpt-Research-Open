@@ -61,7 +61,9 @@ class ECLSimulator : public Simulator {
    */
   void Evaluate() override;
   bool Evaluate(int timeout, int threads = 1) override;
-  
+
+  void EvalXWrapper();
+
   bool Evaluate(const Settings::Ensemble::Realization &realization,
       int timeout, int threads = 1) override;
   
