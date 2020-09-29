@@ -53,9 +53,10 @@ class Well
  public:
   /*!
    * \brief Well Default constructor.
-   * \param settings The settings object to create a well from.
-   * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
-   * \param variables The variables object to add all new variable variables to.
+   * \param settings Settings object to create a well from.
+   * \param well_number The index of the sepcific well
+   * in the Model.Wells list to create a well from.
+   * \param variables Variables object to add all new variables to.
    */
   Well(const Settings::Model& model_settings,
        int well_number,
@@ -63,7 +64,11 @@ class Well
        ::Reservoir::Grid::Grid *grid,
        ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
-  struct Heel { int i; int j; int k; };
+  struct Heel {
+    int i = std::numeric_limits<int>::min();
+    int j = std::numeric_limits<int>::min();
+    int k = std::numeric_limits<int>::min();
+  };
 
   enum PreferredPhase { Oil, Gas, Water, Liquid };
 
@@ -72,10 +77,12 @@ class Well
   QString group() const { return group_; }
   bool IsProducer();
   bool IsInjector();
+
   ::Settings::Model::PreferredPhase preferred_phase() const { return preferred_phase_; }
   double wellbore_radius() const { return wellbore_radius_->value(); }
   Wellbore::Trajectory *trajectory() { return trajectory_; }
   QList<Control *> *controls() { return controls_; }
+
   int heel_i() const { return heel_.i; }
   int heel_j() const { return heel_.j; }
   int heel_k() const { return heel_.k; }
@@ -105,7 +112,11 @@ class Well
   Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
 
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Model";
+  string cl_ = "Well";
   Settings::VerbParams vp_;
+
 
   //!< Whether the trajectory is defined. It does not
   //!< need to be for, e.g., control optimization.
@@ -117,6 +128,7 @@ class Well
   // Fields for segmented wells
   bool is_segmented_ = false;
   void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
+
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
   double tub_cross_sect_area_; //!< Tubing cross section area.
@@ -124,7 +136,10 @@ class Well
   double tub_roughness_;       //!< Roughness for tubing segments.
   double ann_roughness_;       //!< Roughness for annulus segments.
   std::vector<Compartment> compartments_; //!< List of compartments.
-  std::vector<Wellbore::Completions::ICD> icds_; //!< List of icds for when we have neither a defined compartmentalization or a trajectory.
+
+  //!< List of icds for when we have neither a
+  //!< defined compartmentalization or a trajectory.
+  std::vector<Wellbore::Completions::ICD> icds_;
 
   // Methods for segmented wells
   std::vector<int> createTubingSegments(std::vector<Segment> &segments) const;

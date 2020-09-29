@@ -41,23 +41,23 @@ using Printer::ext_warn;
 using Printer::info;
 using std::runtime_error;
 
-using WDefType = Settings::Model::WellDefinitionType;
+using WType=Settings::Model::WellDefinitionType;
 
 Trajectory::Trajectory(Settings::Model::Well well_settings,
                        Properties::VarPropContainer *variable_container,
                        ::Reservoir::Grid::Grid *grid,
                        Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
   vp_ = well_settings.verbParams();
+
   well_blocks_ = new QList<WellBlock *>();
   well_spline_ = nullptr;
   pseudo_cont_vert_ = nullptr;
   definition_type_ = well_settings.definition_type;
 
-  if (well_settings.definition_type == WDefType::WellBlocks) {
+  if (well_settings.definition_type == WType::WellBlocks) {
     initializeWellBlocks(well_settings, variable_container);
-    calculateDirectionOfPenetration();
 
-  } else if (well_settings.definition_type == WDefType::WellSpline) {
+  } else if (well_settings.definition_type == WType::WellSpline) {
     if (well_settings.convert_well_blocks_to_spline) {
       convertWellBlocksToWellSpline(well_settings, grid);
     }
@@ -65,25 +65,25 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
                                   variable_container,
                                   grid, wic);
     well_blocks_ = well_spline_->GetWellBlocks();
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
 
-  } else if (well_settings.definition_type == WDefType::PolarSpline) {
+  } else if (well_settings.definition_type == WType::PolarSpline) {
     well_spline_ = new PolarSpline(well_settings,
                                    variable_container,
                                    grid, wic);
     well_blocks_ = well_spline_->GetWellBlocks();
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
 
-  } else if (well_settings.definition_type == WDefType::PseudoContVertical2D) {
+  } else if (well_settings.definition_type == WType::PseudoContVertical2D) {
     pseudo_cont_vert_ = new PseudoContVert(well_settings,
                                            variable_container,
                                            grid);
     well_blocks_->append(pseudo_cont_vert_->GetWellBlock());
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
   }
+
+  if (well_settings.definition_type != WType::UNDEFINED) {
+    calculateDirectionOfPenetration();
+  }
+
+  if (vp_.vMOD >= 3) { printWellBlocks(); }
 }
 
 int Trajectory::GetTimeSpentInWic() const {
@@ -128,7 +128,7 @@ void Trajectory::UpdateWellBlocks() {
 }
 
 double Trajectory::GetLength() const {
-  if (definition_type_ == WDefType::WellSpline) {
+  if (definition_type_ == WType::WellSpline) {
     return GetSplineLength();
   }
   else { // Block-defined
@@ -216,7 +216,7 @@ void Trajectory::calculateDirectionOfPenetration() {
   }
 }
 
-WDefType Trajectory::GetDefinitionType() {
+WType Trajectory::GetDefinitionType() {
   return definition_type_;
 }
 

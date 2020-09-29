@@ -34,6 +34,8 @@ using Printer::info;
 using Printer::ext_info;
 using Printer::num2str;
 
+using WType=Settings::Model::WellDefinitionType;
+
 Well::Well(const Settings::Model& model_settings,
            int well_number,
            Properties::VarPropContainer *variable_container,
@@ -46,9 +48,12 @@ Well::Well(const Settings::Model& model_settings,
 
   name_ = well_settings_.name;
   type_ = well_settings_.type;
-  if (well_settings_.group.length() >= 1)
+
+  if (well_settings_.group.length() >= 1) {
     group_ = well_settings_.group;
-  else group_ = "";
+  } else {
+    group_ = "";
+  }
 
   preferred_phase_ = well_settings_.preferred_phase;
 
@@ -56,12 +61,16 @@ Well::Well(const Settings::Model& model_settings,
 
   controls_ = new QList<Control *>();
   for (const auto & control : well_settings_.controls) {
-    controls_->append(new Control(control,well_settings_, variable_container));
+    controls_->append(new Control(control,
+                                  well_settings_,
+                                  variable_container));
   }
 
-  trajectory_defined_ = well_settings_.definition_type != Settings::Model::WellDefinitionType::UNDEFINED;
-  trajectory_ = new Wellbore::Trajectory(well_settings_, variable_container, grid, wic);
+  trajectory_ = new Wellbore::Trajectory(well_settings_,
+                                         variable_container,
+                                         grid, wic);
 
+  trajectory_defined_ = well_settings_.definition_type != WType::UNDEFINED;
   if (trajectory_defined_) {
     heel_.i = trajectory_->GetWellBlocks()->first()->i();
     heel_.j = trajectory_->GetWellBlocks()->first()->j();
@@ -73,38 +82,44 @@ Well::Well(const Settings::Model& model_settings,
     } else {
       is_segmented_ = false;
     }
-
   } else {
-    // Completions for wells with no defined trajectory
-    // (they are specified by segment number)
-    if (!well_settings_.completions.empty()
-      && well_settings_.icv_compartments.empty()) {
+    im_ = "No well trajectory defined for well: " + name_.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 
-      for (auto comp : well_settings_.completions) {
-        auto base_name = comp.name;
-        auto comp_num = comp.device_names.size();
-        for (int i = 0; i < comp_num; ++i) {
-          comp.device_name = comp.device_names[i];
-          comp.segment_index = comp.segment_indexes[i];
-          comp.name = base_name + "#" + QString::number(comp.segment_index);
-          icds_.emplace_back(comp, variable_container);
-        }
-        if (VERB_MOD >=2 || vp_.vMOD >= 2 ) {
-          ext_info("Added " + num2str(comp_num) + " ICDs.",
-                   "Well", "Model", vp_.lnw);
-        }
-      }
+  // Completions for wells with no defined trajectory
+  // (they are specified by segment number)
+  if (!well_settings_.completions.empty()
+    && well_settings_.icv_compartments.empty()) {
 
-    } else if (!well_settings_.icv_compartments.empty()) {
-      for (const auto& comp : well_settings_.icv_compartments) {
+    for (auto comp : well_settings_.completions) {
+      auto base_name = comp.name;
+      auto comp_num = comp.device_names.size();
+      for (int i = 0; i < comp_num; ++i) {
+        comp.device_name = comp.device_names[i];
+        comp.segment_index = comp.segment_indexes[i];
+        comp.name = base_name + "#" + QString::number(comp.segment_index);
         icds_.emplace_back(comp, variable_container);
       }
-      if (VERB_MOD >=2 || vp_.vMOD >= 2 ) {
-        ext_info("Added " + num2str(well_settings_.icv_compartments.size())
-                   + " ICV compartment.", "Well", "Model", vp_.lnw);
+      if (vp_.vMOD >= 2) {
+        im_ = "well_settings_.completions => [NOT-EMPTY] ";
+        im_ += "well_settings_.icv_compartments => [EMPTY] -- ";
+        im_ += "Added " + num2str(comp_num) + " ICDs.";
+        ext_info(im_, md_, cl_, vp_.lnw);
       }
     }
+
+  } else if (!well_settings_.icv_compartments.empty()) {
+    for (const auto& comp : well_settings_.icv_compartments) {
+      icds_.emplace_back(comp, variable_container);
+    }
+    if (vp_.vMOD >= 2) {
+      im_ = "well_settings_.icv_compartments => [NOT-EMPTY] -- ";
+      im_ += "Added " + num2str(well_settings_.icv_compartments.size()) + " ICV compartment.";
+      ext_info(im_, md_, cl_, vp_.lnw);
+    }
   }
+
 }
 
 bool Well::IsProducer() {

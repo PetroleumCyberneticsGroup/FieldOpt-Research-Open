@@ -44,7 +44,8 @@ Model::Model(Settings::Settings settings, Logger *logger) {
   wells_ = new QList<Wells::Well *>();
   for (int well_nr = 0; well_nr < settings.model()->wells().size(); ++well_nr) {
     wells_->append(new Wells::Well(*settings.model(), well_nr,
-                                   variable_container_, grid_, wic_));
+                                   variable_container_,
+                                   grid_, wic_));
   }
 
   variable_container_->CheckVariableNameUniqueness();
@@ -176,12 +177,12 @@ void Model::verifyWellTrajectory(Wells::Well *w) {
 
 void Model::verifyWellBlock(Wells::Wellbore::WellBlock *wb) {
   if (wb->i() < 1 || wb->i() > grid()->Dimensions().nx ||
-      wb->j() < 1 || wb->j() > grid()->Dimensions().ny ||
-      wb->k() < 1 || wb->k() > grid()->Dimensions().nz)
+    wb->j() < 1 || wb->j() > grid()->Dimensions().ny ||
+    wb->k() < 1 || wb->k() > grid()->Dimensions().nz)
     throw std::runtime_error("Invalid well block detected: ("
-                                 + boost::lexical_cast<std::string>(wb->i()) + ", "
-                                 + boost::lexical_cast<std::string>(wb->j()) + ", "
-                                 + boost::lexical_cast<std::string>(wb->k()) + ")"
+                               + boost::lexical_cast<std::string>(wb->i()) + ", "
+                               + boost::lexical_cast<std::string>(wb->j()) + ", "
+                               + boost::lexical_cast<std::string>(wb->k()) + ")"
     );
 }
 
@@ -250,15 +251,15 @@ void Model::verifyWellCompartments(Wells::Well *w) {
   for (int i = 0; i < w->GetCompartments().size() - 1; ++i) {
     if (w->GetCompartments()[i].icd->md(well_length) != w->GetCompartments()[i].start_packer->md(well_length)) {
       throw std::runtime_error("The ICD MD for compartment "
-                                   + boost::lexical_cast<std::string>(i)
-                                   + "is different from the start-packer MD.");
+                                 + boost::lexical_cast<std::string>(i)
+                                 + "is different from the start-packer MD.");
     }
     if (w->GetCompartments()[i].icd->valveSize() > 7.8540E-3) {
       throw std::runtime_error("A valve cross sectional area is larger than the simulator maximum (7.8540E-3).");
     }
     if (w->GetCompartments()[i].start_packer->md(well_length) > w->GetCompartments()[i+1].end_packer->md(well_length)) {
       throw std::runtime_error("The start-packer MD is greater than the end-packer md in compartment "
-                                   + boost::lexical_cast<string>(i));
+                                 + boost::lexical_cast<string>(i));
     }
   }
   if (w->GetCompartments()[0].start_packer->md(well_length) < 0) {
@@ -268,14 +269,14 @@ void Model::verifyWellCompartments(Wells::Well *w) {
   double length;
   for (int i = 0; i < w->trajectory()->GetWellSpline()->GetSplinePoints().size() - 1; ++i) {
     length += (w->trajectory()->GetWellSpline()->GetSplinePoints()[i+1]->ToEigenVector()
-        - w->trajectory()->GetWellSpline()->GetSplinePoints()[i]->ToEigenVector()).norm();
+      - w->trajectory()->GetWellSpline()->GetSplinePoints()[i]->ToEigenVector()).norm();
   }
   if (w->GetCompartments().back().end_packer->md(well_length) > length) {
     throw std::runtime_error("The end-packer MD for the final compartment is past the end of the well spline. (length: "
-                                 + boost::lexical_cast<string>(w->trajectory()->GetLength())
-                                 + ", position: "
-                                 + boost::lexical_cast<string>(w->GetCompartments().back().end_packer->md(well_length))
-                                 + ")"
+                               + boost::lexical_cast<string>(w->trajectory()->GetLength())
+                               + ", position: "
+                               + boost::lexical_cast<string>(w->GetCompartments().back().end_packer->md(well_length))
+                               + ")"
     );
   }
 }
