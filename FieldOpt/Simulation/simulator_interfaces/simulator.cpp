@@ -86,14 +86,27 @@ Simulator::Simulator(Settings::Settings *settings) {
 }
 
 void Simulator::PreSimWork() {
-  sim_wrk_dir_ = GetAbsoluteFilePath(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
-  QString presim_script = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
-  QStringList* presim_args = settings_->simulator()->pre_sim_args();
-  presim_args->prepend(sim_wrk_dir_);
 
-  if (settings_->simulator()->use_pre_sim_script() && FileExists(presim_script, vp_, md_, cl_)) {
-    ExecShellScript(presim_script, *presim_args, vp_);
-  } else { ext_warn("Presim script not found."); }
+  if (settings_->simulator()->use_pre_sim_script()) {
+
+    ext_info("Executing presim script", md_, cl_, vp_.lnw);
+    sim_wrk_dir_ = GetAbsoluteFilePath(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
+    QString presim_script = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
+    QStringList pre_sim_args = *settings_->simulator()->pre_sim_args();
+    pre_sim_args.prepend(sim_wrk_dir_);
+
+    if (vp_.vSIM >= 3) {
+      stringstream ss; ss << "pre_sim_args: ";
+      for (int ii=0; ii < pre_sim_args.size(); ++ii) {
+        ss << pre_sim_args.at(ii).toStdString() + " ";
+      }
+    }
+
+    if (settings_->simulator()->use_pre_sim_script() && FileExists(presim_script, vp_, md_, cl_)) {
+      ExecShellScript(presim_script, pre_sim_args, vp_);
+    } else { ext_warn("Presim script not found."); }
+
+  }
 }
 
 void Simulator::PostSimWork() {

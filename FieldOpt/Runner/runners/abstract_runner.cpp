@@ -225,6 +225,7 @@ void AbstractRunner::InitializeBaseCase() {
   base_case_ = new Optimization::Case(model_->variables()->GetBinVarValues(),
                                       model_->variables()->GetDiscVarValues(),
                                       model_->variables()->GetContVarValues());
+  base_case_->SetVerbParams(vp_);
 
   if (!simulator_->results()->isAvailable()) {
     base_case_->set_objf_value(sentinelValue());

@@ -80,6 +80,7 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 
+  tm = "";
   for (auto id : affected_variables_) {
     if (c->get_real_variable_value(id) > max_) {
       c->set_real_variable_value(id, max_);
@@ -90,7 +91,7 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     }
   }
 
-  if (vp_.vOPT >= 4) {
+  if (vp_.vOPT >= 4 && tm.size() > 0) {
     Printer::pad_text(tm, vp_.lnw );
     tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
     ext_info(tm, md_, cl_, vp_.lnw);

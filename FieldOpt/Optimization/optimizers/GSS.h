@@ -80,49 +80,70 @@ class GSS : public Optimizer {
   /*!
    * \brief IsFinished Check if the optimization is finished.
    *
-   * This algorithm has two termination conditions: max number of objective function evaluations and
-   * minimum step length.
+   * The algorithm has two termination conditions: max #
+   * of objective function evaluations and min step length.
    * \return True if the algorithm has finished, otherwise false.
    */
   TerminationCondition IsFinished();
 
  protected:
-  int num_vars_; //!< The number of variables in the problem. This is used in initialization.
-  VectorXd step_tol_; //!< Step length convergence tolerance.
-  double contr_fac_; //!< Step length contraction factor.
-  double expan_fac_; //!< Step length expansion factor.
-  VectorXd step_lengths_; //!< Vector of step lengths.
-  vector<VectorXi> directions_; //!< Vector of search directions.
+  //!< # of variables in the problem. Used in initialization.
+  int num_vars_;
+
+  //!< Step length convergence tolerance.
+  VectorXd step_tol_;
+
+  //!< Step length contraction factor.
+  double contr_fac_;
+
+  //!< Step length expansion factor.
+  double expan_fac_;
+
+  //!< Vector of step lengths.
+  VectorXd step_lengths_;
+
+  //!< Vector of search directions.
+  vector<VectorXi> directions_;
 
   /*!
    * @brief Contract the search pattern: step_lengths_ * contr_fac_
    *
-   * @param dirs (optional) The direction indices to expand. If not provided,
-   * the expansion will be applied to all directions.
+   * @param dirs (optional) The direction indices to expand.
+   * If not provided, the expansion will be applied to all
+   * directions.
    */
   void contract(vector<int> dirs = vector<int>{-1});
 
   /*!
    * @brief Expand the search pattern: step_lengths_ * expan_fac_
    *
-   * @param dirs (optional) The direction indices to expand. If not provided,
-   * the expansion will be applied to all directions.
+   * @param dirs (optional) The direction indices to expand.
+   * If not provided, the expansion will be applied to all
+   * directions.
    */
   void expand(vector<int> dirs = vector<int>{-1});
 
   /*!
-   * @brief Set all step lengths _proportionally_ equal to the length provided.
+   * @brief Set all step lengths _proportionally_ equal
+   * to the length provided.
    *
-   * This will only work properly if bound constraints are provided for all variables. If not, all directions
-   * will be set to the same value (as described in the original paper): max(step_min, len).
+   * This will only work properly if bound constraints are
+   * provided for all variables. If not, all directions will
+   * be set to the same value (as described in the original
+   * paper): max(step_min, len).
    *
-   * The modification to the operation described in the paper is intended to account for variables with very different
-   * bounds (e.g. when optimizing using the PolarSpline well formulation, or well placement in general in thin
+   * The modification to the operation described in the paper
+   * is intended to account for variables with very different
+   * bounds (e.g. when optimizing using the PolarSpline well
+   * formulation, or well placement in general in thin
    * reservoirs).
    *
-   * Given that the variable at dir_idx has bounds [min_a, max_a], a number S is computed as
-   * S = (len - min_a)/(max_a - min_a). The step length at dir_idx is set to len, and the remaining
-   * step lengths len_i for each direction i are computed as len_i = max(step_tol_i, min_i + S * (max_i - min_i)).
+   * Given that the variable at dir_idx has bounds [min_a, max_a],
+   * a number S is computed as S = (len - min_a)/(max_a - min_a).
+   * The step length at dir_idx is set to len, and the remaining
+   * step lengths len_i for each direction i are computed as
+   * len_i = max(step_tol_i, min_i + S * (max_i - min_i)).
+   *
    * @param dir_idx The direction index that produced an improvement.
    * @param len The step length that produced an improvement.
    */
@@ -150,6 +171,14 @@ class GSS : public Optimizer {
    */
   Case *dequeue_case_with_worst_origin();
 
+  string im_ = "", wm_ = "", em_ = "";
+  string cl_ = "GSS";
+  string md_ = "Optimization::Optimizers";
+  Settings::VerbParams vp_;
+
+  VectorXd vd_ = VectorXd::Zero(0);
+  string fl_ = "dbg_aug_obj.py";
+
  private:
 
   /*!
@@ -161,14 +190,6 @@ class GSS : public Optimizer {
    */
   template <typename T>
   Matrix<T, Dynamic, 1> perturb(Matrix<T, Dynamic, 1> base, int dir);
-
-  string im_ = "", wm_ = "", em_ = "";
-  string cl_ = "GSS";
-  string md_ = "Optimization::Optimizers";
-
-  Settings::VerbParams vp_;
-  VectorXd vd_ = VectorXd::Zero(0);
-  string fl_ = "dbg_aug_obj.py";
 
 };
 

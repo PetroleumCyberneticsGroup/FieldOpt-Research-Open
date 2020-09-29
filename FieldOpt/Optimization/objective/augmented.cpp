@@ -200,9 +200,9 @@ double Augmented::value(bool base_case) {
             if (vp_.vOPT >= 3) {
               ss << "scal.type: " << term->scaling << " -- ";
               ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
-              ss << "t_val (scaled) = " << num2str(t_val, 8, 1);
-              info(ss.str(), vp_.lnw);
-              ss.str("");
+              ss << "t_val (scaled) = " << num2str(t_val, 8, 1) << "|";
+              // info(ss.str(), vp_.lnw);
+              // ss.str("");
             }
           }
         }
@@ -227,11 +227,13 @@ double Augmented::value(bool base_case) {
         im += ", prop_type: "+ results_->GetPropertyKey(term->prop_type);
         im += ", prop_spec: "+ results_->GetPropertyKey(term->prop_spec);
         im += ", term value: " + num2str(t_val, 5, 1);
-        info(im, vp_.lnw);
+        ss << im << "|";
+        // info(im, vp_.lnw);
       }
 
       value += t_val;
     }
+    ext_info(ss.str(), md_, cl_, vp_.lnw);
 
   } catch (std::exception const &ex) {
     em_ = "Failed to compute Augmented function " + string(ex.what()) + " Returning 0.0";

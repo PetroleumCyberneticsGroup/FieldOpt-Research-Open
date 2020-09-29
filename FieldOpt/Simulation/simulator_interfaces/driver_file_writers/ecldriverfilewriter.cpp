@@ -37,6 +37,7 @@ namespace Simulation {
 using namespace ECLDriverParts;
 using namespace Utilities::FileHandling;
 using Printer::ext_info;
+using Printer::ext_warn;
 using Printer::info;
 using Printer::num2str;
 
@@ -77,12 +78,14 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
 }
 
 std::string EclDriverFileWriter::buildActionStrings() {
-  if (VERB_SIM >= 2) {
-    Printer::ext_info("Generating action strings", "Simulation", "EclDriverFileWriter");
+  if (vp_.vSIM >= 2) {
+    ext_info("Generating action strings", md_, cl_);
   }
-  std::string actions = "";
 
-  std::string icv_actions = "";
+  std::string actions;
+  std::string icv_actions;
+  std::string ctrl_actions;
+
   for (auto well : *model_->wells()) {
     if (well->HasSimpleICVs()) {
       auto wsegv = ECLDriverParts::Wsegvalv(well);
@@ -90,7 +93,6 @@ std::string EclDriverFileWriter::buildActionStrings() {
     }
   }
 
-  std::string ctrl_actions = "";
   if (model_->wells()->first()->controls()->size() > 0) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
                                                  settings_->model()->control_times(),
@@ -117,9 +119,9 @@ std::string EclDriverFileWriter::buildActionStrings() {
         ctrl_actions += "\n";
       }
     }
-  }
-  else if (VERB_SIM >= 2) {
-    Printer::ext_warn("First well did not have controls; assuming none do.", "Simulation", "ECLDriverFileWriter");
+
+  } else if (vp_.vSIM >= 2) {
+    ext_warn("First well did not have controls; assuming none do.", md_, cl_);
   }
 
   actions += ActionX::ACTIONX("ICVS_T0",

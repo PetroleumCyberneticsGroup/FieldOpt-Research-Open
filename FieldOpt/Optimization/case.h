@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <Eigen/Core>
 #include <QtCore/QDateTime>
 #include <Model/properties/var_prop_container.h>
+#include <Utilities/verbosity.h>
 #include "Runner/loggable.hpp"
 #include "optimization_exceptions.h"
 
@@ -300,6 +301,7 @@ class Case : public Loggable
   // Multiple realizations-support
   void SetEnsembleRealization(const QString &alias) { ensemble_realization_ = alias; }
   QString GetEnsembleRealization() const { return ensemble_realization_; }
+
   void SetRealizationOfv(const QString &alias, const double &ofv);
   bool HasRealizationOfv(const QString &alias);
   double GetRealizationOfv(const QString &alias);
@@ -330,10 +332,17 @@ class Case : public Loggable
     }
   }
 
+  void SetVerbParams(Settings::VerbParams vp) { vp_ = vp; }
+
  private:
   QUuid id_; //!< Unique ID for the case.
   int sim_time_sec_;
   int wic_time_sec_; //!< The number of seconds spent computing the well index for this case.
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Optimization";
+  string cl_ = "Case";
+  Settings::VerbParams vp_;
 
   double objective_function_value_;
   // QHash<QUuid, bool> binary_variables_;

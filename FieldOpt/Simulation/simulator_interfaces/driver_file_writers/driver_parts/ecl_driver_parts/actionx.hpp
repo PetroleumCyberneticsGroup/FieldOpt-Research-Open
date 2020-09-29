@@ -102,7 +102,7 @@ inline std::string ACTIONX(std::string name,
   actionx << "    " << LHQuantityString[lhq] << "  " << OperatorString[op] << "  " << rhq << "  /" << std::endl;
   actionx << "/" << std::endl;
   actionx << std::endl;
-  actionx << actions << std::endl;
+  actionx << actions;
   actionx << "ENDACTIO" << std::endl;
   return actionx.str();
 }
@@ -124,7 +124,7 @@ inline std::string ACTIONX(std::string name,
   actionx << "    " << LHQuantityString[lhq_year] << "  " << OperatorString[op_year] << "  " << rhq.year_str << " /" << std::endl;
   actionx << "/" << std::endl;
   actionx << std::endl;
-  actionx << actions << std::endl;
+  actionx << actions;
   actionx << "ENDACTIO" << std::endl;
   return actionx.str();
 }

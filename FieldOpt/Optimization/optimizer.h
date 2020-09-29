@@ -71,10 +71,12 @@ class Optimizer : public Loggable
   Optimizer() = delete;
 
   /*!
-   * \brief GetCaseForEvaluation Get a new, unevaluated case for evaluation.
+   * \brief GetCaseForEvaluation Get a new, unevaluated case
+   * for evaluation.
    *
-   * If no unevaluated cases are currently available in the CaseHandler, the iterate()
-   * method is called to generate new cases.
+   * If no unevaluated cases are currently available in the
+   * CaseHandler, the iterate() method is called to generate
+   * new cases.
    * \return Pointer to a new, unevaluated case.
    */
   Case *GetCaseForEvaluation();
@@ -105,9 +107,11 @@ class Optimizer : public Loggable
   int nr_evaluated_cases() const {
     return case_handler_->EvaluatedCases().size();
   }
+
   int nr_queued_cases() const {
     return case_handler_->QueuedCases().size();
   }
+
   int nr_recently_evaluated_cases() const {
     return case_handler_->RecentlyEvaluatedCases().size();
   }
@@ -115,34 +119,42 @@ class Optimizer : public Loggable
   // -------------------------------------------------------
   // TerminationCondition enum enumerates the reasons for
   // ending the opt runs. Returned by IsFinished method.
-  enum TerminationCondition : int {NOT_FINISHED=0,
+  enum TerminationCondition : int { NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
     MAX_ITERATIONS_REACHED=3, OPTIMALITY_CRITERIA_REACHED=4,
     TR_MIN_RADIUS_REACHED=5
   };
 
   /*!
-   * \brief IsFinished Check whether the optimization is finished, i.e. if the the optimizer has
-   * reached some  termination condition.
+   * \brief IsFinished Check whether the optimization is
+   * finished, i.e. if the the optimizer has reached some
+   * termination condition.
    *
-   * This method should be called before attempting to get a new case for evaluation.
-   * \return NOT_FINISHED (0, =false) if the optimization has not finished, otherwise the non-zero reason
-   * for termination.
+   * This method should be called before attempting to get
+   * a new case for evaluation.
+   * \return NOT_FINISHED (0, =false) if the optimization
+   * has not finished, otherwise the non-zero reason for
+   * termination.
    */
   virtual TerminationCondition IsFinished() = 0;
 
-  virtual QString GetStatusStringHeader() const; //!< Get the CSV header for the status string.
-  virtual QString GetStatusString() const; //!< Get a CSV string describing the current state of the optimizer.
-  void EnableConstraintLogging(QString output_directory_path); //!< Enable writing a text log for the constraint operations.
+  //!< Get the CSV header for the status string.
+  virtual QString GetStatusStringHeader() const;
 
-//  void SetVerbosityLevel(int level);
+  //!< Get CSV string describing the current optimizer state.
+  virtual QString GetStatusString() const;
 
-  bool IsAsync() const { return is_async_; } //!< Check if the optimizer is asynchronous.
+  //!< Enable writing a text log for the constraint operations.
+  void EnableConstraintLogging(QString output_directory_path);
+
+  //!< Check if the optimizer is asynchronous.
+  bool IsAsync() const { return is_async_; }
 
   /*!
    * @brief Get the simulation duration in seconds for a case.
    * @param c Case to get simulation duration for.
-   * @return Simulation duration in seconds. -1 if the case has not been successfully simulated.
+   * @return Simulation duration in seconds. -1 if the case
+   * has not been successfully simulated.
    */
   int GetSimulationDuration(Case *c);
 
@@ -153,11 +165,19 @@ class Optimizer : public Loggable
    * \param opt_settings Settings for the optimizer.
    * \param base_case Base case for optimizer. Must already
    * have been evaluated (i.e., have an objective function value).
-   * \param variables The variable property container from the Model (needed for initialization of constriants).
-   * \param grid The grid to be used (needed for initializtion of some constraints).
+   *
+   * \param variables The variable property container from
+   * the Model (needed for initialization of constraints).
+   * \param grid The grid to be used (needed for initialization
+   * of some constraints).
+   *
    * \param logger Logger object passed from runner.
-   * \param case_handler CaseHandler object. This is passed from the HybridOptimizer; defaults to 0, in which case a new one will be created.
-   * \param constraint_handler ConstraintHandler object. This is passed from the HybridOptimizer; defaults to 0, in which case a new one will be created.
+   * \param case_handler CaseHandler object. This is passed
+   * from the HybridOptimizer; defaults to 0, in which case
+   * a new one will be created.
+   * \param constraint_handler ConstraintHandler object.
+   * This is passed from the HybridOptimizer; defaults to 0,
+   * in which case a new one will be created.
    */
   Optimizer(::Settings::Optimizer *opt_settings,
             Case *base_case,
@@ -169,25 +189,29 @@ class Optimizer : public Loggable
   );
 
   /*!
-   * @brief Handle an incomming evaluated case. This is called at the end of the SubmitEvaluatedCase method.
+   * @brief Handle an incomming evaluated case. This is
+   * called at the end of the SubmitEvaluatedCase method.
    * @param c
    */
   virtual void handleEvaluatedCase(Case *c) = 0;
 
   /*!
-   * @brief Check whether the Case c is an improvement on the tentative best case.
+   * @brief Check whether the Case c is an improvement on
+   * the tentative best case.
    * @param c Case to be checked.
    * @return True if improvement; otherwise false.
    */
   bool isImprovement(const Case* c);
 
   /*!
-   * @brief Check if Case c1 is better than Case c2, taking into account if we're maximizing or minimizing.
+   * @brief Check if Case c1 is better than Case c2, taking
+   * into account if we're maximizing or minimizing.
    */
   bool isBetter(const Case* c1, const Case *c2) const;
 
   /*!
-   * \brief iterate Performs an iteration, generating new cases and adding them to the case_handler.
+   * \brief iterate Performs an iteration, generating
+   * new cases and adding them to the case_handler.
    */
   virtual void iterate() = 0;
 
@@ -312,9 +336,6 @@ class Optimizer : public Loggable
 
   int iteration_;  // The current iteration.
 
-  // Verbosity level for runtime console logging.
-  int verbosity_level_;
-
   // The optimization mode, i.e. whether the objective
   // function should be maximized or minimized.
   ::Settings::Optimizer::OptimizerMode mode_;
@@ -355,6 +376,11 @@ class Optimizer : public Loggable
   // Initialize all normalization parameters.
   void initializeNormalizers();
 
+  string im_ = "", wm_ = "", em_ = "";
+  ::Settings::VerbParams vp_;
+  string md_ = "Optimization";
+  string cl_ = "Optimizer";
+
   class Summary : public Loggable {
    public:
     Summary(Optimizer *opt, TerminationCondition cond,
@@ -388,7 +414,6 @@ class Optimizer : public Loggable
   // The number of seconds spent in the iterate() method.
   int seconds_spent_in_iterate_;
 
-  // -------------------------------------------------------
   /*!
    * @brief Initialize the OFV normalizer, setting the parameters for it
    * from the cases that have been evaluated so far.
