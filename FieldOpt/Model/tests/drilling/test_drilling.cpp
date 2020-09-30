@@ -77,7 +77,7 @@ TEST_F(DrillingTest, DrillingScheduleDataStructure) {
       is_drilling_object_correct = false;
 
     // check model types
-    if (schedule->getModelTypes().value(i) != drilling_settings.drilling_schedule.model_types.value(i))
+    if ((int)schedule->getModelTypes().value(i) != (int)drilling_settings.drilling_schedule.model_types.value(i))
       is_drilling_object_correct = false;
 
     // check drilling completions
