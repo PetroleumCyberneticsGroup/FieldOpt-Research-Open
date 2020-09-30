@@ -49,10 +49,19 @@ enum CompletionType {
 namespace Reservoir {
 namespace WellIndexCalculation {
 
-// =========================================================
-wicalc_rixx::wicalc_rixx(Grid::Grid *grid,
-                         RICaseData *ricasedata) {
+using Printer::ext_info;
+using Printer::num2str;
+using Printer::DBG_prntVecXd;
 
+// =========================================================
+wicalc_rixw::wicalc_rixw(Grid::Grid *grid,
+                         RICaseData *ricasedata,
+                         Settings::Settings *settings) {
+
+  settings_ = settings;
+  vp_ = settings_->global()->verbParams();
+
+  // -------------------------------------------------------
   if (grid != nullptr) {
     AddGrid(grid);
     SetGridActive(grid);
@@ -70,28 +79,32 @@ wicalc_rixx::~wicalc_rixx() {
   // delete ricasedata_;
 }
 
+// =========================================================
 bool wicalc_rixx::HasGrid(string path) {
   if (dict_grids_.count(path) > 0) {
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }
 
-Grid::Grid * wicalc_rixx::GetGrid(string path) {
+// =========================================================
+Grid::Grid * wicalc_rixw::GetGrid(string path) {
   assert(HasGrid(path) == true);
   return dict_grids_[path];
 }
 
-void wicalc_rixx::AddGrid(Grid::Grid *grid) {
-  if (VERB_WIC >= 2) {
-    Printer::ext_info("Reading grid " + grid->GetGridFilePath(), "wicalc_rixx", "WellIndexCalculation");
+// =========================================================
+void wicalc_rixw::AddGrid(Grid::Grid *grid) {
+
+  if (vp_.vWIC >= 2) {
+    ext_info("Reading grid " + grid->GetGridFilePath(), md_, cl_);
   }
 
   if (dict_grids_.count(grid->GetGridFilePath()) == 0) {
     dict_grids_.insert(pair<string, Grid::Grid*>(grid->GetGridFilePath(), grid));
   }
+
   if (dict_casedata_.count(grid->GetGridFilePath()) == 0) {
     RIReaderECL rireaderecl;
     cvf::ref<RICaseData> ricasedata = new RICaseData(grid->GetGridFilePath());
@@ -102,7 +115,6 @@ void wicalc_rixx::AddGrid(Grid::Grid *grid) {
 
     dict_casedata_.insert(pair<string, cvf::ref<RICaseData>>(grid->GetGridFilePath(), ricasedata));
 
-
     vector<double> intersections;
     intersections.resize(ricasedata->mainGrid()->globalCellArray().size());
     fill(intersections.begin(), intersections.end(), HUGE_VAL);
@@ -110,18 +122,21 @@ void wicalc_rixx::AddGrid(Grid::Grid *grid) {
   }
 }
 
-void wicalc_rixx::SetGridActive(Grid::Grid *grid) {
-  if (VERB_WIC >= 2) {
-    Printer::ext_info("Setting grid active " + grid->GetGridFilePath(), "wicalc_rixx", "WellIndexCalculation");
+// =========================================================
+void wicalc_rixw::SetGridActive(Grid::Grid *grid) {
+
+  if (vp_.vWIC >= 2) {
+    ext_info("Setting grid active " + grid->GetGridFilePath(), md_, cl_);
   }
+
   assert(HasGrid(grid->GetGridFilePath()));
   ricasedata_ = dict_casedata_[grid->GetGridFilePath()];
   grid_ = dict_grids_[grid->GetGridFilePath()];
   intersections_ = dict_intersections_[grid->GetGridFilePath()];
 }
 
-// -----------------------------------------------------------------
-void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
+// =========================================================
+void wicalc_rixw::calculateWellPathIntersections(const WellPath& wellPath,
                                                  vector<double> &isc_values) {
 
   vector<cvf::HexIntersectionInfo> intersections =
@@ -129,8 +144,8 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
                                             wellPath.m_wellPathPoints);
 
   std::stringstream str;
-  if (VERB_WIC >=3) {
-    Printer::info("Found " + Printer::num2str(intersections.size()) + " intersections.");
+  if (vp_.vWIC >=3) {
+    ext_info("Found " + num2str(intersections.size()) + " intersections.", md_, cl_);
   }
 
   for (auto &intersection : intersections) {
@@ -145,9 +160,8 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
   }
 }
 
-// -----------------------------------------------------------------
-void
-wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
+// =========================================================
+void wicalc_rixw::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
                                      vector<WellPathCellIntersectionInfo> isc_info,
                                      WellDefinition well,
                                      WellPath& wellPath) {
@@ -180,9 +194,7 @@ wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
 
     // -------------------------------------------------------------
     // Calculate direction
-    CellDir direction =
-        wellPath.calculateDirectionInCell(cell,
-                                          icell);
+    CellDir direction = wellPath.calculateDirectionInCell(cell, icell);
 
     // -------------------------------------------------------------
     // Calculate transmissibility
@@ -234,9 +246,7 @@ wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
 }
 
 // =========================================================
-void
-wicalc_rixx::ComputeWellBlocks(
-    vector<IntersectedCell> &well_indices,
+void wicalc_rixw::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
     WellDefinition &well) {
 
   // -------------------------------------------------------
@@ -250,17 +260,17 @@ wicalc_rixx::ComputeWellBlocks(
 
   // -------------------------------------------------------------
   // Loop through well segments
-  if (VERB_WIC >= 3) {
-    Printer::ext_info("Looping through " + Printer::num2str(well.radii.size()) + " segments.",
-                      "wicalc_rixx", "WellIndexCalculation");
+  if (vp_.vWIC >= 3) {
+    ext_info("Looping through " + num2str(well.radii.size()) + " segments.", md_, cl_);
   }
   wellPath = new WellPath();
   for (int seg = 0; seg < well.radii.size(); ++seg) {
-    if (VERB_WIC >= 3) {
-      Printer::ext_info("Computing segment " + Printer::num2str(seg)
-                    + ". StartMD: " + Printer::num2str(well.heel_md[seg]) + "; EndMD: " + Printer::num2str(well.toe_md[seg])
-                    + "; StartPt: " + eigenvec_to_str(well.heels[seg]) + "; EndPt: " + eigenvec_to_str(well.toes[seg]),
-                        "wicalc_rixx", "WellIndexCalculation" );
+    if (vp_.vWIC >= 3) {
+      ext_info("Computing segment " + num2str(seg)
+                   + ". StartMD: " + num2str(well.heel_md[seg])
+                   + "; EndMD: " + num2str(well.toe_md[seg])
+                   + "; StartPt: " + DBG_prntVecXd(well.heels[seg])
+                   + "; EndPt: " + DBG_prntVecXd(well.toes[seg]), md_, cl_);
     }
     // -----------------------------------------------------------
     // cvf::ref<WellPath> wellPath = new WellPath();
@@ -284,7 +294,6 @@ wicalc_rixx::ComputeWellBlocks(
     // -----------------------------------------------------------
     wellPath->m_wellPathPoints.push_back(cvf_xyzHeel);
     wellPath->m_wellPathPoints.push_back(cvf_xyzToe);
-
   }
 
   // -----------------------------------------------------------
@@ -307,7 +316,7 @@ wicalc_rixx::ComputeWellBlocks(
   vector<WellPathCellIntersectionInfo>
       intersectedCellInfo = extractor->cellIntersectionInfosAlongWellPath();
   // cout << "[mod]wicalc_rixx-08.--------- intersectedCellInfo" << endl;
-  if (VERB_WIC >= 3) {
+  if (vp_.vWIC >= 3) {
     for (auto celli : intersectedCellInfo) {
       auto gci = celli.globCellIndex;
       auto emd = celli.endMD;
@@ -318,7 +327,7 @@ wicalc_rixx::ComputeWellBlocks(
       ss << "Global cell index: " << gci << " | StartMD: " << smd << " | EndMD: " << emd;
       ss << "Start point: " << spt.x() << ", " << spt.y() << ", " << spt.y();
       ss << " | End point: "   << ept.x() << ", " << ept.y() << ", " << ept.y();
-      Printer::ext_info(ss.str(), "WellIndexCalculation", "wicalc_rixx");
+      ext_info(ss.str(), md_, cl_);
     }
   }
 
@@ -328,9 +337,8 @@ wicalc_rixx::ComputeWellBlocks(
                           well,
                           *wellPath);
 
-  if (VERB_WIC >= 2) {
-    Printer::ext_info("Found " + Printer::num2str(intersected_cells.size())
-                          + " intersected cells.", "WellIndexCalculation", "wicalc_rixx");
+  if (vp_.vWIC >= 2) {
+    ext_info("Found " + num2str(intersected_cells.size()) + " intersected cells.", md_, cl_);
   }
 
 

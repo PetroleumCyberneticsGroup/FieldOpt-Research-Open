@@ -32,6 +32,7 @@ namespace Wells {
 
 using Printer::info;
 using Printer::ext_info;
+using Printer::ext_warn;
 using Printer::num2str;
 
 using WType=Settings::Model::WellDefinitionType;
@@ -165,13 +166,13 @@ void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_contai
     compartment_delimiters.push_back(i * compartment_length);
   }
   compartment_delimiters.push_back(trajectory_->GetLength());
+
   // Snap compartment delimiters to wellblock-intersections
   for (int l = 1; l < compartment_delimiters.size(); ++l) {
     auto wb = trajectory_->GetWellBlockByMd(compartment_delimiters[l]);
     compartment_delimiters[l] = wb->getExitMd() - 0.1;
     assert(compartment_delimiters[l] != compartment_delimiters[l-1]);
   }
-
   assert(compartment_delimiters.size() == well_settings_.seg_n_compartments + 1);
 
   auto well_blocks = trajectory_->GetWellBlocks();
@@ -184,8 +185,8 @@ void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_contai
     if (first_block->i() == last_block->i() &&
       first_block->j() == last_block->j() &&
       first_block->k() == last_block->k()) { // Compartment begins and ends in the same block
-      Printer::ext_warn("Compartment " + boost::lexical_cast<std::string>(i)
-                          + " begins and ends in the same well block.", "Model", "Well");
+
+      ext_warn("Compartment " + num2str(i) + " begins and ends in the same well block.", md_, cl_);
       auto block = first_block;
       compartments_.push_back(Compartment(block->getEntryMd(), block->getExitMd(),
                                           block->getEntryPoint().z(), block->getExitPoint().z(),
@@ -199,7 +200,9 @@ void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_contai
                                           trajectory()->GetLength(),
                                           well_settings_, variable_container, compartments_));
       // Move to after last_block
-      while (! (well_blocks->at(first_idx)->i() == last_block->i() && well_blocks->at(first_idx)->j() == last_block->j() && well_blocks->at(first_idx)->k() == last_block->k())) {
+      while (! (well_blocks->at(first_idx)->i() == last_block->i()
+      && well_blocks->at(first_idx)->j() == last_block->j()
+      && well_blocks->at(first_idx)->k() == last_block->k())) {
         first_idx++;
       }
       first_idx++;
@@ -308,7 +311,7 @@ std::vector<int> Well::createICDSegments(std::vector<Segment> &segments,
       Segment::ICD_SEGMENT,
       index, // index
       i + 2, // branch
-      i + 1, // oulet
+      i + 1, // outlet
       0.1,   // length
       0.0,   // tvd delta
       tub_diam_, tub_roughness_,

@@ -123,6 +123,16 @@ class wicalc_rixx
   map<string, Grid::Grid*> dict_grids_;
   map<string, vector<double>> dict_intersections_;
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  Settings::VerbParams vp_;
+  string md_ = "s1_rix-wic";
+  string cl_ = "wicalc_rixw";
+
 };
 
 }
