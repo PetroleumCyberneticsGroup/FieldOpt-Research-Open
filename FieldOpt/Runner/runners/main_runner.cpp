@@ -42,7 +42,7 @@ namespace Runner {
           runner_ = new OneOffRunner(runtime_settings_);
           break;
         case RuntimeSettings::RunnerType::MPISYNC:
-          runner_ = new MPI::SynchronousMPIRunner(runtime_settings_);
+          runner_ = new MPI::SynchronousMPIRunner(runtime_settings_, base_case, mso);
           break;
         case RuntimeSettings::RunnerType::DRILLINGWORKFLOW:
           runner_ = new DrillingRunner(runtime_settings_);
