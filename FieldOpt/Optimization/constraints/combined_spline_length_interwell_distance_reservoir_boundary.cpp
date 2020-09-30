@@ -1,5 +1,6 @@
 #include "combined_spline_length_interwell_distance_reservoir_boundary.h"
 #include <iostream>
+#include "settings.h"
 
 namespace Optimization {
     namespace Constraints {
