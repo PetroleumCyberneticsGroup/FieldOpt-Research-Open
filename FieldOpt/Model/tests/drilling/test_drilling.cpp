@@ -169,30 +169,6 @@ TEST_F(DrillingTest, ParseJson) {
   }
 }
 
-TEST_F(DrillingTest, DrillingRunOptimization) {
-  int argc = 16;
-  const char *argv[16] = {"FieldOpt",
-                          TestResources::ExampleFilePaths::driver_ECL_5pot_.c_str(),
-                          TestResources::ExampleFilePaths::directory_output_.c_str(),
-                          "-g", TestResources::ExampleFilePaths::grid_ECL_5spot_.c_str(),
-                          "-s", TestResources::ExampleFilePaths::deck_ECL_5spot_.c_str(),
-                          "-b", "./",
-                          "-r", "serial",
-                          "-f",
-                          "-v", "2",
-                          "-t", "1000"};
-
-  Runner::RuntimeSettings *rts = new Runner::RuntimeSettings(argc, argv);
-
-  int drilling_step = 1;
-  QString output_dir = QString::fromStdString(rts->paths().GetPath(Paths::OUTPUT_DIR)) + QString("/drilling_step_%1").arg(drilling_step);
-  Utilities::FileHandling::CreateDirectory(output_dir);
-  rts->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
-
-  Runner::SerialRunner serial_runner = Runner::SerialRunner(rts);
-  serial_runner.Execute();
-}
-
 TEST_F(DrillingTest, DrillingRunner) {
   settings_model_->readDrilling(json_settings_drilling_);
   Settings::Model::Drilling drilling_settings = settings_model_->drilling();
