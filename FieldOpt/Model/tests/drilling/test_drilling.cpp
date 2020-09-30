@@ -23,7 +23,7 @@
 #include "Reservoir/tests/test_resource_grids.h"
 #include "Optimization/tests/test_resource_optimizer.h"
 #include "Optimization/tests/test_resource_test_functions.h"
-#include "serial_runner.h"
+
 #include "drilling_runner.h"
 
 namespace {
