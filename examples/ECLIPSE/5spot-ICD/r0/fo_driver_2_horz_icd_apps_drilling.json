@@ -7,7 +7,7 @@
         "Type": "APPS",
         "Mode": "Maximize",
         "Parameters": {
-            "MaxEvaluations": 500,
+            "MaxEvaluations": 3,
             "InitialStepLength": 1E-5,
             "MinimumStepLength": 1.9633E-8,
             "ContractionFactor": 0.6180339887498949,
@@ -74,7 +74,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 1.0,
@@ -87,7 +88,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 2.0,
@@ -100,7 +102,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 3.0,
@@ -113,7 +116,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 4.0,
@@ -126,7 +130,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+	                "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 5.0,
@@ -139,8 +144,10 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
+
         	    {
                     "TimeStep": 6.0,
                     "Operation": "PullingOutOfHole",
@@ -152,7 +159,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+	                "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 7.0,
@@ -165,7 +173,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+                    "Execution": "Serial" 
                 },	
                 {
                     "TimeStep": 8.0,
@@ -178,7 +187,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 },
                 {
                     "TimeStep": 9.0,
@@ -191,7 +201,8 @@
                     "OptimizeDrillingPoints": false,
                     "ModelUpdate": true,
                     "OptimizeCompletion": true,
-                    "ModelType": "TrueModel"
+                    "ModelType": "TrueModel",
+		            "Execution": "Serial" 
                 }
             ]
         },
