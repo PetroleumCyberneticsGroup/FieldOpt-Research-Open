@@ -508,6 +508,11 @@ void Model::readDrilling(QJsonObject json_drilling) {
             drilling_schedule.execution_modes.insert(i,  Drilling::DrillingSchedule::Execution ::Parallel);
         }
 
+        if (json_drilling_step.contains("Optimizer")) {
+          QJsonObject json_optimizer = json_drilling_step["Optimizer"].toObject();
+          drilling_schedule.optimizer_settings.insert(i, new Optimizer(json_optimizer));
+        }
+
         if (json_drilling_step.contains("DrillingPoints")) {
           QJsonObject json_drilling_points = json_drilling_step["DrillingPoints"].toObject();
 

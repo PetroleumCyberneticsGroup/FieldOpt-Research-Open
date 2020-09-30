@@ -37,8 +37,8 @@
 namespace Settings {
 
 class Simulator;
-class Model;
 class Optimizer;
+class Model;
 
 /*!
  * \brief The Settings class contains both general settings for a FieldOpt run

@@ -23,10 +23,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
  *****************************************************************************/
 
+
 #ifndef SETTINGS_MODEL_H
 #define SETTINGS_MODEL_H
 
-#include "settings.h"
+//#include "settings.h"
+
+#include "Settings/optimizer.h"
 #include "paths.h"
 #include "trajectory_importer.h"
 
@@ -189,6 +192,7 @@ class Model
       QMap<int, DrillingOperation> drilling_operations;
       QMap<int, ModelType> model_types;
       QMap<int, Execution> execution_modes;
+      QMap<int, Optimizer*> optimizer_settings;
       QMap<int, bool> is_variable_drilling_points;
       QMap<int, bool> is_variable_completions;
       QMap<int, bool> is_model_updates;

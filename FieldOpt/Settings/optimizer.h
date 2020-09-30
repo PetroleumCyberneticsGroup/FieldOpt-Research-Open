@@ -20,8 +20,9 @@
 #ifndef SETTINGS_OPTIMIZER_H
 #define SETTINGS_OPTIMIZER_H
 
-#include "settings.h"
+//#include "settings.h"
 
+#include <QJsonObject>
 #include <QList>
 #include <QString>
 #include <QStringList>
@@ -51,6 +52,7 @@ class Optimizer
     PackerConstraint, ICVConstraint, PolarWellLength,
     PolarAzimuth, PolarElevation, PolarSplineBoundary
   };
+
   enum ConstraintWellSplinePointsType { MaxMin, Function};
   enum ObjectiveType { WeightedSum, NPV};
 
@@ -111,6 +113,7 @@ class Optimizer
     double spsa_A = 5;            //!< Affects step length in early iterations. Default: 10% of max iterations.
     double spsa_a = 0.0;          //!< Affects step lengths. Default and recommended: automatically compute from spsa_init_step_magnitude.
     double spsa_init_step_magnitude = 0.0; //!< Smallest desired step magnitude in early iterations.
+
 
     // Hybrid parameters
     /*!
@@ -210,6 +213,7 @@ class Optimizer
 
 
  private:
+
   QList<Constraint> constraints_;
   OptimizerType type_;
   Parameters parameters_;
