@@ -9,9 +9,9 @@ SET(RUNNER_HEADERS
 	runners/oneoff_runner.h
 	runners/overseer.h
 	runners/serial_runner.h
-	runners/drilling_runner.h
 	runners/synchronous_mpi_runner.h
 	runners/worker.h
+	runners/drilling_runner.h
 	runtime_settings.h
 )
 

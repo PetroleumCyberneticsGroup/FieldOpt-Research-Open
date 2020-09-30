@@ -39,10 +39,14 @@ class SynchronousMPIRunner : public MPIRunner, public Loggable {
  public:
   LogTarget GetLogTarget() override;
   SynchronousMPIRunner(RuntimeSettings *rts);
+  SynchronousMPIRunner(RuntimeSettings *rts, Optimization::Case* base_case, Model::ModelSynchronizationObject* mso);
   map<string, string> GetState() override;
   QUuid GetId() override;
 
   virtual void Execute();
+
+ protected:
+  void InitializeModules();
 
  private:
   MPI::Overseer *overseer_;

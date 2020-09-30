@@ -19,7 +19,7 @@
  along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
 ***************************************************************** ****/
 
-#include <Runner/runners/drilling_runner.h>
+
 #include "drilling.h"
 #include "paths.h"
 #include "Optimization/case.h"
@@ -89,8 +89,13 @@ void Drilling::setOptRuntimeSettings(int drilling_step, int argc, const char** a
 }
 
 void Drilling::setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts) {
-  Runner::RuntimeSettings* runtime_settings = rts;
-  runtime_settings_.insert(drilling_step, runtime_settings);
+  if (settings_->drilling().drilling_schedule.execution_modes.value(drilling_step) == settings_->drilling().drilling_schedule.Serial) {
+    rts->setRunnerType(rts->SERIAL);
+  } else if ((settings_->drilling().drilling_schedule.execution_modes.value(drilling_step) == settings_->drilling().drilling_schedule.Parallel)) {
+    rts->setRunnerType(rts->MPISYNC);
+  }
+
+  runtime_settings_.insert(drilling_step, rts);
   original_output_dir_ = runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR);
 }
 
@@ -131,12 +136,11 @@ void Drilling::runOptimization(int drilling_step) {
 
   runtime_settings_.value(drilling_step)->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
 
-
   // warm-starting optimization
-  Runner::SerialRunner runner = Runner::SerialRunner(runtime_settings_.value(drilling_step), best_case_, mso_);
+  Runner::MainRunner* runner = new Runner::MainRunner(runtime_settings_.value(drilling_step), best_case_, mso_);
 
   //   Configure the optimization with the drilling workflow settings.
-  for (auto well: runner.getSettings()->model()->wells()) {
+  for (auto well: runner->getSettings()->model()->wells()) {
     for (int i=0; i < well.completions.size(); i++) {
       // current drilling step
       if (drilling_schedule_->isVariableDrillingPoints().value(i))
@@ -146,17 +150,16 @@ void Drilling::runOptimization(int drilling_step) {
         well.completions.at(i).variable_strength = true;
     }
   }
+  runner->Execute();
 
-  runner.Execute();
-
-  Optimization::Optimizer* opt = runner.getOptimizer();
+  Optimization::Optimizer* opt = runner->getOptimizer();
 
   setWellOptimalVariables(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables(), drilling_step);
   setWellOptimizationValues(opt->GetOptimalValues(), drilling_step);
 
   best_case_ = opt->GetTentativeBestCase();
-  mso_ = new ModelSynchronizationObject(runner.getModel());
-}
+  mso_ = new ModelSynchronizationObject(runner->getModel());
 
+}
 }
 }

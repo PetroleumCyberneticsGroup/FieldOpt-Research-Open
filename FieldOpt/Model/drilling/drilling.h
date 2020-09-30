@@ -32,11 +32,7 @@
 #include "Settings/settings.h"
 #include "Settings/model.h"
 
-//#include "Model/tests/test_resource_model.h"
-//#include "Reservoir/tests/test_resource_grids.h"
-//#include "Optimization/tests/test_resource_optimizer.h"
-
-#include "serial_runner.h"
+#include "main_runner.h"
 
 namespace Model {
 namespace Drilling {

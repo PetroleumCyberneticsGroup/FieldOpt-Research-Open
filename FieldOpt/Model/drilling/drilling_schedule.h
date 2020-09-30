@@ -24,7 +24,6 @@
 
 #include "Model/properties/variable_property_container.h"
 #include "drilling_schedule.h"
-#include "Settings/settings.h"
 #include "Settings/model.h"
 #include <iostream>
 
@@ -62,7 +61,7 @@ class DrillingSchedule {
 
   QMap<int, DrillingOperation> drilling_operations_; //!< Indexed by the drilling steps
   QMap<int, ModelType> model_types_;                 //!< Indexed by the drilling steps
-  QMap<int, Execution> execution_modes_;                 //!< Indexed by the drilling steps
+  QMap<int, Execution> execution_modes_;             //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_drilling_points_;      //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
   QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps

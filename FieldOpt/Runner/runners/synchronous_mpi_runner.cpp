@@ -22,31 +22,46 @@ namespace Runner {
 namespace MPI {
 
 SynchronousMPIRunner::SynchronousMPIRunner(RuntimeSettings *rts) : MPIRunner(rts) {
-    assert(world_.size() >= 2 && "The SynchronousMPIRunner requires at least two MPI processes.");
+  InitializeModules();
+}
 
-    if (world_.rank() == 0) {
-        InitializeSettings("rank" + QString::number(rank()));
 
-        InitializeLogger();
-        InitializeModel();
-        InitializeSimulator();
-        EvaluateBaseModel();
-        InitializeObjectiveFunction();
-        InitializeBaseCase();
-        InitializeOptimizer();
-        InitializeBookkeeper();
-        overseer_ = new MPI::Overseer(this);
-        FinalizeInitialization(true);
-    }
-    else {
-        InitializeLogger("rank" + QString::number(rank()));
-        InitializeSettings("rank" + QString::number(rank()));
-        InitializeModel();
-        InitializeSimulator();
-        InitializeObjectiveFunction();
-        worker_ = new MPI::Worker(this);
-        FinalizeInitialization(false);
-    }
+SynchronousMPIRunner::SynchronousMPIRunner(RuntimeSettings *rts,Optimization::Case* base_case, Model::ModelSynchronizationObject* mso ): MPIRunner(rts) {
+  if (base_case != 0 && mso != 0) {
+    base_case_ = base_case;
+    mso_ = mso;
+  }
+
+  InitializeModules();
+}
+
+void SynchronousMPIRunner::InitializeModules() {
+  assert(world_.size() >= 2 && "The SynchronousMPIRunner requires at least two MPI processes.");
+
+  if (world_.rank() == 0) {
+    InitializeSettings("rank" + QString::number(rank()));
+
+    InitializeLogger();
+    InitializeModel();
+    InitializeSimulator();
+    EvaluateBaseModel();
+    InitializeObjectiveFunction();
+    InitializeBaseCase();
+    InitializeOptimizer();
+    InitializeBookkeeper();
+    overseer_ = new MPI::Overseer(this);
+    FinalizeInitialization(true);
+  }
+  else {
+    InitializeLogger("rank" + QString::number(rank()));
+    InitializeSettings("rank" + QString::number(rank()));
+    InitializeModel();
+    InitializeSimulator();
+    InitializeObjectiveFunction();
+    worker_ = new MPI::Worker(this);
+    FinalizeInitialization(false);
+  }
+
 }
 
 void SynchronousMPIRunner::Execute() {
