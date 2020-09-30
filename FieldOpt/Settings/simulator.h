@@ -20,10 +20,14 @@
 #ifndef SETTINGS_SIMULATOR_H
 #define SETTINGS_SIMULATOR_H
 
-#include "settings.h"
+//#include "settings.h"
+
 #include "Settings/paths.h"
 #include "Settings/ensemble.h"
 
+#include <QJsonObject>
+#include <QList>
+#include <QString>
 #include <QStringList>
 
 namespace Settings {
