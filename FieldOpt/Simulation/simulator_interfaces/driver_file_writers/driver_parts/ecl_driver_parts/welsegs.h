@@ -67,7 +67,8 @@ class Welsegs : public ECLDriverPart {
   Welsegs(Well *well);
 
   /*!
-   * Loop through wells. For all segmented wells, check if start time eqials ts. If yes, generate entries.
+   * Loop through wells. For all segmented wells, check
+   * if start time equals ts. If yes, generate entries.
    * @param wells Wells to loop through
    * @param ts Timestep to write entries for.
    */

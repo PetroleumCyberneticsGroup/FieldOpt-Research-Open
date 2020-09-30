@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<mathias.bellout@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -75,6 +75,7 @@ class Well
   QString name() const { return name_; }
   ::Settings::Model::WellType type() const { return type_; }
   QString group() const { return group_; }
+
   bool IsProducer();
   bool IsInjector();
 
@@ -86,6 +87,7 @@ class Well
   int heel_i() const { return heel_.i; }
   int heel_j() const { return heel_.j; }
   int heel_k() const { return heel_.k; }
+
   void Update();
   int GetTimeSpentInWIC() const { return trajectory_->GetTimeSpentInWic(); }
 
