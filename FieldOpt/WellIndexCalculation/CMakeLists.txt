@@ -13,6 +13,7 @@ message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(WIC_LIB_TARGET wellindexcalculator)
 set(WIC_LIB_TARGET_ADG _wic-rixx)
+set(WIC_EXE_TARGET wic_rixx)
 
 # ResInsight ===========================================================
 set(CVF_ENABLE_ASSERTS 1)
@@ -53,6 +54,7 @@ message(STATUS "Set WIC_LIB_TARGET: ${WIC_LIB_TARGET}")
 
 endif()
 
+message(".............................................................")
 if (NOT BUILD_WIC_ADGPRS)
 
 set_target_properties(${WIC_LIB_TARGET}
@@ -60,17 +62,17 @@ set_target_properties(${WIC_LIB_TARGET}
 
 target_link_libraries(${WIC_LIB_TARGET}
     PUBLIC fieldopt::reservoir
+    PUBLIC fieldopt::settings
     PUBLIC ${Boost_LIBRARIES}
     PUBLIC Qt5::Core
     PUBLIC ri:ert_ecl
     )
 
-install(TARGETS wellindexcalculator
+  install(TARGETS ${WIC_LIB_TARGET}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static
     )
-
 
 endif()
 
@@ -87,12 +89,12 @@ if (BUILD_TESTING AND NOT BUILD_WIC_ADGPRS AND NOT USE_SANITIZING)
       ${WIC_LIB_TARGET}
       ${GTEST_BOTH_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-          )
+      )
 
   add_test(NAME test_wellindexcalculator
       COMMAND $<TARGET_FILE:test_wellindexcalculator>)
-endif()
 
+endif()
 
 # Debug: include dirs ==================================================
 include(../InclDirDbg.cmake)
