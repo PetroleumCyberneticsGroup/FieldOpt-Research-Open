@@ -20,7 +20,6 @@
 *********************************************************************/
 
 #include "drilling_schedule.h"
-using namespace std;
 
 namespace Model {
 namespace Drilling {
