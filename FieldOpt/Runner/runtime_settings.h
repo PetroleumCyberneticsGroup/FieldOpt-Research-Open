@@ -56,7 +56,7 @@ class RuntimeSettings : public Loggable
   int threads_per_sim() const { return threads_per_sim_; }
   int simulation_timeout() const { return simulation_timeout_; }
   int simulation_delay() const { return simulation_delay_; }
-  RunnerType runner_type() const { return runner_type_; }
+  RunnerType runner_type() { return runner_type_; }
   QPair<QVector<double>, QVector<double>> prod_coords() const { return prod_coords_; }
   QPair<QVector<double>, QVector<double>> inje_coords() const { return inje_coords_; }
   LogTarget GetLogTarget() override;
@@ -64,6 +64,7 @@ class RuntimeSettings : public Loggable
   QUuid GetId() override;
   map<string, vector<double>> GetValues() override;
 
+  void setRunnerType(RunnerType runner_type)  { runner_type_ = runner_type; }
  private:
   Paths paths_;
   std::string str_out; //!< Temporary variable for verbosity function
