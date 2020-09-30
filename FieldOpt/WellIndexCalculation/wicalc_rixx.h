@@ -46,7 +46,8 @@ class wicalc_rixx
  public:
   // -------------------------------------------------------
   wicalc_rixx(Grid::Grid *grid = nullptr,
-              RICaseData *ricasedata = nullptr);
+              RICaseData *ricasedata = nullptr,
+              Settings::Settings *settings = nullptr);
 
   // -------------------------------------------------------
   ~wicalc_rixx();
@@ -122,6 +123,8 @@ class wicalc_rixx
   map<string, cvf::ref<RICaseData>> dict_casedata_;
   map<string, Grid::Grid*> dict_grids_;
   map<string, vector<double>> dict_intersections_;
+
+  Settings::Settings settings_;
 
   void E(string m) const {
     m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;

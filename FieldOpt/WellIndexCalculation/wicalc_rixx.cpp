@@ -54,12 +54,10 @@ using Printer::num2str;
 using Printer::DBG_prntVecXd;
 
 // =========================================================
-wicalc_rixw::wicalc_rixw(Grid::Grid *grid,
+wicalc_rixx::wicalc_rixx(Grid::Grid *grid,
                          RICaseData *ricasedata,
                          Settings::Settings *settings) {
-
-  settings_ = settings;
-  vp_ = settings_->global()->verbParams();
+  vp_ = settings->global()->verbParams();
 
   // -------------------------------------------------------
   if (grid != nullptr) {
@@ -89,13 +87,13 @@ bool wicalc_rixx::HasGrid(string path) {
 }
 
 // =========================================================
-Grid::Grid * wicalc_rixw::GetGrid(string path) {
+Grid::Grid * wicalc_rixx::GetGrid(string path) {
   assert(HasGrid(path) == true);
   return dict_grids_[path];
 }
 
 // =========================================================
-void wicalc_rixw::AddGrid(Grid::Grid *grid) {
+void wicalc_rixx::AddGrid(Grid::Grid *grid) {
 
   if (vp_.vWIC >= 2) {
     ext_info("Reading grid " + grid->GetGridFilePath(), md_, cl_);
@@ -123,7 +121,7 @@ void wicalc_rixw::AddGrid(Grid::Grid *grid) {
 }
 
 // =========================================================
-void wicalc_rixw::SetGridActive(Grid::Grid *grid) {
+void wicalc_rixx::SetGridActive(Grid::Grid *grid) {
 
   if (vp_.vWIC >= 2) {
     ext_info("Setting grid active " + grid->GetGridFilePath(), md_, cl_);
@@ -136,7 +134,7 @@ void wicalc_rixw::SetGridActive(Grid::Grid *grid) {
 }
 
 // =========================================================
-void wicalc_rixw::calculateWellPathIntersections(const WellPath& wellPath,
+void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
                                                  vector<double> &isc_values) {
 
   vector<cvf::HexIntersectionInfo> intersections =
@@ -161,7 +159,7 @@ void wicalc_rixw::calculateWellPathIntersections(const WellPath& wellPath,
 }
 
 // =========================================================
-void wicalc_rixw::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
+void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
                                      vector<WellPathCellIntersectionInfo> isc_info,
                                      WellDefinition well,
                                      WellPath& wellPath) {
@@ -246,7 +244,7 @@ void wicalc_rixw::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
 }
 
 // =========================================================
-void wicalc_rixw::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
+void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
     WellDefinition &well) {
 
   // -------------------------------------------------------
