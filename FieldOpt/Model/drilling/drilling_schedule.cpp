@@ -32,6 +32,7 @@ DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::Variab
     model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(i));
     execution_modes_.insert(i, (Execution) settings->drilling().drilling_schedule.execution_modes.value(i));
     drilling_operations_.insert(i, (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(i));
+    optimizer_settings_.insert(i, (Settings::Optimizer*) settings->drilling().drilling_schedule.optimizer_settings.value(i));
     is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
     is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
     is_model_updates_.insert(i, settings->drilling().drilling_schedule.is_model_updates.value(i));
