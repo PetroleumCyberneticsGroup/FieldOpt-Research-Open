@@ -30,6 +30,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <vector>
 #include <deque>
 
+#include <QString>
+
 #include "Utilities/verbosity.h"
 
 namespace Simulation {
@@ -40,9 +42,9 @@ namespace ECLDriverParts {
  * code snippets to be inserted at specific times in the
  * schedule and provides convenient access to these.
  *
- * The file describing the insets may have any name. The path
- * to the file should be provided when launching FieldOpt,
- * using the --sim-inset flag.
+ * The file describing the insets may have any name.
+ * The path to the file should be provided when launching
+ * FieldOpt, using the --sim-inset flag.
  *
  * The file should be formatted as follows:
  *
@@ -55,8 +57,8 @@ namespace ECLDriverParts {
  * END_INSET
  *
  * INSET=365
- * -- Code inserted after 365 days (must be a day in the
- * control times array), after WELSPECS
+ * -- Code inserted after 365 days (must be a day
+ * in the control times array), after WELSPECS
  * OTHERCMD
  *  SHORTABBRV 69 /
  * END_INSET
@@ -109,9 +111,11 @@ class ScheduleInsets {
   /*!
    * @brief Get the inset at the specified time.
    * @param time Time to get snippet for.
-   * @return Snippet at specified time. If no snippet is specified, an empty string is returned.
+   * @return Snippet at specified time. If no snippet
+   * is specified, an empty string is returned.
    */
   std::string GetInset(const int &time) const;
+  QString GetInsetQStr(const int &time) const;
 
  private:
   std::map<int, std::string> insets_;

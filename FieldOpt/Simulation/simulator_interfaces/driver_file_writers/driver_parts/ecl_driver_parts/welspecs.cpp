@@ -63,6 +63,10 @@ QString Welspecs::GetPartString() const {
   return entries;
 }
 
+string Welspecs::GetPartStdStr() const {
+  return GetPartString().toStdString();
+}
+
 QStringList Welspecs::createWellEntry(Model::Wells::Well *well) {
   QStringList entry = QStringList(base_entry_line_);
   entry[0] = well->name();

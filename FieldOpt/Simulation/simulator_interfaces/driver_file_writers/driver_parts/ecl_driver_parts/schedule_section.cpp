@@ -45,19 +45,19 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     GetControlDate(ts_DMY, start_date, ts);
 
     ScheduleTimeEntry time_entry =
-      ScheduleTimeEntry(ts,
-                        ts_DMY,
-                        Welspecs(wells, ts),
-                        Compdat(wells, ts),
-                        WellControls(wells, control_times, ts),
-                        Welsegs(wells, ts),
-                        Compsegs(wells, ts),
-                        Wsegvalv(wells, ts));
+        ScheduleTimeEntry(ts,
+                          ts_DMY,
+                          Welspecs(wells, ts),
+                          Compdat(wells, ts),
+                          WellControls(wells, control_times, ts),
+                          Welsegs(wells, ts),
+                          Compsegs(wells, ts),
+                          Wsegvalv(wells, ts));
     schedule_time_entries_.append(time_entry);
   }
 
   if (insets.HasInset(-1)) {
-    schedule_.append(QString::fromStdString(insets.GetInset(-1)));
+    schedule_.append(insets.GetInsetQStr(-1));
   }
 
   stringstream ss;
@@ -66,7 +66,7 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     schedule_.append(time_entry.welspecs.GetPartString());
 
     if (insets.HasInset(time_entry.control_time)) {
-      schedule_.append(QString::fromStdString(insets.GetInset(time_entry.control_time)));
+      schedule_.append(insets.GetInsetQStr(time_entry.control_time));
     }
 
     schedule_.append(time_entry.compdat.GetPartString());
@@ -77,7 +77,7 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
 
     if (vp_.vRUN >= 3) {
       ss << "TIME: " << time_entry.control_time << "|";
-      ss << "WELLSPEC |" << time_entry.welspecs.GetPartString().toStdString();
+      ss << "WELLSPEC |" << time_entry.welspecs.GetPartStdStr();
       ss << "COMPDAT |" << time_entry.compdat.GetPartString().toStdString();
       ss << "WELSEGS |" << time_entry.welsegs.GetPartString().toStdString();
       ss << "COMPSEGS |" << time_entry.compsegs.GetPartString().toStdString();
@@ -111,7 +111,9 @@ Schedule::ScheduleTimeEntry::ScheduleTimeEntry(int control_time,
   this->wsegvalv = wsegvalv;
 }
 
-void Schedule::GetControlDate(time_DMY &ts_DMY, QList<int> sd, int control_time) const {
+void Schedule::GetControlDate(time_DMY &ts_DMY,
+                              QList<int> sd,
+                              int control_time) const {
 
   const time_t sec_per_day = 24*60*60;
 
