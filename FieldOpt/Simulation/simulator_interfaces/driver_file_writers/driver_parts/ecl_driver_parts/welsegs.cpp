@@ -26,6 +26,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Simulation {
 namespace ECLDriverParts {
+
 Welsegs::Welsegs(Well *well) {
   head_ = "WELSEGS\n";
   foot_ = "/\n\n";

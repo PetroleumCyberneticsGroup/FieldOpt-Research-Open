@@ -96,6 +96,9 @@ class Welsegs : public ECLDriverPart {
   QString createSegmentEntry(Segment segment);
 
   QList<WelsegsKeyword> keywords_;
+  string md_ = "Simulation::sim_interfaces::driver_file_writers"
+               "::driver_parts::ecl_driver_parts";
+  string cl_ = "Welsegs";
 };
 
 }

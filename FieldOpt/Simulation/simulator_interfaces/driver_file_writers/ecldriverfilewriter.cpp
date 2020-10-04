@@ -86,6 +86,7 @@ std::string EclDriverFileWriter::buildActionStrings() {
   std::string icv_actions;
   std::string ctrl_actions;
 
+  // wsegvalv string
   for (auto well : *model_->wells()) {
     if (well->HasSimpleICVs()) {
       auto wsegv = ECLDriverParts::Wsegvalv(well);
@@ -93,6 +94,7 @@ std::string EclDriverFileWriter::buildActionStrings() {
     }
   }
 
+  // cntrl string
   if (model_->wells()->first()->controls()->size() > 0) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
                                                  settings_->model()->control_times(),
@@ -102,8 +104,11 @@ std::string EclDriverFileWriter::buildActionStrings() {
 
     auto schedule_time_entries = schedule.GetScheduleTimeEntries();
     for (auto entry : schedule_time_entries) {
+
+      // obsolete
       int ctrl_time = 0;
       entry.control_time == 0 ? ctrl_time = 1 : ctrl_time = entry.control_time;
+
       for (QString entry_part : entry.well_controls.GetWellEntryList()) {
 
         ctrl_actions += ActionX::ACTIONX("CTR_" + num2str(entry.control_time, 0),
@@ -114,16 +119,16 @@ std::string EclDriverFileWriter::buildActionStrings() {
                                          ECLDriverParts::ActionX::ACTX_LHQuantity::Year,
                                          ECLDriverParts::ActionX::ACTX_Operator::EQ,
                                          entry.control_time_DMY,
-                                         entry_part.toStdString()
-        );
+                                         entry_part.toStdString());
         ctrl_actions += "\n";
       }
     }
 
-  } else if (vp_.vSIM >= 2) {
+  } else {
     ext_warn("First well did not have controls; assuming none do.", md_, cl_);
   }
 
+  // main action string
   actions += ActionX::ACTIONX("ICVS_T0",
                               ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
                               ECLDriverParts::ActionX::ACTX_Operator::GE,

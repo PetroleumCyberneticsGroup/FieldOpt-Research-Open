@@ -58,18 +58,56 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
   if (insets.HasInset(-1)) {
     schedule_.append(QString::fromStdString(insets.GetInset(-1)));
   }
+
+  stringstream ss;
   for (auto time_entry : schedule_time_entries_) {
+
     schedule_.append(time_entry.welspecs.GetPartString());
+
     if (insets.HasInset(time_entry.control_time)) {
       schedule_.append(QString::fromStdString(insets.GetInset(time_entry.control_time)));
     }
+
     schedule_.append(time_entry.compdat.GetPartString());
     schedule_.append(time_entry.welsegs.GetPartString());
     schedule_.append(time_entry.compsegs.GetPartString());
     schedule_.append(time_entry.wsegvalv.GetPartString());
     schedule_.append(time_entry.well_controls.GetPartString());
+
+    if (vp_.vRUN >= 3) {
+      ss << "TIME: " << time_entry.control_time << "|";
+      ss << "WELLSPEC |" << time_entry.welspecs.GetPartString().toStdString();
+      ss << "COMPDAT |" << time_entry.compdat.GetPartString().toStdString();
+      ss << "WELSEGS |" << time_entry.welsegs.GetPartString().toStdString();
+      ss << "COMPSEGS |" << time_entry.compsegs.GetPartString().toStdString();
+      ss << "WSEGVALV |" << time_entry.wsegvalv.GetPartString().toStdString();
+      ss << "WCNTRLS |" << time_entry.well_controls.GetPartString().toStdString();
+    }
+
   }
   schedule_.append("\n\n");
+}
+
+QString Schedule::GetPartString() const {
+  return schedule_;
+}
+
+Schedule::ScheduleTimeEntry::ScheduleTimeEntry(int control_time,
+                                               time_DMY control_time_DMY,
+                                               Welspecs welspecs,
+                                               Compdat compdat,
+                                               WellControls well_controls,
+                                               Welsegs welsegs,
+                                               Compsegs compsegs,
+                                               Wsegvalv wsegvalv) {
+  this->control_time = control_time;
+  this->control_time_DMY = control_time_DMY;
+  this->welspecs = welspecs;
+  this->compdat = compdat;
+  this->well_controls = well_controls;
+  this->welsegs = welsegs;
+  this->compsegs = compsegs;
+  this->wsegvalv = wsegvalv;
 }
 
 void Schedule::GetControlDate(time_DMY &ts_DMY, QList<int> sd, int control_time) const {
@@ -124,30 +162,6 @@ void Schedule::GetControlDate(time_DMY &ts_DMY, QList<int> sd, int control_time)
     // im << " -- asctime date: " << asctime(localtime(&new_date_secs));
     info(im.str(), vp_.lnw);
   }
-}
-
-
-
-QString Schedule::GetPartString() const {
-  return schedule_;
-}
-
-Schedule::ScheduleTimeEntry::ScheduleTimeEntry(int control_time,
-                                               time_DMY control_time_DMY,
-                                               Welspecs welspecs,
-                                               Compdat compdat,
-                                               WellControls well_controls,
-                                               Welsegs welsegs,
-                                               Compsegs compsegs,
-                                               Wsegvalv wsegvalv) {
-  this->control_time = control_time;
-  this->control_time_DMY = control_time_DMY;
-  this->welspecs = welspecs;
-  this->compdat = compdat;
-  this->well_controls = well_controls;
-  this->welsegs = welsegs;
-  this->compsegs = compsegs;
-  this->wsegvalv = wsegvalv;
 }
 
 }
