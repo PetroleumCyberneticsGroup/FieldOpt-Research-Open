@@ -54,9 +54,11 @@ EclDriverFileWriter::EclDriverFileWriter(Settings::Settings *settings,
 }
 
 void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
-  if (VERB_SIM >= 2) {
-    auto fp = schedule_file_path.toStdString();
-    Printer::ext_info("Writing driver file to " + fp + ".", "Simulation", "EclDriverFileWriter");
+  string sched_file = schedule_file_path.toStdString();
+
+  if (vp_.vSIM >= 2) {
+    im_ = "Writing sched file: " + sched_file + ".";
+    ext_info(im_, md_, cl_);
   }
   assert(FileExists(schedule_file_path, vp_, md_, cl_));
 
@@ -66,14 +68,17 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
                                                  settings_->model()->start_date(),
                                                  insets_,
                                                  settings_);
+
     model_->SetCompdatString(schedule.GetPartString());
-    Utilities::FileHandling::WriteStringToFile(schedule.GetPartString(), schedule_file_path);
+    Utilities::FileHandling::WriteStringToFile(schedule.GetPartString(),
+                                               sched_file);
+
+  } else {
+    Utilities::FileHandling::WriteStringToFile(buildActionStrings(),
+                                               sched_file);
   }
-  else {
-    Utilities::FileHandling::WriteStringToFile(QString::fromStdString(buildActionStrings()), schedule_file_path);
-  }
-  if (VERB_SIM >= 2) {
-    Printer::ext_info("Wrote driver string to" + schedule_file_path.toStdString(), "Simulation", "EclDriverFileWriter");
+  if (vp_.vSIM >= 2) {
+    ext_info("Wrote driver string to" + schedule_file_path.toStdString(), md_, cl_);
   }
 }
 

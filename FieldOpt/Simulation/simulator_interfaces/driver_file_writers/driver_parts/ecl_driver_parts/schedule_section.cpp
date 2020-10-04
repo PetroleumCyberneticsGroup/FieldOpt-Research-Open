@@ -44,14 +44,15 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     time_DMY ts_DMY;
     GetControlDate(ts_DMY, start_date, ts);
 
-    ScheduleTimeEntry time_entry = ScheduleTimeEntry(ts,
-                                                     ts_DMY,
-                                                     Welspecs(wells, ts),
-                                                     Compdat(wells, ts),
-                                                     WellControls(wells, control_times, ts),
-                                                     Welsegs(wells, ts),
-                                                     Compsegs(wells, ts),
-                                                     Wsegvalv(wells, ts));
+    ScheduleTimeEntry time_entry =
+      ScheduleTimeEntry(ts,
+                        ts_DMY,
+                        Welspecs(wells, ts),
+                        Compdat(wells, ts),
+                        WellControls(wells, control_times, ts),
+                        Welsegs(wells, ts),
+                        Compsegs(wells, ts),
+                        Wsegvalv(wells, ts));
     schedule_time_entries_.append(time_entry);
   }
 

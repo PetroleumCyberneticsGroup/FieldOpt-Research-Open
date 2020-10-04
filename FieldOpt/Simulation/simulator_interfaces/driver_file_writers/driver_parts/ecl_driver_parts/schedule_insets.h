@@ -36,41 +36,53 @@ namespace Simulation {
 namespace ECLDriverParts {
 
 /*!
- * @brief The ScheduleInsets class parses a file describing code snippets to be inserted
- * at spcific times in the schedule and provides convenient access to these.
+ * @brief The ScheduleInsets class parses a file describing
+ * code snippets to be inserted at specific times in the
+ * schedule and provides convenient access to these.
  *
- * The file describing the insets may have any name. The path to the file should be provided
- * when launching FieldOpt, using the --sim-inset flag.
+ * The file describing the insets may have any name. The path
+ * to the file should be provided when launching FieldOpt,
+ * using the --sim-inset flag.
  *
  * The file should be formatted as follows:
  *
  * @code
  * INSET=-1
- * -- Code inserted at the very beginning of the schedule file written by FieldOpt, before anything else
+ * -- Code inserted at the very beginning of the schedule
+ * file written by FieldOpt, before anything else
  * ECLCMD
  *  SOMETHING 5 /
  * END_INSET
  *
  * INSET=365
- * -- Code inserted after 365 days (must be a day in the control times array), after WELSPECS
+ * -- Code inserted after 365 days (must be a day in the
+ * control times array), after WELSPECS
  * OTHERCMD
  *  SHORTABBRV 69 /
  * END_INSET
  * @endcode
  *
  * Notice the first line: INSET=-1
- * - INSET is the keyword used to indicate the start of a new inset.
- * - INSET should be followed by an`=`, followed by the day at which the code should be inserted.
- * - INSET=-1 indicates that the snippet should be inserted at the very beginning of the schedule written by FieldOpt,
- *   before the first WELSPECS.
- * - INSET=N will insert the snippet after the WELSPECS keyword on day N.
- * - Inserts/snippets should be terminated/ended using the END_INSET keyword.
+ * - INSET is the keyword used to indicate the start
+ *   of a new inset.
+ * - INSET should be followed by an`=`, followed by
+ *   the day at which the code should be inserted.
+ * - INSET=-1 indicates that the snippet should be
+ *   inserted at the very beginning of the schedule
+ *   written by FieldOpt, before the first WELSPECS.
+ * - INSET=N will insert the snippet after the WELSPECS
+ *   keyword on day N.
+ * - Inserts/snippets should be terminated/ended using
+ *   the END_INSET keyword.
  * - The keywords are case sensitive.
- * - Everything between `INSET=N` and `END_INSET` will be inserted verbatim.
+ * - Everything between `INSET=N` and `END_INSET` will
+ *   be inserted verbatim.
  *
- * **Note:** The inset time _must_ be a control time specified in the driver file.
+ * **Note:** The inset time _must_ be a control time
+ * specified in the driver file.
  *
- * An example inset file is shown in examples/ECLIPSE/schedule_inset.txt
+ * An example inset file is shown in
+ * examples/ECLIPSE/schedule_inset.txt
  */
 class ScheduleInsets {
 
@@ -81,7 +93,8 @@ class ScheduleInsets {
   ScheduleInsets();
 
   /*!
-   * @brief Build the day-snippet mapping by parsing the file at the provided path.
+   * @brief Build the day-snippet mapping by parsing
+   * the file at the provided path.
    * @param inset_file_path Path to inset-file.
    */
   ScheduleInsets(const std::string &inset_file_path, Settings::VerbParams vp);

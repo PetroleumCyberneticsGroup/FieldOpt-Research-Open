@@ -190,6 +190,15 @@ inline void WriteStringToFile(QString string, QString file_path) {
   file.close();
 }
 
+inline void WriteStringToFile(string str, string file_path) {
+  WriteStringToFile(QString::fromStdString(str),
+                    QString::fromStdString(file_path));
+}
+
+inline void WriteStringToFile(QString str, string file_path) {
+  WriteStringToFile(str, QString::fromStdString(file_path));
+}
+
 /*!
  * \brief WriteLineToFile Append a string to a file.
  *
