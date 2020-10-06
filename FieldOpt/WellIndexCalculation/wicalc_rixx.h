@@ -45,9 +45,9 @@ class wicalc_rixx
 {
  public:
   // -------------------------------------------------------
-  wicalc_rixx(Grid::Grid *grid = nullptr,
-              RICaseData *ricasedata = nullptr,
-              Settings::Settings *settings = nullptr);
+  wicalc_rixx(Settings::Model::Well well_settings,
+              Grid::Grid *grid = nullptr,
+              RICaseData *ricasedata = nullptr);
 
   // -------------------------------------------------------
   ~wicalc_rixx();

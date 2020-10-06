@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<mathias.bellout@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -59,6 +59,7 @@ class TestResourceSettings {
     settings_optimizer_ = settings_full_->optimizer();
     settings_simulator_ = settings_full_->simulator();
     settings_model_ = settings_full_->model();
+    settings_well_ = settings_full_->model()->wells().at(0);
 
     // -----------------------------------------------------
     paths_hybridopt_.SetPath(Paths::DRIVER_FILE,
@@ -115,6 +116,7 @@ class TestResourceSettings {
   Settings::Optimizer *settings_optimizer_;
   Settings::Simulator *settings_simulator_;
   Settings::Model *settings_model_;
+  Settings::Model::Well settings_well_;
   Paths paths_;
 
   Settings::Settings *settings_hybridopt_full_;

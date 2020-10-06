@@ -61,7 +61,7 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
 
   // Initialize WIC if this is the first spline well initialized.
   if (wic == nullptr) {
-    wic = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
+    wic = new Reservoir::WellIndexCalculation::wicalc_rixx(well_settings_, grid_);
     wic_ = wic;
   } else { // If not, use existing WIC object.
     wic_ = wic;
@@ -89,7 +89,7 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
       im_ += " (" + point.name.toStdString() + ")";
       ext_info(im_,md_, cl_, vp_.lnw);
     }
-    SplinePoint *pt = new SplinePoint();
+    auto *pt = new SplinePoint();
     pt->x = new ContinuousProperty(point.x);
     pt->y = new ContinuousProperty(point.y);
     pt->z = new ContinuousProperty(point.z);
@@ -175,7 +175,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     welldef.skins.push_back(0.0);
     welldef.heels.push_back(spline_points[w]);
     welldef.toes.push_back(spline_points[w+1]);
-    if (welldef.heel_md.size() == 0) {
+    if (welldef.heel_md.empty()) {
       welldef.heel_md.push_back(0.0);
     }
     else {
@@ -206,15 +206,15 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
   auto end = QDateTime::currentDateTime();
   seconds_spent_in_compute_wellblocks_ = time_span_seconds(start, end);
 
-  QList<WellBlock *> *blocks = new QList<WellBlock *>();
-  for (int i = 0; i < block_data.size(); ++i) {
-    blocks->append(getWellBlock(block_data[i]));
-    blocks->last()->setEntryPoint(block_data[i].get_segment_entry_point(0));
-    blocks->last()->setExitPoint(block_data[i].get_segment_exit_point(0));
-    blocks->last()->setEntryMd(block_data[i].get_segment_entry_md(0));
-    blocks->last()->setExitMd(block_data[i].get_segment_exit_md(0));
+  auto *blocks = new QList<WellBlock *>();
+  for (auto & i : block_data) {
+    blocks->append(getWellBlock(i));
+    blocks->last()->setEntryPoint(i.get_segment_entry_point(0));
+    blocks->last()->setExitPoint(i.get_segment_exit_point(0));
+    blocks->last()->setEntryMd(i.get_segment_entry_md(0));
+    blocks->last()->setExitMd(i.get_segment_exit_md(0));
   }
-  if (blocks->size() == 0) {
+  if (blocks->empty()) {
     throw WellBlocksNotDefined("WIC could not compute.");
   }
 

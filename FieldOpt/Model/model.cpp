@@ -30,11 +30,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 
 Model::Model(Settings::Settings settings, Logger *logger) {
-  if (settings.paths().IsSet(Paths::GRID_FILE)) {
+
+  if (settings.paths().IsSet(Paths::GRID_FILE)
+    && !settings.model()->wells().empty()) {
     grid_ = new Reservoir::Grid::ECLGrid(settings.paths().GetPath(Paths::GRID_FILE));
-    wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
+    wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(
+      settings.model()->wells().at(0),
+      grid_);
   } else {
-    grid_ = 0;
+    grid_ = nullptr;
     wic_ = nullptr;
   }
   current_case_ = nullptr;
@@ -54,7 +58,7 @@ Model::Model(Settings::Settings settings, Logger *logger) {
 }
 
 void Model::Finalize() {
-  if (current_case_->GetRealizationOFVMap().size() > 0) {
+  if (!current_case_->GetRealizationOFVMap().empty()) {
     realization_ofv_map_ = current_case_->GetRealizationOFVMap();
     ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
     ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;
@@ -66,7 +70,7 @@ void Model::Finalize() {
 void Model::ApplyCase(Optimization::Case *c) {
   // Notify the logger to log previous case.
   if (current_case_ != nullptr && current_case_->state.eval != Optimization::Case::CaseState::EvalStatus::E_PENDING) {
-    if (current_case_->GetRealizationOFVMap().size() > 0) {
+    if (!current_case_->GetRealizationOFVMap().empty()) {
       realization_ofv_map_ = current_case_->GetRealizationOFVMap();
       ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
       ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;

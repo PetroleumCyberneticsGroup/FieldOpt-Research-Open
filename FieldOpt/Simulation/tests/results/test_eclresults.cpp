@@ -41,8 +41,8 @@ namespace {
 using ECLProp = Simulation::Results::ECLResults::Property;
 
 class ECLResultsTest : public TestResources::TestResourceResults {
- protected:
 
+ protected:
   ECLResultsTest() {
     results_ = new ECLResults(settings_full_);
     // results_olympr37_ = new ECLResults(settings_olympr37_);

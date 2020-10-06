@@ -54,16 +54,15 @@ using Printer::num2str;
 using Printer::DBG_prntVecXd;
 
 // =========================================================
-wicalc_rixx::wicalc_rixx(Grid::Grid *grid,
-                         RICaseData *ricasedata,
-                         Settings::Settings *settings) {
-  vp_ = settings->global()->verbParams();
+wicalc_rixx::wicalc_rixx(Settings::Model::Well well_settings,
+                         Grid::Grid *grid,
+                         RICaseData *ricasedata) {
+  vp_ = well_settings.verbParams();
 
   // -------------------------------------------------------
   if (grid != nullptr) {
     AddGrid(grid);
     SetGridActive(grid);
-
   } else {
     grid_ = nullptr;
     ricasedata_ = nullptr;
@@ -138,8 +137,8 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
                                                  vector<double> &isc_values) {
 
   vector<cvf::HexIntersectionInfo> intersections =
-      WellPath::findRawHexCellIntersections(ricasedata_->mainGrid(),
-                                            wellPath.m_wellPathPoints);
+    WellPath::findRawHexCellIntersections(ricasedata_->mainGrid(),
+                                          wellPath.m_wellPathPoints);
 
   std::stringstream str;
   if (vp_.vWIC >=3) {
@@ -153,16 +152,16 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
         << intersection.m_hexIndex
         << " -- values[intersection.m_hexIndex] = "
         << isc_values[intersection.m_hexIndex];
-     print_dbg_msg_wic_ri(__func__, str.str(), 0.0, 0);
+    print_dbg_msg_wic_ri(__func__, str.str(), 0.0, 0);
     isc_values[intersection.m_hexIndex] = CompletionType::WELL_PATH;
   }
 }
 
 // =========================================================
 void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
-                                     vector<WellPathCellIntersectionInfo> isc_info,
-                                     WellDefinition well,
-                                     WellPath& wellPath) {
+                                          vector<WellPathCellIntersectionInfo> isc_info,
+                                          WellDefinition well,
+                                          WellPath& wellPath) {
 
   vector<RICompData> completionData;
 
@@ -197,11 +196,11 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
     // -------------------------------------------------------------
     // Calculate transmissibility
     double transmissibility =
-        wellPath.calculateTransmissibility(cell.intersectionLengthsInCellCS,
-                                           well.skins[0],
-                                           well.radii[0],
-                                           cell.globCellIndex,
-                                           false, icell);
+      wellPath.calculateTransmissibility(cell.intersectionLengthsInCellCS,
+                                         well.skins[0],
+                                         well.radii[0],
+                                         cell.globCellIndex,
+                                         false, icell);
 
     // -------------------------------------------------------------
     // Deleted in susbsequent versions
@@ -223,11 +222,11 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
     // transfer to FO object
     Vector3d start_pt(cell.startPoint.x(),
                       cell.startPoint.y(),
-                     -cell.startPoint.z());
+                      -cell.startPoint.z());
 
     Vector3d exit_pt(cell.endPoint.x(),
                      cell.endPoint.y(),
-                    -cell.endPoint.z());
+                     -cell.endPoint.z());
 
     Vector3d isc_lengths(cell.intersectionLengthsInCellCS.x(),
                          cell.intersectionLengthsInCellCS.y(),
@@ -245,7 +244,7 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
 
 // =========================================================
 void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
-    WellDefinition &well) {
+                                    WellDefinition &well) {
 
   // -------------------------------------------------------
   stringstream str;
@@ -265,10 +264,10 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
   for (int seg = 0; seg < well.radii.size(); ++seg) {
     if (vp_.vWIC >= 3) {
       ext_info("Computing segment " + num2str(seg)
-                   + ". StartMD: " + num2str(well.heel_md[seg])
-                   + "; EndMD: " + num2str(well.toe_md[seg])
-                   + "; StartPt: " + DBG_prntVecXd(well.heels[seg])
-                   + "; EndPt: " + DBG_prntVecXd(well.toes[seg]), md_, cl_);
+                 + ". StartMD: " + num2str(well.heel_md[seg])
+                 + "; EndMD: " + num2str(well.toe_md[seg])
+                 + "; StartPt: " + DBG_prntVecXd(well.heels[seg])
+                 + "; EndPt: " + DBG_prntVecXd(well.toes[seg]), md_, cl_);
     }
     // -----------------------------------------------------------
     // cvf::ref<WellPath> wellPath = new WellPath();
@@ -312,7 +311,7 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
 
   // -----------------------------------------------------------
   vector<WellPathCellIntersectionInfo>
-      intersectedCellInfo = extractor->cellIntersectionInfosAlongWellPath();
+    intersectedCellInfo = extractor->cellIntersectionInfosAlongWellPath();
   // cout << "[mod]wicalc_rixx-08.--------- intersectedCellInfo" << endl;
   if (vp_.vWIC >= 3) {
     for (auto celli : intersectedCellInfo) {

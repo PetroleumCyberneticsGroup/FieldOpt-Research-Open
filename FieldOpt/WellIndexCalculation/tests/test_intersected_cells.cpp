@@ -34,6 +34,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Reservoir/grid/eclgrid.h"
 #include "WellIndexCalculation/wicalc_rixx.h"
 #include "Settings/tests/test_resource_example_file_paths.hpp"
+#include "Settings/tests/test_resource_settings.hpp"
 
 using namespace Reservoir::Grid;
 using namespace Reservoir::WellIndexCalculation;
@@ -41,11 +42,12 @@ using namespace std;
 
 namespace {
 
-class IntersectedCellsTest : public ::testing::Test {
+class IntersectedCellsTest : public ::testing::Test,
+                             public TestResources::TestResourceSettings {
  protected:
   IntersectedCellsTest() {
       grid_ = new ECLGrid(file_path_);
-      wic_ = new wicalc_rixx(grid_);
+      wic_ = new wicalc_rixx(settings_well_, grid_);
   }
 
   virtual ~IntersectedCellsTest() {
