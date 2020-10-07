@@ -101,6 +101,13 @@ class Model
       bool variable_placement        = false; //!< Whether the placement of a comp. along the trajectory should be variable.
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
+
+      double friction_drop  = 0.0;
+      double pipe_diameter  = 0.0;
+      double abs_roughness  = 0.0;
+      double pipe_xsec_area = 0.0;
+      std::string device_stat = "open";
+      double max_xsec_area = 0.0;
     };
 
     /*!

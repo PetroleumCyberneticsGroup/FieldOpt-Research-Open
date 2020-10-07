@@ -29,30 +29,14 @@ If not, see <http://www.gnu.org/licenses/>.
 void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
 
   for (int i = 0; i < json_icvs.size(); ++i) {
+
     Well::Completion comp;
     comp.type = WellCompletionType::ICV;
+    comp.name = "ICD#" + well.name;
     QJsonObject json_icv = json_icvs[i].toObject();
     comp.is_variable = is_prop_variable(json_icv);
 
-    //bool name_set = set_opt_prop_string(comp.device_name, json_icv, "DeviceName");
-    if (set_opt_prop_string(comp.device_name, json_icv, "DeviceName")) {
-      comp.device_names.push_back(comp.device_name);
-    } else {
-      set_req_prop_string_array(comp.device_names, json_icv, "DeviceNames");
-    }
-
-    set_req_prop_double(comp.valve_size, json_icv, "ValveSize");
-    set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize");
-    set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize");
-    set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient");
-
-    if (set_opt_prop_int(comp.segment_index, json_icv, "Segment")) {
-      comp.segment_indexes.push_back(comp.segment_index);
-    } else {
-      set_req_prop_int_array(comp.segment_indexes, json_icv, "Segments");
-      assert(comp.segment_indexes.size() == comp.device_names.size());
-    }
-
+    // time steps
     if (json_icv.contains("TimeStep")) {
       if (!controlTimeIsDeclared(json_icv["TimeStep"].toInt())) {
         string em = "All time steps must be declared in the ControlTimes array.";
@@ -61,10 +45,39 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
       comp.time_step = json_icv["TimeStep"].toInt();
     }
 
-    comp.name = "ICD#" + well.name;
+    // device names
+    //bool name_set = set_opt_prop_string(comp.device_name, json_icv, "DeviceName");
+    if (set_opt_prop_string(comp.device_name, json_icv, "DeviceName")) {
+      comp.device_names.push_back(comp.device_name);
+    } else {
+      set_req_prop_string_array(comp.device_names, json_icv, "DeviceNames");
+    }
+
+    // segment indices
+    if (set_opt_prop_int(comp.segment_index, json_icv, "Segment")) {
+      comp.segment_indexes.push_back(comp.segment_index);
+    } else {
+      set_req_prop_int_array(comp.segment_indexes, json_icv, "Segments");
+      assert(comp.segment_indexes.size() == comp.device_names.size());
+    }
+
+    set_req_prop_double(comp.valve_size, json_icv, "ValveSize");
+    set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient");
+
+    set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize");
+    set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize");
+
+    set_opt_prop_double(comp.friction_drop, json_icv, "FrictionDrop");
+    set_opt_prop_double(comp.pipe_diameter, json_icv,     "PipeDiameter");
+    set_opt_prop_double(comp.abs_roughness, json_icv,     "AbsRoughness");
+
+    set_opt_prop_double(comp.pipe_xsec_area, json_icv, "PipeXsecArea");
+    set_opt_prop_string(comp.device_stat, json_icv,    "DeviceStatus");
+    set_opt_prop_double(comp.max_xsec_area, json_icv,  "MaxXsectArea");
+
     well.completions.push_back(comp);
 
-    if (vp_.vSET > 1) {
+    if (vp_.vSET >= 3) {
       string im = "Added ICV " + comp.name.toStdString() + " to " + well.name.toStdString();
       im += " with valve size " + num2str(comp.valve_size, 5);
       im += " and flow coefficient " + num2str(comp.valve_flow_coeff, 5);
@@ -72,7 +85,7 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
       ext_info(im, md_, cl_, vp_.lnw);
     }
 
-    if (comp.is_variable && vp_.vSET > 1) {
+    if (comp.is_variable && vp_.vSET >= 3) {
       string im = "ICV " + comp.name.toStdString();
       im += " set as variable with name " + comp.name.toStdString();
       ext_info(im, md_, cl_, vp_.lnw);

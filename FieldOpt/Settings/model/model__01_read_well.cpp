@@ -54,6 +54,14 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     throw UnableToParseWellsModelSectionException(em);
   }
 
+  if (vp_.vSET >= 3) {
+    stringstream ss;
+    ss << "well.name: " + well.name.toStdString() + " | ";
+    ss << "well.group: " + well.group.toStdString() + " | ";
+    ss << "well.type: " + type.toStdString() + " | ";
+    info(ss.str());
+  }
+
   // [WELL]-> set ICVs
   if (json_well.contains("ICVs")) {
     auto json_icvs = json_well["ICVs"].toArray();
@@ -72,12 +80,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     }
   }
 
-
-
-
-
-
   QString definition_type = json_well["DefinitionType"].toString();
+  if (vp_.vSET >= 3) { info("well.def_type: " + definition_type.toStdString()); }
 
   // Well definition type -> WellBlocks
   if (QString::compare(definition_type, "WellBlocks") == 0) {
@@ -139,8 +143,9 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     }
 
     QJsonObject json_pspline = json_well["PolarSpline"].toObject();
-    if (!json_pspline.contains("Midpoint"))
+    if (!json_pspline.contains("Midpoint")) {
       throw UnableToParseWellsModelSectionException("No midpoint was defined for this spline-type");
+    }
 
     QJsonObject json_midpoint = json_pspline["Midpoint"].toObject();
     Well::PolarSpline polar_spline;
@@ -326,7 +331,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     }
 
     // State (Open or shut)
-    if (json_controls[i].toObject().contains("State") && QString::compare("Shut", json_controls.at(i).toObject()["State"].toString()) == 0)
+    if (json_controls[i].toObject().contains("State")
+    && QString::compare("Shut", json_controls.at(i).toObject()["State"].toString()) == 0)
       control.state = WellState::WellShut;
     else
       control.state = WellState::WellOpen;
@@ -358,7 +364,11 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       control.control_mode = ControlMode::RESVControl;
       control.name = "Rate#" + well.name + "#" + QString::number(control.time_step);
     }
-    else throw UnableToParseWellsModelSectionException("Well control type " + json_controls.at(i).toObject()["Mode"].toString().toStdString() + " not recognized for well " + well.name.toStdString());
+    else {
+      string em = "Well control type " + json_controls.at(i).toObject()["Mode"].toString().toStdString();
+      em += " not recognized for well " + well.name.toStdString();
+      throw UnableToParseWellsModelSectionException(em);
+    }
 
     // Control targets/limits
     set_opt_prop_double(control.liq_rate, json_controls[i].toObject(), "Rate");
@@ -378,22 +388,25 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       else if (QString::compare("Gas", json_controls.at(i).toObject()["Type"].toString()) == 0)
         control.injection_type = InjectionType::GasInjection;
     }
-    if (json_controls[i].toObject()["IsVariable"].toBool())
+
+    if (json_controls[i].toObject()["IsVariable"].toBool()) {
       control.is_variable = true;
-    else
+    } else {
       control.is_variable = false;
+    }
     well.controls.append(control);
   }
 
   // Preferred Phase
-  if (QString::compare("Oil", json_well["PreferredPhase"].toString()) == 0)
+  if (QString::compare("Oil", json_well["PreferredPhase"].toString()) == 0) {
     well.preferred_phase = PreferredPhase::Oil;
-  else if (QString::compare("Water", json_well["PreferredPhase"].toString()) == 0)
+  } else if (QString::compare("Water", json_well["PreferredPhase"].toString()) == 0) {
     well.preferred_phase = PreferredPhase::Water;
-  else if (QString::compare("Gas", json_well["PreferredPhase"].toString()) == 0)
+  } else if (QString::compare("Gas", json_well["PreferredPhase"].toString()) == 0) {
     well.preferred_phase = PreferredPhase::Gas;
-  else if (QString::compare("Liquid", json_well["PreferredPhase"].toString()) == 0)
+  } else if (QString::compare("Liquid", json_well["PreferredPhase"].toString()) == 0) {
     well.preferred_phase = PreferredPhase::Liquid;
+  }
 
   // Segmentation
   if (json_well.contains("Segmentation")) {
