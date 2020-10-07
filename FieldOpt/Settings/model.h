@@ -91,10 +91,10 @@ class Model
       double placement               = -1.0; //!< Placement as a fraction of the well length.
       double true_vertical_depth     = -1.0; //!< True vertical depth for the location of the completion.
       int time_step                  = -1;   //!< Time step for completion to activate/be modified.
-      int segment_index              = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
-      std::string device_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
-      std::vector<std::string> device_names; //< List of device names that have common settings.
-      std::vector<int> segment_indexes; //!< List of segment indexes matching the device_names list.
+      int icd_segment              = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
+      std::string icd_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
+      std::vector<std::string> icd_names; //< List of device names that have common settings.
+      std::vector<int> icd_segments; //!< List of segment indexes matching the icd_names list.
       double min_valve_size         = 0.0;    //!< Minimum valve size (needed for simulator input)
       double max_valve_size         = 7.854E-3; //!< Maximum valve size (needed for simulator input)
       bool is_variable               = false; //!< True if all viable properties are variable. Otherwise false.

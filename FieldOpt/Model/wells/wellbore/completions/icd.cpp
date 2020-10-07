@@ -47,8 +47,8 @@ ICD::ICD(const Settings::Model::Well::Completion &completion_settings,
   assert(min_valve_size_ >= 0.0);
 
   time_step_ = completion_settings.time_step;
-  segment_idx_ = completion_settings.segment_index;
-  device_name_ = completion_settings.device_name;
+  segment_idx_ = completion_settings.icd_segment;
+  device_name_ = completion_settings.icd_name;
 
 
   if (completion_settings.variable_strength == true || completion_settings.is_variable == true) {
@@ -70,7 +70,7 @@ ICD::ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
   assert(min_valve_size_ >= 0.0);
 
   time_step_ = icv_group_settings.time_step;
-  segment_idxs_ = icv_group_settings.segment_indexes;
+  segment_idxs_ = icv_group_settings.icd_segments;
   device_names_ = icv_group_settings.icvs;
 
 

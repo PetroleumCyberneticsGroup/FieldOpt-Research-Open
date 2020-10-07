@@ -95,11 +95,11 @@ Well::Well(const Settings::Model& model_settings,
 
     for (auto comp : well_settings_.completions) {
       auto base_name = comp.name;
-      auto comp_num = comp.device_names.size();
+      auto comp_num = comp.icd_names.size();
       for (int i = 0; i < comp_num; ++i) {
-        comp.device_name = comp.device_names[i];
-        comp.segment_index = comp.segment_indexes[i];
-        comp.name = base_name + "#" + QString::number(comp.segment_index);
+        comp.icd_name = comp.icd_names[i];
+        comp.icd_segment = comp.icd_segments[i];
+        comp.name = base_name + "#" + QString::number(comp.icd_segment);
         icds_.emplace_back(comp, variable_container);
       }
       if (vp_.vMOD >= 2) {

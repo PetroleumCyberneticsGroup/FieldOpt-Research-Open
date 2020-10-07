@@ -46,19 +46,19 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
     }
 
     // device names
-    //bool name_set = set_opt_prop_string(comp.device_name, json_icv, "DeviceName");
-    if (set_opt_prop_string(comp.device_name, json_icv, "DeviceName")) {
-      comp.device_names.push_back(comp.device_name);
+    //bool name_set = set_opt_prop_string(comp.icd_name, json_icv, "DeviceName");
+    if (set_opt_prop_string(comp.icd_name, json_icv, "ICDName")) {
+      comp.icd_names.push_back(comp.icd_name);
     } else {
-      set_req_prop_string_array(comp.device_names, json_icv, "DeviceNames");
+      set_req_prop_string_array(comp.icd_names, json_icv, "ICDNames");
     }
 
     // segment indices
-    if (set_opt_prop_int(comp.segment_index, json_icv, "Segment")) {
-      comp.segment_indexes.push_back(comp.segment_index);
+    if (set_opt_prop_int(comp.icd_segment, json_icv, "ICDSegment")) {
+      comp.icd_segments.push_back(comp.icd_segment);
     } else {
-      set_req_prop_int_array(comp.segment_indexes, json_icv, "Segments");
-      assert(comp.segment_indexes.size() == comp.device_names.size());
+      set_req_prop_int_array(comp.icd_segments, json_icv, "ICDSegments");
+      assert(comp.icd_segments.size() == comp.icd_names.size());
     }
 
     set_req_prop_double(comp.valve_size, json_icv, "ValveSize");
@@ -81,7 +81,7 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
       string im = "Added ICV " + comp.name.toStdString() + " to " + well.name.toStdString();
       im += " with valve size " + num2str(comp.valve_size, 5);
       im += " and flow coefficient " + num2str(comp.valve_flow_coeff, 5);
-      im += " at segment idx. " + num2str(comp.segment_index);
+      im += " at segment idx. " + num2str(comp.icd_segment);
       ext_info(im, md_, cl_, vp_.lnw);
     }
 
@@ -96,7 +96,7 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
 void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization,
                                          Well& well) {
   assert(well.completions.size() == 1);
-  auto device_names = well.completions[0].device_names;
+  auto device_names = well.completions[0].icd_names;
 
   for (auto comp : icv_compartmentalization) {
     Well::ICVGroup grp;
@@ -121,8 +121,8 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization,
     for (auto name : grp.icvs) {
       for (int i = 0; i < device_names.size(); i++) {
         if (device_names[i] == name) {
-          grp.segment_indexes.push_back(well.completions[0].segment_indexes[i]);
-          string im = "Added segment nr. " + num2str(grp.segment_indexes.back());
+          grp.icd_segments.push_back(well.completions[0].icd_segments[i]);
+          string im = "Added segment nr. " + num2str(grp.icd_segments.back());
           im += " for ICV " + name + " in group " + grp.icv_group_name;
           ext_info(im, md_, cl_, vp_.lnw);
         }
@@ -144,7 +144,7 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization,
       }
     }
 
-    assert(grp.segment_indexes.size() == grp.icvs.size());
+    assert(grp.icd_segments.size() == grp.icvs.size());
     well.icv_compartments.push_back(grp);
   }
 
