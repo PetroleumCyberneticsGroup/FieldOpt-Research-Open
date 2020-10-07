@@ -39,6 +39,7 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
                    ScheduleInsets &insets,
                    Settings::Settings *settings) : ECLDriverPart(settings) {
 
+  // setting up sched_time_entries
   schedule_time_entries_ = QList<ScheduleTimeEntry>();
   for (int ts : control_times) {
     time_DMY ts_DMY;
@@ -56,11 +57,12 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     schedule_time_entries_.append(time_entry);
   }
 
+  // adding to schedule
   if (insets.HasInset(-1)) {
     schedule_.append(insets.GetInsetQStr(-1));
   }
 
-  stringstream ss;
+  stringstream ss; // dbg
   for (auto time_entry : schedule_time_entries_) {
 
     schedule_.append(time_entry.welspecs.GetPartString());
@@ -75,7 +77,7 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     schedule_.append(time_entry.wsegvalv.GetPartString());
     schedule_.append(time_entry.well_controls.GetPartString());
 
-    if (vp_.vRUN >= 3) {
+    if (vp_.vSIM >= 3) {
       ss << "TIME: " << time_entry.control_time << "|";
       ss << "WELLSPEC |" << time_entry.welspecs.GetPartStdStr();
       ss << "COMPDAT |" << time_entry.compdat.GetPartString().toStdString();
@@ -87,6 +89,7 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
 
   }
   schedule_.append("\n\n");
+
 }
 
 QString Schedule::GetPartString() const {

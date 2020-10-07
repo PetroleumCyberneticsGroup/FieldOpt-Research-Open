@@ -77,6 +77,14 @@ class Simulator
    * some functionality. */
   bool use_actionx() const { return ecl_use_actionx_; }
 
+  QString use_actionx_str() const {
+    if (ecl_use_actionx_) {
+      return "true";
+    } else {
+      return "false";
+    }
+  }
+
   /*! @brief Check whether or not to call a script named
    * FO_POSTSIM.sh in the same directory as the simulator
    * DATA file after simulation, if the script is found. */

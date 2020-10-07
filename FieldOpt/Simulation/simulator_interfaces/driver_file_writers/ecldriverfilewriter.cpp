@@ -49,18 +49,19 @@ EclDriverFileWriter::EclDriverFileWriter(Settings::Settings *settings,
   use_actionx_ = settings->simulator()->use_actionx();
 
   if (settings->paths().IsSet(Paths::SIM_SCH_INSET_FILE)) {
-    insets_ = ECLDriverParts::ScheduleInsets(settings->paths().GetPath(Paths::SIM_SCH_INSET_FILE), vp_);
+    auto sched = settings->paths().GetPath(Paths::SIM_SCH_INSET_FILE);
+    insets_ = ECLDriverParts::ScheduleInsets(sched, vp_);
   }
 }
 
-void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
-  string sched_file = schedule_file_path.toStdString();
+void EclDriverFileWriter::WriteDriverFile(const QString& sched_file_path) {
+  string sched_file = sched_file_path.toStdString();
 
   if (vp_.vSIM >= 2) {
     im_ = "Writing sched file: " + sched_file + ".";
     ext_info(im_, md_, cl_);
   }
-  assert(FileExists(schedule_file_path, vp_, md_, cl_));
+  assert(FileExists(sched_file_path, vp_, md_, cl_));
 
   if (!use_actionx_) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
@@ -78,7 +79,7 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
                                                sched_file);
   }
   if (vp_.vSIM >= 2) {
-    ext_info("Wrote driver string to" + schedule_file_path.toStdString(), md_, cl_);
+    ext_info("Wrote driver string to" + sched_file, md_, cl_);
   }
 }
 
@@ -99,6 +100,13 @@ std::string EclDriverFileWriter::buildActionStrings() {
     }
   }
 
+  // start main action string for SimpleICVs
+  actions += ActionX::ACTIONX("ICVS_T0",
+                              ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
+                              ECLDriverParts::ActionX::ACTX_Operator::GE,
+                              0,
+                              icv_actions);
+
   // cntrl string
   if (model_->wells()->first()->controls()->size() > 0) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
@@ -110,7 +118,7 @@ std::string EclDriverFileWriter::buildActionStrings() {
     auto schedule_time_entries = schedule.GetScheduleTimeEntries();
     for (auto entry : schedule_time_entries) {
 
-      // obsolete
+      // obsolete?
       int ctrl_time = 0;
       entry.control_time == 0 ? ctrl_time = 1 : ctrl_time = entry.control_time;
 
@@ -133,12 +141,6 @@ std::string EclDriverFileWriter::buildActionStrings() {
     ext_warn("First well did not have controls; assuming none do.", md_, cl_);
   }
 
-  // main action string
-  actions += ActionX::ACTIONX("ICVS_T0",
-                              ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
-                              ECLDriverParts::ActionX::ACTX_Operator::GE,
-                              0,
-                              icv_actions);
   actions += ctrl_actions;
   return actions;
 }

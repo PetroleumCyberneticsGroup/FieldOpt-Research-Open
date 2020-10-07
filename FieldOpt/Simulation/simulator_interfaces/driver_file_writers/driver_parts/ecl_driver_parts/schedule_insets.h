@@ -99,7 +99,8 @@ class ScheduleInsets {
    * the file at the provided path.
    * @param inset_file_path Path to inset-file.
    */
-  ScheduleInsets(const std::string &inset_file_path, Settings::VerbParams vp);
+  ScheduleInsets(const std::string &inset_file_path,
+                 Settings::VerbParams vp);
 
   /*!
    * @brief Check whether an inset is specified at a control time step.

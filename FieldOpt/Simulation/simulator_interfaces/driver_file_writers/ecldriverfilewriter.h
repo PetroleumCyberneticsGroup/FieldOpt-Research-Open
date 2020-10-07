@@ -50,7 +50,7 @@ class EclDriverFileWriter
   EclDriverFileWriter(::Settings::Settings *settings,
                       Model::Model *model);
 
-  void WriteDriverFile(QString schedule_file_path);
+  void WriteDriverFile(const QString& schedule_file_path);
   std::string buildActionStrings();
 
   Model::Model *model_;
