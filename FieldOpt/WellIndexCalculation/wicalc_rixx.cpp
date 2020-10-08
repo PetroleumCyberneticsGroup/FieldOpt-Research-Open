@@ -142,7 +142,8 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
 
   std::stringstream str;
   if (vp_.vWIC >=3) {
-    ext_info("Found " + num2str(intersections.size()) + " intersections.", md_, cl_);
+    string im = "Found " + num2str(intersections.size()) + " intersections.";
+    ext_info(im, md_, cl_);
   }
 
   for (auto &intersection : intersections) {
@@ -232,9 +233,16 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
                          cell.intersectionLengthsInCellCS.y(),
                          cell.intersectionLengthsInCellCS.z());
 
+    double length = (exit_pt - start_pt).norm();
+    assert(length - (cell.endMD - cell.startMD) < 1e-6);
+
     // -------------------------------------------------------------
     // Transfer segment data, incl. wccf, to FO intersected cell
-    icell.add_new_segment(start_pt, exit_pt, cell.startMD, cell.endMD, well.radii[0], well.skins[0]);
+    icell.add_new_segment(start_pt, exit_pt,
+                          cell.startMD, cell.endMD,
+                          length,
+                          well.radii[0],
+                          well.skins[0]);
     icell.set_cell_well_index_matrix(transmissibility);
 
     // Add to vector of intersected cells
@@ -258,7 +266,8 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
   // -------------------------------------------------------------
   // Loop through well segments
   if (vp_.vWIC >= 3) {
-    ext_info("Looping through " + num2str(well.radii.size()) + " segments.", md_, cl_);
+    string im = "Looping through " + num2str(well.radii.size()) + " segments.";
+    ext_info(im, md_, cl_);
   }
   wellPath = new WellPath();
   for (int seg = 0; seg < well.radii.size(); ++seg) {
@@ -335,9 +344,9 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
                           *wellPath);
 
   if (vp_.vWIC >= 2) {
-    ext_info("Found " + num2str(intersected_cells.size()) + " intersected cells.", md_, cl_);
+    string im = "Found " + num2str(intersected_cells.size()) + " intersected cells.";
+    ext_info(im, md_, cl_);
   }
-
 
   // Assign intersected cells to well
   well_indices = intersected_cells;

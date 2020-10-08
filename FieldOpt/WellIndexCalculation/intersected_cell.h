@@ -63,16 +63,19 @@ class IntersectedCell : public Grid::Cell {
   Vector3d zvec() const;
 
   void add_new_segment(Vector3d entry_point, Vector3d exit_point,
-                       double entry_md, double exit_md,
+                       double entry_md, double exit_md, double length,
                        double segment_radius, double segment_skin);
   int num_segments() const;
 
   Vector3d get_segment_entry_point(int segment_index) const;
   Vector3d get_segment_exit_point(int segment_index) const;
+
   double get_segment_entry_md(int segment_index) const;
   double get_segment_exit_md(int segment_index) const;
   double get_segment_radius(int segment_index) const;
   double get_segment_skin(int segment_index) const;
+
+  double get_segment_length(int segment_index) const;
 
   void update_last_segment_exit_point(Vector3d exit_point);
 
@@ -87,7 +90,7 @@ class IntersectedCell : public Grid::Cell {
                                     double value);
 
   void set_segment_calculation_data_3d(int segment_index,
-                                    string name,
+                                       string name,
                                        Vector3d value3d);
 
   map<string, vector<double>>& get_calculation_data();
@@ -112,6 +115,7 @@ class IntersectedCell : public Grid::Cell {
   vector<double> exit_mds_;
   vector<double> segment_radius_;
   vector<double> segment_skin_;
+  vector<double> segment_length_;
 
   int i_, j_, k_;
 

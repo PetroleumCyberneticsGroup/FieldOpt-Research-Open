@@ -77,12 +77,13 @@ Well::Well(const Settings::Model& model_settings,
     heel_.j = trajectory_->GetWellBlocks()->first()->j();
     heel_.k = trajectory_->GetWellBlocks()->first()->k();
 
-    if (well_settings_.use_segmented_model) {
+    if (well_settings_.wseg_structure == "ICDBranches") {
+      initSegStructure(variable_container);
+    } else if (well_settings_.use_segmented_model) {
       is_segmented_ = true;
       initializeSegmentedWell(variable_container);
-    } else {
-      is_segmented_ = false;
     }
+
   } else {
     im_ = "No well trajectory defined for well: " + name_.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
@@ -144,6 +145,44 @@ void Well::Update() {
       }
     }
   }
+}
+
+void Well::initSegStructure(Properties::VarPropContainer *variable_container) {
+
+// basis: 1 segment-per-well-block
+
+  auto wblocks = trajectory()->GetWellBlocks();
+  std::vector<Segment> segments;
+
+  for (int ii=0; ii < wblocks->size(); ++ii) {
+
+    // set up main branch
+
+    // set up icd branches
+
+    // set up outer branches
+    auto segment = Segment(
+      Segment::ICD_SEGMENT,
+      ii, // index
+      ii, // branch
+      ii, // outlet
+      wblocks->at(ii)->getLength(),
+      wblocks->at(ii)->getDepthChange(),
+      tub_diam_,
+      tub_roughness_,
+      wblocks->at(ii)->getExitMd());
+
+    cout << segment.ToString();
+
+    segments.push_back(segment);
+  }
+
+
+
+//
+
+// equi-length branches (may become variable)
+
 }
 
 void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_container) {

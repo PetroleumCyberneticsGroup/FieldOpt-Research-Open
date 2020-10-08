@@ -408,6 +408,10 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     well.preferred_phase = PreferredPhase::Liquid;
   }
 
+  if (json_well.contains("WellSegStruct")) {
+    well.wseg_structure = json_well["WellSegStruct"].toString().toStdString();
+  }
+
   // Segmentation
   if (json_well.contains("Segmentation")) {
     well.use_segmented_model = true;

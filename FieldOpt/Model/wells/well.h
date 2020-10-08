@@ -130,6 +130,7 @@ class Well
   // Fields for segmented wells
   bool is_segmented_ = false;
   void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
+  void initSegStructure(Properties::VarPropContainer *variable_container);
 
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.

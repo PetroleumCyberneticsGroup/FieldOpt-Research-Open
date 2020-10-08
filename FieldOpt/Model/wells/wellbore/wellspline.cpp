@@ -213,6 +213,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     blocks->last()->setExitPoint(i.get_segment_exit_point(0));
     blocks->last()->setEntryMd(i.get_segment_entry_md(0));
     blocks->last()->setExitMd(i.get_segment_exit_md(0));
+    blocks->last()->setLength(i.get_segment_length(0));
   }
   if (blocks->empty()) {
     throw WellBlocksNotDefined("WIC could not compute.");
@@ -285,13 +286,15 @@ bool WellSpline::HasSplineChanged() const {
 std::vector<Reservoir::WellIndexCalculation::IntersectedCell>
   WellSpline::convertImportedWellblocksToIntersectedCells() {
   auto intersected_cells = vector<IntersectedCell>();
-  double md_in = 0;
-  double md_out = 0;
+  double md_in = 0.0;
+  double md_out = 0.0;
+  double length = 0.0;
   for (auto iwb : imported_wellblocks_) {
     auto cell = grid_->GetCell(iwb.ijk().x()-1, iwb.ijk().y()-1, iwb.ijk().z()-1);
     auto ic = Reservoir::WellIndexCalculation::IntersectedCell(cell);
     md_out = md_in + (iwb.out() - iwb.in()).norm();
-    ic.add_new_segment(iwb.in(), iwb.out(), md_in, md_out, well_settings_.wellbore_radius, 0.0);
+    length = (iwb.out() - iwb.in()).norm();
+    ic.add_new_segment(iwb.in(), iwb.out(), md_in, md_out, length, well_settings_.wellbore_radius, 0.0);
     intersected_cells.push_back(ic);
     md_in = md_out;
   }

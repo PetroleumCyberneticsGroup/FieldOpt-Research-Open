@@ -85,6 +85,10 @@ double IntersectedCell::get_segment_skin(int segment_index) const {
   return segment_skin_[segment_index];
 }
 
+double IntersectedCell::get_segment_length(int segment_index) const {
+  return segment_length_[segment_index];
+}
+
 void IntersectedCell::update_last_segment_exit_point(Vector3d exit_point) {
   exit_points_[exit_points_.size()-1] = exit_point;
 }
@@ -93,13 +97,18 @@ int IntersectedCell::num_segments() const{
   return entry_points_.size();
 }
 
-void IntersectedCell::add_new_segment(Vector3d entry_point, Vector3d exit_point,
-                                      double entry_md, double exit_md,
-                                      double radius, double skin_factor) {
+void IntersectedCell::add_new_segment(Vector3d entry_point,
+                                      Vector3d exit_point,
+                                      double entry_md,
+                                      double exit_md,
+                                      double length,
+                                      double radius,
+                                      double skin_factor) {
   entry_points_.push_back(entry_point);
   exit_points_.push_back(exit_point);
   entry_mds_.push_back(entry_md);
   exit_mds_.push_back(exit_md);
+  segment_length_.push_back(length);
   segment_radius_.push_back(radius);
   segment_skin_.push_back(skin_factor);
 }
@@ -147,11 +156,11 @@ map<string, vector<double>>& IntersectedCell::get_calculation_data() {
 }
 
 void IntersectedCell::set_segment_calculation_data_3d(int segment_index,
-                                                   string name,
+                                                      string name,
                                                       Vector3d value3d) {
   // Check if this name already exists
   map<string, vector<Vector3d>>::iterator
-      it = calculation_data_3d_.find(name);
+    it = calculation_data_3d_.find(name);
 
   if(it != calculation_data_3d_.end()) {
     if (segment_index >= 0 && segment_index < calculation_data_3d_[name].size()) {

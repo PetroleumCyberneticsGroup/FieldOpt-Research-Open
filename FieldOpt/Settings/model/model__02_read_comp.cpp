@@ -61,19 +61,19 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
       assert(comp.icd_segments.size() == comp.icd_names.size());
     }
 
-    set_req_prop_double(comp.valve_size, json_icv, "ValveSize");
+    set_req_prop_double(comp.valve_size,       json_icv, "ValveSize");
     set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient");
 
     set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize");
     set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize");
 
     set_opt_prop_double(comp.friction_drop, json_icv, "FrictionDrop");
-    set_opt_prop_double(comp.pipe_diameter, json_icv,     "PipeDiameter");
-    set_opt_prop_double(comp.abs_roughness, json_icv,     "AbsRoughness");
+    set_opt_prop_double(comp.pipe_diameter,     json_icv, "PipeDiameter");
+    set_opt_prop_double(comp.abs_roughness,     json_icv, "AbsRoughness");
 
     set_opt_prop_double(comp.pipe_xsec_area, json_icv, "PipeXsecArea");
-    set_opt_prop_string(comp.device_stat, json_icv,    "DeviceStatus");
-    set_opt_prop_double(comp.max_xsec_area, json_icv,  "MaxXsectArea");
+    set_opt_prop_string(comp.device_stat,    json_icv, "DeviceStatus");
+    set_opt_prop_double(comp.max_xsec_area,  json_icv, "MaxXsectArea");
 
     well.completions.push_back(comp);
 

@@ -183,15 +183,19 @@ class Model
     bool is_variable_spline;                    //!< Whether the whole spline should be variable.
     PseudoContPosition pseudo_cont_position;    //!< Initial position when using pseudo-continous positioning variables.
     QList<ControlEntry> controls;               //!< List of well controls
+
     bool use_segmented_model = false;           //!< Whether the segmented well model should be used.
     Completion seg_tubing;                      //!< Tubing settings when the segmented well model is used.
     Completion seg_annulus;                     //!< Annulus settings when the segmented well model is used.
     Completion seg_compartment_params;          //!< Parameters to be used for automatically generated ICDs.
     std::vector<Completion> completions;        //!< List of completions. Used when using neither segmentation or trajectories.
     int seg_n_compartments = 0;                 //!< Number of packer-delimited compartments with ICDs to use.
+
+    string wseg_structure = "";
+
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
     std::string toString();
-    std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
+    std::vector<ICVGroup> icv_compartments;     //!< Grouping of ICVs into named comparments.
 
     VerbParams verb_params_;
     void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
