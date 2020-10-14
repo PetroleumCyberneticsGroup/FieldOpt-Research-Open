@@ -166,11 +166,11 @@ void Well::initSegStructure(Properties::VarPropContainer *variable_container) {
       ii, // index
       ii, // branch
       ii, // outlet
-      wblocks->at(ii)->getLength(),
-      wblocks->at(ii)->getDepthChange(),
-      tub_diam_,
-      tub_roughness_,
-      wblocks->at(ii)->getExitMd());
+      wblocks->at(ii)->getLength(), // length
+      wblocks->at(ii)->getDepthChange(), // tvd
+      tub_diam_, // diam
+      tub_roughness_, // roughness
+      wblocks->at(ii)->getExitMd()); // outlet_md
 
     cout << segment.ToString();
 

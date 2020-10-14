@@ -76,7 +76,8 @@ std::string Segment::ToString() {
   s << "   inlet:  " << vec_to_str(inlets_) << "\n";
   s << "   length: " << length_ << "\n";
   s << "   tvd:    " << tvd_change_ << "\n";
-  s << "   diam:   " << diameter_ << "  ;  " << "roughness: " << roughness_ << "\n";
+  s << "   diam:   " << diameter_ << "\n";
+  s << "   roughness: " << roughness_ << "\n";
   if (type_ == ANNULUS_SEGMENT) {
     s << "   block i, j, k: " << parent_block_->i() << ", " << parent_block_->j() << ", " << parent_block_->k() << "\n";
   }

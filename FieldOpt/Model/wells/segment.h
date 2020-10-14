@@ -52,8 +52,8 @@ class Segment {
 
   void AddParentBlock(Wellbore::WellBlock *parent_block);
   void AddParentICD(Wellbore::Completions::ICD *parent_icd);
-  bool    HasParentBlock() const; //!< Check whether this segment has a parent well block.
-  bool    HasParentICD()   const;   //!< Check whether this segment has a parent ICD decvice.
+  bool HasParentBlock() const; //!< Check whether this segment has a parent well block.
+  bool HasParentICD()   const; //!< Check whether this segment has a parent ICD decvice.
 
   Wellbore::WellBlock *ParentBlock() { return parent_block_; }
   Wellbore::Completions::ICD *ParentICD() { return parent_icd_; }
@@ -67,20 +67,26 @@ class Segment {
   double  Diameter()  const { return diameter_; }
   double  Roughness() const { return roughness_; }
   SegType Type()      const { return type_; }
+
   std::string ToString();
 
  private:
-  int index_;                            //!< Segment index
-  int branch_;                           //!< Branch index
-  int outlet_;                           //!< Index of outlet segment.
-  double length_, diameter_, roughness_; //!< Physical segment properties
-  double md_;                            //!< Measured depth to start of segment
-  double tvd_change_;                    //!< TVD _change_ along the segment (i.e. zero when perfectly horizontal)
+  int index_;         //!< Segment index
+  int branch_;        //!< Branch index
+  int outlet_;        //!< Index of outlet segment.
+  double length_;     //!< Physical segment properties
+  double diameter_;
+  double roughness_;
+  double md_;         //!< Measured depth to start of segment
+  double tvd_change_; //!< TVD _change_ along the segment (i.e. zero when perfectly horizontal)
 
-  SegType type_;                         //!< Segment type (tubing, annulus or ICD)
-  std::vector<int> inlets_;              //!< List of segment (indices) with this segment as their outlet.
-  Wellbore::WellBlock *parent_block_ = 0;      //!< Parent well block for annulus segments.
-  Wellbore::Completions::ICD *parent_icd_ = 0; //!< Parent ICD for ICD segments.
+  SegType type_;             //!< Segment type (tubing, annulus or ICD)
+
+  // List of segment (indices) with this segment as their outlet.
+  std::vector<int> inlets_;
+
+  Wellbore::WellBlock *parent_block_ = nullptr;      //!< Parent well block for annulus segments.
+  Wellbore::Completions::ICD *parent_icd_ = nullptr; //!< Parent ICD for ICD segments.
 };
 
 }
