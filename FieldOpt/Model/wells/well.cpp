@@ -78,7 +78,7 @@ Well::Well(const Settings::Model& model_settings,
     heel_.k = trajectory_->GetWellBlocks()->first()->k();
 
     if (well_settings_.wseg_structure == "ICDBranches") {
-      initSegStructure(variable_container);
+      initSegWellStruct(variable_container);
     } else if (well_settings_.use_segmented_model) {
       is_segmented_ = true;
       initializeSegmentedWell(variable_container);
@@ -147,7 +147,7 @@ void Well::Update() {
   }
 }
 
-void Well::initSegStructure(Properties::VarPropContainer *variable_container) {
+void Well::initSegWellStruct(Properties::VarPropContainer *variable_container) {
 
 // basis: 1 segment-per-well-block
 
@@ -370,13 +370,14 @@ std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) cons
   for (int i = 0; i < compartments_.size(); ++i) {
     int index = i + 2;
     auto tubing_segment = Segment(
-      Segment::TUBING_SEGMENT,              // type
-      index,                                // index
-      1,                                    // branch
-      index - 1,                            // outlet
+      Segment::TUBING_SEGMENT, // type
+      index,                          // index
+      1,                     // branch
+      index - 1,             // outlet
       compartments_[i].GetLength(trajectory_->GetLength()), // length
       compartments_[i].GetTVDDifference(),  // tvd delta
-      tub_diam_, tub_roughness_,
+      tub_diam_,
+      tub_roughness_,
       segments.back().OutletMD()
     );
     segments.push_back(tubing_segment);
