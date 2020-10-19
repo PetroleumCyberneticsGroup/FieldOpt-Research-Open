@@ -25,6 +25,7 @@
 #include "Model/properties/variable_property_container.h"
 #include "drilling_schedule.h"
 #include "Settings/model.h"
+#include "Settings/optimizer.h"
 #include <iostream>
 
 namespace Model {
@@ -50,6 +51,7 @@ class DrillingSchedule {
   QMap<int, DrillingOperation> getDrillingOperations() { return drilling_operations_; }
   QMap<int, ModelType> getModelTypes() { return model_types_; }
   QMap<int, Execution> getExecutionModes() { return execution_modes_; }
+  QMap<int, Settings::Optimizer*> getOptimizerSettings() { return optimizer_settings_;}
   QMap<int, bool> isVariableDrillingPoints() { return is_variable_drilling_points_; }
   QMap<int, bool> isVariableCompletions() { return is_variable_completions_; }
   QMap<int, bool> isModelUpdates() { return is_model_updates_;}
@@ -62,16 +64,13 @@ class DrillingSchedule {
   QMap<int, DrillingOperation> drilling_operations_; //!< Indexed by the drilling steps
   QMap<int, ModelType> model_types_;                 //!< Indexed by the drilling steps
   QMap<int, Execution> execution_modes_;             //!< Indexed by the drilling steps
+  QMap<int, Settings::Optimizer*> optimizer_settings_;//!< Indexed by the drilling steps
   QMap<int, bool> is_variable_drilling_points_;      //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
   QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps
 
   void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
   void printDrillingPoints();
-
-
-
-
 };
 
 }

@@ -65,8 +65,10 @@ class Settings
   double bookkeeper_tolerance() const { return bookkeeper_tolerance_; }
 
   Model *model() const { return model_; } //!< Object containing model specific settings.
-  Optimizer *optimizer() const { return optimizer_; } //!< Object containing optimizer specific settings.
+  Optimizer *optimizer() { return optimizer_; } //!< Object containing optimizer specific settings.
   Simulator *simulator() const { return simulator_; } //!< Object containing simulator specific settings.
+
+  void setOptimizer(Optimizer* opt) {optimizer_ = opt; }
 
   QString GetLogCsvString() const; //!< Get a string containing the CSV header and contents for the log.
 

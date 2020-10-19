@@ -71,6 +71,13 @@ class AbstractRunner
   Optimization::Optimizer* getOptimizer() { return optimizer_; }
   Simulation::Simulator* getSimulator() { return simulator_; }
 
+  /*!
+   * @brief Replace the optimizer.
+   * @param opt New optimizer setttings.
+  */
+  void ReplaceOptimizer(Settings::Optimizer *opt);
+
+
  protected:
   AbstractRunner(RuntimeSettings *runtime_settings);
 
@@ -125,6 +132,7 @@ class AbstractRunner
    * @param output_subdir Optional subdir in the output dir to write the logs in.
    */
   void InitializeLogger(QString output_subdir="", bool write_logs=true);
+
 };
 
 }

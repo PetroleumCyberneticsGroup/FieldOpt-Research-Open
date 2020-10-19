@@ -26,6 +26,12 @@ namespace Runner {
         Optimization::Optimizer* getOptimizer() { return runner_->getOptimizer(); }
         Simulation::Simulator* getSimulator() { return runner_->getSimulator(); }
 
+        /*!
+         * @brief Replace the optimizer.
+         * @param opt New optimizer setttings.
+        */
+        void ReplaceOptimizer(Settings::Optimizer *opt) { runner_->ReplaceOptimizer(opt); }
+
     private:
         RuntimeSettings *runtime_settings_;
         AbstractRunner *runner_;

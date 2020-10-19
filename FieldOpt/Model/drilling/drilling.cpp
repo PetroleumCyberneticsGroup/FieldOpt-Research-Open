@@ -150,6 +150,11 @@ void Drilling::runOptimization(int drilling_step) {
         well.completions.at(i).variable_strength = true;
     }
   }
+
+  if (drilling_schedule_->getOptimizerSettings().value(drilling_step) != nullptr)
+    runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
+
+
   runner->Execute();
 
   Optimization::Optimizer* opt = runner->getOptimizer();

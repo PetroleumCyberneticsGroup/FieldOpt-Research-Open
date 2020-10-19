@@ -369,4 +369,10 @@ void AbstractRunner::FinalizeRun(bool write_logs) {
         logger_->FinalizePostrunSummary();
 }
 
+void AbstractRunner::ReplaceOptimizer(Settings::Optimizer *opt) {
+  settings_->setOptimizer(opt);
+
+  InitializeOptimizer();
+}
+
 }
