@@ -153,8 +153,6 @@ Model::Model(QJsonObject json_model, Paths &paths)
 
   // Drilling
   if (json_model.contains("Drilling")) {
-
-
     QJsonObject json_drilling = json_model["Drilling"].toObject();
     readDrilling(json_drilling);
   }
@@ -576,6 +574,27 @@ void Model::readDrilling(QJsonObject json_drilling) {
 
           if (json_drilling_step["ModelType"].toString().compare("Surrogate") == 0)
             drilling_schedule.model_types.insert(i, Drilling::DrillingSchedule::ModelType::Surrogate);
+        }
+
+        if (json_drilling_step.contains("Trigger")) {
+          QJsonObject json_trigger = json_drilling_step["Trigger"].toObject();
+
+          if (!json_trigger.contains("min_model_deviation") && !json_trigger.contains("max_obj_improvement"))
+            throw UnableToParseDrillingModelSectionException(
+                "The optimization triggers are not properly defined in the Drilling/Model section.");
+          else {
+            Drilling::OptimizationTrigger trigger;
+
+            if (json_trigger.contains("min_model_deviation")) {
+              trigger.min_model_deviation = json_trigger.value("min_model_deviation").toDouble();
+            }
+
+            if (json_trigger.contains("max_obj_improvement")) {
+              trigger.max_objective_improvement = json_trigger.value("max_obj_improvement").toDouble();
+            }
+
+            drilling_schedule.optimization_triggers.insert(i, trigger);
+          }
         }
       }
       drilling_.drilling_schedule = drilling_schedule;

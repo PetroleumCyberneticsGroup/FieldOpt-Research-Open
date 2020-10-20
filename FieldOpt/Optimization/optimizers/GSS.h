@@ -73,8 +73,8 @@ class GSS : public Optimizer {
   /*!
    * \brief IsFinished Check if the optimization is finished.
    *
-   * This algorithm has two termination conditions: max number of objective function evaluations and
-   * minimum step length.
+   * This algorithm has three termination conditions: max number of objective function evaluations,
+   * minimum step length, and sufficient improvement in the objective.
    * \return True if the algorithm has finished, otherwise false.
    */
   TerminationCondition IsFinished();
@@ -136,6 +136,12 @@ class GSS : public Optimizer {
    * @return
    */
   bool is_converged();
+
+  /*!
+   * @brief Check if the algorithm has achieved sufficient improvement for a given tolerance.
+   * @return true if sufficient improvement has been achieved, and false otherwise.
+   */
+  bool is_sufficient_improvement();
 
   /*!
    * @brief Remove the case that has the worst origin from the evaluation queue.

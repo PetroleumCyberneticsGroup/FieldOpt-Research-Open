@@ -77,6 +77,9 @@ GSS::GSS(Settings::Optimizer *settings,
         assert(step_lengths_.size() == directions_.size());
         assert(step_lengths_.size() == step_tol_.size());
     }
+
+    base_case_obj_ = base_case->objective_function_value();
+  sufficient_improvement_tol_ = -1;
 }
 
 Optimizer::TerminationCondition GSS::IsFinished()
@@ -88,6 +91,8 @@ Optimizer::TerminationCondition GSS::IsFinished()
         tc = MAX_EVALS_REACHED;
     else if (is_converged())
         tc = MINIMUM_STEP_LENGTH_REACHED;
+    else if (is_sufficient_improvement())
+        tc = SUFFICIENT_IMPROVEMENT;
 
     if (tc != NOT_FINISHED) {
         if (enable_logging_) {
@@ -158,6 +163,15 @@ bool GSS::is_converged() {
             return false;
     }
     return true;
+}
+
+bool GSS::is_sufficient_improvement() {
+  if ((tentative_best_case_->objective_function_value() != base_case_obj_) &&
+      (sufficient_improvement_tol_ >=0) &&
+      (abs((tentative_best_case_->objective_function_value()-base_case_obj_)/base_case_obj_) >= sufficient_improvement_tol_))
+    return true;
+  else
+    return false;
 }
 
 void GSS::set_step_lengths(int dir_idx, double len) {

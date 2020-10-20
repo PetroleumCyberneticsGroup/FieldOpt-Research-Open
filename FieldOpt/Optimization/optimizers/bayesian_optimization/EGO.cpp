@@ -149,8 +149,12 @@ Optimization::Optimizer::TerminationCondition EGO::IsFinished() {
     TerminationCondition tc = NOT_FINISHED;
     if (case_handler_->CasesBeingEvaluated().size() > 0)
         return tc;
+
     if (evaluated_cases_ > max_evaluations_)
         tc = MAX_EVALS_REACHED;
+    else if (is_sufficient_improvement())
+      tc = SUFFICIENT_IMPROVEMENT;
+
     if (tc != NOT_FINISHED) {
         map<string, string> ext_state;
         ext_state["Time in AF opt"] = boost::lexical_cast<string>(time_af_opt_);
@@ -162,6 +166,16 @@ Optimization::Optimizer::TerminationCondition EGO::IsFinished() {
     }
     return tc;
 }
+
+bool EGO::is_sufficient_improvement() {
+  if ((tentative_best_case_->objective_function_value() != base_case_obj_) &&
+      (sufficient_improvement_tol_ >=0) &&
+      (abs((tentative_best_case_->objective_function_value()-base_case_obj_)/base_case_obj_) >= sufficient_improvement_tol_))
+    return true;
+  else
+    return false;
+}
+
 void EGO::handleEvaluatedCase(Case *c) {
     gp_->add_pattern(c->GetRealVarVector().data(), normalizer_ofv_.normalize(c->objective_function_value()));
     if (isImprovement(c)) {

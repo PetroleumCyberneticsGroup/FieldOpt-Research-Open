@@ -51,6 +51,7 @@ class EGO : public Optimizer {
   );
 
  protected:
+  bool is_sufficient_improvement();
   void handleEvaluatedCase(Case *c) override;
   void iterate() override;
 

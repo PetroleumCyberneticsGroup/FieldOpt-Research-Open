@@ -154,6 +154,15 @@ void Drilling::runOptimization(int drilling_step) {
   if (drilling_schedule_->getOptimizerSettings().value(drilling_step) != nullptr)
     runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
 
+  if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
+    double max_obj_improvement = drilling_schedule_->getOptimizationTriggers().value(drilling_step).max_objective_improvement;
+    if (max_obj_improvement >= 0)
+      runner->getOptimizer()->setSufficientImprovementTolerance(max_obj_improvement);
+
+    double min_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).min_model_deviation;
+    if (min_model_dev >=0)
+      runner->getOptimizer()->setMinModelDeviation(min_model_dev);
+  }
 
   runner->Execute();
 

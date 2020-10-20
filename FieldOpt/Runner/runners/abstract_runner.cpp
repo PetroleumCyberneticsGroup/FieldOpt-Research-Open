@@ -321,6 +321,10 @@ void AbstractRunner::PrintCompletionMessage() const {
         case Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED:
             std::cout << "minimum step length reached (converged)." << std::endl;
             break;
+        case Optimization::Optimizer::TerminationCondition::SUFFICIENT_IMPROVEMENT:
+          std::cout << "sufficient improvement achieved (converged)." << std::endl;
+          break;
+
         default: std::cout << "Unknown termination reason." << std::endl;
     }
 

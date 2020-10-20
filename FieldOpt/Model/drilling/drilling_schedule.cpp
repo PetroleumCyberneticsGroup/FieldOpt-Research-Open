@@ -33,12 +33,15 @@ DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::Variab
     execution_modes_.insert(i, (Execution) settings->drilling().drilling_schedule.execution_modes.value(i));
     drilling_operations_.insert(i, (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(i));
     optimizer_settings_.insert(i, (Settings::Optimizer*) settings->drilling().drilling_schedule.optimizer_settings.value(i));
+
     is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
     is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
     is_model_updates_.insert(i, settings->drilling().drilling_schedule.is_model_updates.value(i));
+
   }
 
   assignDrillingPoints(settings->drilling().drilling_schedule.drilling_points);
+  assignOptimizationTriggers(settings->drilling().drilling_schedule.optimization_triggers);
 }
 
 void DrillingSchedule::assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings) {
@@ -58,6 +61,20 @@ void DrillingSchedule::assignDrillingPoints(QMap<int, QList<Settings::Model::Dri
   }
 }
 
+void DrillingSchedule::assignOptimizationTriggers(QMap<int, Settings::Model::Drilling::OptimizationTrigger> opt_triggers) {
+  for (int i: drilling_steps_) {
+    DrillingSchedule::OptimizationTrigger opt_trigger;
+
+    if (opt_triggers.value(i).max_objective_improvement != -1)
+      opt_trigger.max_objective_improvement = opt_triggers.value(i).max_objective_improvement;
+
+    if (opt_triggers.value(i).min_model_deviation != -1)
+      opt_trigger.min_model_deviation = opt_triggers.value(i).min_model_deviation;
+
+    optimization_triggers_.insert(i, opt_trigger);
+  }
+
+  }
 }
 }
 

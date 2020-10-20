@@ -40,6 +40,7 @@ Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
 
     max_evaluations_ = settings->parameters().max_evaluations;
     tentative_best_case_ = base_case;
+    base_case_obj_ = base_case->objective_function_value();
     tentative_best_case_iteration_ = 0;
     if (case_handler == 0) {
         case_handler_ = new CaseHandler(tentative_best_case_);
@@ -58,6 +59,9 @@ Optimizer::Optimizer(Settings::Optimizer *settings, Case *base_case,
     }
     iteration_ = 0;
     evaluated_cases_ = 0;
+    sufficient_improvement_tol_ = -1;
+    min_model_deviation_tol_ = -1;
+
     mode_ = settings->mode();
     is_async_ = false;
     start_time_ = QDateTime::currentDateTime();
@@ -161,6 +165,14 @@ void Optimizer::EnableConstraintLogging(QString output_directory_path) {
         con->EnableLogging(output_directory_path);
 }
 
+void Optimizer::setSufficientImprovementTolerance(double improvement_tol) {
+  sufficient_improvement_tol_ = improvement_tol;
+}
+
+void Optimizer::setMinModelDeviation(double model_tol) {
+  min_model_deviation_tol_ = model_tol;
+}
+
 void Optimizer::SetVerbosityLevel(int level) {
     verbosity_level_ = level;
     for (auto con : constraint_handler_->constraints())
@@ -234,6 +246,7 @@ map<string, string> Optimizer::Summary::GetState() {
         case MAX_EVALS_REACHED: statemap["Term. condition"] = "Reached max. sims"; break;
         case MINIMUM_STEP_LENGTH_REACHED: statemap["Term. condition"] = "Reached min. step length"; break;
         case MAX_ITERATIONS_REACHED: statemap["Term. condition"] = "Reached max. iterations"; break;
+        case SUFFICIENT_IMPROVEMENT: statemap["Term. condition"] = "Sufficient improvement ach."; break;
         default: statemap["Term. condition"] = "Unknown";
     }
     statemap["bc Best case found in iter"] = boost::lexical_cast<string>(opt_->tentative_best_case_iteration_);

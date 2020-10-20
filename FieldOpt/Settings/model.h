@@ -179,6 +179,12 @@ class Model
         bool is_variable = false;
     };
 
+    struct OptimizationTrigger {
+      OptimizationTrigger() {}
+        double min_model_deviation = -1;
+        double max_objective_improvement = -1;
+    };
+
     struct DrillingSchedule {
       DrillingSchedule() {}
       QList<int> drilling_steps;    //!<We assume the indexes are from ordered from 0 to N
@@ -193,6 +199,8 @@ class Model
       QMap<int, ModelType> model_types;
       QMap<int, Execution> execution_modes;
       QMap<int, Optimizer*> optimizer_settings;
+      QMap<int, OptimizationTrigger> optimization_triggers;
+
       QMap<int, bool> is_variable_drilling_points;
       QMap<int, bool> is_variable_completions;
       QMap<int, bool> is_model_updates;

@@ -87,7 +87,7 @@ class Optimizer : public Loggable
    */
   enum TerminationCondition : int {NOT_FINISHED=0,
     MAX_EVALS_REACHED=1, MINIMUM_STEP_LENGTH_REACHED=2,
-    MAX_ITERATIONS_REACHED=3
+    MAX_ITERATIONS_REACHED=3, SUFFICIENT_IMPROVEMENT=4
   };
 
   /*!
@@ -104,6 +104,8 @@ class Optimizer : public Loggable
   virtual QString GetStatusString() const; //!< Get a CSV string describing the current state of the optimizer.
   void EnableConstraintLogging(QString output_directory_path); //!< Enable writing a text log for the constraint operations.
   void SetVerbosityLevel(int level);
+  void setSufficientImprovementTolerance(double improvement_tol); //!< Tolerance for sufficient improvement in terms of objective
+  void setMinModelDeviation(double model_tol); //!< Set minimum allowable model deviation to perform optimization
   bool IsAsync() const { return is_async_; } //!< Check if the optimizer is asynchronous.
 
   /*!
@@ -198,9 +200,12 @@ class Optimizer : public Loggable
   int evaluated_cases_; //!< Number of evaluated cases.
   int max_evaluations_; //!< Maximum number of objective function evaluations allowed before terminating.
   int iteration_; //!< The current iteration.
+  double base_case_obj_; //!< Base case objective function value
+  double sufficient_improvement_tol_; //!< tolerance for sufficient improvement in the objective
+  double min_model_deviation_tol_;  //!< minimum model deviation to perform optimization
   int verbosity_level_; //!< The verbosity level for runtime console logging.
   ::Settings::Optimizer::OptimizerMode mode_; //!< The optimization mode, i.e. whether the objective function should be maximized or minimized.
-  bool is_async_; //!< Inidcates whether or not the optimizer is asynchronous. Defaults to false.
+  bool is_async_; //!< Indicates whether or not the optimizer is asynchronous. Defaults to false.
   Logger *logger_;
   bool enable_logging_; //!< Whether logging should be performed. This should be set to false when the optimizer is a component in HybridOptimizer.
   void DisableLogging(); //!< Disable logging for this optimizer. This is called by HybridOptimizer.

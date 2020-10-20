@@ -32,11 +32,21 @@ namespace Model {
 namespace Drilling {
 
 class DrillingSchedule {
+ private:
+  void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
+  void assignOptimizationTriggers(QMap<int, Settings::Model::Drilling::OptimizationTrigger> opt_triggers);
+
  public:
   struct DrillingPoint {
     DrillingPoint() {}
     double x, y, z;
     bool is_variable = false;
+  };
+
+  struct OptimizationTrigger {
+    OptimizationTrigger() {}
+    double min_model_deviation;
+    double max_objective_improvement;
   };
 
   enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
@@ -52,6 +62,8 @@ class DrillingSchedule {
   QMap<int, ModelType> getModelTypes() { return model_types_; }
   QMap<int, Execution> getExecutionModes() { return execution_modes_; }
   QMap<int, Settings::Optimizer*> getOptimizerSettings() { return optimizer_settings_;}
+  QMap<int, OptimizationTrigger> getOptimizationTriggers() { return optimization_triggers_; }
+
   QMap<int, bool> isVariableDrillingPoints() { return is_variable_drilling_points_; }
   QMap<int, bool> isVariableCompletions() { return is_variable_completions_; }
   QMap<int, bool> isModelUpdates() { return is_model_updates_;}
@@ -60,6 +72,7 @@ class DrillingSchedule {
   QList<int> drilling_steps_;
   QMap<int, double> time_steps_; //!< Indexed by the drilling steps
   QMap<int, QList<DrillingPoint>> drilling_points_; //!< Indexed by the drilling steps
+  QMap<int, OptimizationTrigger> optimization_triggers_;  //!< Indexed by the drilling steps
 
   QMap<int, DrillingOperation> drilling_operations_; //!< Indexed by the drilling steps
   QMap<int, ModelType> model_types_;                 //!< Indexed by the drilling steps
@@ -69,7 +82,6 @@ class DrillingSchedule {
   QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
   QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps
 
-  void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
   void printDrillingPoints();
 };
 
