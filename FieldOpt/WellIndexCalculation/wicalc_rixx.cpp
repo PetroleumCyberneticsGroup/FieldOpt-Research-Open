@@ -203,6 +203,26 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
                                          cell.globCellIndex,
                                          false, icell);
 
+    for (int ii=0; ii < wellPath.m_measuredDepths.size(); ++ii) {
+      cout << "wellPath.m_measuredDepths[ii= "  << ii << "]: " << wellPath.m_measuredDepths[ii] << endl;
+    }
+
+    for (int ii=0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << endl;
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << endl;
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
+    }
+
+    for (int ii=0; ii < wellPath.m_measuredDepths.size(); ++ii) {
+      cout << "wellPath.m_measuredDepths[ii= "  << ii << "]: " << wellPath.m_measuredDepths[ii] << endl;
+    }
+
+    for (int ii=0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << endl;
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << endl;
+      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
+    }
+
     // -------------------------------------------------------------
     // Deleted in susbsequent versions
     // Store calculated values in RI completion object (for

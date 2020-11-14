@@ -301,9 +301,9 @@ void Well::createAnnulusSegments(std::vector<Segment> &segments,
   assert(is_segmented_);
   std::vector<int> annulus_indexes;
   for (int i = 0; i < compartments_.size(); ++i) {
-    auto comp_blocks = trajectory()->GetWellBlocksByMdRange(compartments_[i].start_packer->md(trajectory()->GetLength()) + 0.1,
-                                                            compartments_[i].end_packer->md(trajectory()->GetLength() - 0.1)
-    );
+    auto comp_blocks = trajectory()->GetWellBlocksByMdRange(
+      compartments_[i].start_packer->md(trajectory()->GetLength()) + 0.1,
+      compartments_[i].end_packer->md(trajectory()->GetLength() - 0.1));
     for (int j = 0; j < comp_blocks.size(); ++j) {
       double outlet_md = -1;
       int index = 2*compartments_.size() + annulus_indexes.size() + 2;
