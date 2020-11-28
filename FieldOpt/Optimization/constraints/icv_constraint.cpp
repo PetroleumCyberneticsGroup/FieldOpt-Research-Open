@@ -70,7 +70,7 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     }
 }
 bool ICVConstraint::IsBoundConstraint() const {
-    true;
+    return true;
 }
 Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
     Eigen::VectorXd lbounds(id_vector.size());
