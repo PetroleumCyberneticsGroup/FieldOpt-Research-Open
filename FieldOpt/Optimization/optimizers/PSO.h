@@ -113,6 +113,7 @@ class PSO : public Optimizer {
   double stagnation_limit_; //!< The stagnation criterion, standard deviation of all particle positions.
   vector<vector<Particle>> swarm_memory_; //!< The memory of the swarm at previous timesteps.
   int number_of_particles_; //!< The number of particles in the swarm
+  bool base_case_init_gen_ = false;
   double learning_factor_1_; //!< Learning factor 1 (c1)
   double learning_factor_2_; //!< Learning factor 2 (c2)
   Eigen::VectorXd v_max_; //!< Max velocity of the particle

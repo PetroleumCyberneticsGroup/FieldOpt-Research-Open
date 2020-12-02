@@ -41,6 +41,8 @@ PSO::PSO(Settings::Optimizer *settings,
     learning_factor_1_ = settings->parameters().pso_learning_factor_1;
     learning_factor_2_ = settings->parameters().pso_learning_factor_2;
     number_of_particles_ = settings->parameters().pso_swarm_size;
+    base_case_init_gen_ = settings->parameters().pso_base_case_init_gen;
+
     if (constraint_handler_->HasBoundaryConstraints()) {
         lower_bound_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
         upper_bound_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
@@ -62,7 +64,12 @@ PSO::PSO(Settings::Optimizer *settings,
         Printer::ext_info(ss.str(), "Optimization","PSO");
     }
     for (int i = 0; i < number_of_particles_; ++i) {
-        auto new_case = generateRandomCase();
+        Case* new_case;
+        if (i == 0 && base_case_init_gen_) {
+          new_case = base_case;
+        } else {
+          new_case = generateRandomCase();
+        }
         swarm_.push_back(Particle(new_case ,gen_, v_max_, n_vars_));
         case_handler_->AddNewCase(new_case);
     }

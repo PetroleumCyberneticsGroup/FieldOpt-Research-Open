@@ -357,6 +357,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
             params.pso_velocity_scale = json_parameters["PSO-VelocityScale"].toDouble();
         }else params.pso_velocity_scale = 1.0;
 
+        if(json_parameters.contains("PSO-BaseCaseInitGen")){
+          params.pso_base_case_init_gen = json_parameters["PSO-BaseCaseInitGen"].toBool();
+        }else params.pso_base_case_init_gen = false;
+
         // EGO Parameters
         if (json_parameters.contains("EGO-InitGuesses")) {
             params.ego_init_guesses = json_parameters["EGO-InitGuesses"].toInt();
