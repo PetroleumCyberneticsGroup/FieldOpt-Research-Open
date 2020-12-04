@@ -216,58 +216,58 @@ void ECLSummaryReader::populateKeyLists() {
     }
     ext_info(swells.str(), md_, cl_, vp_.lnw);
 
-    sseg << "Segment SOFR keys: ";
+    sseg << "Segment SOFR keys: |";
     for (const auto& ckey : seg_sofr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SWFR keys: ";
+    sseg << "Segment SWFR keys: |";
     for (const auto& ckey : seg_swfr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SGFR keys: ";
+    sseg << "Segment SGFR keys: |";
     for (const auto& ckey : seg_sgfr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SOFR keys: ";
+    sseg << "Segment SOFR keys: |";
     for (const auto& ckey : seg_sofr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SPR keys: ";
+    sseg << "Segment SPR keys: |";
     for (const auto& ckey : seg_sprp_keys_) {
-      if(sseg.str().size() % 130 <= 20) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SPRD keys: ";
+    sseg << "Segment SPRD keys: |";
     for (const auto& ckey : seg_sprd_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SWCT keys: ";
+    sseg << "Segment SWCT keys: |";
     for (const auto& ckey : seg_swct_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SCSA keys: ";
+    sseg << "Segment SCSA keys: |";
     for (const auto& ckey : seg_scsa_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
@@ -1692,6 +1692,7 @@ void ECLSummaryReader::initWellSegRates() {
                 cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk],3, 0, 8);
                 cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk],3, 0, 8);
                 cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk],3, 1, 8);
+                cout << " ]";
                 cout << endl;
               }
             }
@@ -1716,6 +1717,7 @@ void ECLSummaryReader::initWellSegRates() {
                 cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk], 3, 0, 8);
                 cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk], 3, 0, 8);
                 cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk], 3, 1, 8);
+                cout << " ]";
                 cout << endl;
               }
             }
