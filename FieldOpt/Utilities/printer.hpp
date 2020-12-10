@@ -28,7 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef PRINTER_FUNCTIONS_H
 #define PRINTER_FUNCTIONS_H
 
-//#include <QString>
+#include <QString>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -236,6 +236,11 @@ inline std::string num2str(const T num, int prc=2, int sci=0, int wdt=0) {
     }
   }
   return ss.str();
+}
+
+template<typename T>
+inline QString num2strQ(const T num, int prc=2, int sci=0, int wdt=0) {
+  return QString::fromStdString(num2str(num, prc, sci, wdt));
 }
 
 //template<typename T>
