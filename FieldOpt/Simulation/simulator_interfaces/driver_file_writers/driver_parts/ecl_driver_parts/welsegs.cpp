@@ -27,16 +27,75 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 namespace ECLDriverParts {
 
+using Printer::num2strQ;
+
 Welsegs::Welsegs(Well *well) {
   head_ = "WELSEGS\n";
   foot_ = "/\n\n";
+
   WelsegsKeyword kw;
   kw.heel_entry = createHeelEntry(well);
   auto segs = well->GetSegments();
+
   for (int i = 1; i < segs.size(); ++i) {
-    kw.seg_entries.push_back(createSegmentEntry(segs[i]));
+    if (segs[i].Type() == Segment::TUBING_SEGMENT) {
+      kw.seg_entries.push_back(createSegmentEntry(segs[i]));
+    }
+  }
+
+  kw.seg_entries.push_back("  " + sepLine());
+
+  for (int i = 1; i < segs.size(); ++i) {
+    if (segs[i].Type() == Segment::ICD_SEGMENT) {
+      kw.seg_entries.push_back(createSegEntryICD(segs[i]));
+    }
+  }
+
+  // kw.seg_entries.push_back("  " + sepLine());
+
+  for (int i = 1; i < segs.size(); ++i) {
+    if (segs[i].Type() == Segment::ANNULUS_SEGMENT) {
+      kw.seg_entries.push_back(createSegmentEntry(segs[i]));
+    }
   }
   keywords_.push_back(kw);
+}
+
+Welsegs::Welsegs(QList<Model::Wells::Well *> *wells, int ts) {
+  for (Well *well : *wells) {
+    if (well->IsSegmented() && well->controls()->first()->time_step() == ts) {
+
+      WelsegsKeyword kw;
+      kw.heel_entry = createHeelEntry(well);
+      auto segs = well->GetSegments();
+
+      for (int i = 1; i < segs.size(); ++i) {
+        if (segs[i].Type() == Segment::TUBING_SEGMENT) {
+          kw.seg_entries.push_back(createSegmentEntry(segs[i]));
+        }
+      }
+
+      kw.seg_entries.push_back("  " + sepLine());
+
+      for (int i = 1; i < segs.size(); ++i) {
+        if (segs[i].Type() == Segment::ICD_SEGMENT) {
+          kw.seg_entries.push_back(createSegEntryICD(segs[i]));
+        }
+      }
+
+      // kw.seg_entries.push_back("  " + sepLine());
+
+      for (int i = 1; i < segs.size(); ++i) {
+        if (segs[i].Type() == Segment::ANNULUS_SEGMENT) {
+          if (segs[i].AuxIndex() > 0) {
+            kw.seg_entries.push_back("  " + sepLine(segs[i].AuxIndex()));
+          }
+          kw.seg_entries.push_back(createSegmentEntry(segs[i]));
+        }
+      }
+      keywords_.push_back(kw);
+    }
+  }
 }
 
 QString Welsegs::GetPartString() const {
@@ -63,15 +122,36 @@ QString Welsegs::createHeelEntry(Well *well) {
    * 8.   Y-coordinate of nodal point.
    */
   auto rseg = well->GetSegments()[0];
+  auto record = GetBaseEntryLine(11);
+
+  record[0]  = "-- Name   Dep 1         Tlen 1    Vol 1    Len&Dep    PresDrop\n";
+  record[1]  = "   " + well->name() + "  ";
+  record[2]  = num2strQ(rseg.TVDChange(), 5, 0, 9) + "    ";
+  record[3]  = num2strQ(0.0, 5, 0, 7) + "    ";
+  record[5]  = "      INC  ";
+  record[6]  = "      HF-  /\n";
+  record[7]  = "--                                                                          -\n";
+  record[8]  = "-- 1st    Last    Branch Outlet Length      Depth     Diam      Rough       -\n";
+  record[9]  = "-- Seg    Seg     Num    Seg                Change                          -\n";
+  record[10] = "-- Main Stem Segments                                                       -\n";
+  // record[6] = "DF";
+  // record[7] = QString::number(well->trajectory()->GetWellBlocks()->at(0)->getEntryPoint().x());
+  // record[8] = QString::number(well->trajectory()->GetWellBlocks()->at(0)->getEntryPoint().y());
+  return record.join("");
+}
+
+QString Welsegs::createSegEntryICD(Segment segment) {
   auto record = GetBaseEntryLine(10);
-  record[0] = well->name();
-  record[1] = QString::number(rseg.TVDChange());
-  record[4] = "INC";
-  record[5] = "HF-";
-  record[6] = "DF";
-  record[7] = QString::number(well->trajectory()->GetWellBlocks()->at(0)->getEntryPoint().x());
-  record[8] = QString::number(well->trajectory()->GetWellBlocks()->at(0)->getEntryPoint().y());
-  return "\t" + record.join("  ") + "  /\n";
+  record[0] = num2strQ(segment.Index(), 0, 0, 4);
+  record[1] = "  " + num2strQ(segment.Index(), 0, 0, 3);
+  record[2] = "  " + num2strQ(segment.Branch(), 0, 0, 3);
+  record[3] = "  " + num2strQ(segment.Outlet(), 0, 0, 2);
+
+  record[4] = "    " + num2strQ(segment.Length(), 5, 0, 9);
+  record[5] = " " + num2strQ(segment.TVDChange(), 5, 0, 7);
+  record[6] = " " + num2strQ(segment.Diameter(), 5, 0, 7);
+  record[7] = " " + num2strQ(segment.Roughness(), 3, 1, 7);
+  return "  " + record.join("  ") + "  /";
 }
 
 QString Welsegs::createSegmentEntry(Segment segment) {
@@ -86,30 +166,17 @@ QString Welsegs::createSegmentEntry(Segment segment) {
    * 7. Roughness.
    * 8. * Cross sectional area for fluid flow.
    */
-  auto record = GetBaseEntryLine(9);
-  record[0] = QString::number(segment.Index());
-  record[1] = QString::number(segment.Index());
-  record[2] = QString::number(segment.Branch());
-  record[3] = QString::number(segment.Outlet());
-  record[4] = QString::number(segment.Length());
-  record[5] = QString::number(segment.TVDChange());
-  record[6] = QString::number(segment.Diameter());
-  record[7] = QString::number(segment.Roughness());
-  return "\t" + record.join("  ") + "  /";
-}
+  auto record = GetBaseEntryLine(8);
+  record[0] = num2strQ(segment.Index(), 0, 0, 4);
+  record[1] = "  " + num2strQ(segment.Index(), 0, 0, 3);
+  record[2] = "  " + num2strQ(segment.Branch(), 0, 0, 3);
+  record[3] = "  " + num2strQ(segment.Outlet(), 0, 0, 2);
 
-Welsegs::Welsegs(QList<Model::Wells::Well *> *wells, int ts) {
-  for (Well *well : *wells) {
-    if (well->IsSegmented() && well->controls()->first()->time_step() == ts) {
-      WelsegsKeyword kw;
-      kw.heel_entry = createHeelEntry(well);
-      auto segs = well->GetSegments();
-      for (int i = 1; i < segs.size(); ++i) {
-        kw.seg_entries.push_back(createSegmentEntry(segs[i]));
-      }
-      keywords_.push_back(kw);
-    }
-  }
+  record[4] = "    " + num2strQ(segment.Length(), 5, 0, 9);
+  record[5] = " " + num2strQ(segment.TVDChange(), 5, 0, 7);
+  record[6] = " " + num2strQ(segment.Diameter(), 5, 0, 7);
+  record[7] = " " + num2strQ(segment.Roughness(), 5, 0, 7);
+  return "  " + record.join("  ") + "  /";
 }
 
 QString Welsegs::WelsegsKeyword::buildKeyword() const {

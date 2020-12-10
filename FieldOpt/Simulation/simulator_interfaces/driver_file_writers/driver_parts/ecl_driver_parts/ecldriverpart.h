@@ -76,6 +76,17 @@ class ECLDriverPart : public Simulation::DriverPart
   //!< Anything that should be printed after the
   //!< content, e.g., a terminator ('/')
   QString foot_;
+
+  QString sepLine(int icd_num=0) {
+    QString start_str = "  -- ";
+    QString end_str;
+    if (icd_num > 0) {
+      end_str = QString::number(icd_num) + QString::fromStdString(string(65, ' ')) + "-";
+    } else {
+      end_str = QString::fromStdString(string(66, ' ')) + "-";
+    }
+    return start_str + end_str;
+  }
 };
 
 }

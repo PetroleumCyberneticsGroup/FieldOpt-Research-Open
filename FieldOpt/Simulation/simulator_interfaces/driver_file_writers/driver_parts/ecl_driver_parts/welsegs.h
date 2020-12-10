@@ -94,6 +94,7 @@ class Welsegs : public ECLDriverPart {
   };
   QString createHeelEntry(Well *well);
   QString createSegmentEntry(Segment segment);
+  QString createSegEntryICD(Segment segment);
 
   QList<WelsegsKeyword> keywords_;
   string md_ = "Simulation::sim_interfaces::driver_file_writers"

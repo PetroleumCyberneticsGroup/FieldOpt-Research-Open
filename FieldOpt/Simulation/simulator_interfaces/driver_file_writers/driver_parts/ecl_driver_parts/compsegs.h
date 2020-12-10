@@ -68,8 +68,14 @@ class Compsegs  : public ECLDriverPart {
     QStringList entries;
     QString buildKeyword() const;
   };
+
   QString generateEntry(Segment seg);
+  vector<size_t> getCompsegOrder(const vector<size_t> &v);
+
   QList<CompsegsKeyword> keywords_;
+
+  vector<size_t> idx_orig_;
+
 };
 
 }

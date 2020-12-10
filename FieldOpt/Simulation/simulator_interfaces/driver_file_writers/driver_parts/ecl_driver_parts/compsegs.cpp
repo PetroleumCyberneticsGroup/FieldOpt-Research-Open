@@ -27,6 +27,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 namespace ECLDriverParts {
 
+using Printer::num2strQ;
+
 Compsegs::Compsegs(Well *well) {
   head_ = "COMPSEGS\n";
   foot_ = "/\n\n";
@@ -44,10 +46,40 @@ Compsegs::Compsegs(QList<Model::Wells::Well *> *wells, int ts) {
     if (well->IsSegmented() && well->controls()->first()->time_step() == ts) {
       CompsegsKeyword kw;
       kw.wname = well->name();
-      auto asegs = well->GetAnnulusSegments();
-      for (int i = 0; i < asegs.size(); ++i) {
-        kw.entries.push_back(generateEntry(asegs[i]));
+
+      // auto tsegs = well->GetTubingSegments();
+      // auto isegs = well->GetICDSegments();
+      // auto asegs = well->GetAnnulusSegments();
+      //
+      // for (int i = 1; i < tsegs.size(); ++i) {
+      //   kw.entries.push_back(sepLine(i));
+      //   kw.entries.push_back(generateEntry(tsegs[i]));
+      //   for (int j = 1; j < isegs.size(); ++j) {
+      //     kw.entries.push_back(generateEntry(isegs[j]));
+      //     for (int k = 1; k < asegs.size(); ++k) {
+      //       kw.entries.push_back(generateEntry(asegs[k]));
+      //     }
+      //   }
+      // }
+
+      auto segs = well->GetSegments();
+      for (int i = 1; i < segs.size(); ++i) {
+        kw.entries.push_back(generateEntry(segs[i]));
       }
+
+      // Some sort of sorting
+      QStringList qsl;
+      auto idx = getCompsegOrder(idx_orig_);
+      for (int i = 0; i < idx.size(); ++i) {
+        // cout << "IDX=" << idx[i] << endl;
+        // cout << kw.entries[idx[i]].toStdString() << endl;
+        qsl << kw.entries[idx[i]];
+      }
+      // qSort(qsl.begin(), qsl.end());
+      kw.entries = qsl;
+
+      // sorting but not by branch
+      // qSort(kw.entries.begin(), kw.entries.end());
       keywords_.push_back(kw);
     }
   }
@@ -64,8 +96,23 @@ QString Simulation::ECLDriverParts::Compsegs::GetPartString() const {
   return all_keywords;
 }
 
+vector<size_t> Simulation::ECLDriverParts::Compsegs::getCompsegOrder(const vector<size_t> &v) {
+
+ //  vector<size_t> idx(v.size());
+ //  iota(idx.begin(), idx.end(), 0);
+ // stable_sort(idx.begin(), idx.end(),
+ //              [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+
+  vector<size_t> idx(v.size());
+  iota(idx.begin(), idx.end(), 0);
+  stable_sort(idx.begin(), idx.end(),
+              [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+
+  return idx;
+}
+
 QString Compsegs::generateEntry(Segment seg) {
-/*
+  /*
  * Record 1:
  *  1. Name of well.
  *
@@ -78,18 +125,28 @@ QString Compsegs::generateEntry(Segment seg) {
  *  5. MD from root to _end_ of connection in this block.
  */
   auto entry = GetBaseEntryLine(6);
-  entry[0] = QString::number(seg.ParentBlock()->i());
-  entry[1] = QString::number(seg.ParentBlock()->j());
-  entry[2] = QString::number(seg.ParentBlock()->k());
-  entry[3] = QString::number(seg.Branch());
-  entry[4] = QString::number(seg.OutletMD());
-  entry[5] = QString::number(seg.OutletMD() + seg.Length());
-  return "\t" + entry.join("  ") + "  /";
+  // cout << "-> " << "I" << endl;
+  entry[0] = num2strQ(seg.ParentBlock()->i(), 0, 0, 4) + "";
+  // cout << "-> " << "J" << endl;
+  entry[1] = num2strQ(seg.ParentBlock()->j(), 0, 0, 3) + "";
+  // cout << "-> " << "K" << endl;
+  entry[2] = num2strQ(seg.ParentBlock()->k(), 0, 0, 3) + "";
+  // cout << "-> " << "Branch" << endl;
+  entry[3] = num2strQ(seg.BlockBranch(), 0, 0, 4) + "   ";
+
+  entry[4] = num2strQ(seg.OutletMD(), 5, 0, 9) + "";
+  entry[5] = num2strQ(seg.OutletMD() + .1, 5, 0, 9) + "";
+  // entry[5] = num2strQ(seg.OutletMD() + seg.Length(), 5, 0, 9) + "  ";
+
+  idx_orig_.push_back(seg.BlockBranch());
+  return "" + entry.join("  ") + "  /";
 }
 
 QString Compsegs::CompsegsKeyword::buildKeyword() const {
   QString kw = "COMPSEGS\n";
-  kw += "\t" + this->wname + "  /\n";
+  kw += "  " + this->wname + " /\n";
+  kw += "-- I    J    K    Branch  Start     End        Dir Pen     End Range     Connection Depth\n";
+  kw += "--                no      Length    Length     -\n";
   kw += this->entries.join("\n");
   kw += "\n/\n\n";
   return kw;
