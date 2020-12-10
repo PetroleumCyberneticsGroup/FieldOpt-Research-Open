@@ -31,6 +31,7 @@ namespace ECLDriverParts {
 
 using Printer::ext_info;
 using Printer::num2str;
+using Printer::num2strQ;
 
 Wsegvalv::Wsegvalv(Well *well) {
   head_ = "WSEGVALV\n";
@@ -94,11 +95,17 @@ QString Wsegvalv::generateEntry(Segment seg, QString wname) {
  * 2. Dimensionless flow coefficient (\$ C_v \$).
  * 3. Cross-section area for flow in the constriction (\$ A_c \$).
  */
-  auto entry = GetBaseEntryLine(4);
+  auto entry = GetBaseEntryLine(10);
   entry[0] = wname;
-  entry[1] = QString::number(seg.Index());
-  entry[2] = QString::number(seg.ParentICD()->flowCoefficient());
-  entry[3] = QString::number(seg.ParentICD()->valveSize());
+  entry[1] = num2strQ(seg.Index(), 0, 0, 2) + "";
+  entry[2] = num2strQ(seg.ParentICD()->flowCoefficient(), 2, 0, 4) + "";
+  entry[3] = num2strQ(seg.ParentICD()->valveSize(), 5, 1, 9) + "";
+
+  entry[5] = num2strQ(0.1016, 4, 0, 6) + "";
+  entry[7] = num2strQ(0.00810732, 5, 1, 9) + "";
+  entry[8] = "OPEN";
+  entry[9] = num2strQ(0.007853, 4, 1, 9) + "";
+
   return "\t" + entry.join("  ") + "  /";
 }
 

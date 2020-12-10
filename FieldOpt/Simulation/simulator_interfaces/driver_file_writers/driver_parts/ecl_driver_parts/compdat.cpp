@@ -30,6 +30,7 @@ namespace Simulation {
 namespace ECLDriverParts {
 
 using Printer::ext_info;
+using Printer::num2strQ;
 
 Compdat::Compdat(QList<Model::Wells::Well *> *wells) {
   initializeBaseEntryLine(13);
@@ -60,9 +61,9 @@ QString Compdat::GetPartString() const {
 
   QString entries = head_ + "\n";
   for (QStringList entry : entries_) {
-    entries.append("    " + entry.join(" ") + " /\n");
+    entries.append("  " + entry.join(" ") + " /\n");
   }
-  entries.append("\n" + foot_);
+  entries.append("" + foot_);
   return entries;
 }
 
@@ -81,27 +82,28 @@ QStringList Compdat::createBlockEntry(QString well_name,
                                       Model::Wells::Wellbore::WellBlock *well_block) {
   QStringList block_entry = QStringList(base_entry_line_);
   block_entry[0] = well_name;
-  block_entry[1] = QString::number(well_block->i());
-  block_entry[2] = QString::number(well_block->j());
-  block_entry[3] = QString::number(well_block->k());
-  block_entry[4] = QString::number(well_block->k());
+  block_entry[1] = num2strQ(well_block->i(), 0, 0, 4) + "";
+  block_entry[2] = num2strQ(well_block->j(), 0, 0, 4) + "";
+  block_entry[3] = num2strQ(well_block->k(), 0, 0, 4) + "";
+  block_entry[4] = num2strQ(well_block->k(), 0, 0, 4) + " ";
 
   if (well_block->HasPerforation()) {
     block_entry[5] = "OPEN";
     if (well_block->GetPerforation()->transmissibility_factor() >= 0.0)
-      block_entry[7] = QString::number(well_block->GetPerforation()->transmissibility_factor());
+      block_entry[7] = " " + num2strQ(well_block->GetPerforation()->transmissibility_factor(), 5, 0, 9) + "";
     // WI is defaulted if a negative value is provided.
   }
   else {
     block_entry[5] = "SHUT";
   }
 
-  block_entry[8] = QString::number(wellbore_radius);
+  block_entry[8] = num2strQ(wellbore_radius, 4, 0, 7) + "";
 
   // \note By default, this is set to X. This is primarily
   // relevant if the well passes diagonally through a block.
-  string tm = "Trajectory class (Model) was unable to determine ";
-  tm += "penetration dir for well: " + well_name.toStdString() + ".";
+  im_ = "@[Compdat::createBlockEntry] ";
+  im_ += "Either Trajectory::calculateDirectionOfPenetration failed ";
+  im_ += "or penetration dir for well: " + well_name.toStdString() + " not def. |";
 
   block_entry[12] = "X";
   switch (well_block->directionOfPenetration()) {
@@ -116,14 +118,20 @@ QStringList Compdat::createBlockEntry(QString well_name,
       break;
     case Model::Wells::Wellbore::WellBlock::DirOfPenetration::D:
       block_entry[12] = "X";
-      tm += " Well is exactly diagonal. Defaulting to \"X\"";
-      tm = "[mod: " + md_ +  "] [cls: " + cl_ + "]:\n" + tm;
-      cout << tm << endl;
+      im_ += " Well is exactly diagonal. Defaulting to \"X\"";
+      im_ += "[mod: " + md_ +  "] [cls: " + cl_ + "]:\n" + im_;
+      cout << im_ << endl;
       break;
     case Model::Wells::Wellbore::WellBlock::DirOfPenetration::W:
-      throw std::runtime_error(tm);
+      block_entry[12] = "X";
+      im_ += "DirOfPenetration::W -> overriding to X for ";
+      im_ += well_block->getPropString();
+      ext_info(im_, md_, cl_);
+      break;
+      // throw std::runtime_error(im_);
     default:
-      throw std::runtime_error(tm);
+      im_ += "No DirOfPenetration defined.";
+      throw std::runtime_error(im_);
   }
   return block_entry;
 }

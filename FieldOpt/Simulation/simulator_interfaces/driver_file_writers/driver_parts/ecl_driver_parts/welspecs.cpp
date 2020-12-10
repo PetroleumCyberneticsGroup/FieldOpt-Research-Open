@@ -28,6 +28,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 namespace ECLDriverParts {
 
+using Printer::num2strQ;
+
 Welspecs::Welspecs(QList<Model::Wells::Well *> *wells) {
   initializeBaseEntryLine(10);
   head_ = "WELSPECS";
@@ -57,9 +59,9 @@ QString Welspecs::GetPartString() const {
 
   QString entries = head_ + "\n";
   for (QStringList entry : entries_) {
-    entries.append("    " + entry.join(" ") + " /\n");
+    entries.append("  " + entry.join(" ") + " /\n");
   }
-  entries.append("\n" + foot_);
+  entries.append("" + foot_);
   return entries;
 }
 
@@ -72,8 +74,8 @@ QStringList Welspecs::createWellEntry(Model::Wells::Well *well) {
   entry[0] = well->name();
   if (well->group().length() >= 1)
     entry[1] = well->group();
-  entry[2] = QString::number(well->heel_i());
-  entry[3] = QString::number(well->heel_j());
+  entry[2] = num2strQ(well->heel_i(), 0, 0, 4) + "";
+  entry[3] = num2strQ(well->heel_j(), 0, 0, 4) + "";
 
   switch (well->preferred_phase()) {
     case Settings::Model::PreferredPhase::Oil:
