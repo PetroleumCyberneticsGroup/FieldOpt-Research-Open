@@ -146,10 +146,10 @@ void WellSpline::spline_points_from_import(Settings::Model::Well &well_settings)
 
 QList<WellBlock *> *WellSpline::computeWellBlocks() {
   assert(spline_points_.size() >= 2);
-  assert(grid_ != nullptr && grid_ != 0);
+  assert(grid_ != nullptr);
 
   if (vp_.vMOD >= 2) {
-    std::string points_str = "";
+    std::string points_str;
     for (auto pt : spline_points_) {
       auto point = pt->ToEigenVector();
       std::stringstream point_str;
@@ -161,6 +161,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     im_ += points_str + "Grid: " + grid_->GetGridFilePath();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
+
 
   last_computed_grid_ = grid_->GetGridFilePath();
   last_computed_spline_ = create_spline_point_vector();
@@ -175,6 +176,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     welldef.skins.push_back(0.0);
     welldef.heels.push_back(spline_points[w]);
     welldef.toes.push_back(spline_points[w+1]);
+
     if (welldef.heel_md.empty()) {
       welldef.heel_md.push_back(0.0);
     }
@@ -203,6 +205,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
       wic_->ComputeWellBlocks(block_data, welldef);
     }
   }
+
   auto end = QDateTime::currentDateTime();
   seconds_spent_in_compute_wellblocks_ = time_span_seconds(start, end);
 
@@ -215,6 +218,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     blocks->last()->setExitMd(i.get_segment_exit_md(0));
     blocks->last()->setLength(i.get_segment_length(0));
   }
+
   if (blocks->empty()) {
     throw WellBlocksNotDefined("WIC could not compute.");
   }

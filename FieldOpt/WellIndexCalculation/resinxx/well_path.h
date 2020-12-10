@@ -197,7 +197,7 @@ class WellPath : public cvf::Object
                                            double cDarcyForRelevantUnit);
 
   CellDir calculateDirectionInCell(// RICaseData* eclipseCase,
-                                   WellPathCellIntersectionInfo cellInfo,
+                                   WellPathCellIntersectionInfo &cellInfo,
                                    IntersectedCell &icell);
 
  private:

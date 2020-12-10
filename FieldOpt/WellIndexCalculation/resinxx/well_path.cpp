@@ -312,7 +312,7 @@ double WellPath::peacemanRadius(double permeabilityNormalDirection1,
 
 // -----------------------------------------------------------------
 CellDir
-WellPath::calculateDirectionInCell(WellPathCellIntersectionInfo cell,
+WellPath::calculateDirectionInCell(WellPathCellIntersectionInfo &cell,
                                    IntersectedCell &icell) {
 
   // -------------------------------------------------------------

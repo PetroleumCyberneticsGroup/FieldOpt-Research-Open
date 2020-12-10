@@ -62,8 +62,7 @@ Well::Well(const Settings::Model& model_settings,
 
   controls_ = new QList<Control *>();
   for (const auto & control : well_settings_.controls) {
-    controls_->append(new Control(control,
-                                  well_settings_,
+    controls_->append(new Control(control,well_settings_,
                                   variable_container));
   }
 
