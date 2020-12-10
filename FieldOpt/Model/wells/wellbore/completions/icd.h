@@ -52,6 +52,7 @@ class ICD : public SegmentedCompletion {
   double setting() const;
   double valveSize() const { return valve_size_->value(); }
   double flowCoefficient() const { return flow_coefficient_; }
+  double length() const { return length_; }
   int timeStep() const { return time_step_; }
   int segmentIdx() const { return segment_idx_; }
   std::string deviceName() const { return device_name_; }
@@ -66,6 +67,7 @@ class ICD : public SegmentedCompletion {
   Properties::ContinuousProperty *valve_size_;
   double min_valve_size_, max_valve_size_;
   double flow_coefficient_;
+  double length_;
   int time_step_;
   int segment_idx_;
   std::string device_name_;

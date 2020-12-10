@@ -41,12 +41,13 @@ namespace Wells {
  */
 class Segment {
  public:
-  enum SegType { TUBING_SEGMENT, ANNULUS_SEGMENT, ICD_SEGMENT, MAIN_BRANCH, OUTER_BRANCH };
+  enum SegType { TUBING_SEGMENT, ANNULUS_SEGMENT,
+    ICD_SEGMENT, MAIN_BRANCH, OUTER_BRANCH };
   Segment();
   Segment(SegType type, int index, int branch, int outlet,
           double length, double tvd, double diameter, double roughness,
-          double outlet_md
-  );
+          double outlet_md, int block_index, int block_branch, int aux_index);
+
   void AddInlet(int index);
   std::vector<int> GetInlets() const;
 
@@ -58,15 +59,17 @@ class Segment {
   Wellbore::WellBlock *ParentBlock() { return parent_block_; }
   Wellbore::Completions::ICD *ParentICD() { return parent_icd_; }
 
-  int     Index()     const { return index_; }
-  int     Branch()    const { return branch_; }
-  int     Outlet()    const { return outlet_; }
-  int     OutletMD()  const { return md_; }
-  double  TVDChange() const { return tvd_change_; }
-  double  Length()    const { return length_; }
-  double  Diameter()  const { return diameter_; }
-  double  Roughness() const { return roughness_; }
-  SegType Type()      const { return type_; }
+  int     Index()       const { return index_; }
+  int     AuxIndex()    const { return aux_index_; }
+  int     Branch()      const { return branch_; }
+  int     BlockBranch() const { return block_branch_; }
+  int     Outlet()      const { return outlet_; }
+  double  OutletMD()    const { return md_; }
+  double  TVDChange()   const { return tvd_change_; }
+  double  Length()      const { return length_; }
+  double  Diameter()    const { return diameter_; }
+  double  Roughness()   const { return roughness_; }
+  SegType Type()        const { return type_; }
 
   std::string ToString();
 
@@ -79,6 +82,9 @@ class Segment {
   double roughness_;
   double md_;         //!< Measured depth to start of segment
   double tvd_change_; //!< TVD _change_ along the segment (i.e. zero when perfectly horizontal)
+  int block_index_;
+  int block_branch_;
+  int aux_index_ = -1;
 
   SegType type_;             //!< Segment type (tubing, annulus or ICD)
 

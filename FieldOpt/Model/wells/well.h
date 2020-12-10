@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Model/properties/var_prop_container.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/wells/control.h"
+#include "Model/wells/wellbore/wellblock.h"
 #include "Model/wells/wellbore/trajectory.h"
 #include "Model/wells/wellbore/completions/icd.h"
 #include "Reservoir/grid/eclgrid.h"
@@ -69,6 +70,9 @@ class Well
     int j = std::numeric_limits<int>::min();
     int k = std::numeric_limits<int>::min();
   };
+
+  template<typename T>
+  std::vector<std::vector<T>> SplitVector(const std::vector<T>& vec, size_t n, bool dbg);
 
   enum PreferredPhase { Oil, Gas, Water, Liquid };
 
@@ -114,6 +118,8 @@ class Well
   Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
 
+  QList<Wellbore::WellBlock *> *well_blocks_;
+
   string im_ = "", wm_ = "", em_ = "";
   string md_ = "Model";
   string cl_ = "Well";
@@ -134,10 +140,16 @@ class Well
 
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
+  double icd_diam_;            //!< ICD diameter.
+
   double tub_cross_sect_area_; //!< Tubing cross section area.
   double ann_cross_sect_area_; //!< Annular cross section area.
+  double icd_cross_sect_area_; //!< ICD cross section area.
+
+
   double tub_roughness_;       //!< Roughness for tubing segments.
   double ann_roughness_;       //!< Roughness for annulus segments.
+  double icd_roughness_;       //!< Roughness for ICD.
   std::vector<Compartment> compartments_; //!< List of compartments.
 
   //!< List of icds for when we have neither a

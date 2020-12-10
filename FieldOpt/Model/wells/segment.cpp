@@ -28,6 +28,7 @@ namespace Model {
 namespace Wells {
 
 Model::Wells::Segment::Segment() { }
+
 Segment::Segment(Segment::SegType type,
                  int index,
                  int branch,
@@ -36,7 +37,10 @@ Segment::Segment(Segment::SegType type,
                  double tvd,
                  double diameter,
                  double roughness,
-                 double outlet_md) {
+                 double outlet_md,
+                 int block_index,
+                 int block_branch,
+                 int aux_index=-1) {
   type_ = type;
   index_ = index;
   branch_ = branch;
@@ -45,26 +49,37 @@ Segment::Segment(Segment::SegType type,
   tvd_change_ = tvd;
   diameter_ = diameter;
   roughness_ = roughness;
-  md_ = outlet_md + length;
+  // md_ = outlet_md + length;
+  md_ = outlet_md;
+  block_index_ = block_index;
+  block_branch_ = block_branch;
+  aux_index_ = aux_index;
 }
+
 void Segment::AddInlet(int index) {
   inlets_.push_back(index);
 }
+
 std::vector<int> Segment::GetInlets() const {
   return inlets_;
 }
+
 void Segment::AddParentBlock(Wellbore::WellBlock *parent_block) {
   parent_block_ = parent_block;
 }
+
 void Segment::AddParentICD(Wellbore::Completions::ICD *parent_icd) {
   parent_icd_ = parent_icd;
 }
+
 bool Segment::HasParentBlock() const {
   return !parent_block_ == 0;
 }
+
 bool Segment::HasParentICD() const {
   return !parent_icd_ == 0;
 }
+
 std::string Segment::ToString() {
   std::stringstream s;
   s << "-- Segment " << index_ << " (";

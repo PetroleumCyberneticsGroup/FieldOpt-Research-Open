@@ -22,12 +22,13 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-#include <Utilities/verbosity.h>
-#include <Utilities/printer.hpp>
 #include "compartment.h"
 
 namespace Model {
 namespace Wells {
+
+using Printer::num2str;
+using Printer::ext_warn;
 
 Compartment::Compartment() { }
 Compartment::Compartment(const double start_md,
@@ -35,13 +36,22 @@ Compartment::Compartment(const double start_md,
                          const double start_tvd,
                          const double end_tvd,
                          const double well_length,
+                         const std::vector<Wellbore::WellBlock *> block_range,
+                         const std::vector<int> block_idx_range,
                          const Settings::Model::Well &well_settings,
                          Properties::VarPropContainer *variable_container,
                          std::vector<Compartment> &compartments_) {
   Settings::Model::Well::Completion comp_settings;
+  block_range_ = block_range;
+  block_idx_range_ = block_idx_range;
 
   if (compartments_.empty()) {
-    assert(start_md == 0.0);
+    // assert(start_md == 0.0); // -- ???
+    if(start_md != 0.0) {
+      wm_ = "Well MD larger than zero: " + num2str(start_md, 3, 0, 7);
+      ext_warn(wm_, md_, cl_);
+    }
+
     comp_settings.name = "Packer#" + well_settings.name + "#0";
     comp_settings.placement = start_md / well_length;
     comp_settings.true_vertical_depth = start_tvd;
@@ -57,11 +67,13 @@ Compartment::Compartment(const double start_md,
   comp_settings.true_vertical_depth = end_tvd;
   comp_settings.type = Settings::Model::WellCompletionType::Packer;
   comp_settings.variable_placement = well_settings.seg_compartment_params.variable_placement;
+
   end_packer = new Wellbore::Completions::Packer(comp_settings, variable_container);
 
   comp_settings.name = "ICD#" + well_settings.name + "#" + QString::number(compartments_.size());
   comp_settings.placement = start_md / well_length;
   comp_settings.true_vertical_depth = start_tvd;
+  comp_settings.icd_segment_length = block_range[0]->getLength();
   comp_settings.valve_size = well_settings.seg_compartment_params.valve_size;
   comp_settings.valve_flow_coeff = well_settings.seg_compartment_params.valve_flow_coeff;
   comp_settings.variable_strength = well_settings.seg_compartment_params.variable_strength;
@@ -70,12 +82,20 @@ Compartment::Compartment(const double start_md,
 
   if (VERB_MOD >= 1) {
     std::stringstream ss;
-    ss << "Created new compartment " << compartments_.size() << ".|";
-    ss << "Start Packer MD: " << start_packer->md(well_length) << ".|";
-    ss << "End Packer MD: " << end_packer->md(well_length) << ".|";
-    ss << "ICD MD: " << icd->md(well_length) << ".|";
+    ss << "Created new compartment " << compartments_.size() + 1 << ".| ";
+    ss << "Start Packer MD: " << start_packer->md(well_length) << ".| ";
+    ss << "End Packer MD: " << end_packer->md(well_length) << ".| ";
+    ss << "ICD MD: " << icd->md(well_length) << " ICD length: " << icd->length() << ".|";
     Printer::ext_info(ss.str(), "Model", "Compartment");
   }
+}
+
+std::vector<Wellbore::WellBlock *> Compartment::GetBlockRange() const {
+  return block_range_;
+}
+
+std::vector<int> Compartment::GetBlockIdxange() const {
+  return block_idx_range_;
 }
 
 double Compartment::GetLength(const double &well_length) const {

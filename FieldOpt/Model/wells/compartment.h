@@ -28,6 +28,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "wellbore/completions/icd.h"
 #include "wellbore/completions/packer.h"
 
+#include "Model/wells/wellbore/wellblock.h"
+
 namespace Model {
 namespace Wells {
 
@@ -37,28 +39,41 @@ using namespace Wellbore::Completions;
  * The Compartment struct models a compartment made up of
  * two packers and an ICD. The ICD is placed at the beginning
  * of the compartment (i.e. closest to the heel of the well).
- * This class is used by segmented wells to build the segmentation.
+ * This class is used by segmented wells to build segments.
  */
 class Compartment {
  public:
   Compartment();
-  Compartment(const double start_md, const double end_md,
-              const double start_tvd, const double end_tvd,
-              const double well_length,
+  Compartment(double start_md, double end_md,
+              double start_tvd, double end_tvd,
+              double well_length,
+              std::vector<Wellbore::WellBlock *> block_range,
+              std::vector<int> block_idx_range,
               const Settings::Model::Well &well_settings,
               Properties::VarPropContainer *variable_container,
               std::vector<Compartment> &compartments_);
+
   double GetLength(const double &well_length) const;
+  std::vector<Wellbore::WellBlock *> GetBlockRange() const;
+  std::vector<int> GetBlockIdxange() const;
   double GetTVDDifference() const;
 
   /*!
-   * Update the the ICD MD to fit new start packer MDs
+   * Update the ICD MD to fit new start packer MDs
    */
   void Update();
 
   Packer *start_packer;
   Packer *end_packer;
   ICD *icd;
+
+  std::vector<Wellbore::WellBlock *> block_range_;
+  std::vector<int> block_idx_range_;
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Model";
+  string cl_ = "Well";
+  Settings::VerbParams vp_;
 };
 
 }
