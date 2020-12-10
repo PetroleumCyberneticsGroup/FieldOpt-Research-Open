@@ -42,6 +42,8 @@ RIExtractor::cellIntersectionInfosAlongWellPath() const {
   vector<WellPathCellIntersectionInfo> infoVector;
   if (m_intersectedCellsGlobIdx.empty()) return infoVector;
 
+  // cout << "m_intersectedCellsGlobIdx.size() = " << m_intersectedCellsGlobIdx.size() << endl;
+
   for (size_t i = 0; i < m_intersectedCellsGlobIdx.size() - 1; i=i+2) {
 
     CVF_ASSERT(m_intersectedCellsGlobIdx[i] ==
@@ -62,12 +64,15 @@ RIExtractor::cellIntersectionInfosAlongWellPath() const {
         this->calculateLengthInCell(cellInfo.globCellIndex,
                                     cellInfo.startPoint,
                                     cellInfo.endPoint);
-
     cellInfo.dxdydz =
         m_caseData.p()->mainGrid()->cell(cellInfo.globCellIndex).dxdydz();
 
+    m_caseData.p()->mainGrid()->ijkFromCellIndex(cellInfo.globCellIndex,
+                                                 &cellInfo.i, &cellInfo.j, &cellInfo.k);
+
     infoVector.push_back(cellInfo);
   }
+  // cout << "infoVector.size() = " << infoVector.size() << endl;
 
   return infoVector;
 }
