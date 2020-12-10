@@ -30,8 +30,9 @@ namespace Wellbore {
 namespace Completions {
 
 Packer::Packer(const Settings::Model::Well::Completion &completion_settings,
-               Properties::VarPropContainer *variable_container) : SegmentedCompletion(completion_settings,
-                                                                                       variable_container) {
+               Properties::VarPropContainer *variable_container)
+  : SegmentedCompletion(completion_settings,
+                        variable_container) {
   if (completion_settings.variable_placement) {
     placement_->setName(completion_settings.name);
     variable_container->AddVariable(placement_);

@@ -32,6 +32,9 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QString>
 #include <QUuid>
 
+#include <Utilities/verbosity.h>
+#include <Utilities/printer.hpp>
+
 namespace Model {
 namespace Properties {
 

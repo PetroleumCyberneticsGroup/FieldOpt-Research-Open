@@ -240,7 +240,8 @@ QList<WellBlock *> *WellSpline::GetWellBlocks() {
 
 WellBlock *WellSpline::getWellBlock(Reservoir::WellIndexCalculation::IntersectedCell block_data) {
   if (vp_.vMOD >= 2) {
-    im_ = "Creating WellBlock for IC " + block_data.ijk_index().to_string();
+    im_ = "@[WellSpline::getWellBlock] ";
+    im_ = "Creating WellBlock for IntersectedCell " + block_data.ijk_index().to_string();
     im_ += " with WI " + num2str(block_data.cell_well_index_matrix());
     cout << im_ << endl;
   }

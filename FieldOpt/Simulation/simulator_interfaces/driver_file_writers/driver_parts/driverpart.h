@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QStringList>
 #include <Settings/settings.h>
 #include "Utilities/verbosity.h"
+#include "Utilities/printer.hpp"
 
 namespace Simulation {
 

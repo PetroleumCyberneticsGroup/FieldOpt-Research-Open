@@ -34,6 +34,8 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
+using Printer::num2str;
+
 /*!
  * \brief The WellBlock class represents a single well block.
  * It contains references to any completion defined within it.
@@ -107,6 +109,20 @@ class WellBlock
   double getExitMd() const { return exit_md_; }
   double getLength() const { return length_; }
   double getDepthChange() const { return exit_point_[2] - entry_point_[2]; }
+
+  string getPropString(double md=0) {
+    stringstream ss;
+    if (md > 0) {
+      ss << "md:[" << num2str(md, 3, 1, 7)  << "] -- ";
+    }
+    ss << "block:[";
+    ss << num2str(this->i(), 0, 0, 4) + ",";
+    ss << num2str(this->j(), 0, 0, 4) + ",";
+    ss << num2str(this->k(), 0, 0, 4) + "] ";
+    ss << "entry_md:[" << num2str(this->entry_md_, 3, 1, 7)  << "] ";
+    ss << "exit_md:[" << num2str(this->exit_md_, 3, 1, 7)  << "] ";
+    return ss.str();
+  }
 
  private:
   Model::Properties::DiscreteProperty *i_;

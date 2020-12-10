@@ -78,9 +78,12 @@ class Trajectory
   double GetLength() const;
 
   //!< Get the wellblock surrounding the given MD.
-  WellBlock * GetWellBlockByMd(double md);
+  WellBlock * GetWellBlockByMd(double md, string dmsg="");
   std::vector<WellBlock *> GetWellBlocksByMdRange(double start_md,
-                                                  double end_md) const;
+                                                  double end_md,
+                                                  string dmsg="") const;
+
+  WellBlock* dummy_block = new WellBlock(0,0,0);
 
   //!< Get the measured depth for the entry point to the block.
   double GetEntryMd(const WellBlock *wb) const;
