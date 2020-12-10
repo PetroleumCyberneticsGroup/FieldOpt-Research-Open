@@ -91,12 +91,13 @@ class Model
       double placement               = -1.0; //!< Placement as a fraction of the well length.
       double true_vertical_depth     = -1.0; //!< True vertical depth for the location of the completion.
       int time_step                  = -1;   //!< Time step for completion to activate/be modified.
-      int icd_segment              = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
-      std::string icd_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
+      int icd_segment                = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
+      std::string icd_name           = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
       std::vector<std::string> icd_names; //< List of device names that have common settings.
       std::vector<int> icd_segments; //!< List of segment indexes matching the icd_names list.
-      double min_valve_size         = 0.0;    //!< Minimum valve size (needed for simulator input)
-      double max_valve_size         = 7.854E-3; //!< Maximum valve size (needed for simulator input)
+      double icd_segment_length      = -1.0; // Set length of ICD equal to trajectory through 1st block
+      double min_valve_size          = 0.0;    //!< Minimum valve size (needed for simulator input)
+      double max_valve_size          = 7.854E-3; //!< Maximum valve size (needed for simulator input)
       bool is_variable               = false; //!< True if all viable properties are variable. Otherwise false.
       bool variable_placement        = false; //!< Whether the placement of a comp. along the trajectory should be variable.
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
