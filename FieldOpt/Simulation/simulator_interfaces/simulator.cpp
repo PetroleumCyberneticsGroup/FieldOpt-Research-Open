@@ -94,6 +94,7 @@ void Simulator::PreSimWork() {
     QString presim_script = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
     QStringList pre_sim_args = *settings_->simulator()->pre_sim_args();
     pre_sim_args.append(settings_->simulator()->use_actionx_str());
+    pre_sim_args.append(settings_->simulator()->file_structure_str());
     pre_sim_args.prepend(sim_wrk_dir_);
 
     if (vp_.vSIM >= 3) {

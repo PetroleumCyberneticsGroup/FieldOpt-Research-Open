@@ -109,8 +109,19 @@ class Simulator
     string levels_str_ = "";
   };
 
-  /*! @brief Get the fluid model. */
+  /*! @brief Get file structure. */
   FileStructure file_structure() { return file_structure_; }
+
+  QStringList file_structure_str() const {
+    QStringList sl;
+    if (file_structure_.type_ == FileStructType::Flat) {
+      sl << "Flat" << "0" << " ";
+    } else if (file_structure_.type_ == FileStructType::Branched) {
+      sl << "Branched" << QString::number(file_structure_.levels_num_)
+      << QString::fromStdString(file_structure_.levels_str_);
+    }
+    return sl;
+  }
 
   VerbParams verbParams() { return vp_; };
 

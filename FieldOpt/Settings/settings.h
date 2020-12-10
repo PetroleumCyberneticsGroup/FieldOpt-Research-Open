@@ -30,6 +30,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QJsonObject>
 
 #include "Utilities/verbosity.h"
+
 #include "global.h"
 #include "simulator.h"
 #include "optimizer.h"
