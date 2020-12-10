@@ -114,6 +114,7 @@ void Trajectory::UpdateWellBlocks() {
       well_blocks_ = well_spline_->GetWellBlocks();
     } else {
       if (vp_.vMOD >= 3) {
+        im_ = "@[Trajectory::UpdateWellBlocks] ";
         im_ = "The well spline has not changed.";
         im_ += "well indices will not be recomputed.";
         info(im_, vp_.lnw);
@@ -162,7 +163,7 @@ void Trajectory::calculateDirectionOfPenetration() {
   }
   // All but the last block use forward direction
   int delta_i, delta_j, delta_k;
-  stringstream ss; ss << "delta ijk -- Trajectory::calculateDirectionOfPenetration():" << endl;
+  stringstream ss; ss << "@[Trajectory::calculateDirectionOfPenetration] delta ijk:" << endl;
 
   for (int i = 0; i < well_blocks_->size()-1; ++i) {
     delta_i = std::abs(well_blocks_->at(i)->i() - well_blocks_->at(i+1)->i());
@@ -290,18 +291,57 @@ void Trajectory::convertWellBlocksToWellSpline(Settings::Model::Well &well_setti
   cout << "Done Converting well " << well_settings.name.toStdString() << " to spline." << endl;
 }
 
-WellBlock * Trajectory::GetWellBlockByMd(double md) {
+WellBlock * Trajectory::GetWellBlockByMd(double md, string dmsg) {
   assert(well_blocks_->size() > 0);
   if (md > GetLength()) {
     E("Attempting to get well block at MD grater than well length.");
   }
 
+  if (dmsg != "") {
+    cout << dmsg << endl;
+  }
+
   for (auto block : *well_blocks_) {
+    if (vp_.vMOD >=3) { cout << block->getPropString(md) << endl; }
     if (md <= block->getExitMd() && md >= block->getEntryMd()) {
+      if (vp_.vMOD >=3) {
+        cout << "Returning block: [" << block->i() << " " << block->j() << " " << block->k() << "]" << endl;
+      }
       return block;
     }
   }
-  throw runtime_error("Unable to get well block by MD.");
+
+  return dummy_block;
+
+  // for (int ii=1; ii < well_blocks_->size()-1; ++ii) {
+  //   auto curr_block = well_blocks_->at(ii);
+  //   auto prev_block = well_blocks_->at(ii-1);
+  //   if (md >= curr_block->getEntryMd() && md <= curr_block->getExitMd()) {
+  //     return curr_block;
+  //   } else if (md >= prev_block->getExitMd() && md <= curr_block->getEntryMd()) {
+  //     if (vp_.vMOD >=3) {
+  //       cout << "Returning block: ["
+  //       << prev_block->i() << " " << prev_block->j() << " " << prev_block->k()
+  //       << "] instead of block ["
+  //       << curr_block->i() << " " << curr_block->j() << " " << curr_block->k()
+  //       << "]" << endl;
+  //     }
+  //     return prev_block;
+  //   }
+  // }
+  // E("Unable to get well block by MD.");
+}
+
+std::vector<WellBlock *> Trajectory::GetWellBlocksByMdRange(double start_md, double end_md, string dmsg) const {
+  std::vector<WellBlock *> affected_blocks;
+  for (auto wb : *well_blocks_) {
+    if (( start_md >= wb->getEntryMd() && start_md <= wb->getExitMd() ) || // Start md inside block
+      (   end_md >= wb->getEntryMd() &&   end_md <= wb->getExitMd() ) || // End md inside block
+      ( start_md <= wb->getEntryMd() &&   end_md >= wb->getExitMd() )) { // Block between start and end blocks
+      affected_blocks.push_back(wb);
+    }
+  }
+  return affected_blocks;
 }
 
 double Trajectory::GetEntryMd(const WellBlock *wb) const {
@@ -314,7 +354,7 @@ double Trajectory::GetExitMd(const WellBlock *wb) const {
 
 void Trajectory::printWellBlocks() {
   cout << endl << "well blocks -- Trajectory::printWellBlocks():" << endl;
-  cout << "I,\tJ,\tK,\tINX,\tINY,\tINZ,\tOUTX,\tOUTY,\tOUTZ" << endl;
+  cout << "I,\tJ,\tK,\tINX,\t\t\tINY,\t\t\tINZ,\t\t\tOUTX,\t\t\tOUTY,\t\t\tOUTZ" << endl;
   for (auto wb : *well_blocks_) {
     stringstream entry;
     entry << wb->i() << ",\t" << wb->j() << ",\t" << wb->k() << ",\t";
@@ -331,17 +371,7 @@ double Trajectory::GetSplineLength() const {
   return well_blocks_->back()->getExitMd();
 }
 
-std::vector<WellBlock *> Trajectory::GetWellBlocksByMdRange(double start_md, double end_md) const {
-  std::vector<WellBlock *> affected_blocks;
-  for (auto wb : *well_blocks_) {
-    if (( start_md >= wb->getEntryMd() && start_md <= wb->getExitMd() ) || // Start md inside block
-      (   end_md >= wb->getEntryMd() &&   end_md <= wb->getExitMd() ) || // End md inside block
-      ( start_md <= wb->getEntryMd() &&   end_md >= wb->getExitMd() )) { // Block between start and end blocks
-      affected_blocks.push_back(wb);
-    }
-  }
-  return affected_blocks;
-}
+
 
 }
 }
