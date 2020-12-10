@@ -39,6 +39,7 @@ FlowDriverFileWriter::FlowDriverFileWriter(::Settings::Settings *settings,
 void FlowDriverFileWriter::WriteDriverFile(QString output_dir) {
   auto welspecs = ECLDriverParts::Welspecs(model_->wells());
   auto compdat = ECLDriverParts::Compdat(model_->wells());
+
   auto wellcontrols = ECLDriverParts::WellControls(model_->wells(), settings_->model()->control_times());
   model_->SetCompdatString(compdat.GetPartString());
 

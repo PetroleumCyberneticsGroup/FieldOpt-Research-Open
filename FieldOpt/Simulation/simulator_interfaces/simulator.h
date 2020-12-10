@@ -137,7 +137,7 @@ class Simulator {
 
   Model::Model *model_;
   QStringList script_args_;
-  QList<int> control_times_;
+  QList<double> control_times_;
   virtual void UpdateFilePaths() = 0;
 
   void E(string m) const {

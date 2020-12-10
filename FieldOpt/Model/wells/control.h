@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<mathias.bellout@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef CONTROL_H
 #define CONTROL_H
@@ -80,6 +85,8 @@ class Control
   ::Settings::Model::ControlMode mode() const { return mode_; }
   ::Settings::Model::InjectionType injection_fluid() const { return injection_fluid_; }
 
+  double TStepRefinement() { return tstep_ref_; }
+
  private:
   Properties::DiscreteProperty *time_step_;
   Properties::BinaryProperty *open_;
@@ -91,6 +98,8 @@ class Control
   Properties::ContinuousProperty *res_rate_;
   ::Settings::Model::ControlMode mode_;
   ::Settings::Model::InjectionType injection_fluid_;
+
+  double tstep_ref_;
 };
 }
 }

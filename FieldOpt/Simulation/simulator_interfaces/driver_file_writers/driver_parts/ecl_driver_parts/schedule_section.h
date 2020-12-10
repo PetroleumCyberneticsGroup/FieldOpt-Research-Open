@@ -60,7 +60,7 @@ class Schedule : public ECLDriverPart
    * at specific time steps in the schedule.
    */
   Schedule(QList<Model::Wells::Well *> *wells,
-           const QList<int>& control_times,
+           const QList<double>& control_times,
            const QList<int>& start_date,
            ScheduleInsets &insets,
            Settings::Settings *settings);

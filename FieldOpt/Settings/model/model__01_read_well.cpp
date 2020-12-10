@@ -319,8 +319,12 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   // Controls
   QJsonArray json_controls = json_well["Controls"].toArray();
   well.controls = QList<Well::ControlEntry>();
+
   for (int i = 0; i < json_controls.size(); ++i) {
     Well::ControlEntry control;
+
+    // Transfer tstep_refinement_ from Well parent class
+    control.tstep_ref_ = this->tstep_refinement_;
 
     if (!controlTimeIsDeclared(json_controls.at(i).toObject()["TimeStep"].toInt())) {
       string em = "All time steps must be declared in the ControlTimes array. ";

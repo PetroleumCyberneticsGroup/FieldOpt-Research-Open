@@ -34,7 +34,7 @@ namespace ECLDriverParts {
 using Printer::num2str;
 
 Schedule::Schedule(QList<Model::Wells::Well *> *wells,
-                   const QList<int>& control_times,
+                   const QList<double>& control_times,
                    const QList<int>& start_date,
                    ScheduleInsets &insets,
                    Settings::Settings *settings) : ECLDriverPart(settings) {

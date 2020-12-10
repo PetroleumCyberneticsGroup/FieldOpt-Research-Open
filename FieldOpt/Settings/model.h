@@ -164,6 +164,9 @@ class Model
       QString name;
       bool isDifferent(ControlEntry other);
       std::string toString();
+
+      double tstep_ref_;
+
     };
 
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
@@ -204,7 +207,7 @@ class Model
   };
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
-  QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
+  QList<double> control_times() const { return control_times_; } //!< Get the control times for the schedule
   QList<int> start_date() const { return start_date_; }
 
   VerbParams vp_;
@@ -212,8 +215,9 @@ class Model
 
  private:
   QList<Well> wells_;
-  QList<int> control_times_;
+  QList<double> control_times_;
   QList<int> start_date_;
+  int tstep_refinement_;
 
   string md_ = "Settings";
   string cl_ = "Model";
@@ -232,6 +236,10 @@ class Model
   void parseICVCompartmentalization(QJsonArray &icv_compartmentalization, Well &well);
 
   bool controlTimeIsDeclared(int time) const;
+
+  void printModelParams() {
+
+  }
 
 };
 

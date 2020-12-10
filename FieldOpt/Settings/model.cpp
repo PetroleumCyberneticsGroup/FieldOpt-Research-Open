@@ -61,7 +61,7 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
     }
   }
 
-  // [STARTDATE]
+  // [STARTDATE] -------------------------------------------
   start_date_ = QList<int>();
   if (json_model.contains("StartDate")) {
     QJsonArray json_start_date = json_model["StartDate"].toArray();
@@ -73,14 +73,21 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
     // throw UnableToParseModelSectionException("StartDate must be specified.");
   }
 
-  // [CONTROL TIMES]
+  // [TSTEP REFINEMENT] ------------------------------------
+  if (json_model.contains("TStepRefinement")) {
+    tstep_refinement_ = json_model["TStepRefinement"].toInt();
+  } else {
+    tstep_refinement_ = 1;
+  }
+
+  // [CONTROL TIMES] ---------------------------------------
   if (!json_model.contains("ControlTimes") || !json_model["ControlTimes"].isArray()) {
     string em = "ControlTimes array must be defined with at least one time step.";
     throw UnableToParseModelSectionException(em);
   }
 
   // [CONTROL TIMES] -> inserting NPV-defined control times
-  control_times_ = QList<int>();
+  control_times_ = QList<double>();
   if (json_model.contains("NPVInterval")) {
     if (json_model["NPVInterval"].toString().compare("Yearly") == 0) {
       if (json_model.contains("NPVYears")) {
@@ -113,6 +120,7 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
   // [WELLS]
   wells_ = QList<Well>();
 
+  // IMPORT WELLS ------------------------------------------
   // [WELLS] -> import trajectories, segmentation
   if (json_model.contains("Import")) {
 
@@ -166,6 +174,7 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
       }
     }
 
+  // READ WELLS --------------------------------------------
   // [WELLS] -> read wells using readSingleWell
   } else {
     try {
@@ -238,7 +247,7 @@ bool Model::Well::ControlEntry::isDifferent(ControlEntry other) {
   return false; // Assume they're equal if none of the above hits.
 }
 
-// ICVS ----------------------------------------------------
+// COMPARTMENTS --------------------------------------------
 #include "model/model__02_read_comp.cpp"
 
 }
