@@ -271,6 +271,15 @@ void Model::parseSegmentCompartments(const QJsonObject &json_seg,
         well.seg_compartment_params.valve_flow_coeff = 0.50;
       }
 
+      try {
+        well.seg_compartment_params.diameter = json_compts["Diameter"].toDouble();
+        well.seg_compartment_params.roughness = json_compts["Roughness"].toDouble();
+        well.seg_compartment_params.cross_sect_area = json_compts["CrossSectionArea"].toDouble();
+      } catch ( ... ) {
+        string em = "Defined Diameter, CrossSectionArea and Roughness for ICD segment.";
+        throw std::runtime_error(em);
+      }
+
     } catch (...) {
       string em = "Something went wrong while parsing the Compartments section.";
       throw std::runtime_error(em);
