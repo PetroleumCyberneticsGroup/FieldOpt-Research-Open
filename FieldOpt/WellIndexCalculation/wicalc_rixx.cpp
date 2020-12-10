@@ -175,9 +175,9 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
 
     // Check if cell is active, if not, skip
     bool cellIsActive = activeCellInfo_->isActive(cell.globCellIndex);
-    //bool cellIsActiveF = fractureActiveCellInfo_->isActive(cell.globCellIndex);
-    if (!cellIsActive) {
-      // cout << "Cell is not active" << endl;
+    // bool cellIsActiveF = fractureActiveCellInfo_->isActive(cell.globCellIndex);
+    if (!cellIsActive && vp_.vWIC >= 3) {
+      cout << "Cell [ijk=" << i+1 << ", " << j+1 << ", " << k+1 << "] is not active" << endl;
       continue;
     }
 
@@ -203,24 +203,30 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
                                          cell.globCellIndex,
                                          false, icell);
 
-    for (int ii=0; ii < wellPath.m_measuredDepths.size(); ++ii) {
-      cout << "wellPath.m_measuredDepths[ii= "  << ii << "]: " << wellPath.m_measuredDepths[ii] << endl;
-    }
+    if (vp_.vWIC >= 6) {
+      for (int ii = 0; ii < wellPath.m_measuredDepths.size(); ++ii) {
+        cout << "wPath.m_msrdDepths[ii= " << ii << "]: " << wellPath.m_measuredDepths[ii] << " - ";
+      }
+      cout << endl;
 
-    for (int ii=0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << endl;
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << endl;
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
-    }
+      for (int ii = 0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
+        cout << "wPath.m_Pnts[ii= " << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << " - ";
+        cout << "wPath.m_Pnts[ii= " << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << " - ";
+        cout << "wPath.m_Pnts[ii= " << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
+      }
 
-    for (int ii=0; ii < wellPath.m_measuredDepths.size(); ++ii) {
-      cout << "wellPath.m_measuredDepths[ii= "  << ii << "]: " << wellPath.m_measuredDepths[ii] << endl;
-    }
+      cout << string(160, '-') << endl;
 
-    for (int ii=0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << endl;
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << endl;
-      cout << "wellPath.m_wellPathPoints[ii= "  << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
+      // for (int ii = 0; ii < wellPath.m_measuredDepths.size(); ++ii) {
+      //   cout << "wellPath.m_measuredDepths[ii= " << ii << "]: " << wellPath.m_measuredDepths[ii] << " - ";
+      // }
+      // cout << endl;
+      //
+      // for (int ii = 0; ii < wellPath.m_wellPathPoints.size(); ++ii) {
+      //   cout << "wellPath.m_Points[ii= " << ii << "].x() : " << wellPath.m_wellPathPoints[ii].x() << " - ";
+      //   cout << "wellPath.m_Points[ii= " << ii << "].y() : " << wellPath.m_wellPathPoints[ii].y() << " - ";
+      //   cout << "wellPath.m_Points[ii= " << ii << "].z() : " << wellPath.m_wellPathPoints[ii].z() << endl;
+      // }
     }
 
     // -------------------------------------------------------------
@@ -290,13 +296,22 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
     ext_info(im, md_, cl_);
   }
   wellPath = new WellPath();
+  stringstream ss;
+
   for (int seg = 0; seg < well.radii.size(); ++seg) {
     if (vp_.vWIC >= 3) {
-      ext_info("Computing segment " + num2str(seg)
-                 + ". StartMD: " + num2str(well.heel_md[seg])
-                 + "; EndMD: " + num2str(well.toe_md[seg])
-                 + "; StartPt: " + DBG_prntVecXd(well.heels[seg])
-                 + "; EndPt: " + DBG_prntVecXd(well.toes[seg]), md_, cl_);
+
+      ss << "Computing segment " + num2str(seg);
+      ss << ". StartMD: " + num2str(well.heel_md[seg]);
+      ss << "; EndMD: " + num2str(well.toe_md[seg]);
+      ss << "; StartPt: " + DBG_prntVecXd(well.heels[seg]);
+      ss << "; EndPt: " + DBG_prntVecXd(well.toes[seg]) << "|";
+
+      // ext_info("Computing segment " + num2str(seg)
+      //            + ". StartMD: " + num2str(well.heel_md[seg])
+      //            + "; EndMD: " + num2str(well.toe_md[seg])
+      //            + "; StartPt: " + DBG_prntVecXd(well.heels[seg])
+      //            + "; EndPt: " + DBG_prntVecXd(well.toes[seg]), md_, cl_);
     }
     // -----------------------------------------------------------
     // cvf::ref<WellPath> wellPath = new WellPath();
@@ -321,6 +336,7 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
     wellPath->m_wellPathPoints.push_back(cvf_xyzHeel);
     wellPath->m_wellPathPoints.push_back(cvf_xyzToe);
   }
+  ext_info(ss.str(), md_, cl_);
 
   // -----------------------------------------------------------
   // Calculate cells intersected by well path
@@ -343,18 +359,31 @@ void wicalc_rixx::ComputeWellBlocks(vector<IntersectedCell> &well_indices,
     intersectedCellInfo = extractor->cellIntersectionInfosAlongWellPath();
   // cout << "[mod]wicalc_rixx-08.--------- intersectedCellInfo" << endl;
   if (vp_.vWIC >= 3) {
+    std::stringstream ss;
+    int nc = 0;
     for (auto celli : intersectedCellInfo) {
       auto gci = celli.globCellIndex;
-      auto emd = celli.endMD;
       auto smd = celli.startMD;
+      auto emd = celli.endMD;
       auto spt = celli.startPoint;
       auto ept = celli.endPoint;
-      std::stringstream ss;
-      ss << "Global cell index: " << gci << " | StartMD: " << smd << " | EndMD: " << emd;
-      ss << "Start point: " << spt.x() << ", " << spt.y() << ", " << spt.y();
-      ss << " | End point: "   << ept.x() << ", " << ept.y() << ", " << ept.y();
-      ext_info(ss.str(), md_, cl_);
+      ss << num2str(++nc, 0, 0, 3);
+      ss << "[ Glob.idx: " << num2str(gci, 0, 0, 6);
+      ss << "; " << num2str(celli.i+1, 0, 0, 4);
+      ss << "" << num2str(celli.j+1, 0, 0, 4);
+      ss << "" << num2str(celli.k+1, 0, 0, 4);
+      ss << " ] [ sMD= " << num2str(smd, 3, 1, 8);
+      ss << " eMD: " << num2str(emd, 3, 1, 8);
+      ss << " ] [ sPnt= ";
+      ss << num2str(spt.x(), 3, 1, 8);
+      ss << num2str(spt.y(), 3, 1, 8);
+      ss << num2str(spt.z(), 3, 1, 8);
+      ss << " ] [ ePnt= ";
+      ss << num2str(ept.x(), 3, 1, 8);
+      ss << num2str(ept.y(), 3, 1, 8);
+      ss << num2str(ept.z(), 3, 1, 8) << "]|";
     }
+    ext_info(ss.str(), md_, cl_);
   }
 
   // -----------------------------------------------------------
