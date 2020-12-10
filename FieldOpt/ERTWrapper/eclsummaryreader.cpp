@@ -285,7 +285,15 @@ void ECLSummaryReader::populateKeyLists() {
     && !seg_scsa_keys_.empty()) {
     read_segments_ = true;
   } else if (vp_.vSIM > 1) {
-    ext_warn("Not reading all segment data!", md_, cl_, vp_.lnw);
+    im_ = "Not reading all segment data! |";
+    im_ += "seg_sofr_keys_:" + num2str(seg_sofr_keys_.size(), 0) + " ";
+    im_ += "seg_swfr_keys_:" + num2str(seg_swfr_keys_.size(), 0) + " ";
+    im_ += "seg_sgfr_keys_:" + num2str(seg_sgfr_keys_.size(), 0) + " ";
+    im_ += "seg_sprp_keys_:" + num2str(seg_sprp_keys_.size(), 0) + " ";
+    im_ += "seg_sprd_keys_:" + num2str(seg_sprd_keys_.size(), 0) + " ";
+    im_ += "seg_swct_keys_:" + num2str(seg_swct_keys_.size(), 0) + " ";
+    im_ += "seg_scsa_keys_:" + num2str(seg_scsa_keys_.size(), 0) + " ";
+    ext_warn(im_, md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);
