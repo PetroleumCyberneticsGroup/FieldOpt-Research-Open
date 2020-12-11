@@ -35,6 +35,10 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint settings,
   assert(settings.wells.size() > 0);
   assert(settings.min < settings.max);
 
+  if (vp_.vOPT >= 1) {
+    info("Adding BHP constraint for " + settings.well.toStdString());
+  }
+
   min_ = settings.min;
   max_ = settings.max;
   affected_well_names_ = settings.wells;
