@@ -53,35 +53,50 @@ class Property
   //!< Get the underlying datatype of the property's value.
   Type type() const { return type_; }
 
-  QString name() const { return name_;} //!< Get the name set for the variable. Returns an empty string if name has not been set.
-  void setName(QString name) { name_ = name; } //!< Set the name of the variable.
+  //!< Get the name set for the variable. Returns
+  //!< an empty string if name has not been set.
+  QString name() const { return name_;}
 
-  bool IsLocked() const { return locked_; } //!< Check if the property is locked.
-  void Lock() { locked_ = true; } //!< Set the property to locked. The value of a locked property cannot be changed.
-  void Unlock() { locked_ = false; } //!< Unlock a property.
+  //!< Set the name of the variable.
+  void setName(QString name) { name_ = name; }
+
+  //!< Check if the property is locked.
+  bool IsLocked() const { return locked_; }
+
+  //!< Set the property to locked. The value
+  //!< of a locked property cannot be changed.
+  void Lock() { locked_ = true; }
+
+  //!< Unlock a property.
+  void Unlock() { locked_ = false; }
 
   /*!
    * \brief //!< Set the property to variable.
    *
-   * This will also populate the info data structure for the property.
-   * The property name is used to create the Info datastructure, thus the name of the property
-   * must be set before setting it to variable.
+   * This will also populate the info data structure for the
+   * property. The property name is used to create the Info
+   * datastructure, thus the name of the property must be set
+   * before setting it to variable.
    */
   void SetVariable();
-  bool isVariable() { return is_variable_; } //!< Check if the property is variable.
 
-  QUuid id() const { return id_; } //!< Unique ID for the property.
+  //!< Check if the property is variable.
+  bool isVariable() { return is_variable_; }
+
+  //!< Unique ID for the property.
+  QUuid id() const { return id_; }
 
   /*!
-   * @brief Update the UUID for this object. This is used when synchronizing models between process instances when
-   * using MPI.
+   * @brief Update the UUID for this object. This is used
+   * when synchronizing models between process instances
+   * when using MPI.
    * @param new_id The new ID for this object.
    */
   void UpdateId(QUuid new_id);
 
   /*!
-   * \brief The type of property represented. This type decides which field in the
-   * Info datastructure is set.
+   * \brief The type of property represented. This type
+   * decides which field in the Info datastructure is set.
    */
   enum PropertyType : int {
     BHP=2001, Rate=2002, SplinePoint=2003, WellBlock=2004,
@@ -90,8 +105,9 @@ class Property
   };
 
   /*!
-   * \brief For SplinePoint type properties, this is used to indicate whether the property
-   * is for the heel or the toe of the well.
+   * \brief For SplinePoint type properties, this is used to
+   * indicate whether the property is for the heel or the toe
+   * of the well.
    */
   enum SplineEnd : int {Heel=3001, Toe=3002, Middle=3003};
 
@@ -101,8 +117,8 @@ class Property
   enum PolarProp : int {Azimuth=5001, Length=5002, Elevation=5003, Midpoint=5004};
 
   /*!
-   * \brief For SplinePoint and WellBlock type variables, this indicates which coordinate
-   * the property is for.
+   * \brief For SplinePoint and WellBlock type variables,
+   * this indicates which coordinate the property is for.
    */
   enum Coordinate : int {x=4001, y=4002, z=4003, i=4004, j=4005, k=4006};
 
@@ -134,11 +150,17 @@ class Property
   QString name_;
   PropertyInfo info_;
 
+  VectorXd bounds_;
+  VectorXd bnds_b_mns_a_;
+  VectorXd bnds_a_pls_b_;
+
   void set_property_info();
   PropertyType get_prop_type_name(const QString prop_name) const;
   QString get_well_name(const QString prop_name) const;
+
   SplineEnd get_spline_end(const QString prop_name) const;
   int get_spline_index(const QString prop_name) const;
+
   int get_prop_index(const QString prop_name) const;
   Coordinate get_prop_coord(const QString prop_name) const;
   PolarProp get_polar_prop(const QString prop_name) const;
