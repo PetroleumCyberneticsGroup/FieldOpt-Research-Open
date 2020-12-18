@@ -34,6 +34,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Settings/model.h"
 #include "Optimization/case.h"
 #include "Model/wells/wellbore/wellblock.h"
+
 #include "Runner/loggable.hpp"
 #include "Runner/logger.h"
 
@@ -41,6 +42,13 @@ class Logger;
 
 namespace Model {
 class ModelSynchronizationObject;
+
+using Reservoir::WellIndexCalculation::wicalc_rixx;
+using Reservoir::Grid::ECLGrid;
+using Optimization::Constraints::ConstraintHandler;
+
+using WDefType = Settings::Model::WellDefinitionType;
+using EvalStat = Optimization::Case::CaseState::EvalStatus;
 
 /*!
  * \brief The Model class represents the reservoir model
@@ -68,7 +76,9 @@ class Model : public Loggable
   /*!
    * \brief variables Get the set of variable properties of all types.
    */
-  Properties::VarPropContainer *variables() const { return variable_container_; }
+  Properties::VarPropContainer *variables() const {
+    return variable_container_;
+  }
 
   /*!
    * \brief wells Get a list of all the wells in the model.
@@ -97,6 +107,10 @@ class Model : public Loggable
    * run. Writes the last case to the extended log.
    */
   void Finalize();
+
+  ConstraintHandler * constraintHandler() {
+    return constraint_handler_;
+  }
 
  private:
   Reservoir::Grid::Grid *grid_;
@@ -167,6 +181,13 @@ class Model : public Loggable
 
  private:
   vector<double> objf_scal_;
+  ConstraintHandler *constraint_handler_;
+
+  Settings::VerbParams vp_;
+
+  string md_ = "Model";
+  string cl_ = "Model";
+  string im_ = "", wm_ = "", em_ = "";
 
  public:
   void setObjfScaler(vector<double> objf_scal) { objf_scal_ = objf_scal; }

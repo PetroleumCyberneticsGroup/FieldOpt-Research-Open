@@ -35,6 +35,8 @@ namespace Optimization {
 using Printer::ext_info;
 using Printer::num2str;
 
+using Constraints::ConstraintHandler;
+
 Optimizer::Optimizer(Settings::Optimizer *opt_settings,
                      Case *base_case,
                      Model::Properties::VarPropContainer *variables,
@@ -48,29 +50,35 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
     base_case->objf_value();
   } catch (ObjectiveFunctionException) {
     throw OptimizerInitializationException(
-      "The objective function value of the base case "
-      "must be set before initializing an Optimizer.");
+        "The objective function value of the base case "
+        "must be set before initializing an Optimizer.");
   }
 
   max_evaluations_ = opt_settings->parameters().max_evaluations;
-  tentative_best_case_ = base_case;
   tentative_best_case_iteration_ = 0;
-  if (case_handler == 0) {
-    case_handler_ = new CaseHandler(tentative_best_case_);
 
+  // CONSTRAINT HANDLER ------------------------------------
+  // Moved constraint handliner initialization to Model
+  // if (constraint_handler == nullptr) {
+  //   constraint_handler_ = new ConstraintHandler(opt_settings,
+  //                                               variables, grid);
+  // } else {
+  //   ext_info("Using shared ConstraintHandler.", md_, cl_);
+    constraint_handler_ = constraint_handler;
+  // }
+
+  // BASE CASE -> NEW CASE ---------------------------------
+  tentative_best_case_ = base_case;
+
+  if (case_handler == nullptr) {
+    case_handler_ = new CaseHandler(tentative_best_case_);
   } else {
-    ext_info("Using shared CaseHandler.",md_, cl_);
+    ext_info("Using shared CaseHandler.", md_, cl_);
     case_handler_ = case_handler;
     is_hybrid_component_ = true;
   }
 
-  if (constraint_handler == 0) {
-    constraint_handler_ = new Constraints::ConstraintHandler(opt_settings, variables, grid);
-
-  } else {
-    ext_info("Using shared ConstraintHandler.",md_, cl_);
-    constraint_handler_ = constraint_handler;
-  }
+  // ITERATION ---------------------------------------------
   iteration_ = 0;
   evaluated_cases_ = 0;
   mode_ = opt_settings->mode();
@@ -82,6 +90,8 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   enable_logging_ = true;
 
   vp_ = opt_settings->verbParams();
+
+  // PENALIZATION ------------------------------------------
   penalize_ = opt_settings->objective().use_penalty_function;
 
   if (penalize_) {
@@ -165,22 +175,22 @@ bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
 
 QString Optimizer::GetStatusStringHeader() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
-    .arg("Iteration")
-    .arg("EvaluatedCases")
-    .arg("QueuedCases")
-    .arg("RecentlyEvaluatedCases")
-    .arg("TentativeBestCaseID")
-    .arg("TentativeBestCaseOFValue");
+      .arg("Iteration")
+      .arg("EvaluatedCases")
+      .arg("QueuedCases")
+      .arg("RecentlyEvaluatedCases")
+      .arg("TentativeBestCaseID")
+      .arg("TentativeBestCaseOFValue");
 }
 
 QString Optimizer::GetStatusString() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
-    .arg(iteration_)
-    .arg(nr_evaluated_cases())
-    .arg(nr_queued_cases())
-    .arg(nr_recently_evaluated_cases())
-    .arg(tentative_best_case_->id().toString())
-    .arg(tentative_best_case_->objf_value());
+      .arg(iteration_)
+      .arg(nr_evaluated_cases())
+      .arg(nr_queued_cases())
+      .arg(nr_recently_evaluated_cases())
+      .arg(tentative_best_case_->id().toString())
+      .arg(tentative_best_case_->objf_value());
 }
 
 void Optimizer::EnableConstraintLogging(QString output_directory_path) {
@@ -231,7 +241,7 @@ map<string, string> Optimizer::Summary::GetState() {
   map<string, string> statemap  = ext_state_;
   statemap["Start"] = timestamp_string(opt_->start_time_);
   statemap["Duration"] = timespan_string(
-    time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
+      time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
   );
   statemap["End"] = timestamp_string(QDateTime::currentDateTime());
   switch (cond_) {
