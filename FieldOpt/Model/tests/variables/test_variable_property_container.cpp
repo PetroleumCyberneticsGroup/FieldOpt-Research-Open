@@ -36,18 +36,18 @@ namespace {
     TEST_F(VariableContainerTest, PRODWellVariables) {
         EXPECT_EQ(9, vc_->GetWellBlockVariables("PROD").length());
         EXPECT_EQ(3, vc_->GetTransmissibilityVariables("PROD").length());
-        EXPECT_EQ(3, vc_->GetWellBHPVariables("PROD").length());
-        EXPECT_EQ(0, vc_->GetWellRateVariables("PROD").length());
-        EXPECT_EQ(0, vc_->GetWellSplineVariables("PROD").length());
+        EXPECT_EQ(3, vc_->GetWellBHPVars("PROD").length());
+        EXPECT_EQ(0, vc_->GetWellRateVars("PROD").length());
+        EXPECT_EQ(0, vc_->GetWSplineVars("PROD").length());
     }
 
 
     TEST_F(VariableContainerTest, INJWellVariables) {
-        EXPECT_EQ(6, vc_->GetWellSplineVariables("INJ").length());
-        EXPECT_EQ(0, vc_->GetWellRateVariables("INJ").length());
+        EXPECT_EQ(6, vc_->GetWSplineVars("INJ").length());
+        EXPECT_EQ(0, vc_->GetWellRateVars("INJ").length());
         EXPECT_EQ(0, vc_->GetWellBlockVariables("INJ").length());
         EXPECT_EQ(0, vc_->GetTransmissibilityVariables("INJ").length());
-        EXPECT_EQ(0, vc_->GetWellBHPVariables("INJ").length());
+        EXPECT_EQ(0, vc_->GetWellBHPVars("INJ").length());
     }
 
 }

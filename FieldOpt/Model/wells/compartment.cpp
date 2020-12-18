@@ -31,6 +31,7 @@ using Printer::num2str;
 using Printer::ext_warn;
 
 Compartment::Compartment() { }
+
 Compartment::Compartment(const double start_md,
                          const double end_md,
                          const double start_tvd,
@@ -41,9 +42,12 @@ Compartment::Compartment(const double start_md,
                          const Settings::Model::Well &well_settings,
                          Properties::VarPropContainer *variable_container,
                          std::vector<Compartment> &compartments_) {
+
   Settings::Model::Well::Completion comp_settings;
   block_range_ = block_range;
   block_idx_range_ = block_idx_range;
+
+  comp_settings.verb_params_ = well_settings.verb_params_;
 
   if (compartments_.empty()) {
     // assert(start_md == 0.0); // -- ???
@@ -80,13 +84,13 @@ Compartment::Compartment(const double start_md,
   comp_settings.type = Settings::Model::WellCompletionType::ICV;
   icd = new Wellbore::Completions::ICD(comp_settings, variable_container);
 
-  if (VERB_MOD >= 1) {
+  if (vp_.vMOD >= 1) {
     std::stringstream ss;
     ss << "Created new compartment " << compartments_.size() + 1 << ".| ";
     ss << "Start Packer MD: " << start_packer->md(well_length) << ".| ";
     ss << "End Packer MD: " << end_packer->md(well_length) << ".| ";
     ss << "ICD MD: " << icd->md(well_length) << " ICD length: " << icd->length() << ".|";
-    Printer::ext_info(ss.str(), "Model", "Compartment");
+    ext_info(ss.str(), md_, cl_);
   }
 }
 

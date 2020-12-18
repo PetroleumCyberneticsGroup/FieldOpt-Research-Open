@@ -30,11 +30,18 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Utilities/math.hpp"
 namespace Optimization {
 namespace Constraints {
-ReservoirBoundaryToe::ReservoirBoundaryToe(const Settings::Optimizer::Constraint &settings,
-                                           Model::Properties::VarPropContainer *variables,
-                                           Reservoir::Grid::Grid *grid,
-                                           Settings::VerbParams vp)
-  : ResBoundary(settings, variables, grid, vp) {}
+ReservoirBoundaryToe::ReservoirBoundaryToe(
+    const Settings::Optimizer::Constraint &settings,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Settings::VerbParams vp)
+  : ResBoundary(settings, variables, grid, vp) {
+
+  if (vp.vOPT >= 1) {
+    info("Adding ReservoirBoundaryToe constraint for " + settings.well.toStdString());
+  }
+
+}
 
 bool ReservoirBoundaryToe::CaseSatisfiesConstraint(Case *c) {
   double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);

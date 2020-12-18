@@ -30,10 +30,19 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-PolarXYZBoundary::PolarXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                                   Model::Properties::VarPropContainer *variables,
-                                   Reservoir::Grid::Grid *grid,
-                                   Settings::VerbParams vp) : Constraint(vp) {
+PolarXYZBoundary::PolarXYZBoundary(
+    const Settings::Optimizer::Constraint &settings,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Settings::VerbParams vp)
+    : Constraint(vp) {
+
+  if (vp.vOPT >= 1) {
+    im_ = "Adding PolarXYZBoundary constraint for ";
+    im_ += settings.well.toStdString();
+    info(im_);
+  }
+
   xmin_ = settings.box_xyz_xmin;
   xmax_ = settings.box_xyz_xmax;
   ymin_ = settings.box_xyz_ymin;
@@ -44,9 +53,9 @@ PolarXYZBoundary::PolarXYZBoundary(const Settings::Optimizer::Constraint &settin
   penalty_weight_ = settings.penalty_weight;
 
   if (!variables->GetPolarSplineVariables(settings.well).empty())
-    affected_well_ = initializeWell(variables->GetPolarSplineVariables(settings.well));
+    affected_well_ = initWSplineConstraint(variables->GetPolarSplineVariables(settings.well), vp_);
   else
-    affected_well_ = initializeWell(variables->GetPolarSplineVariables(settings.well));
+    affected_well_ = initWSplineConstraint(variables->GetPolarSplineVariables(settings.well), vp_);
 }
 
 bool PolarXYZBoundary::CaseSatisfiesConstraint(Case *c) {

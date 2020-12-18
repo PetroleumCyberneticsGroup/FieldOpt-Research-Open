@@ -28,9 +28,15 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint settings,
+PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint const settings,
                                  Model::Properties::VarPropContainer *variables,
-                                 Settings::VerbParams vp) : Constraint(vp) {
+                                 Settings::VerbParams vp)
+                                 : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding PolarWellLength constraint for " + settings.well.toStdString());
+  }
+
   minimum_length_ = settings.min_length;
   maximum_length_ = settings.max_length;
 

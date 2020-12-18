@@ -33,7 +33,12 @@ MxSplineLengthInterwDistResBound
   Settings::Optimizer::Constraint settings,
   Model::Properties::VarPropContainer *variables,
   Reservoir::Grid::Grid *grid,
-  Settings::VerbParams vp) : Constraint(vp) {
+  Settings::VerbParams vp)
+  : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding MxWSplineLengthInterwDistResBound constraint.");
+  }
 
   max_iterations_ = settings.max_iterations;
   Settings::Optimizer::Constraint dist_constr_settings;

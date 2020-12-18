@@ -101,6 +101,9 @@ class ConstraintHandler
   Settings::VerbParams vp_;
   string md_ = "Optimization";
   string cl_ = "ConstraintHandler";
+  string im_ = "", wm_ = "", em_ = "";
+
+
 };
 
 }

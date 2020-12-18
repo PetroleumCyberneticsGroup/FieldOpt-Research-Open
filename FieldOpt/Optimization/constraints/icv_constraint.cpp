@@ -42,6 +42,11 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
                              Model::Properties::VarPropContainer *variables,
                              Settings::VerbParams vp)
   : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding ICV constraint for " + settings.well.toStdString());
+  }
+
   min_ = settings.min;
   max_ = settings.max;
 

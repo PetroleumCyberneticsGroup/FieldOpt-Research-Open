@@ -30,10 +30,17 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PseudoContBoundary2D::PseudoContBoundary2D(const Settings::Optimizer::Constraint &settings,
-                                           Model::Properties::VarPropContainer *variables,
-                                           Reservoir::Grid::Grid *grid,
-                                           Settings::VerbParams vp) : Constraint(vp) {
+PseudoContBoundary2D::PseudoContBoundary2D(
+    const Settings::Optimizer::Constraint &settings,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Settings::VerbParams vp)
+    : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding PseudoContBoundary2D constraint for " + settings.well.toStdString());
+  }
+
   assert(settings.well.size() > 0);
   assert(settings.box_imin < settings.box_imax);
   assert(settings.box_jmin < settings.box_jmax);

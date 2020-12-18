@@ -40,28 +40,33 @@ namespace Optimization {
 namespace Optimizers {
 
 /*!
- * @brief The _abstract_ GSS class implements a generalized form of the
- * Generating Set Search algorithm presented by Kolda, Torczon and Lewis
- * in the 2003 paper Optimization By Direct Search: New perspectives on
- * some classical and modern methods (DOI: 10.1137/S003614450242889)
+ * @brief The _abstract_ GSS class implements a generalized
+ * form of the Generating Set Search algorithm presented by
+ * Kolda, Torczon and Lewis in the 2003 paper Optimization
+ * By Direct Search: New perspectives on some classical and
+ * modern methods (DOI: 10.1137/S003614450242889)
  *
- * This implementation also borrows some from the Kolda's 2005 paper on
- * the Asynchronous Parallel Pattern Search (APPS) (DOI: 0.1137/040603589)
- * in that it allows for multiple current step lengths (e.g. one per search
- * direction). This is to allow for more flexibility in the implementation
- * of specific algorithms (e.g. APPS).
+ * This implementation also borrows some from the Kolda's
+ * 2005 paper on the Asynchronous Parallel Pattern Search
+ * (APPS) (DOI: 0.1137/040603589) in that it allows multiple
+ * current step lengths (e.g. one per search direction). This
+ * is to allow for more flexibility in the implementation of
+ * specific algorithms (e.g. APPS).
  *
- * @note that this is an abstract class. It must be extended by some other
- * class (e.g. like the CompassSearch class) to provide specific patterns
- * and contraction/expansion parameter values.
+ * @note that this is an abstract class. It must be extended
+ * by some other class (e.g. like the CompassSearch class) to
+ * provide specific patterns and contraction/expansion parameter
+ * values.
  */
 class GSS : public Optimizer {
  public:
   /*!
-   * @brief General constructor for GSS algorithms. Sets the step_tol_ property and calls the primary
-   * Optimizer constructor.
+   * @brief General constructor for GSS algorithms. Sets
+   * the step_tol_ property and calls the primaryOptimizer
+   * constructor.
    *
-   * The following properties must be set in the constructor by classes extending this class:
+   * The following properties must be set in the constructor
+   * by classes extending this class:
    *
    *      contr_fac_  : The contraction factor.
    *      expan_fac_  : The expansion factor.

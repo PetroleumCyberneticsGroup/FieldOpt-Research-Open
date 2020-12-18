@@ -55,6 +55,7 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
   vp_ = well_settings.verbParams();
   grid_ = grid;
   assert(grid_ != nullptr);
+
   well_settings_ = well_settings;
   is_variable_ = false;
   use_bezier_spline_ = well_settings.use_bezier_spline;
@@ -81,7 +82,7 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
     ext_info(im_, md_, cl_,vp_.lnw);
   }
 
-  for (auto point : well_settings.spline_points) {
+  for (const auto point : well_settings.spline_points) {
     if (vp_.vMOD >= 2) {
       auto wn = well_settings.name.toStdString();
       im_ = "Adding new spline point for well " + wn + ": ";
@@ -89,14 +90,17 @@ WellSpline::WellSpline(Settings::Model::Well well_settings,
       im_ += " (" + point.name.toStdString() + ")";
       ext_info(im_,md_, cl_, vp_.lnw);
     }
+
     auto *pt = new SplinePoint();
     pt->x = new ContinuousProperty(point.x);
     pt->y = new ContinuousProperty(point.y);
     pt->z = new ContinuousProperty(point.z);
+
     assert(point.name.size() > 0);
     pt->x->setName(point.name + "#x");
     pt->y->setName(point.name + "#y");
     pt->z->setName(point.name + "#z");
+
     if (point.is_variable) {
       is_variable_ = true;
       variable_container->AddVariable(pt->x);
@@ -179,8 +183,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
 
     if (welldef.heel_md.empty()) {
       welldef.heel_md.push_back(0.0);
-    }
-    else {
+    } else {
       double prev_toe = welldef.toe_md.back();
       welldef.heel_md.push_back(prev_toe);
     }
@@ -193,8 +196,7 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
   vector<IntersectedCell> block_data;
   if (imported_wellblocks_.empty() || is_variable_) {
     wic_->ComputeWellBlocks(block_data, welldef);
-  }
-  else {
+  } else {
     if (vp_.vMOD >= 1) {
       wm_ = "Well index calculation for imported ";
       wm_ += "paths is not properly implemented at this time.";
@@ -329,12 +331,14 @@ vector<Eigen::Vector3d> WellSpline::getPoints() const {
 }
 
 vector<Eigen::Vector3d> WellSpline::convertToBezierSpline() const {
-  if (VERB_MOD >= 2) {
+
+  if (vp_.vMOD >= 2) {
     string im = "Generating bezier spline for well ";
     im += well_settings_.name.toStdString() + ". N original points: ";
     im += Printer::num2str(spline_points_.size());
     ext_info(im, md_, cl_, vp_.lnw);
   }
+
   assert(spline_points_.size() >= 4);
   Curve *curve = new Bezier();
   curve->set_steps(50);

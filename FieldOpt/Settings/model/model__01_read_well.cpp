@@ -98,7 +98,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       block.k = json_well_block_i["k"].toDouble();
 
       if (json_well_block_i.contains("IsVariable")
-        && json_well_block_i["IsVariable"].toBool() == true) {
+        && json_well_block_i["IsVariable"].toBool()) {
         block.is_variable = true;
       } else {
         block.is_variable = false;
@@ -136,7 +136,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
 
     well.definition_type = WellDefinitionType::PolarSpline;
     if (json_well.contains("UseBezierSpline")
-      && json_well["UseBezierSpline"].toBool() == true) {
+      && json_well["UseBezierSpline"].toBool()) {
       well.use_bezier_spline = true;
     } else {
       well.use_bezier_spline = false;
@@ -167,7 +167,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
 
     well.definition_type = WellDefinitionType::WellSpline;
     if (json_well.contains("UseBezierSpline")
-      && json_well["UseBezierSpline"].toBool() == true) {
+      && json_well["UseBezierSpline"].toBool()) {
       well.use_bezier_spline = true;
     } else {
       well.use_bezier_spline = false;
@@ -185,7 +185,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
         point.z = json_point["z"].toDouble();
 
         if (json_point.contains("IsVariable")
-          && json_point["IsVariable"].toBool() == true) {
+          && json_point["IsVariable"].toBool()) {
           point.is_variable = true;
         } else {
           point.is_variable = false;
@@ -237,7 +237,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
 
       if ((well.spline_heel.is_variable && well.spline_toe.is_variable)
         || (json_points.contains("IsVariable")
-          && json_points["IsVariable"].toBool() == true)) {
+          && json_points["IsVariable"].toBool())) {
         well.is_variable_spline = true;
       }
 
@@ -271,7 +271,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     well.pseudo_cont_position.j = json_position["j"].toInt();
 
     if (json_position.contains("IsVariable")
-      && json_position["IsVariable"].toBool() == true) {
+      && json_position["IsVariable"].toBool()) {
       well.pseudo_cont_position.is_variable = true;
     } else {
       well.spline_heel.is_variable = false;

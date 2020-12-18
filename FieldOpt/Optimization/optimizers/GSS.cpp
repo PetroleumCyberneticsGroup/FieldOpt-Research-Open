@@ -48,7 +48,8 @@ GSS::GSS(Settings::Optimizer *settings,
          Logger *logger,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, variables, grid,
+    logger, case_handler, constraint_handler) {
 
   vp_ = settings->verbParams();
 

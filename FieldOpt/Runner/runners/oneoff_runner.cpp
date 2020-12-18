@@ -52,8 +52,8 @@ void OneOffRunner::Execute() {
 }
 
 void OneOffRunner::applyWellPositionFromArguments() {
-  QList<Model::Properties::ContinuousProperty *> prod_vars = model_->variables()->GetWellSplineVariables("PRODUCER");
-  QList<Model::Properties::ContinuousProperty *> inje_vars = model_->variables()->GetWellSplineVariables("INJECTOR");
+  QList<Model::Properties::ContinuousProperty *> prod_vars = model_->variables()->GetWSplineVars("PRODUCER");
+  QList<Model::Properties::ContinuousProperty *> inje_vars = model_->variables()->GetWSplineVars("INJECTOR");
   if (prod_vars.length() != 6 || inje_vars.length() != 6)
     throw std::runtime_error("Found an incorrect number of variables for the wells.");
 

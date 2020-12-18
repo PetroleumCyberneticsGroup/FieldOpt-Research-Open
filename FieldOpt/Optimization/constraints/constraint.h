@@ -35,6 +35,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
+using namespace Model::Properties;
+
+using Printer::info;
+using Printer::ext_info;
+using Printer::num2str;
+using Printer::DBG_prntVecXd;
+using Printer::DBG_prntDbl;
+using Printer::pad_text;
+
 /*!
  * \brief The Constraint class is the abstract parent class
  * to all other constraint classes. One Constraint object
@@ -140,8 +149,10 @@ class Constraint
  protected:
   bool logging_enabled_;
   Settings::VerbParams vp_;
-  string md_ = "Optimization";
+
+  string md_ = "Optimization::Constraints";
   string cl_ = "Constraint";
+  string im_ = "", wm_ = "", em_ = "";
 
   Normalizer normalizer_; //!< Normalizer for constraint violation value; to be used with penalty functions.
   long double penalty_weight_; //!< The weight to be used when considering the constraint in a penalty function. (default: 0.0)

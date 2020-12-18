@@ -87,13 +87,14 @@ class EnTrTest : public ::testing::Test,
   VarPropContainer *varcont_tr_dfo_probs_;
   TestResources::TrustRegionModelData tr_mdata;
 
+  Settings::VerbParams vp_ = {};
 
   void SetUpOptimizer(TestResources::TrustRegionModelData::prob &prob){
 
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VarPropContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer(vp_);
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {

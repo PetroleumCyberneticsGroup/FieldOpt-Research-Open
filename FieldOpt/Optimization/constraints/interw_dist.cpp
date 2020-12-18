@@ -34,13 +34,20 @@ namespace Constraints {
 
 InterwDist::InterwDist(Settings::Optimizer::Constraint settings,
                        Model::Properties::VarPropContainer *variables,
-                       Settings::VerbParams vp) : Constraint(vp) {
+                       Settings::VerbParams vp)
+                       : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding WSplineInterwDist constraint.");
+  }
+
   distance_ = settings.min;
   penalty_weight_ = settings.penalty_weight;
 
   for (QString name : settings.wells) {
-    affected_wells_.append(initializeWell(variables->GetWellSplineVariables(name)));
+    affected_wells_.append(initWSplineConstraint(variables->GetWSplineVars(name), vp));
   }
+
   if (affected_wells_.length() != 2) {
     throw std::runtime_error("Currently, the Interwell Distance constraint must be applied to exactly two wells. Found " + boost::lexical_cast<std::string>(affected_wells_.length()));
   }
@@ -78,8 +85,8 @@ bool InterwDist::CaseSatisfiesConstraint(Case *c) {
   return true;
 }
 
-void InterwDist::SnapCaseToConstraints(Case *c)
-{
+void InterwDist::SnapCaseToConstraints(Case *c) {
+
   QList<Eigen::Vector3d> points;
   for (Well well : affected_wells_) {
     double heel_x_val = c->get_real_variable_value(well.heel.x);
@@ -113,6 +120,7 @@ void InterwDist::SnapCaseToConstraints(Case *c)
     c->set_real_variable_value(affected_wells_[i].toe.z, projection[i*2+1](2));
   }
 }
+
 void InterwDist::InitializeNormalizer(QList<Case *> cases) {
   long double minimum_distance = 1e20;
   for (auto c : cases) {
@@ -126,18 +134,23 @@ void InterwDist::InitializeNormalizer(QList<Case *> cases) {
   normalizer_.set_steepness(1.0L/minimum_distance);
   normalizer_.set_midpoint(minimum_distance/2.0L);
 }
+
 double InterwDist::Penalty(Case *c) {
   vector<double> endpoint_distances = endpointDistances(c);
   double violation = 0.0;
   for (auto distance : endpoint_distances) {
     if (distance < distance_) {
-      if (VERB_OPT >= 2) Printer::ext_info("Interwell distance penalty for case " + c->id().toString().toStdString()
-                                             + ": " + Printer::num2str(distance - distance_) + " m too close");
+      if (vp_.vOPT >= 2) {
+        ext_info("Interwell distance penalty for case " + c->id().toString().toStdString()
+                     + ": " + Printer::num2str(distance - distance_) + " m too close");
+      }
       violation += abs(distance - distance_);
     }
   }
-  if (VERB_OPT >= 2) Printer::ext_info("Interwell distance total violation for case "
-                                         + c->id().toString().toStdString() + ": " + Printer::num2str(violation));
+  if (vp_.vOPT >= 2) {
+    ext_info("Interwell distance total violation for case "
+                 + c->id().toString().toStdString() + ": " + Printer::num2str(violation));
+  }
   return violation;
 }
 
@@ -157,6 +170,7 @@ vector<double> InterwDist::endpointDistances(Case *c) {
   }
   return endpoint_distances;
 }
+
 long double InterwDist::PenaltyNormalized(Case *c) {
   double penalty = Penalty(c);
   if (penalty > 0.0)

@@ -57,7 +57,7 @@ TEST_F(PolarSplineTest, Constructor) {
   wsettings.polar_spline.midpoint.y = 732;
   wsettings.polar_spline.midpoint.z = 1712;
 
-  auto varcont = new Model::Properties::VarPropContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 
@@ -80,7 +80,7 @@ TEST_F(PolarSplineTest, Endblocks) {
   wsettings.polar_spline.midpoint.y = 732;
   wsettings.polar_spline.midpoint.z = 1712;
 
-  auto varcont = new Model::Properties::VarPropContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 
@@ -117,8 +117,9 @@ TEST_F(PolarSplineTest, Tilting) {
   wsettings.polar_spline.midpoint.y = 732;
   wsettings.polar_spline.midpoint.z = 1712;
 
-  auto varcont = new Model::Properties::VarPropContainer();
-  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
+  auto well = Model::Wells::Wellbore::PolarSpline(
+      wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 
   auto first_block = well_blocks->front();
@@ -145,8 +146,9 @@ TEST_F(PolarSplineTest, Screwing) {
   wsettings.polar_spline.midpoint.y = 732;
   wsettings.polar_spline.midpoint.z = 1712;
 
-  auto varcont = new Model::Properties::VarPropContainer();
-  auto well = Model::Wells::Wellbore::PolarSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
+  auto well = Model::Wells::Wellbore::PolarSpline(
+      wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 
   auto first_block = well_blocks->front();

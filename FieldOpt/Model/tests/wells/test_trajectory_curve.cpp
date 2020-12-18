@@ -34,8 +34,7 @@ namespace {
 
 class TrajectoryCurveTest : public ::testing::Test,
                             public TestResources::TestResourceModel,
-                            public TestResources::TestResourceGrids
-{
+                            public TestResources::TestResourceGrids {
  protected:
   TrajectoryCurveTest() {}
   Settings::VerbParams vp_ = {};
@@ -64,7 +63,7 @@ TEST_F(TrajectoryCurveTest, WellApplication) {
   auto model_settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_bezier_well(), paths, vp_);
   auto wsettings = model_settings.wells()[0];
   wsettings.use_bezier_spline = true;
-  auto varcont = new Model::Properties::VarPropContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::WellSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 

@@ -54,7 +54,7 @@ TEST_F(BhpConstraintTest, BaseCaseSatisfaction) {
 TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
   // get the bhp variable ids
   QList<QUuid> bhp_ids;
-  for (auto var : model_->variables()->GetWellBHPVariables("PROD")) {
+  for (auto var : model_->variables()->GetWellBHPVars("PROD")) {
     bhp_ids.append(var->id());
   }
 
@@ -80,7 +80,7 @@ TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
 TEST_F(BhpConstraintTest, SnappingValues) {
   // get the bhp variable ids
   QList<QUuid> bhp_ids;
-  for (auto var : model_->variables()->GetWellBHPVariables("PROD")) {
+  for (auto var : model_->variables()->GetWellBHPVars("PROD")) {
     bhp_ids.append(var->id());
   }
 

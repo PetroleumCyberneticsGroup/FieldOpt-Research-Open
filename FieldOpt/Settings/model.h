@@ -79,6 +79,7 @@ class Model
 
   struct Well {
     Well(){}
+
     struct Completion {
       Completion(){}
       WellCompletionType type;               //!< Which type of completion this is (Perforation/ICD)
@@ -109,6 +110,8 @@ class Model
       double pipe_xsec_area = 0.0;
       std::string device_stat = "open";
       double max_xsec_area = 0.0;
+
+      VerbParams verb_params_;
     };
 
     /*!

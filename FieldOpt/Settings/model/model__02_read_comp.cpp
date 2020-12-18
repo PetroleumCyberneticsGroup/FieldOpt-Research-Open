@@ -36,6 +36,8 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
     QJsonObject json_icv = json_icvs[i].toObject();
     comp.is_variable = is_prop_variable(json_icv);
 
+    comp.verb_params_ = well.verbParams();
+
     // time steps
     if (json_icv.contains("TimeStep")) {
       if (!controlTimeIsDeclared(json_icv["TimeStep"].toInt())) {
@@ -238,12 +240,12 @@ void Model::parseSegmentCompartments(const QJsonObject &json_seg,
       well.seg_n_compartments = json_compts["Count"].toInt();
 
       if (json_compts.contains("VariablePackers")
-        && json_compts["VariablePackers"].toBool() == true) {
+        && json_compts["VariablePackers"].toBool()) {
         well.seg_compartment_params.variable_placement = true;
       }
 
       if (json_compts.contains("VariableICDs") &&
-        json_compts["VariableICDs"].toBool() == true) {
+        json_compts["VariableICDs"].toBool()) {
         well.seg_compartment_params.variable_strength = true;
       }
 

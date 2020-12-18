@@ -43,8 +43,8 @@ class InterwDist : public Constraint, WellSplineConstraint
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
   /*!
    * @brief Set the normalizer parameters.

@@ -36,6 +36,7 @@ using namespace Model::Wells;
 namespace {
 
 class SegmentedWellTest : public ::testing::Test {
+
  protected:
   SegmentedWellTest() {
     auto partial_deck = model_adtl_pts;
@@ -44,7 +45,7 @@ class SegmentedWellTest : public ::testing::Test {
     // paths_.SetPath(Paths::SIM_SCH_FILE, TestResources::ExampleFilePaths::norne_sch_);
     mod_json_ = partial_deck["Model"].toObject();
     mod_settings_ = new Settings::Model(mod_json_, paths_, vp_);
-    varcont_ = new Model::Properties::VarPropContainer();
+    varcont_ = new Model::Properties::VarPropContainer(vp_);
     grid_ = new Reservoir::Grid::ECLGrid(paths_.GetPath(Paths::GRID_FILE));
   }
 

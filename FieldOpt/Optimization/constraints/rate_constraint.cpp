@@ -27,18 +27,25 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-RateConstraint::RateConstraint(Settings::Optimizer::Constraint settings,
+RateConstraint::RateConstraint(Settings::Optimizer::Constraint const settings,
                                Model::Properties::VarPropContainer *variables,
-                               Settings::VerbParams vp) : Constraint(vp) {
-  assert(settings.wells.size() > 0);
+                               Settings::VerbParams vp)
+                               : Constraint(vp) {
+
+  assert(!settings.wells.empty());
   assert(settings.min < settings.max);
+
+  if (vp_.vOPT >= 1) {
+    info("Adding Rate constraint for " + settings.well.toStdString());
+  }
 
   affected_well_names_ = settings.wells;
   min_ = settings.min;
   max_ = settings.max;
   penalty_weight_ = settings.penalty_weight;
-  for (auto wname : affected_well_names_) {
-    affected_real_variables_.append(variables->GetWellRateVariables(wname));
+
+  for (auto &wname : affected_well_names_) {
+    affected_real_variables_.append(variables->GetWellRateVars(wname));
   }
 }
 

@@ -33,6 +33,7 @@ namespace Constraints {
 using Printer::info;
 using Printer::ext_info;
 using Printer::ext_warn;
+using Printer::num2str;
 
 ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
                                      Model::Properties::VarPropContainer *variables,
@@ -47,18 +48,12 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
 
       // BHP
       case Settings::Optimizer::ConstraintType::BHP: {
-        if (vp_.vOPT >= 1) {
-          info("Adding BHP constraint for " + constraint.well.toStdString());
-        }
         constraints_.append(new BhpConstraint(constraint, variables, vp_));
         break;
       }
 
       // RATE
       case Settings::Optimizer::ConstraintType::Rate: {
-        if (vp_.vOPT >= 1) {
-          info("Adding Rate constraint for " + constraint.well.toStdString());
-        }
         constraints_.append(new RateConstraint(constraint, variables, vp_));
         break;
       }
@@ -68,9 +63,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding WSplineLength constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new WSplineLength(cons, variables, vp_));
         }
         break;
@@ -81,9 +73,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding PolarAzimuth constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PolarAzimuth(cons, variables, vp_));
         }
         break;
@@ -94,9 +83,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding PolarElevation constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PolarElevation(cons, variables, vp_));
         }
         break;
@@ -107,9 +93,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding PolarWellLength constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PolarWellLength(cons, variables, vp_));
         }
         break;
@@ -120,9 +103,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding PolarSplineBoundary constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PolarSplineBoundary(cons, variables, grid, vp_));
         }
         break;
@@ -133,9 +113,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding ICV constraint for " + cons.well.toStdString());
-          }
+
           constraints_.append(new ICVConstraint(cons, variables, vp_));
         }
         break;
@@ -146,9 +124,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding Packer constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PackerConstraint(cons, variables, vp_));
         }
         break;
@@ -156,18 +131,12 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
 
       // WELLSPLINE INTERWELL DISTANCE
       case Settings::Optimizer::ConstraintType::WSplineInterwDist: {
-        if (vp_.vOPT >= 1) {
-          info("Adding WSplineInterwDist constraint.");
-        }
         constraints_.append(new InterwDist(constraint, variables, vp_));
         break;
       }
 
       // WSPLINE + WSPLINE LENGTH + INTERWELL DISTANCE
       case Settings::Optimizer::ConstraintType::MxWSplineLengthInterwDist: {
-        if (vp_.vOPT >= 1) {
-          info("Adding MxWSplineLengthInterwDist constraint.");
-        }
         constraints_.append(new MxSplineLengthInterwDist(constraint, variables, vp_));
         break;
       }
@@ -175,9 +144,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
       // WSPLINE + WSPLINE LENGTH + INTERW DISTANCE + RESERVOIR BOUND
       case Settings::Optimizer::ConstraintType::
         MxWSplineLengthInterwDistResBound: {
-        if (vp_.vOPT >= 1) {
-          info("Adding MxWSplineLengthInterwDistResBound constraint.");
-        }
         constraints_.append(new MxSplineLengthInterwDistResBound(constraint, variables, grid, vp_));
         break;
       }
@@ -187,9 +153,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding ResBoundary constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new ResBoundary(cons, variables, grid, vp_));
         }
         break;
@@ -200,7 +163,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) Printer::info("Adding PolarXYZBoundary constraint for " + cons.well.toStdString());
           constraints_.append(new PolarXYZBoundary(cons, variables, grid, vp_));
         }
         break;
@@ -211,9 +173,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding ReservoirXYZBoundary constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new ReservoirXYZBoundary(cons, variables, grid, vp_));
         }
         break;
@@ -224,9 +183,6 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding ReservoirBoundaryToe constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new ReservoirBoundaryToe(cons, variables, grid, vp_));
         }
         break;
@@ -237,16 +193,13 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          if (vp_.vOPT >= 1) {
-            info("Adding PseudoContBoundary2D constraint for " + cons.well.toStdString());
-          }
           constraints_.append(new PseudoContBoundary2D(cons, variables, grid, vp_));
         }
         break;
       }
 
       default:
-        Printer::ext_warn("Constraint type not recognized.", "Optimization", "ConstraintHandler");
+        ext_warn("Constraint type not recognized.", md_, cl_);
     }
   }
 }
@@ -307,7 +260,9 @@ Eigen::VectorXd ConstraintHandler::GetUpperBounds(QList<QUuid> id_vector) const 
 }
 
 void ConstraintHandler::InitializeNormalizers(QList<Case *> cases) {
-  cout << "ConstraintHandler Initializing constraint normalizers" << endl;
+  if (vp_.vOPT >= 1) {
+    info("ConstraintHandler Initializing constraint normalizers.");
+  }
   for (auto con : constraints_) {
     con->InitializeNormalizer(cases);
   }
@@ -315,17 +270,20 @@ void ConstraintHandler::InitializeNormalizers(QList<Case *> cases) {
 
 long double ConstraintHandler::GetWeightedNormalizedPenalties(Case *c) {
   long double wnp = 0.0L;
+
   for (auto con : constraints_) {
     long double pen = con->PenaltyNormalized(c);
-    if (VERB_OPT >= 3 && pen > 0) {
-      Printer::ext_info("Penalty from constraint " + con->name()
-                            + ": " + Printer::num2str(pen), "Optimization", "ConstraintHandler");
+    if (vp_.vOPT >= 3 && pen > 0) {
+      im_ = "Penalty from constraint " + con->name() + ": " + num2str(pen);
+      ext_info(im_, md_, cl_);
     }
     wnp += pen * con->GetPenaltyWeight();
   }
-  if (VERB_OPT >= 2) {
-    Printer::ext_info("Weighted, normalized penalty for case " + c->id().toString().toStdString()
-                          + ": " + Printer::num2str(wnp), "Optimization", "ConstraintHandler");
+
+  if (vp_.vOPT >= 2) {
+    im_ = "Weighted, normalized penalty for case ";
+    im_ += c->id().toString().toStdString() + ": " + num2str(wnp);
+    ext_info(im_, md_, cl_);
   }
   return wnp;
 }

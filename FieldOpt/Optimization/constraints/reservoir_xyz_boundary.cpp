@@ -35,6 +35,10 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(const Settings::Optimizer::Constraint
                                            Model::Properties::VarPropContainer *variables,
                                            Reservoir::Grid::Grid *grid,
                                            Settings::VerbParams vp) : Constraint(vp) {
+  if (vp_.vOPT >= 1) {
+    info("Adding ReservoirXYZBoundary constraint for " + settings.well.toStdString());
+  }
+
   xmin_ = settings.box_xyz_xmin;
   xmax_ = settings.box_xyz_xmax;
   ymin_ = settings.box_xyz_ymin;

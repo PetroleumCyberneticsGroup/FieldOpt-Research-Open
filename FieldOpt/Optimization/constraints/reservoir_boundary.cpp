@@ -36,7 +36,13 @@ ResBoundary::ResBoundary(
   const Settings::Optimizer::Constraint &settings,
   Model::Properties::VarPropContainer *variables,
   Reservoir::Grid::Grid *grid,
-  Settings::VerbParams vp) : Constraint(vp) {
+  Settings::VerbParams vp)
+  : Constraint(vp) {
+
+  if (vp.vOPT >= 1) {
+    info("Adding ResBoundary constraint for " + settings.well.toStdString());
+  }
+
   imin_ = settings.box_imin;
   imax_ = settings.box_imax;
   jmin_ = settings.box_jmin;
@@ -47,10 +53,11 @@ ResBoundary::ResBoundary(
   penalty_weight_ = settings.penalty_weight;
 
   index_list_ = getListOfCellIndices();
-  if (variables->GetWellSplineVariables(settings.well).size() > 0)
-    affected_well_ = initializeWell(variables->GetWellSplineVariables(settings.well));
-  else
-    affected_well_ = initializeWell(variables->GetPolarSplineVariables(settings.well));
+  if (variables->GetWSplineVars(settings.well).size() > 0) {
+    affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp);
+  } else {
+    affected_well_ = initWSplineConstraint(variables->GetPolarSplineVariables(settings.well), vp);
+  }
 
   // QList with indices of box edge cells
   index_list_edge_ = getIndicesOfEdgeCells();

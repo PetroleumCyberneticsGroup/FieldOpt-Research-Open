@@ -38,6 +38,10 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 
+using Printer::ext_warn;
+using Printer::ext_info;
+using Printer::info;
+
 class CaseHandler;
 class CaseTransferObject;
 
@@ -69,9 +73,10 @@ class Case : public Loggable
   Case(const Case *c);
 
   /*!
-   * @brief The CaseState struct holds information about the current
-   * status of the Case object, such as whether or not it has been
-   * evaluated and whether or not it has been modified by a constriant.
+   * @brief The CaseState struct holds information about the
+   * current status of the Case object, such as whether or
+   * not it has been evaluated and whether or not it has been
+   * modified by a constriant.
    */
   struct CaseState {
     enum EvalStatus : int {
@@ -82,8 +87,7 @@ class Case : public Loggable
     };
 
     enum ConsStatus : int {
-      C_PROJ_FAILED=-2, C_INFEASIBLE=-1,
-      C_PENDING=0,
+      C_PROJ_FAILED=-2, C_INFEASIBLE=-1, C_PENDING=0,
       C_FEASIBLE=1, C_PROJECTED=2, C_PENALIZED=3,
     };
 
@@ -111,22 +115,29 @@ class Case : public Loggable
     ErrorMessage err_msg;
   };
 
-  CaseState state; //!< The state of the Case, directly modifiable.
+  //!< The state of the Case, directly modifiable.
+  CaseState state;
 
   /*!
-   * \brief Equals Checks whether this case is equal to another case within some tolerance.
+   * \brief Equals Checks whether this case is equal
+   * to another case within some tolerance.
    * \param other Case to compare with.
    * \param tolerance The allowed deviation between two cases.
-   * \return True if the cases are equal within the tolerance, otherwise false.
+   * \return True if the cases are equal within the tolerance,
+   * otherwise false.
    */
   bool Equals(const Case *other, double tolerance=0.0) const;
 
   QUuid id() const { return id_; }
-  string id_stdstr() { return id_.toString().toStdString(); } //!< Get an std string representation of the case uuid.
+
+  //!< Get an std string representation of the case uuid.
+  string id_stdstr() { return id_.toString().toStdString(); }
 
   /*!
-   * @brief Get a string representation of this case, suitable for console printing.
-   * @param varcont Pointer to the variable container. This is needed to get variable names.
+   * @brief Get a string representation of this case,
+   * suitable for console printing.
+   * @param varcont Pointer to the variable container.
+   * This is needed to get variable names.
    * @return An std string describing the case.
    */
   string StringRepresentation(Model::Properties::VarPropContainer *varcont);
@@ -139,9 +150,15 @@ class Case : public Loggable
   // QMap<QUuid, int> integer_variables() const { return integer_variables_; }
   // QMap<QUuid, double> real_variables() const { return real_variables_; }
 
-  QList<QPair<QUuid, bool>> binary_variables() const { return binary_variables_; }
-  QList<QPair<QUuid, int>> integer_variables() const { return integer_variables_; }
-  QList<QPair<QUuid, double>> real_variables() const { return real_variables_; }
+  QList<QPair<QUuid, bool>> binary_variables() const {
+    return binary_variables_;
+  }
+  QList<QPair<QUuid, int>> integer_variables() const {
+    return integer_variables_;
+  }
+  QList<QPair<QUuid, double>> real_variables() const {
+    return real_variables_;
+  }
 
   // void set_binary_variables(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
   // void set_integer_variables(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
@@ -151,9 +168,17 @@ class Case : public Loggable
   // void set_integer_variables(const QMap<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
   // void set_real_variables(const QMap<QUuid, double> &real_variables) { real_variables_ = real_variables; }
 
-  void set_binary_variables(const QList<QPair<QUuid, bool>> &binary_variables) { binary_variables_ = binary_variables; }
-  void set_integer_variables(const QList<QPair<QUuid, int>> &integer_variables) { integer_variables_ = integer_variables; }
-  void set_real_variables(const QList<QPair<QUuid, double>> &real_variables) { real_variables_ = real_variables; }
+  void set_binary_variables(const QList<QPair<QUuid, bool>> &binary_variables) {
+    binary_variables_ = binary_variables;
+  }
+
+  void set_integer_variables(const QList<QPair<QUuid, int>> &integer_variables) {
+    integer_variables_ = integer_variables;
+  }
+
+  void set_real_variables(const QList<QPair<QUuid, double>> &real_variables) {
+    real_variables_ = real_variables;
+  }
 
   double objf_value() const; //!< Get the objective function value. Throws an exception if the value has not been defined.
   void set_objf_value(double objective_function_value);

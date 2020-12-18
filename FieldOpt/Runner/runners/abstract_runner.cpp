@@ -52,6 +52,18 @@ using Printer::ext_info;
 using Printer::num2str;
 using std::runtime_error;
 
+using OptzrMod = Settings::Optimizer::OptimizerMode;
+using OptzrTyp = Settings::Optimizer::OptimizerType;
+
+using SimTyp = Settings::Simulator::SimulatorType;
+using ObjTyp = Settings::Optimizer::ObjectiveType;
+
+using Optimization::Objective::WeightedSum;
+using Optimization::Objective::NPV;
+using Optimization::Objective::Augmented;
+
+namespace Optzr = Optimization::Optimizers;
+
 AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
   runtime_settings_ = runtime_settings;
 
@@ -68,7 +80,7 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
 }
 
 double AbstractRunner::sentinelValue() const {
-  if (settings_->optimizer()->mode() == Settings::Optimizer::OptimizerMode::Minimize)
+  if (settings_->optimizer()->mode() == OptzrMod::Minimize)
     return -1*sentinel_value_;
   return sentinel_value_;
 }
@@ -113,35 +125,32 @@ void AbstractRunner::InitializeSimulator() {
     throw std::runtime_error("Model must be initialized before Simulator.");
 
   switch (settings_->simulator()->type()) {
-    case ::Settings::Simulator::SimulatorType::ECLIPSE: {
+
+    case SimTyp::ECLIPSE: {
       string tm = "Using ECLIPSE simulator.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::ECLSimulator(settings_,
-                                                model_);
+      simulator_ = new Simulation::ECLSimulator(settings_, model_);
       break;
     }
 
-    case ::Settings::Simulator::SimulatorType::ADGPRS: {
+    case SimTyp::ADGPRS: {
       auto tm = "Using ADGPRS simulator.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::AdgprsSimulator(settings_,
-                                                   model_);
+      simulator_ = new Simulation::AdgprsSimulator(settings_, model_);
       break;
     }
 
-    case ::Settings::Simulator::SimulatorType::Flow: {
+    case SimTyp::Flow: {
       auto tm = "Using Flow simulator.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::ECLSimulator(settings_,
-                                                model_);
+      simulator_ = new Simulation::ECLSimulator(settings_, model_);
       break;
     }
 
-    case ::Settings::Simulator::SimulatorType::INTERSECT: {
+    case SimTyp::INTERSECT: {
       auto tm = "Using INTERSECT simulator.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      simulator_ = new Simulation::IXSimulator(settings_,
-                                               model_);
+      simulator_ = new Simulation::IXSimulator(settings_, model_);
       break;
     }
 
@@ -180,33 +189,25 @@ void AbstractRunner::InitializeObjectiveFunction() {
   }
 
   switch (settings_->optimizer()->objective().type) {
-    case Settings::Optimizer::ObjectiveType::WeightedSum: {
+
+    case ObjTyp::WeightedSum: {
       auto tm = "Using WeightedSum-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ =
-        new Optimization::Objective::WeightedSum(settings_->optimizer(),
-                                                 simulator_->results(),
-                                                 model_);
+      objf_ = new WeightedSum(settings_->optimizer(), simulator_->results(), model_);
       break;
     }
 
-    case Settings::Optimizer::ObjectiveType::NPV: {
+    case ObjTyp::NPV: {
       auto tm = "Using NPV-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ =
-        new Optimization::Objective::NPV(settings_->optimizer(),
-                                         simulator_->results(),
-                                         model_);
+      objf_ = new NPV(settings_->optimizer(), simulator_->results(), model_);
       break;
     }
 
-    case Settings::Optimizer::ObjectiveType::Augmented: {
+    case ObjTyp::Augmented: {
       auto tm = "Using Augmented objective.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ =
-        new Optimization::Objective::Augmented(settings_->optimizer(),
-                                               simulator_->results(),
-                                               model_);
+      objf_ = new Augmented(settings_->optimizer(), simulator_->results(), model_);
       break;
     }
 
@@ -236,7 +237,7 @@ void AbstractRunner::InitializeBaseCase() {
 
   } else {
     model_->wellCost(settings_->optimizer());
-    if (settings_->optimizer()->objective().type == Settings::Optimizer::ObjectiveType::Augmented) {
+    if (settings_->optimizer()->objective().type == ObjTyp::Augmented) {
       base_case_->set_objf_value(objf_->value(true));
     } else {
       base_case_->set_objf_value(objf_->value());
@@ -248,8 +249,6 @@ void AbstractRunner::InitializeBaseCase() {
   }
 }
 
-namespace Optzr = Optimization::Optimizers;
-
 void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
     string em = "Base Case and Model must be initialized before the Optimizer";
@@ -258,7 +257,7 @@ void AbstractRunner::InitializeOptimizer() {
 
   switch (settings_->optimizer()->type()) {
 
-    case Settings::Optimizer::OptimizerType::Compass: {
+    case OptzrTyp::Compass: {
       if (vp_.vRUN >= 1) info("Using CompassSearch optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
                                             base_case_,
@@ -268,17 +267,18 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::APPS: {
+    case OptzrTyp::APPS: {
       if (vp_.vRUN >= 1) info("Using APPS optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::APPS(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
                                    model_->grid(),
-                                   logger_
-      );
+                                   logger_,
+                                   nullptr,
+                                   model_->constraintHandler());
       break;
     }
-    case Settings::Optimizer::OptimizerType::GeneticAlgorithm: {
+    case OptzrTyp::GeneticAlgorithm: {
       if (vp_.vRUN >= 1) info("Using GeneticAlgorithm optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::RGARDD(settings_->optimizer(),
                                      base_case_,
@@ -288,7 +288,7 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::EGO: {
+    case OptzrTyp::EGO: {
       if (vp_.vRUN >= 1) info("Using EGO optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::BayesianOptimization::EGO(settings_->optimizer(),
                                                         base_case_,
@@ -298,7 +298,7 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::ExhaustiveSearch2DVert: {
+    case OptzrTyp::ExhaustiveSearch2DVert: {
       if (vp_.vRUN >= 1) info("Using ExhaustiveSearch2DVert optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::ExhaustiveSearch2DVert(settings_->optimizer(),
                                                      base_case_,
@@ -308,7 +308,7 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::Hybrid: {
+    case OptzrTyp::Hybrid: {
       if (vp_.vRUN >= 1) info("Using Hybrid optimization algorithm.", vp_.lnw);
       optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
                                                      base_case_,
@@ -318,8 +318,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::TrustRegionOptimization: {
-      if (VERB_RUN >= 1) info("Using Trust Region optimization algorithm.", vp_.lnw);
+    case OptzrTyp::TrustRegionOptimization: {
+      if (vp_.vRUN >= 1) info("Using Trust Region optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
                                                       base_case_,
                                                       model_->variables(),
@@ -328,8 +328,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::PSO: {
-      if (VERB_RUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
+    case OptzrTyp::PSO: {
+      if (vp_.vRUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::PSO(settings_->optimizer(),
                                   base_case_,
                                   model_->variables(),
@@ -338,8 +338,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::CMA_ES: {
-      if (VERB_RUN >= 1) info("Using CMA_ES optimization algorithm.", vp_.lnw);
+    case OptzrTyp::CMA_ES: {
+      if (vp_.vRUN >= 1) info("Using CMA_ES optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::CMA_ES(settings_->optimizer(),
                                      base_case_,
                                      model_->variables(),
@@ -348,8 +348,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::VFSA: {
-      if (VERB_RUN >= 1) info("Using VFSA optimization algorithm.", vp_.lnw);
+    case OptzrTyp::VFSA: {
+      if (vp_.vRUN >= 1) info("Using VFSA optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::VFSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
@@ -358,8 +358,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case Settings::Optimizer::OptimizerType::SPSA: {
-      if (VERB_RUN >= 1) info("Using SPSA optimization algorithm.", vp_.lnw);
+    case OptzrTyp::SPSA: {
+      if (vp_.vRUN >= 1) info("Using SPSA optimization algorithm.", vp_.lnw);
       optimizer_ = new Optzr::SPSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),

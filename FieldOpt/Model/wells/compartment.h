@@ -71,8 +71,8 @@ class Compartment {
   std::vector<int> block_idx_range_;
 
   string im_ = "", wm_ = "", em_ = "";
-  string md_ = "Model";
-  string cl_ = "Well";
+  string md_ = "Model::Wells";
+  string cl_ = "Compartment ";
   Settings::VerbParams vp_;
 };
 
