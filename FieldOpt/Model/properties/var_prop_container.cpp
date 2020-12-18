@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Properties {
 
+// MAKE VARIABLE CONTAINER ---------------------------------
 //VarPropContainer::VarPropContainer() {
 //  binary_variables_ = new QHash<QUuid, BinaryProperty *>();
 //  discrete_variables_ = new QHash<QUuid, DiscreteProperty *>();
@@ -41,12 +42,14 @@ namespace Properties {
 //  continuous_variables_ = new QMap<QUuid, ContinuousProperty *>();
 //}
 
-VarPropContainer::VarPropContainer() {
+VarPropContainer::VarPropContainer(Settings::VerbParams vp) {
   binary_variables_ = new QList<QPair<QUuid, BinaryProperty *>>();
   discrete_variables_ = new QList<QPair<QUuid, DiscreteProperty *>>();
   continuous_variables_ = new QList<QPair<QUuid, ContinuousProperty *>>();
+  vp_ = vp;
 }
 
+// ADD VARIABLE --------------------------------------------
 void VarPropContainer::AddVariable(BinaryProperty *var) {
   var->SetVariable();
   // binary_variables_->insert(var->id(), var);
@@ -63,9 +66,12 @@ void VarPropContainer::AddVariable(ContinuousProperty *var) {
   var->SetVariable();
   // continuous_variables_->insert(var->id(), var);
   continuous_variables_->append(qMakePair(var->id(), var));
+  if (vp_.vOPT > 3) {
+    ext_info("@[AddVariable]: " + var->ToString(), md_, cl_);
+  }
 }
 
-
+// GET BINARY VAR ------------------------------------------
 BinaryProperty* VarPropContainer::GetBinaryVariable(QUuid id) const {
   for(int ii=0; ii < binary_variables_->size(); ii++) {
     if (binary_variables_->at(ii).first==id) {
@@ -76,6 +82,7 @@ BinaryProperty* VarPropContainer::GetBinaryVariable(QUuid id) const {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// GET DISCRETE VAR ----------------------------------------
 DiscreteProperty *VarPropContainer::GetDiscreteVariable(QUuid id) const {
   for(int ii=0; ii < discrete_variables_->size(); ii++) {
     if (discrete_variables_->at(ii).first==id) {
@@ -86,6 +93,7 @@ DiscreteProperty *VarPropContainer::GetDiscreteVariable(QUuid id) const {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// GET CONTINUOUS VAR --------------------------------------
 ContinuousProperty *VarPropContainer::GetContinuousVariable(QUuid id) const {
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     if (continuous_variables_->at(ii).first==id) {
@@ -96,6 +104,7 @@ ContinuousProperty *VarPropContainer::GetContinuousVariable(QUuid id) const {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// SET BINARY VALUE ----------------------------------------
 void VarPropContainer::SetBinaryVariableValue(QUuid id, bool val) {
   for(int ii=0; ii < binary_variables_->size(); ii++) {
     if (binary_variables_->at(ii).first==id) {
@@ -107,6 +116,7 @@ void VarPropContainer::SetBinaryVariableValue(QUuid id, bool val) {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// SET DISCRETE VALUE --------------------------------------
 void VarPropContainer::SetDiscreteVariableValue(QUuid id, int val) {
   for(int ii=0; ii < discrete_variables_->size(); ii++) {
     if (discrete_variables_->at(ii).first==id) {
@@ -118,10 +128,11 @@ void VarPropContainer::SetDiscreteVariableValue(QUuid id, int val) {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// SET CONTINUOUS VALUE ------------------------------------
 void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     if (continuous_variables_->at(ii).first==id) {
-      continuous_variables_->at(ii).second->setValue(val);
+      continuous_variables_->at(ii).second->setValueSc(val);
       return;
     }
   }
@@ -129,6 +140,7 @@ void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   throw VariableIdDoesNotExistException(tm);
 }
 
+// BINARY VALUES -------------------------------------------
 //QHash<QUuid, bool> VarPropContainer::GetBinVarValues() const {
 //  QHash<QUuid, bool> binary_values = QHash<QUuid, bool>();
 //  for (QUuid key : binary_variables_->keys())
@@ -152,6 +164,7 @@ QList<QPair<QUuid, bool>> VarPropContainer::GetBinVarValues() const {
   return bin_vals;
 }
 
+// DISCRETEVALUES ---------------------------------------
 //QHash<QUuid, int> VarPropContainer::GetDiscVarValues() const {
 //  QHash<QUuid, int> discrete_values = QHash<QUuid, int>();
 //  for (QUuid key : discrete_variables_->keys()) {
@@ -177,6 +190,7 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscVarValues() const {
   return int_vals;
 }
 
+// CONTINUOUS VALUES ---------------------------------------
 //QHash<QUuid, double> VarPropContainer::GetContVarValues() const {
 //  QHash<QUuid, double> continous_values = QHash<QUuid, double>();
 //  for (QUuid key : continuous_variables_->keys()) {
@@ -197,11 +211,12 @@ QList<QPair<QUuid, double>> VarPropContainer::GetContVarValues() const {
   QList<QPair<QUuid, double>> cont_vals = QList<QPair<QUuid, double>>();
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-                               continuous_variables_->at(ii).second->value()));
+                               continuous_variables_->at(ii).second->valueSc()));
   }
   return cont_vals;
 }
 
+// CHECK VAR.NAME UNIQUENESS--------------------------------
 void VarPropContainer::CheckVariableNameUniqueness() {
   QList<QString> names = QList<QString>();
   string tm = "Encountered non-unique variable name: ";
@@ -237,7 +252,9 @@ void VarPropContainer::CheckVariableNameUniqueness() {
   }
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetWellSplineVariables(const QString well_name) const {
+// SPLINEVARS ----------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetWSplineVars(QString well_name) const {
   QList<ContinuousProperty *> spline_vars;
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
@@ -249,7 +266,9 @@ QList<ContinuousProperty *> VarPropContainer::GetWellSplineVariables(const QStri
   return spline_vars;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetPolarSplineVariables(const QString well_name) const {
+// POLARSPLINE ---------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetPolarSplineVariables(const QString well_name) const {
   QList<ContinuousProperty *> polar_vars;
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
@@ -261,7 +280,9 @@ QList<ContinuousProperty *> VarPropContainer::GetPolarSplineVariables(const QStr
   return polar_vars;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetPseudoContVertVariables(const QString well_name) const {
+// PSEUDOCONT ----------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetPseudoContVertVariables(const QString well_name) const {
   QList<ContinuousProperty *> pcv_vars;
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
@@ -271,10 +292,13 @@ QList<ContinuousProperty *> VarPropContainer::GetPseudoContVertVariables(const Q
     }
   }
 
+  stringstream es;
   if (pcv_vars.size() != 2) {
-    std::cerr << "Error: Incorrect number (" << pcv_vars.size()
-              << ") found for well " << well_name.toStdString() << std::endl;
-    throw std::runtime_error("Incorrect number of pseudocontinuous variables found.");
+    es << "Error: Incorrect number (" << pcv_vars.size();
+    es << ") found for well " << well_name.toStdString() << endl;
+    std::cerr << es.str();
+    string em = "Incorrect number of pseudocontinuous variables found.";
+    throw std::runtime_error(em);
   }
 
   if (pcv_vars[0]->propertyInfo().coord != Property::Coordinate::x)
@@ -282,13 +306,15 @@ QList<ContinuousProperty *> VarPropContainer::GetPseudoContVertVariables(const Q
   return pcv_vars;
 }
 
-
-QList<ContinuousProperty *> VarPropContainer::GetWellControlVariables() const {
+// CONTROL -------------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetWellControlVariables() const {
   QList<ContinuousProperty *> well_controls;
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
-    if (var->propertyInfo().prop_type == Property::PropertyType::BHP||
-        var->propertyInfo().prop_type == Property::PropertyType::Rate) {
+    if (var->propertyInfo().prop_type == Property::PropertyType::BHP
+        || var->propertyInfo().prop_type == Property::PropertyType::Rate
+        || var->propertyInfo().prop_type == Property::PropertyType::ICD) {
       well_controls.append(var);
     }
   }
@@ -300,7 +326,8 @@ QList<ContinuousProperty *> VarPropContainer::GetWellControlVariables() const {
   return well_controls;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetWellControlVariables(const QString well_name) const {
+QList<ContinuousProperty *>
+VarPropContainer::GetWellControlVariables(const QString well_name) const {
   QList<ContinuousProperty *> well_controls;
   for (auto var : GetWellControlVariables()) {
     if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0) {
@@ -310,7 +337,9 @@ QList<ContinuousProperty *> VarPropContainer::GetWellControlVariables(const QStr
   return well_controls;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetWellBHPVariables() const {
+// BHP -----------------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetWellBHPVariables() const {
   QList<ContinuousProperty *> bhp_variables;
   for (auto var : GetWellControlVariables()) {
     if (var->propertyInfo().prop_type == Property::PropertyType::BHP)
@@ -319,16 +348,8 @@ QList<ContinuousProperty *> VarPropContainer::GetWellBHPVariables() const {
   return bhp_variables;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetWellRateVariables() const {
-  QList<ContinuousProperty *> rate_variables;
-  for (auto var : GetWellControlVariables()) {
-    if (var->propertyInfo().prop_type == Property::PropertyType::Rate)
-      rate_variables.append(var);
-  }
-  return rate_variables;
-}
-
-QList<ContinuousProperty *> VarPropContainer::GetWellBHPVariables(QString well_name) const {
+QList<ContinuousProperty *>
+VarPropContainer::GetWellBHPVars(QString const &well_name) const {
   QList<ContinuousProperty *> well_bhp_variables;
   for (auto var : GetWellBHPVariables()) {
     if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0) {
@@ -338,7 +359,41 @@ QList<ContinuousProperty *> VarPropContainer::GetWellBHPVariables(QString well_n
   return well_bhp_variables;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetWellRateVariables(QString well_name) const {
+// ICD -----------------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetWellICDVariables() const {
+  QList<ContinuousProperty *> icd_variables;
+  for (auto var : GetWellControlVariables()) {
+    if (var->propertyInfo().prop_type == Property::PropertyType::ICD)
+      icd_variables.append(var);
+  }
+  return icd_variables;
+}
+
+QList<ContinuousProperty *>
+VarPropContainer::GetWellICDVars(QString const &well_name) const {
+  QList<ContinuousProperty *> well_icd_variables;
+  for (auto var : GetWellICDVariables()) {
+    if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0) {
+      well_icd_variables.append(var);
+    }
+  }
+  return well_icd_variables;
+}
+
+// RATE ----------------------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetWellRateVariables() const {
+  QList<ContinuousProperty *> rate_variables;
+  for (auto var : GetWellControlVariables()) {
+    if (var->propertyInfo().prop_type == Property::PropertyType::Rate)
+      rate_variables.append(var);
+  }
+  return rate_variables;
+}
+
+QList<ContinuousProperty *>
+VarPropContainer::GetWellRateVars(QString well_name) const {
   QList<ContinuousProperty *> well_rate_variables;
   for (auto var : GetWellRateVariables()) {
     if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0) {
@@ -348,7 +403,9 @@ QList<ContinuousProperty *> VarPropContainer::GetWellRateVariables(QString well_
   return well_rate_variables;
 }
 
-QList<DiscreteProperty *> VarPropContainer::GetWellBlockVariables() const {
+// WELL BLOCKS ---------------------------------------------
+QList<DiscreteProperty *>
+VarPropContainer::GetWellBlockVariables() const {
   QList<DiscreteProperty *> wb_vars;
   for(int ii=0; ii < discrete_variables_->size(); ii++) {
     auto var = discrete_variables_->at(ii).second;
@@ -358,7 +415,8 @@ QList<DiscreteProperty *> VarPropContainer::GetWellBlockVariables() const {
   return wb_vars;
 }
 
-QList<DiscreteProperty *> VarPropContainer::GetWellBlockVariables(const QString well_name) const {
+QList<DiscreteProperty *>
+VarPropContainer::GetWellBlockVariables(const QString well_name) const {
   QList<DiscreteProperty *> wb_vars;
   for (auto var : GetWellBlockVariables()) {
     if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0)
@@ -367,7 +425,9 @@ QList<DiscreteProperty *> VarPropContainer::GetWellBlockVariables(const QString 
   return wb_vars;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetTransmissibilityVariables() const {
+// TRANSMISSIBILITY VARS -----------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetTransmissibilityVariables() const {
   QList<ContinuousProperty *> trans_vars;
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
@@ -377,7 +437,8 @@ QList<ContinuousProperty *> VarPropContainer::GetTransmissibilityVariables() con
   return trans_vars;
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetTransmissibilityVariables(const QString well_name) const {
+QList<ContinuousProperty *>
+VarPropContainer::GetTransmissibilityVariables(const QString well_name) const {
   QList<ContinuousProperty *> trans_vars;
   for (auto var : GetTransmissibilityVariables()) {
     if (QString::compare(well_name, var->propertyInfo().parent_well_name) == 0)
@@ -386,7 +447,9 @@ QList<ContinuousProperty *> VarPropContainer::GetTransmissibilityVariables(const
   return trans_vars;
 }
 
-BinaryProperty *VarPropContainer::GetBinaryVariable(QString name) const {
+// GET BINARY VAR ------------------------------------------
+BinaryProperty*
+VarPropContainer::GetBinaryVariable(QString name) const {
   for(int ii=0; ii < binary_variables_->size(); ii++) {
     auto var = binary_variables_->at(ii).second;
     if (QString::compare(var->name(), name) == 0)
@@ -395,7 +458,9 @@ BinaryProperty *VarPropContainer::GetBinaryVariable(QString name) const {
   throw std::runtime_error("Unable to find binary variable with name " + name.toStdString());
 }
 
-DiscreteProperty *VarPropContainer::GetDiscreteVariable(QString name) const {
+// GET DISCRETE VAR ----------------------------------------
+DiscreteProperty*
+VarPropContainer::GetDiscreteVariable(QString name) const {
   string tm = "Unable to find discrete variable with name ";
   for(int ii=0; ii < discrete_variables_->size(); ii++) {
     auto var = discrete_variables_->at(ii).second;
@@ -405,7 +470,9 @@ DiscreteProperty *VarPropContainer::GetDiscreteVariable(QString name) const {
   throw std::runtime_error(tm + name.toStdString());
 }
 
-ContinuousProperty *VarPropContainer::GetContinousVariable(QString name) const {
+// GET CONTINUOUS VAR --------------------------------------
+ContinuousProperty*
+VarPropContainer::GetContinousVariable(QString name) const {
   string tm = "Unable to find continous variable with name ";
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
@@ -415,7 +482,9 @@ ContinuousProperty *VarPropContainer::GetContinousVariable(QString name) const {
   throw std::runtime_error(tm + name.toStdString());
 }
 
-QList<ContinuousProperty *> VarPropContainer::GetContinuousProperties(QList<QUuid> ids) const {
+// GET CONTINUOUS PROPS ------------------------------------
+QList<ContinuousProperty *>
+VarPropContainer::GetContinuousProperties(QList<QUuid> ids) const {
   QList<ContinuousProperty *> props;
   for (int ii = 0; ii < ids.size(); ++ii) {
     for(int jj=0; jj < continuous_variables_->size(); jj++) {
@@ -425,6 +494,41 @@ QList<ContinuousProperty *> VarPropContainer::GetContinuousProperties(QList<QUui
     }
   }
   return props;
+}
+
+// SCALE VARIABLES -----------------------------------------
+void VarPropContainer::ScaleVariables(){
+  stringstream ss;
+  ss << "@[VarPropContainer::ScaleVariables]|";
+
+  // constraint_handler constructor inserts the bounds of
+  // each variable in the variable container
+
+  double D = 1.0, c = 1.0;
+  // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2
+  // y = 2*x/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_
+
+  for(int ii=0; ii < continuous_variables_->size(); ii++) {
+
+    // set up scaling multiplier (D) and constant (c) terms
+    auto bounds = continuous_variables_->value(ii).second->bounds();
+
+    D = bounds(1) - bounds(0); // bnds_b_mns_a_
+    c = bounds(0) + bounds(1); // bnds_a_pls_b_
+
+    continuous_variables_->value(ii).second->setScalingCoeffs(D, c);
+    continuous_variables_->value(ii).second->scaleValue();
+
+    if (vp_.vMOD >= 3) {
+      ss << continuous_variables_->value(ii).second->ToString();
+    }
+  }
+
+  ext_info(ss.str(), md_, cl_);
+
+  // ext_warn(wm_, md_, cl_);
+  // em_ = "";
+  // throw runtime_error(em_);
 }
 
 }
