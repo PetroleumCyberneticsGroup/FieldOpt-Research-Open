@@ -42,10 +42,19 @@ namespace Properties {
 class ContinuousProperty : public Property
 {
  public:
-  ContinuousProperty(double value);
+  explicit ContinuousProperty(double value);
 
-  double value() const { return value_; }
+  double value();
+
+  double valueSc();
+
   void setValue(double value);
+
+  void setValueSc(double value);
+
+  void scaleValue();
+
+  void UpdateValue();
 
   void Add(double d); //!< Add d to the value of this property.
 
@@ -57,12 +66,17 @@ class ContinuousProperty : public Property
    * \param epsilon Optional tolerance. Default: 0.0
    * \return True if abs(this->value() - other->value()) <= epsilon; otherwise false.
    */
-  bool Equals(const ContinuousProperty *other, double epsilon=0.0) const;
+  bool Equals(ContinuousProperty *other,
+              double epsilon=0.0);
 
-  QString ToString() const;
+  string ToString();
 
  private:
   double value_;
+  double value_sc_;
+
+  // double value_bf_scale_ = 0.0;
+  // double value_bf_descale_ = 0.0;
 };
 
 }
