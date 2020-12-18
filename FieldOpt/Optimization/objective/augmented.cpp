@@ -28,17 +28,6 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Objective {
 
-using Printer::ext_warn;
-using Printer::ext_info;
-using Printer::info;
-using Printer::ext_error;
-using Printer::num2str;
-
-using Printer::DBG_prntDbl;
-using Printer::DBG_prntVecXd;
-using Printer::DBG_prntMatXd;
-using Printer::DBG_prntToFile;
-
 using ECLProp = Simulation::Results::Results::Property;
 
 using std::runtime_error;
@@ -223,14 +212,8 @@ double Augmented::value(bool base_case) {
       }
 
       if (vp_.vOPT >= 3) {
-        string im = "prop_name: "+ term->prop_name_str;
-        im += ", prop_type: "+ results_->GetPropertyKey(term->prop_type);
-        im += ", prop_spec: "+ results_->GetPropertyKey(term->prop_spec);
-        im += ", term value: " + num2str(t_val, 5, 1);
-        ss << im << "|";
-        // info(im, vp_.lnw);
+        ss << printTerm(term, t_val, 1);
       }
-
       value += t_val;
     }
     ext_info(ss.str(), md_, cl_, vp_.lnw);
@@ -270,6 +253,9 @@ void Augmented::setUpWaterCutLimit() {
 }
 
 void Augmented::setUpAugTerms() {
+  stringstream ss;
+  ss << "Setting up terms in augmeted formulation|";
+
   for (int ii = 0; ii < settings_->objective().terms.size(); ++ii) {
     auto *term = new Augmented::Term();
     term->prop_name_str = settings_->objective().terms.at(ii).prop_name;
@@ -319,18 +305,13 @@ void Augmented::setUpAugTerms() {
       term->prop_type = ECLProp::AuxProp;
       term->prop_spec = ECLProp::AuxProp;
     }
-
-    if (vp_.vOPT >= 4) {
-      string im = "Term: " + term->prop_name_str;
-      im += ", coeff: " + num2str(term->coeff, 5);
-      im += ", prop_type: " + results_->GetPropertyKey(term->prop_type);
-      im += ", prop_spec: " + results_->GetPropertyKey(term->prop_spec);
-      info(im, vp_.lnw);
-    }
+    ss << printTerm(term, 0, 0);
   }
+
+  if (vp_.vOPT >= 4) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 }
 
-void Augmented::dbg(int dm,
+void Augmented::dbg(const int dm,
                     const VectorXd& v0,
                     const VectorXd& v1,
                     const VectorXd& v2,
