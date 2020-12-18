@@ -60,10 +60,6 @@ namespace Constraints {
 class ConstraintHandler
 {
  public:
-  // ConstraintHandler(QList<Settings::Optimizer::Constraint> constraints,
-  //                   Model::Properties::VarPropContainer *variables,
-  //                   Reservoir::Grid::Grid *grid);
-
   ConstraintHandler(Settings::Optimizer *opt_settings,
                     Model::Properties::VarPropContainer *variables,
                     Reservoir::Grid::Grid *grid);
@@ -83,7 +79,7 @@ class ConstraintHandler
    * @param cases Cases to be used for determining parameters.
    */
   void InitializeNormalizers(QList<Case *> cases);
-
+  
   /*!
    * @brief Get the sum of all normalized penalties multiplied by their respective weights.
    * @param c The case to get the penalties for.
@@ -97,9 +93,10 @@ class ConstraintHandler
  private:
   QList<Constraint *> constraints_;
   QList<Settings::Optimizer::Constraint> constraint_set_;
+  Model::Properties::VarPropContainer *vars_;
 
   Settings::VerbParams vp_;
-  string md_ = "Optimization";
+  string md_ = "Optimization::Constraints";
   string cl_ = "ConstraintHandler";
   string im_ = "", wm_ = "", em_ = "";
 
