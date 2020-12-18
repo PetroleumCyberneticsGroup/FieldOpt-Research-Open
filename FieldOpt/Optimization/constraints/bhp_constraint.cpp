@@ -29,9 +29,11 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint settings,
+BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
                              Model::Properties::VarPropContainer *variables,
-                             Settings::VerbParams vp) : Constraint(vp) {
+                             Settings::VerbParams vp)
+                             : Constraint(vp) {
+
   assert(settings.wells.size() > 0);
   assert(settings.min < settings.max);
 
@@ -41,19 +43,39 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint settings,
 
   min_ = settings.min;
   max_ = settings.max;
-  affected_well_names_ = settings.wells;
+
+  bhp_cnstrnd_well_nms_ = settings.wells;
   penalty_weight_ = settings.penalty_weight;
 
-  for (auto &wname : affected_well_names_) {
-    affected_real_variables_.append(variables->GetWellBHPVariables(wname));
+  if (vp_.vOPT >= 1) {
+    im_ = "Adding BHP constraint with [min, max] = [";
+    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
+    im_ += "] for well " + settings.well.toStdString() + " with variables: ";
   }
+
+  for (auto &wname : bhp_cnstrnd_well_nms_) {
+    auto bhp_vars = variables->GetWellBHPVars(wname);
+    for (auto var : bhp_vars) {
+      var->setBounds(min_, max_);
+      bhp_cnstrnd_uuid_vars_.push_back(var->id());
+      im_ += var->name().toStdString() + ", ";
+    }
+    bhp_cnstrnd_real_vars_.append(bhp_vars);
+  }
+
+  if(settings.scaling_) {
+    min_ = -1.0;
+    max_ = 1.0;
+  }
+
+  ext_info(im_, md_, cl_, vp_.lnw);
 }
 
 bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
-  for (auto var : affected_real_variables_) {
+  for (auto var : bhp_cnstrnd_real_vars_) {
     // double case_value = c->real_variables()[var->id()];
-    double case_value = c->get_real_variable_value(var->id());
-    if (case_value > max_ || case_value < min_)
+    // double case_value = c->get_real_variable_value(var->id());
+    if (var->value() > max_ || var->value() < min_)
       return false;
   }
   return true;
@@ -66,7 +88,7 @@ bool BhpConstraint::IsBoundConstraint() const {
 Eigen::VectorXd BhpConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
-  for (auto var : affected_real_variables_) {
+  for (auto var : bhp_cnstrnd_real_vars_) {
     lbounds[id_vector.indexOf(var->id())] = min_;
   }
   return lbounds;
@@ -75,14 +97,14 @@ Eigen::VectorXd BhpConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
 Eigen::VectorXd BhpConstraint::GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
-  for (auto var : affected_real_variables_) {
+  for (auto var : bhp_cnstrnd_real_vars_) {
     ubounds[id_vector.indexOf(var->id())] = max_;
   }
   return ubounds;
 }
 
 void BhpConstraint::SnapCaseToConstraints(Case *c) {
-  for (auto var : affected_real_variables_) {
+  for (auto var : bhp_cnstrnd_real_vars_) {
     if (c->get_real_variable_value(var->id()) > max_) {
       c->set_real_variable_value(var->id(), max_);
     } else if (c->get_real_variable_value(var->id()) < min_) {

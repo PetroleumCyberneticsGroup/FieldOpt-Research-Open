@@ -31,13 +31,16 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-class ICVConstraint : public Constraint {
+using Model::Properties::ContinuousProperty;
+
+class ICVConstraint : public Constraint
+{
  public:
   ICVConstraint(const Settings::Optimizer::Constraint& settings,
                 Model::Properties::VarPropContainer *variables,
                 Settings::VerbParams vp);
 
-  string name() override;
+  string name() override { return cl_; }
 
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
@@ -48,7 +51,11 @@ class ICVConstraint : public Constraint {
 
  private:
   double min_, max_;
-  QList<QUuid> affected_variables_;
+  QStringList icd_cnstrnd_well_nms_;
+  QList<ContinuousProperty *> icd_cnstrnd_real_vars_;
+  QList<QUuid> icd_cnstrnd_uuid_vars_;
+
+  Model::Properties::VarPropContainer *variables_;
 
   string md_ = "Optimizer::constraints";
   string cl_ = "ICVConstraint";

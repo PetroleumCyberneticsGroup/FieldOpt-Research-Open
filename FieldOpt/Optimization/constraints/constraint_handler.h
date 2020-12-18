@@ -79,7 +79,7 @@ class ConstraintHandler
    * @param cases Cases to be used for determining parameters.
    */
   void InitializeNormalizers(QList<Case *> cases);
-  
+
   /*!
    * @brief Get the sum of all normalized penalties multiplied by their respective weights.
    * @param c The case to get the penalties for.

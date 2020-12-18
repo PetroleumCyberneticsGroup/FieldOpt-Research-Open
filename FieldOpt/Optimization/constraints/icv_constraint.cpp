@@ -30,18 +30,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-using namespace Model::Properties;
-using Printer::info;
-using Printer::ext_info;
-using Printer::num2str;
-using Printer::DBG_prntVecXd;
-using Printer::DBG_prntDbl;
-using Printer::pad_text;
-
 ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
                              Model::Properties::VarPropContainer *variables,
                              Settings::VerbParams vp)
-  : Constraint(vp) {
+    : Constraint(vp) {
+
+  variables_ = variables;
+
+  assert(settings.wells.size() > 0);
+  assert(settings.min < settings.max);
 
   if (vp_.vOPT >= 1) {
     info("Adding ICV constraint for " + settings.well.toStdString());
@@ -50,27 +47,37 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
   min_ = settings.min;
   max_ = settings.max;
 
-  string tm = "Adding ICV constraint with [min, max] = [";
-  tm += num2str(min_, 5) + ", " + num2str(max_, 5);
-  tm += "] for well " + settings.well.toStdString() + " with variables: ";
+  icd_cnstrnd_well_nms_ = settings.wells;
+  penalty_weight_ = settings.penalty_weight;
 
-  for (auto var : *variables->GetContinuousVariables()) {
-    auto lvar = var.second;
-    if (lvar->propertyInfo().prop_type == Property::PropertyType::ICD
-      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0) {
-      affected_variables_.push_back(lvar->id());
-      tm += lvar->name().toStdString() + ", ";
-    }
+  if (vp_.vOPT >= 1) {
+    im_ = "Adding ICV constraint with [min, max] = [";
+    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
+    im_ += "] for well " + settings.well.toStdString() + " with variables: ";
   }
 
-  ext_info(tm, md_, cl_, vp_.lnw);
+  for (auto &wname : icd_cnstrnd_well_nms_) {
+    auto icd_vars = variables->GetWellICDVars(wname);
+    for (auto var : icd_vars) {
+      var->setBounds(min_, max_);
+      icd_cnstrnd_uuid_vars_.push_back(var->id());
+      im_ += var->name().toStdString() + ", ";
+    }
+    icd_cnstrnd_real_vars_.append(icd_vars);
+  }
+
+  if(settings.scaling_) {
+    min_ = -1.0;
+    max_ = 1.0;
+  }
+
+  ext_info(im_, md_, cl_, vp_.lnw);
 }
 
 bool ICVConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
-  for (auto id : affected_variables_) {
-    if (c->get_real_variable_value(id) > max_ || c->get_real_variable_value(id) < min_) {
+  for (auto var : icd_cnstrnd_real_vars_) {
+    if (var->value() > max_ || var->value() < min_)
       return false;
-    }
   }
   return true;
 }
@@ -80,13 +87,13 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   if (vp_.vOPT >= 4) {
     tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
     tm += "for case: " + c->id_stdstr();
-    Printer::pad_text(tm, vp_.lnw );
+    pad_text(tm, vp_.lnw );
     tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 
   tm = "";
-  for (auto id : affected_variables_) {
+  for (auto id : icd_cnstrnd_uuid_vars_) {
     if (c->get_real_variable_value(id) > max_) {
       c->set_real_variable_value(id, max_);
       tm = "Upper bound active";
@@ -97,7 +104,7 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   }
 
   if (vp_.vOPT >= 4 && tm.size() > 0) {
-    Printer::pad_text(tm, vp_.lnw );
+    pad_text(tm, vp_.lnw );
     tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
     ext_info(tm, md_, cl_, vp_.lnw);
   }
@@ -108,7 +115,7 @@ bool ICVConstraint::IsBoundConstraint() const { true; }
 Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
-  for (auto id : affected_variables_) {
+  for (auto id : icd_cnstrnd_uuid_vars_) {
     lbounds[id_vector.indexOf(id)] = min_;
   }
   return lbounds;
@@ -117,14 +124,10 @@ Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
 Eigen::VectorXd ICVConstraint::GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
-  for (auto id : affected_variables_) {
+  for (auto id : icd_cnstrnd_uuid_vars_) {
     ubounds[id_vector.indexOf(id)] = max_;
   }
   return ubounds;
-}
-
-string ICVConstraint::name() {
-  return "ICVConstraint";
 }
 
 }

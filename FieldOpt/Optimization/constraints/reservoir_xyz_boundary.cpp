@@ -31,10 +31,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-ReservoirXYZBoundary::ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                                           Model::Properties::VarPropContainer *variables,
-                                           Reservoir::Grid::Grid *grid,
-                                           Settings::VerbParams vp) : Constraint(vp) {
+using Printer::ext_warn;
+
+ReservoirXYZBoundary::ReservoirXYZBoundary(
+    const Settings::Optimizer::Constraint &settings,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Settings::VerbParams vp)
+    : Constraint(vp) {
+
   if (vp_.vOPT >= 1) {
     info("Adding ReservoirXYZBoundary constraint for " + settings.well.toStdString());
   }
@@ -45,24 +50,40 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(const Settings::Optimizer::Constraint
   ymax_ = settings.box_xyz_ymax;
   zmin_ = settings.box_xyz_zmin;
   zmax_ = settings.box_xyz_zmax;
+
   grid_ = grid;
   penalty_weight_ = settings.penalty_weight;
 
-  if (!variables->GetWellSplineVariables(settings.well).empty())
-    affected_well_ = initializeWell(variables->GetWellSplineVariables(settings.well));
-  else
-    affected_well_ = initializeWell(variables->GetWellSplineVariables(settings.well));
+  if (!variables->GetWSplineVars(settings.well).empty()) {
+    auto wspline_vars = variables->GetWSplineVars(settings.well);
+
+    for (auto var : wspline_vars) {
+      if (var->propertyInfo().coord == Model::Properties::Property::x) {
+        var->setBounds(xmin_, xmax_);
+      } else if (var->propertyInfo().coord == Model::Properties::Property::y) {
+        var->setBounds(ymin_, ymax_);
+      } else if (var->propertyInfo().coord == Model::Properties::Property::z) {
+        var->setBounds(zmin_, zmax_);
+      }
+    }
+
+    box_xyz_cnstrnd_well_ = initWSplineConstraint(wspline_vars, vp);
+
+  } else {
+    ext_warn("GetWSplineVars for well " + settings.well.toStdString() + " is empty.", md_, cl_);
+
+  }
 }
 
 bool ReservoirXYZBoundary::CaseSatisfiesConstraint(Case *c) {
 
-  double heel_x_val = c->get_real_variable_value(affected_well_.heel.x);
-  double heel_y_val = c->get_real_variable_value(affected_well_.heel.y);
-  double heel_z_val = c->get_real_variable_value(affected_well_.heel.z);
+  double heel_x_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.x);
+  double heel_y_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.y);
+  double heel_z_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.z);
 
-  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
-  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
-  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
+  double toe_x_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.z);
 
   bool heel_feasible = false;
   bool toe_feasible = false;
@@ -83,13 +104,13 @@ bool ReservoirXYZBoundary::CaseSatisfiesConstraint(Case *c) {
 
 void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
 
-  double heel_x_val = c->get_real_variable_value(affected_well_.heel.x);
-  double heel_y_val = c->get_real_variable_value(affected_well_.heel.y);
-  double heel_z_val = c->get_real_variable_value(affected_well_.heel.z);
+  double heel_x_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.x);
+  double heel_y_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.y);
+  double heel_z_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.z);
 
-  double toe_x_val = c->get_real_variable_value(affected_well_.toe.x);
-  double toe_y_val = c->get_real_variable_value(affected_well_.toe.y);
-  double toe_z_val = c->get_real_variable_value(affected_well_.toe.z);
+  double toe_x_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.x);
+  double toe_y_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.y);
+  double toe_z_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.toe.z);
 
   Eigen::Vector3d projected_heel =
     WellConstraintProjections::well_domain_constraint_indices(
@@ -104,25 +125,25 @@ void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
       index_list_
     );
 
-  c->set_real_variable_value(affected_well_.heel.x, projected_heel(0));
-  c->set_real_variable_value(affected_well_.heel.y, projected_heel(1));
-  c->set_real_variable_value(affected_well_.heel.z, projected_heel(2));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.x, projected_heel(0));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.y, projected_heel(1));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.z, projected_heel(2));
 
-  c->set_real_variable_value(affected_well_.toe.x, projected_toe(0));
-  c->set_real_variable_value(affected_well_.toe.y, projected_toe(1));
-  c->set_real_variable_value(affected_well_.toe.z, projected_toe(2));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.x, projected_toe(0));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.y, projected_toe(1));
+  c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.z, projected_toe(2));
 }
 
 Eigen::VectorXd ReservoirXYZBoundary::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
 
-  int ind_heel_x = id_vector.indexOf(affected_well_.heel.x);
-  int ind_heel_y = id_vector.indexOf(affected_well_.heel.y);
-  int ind_heel_z = id_vector.indexOf(affected_well_.heel.z);
-  int ind_toe_x = id_vector.indexOf(affected_well_.toe.x);
-  int ind_toe_y = id_vector.indexOf(affected_well_.toe.y);
-  int ind_toe_z = id_vector.indexOf(affected_well_.toe.z);
+  int ind_heel_x = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.x);
+  int ind_heel_y = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.y);
+  int ind_heel_z = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.z);
+  int ind_toe_x = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.x);
+  int ind_toe_y = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.y);
+  int ind_toe_z = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.z);
   lbounds(ind_heel_x) = xmin_;
   lbounds(ind_toe_x) = xmin_;
   lbounds(ind_heel_y) = ymin_;
@@ -137,12 +158,12 @@ Eigen::VectorXd ReservoirXYZBoundary::GetUpperBounds(QList<QUuid> id_vector) con
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
 
-  int ind_heel_x = id_vector.indexOf(affected_well_.heel.x);
-  int ind_heel_y = id_vector.indexOf(affected_well_.heel.y);
-  int ind_heel_z = id_vector.indexOf(affected_well_.heel.z);
-  int ind_toe_x = id_vector.indexOf(affected_well_.toe.x);
-  int ind_toe_y = id_vector.indexOf(affected_well_.toe.y);
-  int ind_toe_z = id_vector.indexOf(affected_well_.toe.z);
+  int ind_heel_x = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.x);
+  int ind_heel_y = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.y);
+  int ind_heel_z = id_vector.indexOf(box_xyz_cnstrnd_well_.heel.z);
+  int ind_toe_x = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.x);
+  int ind_toe_y = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.y);
+  int ind_toe_z = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.z);
   ubounds(ind_heel_x) = xmax_;
   ubounds(ind_toe_x) = xmax_;
   ubounds(ind_heel_y) = ymax_;
