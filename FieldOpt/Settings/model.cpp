@@ -472,6 +472,16 @@ void Model::readDrilling(QJsonObject json_drilling) {
       drilling_.well_name = json_drilling["WellName"].toString();
     }
 
+    if (json_drilling.contains("LocalOptimizer")) {
+      QJsonObject json_local_optimizer = json_drilling["LocalOptimizer"].toObject();
+      drilling_.local_optimizer_settings = new Optimizer(json_local_optimizer);
+    }
+
+    if (json_drilling.contains("GlobalOptimizer")) {
+      QJsonObject json_global_optimizer = json_drilling["GlobalOptimizer"].toObject();
+      drilling_.global_optimizer_settings = new Optimizer(json_global_optimizer);
+    }
+
     if (!json_drilling.contains("DrillingSchedule"))
       throw UnableToParseDrillingModelSectionException(
           "The Drilling schedule must be defined at least one time in the Drilling/Model section.");
@@ -579,18 +589,30 @@ void Model::readDrilling(QJsonObject json_drilling) {
         if (json_drilling_step.contains("Trigger")) {
           QJsonObject json_trigger = json_drilling_step["Trigger"].toObject();
 
-          if (!json_trigger.contains("min_model_deviation") && !json_trigger.contains("max_obj_improvement"))
+          if (!json_trigger.contains("min_model_deviation") &&
+             !json_trigger.contains("max_model_deviation")  &&
+             !json_trigger.contains("max_obj_improvement"))
             throw UnableToParseDrillingModelSectionException(
                 "The optimization triggers are not properly defined in the Drilling/Model section.");
           else {
             Drilling::OptimizationTrigger trigger;
 
             if (json_trigger.contains("min_model_deviation")) {
+              trigger.max_model_deviation = json_trigger.value("max_model_deviation").toDouble();
+            } else {
+              trigger.max_model_deviation = -1;
+            }
+
+            if (json_trigger.contains("max_model_deviation")) {
               trigger.min_model_deviation = json_trigger.value("min_model_deviation").toDouble();
+            } else {
+              trigger.min_model_deviation = -1;
             }
 
             if (json_trigger.contains("max_obj_improvement")) {
               trigger.max_objective_improvement = json_trigger.value("max_obj_improvement").toDouble();
+            } else {
+              trigger.max_objective_improvement = -1;
             }
 
             drilling_schedule.optimization_triggers.insert(i, trigger);

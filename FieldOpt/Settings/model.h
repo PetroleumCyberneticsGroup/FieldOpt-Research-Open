@@ -172,6 +172,8 @@ class Model
   struct Drilling {
     Drilling(){}
     QString well_name;
+    Optimizer* local_optimizer_settings;
+    Optimizer* global_optimizer_settings;
 
     struct DrillingPoint {
       DrillingPoint() {}
@@ -182,6 +184,7 @@ class Model
     struct OptimizationTrigger {
       OptimizationTrigger() {}
         double min_model_deviation = -1;
+        double max_model_deviation = -1;
         double max_objective_improvement = -1;
     };
 
