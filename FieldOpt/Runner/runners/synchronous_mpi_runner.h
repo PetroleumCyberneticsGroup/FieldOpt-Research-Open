@@ -45,7 +45,6 @@ class SynchronousMPIRunner : public MPIRunner, public Loggable {
 
   virtual void Execute();
 
- protected:
   void InitializeModules();
 
  private:

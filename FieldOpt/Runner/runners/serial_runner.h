@@ -35,13 +35,12 @@ class SerialRunner : public AbstractRunner
 
   // AbstractRunner interface
 
- protected:
-  void InitializeModules();
-
  public:
   SerialRunner(RuntimeSettings *runtime_settings);
   SerialRunner(RuntimeSettings *runtime_settings, Optimization::Case* base_case, Model::ModelSynchronizationObject* mso);
+  void InitializeModules();
   void Execute();
+
 };
 
 }

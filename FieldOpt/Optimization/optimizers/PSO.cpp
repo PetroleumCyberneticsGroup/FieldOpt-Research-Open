@@ -99,6 +99,16 @@ void PSO::iterate(){
     iteration_++;
 }
 
+bool PSO::is_sufficient_improvement() {
+  if ((iteration_ != 0) &&
+      (tentative_best_case_->objective_function_value() != base_case_obj_) &&
+      (sufficient_improvement_tol_ >=0) &&
+      (abs((tentative_best_case_->objective_function_value()-base_case_obj_)/base_case_obj_) >= sufficient_improvement_tol_))
+    return true;
+  else
+    return false;
+}
+
 void PSO::handleEvaluatedCase(Case *c) {
     if(isImprovement(c)){
         updateTentativeBestCase(c);
@@ -116,6 +126,7 @@ Optimizer::TerminationCondition PSO::IsFinished() {
     if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
     if (is_stagnant()) return MINIMUM_STEP_LENGTH_REACHED;
     if (iteration_ < max_iterations_) return NOT_FINISHED;
+    if (is_sufficient_improvement()) return SUFFICIENT_IMPROVEMENT;
     else return MAX_EVALS_REACHED;
 }
 

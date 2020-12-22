@@ -63,6 +63,11 @@ class AbstractRunner
    * \brief Execute starts the actual optimization run and should not return until the optimization is done.
    */
   virtual void Execute() = 0;
+
+  /*!
+   * @brief Initializes runner modules.
+  */
+  virtual void InitializeModules() {};
   const double sentinel_value_ = 0.0001; //!< Value to be used as a sentinel value for the objective function of cases that cannot be evaluated.
 
  public:
@@ -76,6 +81,9 @@ class AbstractRunner
    * @param opt New optimizer setttings.
   */
   void ReplaceOptimizer(Settings::Optimizer *opt);
+
+
+
 
 
  protected:

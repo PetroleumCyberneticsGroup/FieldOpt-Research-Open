@@ -375,8 +375,9 @@ void AbstractRunner::FinalizeRun(bool write_logs) {
 
 void AbstractRunner::ReplaceOptimizer(Settings::Optimizer *opt) {
   settings_->setOptimizer(opt);
-
   InitializeOptimizer();
+  InitializeBookkeeper();
+  FinalizeInitialization(true);
 }
 
 }

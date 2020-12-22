@@ -27,10 +27,22 @@ namespace Runner {
         Simulation::Simulator* getSimulator() { return runner_->getSimulator(); }
 
         /*!
+         * @brief Initializes runner modules.
+        */
+        void InitializeModules() { runner_->InitializeModules(); }
+
+        /*!
          * @brief Replace the optimizer.
          * @param opt New optimizer setttings.
         */
         void ReplaceOptimizer(Settings::Optimizer *opt) { runner_->ReplaceOptimizer(opt); }
+
+
+        /*!
+         * @brief Evaluates the base case.
+         * @return Base case with objective value.
+        */
+        Optimization::Case* evaluateBaseCase();
 
     private:
         RuntimeSettings *runtime_settings_;

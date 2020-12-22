@@ -59,5 +59,14 @@ namespace Runner {
         runner_->Execute();
     }
 
-
+    Optimization::Case* MainRunner::evaluateBaseCase() {
+      runner_->InitializeSettings();
+      runner_->InitializeModel();
+      runner_->InitializeSimulator();
+      runner_->EvaluateBaseModel();
+      runner_->InitializeObjectiveFunction();
+      runner_->InitializeBaseCase();
+      runner_->InitializeOptimizer();
+      return runner_->base_case_;
+    }
 }

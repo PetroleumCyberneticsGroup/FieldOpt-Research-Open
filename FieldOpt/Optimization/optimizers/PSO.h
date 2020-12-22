@@ -43,6 +43,7 @@ class PSO : public Optimizer {
       CaseHandler *case_handler=0,
       Constraints::ConstraintHandler *constraint_handler=0);
  protected:
+  bool is_sufficient_improvement();
   void handleEvaluatedCase(Case *c) override;
   void iterate() override;
   virtual TerminationCondition IsFinished() override;
