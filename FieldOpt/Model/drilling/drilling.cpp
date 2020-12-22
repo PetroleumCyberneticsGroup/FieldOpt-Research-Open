@@ -33,12 +33,19 @@ Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContai
 
 
   well_name_ = settings->drilling().well_name;
+  local_optimizer_settings_ = settings->drilling().local_optimizer_settings;
+  global_optimizer_settings_ = settings->drilling().global_optimizer_settings;
+
   drilling_schedule_ = new DrillingSchedule(settings_, drilling_variables_);
 
   current_step_ = 0;
   current_model_ = 0;
 
+  skip_optimization_ = false;
+
   best_case_ = 0;
+  base_case_ = 0;
+  best_objective_ = 0;
   mso_ = 0;
 };
 
@@ -154,26 +161,51 @@ void Drilling::runOptimization(int drilling_step) {
   if (drilling_schedule_->getOptimizerSettings().value(drilling_step) != nullptr)
     runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
 
+  //!<Trigger #1: model deviation>
+  if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
+    double min_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).min_model_deviation;
+    double max_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).max_model_deviation;
+    if (min_model_dev >=0) {
+      runner->getOptimizer()->setMinModelDeviation(min_model_dev);
+
+      base_case_ = runner->evaluateBaseCase();
+
+      double model_dev = abs((base_case_->objective_function_value() - best_objective_) / best_objective_);
+      if (model_dev <= min_model_dev) {
+        skip_optimization_ = true;
+      } else if ((model_dev > min_model_dev)  && (model_dev <= max_model_dev)) {
+        runner->ReplaceOptimizer(local_optimizer_settings_);
+      } else if (model_dev > max_model_dev) {
+        runner->ReplaceOptimizer(global_optimizer_settings_);
+      }
+    }
+  }
+
+  //!<Trigger #2: sufficient improvement>
   if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
     double max_obj_improvement = drilling_schedule_->getOptimizationTriggers().value(drilling_step).max_objective_improvement;
     if (max_obj_improvement >= 0)
       runner->getOptimizer()->setSufficientImprovementTolerance(max_obj_improvement);
-
-    double min_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).min_model_deviation;
-    if (min_model_dev >=0)
-      runner->getOptimizer()->setMinModelDeviation(min_model_dev);
   }
 
-  runner->Execute();
+  if (!skip_optimization_) {
+    runner->Execute();
+  }
 
-  Optimization::Optimizer* opt = runner->getOptimizer();
+  Optimization::Optimizer *opt = runner->getOptimizer();
 
-  setWellOptimalVariables(opt->GetOptimalBinaryVariables(), opt->GetOptimalIntegerVariables(), opt->GetOptimalVariables(), drilling_step);
+  setWellOptimalVariables(opt->GetOptimalBinaryVariables(),
+                          opt->GetOptimalIntegerVariables(),
+                          opt->GetOptimalVariables(),
+                          drilling_step);
   setWellOptimizationValues(opt->GetOptimalValues(), drilling_step);
 
   best_case_ = opt->GetTentativeBestCase();
+  best_objective_ = best_case_->objective_function_value();
+
   mso_ = new ModelSynchronizationObject(runner->getModel());
 
+  skip_optimization_ = false;
 }
 }
 }

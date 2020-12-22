@@ -29,8 +29,9 @@
 #include "Model/properties/variable_property_container.h"
 #include "Model/model_synchronization_object.h"
 #include "drilling_schedule.h"
-#include "Settings/settings.h"
 #include "Settings/model.h"
+#include "Settings/settings.h"
+
 
 #include "main_runner.h"
 
@@ -46,6 +47,9 @@ class Drilling {
 
   QString getWellName(){ return well_name_; }
 
+  Settings::Optimizer* getLocalOptimizerSettings() { return local_optimizer_settings_;}
+  Settings::Optimizer* getGlobalOptimizerSettings() { return global_optimizer_settings_;}
+
   Properties::VariablePropertyContainer* getVariables() { return drilling_variables_;}
 
   QMap<int, std::map<string, QHash<QUuid, double>>> getOptimalVariables() { optimal_variables_; }
@@ -58,9 +62,6 @@ class Drilling {
   QString GetStatusString() const;
   QString GetStatusStringHeader() const;
 
-  Optimization::Case* best_case_;
-  ModelSynchronizationObject* mso_;
-
   void setOptRuntimeSettings(int drilling_step, int argc, const char** argv);
   void setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts);
   void maintainRuntimeSettings(int drilling_step);
@@ -68,11 +69,16 @@ class Drilling {
   void modelUpdate(int drilling_step);
   void runOptimization(int drilling_step);
 
+  double getBestObjective() { return best_objective_;}
 
 
  private:
   int current_step_;
   int current_model_;
+
+  bool skip_optimization_;
+  double best_objective_;
+
   string original_output_dir_;
 
   Properties::VariablePropertyContainer *drilling_variables_;
@@ -81,12 +87,19 @@ class Drilling {
   DrillingSchedule *drilling_schedule_;
   QString well_name_;
 
+  Settings::Optimizer* local_optimizer_settings_;
+  Settings::Optimizer* global_optimizer_settings_;
+
   QMap<int, QHash<QUuid, double>> optimal_variables_;  //!< Optimal variables per drilling step
   QMap<int, QHash<QUuid, int>> optimal_int_variables_;  //!< Optimal variables per drilling step
   QMap<int, QHash<QUuid, bool>> optimal_bin_variables_;  //!< Optimal variables per drilling step
 
   QMap<int, std::map<string, std::vector<double>>>  optimal_values_;     //!< Optimal values per drilling step
   QMap<int, Runner::RuntimeSettings*> runtime_settings_;                    //!< Optimization runtime settings per drilling step
+
+  Optimization::Case* best_case_;
+  Optimization::Case* base_case_;
+  ModelSynchronizationObject* mso_;
 
   void setWellOptimalVariables(const QHash<QUuid, bool>& opt_bin_var,  const QHash<QUuid, int>& opt_int_var, const QHash<QUuid, double>& opt_var, int drilling_step);
   void setWellOptimizationValues(const std::map<string, std::vector<double>>& opt_val, int drilling_step);
