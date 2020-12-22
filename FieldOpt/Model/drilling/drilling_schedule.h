@@ -46,6 +46,7 @@ class DrillingSchedule {
   struct OptimizationTrigger {
     OptimizationTrigger() {}
     double min_model_deviation;
+    double max_model_deviation;
     double max_objective_improvement;
   };
 

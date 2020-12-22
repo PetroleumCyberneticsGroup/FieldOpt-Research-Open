@@ -65,11 +65,24 @@ void DrillingSchedule::assignOptimizationTriggers(QMap<int, Settings::Model::Dri
     if (opt_triggers.contains(i)) {
       DrillingSchedule::OptimizationTrigger opt_trigger;
 
-      if (opt_triggers.value(i).max_objective_improvement != -1)
+      if (opt_triggers.value(i).max_objective_improvement >=0) {
         opt_trigger.max_objective_improvement = opt_triggers.value(i).max_objective_improvement;
+      } else {
+        opt_trigger.max_objective_improvement = -1;
+      }
 
-      if (opt_triggers.value(i).min_model_deviation != -1)
+      if (opt_triggers.value(i).min_model_deviation >=0) {
         opt_trigger.min_model_deviation = opt_triggers.value(i).min_model_deviation;
+      } else {
+        opt_trigger.min_model_deviation = -1;
+      }
+
+
+      if (opt_triggers.value(i).max_model_deviation >=0) {
+        opt_trigger.max_model_deviation = opt_triggers.value(i).max_model_deviation;
+      } else {
+        opt_trigger.max_model_deviation = -1;
+      }
 
       optimization_triggers_.insert(i, opt_trigger);
     }
