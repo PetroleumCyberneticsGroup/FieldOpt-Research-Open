@@ -101,6 +101,9 @@ class Well
   // Methods for segmented wells
   virtual bool IsSegmented() const { return is_segmented_; }
   std::vector<Compartment> GetCompartments() const;
+
+  int GetNumCompartments() const { return compartments_.size(); };
+
   std::vector<Packer *> GetPackers() const;
   std::vector<ICD *> GetICDs() const;
   std::vector<Segment> GetSegments();
@@ -117,6 +120,8 @@ class Well
   ::Settings::Model::PreferredPhase preferred_phase_;
   Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
+
+  Eigen::Vector3d zero_pt_ = Eigen::Vector3d::Zero(3);
 
   QList<Wellbore::WellBlock *> *well_blocks_;
 
@@ -157,9 +162,13 @@ class Well
   std::vector<Wellbore::Completions::ICD> icds_;
 
   // Methods for segmented wells
-  std::vector<int> createTubingSegments(std::vector<Segment> &segments) const;
+  std::vector<int> createTubingSegments(std::vector<Segment> &segments);
   std::vector<int> createICDSegments(std::vector<Segment> &segments, std::vector<int> &tubing_indexes) const;
   void createAnnulusSegments(std::vector<Segment> &segments, const std::vector<int> &icd_indexes);
+
+  double length_delta_ = 2131.06288;
+  double depth_delta_ = 2034.43714;
+
 };
 
 }

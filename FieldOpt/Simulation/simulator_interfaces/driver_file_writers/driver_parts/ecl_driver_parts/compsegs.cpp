@@ -47,40 +47,65 @@ Compsegs::Compsegs(QList<Model::Wells::Well *> *wells, int ts) {
       CompsegsKeyword kw;
       kw.wname = well->name();
 
-      // auto tsegs = well->GetTubingSegments();
-      // auto isegs = well->GetICDSegments();
-      // auto asegs = well->GetAnnulusSegments();
-      //
-      // for (int i = 1; i < tsegs.size(); ++i) {
-      //   kw.entries.push_back(sepLine(i));
-      //   kw.entries.push_back(generateEntry(tsegs[i]));
-      //   for (int j = 1; j < isegs.size(); ++j) {
-      //     kw.entries.push_back(generateEntry(isegs[j]));
-      //     for (int k = 1; k < asegs.size(); ++k) {
-      //       kw.entries.push_back(generateEntry(asegs[k]));
-      //     }
-      //   }
-      // }
-
       auto segs = well->GetSegments();
-      for (int i = 1; i < segs.size(); ++i) {
-        kw.entries.push_back(generateEntry(segs[i]));
+      vector<Segment> tsegs;
+      vector<Segment> isegs;
+      vector<vector<Segment>> asegs(well->GetNumCompartments());
+
+      for (const auto& seg : segs) {
+        if (seg.Type() == Segment::TUBING_SEGMENT) {
+          tsegs.push_back(seg);
+        } else if (seg.Type() == Segment::ICD_SEGMENT) {
+          isegs.push_back(seg);
+        } else if (seg.Type() == Segment::ANNULUS_SEGMENT) {
+          int k = seg.BlockBranch() - well->GetNumCompartments() - 2;
+          asegs[k].push_back(seg);
+        }
       }
 
-      // Some sort of sorting
-      QStringList qsl;
-      auto idx = getCompsegOrder(idx_orig_);
-      for (int i = 0; i < idx.size(); ++i) {
-        // cout << "IDX=" << idx[i] << endl;
-        // cout << kw.entries[idx[i]].toStdString() << endl;
-        qsl << kw.entries[idx[i]];
+      cout << "tsegs.sz(): " << tsegs.size() << endl;
+      cout << "isegs.sz(): " << isegs.size() << endl;
+      cout << "asegs.sz(): " << asegs.size() << endl;
+      for (int kk=0; kk < asegs.size(); kk++) {
+        cout << "asegs[kk=" << kk << "].sz(): " << asegs[kk].size() << endl;
       }
-      // qSort(qsl.begin(), qsl.end());
-      kw.entries = qsl;
 
+      int idx_icd = 0, idx_ann = 0;
+
+      for (int idx_tub=1; idx_tub < tsegs.size(); idx_tub++) {
+        kw.entries.push_back(sepLine(idx_tub+1));
+        kw.entries.push_back(generateEntry(tsegs[idx_tub]));
+
+        kw.entries.push_back(generateEntry(isegs[idx_icd]));
+        for (const auto & aseg : asegs[idx_icd]) {
+          kw.entries.push_back(generateEntry(aseg));
+        }
+        idx_icd++;
+
+      }
+
+      // // ORIG CODE ----
+      // // auto segs = well->GetSegments();
+      // for (int i = 1; i < segs.size(); ++i) {
+      //   kw.entries.push_back(generateEntry(segs[i]));
+      // }
+      //
+      // // Some sort of sorting
+      // QStringList qsl;
+      // auto idx = getCompsegOrder(idx_orig_);
+      // for (int i = 0; i < idx.size(); ++i) {
+      //   // cout << "IDX=" << idx[i] << endl;
+      //   // cout << kw.entries[idx[i]].toStdString() << endl;
+      //   qsl << kw.entries[idx[i]];
+      // }
+      // // qSort(qsl.begin(), qsl.end());
+      // // kw.entries = qsl;
+
+      // ----
       // sorting but not by branch
       // qSort(kw.entries.begin(), kw.entries.end());
       keywords_.push_back(kw);
+
     }
   }
 }
@@ -98,10 +123,10 @@ QString Simulation::ECLDriverParts::Compsegs::GetPartString() const {
 
 vector<size_t> Simulation::ECLDriverParts::Compsegs::getCompsegOrder(const vector<size_t> &v) {
 
- //  vector<size_t> idx(v.size());
- //  iota(idx.begin(), idx.end(), 0);
- // stable_sort(idx.begin(), idx.end(),
- //              [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+  //  vector<size_t> idx(v.size());
+  //  iota(idx.begin(), idx.end(), 0);
+  // stable_sort(idx.begin(), idx.end(),
+  //              [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
 
   vector<size_t> idx(v.size());
   iota(idx.begin(), idx.end(), 0);
@@ -134,8 +159,12 @@ QString Compsegs::generateEntry(Segment seg) {
   // cout << "-> " << "Branch" << endl;
   entry[3] = num2strQ(seg.BlockBranch(), 0, 0, 4) + "   ";
 
-  entry[4] = num2strQ(seg.OutletMD(), 5, 0, 9) + "";
-  entry[5] = num2strQ(seg.OutletMD() + .1, 5, 0, 9) + "";
+  entry[4] = num2strQ(seg.GetEntryMD(), 5, 0, 9) + "";
+  entry[5] = num2strQ(seg.GetExitMD(), 5, 0, 9) + "";
+
+  // entry[4] = num2strQ(seg.OutletMD(), 5, 0, 9) + "";
+  // entry[5] = num2strQ(seg.OutletMD() + seg.Length(), 5, 0, 9) + "";
+
   // entry[5] = num2strQ(seg.OutletMD() + seg.Length(), 5, 0, 9) + "  ";
 
   idx_orig_.push_back(seg.BlockBranch());

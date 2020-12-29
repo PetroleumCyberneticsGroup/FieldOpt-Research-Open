@@ -27,17 +27,21 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Wells {
 
-Model::Wells::Segment::Segment() { }
+// Model::Wells::Segment::Segment() { }
 
 Segment::Segment(Segment::SegType type,
                  int index,
                  int branch,
                  int outlet,
-                 double length,
+                 double seg_length,
+                 double md_length,
                  double tvd,
                  double diameter,
                  double roughness,
-                 double outlet_md,
+                 double entry_md,
+                 double exit_md,
+                 Eigen::Vector3d entry_pt,
+                 Eigen::Vector3d exit_pt,
                  int block_index,
                  int block_branch,
                  int aux_index=-1) {
@@ -45,12 +49,19 @@ Segment::Segment(Segment::SegType type,
   index_ = index;
   branch_ = branch;
   outlet_ = outlet;
-  length_ = length;
+
+  seg_length_ = seg_length;
+  md_length_ = md_length;
   tvd_change_ = tvd;
   diameter_ = diameter;
   roughness_ = roughness;
-  // md_ = outlet_md + length;
-  md_ = outlet_md;
+
+  entry_md_ = entry_md;
+  exit_md_ = exit_md;
+
+  entry_pt_ = entry_pt;
+  exit_pt_ = exit_pt;
+
   block_index_ = block_index;
   block_branch_ = block_branch;
   aux_index_ = aux_index;
@@ -89,7 +100,8 @@ std::string Segment::ToString() {
   s << "   branch: " << branch_ << "\n";
   s << "   outlet: " << outlet_ << "\n";
   s << "   inlet:  " << vec_to_str(inlets_) << "\n";
-  s << "   length: " << length_ << "\n";
+  s << "   seg_length: " << seg_length_ << "\n";
+  s << "   md_length: " << md_length_ << "\n";
   s << "   tvd:    " << tvd_change_ << "\n";
   s << "   diam:   " << diameter_ << "\n";
   s << "   roughness: " << roughness_ << "\n";

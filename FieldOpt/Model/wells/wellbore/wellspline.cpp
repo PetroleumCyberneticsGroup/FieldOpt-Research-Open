@@ -219,6 +219,9 @@ QList<WellBlock *> *WellSpline::computeWellBlocks() {
     blocks->last()->setEntryMd(i.get_segment_entry_md(0));
     blocks->last()->setExitMd(i.get_segment_exit_md(0));
     blocks->last()->setLength(i.get_segment_length(0));
+
+    blocks->last()->setDxDyDz(i.dxdydz());
+
   }
 
   if (blocks->empty()) {

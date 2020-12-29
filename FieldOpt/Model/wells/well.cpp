@@ -327,11 +327,11 @@ void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_contai
   // Snap compartment delimiters to wellblock-intersections
   for (int l = 1; l < compartment_delimiters.size(); ++l) {
     auto wb = trajectory_->GetWellBlockByMd(compartment_delimiters[l],
-      "Snap compartment delimiter to block:");
+                                            "Snap compartment delimiter to block:");
     while (wb->i()==0 && wb->j()==0 && wb->k()==0) {
       compartment_delimiters[l] = compartment_delimiters[l]*1.025;
       wb = trajectory_->GetWellBlockByMd(compartment_delimiters[l],
-        "Retrying snap of compartment delimiter to block:");
+                                         "Retrying snap of compartment delimiter to block:");
     }
 
     compartment_delimiters[l] = wb->getExitMd() - 0.1;
@@ -353,7 +353,7 @@ void Well::initializeSegmentedWell(Properties::VarPropContainer *variable_contai
 
     auto first_block = well_blocks->at(first_idx);
     auto last_block = trajectory_->GetWellBlockByMd(compartment_delimiters[i+1],
-      "Finding last block in compartment:");
+                                                    "Finding last block in compartment:");
 
     // Get compartment blocks
     block_range = trajectory_->GetWellBlocksByMdRange(
@@ -470,9 +470,10 @@ std::vector<Segment> Well::GetSegments() {
 
   std::vector<Segment> segments;
   auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
-                              1, 1, -1, -1.0,
-                              compartments_.front().start_packer->tvd(),
-                              -1.0, -1.0, 0.0, 1, 1, -1);
+                              1, 1, -1, -1.0, -1.0,
+                              compartments_.front().start_packer->tvd(), -1.0,
+                              -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+                              1, 1, -1);
 
   root_segment.AddParentBlock(well_blocks_->at(0));
   segments.push_back(root_segment);
@@ -510,31 +511,46 @@ void Well::createAnnulusSegments(std::vector<Segment> &segments,
 
     // Should be compartment.block range, but then we need to update well_blocks_
     // with the compartment.block range found in initializeSegmentedWell()
-    for (int j = 0; j < comp_blocks.size() - 2; ++j) {
-    // for (int j = 0; j < compartments_[i].block_range_.size() - 2; ++j) {
 
-      double outlet_md = -1;
+    double outlet_md = -1;
+
+    for (int j = 0; j < comp_blocks.size() - 2; ++j) {
+      // for (int j = 0; j < compartments_[i].block_range_.size() - 2; ++j) {
+
       int index = 2*compartments_.size() + annulus_indexes.size() + 2;
       int outlet_index;
       // int block_index = 2*compartments_.size() + annulus_indexes.size() + 2;
 
       if (j == 0) { // Outlet to ICD
         outlet_index = icd_indexes[i];
-        for (int k=0; k < segments.size(); ++k) {
-          if (segments[k].Type() == Segment::ICD_SEGMENT && segments[k].Index() == icd_indexes[i]) {
-            outlet_md = segments[k].OutletMD();
+        for (int k = 0; k < segments.size(); ++k) {
+          if (segments[k].Type() == Segment::ICD_SEGMENT
+            && segments[k].Index() == icd_indexes[i]) {
+            // outlet_md = segments[k].OutletMD();
             segments[k].AddInlet(index);
             break;
           }
         }
+
+        outlet_md = compartments_[i].block_range_.at(0)->getEntryMd() + length_delta_; // 0 block (tubing)
+        outlet_md += 0.08, // 1 block (ICD)
+        outlet_md += comp_blocks[j]->getLength();
+
         assert(outlet_md != -1); // Ensure that the outlet md has been set
         aux_idx = outlet_index - 1;
 
       } else { // Outlet to previous annulus segment
         outlet_index = segments.back().Index();
-        outlet_md = segments.back().OutletMD();
+        // outlet_md = segments.back().OutletMD();
         segments.back().AddInlet(index);
         aux_idx = -1;
+
+        outlet_md += comp_blocks[j]->getLength();
+        if (j == comp_blocks.size() - 3) {
+          outlet_md += comp_blocks[j]->getLength(); // next-to last block
+          outlet_md += comp_blocks[j]->getLength(); // last block
+        }
+
       }
 
       // cout << "compartments_[i].block_idx_range_[j+2]: " << compartments_[i].block_idx_range_[j+2] << endl;
@@ -547,17 +563,26 @@ void Well::createAnnulusSegments(std::vector<Segment> &segments,
         //
         // compartments_[i].block_range_[j+2]->getLength(),
         // compartments_[i].block_range_[j+2]->getDepthChange(),
+        // comp_blocks[j]->getLength(),
+        // comp_blocks[j]->getDepthChange(),
         comp_blocks[j]->getLength(),
-        comp_blocks[j]->getDepthChange(),
+        outlet_md,
+        comp_blocks[j]->getDepth(),
         // (comp_blocks[j]->getExitPoint() - comp_blocks[j]->getEntryPoint()).norm(), // length
         // comp_blocks[j]->getExitPoint().z() - comp_blocks[j]->getEntryPoint().z(),  // tvd delta
         //
-        ann_diam_,
+        0.0889,
+        // ann_diam_,
         ann_roughness_,
         //
         // compartments_[i].block_range_[j+2]->getLength()/2,
-        comp_blocks[j]->getLength()/2,
         // outlet_md,
+        // comp_blocks[j]->getLength()/2,
+        comp_blocks[j]->getEntryMd() + length_delta_,
+        comp_blocks[j]->getExitMd() + length_delta_,
+        comp_blocks[j]->getEntryPoint(),
+        comp_blocks[j]->getExitPoint(),
+        //
         compartments_[i].block_idx_range_[j+2],
         compartments_.size() + 2 + i,
         aux_idx
@@ -577,30 +602,49 @@ std::vector<int> Well::createICDSegments(std::vector<Segment> &segments,
   int outlet = 1;
   stringstream ss;
 
+  double seg_length = 0.0;
+  double md_length = 0.0;
+  double depth = 0.0;
+
   for (int i = 0; i < compartments_.size(); ++i) {
     // int index = tubing_indexes.back() + 1 + i;
     int index = i + 2;
-    if (i > 0) { outlet = index + compartments_.size(); }
+    // if (i > 0) {
+      outlet = index + compartments_.size();
+    // }
 
     if (vp_.vMOD >=5) {
       ss << "@[Well::createICDSegments] " + compartments_[i].block_range_[1]->getPropString() << "|";
     }
+
+    seg_length = compartments_[i].block_range_.front()->getExitMd() - compartments_[i].block_range_.front()->getEntryMd();
+    md_length = compartments_[i].block_range_.front()->getEntryMd() + length_delta_;
+    depth = compartments_[i].block_range_.front()->getEntryPoint().z();
 
     auto icd_segment = Segment(
       Segment::ICD_SEGMENT,
       index, // index
       i + 2, // branch
       outlet, // outlet
-      compartments_[i].block_range_[1]->getLength(),
-      compartments_[i].block_range_[1]->getDepthChange(),
+      seg_length + 0.08,
+      md_length + 0.08,
+      depth,
+      // compartments_[i].block_range_[1]->getLength(),
+      // compartments_[i].block_range_[1]->getDepthChange(),
       // well_blocks_->at(index)->getLength(),
       // well_blocks_->at(index)->getDepthChange(),
       // 0.1,   // length
       // 0.0,   // tvd delta
       icd_diam_,
       icd_roughness_,
-      compartments_[i].block_range_[1]->getLength()/2,
+      //
       // segments[tubing_indexes[i]].OutletMD(), // outlet md
+      // compartments_[i].block_range_[1]->getLength()/2,
+      compartments_[i].block_range_[1]->getEntryMd() + length_delta_,
+      compartments_[i].block_range_[1]->getExitMd() + length_delta_,
+      compartments_[i].block_range_[1]->getEntryPoint(),
+      compartments_[i].block_range_[1]->getExitPoint(),
+      //
       compartments_[i].block_idx_range_[1],
       index + compartments_.size(),
       -1
@@ -620,7 +664,7 @@ std::vector<int> Well::createICDSegments(std::vector<Segment> &segments,
   return icd_indexes;
 }
 
-std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) const {
+std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) {
   assert(is_segmented_);
   std::vector<int> tubing_indexes;
   int outlet = 1;
@@ -654,26 +698,55 @@ std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) cons
   // }
   // end-dbg
 
+  double seg_length = 0.0;
+  double md_length = 0.0;
+  double depth = 0.0;
+
   for (int i = 0; i < compartments_.size(); ++i) {
     seg_index = i + 2 + compartments_.size();
 
     if (i > 0) { outlet = seg_index - 1; }
+
+    seg_length = compartments_[i].block_range_.front()->getExitMd() - compartments_[i].block_range_.front()->getEntryMd();
+    md_length = compartments_[i].block_range_.front()->getEntryMd() + length_delta_;
+    depth = compartments_[i].block_range_.front()->getEntryPoint().z();
+
+    // if (i==0) {
+    //
+    // } else {
+    //   length = compartments_[i].block_range_.front()->getEntryMd();
+    // }
 
     auto tubing_segment = Segment(
       Segment::TUBING_SEGMENT, // type
       seg_index,  // seg_index
       1,  // branch
       outlet, // outlet
-      compartments_[i].block_range_[0]->getLength(),
-      compartments_[i].block_range_[0]->getDepthChange(),
+      //
+      seg_length,
+      md_length,
+      depth,
+    // compartments_[i].block_range_.back()->getExitMd() - compartments_[i].block_range_.front()->getEntryMd(),
+    //   compartments_[i].block_range_.back()->getExitPoint().z() - compartments_[i].block_range_.front()->getEntryPoint().z(),
+      //
+      // compartments_[i].block_range_[0]->getLength(),
+      // compartments_[i].block_range_[0]->getDepthChange(),
+      //
       // well_blocks_->at(block_index)->getLength(),
       // well_blocks_->at(block_index)->getDepthChange(),
       // compartments_[i].GetLength(trajectory_->GetLength()), // length
       // compartments_[i].GetTVDDifference(),  // tvd delta
+
       tub_diam_,
       tub_roughness_,
-      compartments_[i].block_range_[0]->getLength()/2,
+      //
       // segments.back().OutletMD(),
+      // compartments_[i].block_range_[0]->getLength()/2,
+      compartments_[i].block_range_[0]->getEntryMd() + length_delta_,
+      compartments_[i].block_range_[0]->getExitMd() + length_delta_,
+      compartments_[i].block_range_[0]->getEntryPoint(),
+      compartments_[i].block_range_[0]->getExitPoint(),
+      //
       compartments_[i].block_idx_range_[0], // block_index,
       seg_index,
       -1
@@ -691,9 +764,11 @@ std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) cons
 std::vector<Segment> Well::GetTubingSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
-  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT, 1, 1, -1, -1.0,
-                              compartments_.front().start_packer->tvd(),
-                              -1.0, -1.0, 0.0, 1, 1, -1);
+  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
+    1, 1, -1, -1.0, -1.0,
+    compartments_.front().start_packer->tvd(),-1.0,
+    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+    1, 1, -1);
   segments.push_back(root_segment);
   std::vector<int> tubing_indexes = createTubingSegments(segments);
   return segments;
@@ -703,9 +778,11 @@ std::vector<Segment> Well::GetICDSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
 
-  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT, 1, 1, -1, -1.0,
-                              compartments_.front().start_packer->tvd(),
-                              -1.0, -1.0, 0.0, 1, 1, -1);
+  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
+    1, 1,-1, -1.0, -1.0,
+    compartments_.front().start_packer->tvd(),-1.0,
+    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+    1, 1, -1);
   segments.push_back(root_segment);
 
   std::vector<int> tubing_indexes = createTubingSegments(segments);
@@ -722,9 +799,11 @@ std::vector<Segment> Well::GetICDSegments() {
 std::vector<Segment> Well::GetAnnulusSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
-  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT, 1, 1, -1, -1.0,
-                              compartments_.front().start_packer->tvd(),
-                              -1.0, -1.0, 0.0, 1, 1, -1);
+  auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
+    1, 1, -1, -1.0, -1.0,
+    compartments_.front().start_packer->tvd(),-1.0,
+    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+    1, 1, -1);
   segments.push_back(root_segment);
 
   std::vector<int> tubing_indexes = createTubingSegments(segments);

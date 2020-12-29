@@ -90,7 +90,7 @@ QStringList Compdat::createBlockEntry(QString well_name,
   if (well_block->HasPerforation()) {
     block_entry[5] = "OPEN";
     if (well_block->GetPerforation()->transmissibility_factor() >= 0.0)
-      block_entry[7] = " " + num2strQ(well_block->GetPerforation()->transmissibility_factor(), 5, 0, 9) + "";
+      block_entry[7] = " " + num2strQ(well_block->GetPerforation()->transmissibility_factor(), 6, 1, 9) + "";
     // WI is defaulted if a negative value is provided.
   }
   else {

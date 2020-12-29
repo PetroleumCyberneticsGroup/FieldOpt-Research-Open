@@ -222,8 +222,11 @@ void Model::parseSegmentAnnulus(const QJsonObject &json_seg,
       im += "Diameter to 0.04, Ac to 8.17E-3 and Roughness to 1.52E-5.";
       ext_info(im, md_, cl_, vp_.lnw);
     }
-    well.seg_annulus.diameter = 0.04;
-    well.seg_annulus.roughness = 1.52E-5;
+    // well.seg_annulus.diameter = 0.04;
+    well.seg_annulus.diameter = 0.0889;
+    // well.seg_annulus.roughness = 1.52E-5;
+    well.seg_annulus.roughness = 9.83673E-05;
+
     well.seg_annulus.cross_sect_area = 8.17E-3;
   }
 }

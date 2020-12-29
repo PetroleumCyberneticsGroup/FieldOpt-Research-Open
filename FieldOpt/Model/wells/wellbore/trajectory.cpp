@@ -36,13 +36,6 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
-using Printer::ext_info;
-using Printer::ext_warn;
-using Printer::info;
-using std::runtime_error;
-
-using WType=Settings::Model::WellDefinitionType;
-
 Trajectory::Trajectory(Settings::Model::Well well_settings,
                        Properties::VarPropContainer *variable_container,
                        ::Reservoir::Grid::Grid *grid,
@@ -96,8 +89,8 @@ int Trajectory::GetTimeSpentInWic() const {
 WellBlock *Trajectory::GetWellBlock(int i, int j, int k) {
   for (int idx = 0; idx < well_blocks_->size(); ++idx) {
     if (well_blocks_->at(idx)->i() == i
-        && well_blocks_->at(idx)->j() == j
-        && well_blocks_->at(idx)->k() == k)
+      && well_blocks_->at(idx)->j() == j
+      && well_blocks_->at(idx)->k() == k)
       return well_blocks_->at(idx);
   }
   throw WellBlockNotFoundException(i, j, k);
@@ -354,15 +347,46 @@ double Trajectory::GetExitMd(const WellBlock *wb) const {
 
 void Trajectory::printWellBlocks() {
   cout << endl << "well blocks -- Trajectory::printWellBlocks():" << endl;
-  cout << "I,\tJ,\tK,\tINX,\t\t\tINY,\t\t\tINZ,\t\t\tOUTX,\t\t\tOUTY,\t\t\tOUTZ" << endl;
+  // cout << "I,\tJ,\tK,\tINX,\t\t\tINY,\t\t\tINZ,\t\t\tOUTX,\t\t\tOUTY,\t\t\tOUTZ" << endl;
+
+  string sep = "         ";
+  string lbl;
+  lbl = "[    I    J    K ] [ Xin" + sep + "Yin" + sep + "Zin         ] ";
+  lbl += "[ Xou" + sep + "You" + sep + "Zou" + sep + "] ";
+  lbl +=  "[    Len EntryMd  ExitMd  DepthD ] ";
+  lbl +=  "[      Dx      Dy     Dz ]";
+  cout << lbl << endl;
+
   for (auto wb : *well_blocks_) {
     stringstream entry;
-    entry << wb->i() << ",\t" << wb->j() << ",\t" << wb->k() << ",\t";
-    entry.precision(12);
-    entry << std::scientific;
-    entry << wb->getEntryPoint().x() << ",\t" << wb->getEntryPoint().y() << ",\t" << wb->getEntryPoint().z() << ",\t"
-          << wb->getExitPoint().x() << ",\t" << wb->getExitPoint().y() << ",\t" << wb->getExitPoint().z()
+    entry << "[ "
+          << num2str(wb->i(), 0, 0, 4) << " "
+          << num2str(wb->j(), 0, 0, 4) << " "
+          << num2str(wb->k(), 0, 0, 4) << " ] ";
+    // entry.precision(3);
+    // entry << std::scientific;
+
+    entry << "[ "
+          << num2str(wb->getEntryPoint().x(), 5, 1, 9) << " "
+          << num2str(wb->getEntryPoint().y(), 5, 1, 9) << " "
+          << num2str(wb->getEntryPoint().z(), 5, 1, 9) << " ] [ "
+          << num2str(wb->getExitPoint().x(), 5, 1, 9) << " "
+          << num2str(wb->getExitPoint().y(), 5, 1, 9) << " "
+          << num2str(wb->getExitPoint().z(), 5, 1, 9) << " ] ";
+
+    entry << "[ "
+          << num2str(wb->getLength(), 1, 0, 6) << " "
+          << num2str(wb->getEntryMd(), 1, 0, 7) << " "
+          << num2str(wb->getExitMd(), 1, 0, 7) << " "
+          << num2str(wb->getDepthChange(), 1, 0, 7) << " ] ";
+
+    auto dxdydz = wb->getDxDyDz();
+    entry << "[ "
+          << num2str(dxdydz(0), 1, 0, 7) << " "
+          << num2str(dxdydz(1), 1, 0, 7) << " "
+          << num2str(dxdydz(2), 1, 0, 6) << " ]"
           << std::endl;
+
     cout << entry.str();
   }
 }

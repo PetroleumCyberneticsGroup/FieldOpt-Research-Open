@@ -128,8 +128,10 @@ QString Welsegs::createHeelEntry(Well *well) {
   record[1]  = "   " + well->name() + "  ";
   record[2]  = num2strQ(rseg.TVDChange(), 5, 0, 9) + "    ";
   record[3]  = num2strQ(0.0, 5, 0, 7) + "    ";
-  record[5]  = "      INC  ";
-  record[6]  = "      HF-  /\n";
+  // record[5]  = "      INC  ";
+  record[5]  = "      ABS  ";
+  // record[6]  = "      HF-  /\n";
+  record[6]  = "      HFA HO  /\n";
   record[7]  = "--                                                                          -\n";
   record[8]  = "-- 1st    Last    Branch Outlet Length      Depth     Diam      Rough       -\n";
   record[9]  = "-- Seg    Seg     Num    Seg                Change                          -\n";
@@ -147,10 +149,10 @@ QString Welsegs::createSegEntryICD(Segment segment) {
   record[2] = "  " + num2strQ(segment.Branch(), 0, 0, 3);
   record[3] = "  " + num2strQ(segment.Outlet(), 0, 0, 2);
 
-  record[4] = "    " + num2strQ(segment.Length(), 5, 0, 9);
-  record[5] = " " + num2strQ(segment.TVDChange(), 5, 0, 7);
+  record[4] = "  " + num2strQ(segment.MDLength(), 2, 0, 9);
+  record[5] = " " + num2strQ(segment.TVDChange(), 2, 0, 7);
   record[6] = " " + num2strQ(segment.Diameter(), 5, 0, 7);
-  record[7] = " " + num2strQ(segment.Roughness(), 3, 1, 7);
+  record[7] = " " + num2strQ(segment.Roughness(), 4, 1, 7);
   return "  " + record.join("  ") + "  /";
 }
 
@@ -172,10 +174,10 @@ QString Welsegs::createSegmentEntry(Segment segment) {
   record[2] = "  " + num2strQ(segment.Branch(), 0, 0, 3);
   record[3] = "  " + num2strQ(segment.Outlet(), 0, 0, 2);
 
-  record[4] = "    " + num2strQ(segment.Length(), 5, 0, 9);
-  record[5] = " " + num2strQ(segment.TVDChange(), 5, 0, 7);
+  record[4] = "  " + num2strQ(segment.MDLength(), 2, 0, 9);
+  record[5] = " " + num2strQ(segment.TVDChange(), 2, 0, 7);
   record[6] = " " + num2strQ(segment.Diameter(), 5, 0, 7);
-  record[7] = " " + num2strQ(segment.Roughness(), 5, 0, 7);
+  record[7] = " " + num2strQ(segment.Roughness(), 4, 1, 7);
   return "  " + record.join("  ") + "  /";
 }
 

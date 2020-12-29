@@ -43,10 +43,14 @@ class Segment {
  public:
   enum SegType { TUBING_SEGMENT, ANNULUS_SEGMENT,
     ICD_SEGMENT, MAIN_BRANCH, OUTER_BRANCH };
-  Segment();
+
+  // Segment();
   Segment(SegType type, int index, int branch, int outlet,
-          double length, double tvd, double diameter, double roughness,
-          double outlet_md, int block_index, int block_branch, int aux_index);
+          double seg_length,
+          double md_length, double tvd, double diameter, double roughness,
+          double entry_md, double exit_md,
+          Eigen::Vector3d entry_pt, Eigen::Vector3d exit_pt,
+          int block_index, int block_branch, int aux_index);
 
   void AddInlet(int index);
   std::vector<int> GetInlets() const;
@@ -64,9 +68,18 @@ class Segment {
   int     Branch()      const { return branch_; }
   int     BlockBranch() const { return block_branch_; }
   int     Outlet()      const { return outlet_; }
-  double  OutletMD()    const { return md_; }
+
+  double  OutletMD()    const { return entry_md_; }
+  Eigen::Vector3d  EntryPt()    const { return entry_pt_; }
+  Eigen::Vector3d  ExitPt()    const { return exit_pt_; }
+
   double  TVDChange()   const { return tvd_change_; }
-  double  Length()      const { return length_; }
+  double  MDLength()      const { return md_length_; }
+  double  SegLength()      const { return seg_length_; }
+
+  double  GetEntryMD()      const { return entry_md_; }
+  double  GetExitMD()      const { return exit_md_; }
+
   double  Diameter()    const { return diameter_; }
   double  Roughness()   const { return roughness_; }
   SegType Type()        const { return type_; }
@@ -77,10 +90,15 @@ class Segment {
   int index_;         //!< Segment index
   int branch_;        //!< Branch index
   int outlet_;        //!< Index of outlet segment.
-  double length_;     //!< Physical segment properties
+  double md_length_;     //!< Physical segment properties
+  double seg_length_;
   double diameter_;
   double roughness_;
-  double md_;         //!< Measured depth to start of segment
+
+  double entry_md_, exit_md_;         //!< Measured depth to start of segment
+  Eigen::Vector3d entry_pt_;
+  Eigen::Vector3d exit_pt_;
+
   double tvd_change_; //!< TVD _change_ along the segment (i.e. zero when perfectly horizontal)
   int block_index_;
   int block_branch_;

@@ -42,6 +42,15 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::info;
+
+using Printer::num2str;
+using std::runtime_error;
+
+using WType=Settings::Model::WellDefinitionType;
+
 class WellSpline;
 
 /*!

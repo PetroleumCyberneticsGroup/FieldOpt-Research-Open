@@ -104,11 +104,15 @@ class WellBlock
   void setEntryMd(const double entry_md) { entry_md_ = entry_md; }
   void setExitMd(const double exit_md) { exit_md_ = exit_md; }
   void setLength(const double length) { length_ = length; }
+  void setDxDyDz(const Eigen::VectorXd dxdydz) { dxdydz_ = dxdydz; }
 
   double getEntryMd() const { return entry_md_; }
   double getExitMd() const { return exit_md_; }
   double getLength() const { return length_; }
+
   double getDepthChange() const { return exit_point_[2] - entry_point_[2]; }
+  double getDepth() const { return entry_point_[2] + (exit_point_[2] - entry_point_[2])/2; }
+  Eigen::VectorXd getDxDyDz() { return dxdydz_; }
 
   string getPropString(double md=0) {
     stringstream ss;
@@ -135,6 +139,8 @@ class WellBlock
   double exit_md_;
   double length_;
   Completions::Completion *completion_;
+
+  Eigen::VectorXd dxdydz_;
 
   //!< Well's direction of penetration through block.
   DirOfPenetration dir_of_penetration_;
