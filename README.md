@@ -7,7 +7,7 @@ for problems involving large-scale numerical simulations.
 ### Petroleum Field Development
 - [x] Well placement optimization
 - [x] Production optimization
-- [x] Optimization of Inflow-control valve settings
+- [x] Optimization of inflow-control valve settings
 
 ## Optimization methodologies
 
