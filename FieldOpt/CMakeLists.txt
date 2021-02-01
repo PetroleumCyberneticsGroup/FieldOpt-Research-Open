@@ -203,7 +203,12 @@ else()
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
   message(STATUS "HDF5: ${HDF5}")
-  message(STATUS "snopt: ${snopt}")
+
+  if(snopt MATCHES NOTFOUND)
+    message(STATUS "snopt lib NOT found; snopt=${snopt}")
+  else()
+    message(STATUS "snopt: ${snopt}")
+  endif()
 
 endif()
 
