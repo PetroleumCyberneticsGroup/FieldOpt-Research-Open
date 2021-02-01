@@ -1,32 +1,85 @@
-# Prerequisites
-*.d
+# C++ objects and libs
 
-# Compiled Object files
 *.slo
 *.lo
 *.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
 *.a
-*.lib
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
 
-# Executables
-*.exe
-*.out
-*.app
+
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+*-build-*
+
+# QtCreator
+
+*.autosave
+
+#QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# Build folders
+build-*
+FieldOpt/CMakeFiles/*
+*/CMakeFiles/*
+
+# Compiled doxygen documentation
+doxygen/*
+
+# Local boost lib
+libs/*
+!libs/get_boost.sh
+
+# Manually compiled program
+build/*
+FieldOpt/build
+# FieldOpt/ThirdParty/*
+FieldOpt/ThirdParty/Eigen3/*
+
+
+# Test folders
+test-*
+
+# Ignore ADGPRS output files
+*.SIM.H5
+*.res_partition.bin
+*.log.txt
+
+# Ignore ECLIPSE output files
+*.DBG
+*.ECLEND
+#*.EGRID
+*.GRID
+#*.INIT
+*.INSPEC
+*.MSG
+*.RSM
+*.LOG
+*.ECLRUN
+*.h5
+*.PRT
+*.RSSPEC
+*.SMSPEC
+*.UNRST
+*.UNSMRY
+*.xml
+*.eclrun_dbg
+FieldOpt/CMakeCache.txt
+FieldOpt/CMakeFiles/cmake.check_cache
+*.bin
+/fieldopt-output/
+*.RFT

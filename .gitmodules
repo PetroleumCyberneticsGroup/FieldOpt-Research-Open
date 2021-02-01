@@ -1,0 +1,18 @@
+[submodule "FieldOpt/libgp"]
+	path = FieldOpt/ThirdParty/libgp
+	url = https://github.com/PetroleumCyberneticsGroup/libgp.git
+[submodule "FieldOpt/ThirdParty/googletest"]
+	path = FieldOpt/ThirdParty/googletest
+	url = https://github.com/PetroleumCyberneticsGroup/googletest.git
+[submodule "FieldOpt/ThirdParty/RpolyPlusPlus"]
+	path = FieldOpt/ThirdParty/RpolyPlusPlus
+	url = https://github.com/PetroleumCyberneticsGroup/RpolyPlusPlus.git
+[submodule "FieldOpt/ThirdParty/Eigen3"]
+	path = FieldOpt/ThirdParty/Eigen3
+	url = https://github.com/PetroleumCyberneticsGroup/eigen-git-mirror.git
+[submodule "FieldOpt/ThirdParty/qtbase"]
+	path = FieldOpt/ThirdParty/qtbase
+	url = https://github.com/PetroleumCyberneticsGroup/qtbase.git
+[submodule "FieldOpt/ThirdParty/hdf5-1.8.16"]
+	path = FieldOpt/ThirdParty/hdf5-1.8.16
+	url = https://github.com/PetroleumCyberneticsGroup/hdf5-1.8.16.git
