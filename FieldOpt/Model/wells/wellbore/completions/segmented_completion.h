@@ -20,7 +20,7 @@
 #ifndef FIELDOPT_SEGMENTED_COMPLETION_H
 #define FIELDOPT_SEGMENTED_COMPLETION_H
 
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "completion.h"
 namespace Model {
 namespace Wells {
@@ -34,7 +34,7 @@ class SegmentedCompletion : public Completion {
 
  protected:
   SegmentedCompletion(Settings::Model::Well::Completion completion_settings,
-                      Properties::VariablePropertyContainer *variable_container);
+                      Properties::VarPropContainer *variable_container);
 
 
  public:
@@ -53,7 +53,7 @@ class SegmentedCompletion : public Completion {
   /*!
    * Placement of a packer of ICD as a fraction of well length.
    */
-  Properties::ContinousProperty *placement_;
+  Properties::ContinuousProperty *placement_;
 
   /*!
    * True vertical depth. For ICDs and packers, this is the vertical depth

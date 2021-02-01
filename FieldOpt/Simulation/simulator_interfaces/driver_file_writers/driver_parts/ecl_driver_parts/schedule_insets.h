@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2019-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_SCHEDULE_INSETS_H
 #define FIELDOPT_SCHEDULE_INSETS_H
 
@@ -23,6 +29,8 @@
 #include <map>
 #include <vector>
 #include <deque>
+
+#include "Utilities/verbosity.h"
 
 namespace Simulation {
 namespace ECLDriverParts {
@@ -76,7 +84,7 @@ class ScheduleInsets {
    * @brief Build the day-snippet mapping by parsing the file at the provided path.
    * @param inset_file_path Path to inset-file.
    */
-  ScheduleInsets(const std::string &inset_file_path);
+  ScheduleInsets(const std::string &inset_file_path, Settings::VerbParams vp);
 
   /*!
    * @brief Check whether an inset is specified at a control time step.
@@ -94,6 +102,7 @@ class ScheduleInsets {
 
  private:
   std::map<int, std::string> insets_;
+  Settings::VerbParams vp_;
 
   std::pair<int, std::string> parseNextInset(std::deque<std::string> &lines) const;
   std::deque<std::string> trimEmptyLines(const std::vector<std::string> &lines) const;

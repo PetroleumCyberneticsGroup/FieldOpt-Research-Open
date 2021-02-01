@@ -1,0 +1,184 @@
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+RUNSPEC
+
+TITLE
+OLYMPUS_37
+
+DIMENS
+118 181 16 /
+
+HWELLS
+
+--RESOPT
+
+-- _________________________________________________________
+BLACKOIL
+
+OIL
+WATER
+GAS
+
+MONITOR
+
+METRIC
+
+ACTDIMS
+50 200 /
+
+TABDIMS
+1 1 50 50 1 50 /
+
+WELLDIMS
+4 70 3 16 /
+
+WSEGDIMS
+50  400  50  5 /
+
+--REGDIMS
+--/
+
+-- _________________________________________________________
+START
+1 JAN 2020 /
+
+NSTACK
+100 /
+
+NUPCOL
+8 /
+
+UNIFOUT
+UNIFIN
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+GRID
+NOECHO
+
+INCLUDE
+'../S00/OLYMP_GRID.INC' /
+
+INCLUDE
+'../S00/OLYMP_GRID.GRDECL' /
+
+INCLUDE
+'../S00/ACTNUM.GRDECL' /
+
+-- _________________________________________________________
+-- PERMXYZ, PORO, NTG
+INCLUDE
+'R37_PERMX.GRDECL' /
+
+INCLUDE
+'R37_PERMY.GRDECL' /
+
+INCLUDE
+'R37_PERMZ.GRDECL' /
+
+MULTIPLY
+PERMZ 0.1  /
+/
+
+INCLUDE
+'R37_PORO.GRDECL' /
+
+INCLUDE
+'R37_NTG.GRDECL' /
+
+INCLUDE
+'F37_FMULT.INC' /
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+EDIT
+
+-- IX1-IX2 JY1-JY2 KZ1-KZ2
+BOX
+1 118 1 181  9 16 /
+
+ACTNUM
+170864*0 /
+
+ENDBOX
+
+-- IX1-IX2 JY1-JY2 KZ1-KZ2
+BOX
+1 32 1 181  1 16 /
+
+ACTNUM
+92672*0 /
+
+ENDBOX
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+PROPS
+NOECHO
+
+INCLUDE
+'../S00/DO_DG_PROP.INC' /
+
+RPTPROPS
+NOTHING
+/
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+REGIONS
+NOECHO
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SOLUTION
+NOECHO
+
+--DATUM  DATUM OWC    OWC   GOC   GOC  RSVD  RVVD  SOLN
+--DEPTH  PRESS DEPTH  PCOW  DEPTH PCOG TABLE TABLE METH
+EQUIL
+  2022   195   2061.7  0    2022     0    0     0     0 /
+
+--DEPTH RS
+RSVD
+2022 1.270 /
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SUMMARY
+NOECHO
+
+INCLUDE
+'../S00/OLYMP_SUM.INC' /
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+SCHEDULE
+NOECHO
+
+RPTRST
+BASIC=2 PRESSURE SOIL SGAS SWAT CELLINDX RPORV /
+
+OPTIONS3
+33* 10000 / #34: MSEGWELLS
+
+TUNING
+--1 30 0.1 /
+--  /
+--12 1* 150 /
+1* 1* 0.1 /
+/
+2* 600 /
+
+WSEGITER
+80 10 1*
+/
+
+-- _________________________________________________________
+INCLUDE
+'OLPZ_BC01_SCH.INC' /
+
+-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+END
+
+OPTIMIZE
+
+RPTOPT
+'CLRFILES' /
+
+INCLUDE
+'OLPZ_BCXX_R37_F37_W03.INC' /
+
+END

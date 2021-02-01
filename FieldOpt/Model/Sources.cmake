@@ -11,7 +11,7 @@ SET(MODEL_HEADERS
 	properties/discrete_property.h
 	properties/property.h
 	properties/property_exceptions.h
-	properties/variable_property_container.h
+        properties/var_prop_container.h
 	wells/compartment.h
 	wells/control.h
 	wells/segment.h
@@ -41,7 +41,7 @@ SET(MODEL_SOURCES
 	properties/continous_property.cpp
 	properties/discrete_property.cpp
 	properties/property.cpp
-	properties/variable_property_container.cpp
+        properties/var_prop_container.cpp
 	wells/compartment.cpp
 	wells/control.cpp
 	wells/segment.cpp

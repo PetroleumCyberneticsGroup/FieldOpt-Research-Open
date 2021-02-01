@@ -3,31 +3,38 @@ project(hdf5summaryreader)
 
 include(Sources.cmake)
 
-add_library(hdf5summaryreader STATIC ${HDF5SUMMARYREADER_HEADERS} ${HDF5SUMMARYREADER_SOURCES})
-add_library(fieldopt::hdf5summaryreader ALIAS ${PROJECT_NAME})
+add_library(hdf5summaryreader STATIC
+  ${HDF5SUMMARYREADER_HEADERS}
+  ${HDF5SUMMARYREADER_SOURCES})
+
+add_library(fieldopt::hdf5summaryreader
+  ALIAS ${PROJECT_NAME})
 
 target_link_libraries(hdf5summaryreader
-        PUBLIC ${HDF5} ${HDF5_CPP})
+  PUBLIC ${HDF5} ${HDF5_CPP})
 
 add_compile_options(-std=c++11)
 
+# Unit tests
 if (BUILD_TESTING)
-    # Unit tests
-    include_directories(${HDF5_INCLUDE_DIRS})
-	add_executable(test_hdf5summaryreader ${HDF5SUMMARYREADER_TESTS})
+  include_directories(${HDF5_INCLUDE_DIRS})
+  add_executable(test_hdf5summaryreader
+    ${HDF5SUMMARYREADER_TESTS})
 
-    target_link_libraries(test_hdf5summaryreader
-            fieldopt::hdf5summaryreader
-            ${HDF5}
-            ${gtest}
-            ${gtest_main}
-            ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(test_hdf5summaryreader
+    fieldopt::hdf5summaryreader
+    ${HDF5}
+    ${gtest}
+    ${gtest_main}
+    ${CMAKE_THREAD_LIBS_INIT}
+    )
 
-    add_test(NAME test_hdf5summaryreader COMMAND $<TARGET_FILE:test_hdf5summaryreader>)
+  add_test(NAME test_hdf5summaryreader
+    COMMAND $<TARGET_FILE:test_hdf5summaryreader>)
 endif()
 
 install( TARGETS hdf5summaryreader
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib/static
-        )
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib/static
+  )

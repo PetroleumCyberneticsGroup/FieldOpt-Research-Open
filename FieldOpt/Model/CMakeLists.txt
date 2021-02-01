@@ -3,11 +3,15 @@ project(model)
 
 include(Sources.cmake)
 
-add_library(model STATIC ${MODEL_HEADERS} ${MODEL_SOURCES})
+# Target lib ===============================================
+add_library(model STATIC
+		${MODEL_HEADERS}
+		${MODEL_SOURCES})
+
 add_library(fieldopt::model ALIAS ${PROJECT_NAME})
 
 target_link_libraries (model
-        PUBLIC fieldopt::reservoir
+		PUBLIC fieldopt::reservoir
 		PUBLIC fieldopt::wellindexcalculator
 		PUBLIC fieldopt::settings
 		PUBLIC fieldopt::constraintmath
@@ -23,22 +27,24 @@ target_include_directories(model PUBLIC
 
 add_compile_options(-std=c++11)
 
+# Test exec ================================================
+# Unit tests
 if (BUILD_TESTING)
-    # Unit tests
 	add_executable(test_model ${MODEL_TESTS})
-    target_link_libraries(test_model
-            fieldopt::model
-            fieldopt::reservoir
-            fieldopt::optimization
-            ${gtest}
-			${gtest_main}
-            ${CMAKE_THREAD_LIBS_INIT})
 
-    add_test(NAME test_model COMMAND $<TARGET_FILE:test_model>)
+	target_link_libraries(test_model
+			fieldopt::model
+			fieldopt::reservoir
+			fieldopt::optimization
+			${gtest}
+			${gtest_main}
+			${CMAKE_THREAD_LIBS_INIT})
+
+	add_test(NAME test_model COMMAND $<TARGET_FILE:test_model>)
 endif()
 
-install( TARGETS model
+# Install ==================================================
+install(TARGETS model
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib/static
-		)
+		ARCHIVE DESTINATION lib/static)

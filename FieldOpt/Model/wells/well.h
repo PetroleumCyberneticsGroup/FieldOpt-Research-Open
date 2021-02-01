@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef WELL_H
 #define WELL_H
@@ -24,7 +29,7 @@
 #include "Settings/model.h"
 #include "Model/wells/wellbore/completions/completion.h"
 #include "Model/wells/wellbore/completions/perforation.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/wells/control.h"
 #include "Model/wells/wellbore/trajectory.h"
@@ -32,9 +37,10 @@
 #include "Reservoir/grid/eclgrid.h"
 #include "WellIndexCalculation/wicalc_rixx.h"
 
-#include <QList>
 #include "compartment.h"
 #include "segment.h"
+
+#include <QList>
 
 namespace Model {
 namespace Wells {
@@ -51,12 +57,11 @@ class Well
    * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
    * \param variables The variables object to add all new variable variables to.
    */
-  Well(Settings::Model settings,
+  Well(const Settings::Model& model_settings,
        int well_number,
-       ::Model::Properties::VariablePropertyContainer *variable_container,
+       ::Model::Properties::VarPropContainer *variable_container,
        ::Reservoir::Grid::Grid *grid,
-       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic
-  );
+       ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
   struct Heel { int i; int j; int k; };
 
@@ -97,16 +102,21 @@ class Well
   ::Settings::Model::WellType type_;
   QString group_;
   ::Settings::Model::PreferredPhase preferred_phase_;
-  Properties::ContinousProperty *wellbore_radius_;
+  Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
-  bool trajectory_defined_ = true; //!< Whether the trajectory is defined. It does not need to be for, e.g., control optimization.
+
+  Settings::VerbParams vp_;
+
+  //!< Whether the trajectory is defined. It does not
+  //!< need to be for, e.g., control optimization.
+  bool trajectory_defined_ = true;
 
   Heel heel_;
   QList<Control *> *controls_;
 
   // Fields for segmented wells
   bool is_segmented_ = false;
-  void initializeSegmentedWell(Properties::VariablePropertyContainer *variable_container);
+  void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
   double tub_cross_sect_area_; //!< Tubing cross section area.

@@ -64,6 +64,8 @@ class AdgprsSimulator : public Simulator
  protected:
   void UpdateFilePaths();
 
+  string cl_ = "adgsimulator";
+
   // Simulator interface
  public:
   QString GetCompdatString();

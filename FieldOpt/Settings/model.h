@@ -1,27 +1,27 @@
-/******************************************************************************
- *
- * model.h
- *
- * Created: 28.09.2015 2015 by einar
- *
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2015 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Created: 28.09.2015 2015 by einar
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef SETTINGS_MODEL_H
 #define SETTINGS_MODEL_H
@@ -41,24 +41,40 @@ namespace Settings {
 class DeckParser;
 
 /*!
- * \brief The Model class contains model-specific settings. Model settings objects may _only_ be
- * created by the Settings class. They are created when reading a JSON-formatted "driver file".
+ * \brief The Model class contains model-specific settings. Model
+ * settings objects may _only_ be created by the Settings class.
+ * They are created when reading a JSON-formatted "driver file".
  *
- * \todo Add more control types, e.g. multiple rate types (liquid rate, oil rate, gas rate, etc.) for producers.
+ * \todo Add more control types, e.g. multiple rate types
+ * (liquid rate, oil rate, gas rate, etc.) for producers.
  */
 class Model
 {
   friend class Settings;
 
  public:
-  Model(QJsonObject json_model, Paths &paths); // This should only be accessed externally for testing purposes.
+  // This should only be accessed externally for testing purposes.
+  Model(QJsonObject json_model, Paths &paths, VerbParams vp);
+
   enum WellType : int { Injector=11, Producer=12, UNKNOWN_TYPE=19 };
-  enum ControlMode : int { BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24, RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
+  enum ControlMode : int {
+    BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24,
+    RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
   enum InjectionType : int { WaterInjection=31, GasInjection=32 };
-  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42, PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
-  enum WellCompletionType : int { Perforation=61, ICV=62, Packer=63, Tubing=64, Annulus=65 };
+
+  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42,
+    PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
+
+  enum WellCompletionType : int { Perforation=61, ICV=62,
+    Packer=63, Tubing=64, Annulus=65 };
+
   enum WellState : int { WellOpen=71, WellShut=72 };
-  enum PreferredPhase : int { Oil=81, Water=82, Gas=83, Liquid=84, UNKNOWN_PHASE=89 };
+
+  enum PreferredPhase : int { Oil=81, Water=82, Gas=83,
+    Liquid=84, UNKNOWN_PHASE=89 };
+
   enum Direction : int { X=91, Y=92, Z=93 };
 
   struct Well {
@@ -86,13 +102,15 @@ class Model
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
     };
+
     /*!
      * @brief A grouping of ICVs that make up a compartment
      */
     struct ICVGroup : Completion {
-        std::string icv_group_name;
-        std::vector<std::string> icvs;
+      std::string icv_group_name;
+      std::vector<std::string> icvs;
     };
+
     struct WellBlock {
       WellBlock(){}
       bool is_variable;
@@ -101,24 +119,28 @@ class Model
       QString name;
       int i, j, k;
     };
+
     struct SplinePoint {
       SplinePoint(){}
       QString name;
       double x, y, z;
       bool is_variable = false;
     };
+
     struct PolarSpline{
-        SplinePoint midpoint;
-        double azimuth=0;
-        double length=0;
-        double elevation=90;
-        QString name="";
-        bool is_variable=false;
+      SplinePoint midpoint;
+      double azimuth=0;
+      double length=0;
+      double elevation=90;
+      QString name="";
+      bool is_variable=false;
     };
+
     struct PseudoContPosition {
       int i, j;
       bool is_variable = false;
     };
+
     struct ControlEntry {
       int time_step;                                 //!< The time step this control is to be applied at.
       WellState state;                               //!< Whether the well is open or shut.
@@ -135,6 +157,7 @@ class Model
       bool isDifferent(ControlEntry other);
       std::string toString();
     };
+
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
     QString name;                               //!< The name to be used for the well.
     WellType type;                              //!< The well type, i.e. producer or injector.
@@ -162,21 +185,31 @@ class Model
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
     std::string toString();
     std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
+
+    VerbParams verb_params_;
+    void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
+    VerbParams verbParams() { return verb_params_; };
   };
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
 
+  VerbParams vp_;
+  VerbParams verbParams() { return vp_; };
+
  private:
   QList<Well> wells_;
   QList<int> control_times_;
+
+  string md_ = "Settings";
+  string cl_ = "Model";
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
   void setImportedWellDefaults(QJsonObject json_model);
   void parseImportedWellOverrides(QJsonArray json_wells);
 
-  void parseSegmentation(QJsonObject json_seg, Well &well);
+  void parseSegmentation(const QJsonObject& json_seg, Well &well);
   void parseSegmentTubing(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentAnnulus(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentCompartments(const QJsonObject &json_seg, Well &well) const;

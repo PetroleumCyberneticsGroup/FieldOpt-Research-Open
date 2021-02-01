@@ -41,7 +41,7 @@ class GeneticAlgorithm : public Optimizer {
    */
   GeneticAlgorithm(Settings::Optimizer *settings,
                    Case *base_case,
-                   Model::Properties::VariablePropertyContainer *variables,
+                   Model::Properties::VarPropContainer *variables,
                    Reservoir::Grid::Grid *grid,
                    Logger *logger,
                    CaseHandler *case_handler=0,
@@ -63,7 +63,7 @@ class GeneticAlgorithm : public Optimizer {
     Case *case_pointer;
     Chromosome(Case *c);
     Chromosome() {}
-    double ofv() { return case_pointer->objective_function_value(); }
+    double ofv() { return case_pointer->objf_value(); }
     void createNewCase();
   };
 

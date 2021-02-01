@@ -30,7 +30,7 @@ namespace Optimization {
 namespace Optimizers {
 CMA_ES::CMA_ES(Settings::Optimizer *settings,
                Case *base_case,
-               Model::Properties::VariablePropertyContainer *variables,
+               Model::Properties::VarPropContainer *variables,
                Reservoir::Grid::Grid *grid,
                Logger *logger,
                CaseHandler *case_handler,
@@ -38,7 +38,7 @@ CMA_ES::CMA_ES(Settings::Optimizer *settings,
 ) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
     settings_ = settings;
     // User defined parameters (need to be edited)
-    n_vars_ = variables->ContinousVariableSize();
+    n_vars_ = variables->ContinuousVariableSize();
     improve_base_case_ = settings->parameters().improve_base_case;
 
     penalty_ = 0.01;
@@ -175,11 +175,11 @@ void CMA_ES::iterate() {
     }
     for (int i = 0; i < population_.size(); i++) {
         if (Settings::Optimizer::Minimize == settings_->mode()) {
-            population_[i].case_pointer_->set_objective_function_value(
-                    population_[i].ofv() + (exp(penalty_ * population_[i].penalty_dist_) - 1));
+          population_[i].case_pointer_->set_objf_value(
+            population_[i].ofv() + (exp(penalty_ * population_[i].penalty_dist_) - 1));
         } else {
-            population_[i].case_pointer_->set_objective_function_value(
-                    population_[i].ofv() - (exp(penalty_ * population_[i].penalty_dist_) - 1));
+          population_[i].case_pointer_->set_objf_value(
+            population_[i].ofv() - (exp(penalty_ * population_[i].penalty_dist_) - 1));
         }
     }
     population_ = sortPopulation(population_);
@@ -212,7 +212,7 @@ void CMA_ES::handleEvaluatedCase(Case *c) {
             ss.precision(6);
             ss << scientific;
             ss << "New best in population, iteration " << Printer::num2str(iteration_) << ": OFV "
-               << c->objective_function_value();
+               << c->objf_value();
             Printer::ext_info(ss.str(), "Optimization", "CMA_ES");
         }
     }
