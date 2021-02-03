@@ -126,6 +126,7 @@ std::list<pair<uuid, T>> CaseTransferObject::qListToStdList(const QList<QPair<QU
     pair<uuid, T> qpair = pair<uuid, T>(qUuidToBoostUuid(qhash.at(ii).first), qhash.at(ii).second);
     stdlist.push_back(qpair);
   }
+  return stdlist;
 }
 
 // template<typename T>
