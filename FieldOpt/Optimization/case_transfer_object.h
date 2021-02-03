@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/uuid/uuid_serialize.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
 #include <map>
 
 using namespace boost::uuids;

@@ -167,13 +167,13 @@ SET(OPTIMIZATION_TESTS
 		#
 		# objective
 		tests/objective/test_weightedsum.cpp
-#		tests/objective/test_augmented.cpp
+		tests/objective/test_augmented.cpp
 		#
 		# case, case-handling
-		# tests/test_case.cpp
-		# tests/test_case_handler.cpp
-		# tests/test_case_transfer_object.cpp
-		# tests/test_normalizer.cpp
+		tests/test_case.cpp
+		tests/test_case_handler.cpp
+		tests/test_case_transfer_object.cpp
+		tests/test_normalizer.cpp
 		#
 		# constraints, constraint-handling
 		# tests/constraints/test_bhp_constraint.cpp
