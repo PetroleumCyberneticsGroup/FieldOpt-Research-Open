@@ -38,7 +38,7 @@ WeightedSum::WeightedSum(Settings::Optimizer *settings,
   components_ = new QList<WeightedSum::Component *>();
 
   for (int i = 0; i < settings->objective().weighted_sum.size(); ++i) {
-    WeightedSum::Component *comp = new WeightedSum::Component();
+    auto *comp = new WeightedSum::Component();
     comp->property = results_->GetPropertyKey(settings->objective().weighted_sum.at(i).property);
     comp->coefficient = settings->objective().weighted_sum.at(i).coefficient;
     comp->time_step = settings->objective().weighted_sum.at(i).time_step;
@@ -70,7 +70,7 @@ double WeightedSum::value() const {
   return value;
 }
 
-double WeightedSum::Component::resolveValue(Simulation::Results::Results *results) {
+double WeightedSum::Component::resolveValue(Simulation::Results::Results *results) const {
   if (is_well_property) {
     if (time_step < 0) { // Final time step well property
       return coefficient * results->GetValue(property, well);

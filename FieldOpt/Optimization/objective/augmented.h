@@ -50,8 +50,8 @@ class Augmented : public Objective {
             Simulation::Results::Results *results,
             Model::Model *model);
 
-  double value() const override {};
-  double value(bool base_case = false) override;
+  double value() const override { return -1.0; };
+  double value(bool base_case) override;
 
   void setDbgFileName(string fl) { fl_ = fl; }
 

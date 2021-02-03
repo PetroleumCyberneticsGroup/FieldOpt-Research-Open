@@ -44,8 +44,7 @@ class WeightedSumTest : public TestResources::TestResourceResults,
 
   void TearDown() override { }
 
-  Model::Model *model_ = new Model::Model(*settings_full_,
-                                          logger_);
+  Model::Model *model_ = new Model::Model(*settings_full_, logger_);
 
 };
 
@@ -58,6 +57,7 @@ TEST_F(WeightedSumTest, Value) {
   EXPECT_FLOAT_EQ(100.0, results_ecl_horzwell_->GetValue(Results::Property::Time, 10));
   EXPECT_FLOAT_EQ(wwpt, 524.5061);
   EXPECT_FLOAT_EQ(fopt, 187866.44);
+  cout << "obj->value(): " << obj->value() << endl;
   EXPECT_FLOAT_EQ(fopt - 0.2*wwpt, obj->value());
 }
 

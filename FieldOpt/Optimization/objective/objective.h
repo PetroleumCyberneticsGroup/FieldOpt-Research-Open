@@ -49,7 +49,7 @@ class Objective
    */
   virtual double value() const = 0;
 
-  virtual double value(bool base_case) = 0;
+  virtual double value(bool base_case = false) = 0;
 
  protected:
   Objective(Settings::Optimizer *settings);
