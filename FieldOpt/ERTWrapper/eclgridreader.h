@@ -2,11 +2,11 @@
 Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
- Modified by Alin G. Chitu (2016-2017)
+Modified by Alin G. Chitu (2016-2017)
 <alin.chitu@tno.nl, chitu_alin@yahoo.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

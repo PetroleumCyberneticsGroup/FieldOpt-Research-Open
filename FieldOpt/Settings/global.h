@@ -1,6 +1,6 @@
 /***********************************************************
 Copyright (C) 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Created by bellout on 8/10/20.
 
