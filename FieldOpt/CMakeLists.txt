@@ -84,7 +84,6 @@ endif()
 # ----------------------------------------------------------
 add_subdirectory(ThirdParty/libecl)
 
-
 # ----------------------------------------------------------
 # ╦  ╔═╗╔═╗╔═╗╦    ╦  ╦╔╗ ╔═╗
 # ║  ║ ║║  ╠═╣║    ║  ║╠╩╗╚═╗
@@ -95,7 +94,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib/cmake)
 message(STATUS "CMAKE_PREFIX_PATH:" ${CMAKE_PREFIX_PATH})
 
 # Add local third party include dirs
-include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗
@@ -216,7 +215,7 @@ find_package(Qt5Core
 
 message(STATUS "Qt5Core_QTMAIN_LIBRARIES: ${Qt5Core_QTMAIN_LIBRARIES}")
 message(STATUS "Qt5Core_INCLUDE_DIRS: ${Qt5Core_INCLUDE_DIRS}")
-include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(SYSTEM ${Qt5Core_INCLUDE_DIRS})
 
 # ----------------------------------------------------------
 # ╦═╗╔═╗╔═╗╦ ╦ ╦╔═╗╔═╗╦ ╦ ╦
@@ -280,7 +279,7 @@ endif()
 message("..................................................")
 find_package(Boost REQUIRED) # 1.63
 if (Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIR})
+  include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 endif()
 set(Boost_USE_STATIC_LIBS OFF) # enable dynamic linking
 set(Boost_USE_MULTITHREAD ON)  # enable multithreading
