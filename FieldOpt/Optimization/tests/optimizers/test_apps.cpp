@@ -49,7 +49,7 @@ class APPSTest : public ::testing::Test,
 };
 
 TEST_F(APPSTest, Constructor) {
-  test_case_2r_->set_objective_function_value(1.0);
+  test_case_2r_->set_objf_value(1.0);
   apps_minimizer_ = new APPS(settings_apps_min_unconstr_,
                              test_case_2r_,
                              varcont_prod_bhp_,
@@ -58,7 +58,7 @@ TEST_F(APPSTest, Constructor) {
 }
 
 TEST_F(APPSTest, GetNewCases) {
-  test_case_1_3i_->set_objective_function_value(
+  test_case_1_3i_->set_objf_value(
       Sphere(test_case_1_3i_->GetRealVarVector()));
 
   Optimization::Optimizer *maximizer = new APPS(settings_apps_max_unconstr_,
@@ -92,7 +92,7 @@ TEST_F(APPSTest, GetNewCases) {
 
 TEST_F(APPSTest, TestFunctionSpherical) {
   auto gen = get_random_generator(10);
-  test_case_2r_->set_objective_function_value(
+  test_case_2r_->set_objf_value(
       Sphere(test_case_2r_->GetRealVarVector()));
 
   Optimization::Optimizer *minimizer = new APPS(settings_apps_min_unconstr_,
@@ -120,12 +120,12 @@ TEST_F(APPSTest, TestFunctionSpherical) {
     auto random_evaluated_case = under_eval.takeAt(
         random_integer(gen, 0, under_eval.size()-1));
 
-    random_evaluated_case->set_objective_function_value(Sphere(random_evaluated_case->GetRealVarVector()));
+    random_evaluated_case->set_objf_value(Sphere(random_evaluated_case->GetRealVarVector()));
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
 
   auto best_case = minimizer->GetTentativeBestCase();
-  EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.01);
+  EXPECT_NEAR(0.0, best_case->objf_value(), 0.01);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.01);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.01);
 }
@@ -137,7 +137,7 @@ TEST_F(APPSTest, TestFunctionRosenbrock) {
   Eigen::VectorXd optimum(2); optimum << 1.0, 1.0;
   EXPECT_FLOAT_EQ(0.0, Rosenbrock(optimum));
 
-  test_case_2r_->set_objective_function_value(
+  test_case_2r_->set_objf_value(
       Rosenbrock(test_case_2r_->GetRealVarVector()));
 
   Optimization::Optimizer *minimizer = new APPS(settings_apps_min_unconstr_,
@@ -157,13 +157,13 @@ TEST_F(APPSTest, TestFunctionRosenbrock) {
       std::cout << "Unable to get new case. Waiting for completed.";
     }
     auto random_evaluated_case = under_eval.takeAt(random_integer(gen, 0, under_eval.size()-1));
-    random_evaluated_case->set_objective_function_value(Rosenbrock(random_evaluated_case->GetRealVarVector()));
+    random_evaluated_case->set_objf_value(Rosenbrock(random_evaluated_case->GetRealVarVector()));
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
   auto best_case = minimizer->GetTentativeBestCase();
 
   // The Rosenbrock function is hard. We don't expect Compass search to find the optimum exactly.
-  EXPECT_NEAR(0.0, best_case->objective_function_value(), 2);
+  EXPECT_NEAR(0.0, best_case->objf_value(), 2);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 3);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[1], 3);
 }

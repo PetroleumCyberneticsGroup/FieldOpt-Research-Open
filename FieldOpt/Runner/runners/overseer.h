@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_OVERSEER_H
 #define FIELDOPT_OVERSEER_H
 
@@ -31,7 +37,7 @@ namespace MPI {
  */
 class Overseer {
  public:
-  Overseer(MPIRunner *runner);
+  explicit Overseer(MPIRunner *runner);
 
   /*!
    * @brief Assign a Case to a Worker. If no workers are free, the scheduler will wait untill one is.
@@ -77,27 +83,27 @@ class Overseer {
    */
   struct WorkerStatus {
     WorkerStatus() { rank = -1; }
-    WorkerStatus(int r) { rank = r;}
+    explicit WorkerStatus(int r) { rank = r;}
     int rank; //!< The rank of the process the worker is running on.
     bool working = false; //!< Indicates if the worker is currently performing simulations.
     QDateTime working_since; //!< The last time a job was sent to the worker.
-    int working_seconds() { //!< Number of seconds since last work was sent to the process.
-        return time_since_seconds(working_since);
+    int working_seconds() const { //!< Number of seconds since last work was sent to the process.
+      return time_since_seconds(working_since);
     }
     /*!
      * @brief Start the worker. Should be called whenever work is sent to the worker. This marks is as
      * working.
      */
     void start() {
-        working = true;
-        working_since = QDateTime::currentDateTime();
+      working = true;
+      working_since = QDateTime::currentDateTime();
     }
     /*!
      * @brief Stop the worker. This should be called whenever results are received from the worker. This
      * marks the worker as not working.
      */
     void stop() {
-        working = false;
+      working = false;
     }
   };
 

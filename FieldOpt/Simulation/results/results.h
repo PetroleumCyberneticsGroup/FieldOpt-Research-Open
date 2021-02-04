@@ -368,6 +368,11 @@ class Results
  protected:
   std::set<string> wells_;
 
+  vector<double> zr_std_ = vector<double>(0);
+  VectorXd zr_Xd_ = VectorXd(0);
+
+  vector<vector<double>> zr_std2d_ = vector<vector<double>> (0, vector<double>(0));
+  vector<VectorXd> zr_Xd2d_ = vector<VectorXd> (0, VectorXd(0));
 
 };
 

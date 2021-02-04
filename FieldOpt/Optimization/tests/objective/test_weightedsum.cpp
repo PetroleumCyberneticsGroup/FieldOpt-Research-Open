@@ -44,8 +44,7 @@ class WeightedSumTest : public TestResources::TestResourceResults,
 
   void TearDown() override { }
 
-  Model::Model *model_ = new Model::Model(*settings_full_,
-                                          logger_);
+  Model::Model *model_ = new Model::Model(*settings_full_, logger_);
 
 };
 

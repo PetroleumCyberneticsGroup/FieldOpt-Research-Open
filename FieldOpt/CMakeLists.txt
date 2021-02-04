@@ -45,7 +45,6 @@ endif()
 #CMAKE_EXE_LINKER_FLAGS:STRING=-fsanitize=address  -fsanitize=leak
 #CMAKE_MODULE_LINKER_FLAGS:STRING=-fsanitize=address  -fsanitize=leak
 
-
 # Build dirs ===============================================
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -59,8 +58,6 @@ include_directories(${PROJECT_SOURCE_DIR})
 # ╠╦╝║╣ ╚═╗║║║║╚═╗║║ ╦╠═╣ ║
 # ╩╚═╚═╝╚═╝╩╝╚╝╚═╝╩╚═╝╩ ╩ ╩
 # ----------------------------------------------------------
-
-# ResInsight ===============================================
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   add_definitions(-DCVF_LINUX)
   message(STATUS "CMAKE_SYSTEM_NAME => ${CMAKE_SYSTEM_NAME}")
@@ -85,29 +82,25 @@ endif()
 # ║╣ ╠╦╝ ║    ║╣ ║  ║
 # ╚═╝╩╚═ ╩────╚═╝╚═╝╩═╝
 # ----------------------------------------------------------
-
 add_subdirectory(ThirdParty/libecl)
-
 
 # ----------------------------------------------------------
 # ╦  ╔═╗╔═╗╔═╗╦    ╦  ╦╔╗ ╔═╗
 # ║  ║ ║║  ╠═╣║    ║  ║╠╩╗╚═╗
 # ╩═╝╚═╝╚═╝╩ ╩╩═╝  ╩═╝╩╚═╝╚═╝
 # ----------------------------------------------------------
-
 # Set bundled dependencies first in package search path
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib/cmake)
 message(STATUS "CMAKE_PREFIX_PATH:" ${CMAKE_PREFIX_PATH})
 
 # Add local third party include dirs
-include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗
 # ║ ║║║║║ ║    ║ ║╣ ╚═╗ ║
 # ╚═╝╝╚╝╩ ╩    ╩ ╚═╝╚═╝ ╩
 # ----------------------------------------------------------
-
 # Enable unit tests + example dir ==========================
 option(BUILD_TESTING "Build unit tests"                 ON)
 option(COPY_EXAMPLES "Copy examples to build directory" ON)
@@ -122,7 +115,6 @@ endif()
 # ╠═╣ ║║║ ╦╠═╝╠╦╝╚═╗  ║  ║╠╩╗
 # ╩ ╩═╩╝╚═╝╩  ╩╚═╚═╝  ╩═╝╩╚═╝
 # ----------------------------------------------------------
-
 # Enable compilation of WIC as standalone executable and/or lib ========
 # NOTE: only one of the following two options should be ON at same time
 # [1] Build standalone well index calculator executable
@@ -135,7 +127,6 @@ option(BUILD_WIC_ADGPRS "Build WIC as SHARED lib"       OFF)
 # ║║║╠═╣║ ║╠╦╝
 # ╩ ╩╩ ╩╚═╝╩╚═
 # ----------------------------------------------------------
-
 # Build executable for WI benchmarktests ===================
 option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 
@@ -144,11 +135,10 @@ option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 # ║╣ ║║ ╦║╣ ║║║
 # ╚═╝╩╚═╝╚═╝╝╚╝
 # ----------------------------------------------------------
-
 # Include Eigen: Options ===================================
 if(NOT COMPILATION_AT_MAUR)
   find_package(Eigen3 REQUIRED)
-  include_directories(${EIGEN3_INCLUDE_DIR})
+  include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
   message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
@@ -225,7 +215,7 @@ find_package(Qt5Core
 
 message(STATUS "Qt5Core_QTMAIN_LIBRARIES: ${Qt5Core_QTMAIN_LIBRARIES}")
 message(STATUS "Qt5Core_INCLUDE_DIRS: ${Qt5Core_INCLUDE_DIRS}")
-include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(SYSTEM ${Qt5Core_INCLUDE_DIRS})
 
 # ----------------------------------------------------------
 # ╦═╗╔═╗╔═╗╦ ╦ ╦╔═╗╔═╗╦ ╦ ╦
@@ -289,7 +279,7 @@ endif()
 message("..................................................")
 find_package(Boost REQUIRED) # 1.63
 if (Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIR})
+  include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 endif()
 set(Boost_USE_STATIC_LIBS OFF) # enable dynamic linking
 set(Boost_USE_MULTITHREAD ON)  # enable multithreading

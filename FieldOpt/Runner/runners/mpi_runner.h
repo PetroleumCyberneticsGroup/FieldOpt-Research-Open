@@ -67,8 +67,8 @@ class MPIRunner : public AbstractRunner {
    * TERMINATE: This tag should be sent by the overseer to terminate a worker.
    */
   enum MsgTag : int {
-    CASE_UNEVAL = 1, CASE_EVAL_SUCCESS = 2, CASE_EVAL_INVALID = 3, CASE_EVAL_TIMEOUT = 4,
-    MODEL_SYNC = 10, TERMINATE = 100,
+    CASE_UNEVAL = 1, CASE_EVAL_SUCCESS = 2, CASE_EVAL_INVALID = 3,
+    CASE_EVAL_TIMEOUT = 4, MODEL_SYNC = 10, TERMINATE = 100,
     ANY_TAG = MPI_ANY_TAG
   };
 
@@ -101,6 +101,7 @@ class MPIRunner : public AbstractRunner {
         case 10: return MODEL_SYNC;
         case 100: return TERMINATE;
       }
+      return ANY_TAG;
     }
     Optimization::Case *c; //!< The case associated with the message (if any).
     int tag; //!< The tag for the message.

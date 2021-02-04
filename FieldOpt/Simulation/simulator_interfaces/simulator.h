@@ -116,7 +116,7 @@ class Simulator {
   void PostSimWork();
   void PreSimWork();
 
-  ::Simulation::Results::Results::EclAjdGData ReadEclAdjG();
+  // ::Simulation::Results::Results::EclAjdGData ReadEclAdjG();
 
   Paths paths_;
 

@@ -188,6 +188,7 @@ class Case : public Loggable
         return real_variable.second;
       }
     }
+    return -1.0;
   };
 
   enum SIGN { PLUS, MINUS, PLUSMINUS};
@@ -319,6 +320,7 @@ class Case : public Loggable
         return true;
       }
     }
+    return false;
   }
 
   bool real_vars_contain(int &var_indx, QUuid var_id) {
@@ -328,6 +330,7 @@ class Case : public Loggable
         return true;
       }
     }
+    return false;
   }
 
  private:

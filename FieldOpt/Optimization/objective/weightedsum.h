@@ -67,8 +67,8 @@ class WeightedSum : public Objective {
               Simulation::Results::Results *results,
               Model::Model *model);
 
-  double value() const;
-  double value(bool base_case = false) override {};
+  double value() const override;
+  double value(bool base_case) override { return -1.0; };
 
  private:
   /*!
@@ -84,7 +84,7 @@ class WeightedSum : public Objective {
     int time_step;
     bool is_well_property;
     QString well;
-    double resolveValue(Simulation::Results::Results *results);
+    double resolveValue(Simulation::Results::Results *results) const;
   };
 
   QList<Component *> *components_; //!< List of gamma, k pairs.

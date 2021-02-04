@@ -61,11 +61,11 @@ class AdgprsResults : public Results
   vector<double> GetValueVector(Property prop) override;
   VectorXd GetValueVectorXd(Property prop) override;
 
-  vector<vector<double>> GetValVectorSeg(Property prop, string wn) override {};
-  vector<VectorXd> GetValVectorSegXd(Property prop, string wn) override {};
+  vector<vector<double>> GetValVectorSeg(Property prop, string wn) override { return zr_std2d_; };
+  vector<VectorXd> GetValVectorSegXd(Property prop, string wn) override { return zr_Xd2d_; };
 
-  vector<double> GetValueVector(Property prop, string wn) override {};
-  VectorXd GetValueVectorXd(Property prop, string wn) override {};
+  vector<double> GetValueVector(Property prop, string wn) override { return zr_std_; };
+  VectorXd GetValueVectorXd(Property prop, string wn) override { return zr_Xd_; };
 
  private:
   QString file_path_;
