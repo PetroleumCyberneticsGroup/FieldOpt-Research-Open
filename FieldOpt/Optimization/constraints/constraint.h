@@ -42,7 +42,7 @@ namespace Constraints {
 class Constraint
 {
  public:
-  Constraint(Settings::VerbParams vp);
+  explicit Constraint(Settings::VerbParams vp);
 
   /*!
    * \brief CaseSatisfiesConstraint checks whether a case satisfies the constraints for all

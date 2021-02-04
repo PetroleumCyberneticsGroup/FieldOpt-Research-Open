@@ -272,6 +272,7 @@ double TrustRegionModel::checkInterpolation() {
       }
     }
   }
+  return max_diff;
 }
 
 void TrustRegionModel::submitTempInitCases() {
