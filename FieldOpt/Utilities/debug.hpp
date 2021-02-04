@@ -137,7 +137,7 @@ inline static string fstr(string ostr,
 /*!
  * \brief
  */
-inline string verbstr(const vector<int> vvec,
+inline void verbstr(const vector<int> vvec,
                       int idx = -1,
                       int wdth = 29) {
 

@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -42,7 +42,7 @@ namespace Constraints {
 class Constraint
 {
  public:
-  Constraint(Settings::VerbParams vp);
+  explicit Constraint(Settings::VerbParams vp);
 
   /*!
    * \brief CaseSatisfiesConstraint checks whether a case satisfies the constraints for all

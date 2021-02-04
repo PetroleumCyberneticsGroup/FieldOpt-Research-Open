@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -126,6 +126,7 @@ std::list<pair<uuid, T>> CaseTransferObject::qListToStdList(const QList<QPair<QU
     pair<uuid, T> qpair = pair<uuid, T>(qUuidToBoostUuid(qhash.at(ii).first), qhash.at(ii).second);
     stdlist.push_back(qpair);
   }
+  return stdlist;
 }
 
 // template<typename T>

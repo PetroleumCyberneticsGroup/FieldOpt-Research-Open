@@ -5,7 +5,7 @@ Copyright (C) 2015
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -27,10 +27,13 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef RESULTS_EXCEPTIONS
 #define RESULTS_EXCEPTIONS
 
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <boost/lexical_cast.hpp>
 
+using std::cout;
+using std::endl;
 using std::string;
 using std::runtime_error;
 
@@ -39,31 +42,46 @@ namespace Results {
 
 class RsltFileNotFoundExc : public std::runtime_error {
  public:
-  RsltFileNotFoundExc(const string &path)
-    : runtime_error("[ECLResults] No valid result file found at path" + path) {}
+  string em_;
+  explicit RsltFileNotFoundExc(const string& path)
+    : runtime_error("[ECLResults] No valid result file found") {
+    em_ = "Path: " + path + "\n";
+    em_ += "Enter dir and run simulation to create results files, ";
+    em_ += "e.g., run @e300 -file OLPZ_BCXX_R37_F37_W01 -local";
+    cout << endl << em_ << endl;
+  }
 };
 
 class RsltsNotAvailExc : public std::runtime_error {
  public:
-  RsltsNotAvailExc(string err_src)
-    : runtime_error("[ECLResults] Results (" + err_src + ") are not currently available.") {}
+  string em_;
+  explicit RsltsNotAvailExc(const string& err_src)
+    : runtime_error("[ECLResults] Results not available.") {
+    em_ = "Check results in " + err_src + "." + "\n";
+    cout << endl << em_ << endl;
+  }
 };
 
 class RsltPropKeyDoesNotExistExc : public std::runtime_error {
  public:
+  string em_;
   explicit RsltPropKeyDoesNotExistExc(const string &simulator,
                                       const string &prop)
-    : runtime_error("[ECLResults] Requested property key (" + prop
-                      + ") cannot be retrieved from " + simulator
-                      + "summaries.") {}
+    : runtime_error("[ECLResults] Requested property key cannot be retrieved.") {
+    em_ = "Key: " + prop + " cannot be retrieved from " + simulator + " summaries.";
+    cout << endl << em_ << endl;
+  }
 };
 
-class ResultTimeIndexInvalidException : public std::runtime_error {
+class RsltTimeIndexInvalidExc : public std::runtime_error {
  public:
-  ResultTimeIndexInvalidException(const int index)
-    : runtime_error("[ECLResults] Time index "
-    + boost::lexical_cast<std::string>(index)
-      + " is not valid for the current results.") {}
+  string em_;
+  explicit RsltTimeIndexInvalidExc(const int index)
+    : runtime_error("[ECLResults] Time index invalid.") {
+    em_ = "Time index " + std::to_string(index) + " is not";
+    em_ += " valid for the current results.";
+    cout << endl << em_ << endl;
+  }
 };
 
 }}

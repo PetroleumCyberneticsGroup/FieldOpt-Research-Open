@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -285,7 +285,7 @@ void ECLSummaryReader::populateKeyLists() {
     && !seg_scsa_keys_.empty()) {
     read_segments_ = true;
   } else {
-    ext_warn("Not reading all segment data!", md_, cl_);
+    ext_warn("Some or all segment result keywords empty - not read.", md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);

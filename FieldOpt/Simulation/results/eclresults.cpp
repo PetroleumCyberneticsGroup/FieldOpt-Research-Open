@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -125,6 +125,7 @@ std::vector<double> ECLResults::GetValueVector(Results::Property prop) {
       E("[ECLResults] Requested property" + p + " is not a field or misc property.");
     }
   }
+  return zr_std_;
 }
 
 vector<double> ECLResults::GetValueVector(Results::Property prop,
@@ -153,6 +154,7 @@ vector<double> ECLResults::GetValueVector(Results::Property prop,
       E("[ECLResults->GetValueVector] Req. prop. " + p + " is not a well property.");
     }
   }
+  return zr_std_;
 }
 
 VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
@@ -181,6 +183,7 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop) {
       E("[ECLResults->GetValueVectorXd] Requ. prop " + p + " is not a field or misc property.");
     }
   }
+  return zr_Xd_;
 }
 
 VectorXd ECLResults::GetValueVectorXd(Results::Property prop, string wn) {
@@ -209,6 +212,7 @@ VectorXd ECLResults::GetValueVectorXd(Results::Property prop, string wn) {
       E("[ECLResults->GetValueVectorXd] Req. prop. " + p + " is not a field or misc property.");
     }
   }
+  return zr_Xd_;
 }
 
 vector<vector<double>> ECLResults::GetValVectorSeg(Results::Property prop,
@@ -236,6 +240,7 @@ vector<vector<double>> ECLResults::GetValVectorSeg(Results::Property prop,
       E("[ECLResults->GetValVectorSeg] Req. pro " + p + " is not a well segment property.");
     }
   }
+  return zr_std2d_;
 }
 
 vector<VectorXd> ECLResults::GetValVectorSegXd(Results::Property prop,
@@ -263,6 +268,8 @@ vector<VectorXd> ECLResults::GetValVectorSegXd(Results::Property prop,
       E("[ECLResults] Requested property " + p + " is not a well segment property.");
     }
   }
+  return zr_Xd2d_;
 }
 
-}}
+}
+}

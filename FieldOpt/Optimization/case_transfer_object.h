@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/uuid/uuid_serialize.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
 #include <map>
 
 using namespace boost::uuids;

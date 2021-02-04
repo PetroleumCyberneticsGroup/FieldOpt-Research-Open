@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -44,8 +44,7 @@ class WeightedSumTest : public TestResources::TestResourceResults,
 
   void TearDown() override { }
 
-  Model::Model *model_ = new Model::Model(*settings_full_,
-                                          logger_);
+  Model::Model *model_ = new Model::Model(*settings_full_, logger_);
 
 };
 
