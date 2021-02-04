@@ -2,7 +2,7 @@
 Created by bellout on 8/28/20.
 
 Copyright (C) 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

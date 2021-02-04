@@ -7,7 +7,7 @@
  <thiagolims@gmail.com>
 
  Modified 2019-2020 Mathias Bellout
- <chakibbb-pcg@gmail.com>
+ <chakibbb.pcg@gmail.com>
 
  This file is part of the FieldOpt project.
 
