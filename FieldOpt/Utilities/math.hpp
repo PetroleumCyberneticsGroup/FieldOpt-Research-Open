@@ -84,6 +84,7 @@ inline std::vector<T> range(T start, T end, T step) {
     }
     return ran;
 }
+
 inline double calc_variance(std::vector<double> sums){
     std::vector<double> diff(sums.size());
     transform(sums.begin(), sums.end(), diff.begin(),

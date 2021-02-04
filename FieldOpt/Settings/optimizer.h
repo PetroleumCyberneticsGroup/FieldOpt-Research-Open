@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef SETTINGS_OPTIMIZER_H
 #define SETTINGS_OPTIMIZER_H
@@ -40,8 +45,14 @@ class Optimizer
  public:
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer);
-  enum OptimizerType { Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm, EGO, PSO, VFSA, SPSA, Hybrid, CMA_ES };
+
+  enum OptimizerType {
+    Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
+    EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization
+  };
+
   enum OptimizerMode { Maximize, Minimize };
+
   enum ConstraintType { BHP, Rate, SplinePoints,
     WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
     CombinedWellSplineLengthInterwellDistance,
@@ -92,6 +103,33 @@ class Optimizer
     std::string ego_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
     std::string ego_kernel = "CovMatern5iso";        //!< Which kernel function to use for the gaussian process model.
     std::string ego_af = "ExpectedImprovement";      //!< Which acquisiton function to use.
+
+    // Trust Region Optimization parameters
+    double tr_initial_radius = 1; //!< The initial trust region radius
+//    double tr_tol_f = 1e-6;
+    double tr_tol_f = 1e-6;
+    double tr_eps_c = 1e-5;
+    double tr_eta_0 = 0;
+    double tr_eta_1 = 0.05;
+    double tr_pivot_threshold = 0.0625;
+    double tr_add_threshold = 100;
+    double tr_exchange_threshold = 1000;
+    double tr_radius_max = 1e3;
+    double tr_radius_factor = 6;
+    double tr_tol_radius = 1e-5;
+    double tr_gamma_inc = 2;
+    double tr_gamma_dec = 0.5;
+    double tr_criticality_mu = 100;
+    double tr_criticality_beta = 10;
+    double tr_criticality_omega = 0.5;
+    double tr_lower_bound = -std::numeric_limits<double>::infinity();
+    double tr_upper_bound = -std::numeric_limits<double>::infinity();
+
+    int tr_iter_max = 10000;
+    int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
+    std::string tr_basis = "diagonalHessian";
+    std::string tr_init_sampling_method = "Random"; //!< Sampling method to be used for initial guesses (Random or Uniform)
+
 
     // VFSA Parameters
     int vfsa_evals_pr_iteration = 1; //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.

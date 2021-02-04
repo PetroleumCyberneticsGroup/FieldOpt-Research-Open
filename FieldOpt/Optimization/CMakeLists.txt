@@ -3,25 +3,32 @@ project(optimization)
 
 include(Sources.cmake)
 
-add_library(optimization STATIC ${OPTIMIZATION_HEADERS} ${OPTIMIZATION_SOURCES})
+add_library(optimization STATIC
+		${OPTIMIZATION_HEADERS}
+		${OPTIMIZATION_SOURCES})
+
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
 target_link_libraries(optimization
-        PUBLIC fieldopt::model
-        PUBLIC fieldopt::simulation
-        PUBLIC fieldopt::constraintmath
+		PUBLIC fieldopt::model
+		PUBLIC fieldopt::simulation
+		PUBLIC fieldopt::constraintmath
 		PUBLIC fieldopt::reservoir
-        PUBLIC fieldopt::runner
+		PUBLIC fieldopt::runner
 		PUBLIC ${gp}
-        Qt5::Core
+		PUBLIC ${snopt}
+		Qt5::Core
 		PUBLIC ${Boost_LIBRARIES})
 
 target_include_directories(optimization PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 add_compile_options(-std=c++11)
+
+set_target_properties(optimization PROPERTIES COMPILE_FLAGS "-fPIC")
 
 if (BUILD_TESTING)
 	# Unit tests
@@ -42,12 +49,13 @@ if (BUILD_TESTING)
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 	add_test(NAME test_optimization COMMAND $<TARGET_FILE:test_optimization>)
 endif()
 
-install( TARGETS optimization
+install(TARGETS optimization
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib/static

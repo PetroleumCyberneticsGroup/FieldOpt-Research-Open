@@ -69,6 +69,7 @@ class Logger
   void AddEntry(Loggable *obj);
   void FinalizePrerunSummary();
   void FinalizePostrunSummary();
+  QString getOutputDir() { return output_dir_;}
 
  private:
   bool is_worker_; //!< Indicates whether or not this logger is on a worker process. This determines which logs are written.

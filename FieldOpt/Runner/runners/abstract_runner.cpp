@@ -26,6 +26,7 @@
 #include <Optimization/optimizers/RGARDD.h>
 #include <Optimization/hybrid_optimizer.h>
 #include <Optimization/optimizers/bayesian_optimization/EGO.h>
+#include <Optimization/optimizers/trust_region/TrustRegionOptimization.h>
 #include "Optimization/optimizers/PSO.h"
 #include "Optimization/optimizers/CMA_ES.h"
 #include "Optimization/optimizers/VFSA.h"
@@ -243,6 +244,18 @@ void AbstractRunner::InitializeOptimizer()
             );
             optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
             break;
+	 case Settings::Optimizer::OptimizerType::TrustRegionOptimization:
+            if (VERB_RUN >= 1) Printer::ext_info("Using Trust Region optimization algorithm.", "Runner", "AbstractRunner");
+            optimizer_ = new Optimization::Optimizers::TrustRegionOptimization(settings_->optimizer(),
+                                                                               base_case_,
+                                                                               model_->variables(),
+                                                                               model_->grid(),
+                                                                               logger_
+            );
+
+            optimizer_->SetVerbosityLevel(runtime_settings_->verbosity_level());
+            break;
+
         case Settings::Optimizer::OptimizerType::PSO:
             if (VERB_RUN >= 1) Printer::ext_info("Using PSO optimization algorithm.", "Runner", "AbstractRunner");
             optimizer_ = new Optimization::Optimizers::PSO(settings_->optimizer(),
