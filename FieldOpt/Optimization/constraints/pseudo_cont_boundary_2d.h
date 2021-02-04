@@ -35,8 +35,9 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * @brief The PseudoContBoundary2D constraint must be used alongside the pseudo-continuous
- * vertical well variable type. It only works with flat reservoirs.
+ * @brief The PseudoContBoundary2D constraint must be used
+ * alongside the pseudo-continuous vertical well variable
+ * type. It only works with flat reservoirs.
  */
 class PseudoContBoundary2D : public Constraint {
  public:
