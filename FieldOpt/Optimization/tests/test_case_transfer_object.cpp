@@ -28,12 +28,12 @@ TEST_F(CaseTransferObjectTest, BaseConstructor) {
 
 TEST_F(CaseTransferObjectTest, CaseConstructor) {
   CaseTransferObject cto(test_case_3_4b3i3r_);
-  EXPECT_STREQ(    test_case_3_4b3i3r_->id_stdstr().c_str(),        cto.id_stdstr().c_str());
-  EXPECT_FLOAT_EQ( test_case_3_4b3i3r_->objf_value(), cto.objective_function_value());
-  EXPECT_EQ(       test_case_3_4b3i3r_->binary_variables().size(),  cto.binary_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->integer_variables().size(), cto.integer_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->real_variables().size(),    cto.real_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->GetWICTime(),               cto.wic_time_secs());
+  EXPECT_STREQ(test_case_3_4b3i3r_->id_stdstr().c_str(), cto.id_stdstr().c_str());
+  EXPECT_FLOAT_EQ(test_case_3_4b3i3r_->objf_value(),cto.objective_function_value());
+  EXPECT_EQ(test_case_3_4b3i3r_->binary_variables().size(), cto.binary_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->integer_variables().size(),cto.integer_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->real_variables().size(),cto.real_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->GetWICTime(), cto.wic_time_secs());
 }
 
 TEST_F(CaseTransferObjectTest, SerializationAndDeserializationAndGeneratedCase) {
@@ -54,26 +54,27 @@ TEST_F(CaseTransferObjectTest, SerializationAndDeserializationAndGeneratedCase) 
 
   // Check that the generated case matches with the original test_case_3
   EXPECT_TRUE(test_case_3_4b3i3r_->Equals(c));
-  EXPECT_STREQ(    test_case_3_4b3i3r_->id_stdstr().c_str(),        c->id_stdstr().c_str());
+  EXPECT_STREQ(test_case_3_4b3i3r_->id_stdstr().c_str(), c->id_stdstr().c_str());
   EXPECT_FLOAT_EQ( test_case_3_4b3i3r_->objf_value(), c->objf_value());
-  EXPECT_EQ(       test_case_3_4b3i3r_->binary_variables().size(),  c->binary_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->integer_variables().size(), c->integer_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->real_variables().size(),    c->real_variables().size());
-  EXPECT_EQ(       test_case_3_4b3i3r_->GetWICTime(),               c->GetWICTime());
-
-  // for (auto id : test_case_3_4b3i3r_->integer_variables().keys())
+  EXPECT_EQ(test_case_3_4b3i3r_->binary_variables().size(), c->binary_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->integer_variables().size(), c->integer_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->real_variables().size(), c->real_variables().size());
+  EXPECT_EQ(test_case_3_4b3i3r_->GetWICTime(), c->GetWICTime());
 
   for (int ii=0; ii < test_case_3_4b3i3r_->integer_variables().size(); ii++) {
     EXPECT_EQ(test_case_3_4b3i3r_->integer_variables().at(ii).second,
               c->integer_variables().at(ii).second);
   }
 
+  for (int ii=0; ii < test_case_3_4b3i3r_->binary_variables().size(); ii++) {
+    EXPECT_EQ(test_case_3_4b3i3r_->binary_variables().at(ii).second,
+              c->binary_variables().at(ii).second);
+  }
 
-  // for (auto id : test_case_3_4b3i3r_->binary_variables().keys())
-  //   EXPECT_EQ(      test_case_3_4b3i3r_->binary_variables()[id],  c->binary_variables()[id]);
-  // for (auto id : test_case_3_4b3i3r_->real_variables().keys())
-  //   EXPECT_FLOAT_EQ(test_case_3_4b3i3r_->real_variables()[id],    c->real_variables()[id]);
-
+  for (int ii=0; ii < test_case_3_4b3i3r_->real_variables().size(); ii++) {
+    EXPECT_EQ(test_case_3_4b3i3r_->real_variables().at(ii).second,
+              c->real_variables().at(ii).second);
+  }
 
 }
 }
