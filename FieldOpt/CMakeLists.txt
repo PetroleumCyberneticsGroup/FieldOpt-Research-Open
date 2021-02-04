@@ -328,7 +328,7 @@ include(DebugMsg.cmake)
 
 ## ADDED
 ## Set this directory as the root dir
-include_directories(${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
 
 # ----------------------------------------------------------
 # ╔═╗╔╗╔╔═╗╔═╗╔╦╗
