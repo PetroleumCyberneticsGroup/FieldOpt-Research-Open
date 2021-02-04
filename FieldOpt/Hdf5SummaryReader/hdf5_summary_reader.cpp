@@ -457,7 +457,7 @@ int Hdf5SummaryReader::cells_find_statuses(std::vector<int> &cells_all_vector_) 
     cells_num_inactive_ = (int)cells_inactive_.size();
 }
 
-std::vector<double> Hdf5SummaryReader::field_cumulative_oil_production_sc() const {
+std::vector<double> Hdf5SummaryReader::field_oil_prod_total_sc() const {
     std::vector<double> sum(ntimes_, 0.0);
     for (int w = 0; w < nwells_; ++w) {
         if (is_injector(w)) continue; // Skip injectors
@@ -469,7 +469,7 @@ std::vector<double> Hdf5SummaryReader::field_cumulative_oil_production_sc() cons
     return sum;
 }
 
-std::vector<double> Hdf5SummaryReader::field_cumulative_water_production_sc() const {
+std::vector<double> Hdf5SummaryReader::field_water_prod_total_sc() const {
     std::vector<double> sum(ntimes_, 0.0);
     for (int w = 0; w < nwells_; ++w) {
         if (is_injector(w)) continue; // Skip injectors
@@ -481,7 +481,7 @@ std::vector<double> Hdf5SummaryReader::field_cumulative_water_production_sc() co
     return sum;
 }
 
-std::vector<double> Hdf5SummaryReader::field_cumulative_gas_production_sc() const {
+std::vector<double> Hdf5SummaryReader::field_gas_prod_total_sc() const {
     std::vector<double> sum(ntimes_, 0.0);
     for (int w = 0; w < nwells_; ++w) {
         if (is_injector(w)) continue; // Skip injectors

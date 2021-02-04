@@ -33,10 +33,16 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+using std::vector;
+using std::string;
+using std::map;
+using Printer::num2str;
+
 /*!
- * \brief The Optimizer class contains optimizer-specific settings. Optimizer settings objects
- * may _only_ be created by the Settings class. They are created when reading a
- * JSON-formatted "driver file".
+ * \brief The Optimizer class contains optimizer-specific
+ * settings. Optimizer settings objects may _only_ be
+ * created by the Settings class. They are created when
+ * reading a JSON-formatted "driver file".
  */
 class Optimizer
 {
@@ -44,7 +50,7 @@ class Optimizer
 
  public:
   Optimizer(){}
-  Optimizer(QJsonObject json_optimizer);
+  Optimizer(QJsonObject json_optimizer, VerbParams vp);
 
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
@@ -54,16 +60,16 @@ class Optimizer
   enum OptimizerMode { Maximize, Minimize };
 
   enum ConstraintType { BHP, Rate, SplinePoints,
-    WellSplineLength, WellSplineInterwellDistance, WellSplineDomain,
-    CombinedWellSplineLengthInterwellDistance,
-    CombinedWellSplineLengthInterwellDistanceReservoirBoundary,
+    WSplineLength, WSplineInterwDist, WellSplineDomain,
+    MxWSplineLengthInterwDist, MxWSplineLengthInterwDistResBound,
     ReservoirBoundary, PseudoContBoundary2D, PolarXYZBoundary,
     ReservoirXYZBoundary, ReservoirBoundaryToe,
     PackerConstraint, ICVConstraint, PolarWellLength,
     PolarAzimuth, PolarElevation, PolarSplineBoundary
   };
+
   enum ConstraintWellSplinePointsType { MaxMin, Function};
-  enum ObjectiveType { WeightedSum, NPV};
+  enum ObjectiveType { WeightedSum, NPV, Augmented};
 
   struct Parameters {
     // Common parameters
@@ -75,7 +81,7 @@ class Optimizer
     double minimum_step_length; //!< The minimum step length in the algorithm when applicable.
     double contraction_factor;  //!< The contraction factor for GSS algorithms.
     double expansion_factor;    //!< The expansion factor for GSS algorithms.
-    int max_queue_size;      //!< Maximum size of evaluation queue.
+    int max_queue_size;         //!< Maximum size of evaluation queue.
     bool auto_step_lengths = false;     //!< Automatically determine appropriate step lengths from bound constraints.
     double auto_step_init_scale = 0.25; //!< Scaling factor for auto-determined initial step lengths (e.g. 0.25*(upper-lower)
     double auto_step_conv_scale = 0.01; //!< Scaling factor for auto-determined convergence step lengths (e.g. 0.01*(upper-lower)
@@ -106,7 +112,6 @@ class Optimizer
 
     // Trust Region Optimization parameters
     double tr_initial_radius = 1; //!< The initial trust region radius
-//    double tr_tol_f = 1e-6;
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
@@ -120,10 +125,11 @@ class Optimizer
     double tr_gamma_inc = 2;
     double tr_gamma_dec = 0.5;
     double tr_criticality_mu = 100;
-    double tr_criticality_beta = 10;
     double tr_criticality_omega = 0.5;
+    double tr_criticality_beta = 10;
     double tr_lower_bound = -std::numeric_limits<double>::infinity();
-    double tr_upper_bound = -std::numeric_limits<double>::infinity();
+    double tr_upper_bound = std::numeric_limits<double>::infinity();
+    std::string tr_prob_name = "prob0";
 
     int tr_iter_max = 10000;
     int tr_init_guesses = -1; //!< Number of initial guesses provided to build the Trust Region (default is 1)
@@ -185,30 +191,68 @@ class Optimizer
   };
 
   struct Objective {
-    ObjectiveType type; //!< The objective definition type (e.g. WeightedSum, NPV)
+    ObjectiveType type; //!< Objective function type (e.g. WeightedSum, NPV)
     bool use_penalty_function; //!< Whether or not to use penalty function (default: false).
     bool use_well_cost; //!<Whether or not to use costs associated to wells in calculation of the objective.
     bool separatehorizontalandvertical; //!<Whether or not to use different values in the horizontal or vertical direction
     double wellCostXY; //!<Cost associated with drilling in the horizontal plane [$/m]
     double wellCostZ; //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCost; //!<Cost associated with drilling the well, independent of direction [$/m]
+
+    //!< Weighted sum component
     struct WeightedSumComponent {
-      double coefficient; 
-      QString property; 
+      double coefficient;
+      QString property;
       int time_step;
-      bool is_well_prop; 
-      QString well; 
-    }; //!< A component of a weighted sum objective function
+      bool is_well_prop;
+      QString well;
+    };
+
+    //!< NPV component
     struct NPVComponent{
       double coefficient;
-      std::string property;
-      std::string interval = "";
+      string property;
+      string interval = "";
       bool usediscountfactor = false;
-      std::string well;
+      string well;
       double discount = 0.0;
     };
-    QList<WeightedSumComponent> weighted_sum; //!< The expression for the Objective function formulated as a weighted sum
-    QList<NPVComponent> NPV_sum;  //!< The expression for the Objective function formulated as an NPV
+
+    //!< Weighted sum formulation
+    QList<WeightedSumComponent> weighted_sum;
+
+     //!< NPV formulation
+    QList<NPVComponent> NPV_sum;
+
+    //!< Augmented function term
+    struct AugTerms {
+      string prop_name; // -> defines prop_type
+      double coefficient;
+      string prop_spec;
+      vector<string> wells;
+      map<string, vector<int>> segments;
+      bool active;
+      string scaling;
+
+      void showTerms() {
+        stringstream ss;
+        ss << "prop_name: " << prop_name;
+        ss << ", coefficient: " << coefficient;
+        ss << ", active: " << active;
+        ss << ", prop_spec: " << prop_spec;
+        for(string w : wells) {
+          ss << segments[w].size() << ", well: " << w << " w/ segs: [ ";
+          for  (int ii=0; ii < segments[w].size(); ++ii) {
+            ss << num2str(segments[w][ii], 0) << " ";
+          }
+          ss << "]";
+        }
+        ext_info(ss.str(), "Settings", "Optimizer", 140);
+      }
+    };
+
+    //!< Augmented formulation
+    vector<AugTerms> terms;
 
   };
 
@@ -218,6 +262,7 @@ class Optimizer
     ConstraintType type; //!< The constraint type (e.g. BHP or SplinePoints positions).
     QString well; //!< The name of the well this Constraint applies to.
     QStringList wells; //!< List of well names if the constraint applies to more than one.
+
     double max; //!< Max limit when using constraints like BHP.
     double min; //!< Min limit when using constraints like BHP.
     double box_imin, box_imax, box_jmin, box_jmax, box_kmin, box_kmax; //!< Min max limits for geometric box constraints.
@@ -235,10 +280,12 @@ class Optimizer
     OptimizerType type;
     Parameters parameters;
   };
+
   Optimizer(HybridComponent hc); //!< Create a basic Optimizer Settings object from a HybridComponent object.
 
   OptimizerType type() const { return type_; } //!< Get the Optimizer type (e.g. Compass).
   OptimizerMode mode() const { return mode_; } //!< Get the optimizer mode (maximize/minimize).
+
   void set_mode(const OptimizerMode mode) { mode_ = mode; } //!< Set the optimizer mode (used by HybridOptimizer)
   Parameters parameters() const { return parameters_; } //!< Get the optimizer parameters.
   Objective objective() const { return objective_; } //!< Get the optimizer objective function.
@@ -246,13 +293,21 @@ class Optimizer
   QList<HybridComponent> HybridComponents() { return hybrid_components_; } // Get the list of hybrid-optimizer components when using the HYBRID type.
   void SetRngSeed(const int seed) { parameters_.rng_seed = seed; } //!< Change the RNG seed (used by HybridOptimizer).
 
+  void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
+  VerbParams verbParams() { return vp_; };
 
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
-  OptimizerMode mode_ = OptimizerMode::Maximize; //!< Optimization mode (maximize or minimize). Default: Maximize
+
+  string md_ = "Settings";
+  string cl_ = "Optimizer";
+  VerbParams vp_;
+
+  //!< Optimization mode (maximize or minimize). Def: Maximize
+  OptimizerMode mode_ = OptimizerMode::Maximize;
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
@@ -261,6 +316,7 @@ class Optimizer
   Parameters parseParameters(QJsonObject &json_parameters);
   Objective parseObjective(QJsonObject &json_objective);
   QList<HybridComponent> parseHybridComponents(QJsonObject &json_optimizer);
+
 };
 
 }

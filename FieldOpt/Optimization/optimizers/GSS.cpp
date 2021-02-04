@@ -36,21 +36,27 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Optimizers {
 
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::DBG_prntVecXdSz;
+
 GSS::GSS(Settings::Optimizer *settings,
          Case *base_case,
-         Model::Properties::VariablePropertyContainer *variables,
+         Model::Properties::VarPropContainer *variables,
          Reservoir::Grid::Grid *grid,
          Logger *logger,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
-)
-    : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+
+  vp_ = settings->verbParams();
 
   int numRvars = base_case->GetRealVarVector().size();
   int numIvars = base_case->GetIntegerVarVector().size();
   num_vars_ = numRvars + numIvars;
-  if (numRvars > 0 && numIvars > 0)
-    std::cout << ("WARNING: Compass search does not handle both continuous and discrete variables at the same time");
+  if (numRvars > 0 && numIvars > 0) {
+    ext_warn("CS cannot handle both continuous and discrete variables at the same time", md_, cl_);
+  }
 
   contr_fac_ = settings->parameters().contraction_factor;
   assert(contr_fac_ < 1.0);
@@ -65,8 +71,8 @@ GSS::GSS(Settings::Optimizer *settings,
     step_lengths_.fill(settings->parameters().initial_step_length);
     step_tol_ = Eigen::VectorXd(directions_.size());
     step_tol_.fill(settings->parameters().minimum_step_length);
-  }
-  else {
+
+  } else {
     assert(constraint_handler_->HasBoundaryConstraints());
     auto lower_bound = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
     auto upper_bound = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
@@ -79,15 +85,18 @@ GSS::GSS(Settings::Optimizer *settings,
     }
     step_lengths_ = base * settings->parameters().auto_step_init_scale;
     step_tol_ = base * settings->parameters().auto_step_conv_scale;
-    Printer::ext_info("Step lengths: " + eigenvec_to_str(step_lengths_), "Optimization", "GSS");
-    Printer::ext_info("Step tols: " + eigenvec_to_str(step_tol_), "Optimization", "GSS");
-    assert(step_lengths_.size() == directions_.size());
-    assert(step_lengths_.size() == step_tol_.size());
   }
+
+  if (vp_.vOPT >= 4) {
+    ext_info("Step lengths: " + DBG_prntVecXdSz(step_lengths_), md_, cl_);
+    ext_info("Step tols: " + DBG_prntVecXdSz(step_tol_), md_, cl_);
+  }
+  assert(step_lengths_.size() == directions_.size());
+  assert(step_lengths_.size() == step_tol_.size());
+
 }
 
-Optimizer::TerminationCondition GSS::IsFinished()
-{
+Optimizer::TerminationCondition GSS::IsFinished() {
   TerminationCondition tc = NOT_FINISHED;
   if (case_handler_->CasesBeingEvaluated().size() > 0)
     return tc;

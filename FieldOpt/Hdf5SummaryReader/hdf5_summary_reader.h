@@ -216,17 +216,17 @@ public:
     /*!
      * Get field-wide cumulative oil production (at standard conditions) at each time step.
      */
-    std::vector<double> field_cumulative_oil_production_sc() const;
+    std::vector<double> field_oil_prod_total_sc() const;
 
     /*!
      * Get field-wide cumulative water production (at standard conditions) at each time step.
      */
-    std::vector<double> field_cumulative_water_production_sc() const;
+    std::vector<double> field_water_prod_total_sc() const;
 
     /*!
      * Get field-wide cumulative gas production (at standard conditions) at each time step.
      */
-    std::vector<double> field_cumulative_gas_production_sc() const;
+    std::vector<double> field_gas_prod_total_sc() const;
 
     /*!
      * Get the water injection rates (at standard conditions) at each time step for a well.

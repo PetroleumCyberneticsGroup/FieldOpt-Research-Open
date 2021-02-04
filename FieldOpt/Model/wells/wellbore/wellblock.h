@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef WELLBLOCK_H
 #define WELLBLOCK_H
@@ -30,11 +35,13 @@ namespace Wells {
 namespace Wellbore {
 
 /*!
- * \brief The WellBlock class represents a single well block. It contains references to any completion
- * defined within it.
+ * \brief The WellBlock class represents a single well block.
+ * It contains references to any completion defined within it.
  *
- * Note that wellblocks should use 1-indexed IJK-indices, instead of 0-indexing as is used in the rest
- * of FieldOpt and ERT. This is because the IJK-values will be used directly by the simulator interface.
+ * Note that wellblocks should use 1-indexed IJK-indices,
+ * instead of 0-indexing as is used in the rest of FieldOpt
+ * and ERT. This is because the IJK-values will be used
+ * directly by the simulator interface.
  */
 class WellBlock
 {
@@ -45,12 +52,16 @@ class WellBlock
   virtual ~WellBlock();
 
 /*!
-     * \brief The DirectionOfPenetration enum indicates the wells direction of penetration through
-     * this block. The W value should be used to indicate that the direction could not be calculated.
-     */
-  enum DirectionOfPenetration : int {X=1, Y=2, Z=3, W=4};
+ * \brief The DirOfPenetration enum indicates the
+ * wells direction of penetration through block. The W
+ * value should be used to indicate that the direction
+ * could not be calculated.
+ */
+  enum DirOfPenetration : int { X=1, Y=2, Z=3, W=4, D=5 };
 
-  void AddCompletion(::Model::Wells::Wellbore::Completions::Completion *completion); //!< Add a completion to this well block.
+  //!< Add a completion to this well block.
+  void AddCompletion(::Model::Wells::Wellbore::Completions::Completion *completion);
+
   bool HasCompletion(); //!< Check if this well block has a completion.
   Completions::Completion *GetCompletion(); //!< Get the completion defined for this block.
 
@@ -60,30 +71,51 @@ class WellBlock
   int i() const { return i_->value(); }
   int j() const { return j_->value(); }
   int k() const { return k_->value(); }
-  DirectionOfPenetration directionOfPenetration() const { return direction_of_penetration_; }
+
+  DirOfPenetration directionOfPenetration() const {
+    return dir_of_penetration_;
+  }
 
   void setI(const int i) { i_->setValue(i); }
   void setJ(const int j) { j_->setValue(j); }
   void setK(const int k) { k_->setValue(k); }
-  void setDirectionOfPenetration(const DirectionOfPenetration dop) { direction_of_penetration_ = dop; }
-  void setEntryPoint(const Eigen::Vector3d entry_point) { entry_point_ = entry_point; }
-  void setExitPoint(const Eigen::Vector3d exit_point) { exit_point_ = exit_point; }
+
+  void setDirOfPenetration(const DirOfPenetration dop) {
+    dir_of_penetration_ = dop;
+  }
+
+  string getDirPenetrationStr() {
+    if (dir_of_penetration_ == X) return "X";
+    if (dir_of_penetration_ == Y) return "Y";
+    if (dir_of_penetration_ == Z) return "Z";
+    if (dir_of_penetration_ == D) return "D";
+    if (dir_of_penetration_ == W) return "W";
+    return "N";
+  }
+
+  void setEntryPoint(const Eigen::Vector3d& entry_point) { entry_point_ = entry_point; }
+  void setExitPoint(const Eigen::Vector3d& exit_point) { exit_point_ = exit_point; }
   Eigen::Vector3d getEntryPoint() const { return entry_point_; }
   Eigen::Vector3d getExitPoint() const { return exit_point_; }
+
   void setEntryMd(const double entry_md) { entry_md_ = entry_md; }
   void setExitMd(const double exit_md) { exit_md_ = exit_md; }
   double getEntryMd() const { return entry_md_; }
   double getExitMd() const { return exit_md_; }
+
  private:
   Model::Properties::DiscreteProperty *i_;
   Model::Properties::DiscreteProperty *j_;
   Model::Properties::DiscreteProperty *k_;
+
   Eigen::Vector3d entry_point_; //!< Entry point for splines through this block.
   Eigen::Vector3d exit_point_;  //!< Exit point for splines through this block.
   double entry_md_;
   double exit_md_;
   Completions::Completion *completion_;
-  DirectionOfPenetration direction_of_penetration_; //!< The well's direction of penetration through this block.
+
+  //!< Well's direction of penetration through block.
+  DirOfPenetration dir_of_penetration_;
 };
 
 }

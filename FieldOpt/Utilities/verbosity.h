@@ -48,4 +48,22 @@ If not, see <http://www.gnu.org/licenses/>.
 #define VERB_RES 1 // Reservoir
 #define VERB_SET 1 // Settings
 
+#define LINEWDTH 165
+
+namespace Settings {
+
+struct VerbParams {
+  int lnw = 141;
+  int vMOD = 0;
+  int vOPT = 0;
+  int vWIC = 0;
+  int vSIM = 0;
+  int vRUN = 0;
+  int vRES = 0;
+  int vSET = 0;
+  int vUTI = 0;
+};
+
+}
+
 #endif //FIELDOPT_VERBOSITY_H

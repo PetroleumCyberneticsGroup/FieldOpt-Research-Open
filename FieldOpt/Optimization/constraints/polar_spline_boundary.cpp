@@ -1,35 +1,42 @@
-/******************************************************************************
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>,
-   Brage Strand Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
+Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "polar_spline_boundary.h"
 
 namespace Optimization {
 namespace Constraints {
 PolarSplineBoundary::PolarSplineBoundary(const Settings::Optimizer::Constraint &settings,
-                                         Model::Properties::VariablePropertyContainer *variables,
-                                         Reservoir::Grid::Grid *grid)
-                                         : ReservoirBoundary(settings, variables, grid){}
+                                         Model::Properties::VarPropContainer *variables,
+                                         Reservoir::Grid::Grid *grid,
+                                         Settings::VerbParams vp)
+                                         : ResBoundary(settings, variables, grid, vp){}
+
 bool PolarSplineBoundary::CaseSatisfiesConstraint(Case *c) {
-  double midpoint_x_val = c->real_variables()[affected_well_.midpoint.x];
-  double midpoint_y_val = c->real_variables()[affected_well_.midpoint.y];
-  double midpoint_z_val = c->real_variables()[affected_well_.midpoint.z];
+  double midpoint_x_val = c->get_real_variable_value(affected_well_.midpoint.x);
+  double midpoint_y_val = c->get_real_variable_value(affected_well_.midpoint.y);
+  double midpoint_z_val = c->get_real_variable_value(affected_well_.midpoint.z);
   
   bool midpoint_feasible = false;
 
@@ -42,11 +49,12 @@ bool PolarSplineBoundary::CaseSatisfiesConstraint(Case *c) {
 
   return midpoint_feasible;
 }
+
 void PolarSplineBoundary::SnapCaseToConstraints(Case *c) {
 
-  double midpoint_x_val = c->real_variables()[affected_well_.midpoint.x];
-  double midpoint_y_val = c->real_variables()[affected_well_.midpoint.y];
-  double midpoint_z_val = c->real_variables()[affected_well_.midpoint.z];
+  double midpoint_x_val = c->get_real_variable_value(affected_well_.midpoint.x);
+  double midpoint_y_val = c->get_real_variable_value(affected_well_.midpoint.y);
+  double midpoint_z_val = c->get_real_variable_value(affected_well_.midpoint.z);
   
   Eigen::Vector3d projected_midpoint =
       WellConstraintProjections::well_domain_constraint_indices(
@@ -60,6 +68,7 @@ void PolarSplineBoundary::SnapCaseToConstraints(Case *c) {
   c->set_real_variable_value(affected_well_.midpoint.z, projected_midpoint(2));
   
 }
+
 Eigen::VectorXd PolarSplineBoundary::GetLowerBounds(QList<QUuid> id_vector) const {
   auto cell_min = grid_->GetCell(imin_, jmin_, kmin_);
   auto cell_max = grid_->GetCell(imax_, jmax_, kmax_);
@@ -104,6 +113,7 @@ Eigen::VectorXd PolarSplineBoundary::GetUpperBounds(QList<QUuid> id_vector) cons
   ubounds(ind_midpoint_z) = zmax;
   return ubounds;
 }
+
 }
 }
 

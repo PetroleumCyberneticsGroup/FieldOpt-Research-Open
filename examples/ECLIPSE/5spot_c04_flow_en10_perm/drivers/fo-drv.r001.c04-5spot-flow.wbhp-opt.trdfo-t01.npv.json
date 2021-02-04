@@ -1,0 +1,302 @@
+{
+  "Global": {
+    "Name": "c04-5spot-flow.wbhp-opt.trdfo-test",
+    "BookkeeperTolerance": 1e-12,
+    "VerbConf": {
+      "iBoxLineWidth": 140,
+      "Model": 1,
+      "Optim": 1,
+      "WICal": 1,
+      "Simul": 1,
+      "Runnr": 1,
+      "Resvr": 1,
+      "Setng": 1,
+      "Utils": 1
+    }
+  },
+  "Optimizer": {
+    "Type": "TrustRegionOptimization",
+    "Mode": "Maximize",
+    "Parameters": {
+        "MaxEvaluations": 20,
+        "InitialTrustRegionRadius": 25,
+        "MaxTrustRegionRadius": 100,
+        "TrustRegionLowerBound": 70,
+        "TrustRegionUpperBound": 200,
+        "RNGSeed": 25,
+        "TRMaxIter": 150
+    },
+    "Objective": {
+      "Type": "WeightedSum",
+      "WeightedSumComponents": [
+        {
+          "Comment": "Oil price: 60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
+          "Coefficient": 377.3887,
+          "Property": "FieldOilProdTotal",
+          "TimeStep": -1,
+          "IsWellProp": false
+        },
+        {
+          "Comment": "Water production cost: 6 $/bbl * 6.289811 bbl/m^3 ",
+          "Coefficient": -37.7388,
+          "Property": "FieldWatProdTotal",
+          "TimeStep": -1,
+          "IsWellProp": false
+        },
+        {
+          "Comment": "Water injection cost: 2 $/bbl * 6.289811 bbl/m^3",
+          "Coefficient": -12.5796,
+          "Property": "FieldWatInjTotal",
+          "TimeStep": -1,
+          "IsWellProp": false
+        }
+      ]
+    },
+    "Constraints": [
+      {
+        "Wells": [ "PROD1", "PROD2", "PROD3", "PROD4",
+          "PROD5", "PROD6", "PROD7", "PROD8" ],
+        "Type": "BHP",
+        "Min": 70.0,
+        "Max": 200.0
+      }
+    ]
+  },
+  "Simulator": {
+    "Type": "ECLIPSE",
+    "FluidModel": "BlackOil",
+    "ScheduleFile": "fo_edits.INC",
+    "ExecScript": "bash_flow",
+    "UseACTIONX": false,
+    "SelectRealizations": 10,
+    "MaxMinutes": 15
+  },
+  "Model": {
+    "ControlTimes": [
+       0,   10,   20,   30,   40,   50,   60,   70,   80, 
+      90,  100,  110,  120,  130,  140,  150,  160,  170, 
+     180,  190,  200,  210,  220,  230,  240,  250,  260, 
+     270,  280,  290,  300,  310,  320,  330,  340,  350, 
+     360,  370,  380,  390,  400,  410,  420,  430,  440, 
+     450,  460,  470,  480,  490,  500,  510,  520,  530, 
+     540,  550,  560,  570,  580,  590,  600,  610,  620, 
+     630,  640,  650,  660,  670,  680,  690,  700,  710, 
+     720,  730,  740,  750,  760,  770,  780,  790,  800, 
+     810,  820,  830,  840,  850,  860,  870,  880,  890, 
+     900,  910,  920,  930,  940,  950,  960,  970,  980, 
+     990, 1000, 1010, 1020, 1030, 1040, 1050, 1060, 1070, 
+    1080, 1090, 1100, 1110, 1120, 1130, 1140, 1150, 1160, 
+    1170, 1180, 1190, 1200, 1210, 1220, 1230, 1240, 1250, 
+    1260, 1270, 1280, 1290, 1300, 1310, 1320, 1330, 1340, 
+    1350, 1360, 1370, 1380, 1390, 1400, 1410, 1420, 1430, 
+    1440, 1450, 1460, 1470, 1480, 1490, 1500, 1510, 1520, 
+    1530, 1540, 1550, 1560, 1570, 1580, 1590, 1600, 1610, 
+    1620, 1630, 1640, 1650, 1660, 1670, 1680, 1690, 1700, 
+    1710, 1720, 1730, 1740, 1750, 1760, 1770, 1780, 1790, 
+    1800, 1810, 1820, 1830, 1840, 1850, 1860, 1870, 1880, 
+    1890, 1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 
+    1980, 1990, 2000, 2010, 2020, 2030, 2040, 2050, 2060, 
+    2070, 2080, 2090, 2100, 2110, 2120, 2130, 2140, 2150, 
+    2160, 2170, 2180, 2190
+    ],
+    "Reservoir": {
+      "Type": "ECLIPSE"
+    },
+    "Wells": [
+      {
+        "Group": "I",
+        "Name": "INJ1",
+        "Type": "Injector",
+        "PreferredPhase": "Water",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i":  8, "j": 56, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 230, "IsVariable": false }
+        ]
+      },
+      {
+        "Group": "I",
+        "Name": "INJ2",
+        "Type": "Injector",
+        "PreferredPhase": "Water",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i":  51, "j": 44, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 230, "IsVariable": false }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD1",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i":  4, "j": 7, "k": 1 },
+            { "i":  5, "j": 7, "k": 1 },
+            { "i":  6, "j": 7, "k": 1 },
+            { "i":  7, "j": 7, "k": 1 },
+            { "i":  8, "j": 7, "k": 1 },
+            { "i":  9, "j": 7, "k": 1 },
+            { "i": 10, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD2",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 11, "j": 7, "k": 1 },
+            { "i": 12, "j": 7, "k": 1 },
+            { "i": 13, "j": 7, "k": 1 },
+            { "i": 14, "j": 7, "k": 1 },
+            { "i": 15, "j": 7, "k": 1 },
+            { "i": 16, "j": 7, "k": 1 },
+            { "i": 17, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD3",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 18, "j": 7, "k": 1 },
+            { "i": 19, "j": 7, "k": 1 },
+            { "i": 20, "j": 7, "k": 1 },
+            { "i": 21, "j": 7, "k": 1 },
+            { "i": 22, "j": 7, "k": 1 },
+            { "i": 23, "j": 7, "k": 1 },
+            { "i": 24, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD4",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 25, "j": 7, "k": 1 },
+            { "i": 26, "j": 7, "k": 1 },
+            { "i": 27, "j": 7, "k": 1 },
+            { "i": 28, "j": 7, "k": 1 },
+            { "i": 29, "j": 7, "k": 1 },
+            { "i": 30, "j": 7, "k": 1 },
+            { "i": 31, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD5",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 32, "j": 7, "k": 1 },
+            { "i": 33, "j": 7, "k": 1 },
+            { "i": 34, "j": 7, "k": 1 },
+            { "i": 35, "j": 7, "k": 1 },
+            { "i": 36, "j": 7, "k": 1 },
+            { "i": 37, "j": 7, "k": 1 },
+            { "i": 38, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD6",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 39, "j": 7, "k": 1 },
+            { "i": 40, "j": 7, "k": 1 },
+            { "i": 41, "j": 7, "k": 1 },
+            { "i": 42, "j": 7, "k": 1 },
+            { "i": 43, "j": 7, "k": 1 },
+            { "i": 44, "j": 7, "k": 1 },
+            { "i": 45, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD7",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 46, "j": 7, "k": 1 },
+            { "i": 47, "j": 7, "k": 1 },
+            { "i": 48, "j": 7, "k": 1 },
+            { "i": 49, "j": 7, "k": 1 },
+            { "i": 50, "j": 7, "k": 1 },
+            { "i": 51, "j": 7, "k": 1 },
+            { "i": 52, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      },
+      {
+        "Group": "P",
+        "Name": "PROD8",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellBlocks",
+        "Direction": "Z",
+        "WellBlocks": [
+            { "i": 53, "j": 7, "k": 1 },
+            { "i": 54, "j": 7, "k": 1 },
+            { "i": 55, "j": 7, "k": 1 }
+        ],
+        "Controls": [
+          { "TimeStep": 0,    "State": "Open", "Mode": "BHP", "BHP": 90, "IsVariable": true }
+        ]
+      }
+    ]
+  }
+}

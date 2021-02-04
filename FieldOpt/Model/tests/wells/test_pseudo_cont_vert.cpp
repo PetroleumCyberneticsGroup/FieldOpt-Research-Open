@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 8/16/17.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 8/16/17.
 
-   This file is part of the FieldOpt project.
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This file is part of the FieldOpt project.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "Reservoir/tests/test_resource_grids.h"
@@ -32,21 +38,22 @@ class PseudoContVertTest : public ::testing::Test, public TestResources::TestRes
   }
   virtual ~PseudoContVertTest() {}
   virtual void SetUp() {}
+  Settings::VerbParams vp_ = {};
 };
 
 TEST_F(PseudoContVertTest, ConstructorAndGetter) {
-    Paths paths;
-    auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_pseudocont_2_prods_var_pos_and_bhp(), paths);
-    auto wsettings = settings.wells()[0];
-    auto varcont = new Model::Properties::VariablePropertyContainer();
-    auto well = Model::Wells::Wellbore::PseudoContVert(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_);
+  Paths paths;
+  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_pseudocont_2_prods_var_pos_and_bhp(), paths, vp_);
+  auto wsettings = settings.wells()[0];
+  auto varcont = new Model::Properties::VarPropContainer();
+  auto well = Model::Wells::Wellbore::PseudoContVert(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_);
 
-    auto block = well.GetWellBlock();
+  auto block = well.GetWellBlock();
 
-    // These should be 1 higher, as well blocks use 1-indexing instead of 0-indexing.
-    EXPECT_EQ(block->i(), 6);
-    EXPECT_EQ(block->j(), 6);
-    EXPECT_EQ(block->k(), 1);
+  // These should be 1 higher, as well blocks use 1-indexing instead of 0-indexing.
+  EXPECT_EQ(block->i(), 6);
+  EXPECT_EQ(block->j(), 6);
+  EXPECT_EQ(block->k(), 1);
 }
 
 }

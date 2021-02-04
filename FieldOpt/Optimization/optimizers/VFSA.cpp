@@ -26,7 +26,7 @@ namespace Optimizers {
 
 VFSA::VFSA(Settings::Optimizer *settings,
            Optimization::Case *base_case,
-           Model::Properties::VariablePropertyContainer *variables,
+           Model::Properties::VarPropContainer *variables,
            Reservoir::Grid::Grid *grid,
            Logger *logger,
            Optimization::CaseHandler *case_handler,
@@ -71,18 +71,18 @@ void VFSA::handleEvaluatedCase(Optimization::Case *c) {
     if (isImprovement(c)) { // Update tentative best case if improvement
         if (VERB_OPT >= 1) {
             Printer::ext_info("Found new best case in iteration " + Printer::num2str(iteration_) + ". OFV: "
-                                  + Printer::num2str(c->objective_function_value()), "Optimization", "VFSA");
+                                  + Printer::num2str(c->objf_value()), "Optimization", "VFSA");
         }
         updateTentativeBestCase(c);
     }
     else { // If not improvement, update anyway if selection probability is greater than a random number [0, 1].
-        double sel_prop = selectionProbability(tentative_best_case_->objective_function_value(),
-                                               c->objective_function_value());
+        double sel_prop = selectionProbability(tentative_best_case_->objf_value(),
+                                               c->objf_value());
         if (sel_prop > random_double(gen_)) {
             updateTentativeBestCase(c);
             if (VERB_OPT >= 1) {
                 Printer::ext_info("Updated tent. best with other case randomly. New OFV: "
-                                      + Printer::num2str(c->objective_function_value()), "Optimization", "VFSA");
+                                      + Printer::num2str(c->objf_value()), "Optimization", "VFSA");
             }
         }
     }

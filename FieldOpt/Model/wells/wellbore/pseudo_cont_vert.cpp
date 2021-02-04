@@ -24,7 +24,7 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 PseudoContVert::PseudoContVert(Settings::Model::Well well_settings,
-                               Properties::VariablePropertyContainer *variable_container,
+                               Properties::VarPropContainer *variable_container,
                                Reservoir::Grid::Grid *grid) {
     grid_ = grid;
     int i_idx = well_settings.pseudo_cont_position.i;
@@ -43,8 +43,8 @@ PseudoContVert::PseudoContVert(Settings::Model::Well well_settings,
         exit(1);
     }
     z_pos_ = init_cell.center().z();
-    x_pos_ = new Properties::ContinousProperty(init_cell.center().x());
-    y_pos_ = new Properties::ContinousProperty(init_cell.center().y());
+    x_pos_ = new Properties::ContinuousProperty(init_cell.center().x());
+    y_pos_ = new Properties::ContinuousProperty(init_cell.center().y());
 
     if (well_settings.pseudo_cont_position.is_variable) {
         x_pos_->setName("PseudoContVert#" + well_settings.name + "#x");

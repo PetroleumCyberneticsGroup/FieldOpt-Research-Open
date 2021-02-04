@@ -43,7 +43,7 @@ class PolarSpline : public WellSpline
 {
  public:
   PolarSpline(::Settings::Model::Well well_settings,
-             Properties::VariablePropertyContainer *variable_container,
+             Properties::VarPropContainer *variable_container,
              Reservoir::Grid::Grid *grid,
              Reservoir::WellIndexCalculation::wicalc_rixx *wic
   );
@@ -58,9 +58,9 @@ class PolarSpline : public WellSpline
 
  private:
   SplinePoint *midpoint_; //!< The midpoint defined by x, y, and z in cartesian coordinates
-  Properties::ContinousProperty *azimuth_; //!< The azimuth rotation in the x-y plane, with 0 degrees being parallel to the x axis
-  Properties::ContinousProperty *length_; //!< The length of the well in meters, length/2 is used as the radius
-  Properties::ContinousProperty *elevation_; //!< The angle of the well relative to the z plane
+  Properties::ContinuousProperty *azimuth_; //!< The azimuth rotation in the x-y plane, with 0 degrees being parallel to the x axis
+  Properties::ContinuousProperty *length_; //!< The length of the well in meters, length/2 is used as the radius
+  Properties::ContinuousProperty *elevation_; //!< The angle of the well relative to the z plane
 
   /*!
    * @brief Compute the two other points defined by the midpoint, length and angles.

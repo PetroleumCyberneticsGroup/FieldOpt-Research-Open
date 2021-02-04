@@ -29,12 +29,12 @@ cmake_policy(SET CMP0054 OLD)
 # Sanitizing ===============================================
 option(USE_SANITIZING "Build sanitizing features for debugging"  OFF)
 if (USE_SANITIZING)
-#  https://github.com/google/sanitizers
-#  Sanitizing is a feature built into more recent versions of GCC (>4.7).
-#  It add additional (better) error traces for memory-related problems.
-#  AddressSanitizer (detects addressability issues) and LeakSanitizer (detects memory leaks) [address] [leak]
-#  ThreadSanitizer (detects data races and deadlocks) for C++ and Go                         [thread]
-#  MemorySanitizer (detects use of uninitialized memory)                                     [memory]
+  #  https://github.com/google/sanitizers
+  #  Sanitizing is a feature built into more recent versions of GCC (>4.7).
+  #  It add additional (better) error traces for memory-related problems.
+  #  AddressSanitizer (detects addressability issues) and LeakSanitizer (detects memory leaks) [address] [leak]
+  #  ThreadSanitizer (detects data races and deadlocks) for C++ and Go                         [thread]
+  #  MemorySanitizer (detects use of uninitialized memory)                                     [memory]
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fsanitize=leak -g")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address  -fsanitize=leak -g")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address  -fsanitize=leak -g")
@@ -66,11 +66,18 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   message(STATUS "CMAKE_SYSTEM_NAME => ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# ____________________________________________________________________
+# ╔═╗  ╔═╗╔═╗╔═╗  ╔═╗╦  ╔═╗╔═╗╔═╗
+# ║    ║  ╠═╝╠═╝  ╠╣ ║  ╠═╣║ ╦╚═╗
+# ╚═╝  ╚═╝╩  ╩    ╚  ╩═╝╩ ╩╚═╝╚═╝
+# ____________________________________________________________________
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX -pipe -Wextra ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wextra ")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -g3 -O0 -DDEBUG -D_DEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNO_DEBUG")
+  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 endif()
 
 # ----------------------------------------------------------
@@ -148,7 +155,7 @@ endif()
 if(NOT EIGEN3_FOUND)
   message(STATUS "Using local Eigen3")
   set(EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
-#  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
+  #  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
 endif()
 
 # ----------------------------------------------------------
@@ -175,7 +182,7 @@ else()
   find_library(HDF5_CPP NAMES hdf5_cpp
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   find_library(HDF5 NAMES hdf5
-          HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
   find_package(Threads REQUIRED)
 
@@ -187,16 +194,21 @@ else()
       REQUIRED)
 
   find_library(snopt NAMES snopt-7.2.12.2
-          HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-          PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-          REQUIRED)
+      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+      REQUIRED)
 
   message(STATUS "ecl_LIBRARIES: ${ecl_LIBRARIES}")
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
   message(STATUS "HDF5: ${HDF5}")
-  message(STATUS "snopt: ${snopt}")
+
+  if(snopt MATCHES NOTFOUND)
+    message(STATUS "snopt lib NOT found; snopt=${snopt}")
+  else()
+    message(STATUS "snopt: ${snopt}")
+  endif()
 
 endif()
 
@@ -374,7 +386,7 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   add_subdirectory(Runner)
   add_subdirectory(ConstraintMath)
   add_subdirectory(Hdf5SummaryReader)
-#  add_subdirectory(FieldOpt-3rdPartySolvers)
+  #  add_subdirectory(FieldOpt-3rdPartySolvers)
 
   # Copy execution scripts
   file(GLOB EXECUTION_SCRIPTS
@@ -385,15 +397,25 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   ## Copy the test driver file into the build dir
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver.json
       DESTINATION ${CMAKE_BINARY_DIR}/examples)
+
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_sane.json
       DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_hybridopt.json
-          DESTINATION ${CMAKE_BINARY_DIR}/examples)
+      DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
-  ## Create an empty directory for test output
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output/norne_test)
+  # Create FO output dirs
+  set(FO_OUTPUT_DIR ${CMAKE_BINARY_DIR}/fieldopt-output)
+  set(DIRS
+      norne_test
+      en_5spot/fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv
+      olympr37/fo-drv.r001.c02-olympr37.icd-opt.apps.aug)
+
+  foreach(DIR ${DIRS})
+    message(STATUS "DIR=${FO_OUTPUT_DIR}/${DIR}")
+    file(MAKE_DIRECTORY ${FO_OUTPUT_DIR}/${DIR})
+  endforeach()
+
 endif()
 
 # Compile options ==========================================
