@@ -595,6 +595,7 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
     updateRadius();
     return false;
   }
+  return false;
 }
 
 Optimization::Optimizer::TerminationCondition
