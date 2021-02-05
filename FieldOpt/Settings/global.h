@@ -1,6 +1,6 @@
 /***********************************************************
 Copyright (C) 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Created by bellout on 8/10/20.
 
@@ -48,8 +48,8 @@ class Global {
   double bookkeeper_tol() const { return bookkeeper_tol_; }
 
   VerbParams verbParams() { return verb_params_; };
-  void showVerbParams(string sin="");
-  void showVerbParams(VerbParams &vp, string sin="");
+  void showVerbParams(string sin="") const;
+  void showVerbParams(VerbParams &vp, string sin="") const;
 
  protected:
   string name_;
@@ -60,7 +60,7 @@ class Global {
   string md_ = "Settings";
   string cl_ = "Global";
   VerbParams verb_params_;
-  VerbParams parseVerbParams(QJsonObject json_verb);
+  void parseVerbParams(QJsonObject json_verb);
 };
 
 }

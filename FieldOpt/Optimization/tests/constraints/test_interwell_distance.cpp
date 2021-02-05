@@ -1,9 +1,10 @@
 /***********************************************************
 Copyright (C) 2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
+Created by einar on 5/24/17.
 
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -33,7 +34,6 @@ namespace {
 class InterwellDistanceTest : public ::testing::Test,
                               public TestResources::TestResourceCases
 {
-
  public:
   InterwellDistanceTest() {
     iwd_settings_.type = Settings::Optimizer::ConstraintType::WSplineInterwDist;

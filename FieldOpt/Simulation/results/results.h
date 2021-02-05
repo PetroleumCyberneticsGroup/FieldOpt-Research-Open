@@ -3,7 +3,7 @@ Copyright (C) 2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020- Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -368,6 +368,11 @@ class Results
  protected:
   std::set<string> wells_;
 
+  vector<double> zr_std_ = vector<double>(0);
+  VectorXd zr_Xd_ = VectorXd(0);
+
+  vector<vector<double>> zr_std2d_ = vector<vector<double>> (0, vector<double>(0));
+  vector<VectorXd> zr_Xd2d_ = vector<VectorXd> (0, VectorXd(0));
 
 };
 

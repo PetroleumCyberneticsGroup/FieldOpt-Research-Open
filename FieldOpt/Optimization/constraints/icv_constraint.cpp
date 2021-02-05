@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -110,7 +110,7 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   }
 }
 
-bool ICVConstraint::IsBoundConstraint() const { true; }
+bool ICVConstraint::IsBoundConstraint() const { return true; }
 
 Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());

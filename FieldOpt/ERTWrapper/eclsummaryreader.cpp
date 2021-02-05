@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -294,6 +294,8 @@ void ECLSummaryReader::populateKeyLists() {
     im_ += "seg_swct_keys_:" + num2str(seg_swct_keys_.size(), 0) + " ";
     im_ += "seg_scsa_keys_:" + num2str(seg_scsa_keys_.size(), 0) + " ";
     ext_warn(im_, md_, cl_, vp_.lnw);
+  } else {
+    ext_warn("Some or all segment result keywords empty - not read.", md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);

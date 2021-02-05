@@ -2,7 +2,7 @@
 Created by bellout on 8/19/20.
 
 Copyright (C) 2020
-Mathias Bellout <chakibbb-pcg@gmail.com>
+Mathias Bellout <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -62,8 +62,7 @@ class Augmented : public Objective {
             Simulation::Results::Results *results,
             Model::Model *model);
 
-  double value() const override {};
-  // double value(bool base_case = false) override;
+  double value() const override { return -1.0; };
   double value(bool base_case) override;
 
   void setDbgFileName(string fl) { fl_ = fl; }

@@ -1,9 +1,9 @@
 /***********************************************************
-Copyright (C) 2019
+Copyright (C) 2015-2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

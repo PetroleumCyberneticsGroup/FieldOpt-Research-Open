@@ -1,10 +1,10 @@
 /***********************************************************
-Created by thiagols on 27.11.18
+Created by thiagols on 26.11.18
 Copyright (C) 2018
 Thiago Lima Silva <thiagolims@gmail.com>
 
 Modified 2018-2019 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

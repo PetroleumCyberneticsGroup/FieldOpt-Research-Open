@@ -143,7 +143,7 @@ inline bool set_opt_prop_bool(bool &prop, const QJsonObject &container, const QS
   }
 }
 
-inline bool set_req_prop_bool(bool &prop, const QJsonObject &container, const QString &prop_name) {
+inline void set_req_prop_bool(bool &prop, const QJsonObject &container, const QString &prop_name) {
   if (!set_opt_prop_bool(prop, container, prop_name)) {
     throw std::runtime_error("Required property " + prop_name.toStdString() + " not found.");
   }

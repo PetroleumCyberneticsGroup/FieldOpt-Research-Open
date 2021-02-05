@@ -3,7 +3,7 @@ Copyright (C) 2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-
-Mathias Bellout <chakibbb-pcg@gmail.com>
+Mathias Bellout <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -98,6 +98,7 @@ std::vector<double> AdgprsResults::GetValueVector(Results::Property prop) {
 }
 
 VectorXd AdgprsResults::GetValueVectorXd(Results::Property prop) {
+  return zr_Xd_;
 }
 
 }}

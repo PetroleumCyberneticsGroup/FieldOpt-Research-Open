@@ -3,8 +3,8 @@ Created: 28.09.2015 2015 by einar
 Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2021 Mathias Bellout
-<mathias.bellout@gmail.com>
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

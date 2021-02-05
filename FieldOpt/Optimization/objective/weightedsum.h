@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -68,7 +68,7 @@ class WeightedSum : public Objective {
               Model::Model *model);
 
   double value() const override;
-  double value(bool base_case) override {};
+  double value(bool base_case) override { return -1.0; };
 
  private:
   /*!
@@ -84,7 +84,7 @@ class WeightedSum : public Objective {
     int time_step;
     bool is_well_property;
     QString well;
-    double resolveValue(Simulation::Results::Results *results);
+    double resolveValue(Simulation::Results::Results *results) const;
   };
 
   QList<Component *> *components_; //!< List of gamma, k pairs.

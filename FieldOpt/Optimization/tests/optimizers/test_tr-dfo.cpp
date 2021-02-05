@@ -1,7 +1,7 @@
 /***********************************************************
 Created by Mathias C. Bellout on 27.11.18
 Copyright (C) 2018-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Modified 2018-2020 Thiago Lima Silva
 <thiagolims@gmail.com>

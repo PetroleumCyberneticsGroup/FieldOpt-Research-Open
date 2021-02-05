@@ -2,8 +2,8 @@
 Copyright (C) 2015-2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -27,8 +27,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "test_resource_optimizer.h"
 
 namespace {
-class RateConstraintTest
-    : public ::testing::Test, public TestResources::TestResourceOptimizer {
+class RateConstraintTest : public ::testing::Test,
+                           public TestResources::TestResourceOptimizer {
 
  public:
   RateConstraintTest() : Test() {

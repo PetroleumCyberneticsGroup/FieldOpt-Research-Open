@@ -1,23 +1,27 @@
-/*********************************************************************
- Created by thiagols on 26.11.18
- Copyright (C) 2018 Thiago Lima Silva<thiagolims@gmail.com>
- Modified 2018-2019 Mathias Bellout <mathias.bellout@ntnu.no>
+/***********************************************************
+Created by thiagols on 26.11.18
+Copyright (C) 2018
+Thiago Lima Silva <thiagolims@gmail.com>
 
- This file is part of the FieldOpt project.
+Modified 2018-2019 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published
- by the Free Software Foundation, either version 3 of the License,
- or (at your option) any later version.
+This file is part of the FieldOpt project.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt. If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <Utilities/verbosity.h>
 #include "Utilities/printer.hpp"
@@ -596,6 +600,7 @@ bool TrustRegionOptimization::ensureImprovementPostProcessing(){
     updateRadius();
     return false;
   }
+  return false;
 }
 
 Optimization::Optimizer::TerminationCondition

@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -214,6 +214,7 @@ class Case : public Loggable
         return real_variable.second;
       }
     }
+    return -1.0;
   };
 
   enum SIGN { PLUS, MINUS, PLUSMINUS};
@@ -346,6 +347,7 @@ class Case : public Loggable
         return true;
       }
     }
+    return false;
   }
 
   bool real_vars_contain(int &var_indx, QUuid var_id) {
@@ -355,6 +357,7 @@ class Case : public Loggable
         return true;
       }
     }
+    return false;
   }
 
   void SetVerbParams(Settings::VerbParams vp) { vp_ = vp; }

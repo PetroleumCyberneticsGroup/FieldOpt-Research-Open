@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -153,13 +153,14 @@ void Simulator::PostSimWork() {
   }
 }
 
-::Simulation::Results::Results::EclAjdGData Simulator::ReadEclAdjG() {
-  QString data_root = FileNameQstr(paths_.GetPath(Paths::SIM_OUT_DRIVER_FILE));
-  string adjg_file = data_root.split(".DATA").first().toStdString() + ".GRD";
-
-  string tm = "Reading gradient from e300 file: " + adjg_file;
-  ext_info(tm, md_, cl_, vp_.lnw);
-}
+// Check if obsolete: Reading e300 gradients done by PostSimWork:
+//::Simulation::Results::Results::EclAjdGData Simulator::ReadEclAdjG() {
+//  QString data_root = FileNameQstr(paths_.GetPath(Paths::SIM_OUT_DRIVER_FILE));
+//  string adjg_file = data_root.split(".DATA").first().toStdString() + ".GRD";
+//
+//  string tm = "Reading gradient from e300 file: " + adjg_file;
+//  ext_info(tm, md_, cl_, vp_.lnw);
+//}
 
 void Simulator::updateResultsInModel() {
   model_->SetResult("Time", results_->GetValueVector(Results::Results::Property::Time));
