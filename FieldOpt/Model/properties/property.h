@@ -186,20 +186,21 @@ class Property
       }
     }
 
-    string getSplineEndName() {
-      enum SplineEnd : int { SplineEndNone=3000,
-        Heel=3001, Toe=3002, Middle=3003 };
-    }
+    // TODO Obsolete functions?
+    // string getSplineEndName() {
+    // enum SplineEnd : int { SplineEndNone=3000,
+    //   Heel=3001, Toe=3002, Middle=3003 };
+    // }
 
-    string getPolarPropName() {
-      // enum PolarProp : int { PolarPropNone=5000,
-      //   Azimuth=5001, Length=5002, Elevation=5003, Midpoint=5004 };
-    }
+    // string getPolarPropName() {
+    // enum PolarProp : int { PolarPropNone=5000,
+    //   Azimuth=5001, Length=5002, Elevation=5003, Midpoint=5004 };
+    // }
 
-    string getCoordinateName() {
-      // enum Coordinate : int { CoordinateNone=4000,
-      //   x=4001, y=4002, z=4003, i=4004, j=4005, k=4006 };
-    }
+    // string getCoordinateName() {
+    // enum Coordinate : int { CoordinateNone=4000,
+    //   x=4001, y=4002, z=4003, i=4004, j=4005, k=4006 };
+    // }
   };
 
   //!< Get an Info struc containing information about the

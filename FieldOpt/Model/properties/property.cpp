@@ -194,7 +194,11 @@ void Property::UpdateId(QUuid new_id) {
 }
 
 void Property::setBounds(double min, double max) {
-  cout << "min: " << min << "  max: " << max << endl;
+  if (vp_.vMOD >= 3) {
+    im_ = "[property.cpp] Setting [min, max] bounds = [";
+    im_ += num2str(min, 5) + ", " + num2str(max, 5) + "]";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   bounds_ << min, max;
 }
 
@@ -219,6 +223,9 @@ int Property::get_spline_index(const QString prop_name) const {
       throw std::runtime_error(em);
     }
   }
+
+  // TODO Restructure function to give proper return int value
+  return STDMAX_I;
 }
 
 }

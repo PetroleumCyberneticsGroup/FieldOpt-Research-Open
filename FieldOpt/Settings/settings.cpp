@@ -29,7 +29,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QJsonDocument>
 #include <iostream>
 
-
 namespace Settings {
 
 Settings::Settings(Paths &paths) {
@@ -85,10 +84,11 @@ void Settings::readDriverFile() {
   readOptimizerSection();
 
   file->close();
+  if(vp_.vSET >= 5) { ext_info("Finished reading JSON.",md_, cl_, vp_.lnw, 2, 2); }
 }
 
 void Settings::readGlobalSection() {
-  if(vp_.vSET >= 5) { info("Reading Global section.", vp_.lnw); }
+  if(vp_.vSET >= 5) { ext_info("Reading Global section.", md_, cl_, vp_.lnw); }
   try {
     QJsonObject json_global = json_driver_->value("Global").toObject();
     global_ = new Global(json_global);
@@ -99,7 +99,7 @@ void Settings::readGlobalSection() {
 }
 
 void Settings::readSimulatorSection() {
-  if(vp_.vSET >= 5) { info("Reading Simulator section.", vp_.lnw); }
+  if(vp_.vSET >= 5) { ext_info("Reading Simulator section.", md_, cl_, vp_.lnw); }
   try {
     QJsonObject json_simulator = json_driver_->value("Simulator").toObject();
     simulator_ = new Simulator(json_simulator, paths_,global()->verbParams());
@@ -110,7 +110,7 @@ void Settings::readSimulatorSection() {
 }
 
 void Settings::readOptimizerSection() {
-  if(vp_.vSET >= 5) { info("Reading Optimizer section.", vp_.lnw); }
+  if(vp_.vSET >= 5) { ext_info("Reading Optimizer section.", md_, cl_, vp_.lnw); }
   try {
     QJsonObject optimizer = json_driver_->value("Optimizer").toObject();
     optimizer_ = new Optimizer(optimizer,global()->verbParams());
@@ -121,7 +121,7 @@ void Settings::readOptimizerSection() {
 }
 
 void Settings::readModelSection() {
-  if(vp_.vSET >= 5) { info("Reading Model section.", vp_.lnw); }
+  if(vp_.vSET >= 5) { ext_info("Reading Model section.", md_, cl_, vp_.lnw); }
   try {
     QJsonObject model = json_driver_->value("Model").toObject();
     model_ = new Model(model, paths_,global()->verbParams());

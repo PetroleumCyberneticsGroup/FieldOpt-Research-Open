@@ -40,7 +40,10 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
                        Properties::VarPropContainer *variable_container,
                        ::Reservoir::Grid::Grid *grid,
                        Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
-  vp_ = well_settings.verbParams();
+
+  wsettings_ = well_settings;
+  string wn = wsettings_.name.toStdString();
+  vp_ = wsettings_.verbParams();
 
   well_blocks_ = new QList<WellBlock *>();
   well_spline_ = nullptr;
@@ -48,9 +51,11 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
   definition_type_ = well_settings.definition_type;
 
   if (well_settings.definition_type == WType::WellBlocks) {
+    if (vp_.vMOD >= 5) { ext_warn("BLOCK WELL: " + wn); }
     initializeWellBlocks(well_settings, variable_container);
 
   } else if (well_settings.definition_type == WType::WellSpline) {
+    if (vp_.vMOD >= 5) { ext_warn("WELLSPLINE: " + wn); }
     if (well_settings.convert_well_blocks_to_spline) {
       convertWellBlocksToWellSpline(well_settings, grid);
     }
@@ -60,12 +65,14 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
     well_blocks_ = well_spline_->GetWellBlocks();
 
   } else if (well_settings.definition_type == WType::PolarSpline) {
+    if (vp_.vMOD >= 5) { ext_warn("POLARSPLINE: " + wn); }
     well_spline_ = new PolarSpline(well_settings,
                                    variable_container,
                                    grid, wic);
     well_blocks_ = well_spline_->GetWellBlocks();
 
   } else if (well_settings.definition_type == WType::PseudoContVertical2D) {
+    if (vp_.vMOD >= 5) { ext_warn("VERT3D: " + wn); }
     pseudo_cont_vert_ = new PseudoContVert(well_settings,
                                            variable_container,
                                            grid);
@@ -76,7 +83,7 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
     calculateDirectionOfPenetration();
   }
 
-  if (vp_.vMOD >= 3) { printWellBlocks(); }
+  if (vp_.vMOD >= 5) { printWellBlocks(); }
 }
 
 int Trajectory::GetTimeSpentInWic() const {
@@ -113,8 +120,8 @@ void Trajectory::UpdateWellBlocks() {
         info(im_, vp_.lnw);
       }
     }
-  }
-  else if (pseudo_cont_vert_ != 0) {
+
+  } else if (pseudo_cont_vert_ != 0) {
     well_blocks_ = new QList<WellBlock *>();
     well_blocks_->append(pseudo_cont_vert_->GetWellBlock());
   }
@@ -346,6 +353,8 @@ double Trajectory::GetExitMd(const WellBlock *wb) const {
 }
 
 void Trajectory::printWellBlocks() {
+  ext_info(wsettings_.toString("|"), md_, cl_, vp_.lnw);
+
   cout << endl << "well blocks -- Trajectory::printWellBlocks():" << endl;
   // cout << "I,\tJ,\tK,\tINX,\t\t\tINY,\t\t\tINZ,\t\t\tOUTX,\t\t\tOUTY,\t\t\tOUTZ" << endl;
 
@@ -381,12 +390,13 @@ void Trajectory::printWellBlocks() {
           << num2str(wb->getDepthChange(), 1, 0, 7) << " ] ";
 
     auto dxdydz = wb->getDxDyDz();
-    entry << "[ "
-          << num2str(dxdydz(0), 1, 0, 7) << " "
-          << num2str(dxdydz(1), 1, 0, 7) << " "
-          << num2str(dxdydz(2), 1, 0, 6) << " ]"
-          << std::endl;
-
+    if (dxdydz.size() != 0) {
+      entry << "[ "
+            << num2str(dxdydz(0), 1, 0, 7) << " "
+            << num2str(dxdydz(1), 1, 0, 7) << " "
+            << num2str(dxdydz(2), 1, 0, 6) << " ]"
+            << std::endl;
+    }
     cout << entry.str();
   }
 }

@@ -39,7 +39,8 @@ WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
                              : Constraint(vp) {
 
   if (vp_.vOPT >= 1) {
-    info("Adding WSplineLength constraint for " + settings.well.toStdString());
+    im_ = "Adding WSplineLength constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   min_length_ = settings.min;
@@ -48,9 +49,9 @@ WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
 
   affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp_);
 
-  if (vp_.vOPT>=1)
-    std::cout << "... ... initialized length constraint for well: "
-              << settings.well.toStdString() << std::endl;
+  if (vp_.vOPT>=3)
+    im_ = " -> initialized length constraint for well: " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
 }
 
 bool WSplineLength::CaseSatisfiesConstraint(Case *c) {

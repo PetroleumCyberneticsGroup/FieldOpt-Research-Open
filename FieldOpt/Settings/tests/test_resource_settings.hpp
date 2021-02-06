@@ -52,7 +52,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_full_(";
       im += paths_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
 
     settings_full_ = new Settings::Settings(paths_);
@@ -77,7 +77,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_hybridopt_full_(";
       im += paths_hybridopt_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
 
     settings_hybridopt_full_ = new Settings::Settings(paths_hybridopt_);
@@ -92,7 +92,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_en_5spot_full_(";
       im += en_paths.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
     settings_en_5spot_full_ = new Settings::Settings(en_paths);
 
@@ -101,7 +101,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: paths_olympr37_full_(";
       im += paths_olympr37_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
     settings_olympr37_ = new Settings::Settings(paths_olympr37_);
     settings_olympr37_opt_ = settings_olympr37_->optimizer();

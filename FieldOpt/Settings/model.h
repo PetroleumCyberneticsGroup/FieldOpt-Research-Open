@@ -35,7 +35,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QJsonArray>
 #include <assert.h>
 
-
 namespace Settings {
 
 class DeckParser;
@@ -201,7 +200,7 @@ class Model
     string wseg_structure = "";
 
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
-    std::string toString();
+    std::string toString(std::string sp="\n");
     std::vector<ICVGroup> icv_compartments;     //!< Grouping of ICVs into named comparments.
 
     VerbParams verb_params_;

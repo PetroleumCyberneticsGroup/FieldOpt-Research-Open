@@ -374,6 +374,7 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   # Copy execution scripts
   file(GLOB EXECUTION_SCRIPTS
       "Simulation/execution_scripts/*.sh")
+
   file(COPY ${EXECUTION_SCRIPTS}
       DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/execution_scripts)
 

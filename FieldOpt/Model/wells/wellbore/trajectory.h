@@ -106,6 +106,7 @@ class Trajectory
 
 
  private:
+  Settings::Model::Well wsettings_;
   Settings::Model::WellDefinitionType definition_type_;
   QList<WellBlock *> *well_blocks_;
 

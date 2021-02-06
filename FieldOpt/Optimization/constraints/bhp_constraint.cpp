@@ -37,8 +37,15 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
   assert(settings.wells.size() > 0);
   assert(settings.min < settings.max);
 
+  string ws;
+  if (settings.well.isEmpty()) {
+    for (auto wn : settings.wells) { ws += wn.toStdString() + "; "; }
+  } else {
+    ws = settings.well.toStdString();
+  }
+
   if (vp_.vOPT >= 1) {
-    info("Adding BHP constraint for " + settings.well.toStdString());
+    ext_info("Adding BHP constraint for " + ws, md_, cl_, vp_.lnw);
   }
 
   min_ = settings.min;
@@ -47,10 +54,10 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
   bhp_cnstrnd_well_nms_ = settings.wells;
   penalty_weight_ = settings.penalty_weight;
 
-  if (vp_.vOPT >= 1) {
+  if (vp_.vOPT >= 3) {
     im_ = "Adding BHP constraint with [min, max] = [";
     im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well " + settings.well.toStdString() + " with variables: ";
+    im_ += "] for well(s) " + ws + " with variables: ";
   }
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {

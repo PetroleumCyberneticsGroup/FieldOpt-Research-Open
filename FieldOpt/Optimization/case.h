@@ -47,7 +47,7 @@ class CaseTransferObject;
 
 /*!
  * \brief The Case class represents a specific case for the
- * optimizer, i.e. a specific set of variable values and
+ * optimizer, i.e., a specific set of variable values and
  * the value of the objective function after evaluation.
  */
 class Case : public Loggable
@@ -73,10 +73,10 @@ class Case : public Loggable
   Case(const Case *c);
 
   /*!
-   * @brief The CaseState struct holds information about the
-   * current status of the Case object, such as whether or
-   * not it has been evaluated and whether or not it has been
-   * modified by a constriant.
+   * @brief The CaseState struct holds information about
+   * the current status of the Case object, e.g., whether
+   * or not it has been evaluated, and whether or not it
+   * has been modified by a constraint.
    */
   struct CaseState {
     enum EvalStatus : int {
@@ -115,15 +115,15 @@ class Case : public Loggable
     ErrorMessage err_msg;
   };
 
-  //!< The state of the Case, directly modifiable.
+  //!< State of Case, directly modifiable.
   CaseState state;
 
   /*!
    * \brief Equals Checks whether this case is equal
    * to another case within some tolerance.
    * \param other Case to compare with.
-   * \param tolerance The allowed deviation between two cases.
-   * \return True if the cases are equal within the tolerance,
+   * \param tolerance Allowed deviation between two cases.
+   * \return True if cases are equal within tolerance,
    * otherwise false.
    */
   bool Equals(const Case *other, double tolerance=0.0) const;
@@ -137,7 +137,7 @@ class Case : public Loggable
    * @brief Get a string representation of this case,
    * suitable for console printing.
    * @param varcont Pointer to the variable container.
-   * This is needed to get variable names.
+   * Needed to get variable names.
    * @return An std string describing the case.
    */
   string StringRepresentation(Model::Properties::VarPropContainer *varcont);
@@ -160,27 +160,29 @@ class Case : public Loggable
     return real_variables_;
   }
 
-  // void set_binary_variables(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
-  // void set_integer_variables(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
-  // void set_real_variables(const QHash<QUuid, double> &real_variables) { real_variables_ = real_variables; }
+  // void set_binary_vars(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
+  // void set_integer_vars(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
+  // void set_real_vars(const QHash<QUuid, double> &real_variables) { real_variables_ = real_variables; }
 
-  // void set_binary_variables(const QMap<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
-  // void set_integer_variables(const QMap<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
-  // void set_real_variables(const QMap<QUuid, double> &real_variables) { real_variables_ = real_variables; }
+  // void set_binary_vars(const QMap<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
+  // void set_integer_vars(const QMap<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
+  // void set_real_vars(const QMap<QUuid, double> &real_variables) { real_variables_ = real_variables; }
 
-  void set_binary_variables(const QList<QPair<QUuid, bool>> &binary_variables) {
-    binary_variables_ = binary_variables;
+  void set_binary_vars(const QList<QPair<QUuid, bool>> &binary_vars) {
+    binary_variables_ = binary_vars;
   }
 
-  void set_integer_variables(const QList<QPair<QUuid, int>> &integer_variables) {
-    integer_variables_ = integer_variables;
+  void set_integer_vars(const QList<QPair<QUuid, int>> &integer_vars) {
+    integer_variables_ = integer_vars;
   }
 
-  void set_real_variables(const QList<QPair<QUuid, double>> &real_variables) {
-    real_variables_ = real_variables;
+  void set_real_vars(const QList<QPair<QUuid, double>> &real_vars) {
+    real_variables_ = real_vars;
   }
 
-  double objf_value() const; //!< Get the objective function value. Throws an exception if the value has not been defined.
+  //!< Get the objective function value. Throws an
+  //!< exception if the value has not been defined.
+  double objf_value() const;
   void set_objf_value(double objective_function_value);
 
   //!< Set the value of an integer variable in the case.
@@ -198,6 +200,9 @@ class Case : public Loggable
         return integer_variable.second;
       }
     }
+    wm_ = "QUuid id not found [INT]! Returned default.";
+    ext_warn(wm_ , md_, cl_, vp_.lnw);
+    return STDMIN_I;
   };
 
   bool get_binary_variable_value(QUuid id) {
@@ -206,6 +211,9 @@ class Case : public Loggable
         return binary_variable.second;
       }
     }
+    wm_ = "QUuid id not found [BIN]! Returned default.";
+    ext_warn(wm_ , md_, cl_, vp_.lnw);
+    return STDMIN_I;
   };
 
   double get_real_variable_value(QUuid id) {
@@ -214,18 +222,22 @@ class Case : public Loggable
         return real_variable.second;
       }
     }
-    return -1.0;
+    wm_ = "QUuid id not found [DBL]! Returned default.";
+    ext_warn(wm_ , md_, cl_, vp_.lnw);
+    return STDMIN_D;
   };
 
   enum SIGN { PLUS, MINUS, PLUSMINUS};
 
   /*!
-   * \brief Perturb Creates variations of this Case where the value of one variable has been changed.
+   * \brief Perturb Creates variations of this Case,
+   * i.e., changes the value of one of the variables.
    *
-   * If PLUS or MINUS is selected as the sign, _one_ case is returned. If PLUSMINUS is selected, _two_
-   * cases are returned.
+   * If PLUS or MINUS is selected as the sign, _one_ case
+   * is returned. If PLUSMINUS is selected, _two_ cases
+   * are returned.
    *
-   * Note that this method only handles integer and real variables.
+   * Note: this method only handles integer and real variables.
    * \param variabe_id The UUID of the variable to be perturbed.
    * \param sign The sign/direction of the perturbation.
    * \param magnitude The magnitude of the perturbaton.
@@ -236,68 +248,87 @@ class Case : public Loggable
   /*!
    * Get the real variables of this case as a Vector.
    *
-   * @note This function will not work with Case objects created from CaseTransferObject.
-   * This implies that, when running in parallel, it will only work on the main process.
+   * @note This function will not work with Case objects
+   * created from CaseTransferObject. Thus, when running
+   * in parallel, this function will only work on the main
+   * process.
    *
-   * This creates an ordering of the variables so that for future
-   * use the i'th index in the vector will always correspond to the
-   * same variable.
+   * This function creates an ordering of the variables so
+   * that for future use the i'th index in the vector will
+   * always correspond to the same variable.
+   * [Obsolete b/c QHash -> QList change?]
+   *
    * @return Values of the real variables in a vector
    */
   Eigen::VectorXd GetRealVarVector();
 
   /*!
-   * Sets the real variable values of this case from a given vector.
+   * Sets real variable values in case from a given vector.
    *
-   * @note This function will not work with Case objects created from CaseTransferObject.
-   * This implies that, when running in parallel, it will only work on the main process.
+   * @note This function will not work with Case objects
+   * created from CaseTransferObject. Thus, when running
+   * in parallel, this function will only work on the main
+   * process.
    *
-   * The order of the variables as they appear in vector this case is preserved
-   * given that they were taken from this same case from the function GetRealVector()
+   * The order of the variables as they appear in the vector
+   * is preserved given that they were taken from this same
+   * case from the function GetRealVector()
    * @param vec
    */
   void SetRealVarValues(Eigen::VectorXd vec);
 
   /*!
-   * @brief Get a vector containing the variable UUIDs in the same order they appear
-   * in in the vector from GetRealVarVector.
+   * @brief Get a vector containing the variable UUIDs in the
+   * same order they appear in the vector from GetRealVarVector.
    */
   QList<QUuid> GetRealVarIdVector() { return real_id_index_map_; }
 
   /*!
    * Get the integer variables of this case as a Vector.
    *
-   * @note This function will not work with Case objects created from CaseTransferObject.
-   * This implies that, when running in parallel, it will only work on the main process.
+   * @note This function will not work with Case objects
+   * created from CaseTransferObject. Thus, when running
+   * in parallel, this function will only work on the main
+   * process.
    *
-   * This creates an ordering of the variables so that for future
-   * use the i'th index in the vector will always correspond to the
-   * same variable.
+   * This function creates an ordering of the variables so
+   * that for future use the i'th index in the vector will
+   * always correspond to the same variable.
+   * [Obsolete b/c QHash -> QList change?]
+   *
    * @return Values of the integer variables in a vector
    */
   Eigen::VectorXi GetIntegerVarVector();
 
   /*!
-   * Sets the integer variable values of this case from a given vector.
+   * Sets integer variable values in case from a given vector.
    *
-   * @note This function will not work with Case objects created from CaseTransferObject.
-   * This implies that, when running in parallel, it will only work on the main process.
+   * @note This function will not work with Case objects
+   * created from CaseTransferObject. Thus, when running
+   * in parallel, this function will only work on the main
+   * process.
    *
-   * The order of the variables as they appear in vector this case is preserved
-   * given that they were taken from this same case from the function GetIntegerVarVector()
+   * The order of the variables as they appear in the vector
+   * is preserved given that they were taken from this same
+   * case from the function GetIntegerVarVector()
+   *
    * @param vec
    */
   void SetIntegerVarValues(Eigen::VectorXi vec);
 
   /*!
-   * @brief Set the origin info of this Case/trial point, i.e. which point it was generated
-   * from, in which direction it was perturbed, and with what magnitude. This method is
-   * needed by some optimization algorithms.
+   * @brief Set the origin info of this Case/trial point,
+   * i.e., which point it was generated from, in which
+   * direction it was perturbed, and with what magnitude.
+   * This method is needed by some optimization algorithms.
+   *
    * @param parent The Case/trial point this was generated from.
    * @param direction_index The direction index of the perturbation.
    * @param step_length The magnitude of the perturbation.
    */
-  void set_origin_data(Case* parent, int direction_index, double step_length);
+  void set_origin_data(Case* parent,
+                       int direction_index,
+                       double step_length);
 
   Case* origin_case() const { return parent_; }
   int origin_direction_index() const { return direction_index_; }
@@ -314,31 +345,39 @@ class Case : public Loggable
   // End Logger interface
 
   /*!
-   * @brief Set the time spent computing the well blocs for this case.
-   * @param secs The number of seconds it took.
+   * @brief Set the time spent computing well blocks.
+   * @param secs Number of seconds.
    */
   void SetWICTime(const int secs) { wic_time_sec_ = secs; }
 
   /*!
-   * @brief Get the number of seconds spent computing the well blocks for this case.
+   * @brief Get the number of seconds spent computing well blocks.
    */
   int GetWICTime() const { return wic_time_sec_; }
 
   // Multiple realizations-support
-  void SetEnsembleRealization(const QString &alias) { ensemble_realization_ = alias; }
-  QString GetEnsembleRealization() const { return ensemble_realization_; }
+  void SetEnsembleRealization(const QString &alias) {
+    ensemble_realization_ = alias;
+  }
+
+  QString GetEnsembleRealization() const {
+    return ensemble_realization_;
+  }
 
   void SetRealizationOfv(const QString &alias, const double &ofv);
   bool HasRealizationOfv(const QString &alias);
   double GetRealizationOfv(const QString &alias);
   double GetEnsembleAverageOfv() const;
-  /*!
-   * Gets Ensemble Expected Objective Function Value (OFV). This includes the average
-   * and standard deviation for all the OFVs in the ensemble that was previously run.
-   */
 
+  /*!
+   * Gets Ensemble Expected Objective Function Value (OFV).
+   * This includes the average and standard deviation for
+   * all the OFVs in the ensemble that was previously run.
+   */
   QPair<double, double> GetEnsembleExpectedOfv() const;
-  QHash<QString, double> GetRealizationOFVMap() const { return ensemble_ofvs_; }
+  QHash<QString, double> GetRealizationOFVMap() const {
+    return ensemble_ofvs_;
+  }
 
   bool integer_vars_contain(int &var_indx, QUuid var_id) {
     for(int ii=0; ii < integer_variables_.size(); ii++) {
@@ -363,9 +402,12 @@ class Case : public Loggable
   void SetVerbParams(Settings::VerbParams vp) { vp_ = vp; }
 
  private:
-  QUuid id_; //!< Unique ID for the case.
+  //!< Unique ID for the case.
   int sim_time_sec_;
-  int wic_time_sec_; //!< The number of seconds spent computing the well index for this case.
+  QUuid id_;
+
+  //!< Number of seconds spent computing the well index.
+  int wic_time_sec_;
 
   string im_ = "", wm_ = "", em_ = "";
   string md_ = "Optimization";
@@ -389,13 +431,23 @@ class Case : public Loggable
   QList<QUuid> integer_id_index_map_;
   QList<QUuid> binary_id_index_map_;
 
-  Case* parent_; //!< The parent of this trial point. Needed by the APPS algorithm.
-  int direction_index_; //!< The direction index used to generate this trial point.
-  double step_length_; //!< The step length used to generate this trial point.
+  //!< The parent of this trial point. Needed by APPS.
+  Case* parent_;
+
+  //!< Direction index used to generate this trial point.
+  int direction_index_;
+
+  //!< The step length used to generate this trial point.
+  double step_length_;
 
   // Multiple realizations-support
-  QString ensemble_realization_; //!< The realization to evaluate next. Used by workers when in parallel mode.
-  QHash<QString, double> ensemble_ofvs_; //!< Map of objective function values from realization alias - value.
+
+  //!< The realization to evaluate next.
+  //!< Used by workers when in parallel mode.
+  QString ensemble_realization_;
+
+  //!< Map of objf values from realization alias - value.
+  QHash<QString, double> ensemble_ofvs_;
 };
 
 }

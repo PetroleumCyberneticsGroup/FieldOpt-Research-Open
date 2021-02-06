@@ -135,6 +135,7 @@ class WellBlock
 
   Eigen::Vector3d entry_point_; //!< Entry point for splines through this block.
   Eigen::Vector3d exit_point_;  //!< Exit point for splines through this block.
+
   double entry_md_;
   double exit_md_;
   double length_;

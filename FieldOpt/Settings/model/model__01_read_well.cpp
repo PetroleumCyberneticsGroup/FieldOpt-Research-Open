@@ -81,9 +81,12 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   }
 
   QString definition_type = json_well["DefinitionType"].toString();
-  if (vp_.vSET >= 3) { info("well.def_type: " + definition_type.toStdString()); }
+  if (vp_.vSET >= 3) {
+    info("well.def_type: " + definition_type.toStdString());
+  }
 
-  // Well definition type -> WellBlocks
+
+  // -------------------- Well definition type -> WellBlocks
   if (QString::compare(definition_type, "WellBlocks") == 0) {
     well.definition_type = WellDefinitionType::WellBlocks;
     well.well_blocks = QList<Well::WellBlock>();
@@ -131,7 +134,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       well.well_blocks.append(block);
     } // emd for loop
 
-    // Well definition type -> PolarSpline
+
+    // ----------------- Well definition type -> PolarSpline
   } else if (QString::compare(definition_type, "PolarSpline") == 0) {
 
     well.definition_type = WellDefinitionType::PolarSpline;
@@ -162,7 +166,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     }
     well.polar_spline = polar_spline;
 
-    // Well definition type -> WellSpline
+
+    // ------------------ Well definition type -> WellSpline
   } else if (QString::compare(definition_type, "WellSpline") == 0) {
 
     well.definition_type = WellDefinitionType::WellSpline;
@@ -203,7 +208,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       well.spline_heel = well.spline_points.front();
       well.spline_toe = well.spline_points.back();
 
-      // SplinePoints defined
+
+      // ------------------------------ SplinePoints defined
     } else {
 
       QJsonObject json_points = json_well["SplinePoints"].toObject();
@@ -262,7 +268,8 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       well.spline_points.push_back(well.spline_toe);
     }
 
-    // Well definition type -> PseudoContVertical2D
+
+    // -------- Well definition type -> PseudoContVertical2D
   } else if (QString::compare(definition_type, "PseudoContVertical2D") == 0) {
 
     QJsonObject json_position = json_well["Position"].toObject();

@@ -69,7 +69,7 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
       start_date_.append(json_start_date.at(i).toInt());
     }
   } else {
-    start_date_ = {1, 1, 1980};
+    start_date_ = { 1, 1, 1980 };
     // throw UnableToParseModelSectionException("StartDate must be specified.");
   }
 
@@ -221,17 +221,17 @@ std::string Model::Well::ControlEntry::toString() {
   return ce.str();
 }
 
-std::string Model::Well::toString() {
+std::string Model::Well::toString(std::string sp) {
   std::stringstream ce;
-  ce << "Well - Name:           " << name.toStdString() << "\n";
-  ce << "       Type:           " << (type == WellType::Injector ? "Injector" : "Producer") << "\n";
-  ce << "       Group:          " << group.toStdString() << "\n";
-  ce << "       Radius:         " << wellbore_radius << "\n";
-  ce << "       Direction:      " << direction << "\n";
-  ce << "       Pref. phase:    " << preferred_phase << "\n";
-  ce << "       Def. type:      " << definition_type << "\n";
-  ce << "       N. well blocks: " << well_blocks.size() << "\n";
-  ce << "       N. controls:    " << controls.size() << "\n";
+  ce << "Well - Name:           " << name.toStdString() << sp;
+  ce << "       Type:           " << (type == WellType::Injector ? "Injector" : "Producer") << sp;
+  ce << "       Group:          " << group.toStdString() << sp;
+  ce << "       Radius:         " << wellbore_radius << sp;
+  ce << "       Direction:      " << direction << sp;
+  ce << "       Pref. phase:    " << preferred_phase << sp;
+  ce << "       Def. type:      " << definition_type << sp;
+  ce << "       N. well blocks: " << well_blocks.size() << sp;
+  ce << "       N. controls:    " << controls.size() << sp;
   return ce.str();
 }
 

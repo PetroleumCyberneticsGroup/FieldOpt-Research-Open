@@ -31,6 +31,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QPair>
 #include <stdexcept>
+
 #include "Utilities/filehandling.hpp"
 #include "Utilities/verbosity.h"
 #include "loggable.hpp"

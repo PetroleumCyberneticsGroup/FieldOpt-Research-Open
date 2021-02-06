@@ -39,6 +39,7 @@ Global::Global(QJsonObject json_global) {
   if (json_global.contains("VerbConf")) {
     QJsonObject json_verb = json_global["VerbConf"].toObject();
     parseVerbParams(json_verb);
+    // showVerbParams(im_); // dbg
   } else {
     im_ = "JSON driver file contains no \"VerbConf\" parameter.";
     im_ += "\"VerbConf\" parameter set to default:";
