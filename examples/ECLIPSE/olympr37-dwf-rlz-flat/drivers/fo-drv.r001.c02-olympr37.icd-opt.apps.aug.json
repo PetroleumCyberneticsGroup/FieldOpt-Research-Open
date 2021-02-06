@@ -4,7 +4,7 @@
     "Name": "olympr37-c02-icd-opt-apps",
     "BookkeeperTol": 1E-7,
     "VerbConf": {
-        "iBoxLineWidth": 140,
+        "iBoxLineWidth": 163,
         "Model": 1,
         "Optim": 1,
         "WICal": 1,
@@ -97,13 +97,13 @@
     },
     "Constraints": [
       {
-        "Wells": ["PROD1"],
+        "Wells": [ "PROD1" ],
         "Type": "ICVConstraint",
         "Min": 0.0,
         "Max": 7.853E-03
       },
       {
-        "Wells": ["PROD1"],
+        "Wells": [ "PROD1" ],
         "Type": "BHP",
         "Min": 105.0,
         "Max": 175.0
@@ -152,20 +152,18 @@
           {
             "IsVariable": true,
             "TimeStep": 0,
-            "DeviceNames": ["ICV2", "ICV3", "ICV4", "ICV5",
-                            "ICV6", "ICV7", "ICV8", "ICV9"
-            ],
-            "Segments": [ 2, 3, 4, 5, 6, 7, 8, 9 ],
-            "ValveSize": 3.9265E-03,
+            "ICDNames": [ "ICV2", "ICV3", "ICV4", "ICV5", "ICV6", "ICV7", "ICV8", "ICV9" ],
+            "ICDSegments": [ 2, 3, 4, 5, 6, 7, 8, 9 ],
+            "ValveSize": "3.9265E-5",
             "FlowCoefficient": 0.7,
-            "MinValveSize": 0.0,
-            "MaxValveSize": 7.853E-03,
-            "FrictionDrop": "*",
+            "MinValveSize": 0,
+            "MaxValveSize": "7.853E-3",
+            "FrictionDrop": "-1",
             "PipeDiameter": "0.1016",
-            "AbsRoughness": "*",
-            "PipeAc":       "8.10732E-3",
+            "AbsRoughness": "-1",
+            "PipeXsecArea": "8.10732E-3",
             "DeviceStatus": "OPEN",
-            "Amax":         "7.853E-3"
+            "MaxXsectArea": "7.853E-3"
           }
         ],
         "Controls": [
