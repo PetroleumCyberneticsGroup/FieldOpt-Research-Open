@@ -210,7 +210,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
   }
 
   if (opt_settings->Scaling() && !constraint_set_.empty()) {
-    variables->ScaleVariables();
+    // variables->ScaleVariables();
   }
 
 }

@@ -132,7 +132,8 @@ void VarPropContainer::SetDiscreteVariableValue(QUuid id, int val) {
 void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     if (continuous_variables_->at(ii).first==id) {
-      continuous_variables_->at(ii).second->setValueSc(val);
+      // continuous_variables_->at(ii).second->setValueSc(val);
+      continuous_variables_->at(ii).second->setValue(val);
       return;
     }
   }
@@ -210,8 +211,10 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscVarValues() const {
 QList<QPair<QUuid, double>> VarPropContainer::GetContVarValues() const {
   QList<QPair<QUuid, double>> cont_vals = QList<QPair<QUuid, double>>();
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
+    // cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
+    //                            continuous_variables_->at(ii).second->valueSc()));
     cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-                               continuous_variables_->at(ii).second->valueSc()));
+                               continuous_variables_->at(ii).second->value()));
   }
   return cont_vals;
 }
@@ -501,8 +504,8 @@ void VarPropContainer::ScaleVariables(){
   stringstream ss;
   ss << "@[VarPropContainer::ScaleVariables]|";
 
-  // constraint_handler constructor inserts the bounds of
-  // each variable in the variable container
+  // constraint_handler constructor inserts the bounds
+  // of each variable in the variable container
 
   double D = 1.0, c = 1.0;
   // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2
