@@ -109,7 +109,7 @@ QList<WellBlock *> *Trajectory::GetWellBlocks() {
 
 void Trajectory::UpdateWellBlocks() {
   // \todo This is the source of a memory leak: old well blocks are not deleted. Fix it.
-  if (well_spline_ != 0) {
+  if (well_spline_ != nullptr) {
     if (well_spline_->HasGridChanged() || well_spline_->HasSplineChanged()) {
       well_blocks_ = well_spline_->GetWellBlocks();
     } else {

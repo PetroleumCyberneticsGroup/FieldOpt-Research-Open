@@ -90,8 +90,8 @@ Well::Well(const Settings::Model& model_settings,
     }
 
   } else {
-    im_ = "No well trajectory defined for well: " + name_.toStdString();
-    ext_info(im_, md_, cl_, vp_.lnw);
+    wm_ = "No well trajectory defined for well: " + name_.toStdString();
+    ext_warn(wm_, md_, cl_, vp_.lnw);
   }
 
   // Completions for wells with no defined trajectory

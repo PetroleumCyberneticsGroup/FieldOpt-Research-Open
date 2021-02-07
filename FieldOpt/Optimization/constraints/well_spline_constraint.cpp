@@ -32,22 +32,22 @@ namespace Constraints {
 
 using namespace Model::Properties;
 
-using Printer::ext_info;
-using Printer::ext_warn;
+// using Printer::ext_info;
+// using Printer::ext_warn;
 
-WellSplineConstraint::Well
-WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
-                                            Settings::VerbParams vp) {
-
-  vp__ = vp;
+WellSplineConstraint::Well WellSplineConstraint::
+initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
+                      Settings::VerbParams vp) {
+  xvp_ = vp;
 
   Well well;
   if ((vars.length() >= 6)
-      && (vars.length() % 3) == 0
-      && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+    && (vars.length() % 3) == 0
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
 
-    if (vp__.vOPT >= 2) {
-      ext_info("Using heel-toe parameterization for well spline constraint", md_, cl_);
+    if (xvp_.vOPT >= 3) {
+      xim_ = "Using heel-toe parameterization for well spline constraint";
+      ext_info(xim_, xmd_, xcl_, xvp_.lnw);
     }
 
     for (auto var : vars) {
@@ -60,7 +60,8 @@ WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousP
         } else if (var->propertyInfo().coord == Property::Coordinate::z) {
           well.heel.z = var->id();
         } else {
-          throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+          xem_ = "Unable to parse variable " + var->name().toStdString();
+          throw std::runtime_error(xem_);
         }
 
       } else if (var->propertyInfo().spline_end == Property::SplineEnd::Toe) {
@@ -72,19 +73,22 @@ WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousP
         } else if (var->propertyInfo().coord == Property::Coordinate::z) {
           well.toe.z = var->id();
         } else {
-          throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+          xem_ = "Unable to parse variable " + var->name().toStdString();
+          throw std::runtime_error(xem_);
         }
 
       } else {
-        throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+        xem_ = "Unable to parse variable " + var->name().toStdString();
+        throw std::runtime_error(xem_);
       }
     }
 
     // Adding additional points
     if ((vars.length() > 6)
-        && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
-      if (vp__.vOPT >= 2) {
-        ext_info("Using multi-point parameterization for well spline constraint", md_, cl_);
+      && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+      if (xvp_.vOPT >= 3) {
+        xim_ = "Using multi-point parameterization for well spline constraint";
+        ext_info(xim_, xmd_, xcl_, xvp_.lnw);
       }
 
       std::map<int, Coord> addtl_points;
@@ -108,7 +112,7 @@ WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousP
     }
 
   } else if ((vars.length() == 3)
-      && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
     for (auto var : vars) {
       if (var->propertyInfo().coord == Property::Coordinate::x) {
         well.toe.x = var->id();
@@ -117,14 +121,16 @@ WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousP
       } else if (var->propertyInfo().coord == Property::Coordinate::z) {
         well.toe.z = var->id();
       } else {
-        throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+        xem_ = "Unable to parse variable " + var->name().toStdString();
+        throw std::runtime_error(xem_);
       }
     }
 
   } else if ((vars.length() > 0)
-      && vars[0]->propertyInfo().prop_type == Property::PropertyType::PolarSpline) {
-    if (vp__.vOPT >= 2) {
-      ext_info("Using PolarSpline parameterization for well spline constraint", md_, cl_);
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::PolarSpline) {
+    if (xvp_.vOPT >= 2) {
+      xim_ = "Using PolarSpline parameterization for well spline constraint";
+      ext_info(xim_, xmd_, xcl_, xvp_.lnw);
     }
     for (auto var : vars) {
       if (var->propertyInfo().polar_prop == Property::PolarProp::Midpoint) {
@@ -139,28 +145,31 @@ WellSplineConstraint::initWSplineConstraint(QList<Model::Properties::ContinuousP
     }
 
   } else {
-    em__  = "Incorrect number of variables (" + boost::lexical_cast<std::string>(vars.length());
-    em__ += ") passed to the initialize well method.";
-    throw std::runtime_error(em__);
+    xem_  = "Incorrect number of variables (" + num2str(vars.length());
+    xem_ += ") passed to the initialize well method.";
+    throw std::runtime_error(xem_);
   }
   return well;
 }
 
 QPair<Eigen::Vector3d, Eigen::Vector3d>
-WellSplineConstraint::GetEndpointValueVectors(Case *c, Well well) {
+WellSplineConstraint::GetEndpointValueVectors(Case *c,
+                                              Well well) {
   double hx = c->get_real_variable_value(well.heel.x);
   double hy = c->get_real_variable_value(well.heel.y);
   double hz = c->get_real_variable_value(well.heel.z);
   double tx = c->get_real_variable_value(well.toe.x);
   double ty = c->get_real_variable_value(well.toe.y);
   double tz = c->get_real_variable_value(well.toe.z);
+
   Eigen::Vector3d heel(hx, hy, hz);
   Eigen::Vector3d toe(tx, ty, tz);
   return qMakePair(heel, toe);
 }
 
 std::vector<Eigen::Vector3d>
-WellSplineConstraint::GetPointValueVectors(Case *c, WellSplineConstraint::Well well) {
+WellSplineConstraint::GetPointValueVectors(Case *c,
+                                           WellSplineConstraint::Well well) {
 
   std::vector<Eigen::Vector3d> points;
   auto endpoints = GetEndpointValueVectors(c, well);
@@ -178,7 +187,8 @@ WellSplineConstraint::GetPointValueVectors(Case *c, WellSplineConstraint::Well w
   return points;
 }
 
-double WellSplineConstraint::GetWellLength(Case *c, WellSplineConstraint::Well well) {
+double WellSplineConstraint::GetWellLength(Case *c,
+                                           WellSplineConstraint::Well well) {
   double length = 0.0;
   auto points = GetPointValueVectors(c, well);
   for (int i = 0; i < points.size() - 1; ++i) {

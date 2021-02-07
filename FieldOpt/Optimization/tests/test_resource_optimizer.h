@@ -53,8 +53,6 @@ class TestResourceOptimizer :
 
     base_case_->set_objf_value(1000.0);
 
-    Settings::VerbParams vp_ = {};
-
     settings_compass_search_min_unconstr_ =
       new Settings::Optimizer(
         get_json_settings_compass_search_minimize_, vp_);
@@ -127,6 +125,8 @@ class TestResourceOptimizer :
   Settings::Optimizer *settings_ego_max_;
   Settings::Optimizer *settings_cma_es_min_;
   Settings::Optimizer *settings_tr_opt_max_;
+
+  Settings::VerbParams vp_ = {};
 
  private:
   QJsonObject obj_fun_{

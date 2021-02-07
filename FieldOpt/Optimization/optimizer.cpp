@@ -280,7 +280,9 @@ void Optimizer::updateTentativeBestCase(Case *c) {
 
 void Optimizer::initializeNormalizers() {
   initializeOfvNormalizer();
-  constraint_handler_->InitializeNormalizers(case_handler_->AllCases());
+  if (constraint_handler_ != nullptr) { // All actual cases, i.e., not unit tests
+    constraint_handler_->InitializeNormalizers(case_handler_->AllCases());
+  }
 }
 
 void Optimizer::initializeOfvNormalizer() {

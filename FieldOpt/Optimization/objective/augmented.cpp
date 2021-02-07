@@ -24,7 +24,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "augmented.h"
 #include <Utilities/printer.hpp>
 
-
 namespace Optimization {
 namespace Objective {
 
@@ -38,8 +37,9 @@ Augmented::Augmented(Settings::Optimizer *settings,
   settings_ = settings;
   results_ = results;
   model_ = model;
-  if (model_ == nullptr)
+  if (model_ == nullptr) {
     ext_error("Initialize model", md_, cl_, vp_.lnw);
+  }
 
   setUpAugTerms();
   setUpWaterCutLimit();
@@ -78,7 +78,8 @@ double Augmented::value(bool base_case) {
             // VectorXd wlft = results_->GetValueVectorXd(ECLProp::WellLiqProdTotal, wn); // not used, keep-for-ref
             vector<VectorXd> slft = results_->GetValVectorSegXd(ECLProp::WellSegLiqFlowTotal, wn);
             if (slft.size() == 0) {
-              ext_error("One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.", md_, cl_);
+              em_ = "One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.";
+              ext_error(em_, md_, cl_, vp_.lnw);
               assert(slft.size() > 0);
             }
 
@@ -216,10 +217,11 @@ double Augmented::value(bool base_case) {
       }
       value += t_val;
     }
-    ext_info(ss.str(), md_, cl_, vp_.lnw);
+    if (vp_.vOPT >= 3) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 
   } catch (std::exception const &ex) {
-    em_ = "Failed to compute Augmented function " + string(ex.what()) + " Returning 0.0";
+    em_ = "Failed to compute Augmented function ";
+    em_ += string(ex.what()) + " Returning 0.0";
     ext_error(em_, md_, cl_, vp_.lnw);
   }
   return value;
@@ -243,7 +245,7 @@ void Augmented::setUpWaterCutLimit() {
     wcut_limit_ = abs(po_cwp) / (abs(po_cwp) + 1);
     if (vp_.vOPT >= 3) {
       im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
-      info(im_, vp_.lnw);
+      ext_info(im_, md_, cl_, vp_.lnw);
     }
 
   } else if (vp_.vOPT >= 3) {

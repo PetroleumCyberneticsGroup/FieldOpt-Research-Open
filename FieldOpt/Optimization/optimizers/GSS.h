@@ -71,7 +71,7 @@ class GSS : public Optimizer {
    *      contr_fac_  : The contraction factor.
    *      expan_fac_  : The expansion factor.
    *      directions_ : The set of search directions to be used.
-   *      step_lengths_ : The set of step lengts to be used (one per step direction).
+   *      step_lengths_ : Set of step lengths to be used (one per step direction).
    */
   GSS(Settings::Optimizer *settings,
       Case *base_case,
@@ -89,7 +89,7 @@ class GSS : public Optimizer {
    * of objective function evaluations and min step length.
    * \return True if the algorithm has finished, otherwise false.
    */
-  TerminationCondition IsFinished();
+  TerminationCondition IsFinished() override;
 
  protected:
   //!< # of variables in the problem. Used in initialization.

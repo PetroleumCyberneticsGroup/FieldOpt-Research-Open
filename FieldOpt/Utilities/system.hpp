@@ -38,22 +38,22 @@ inline bool is_env_var_set(std::string var_name) {
   char const* var_value = getenv(var_name.c_str());
   if (var_value == NULL) {
     return false;
-  }
-  else {
+  } else {
     return true;
   }
 }
 
 /*!
- * @brief Get the value of an environment variable. Throws an exception if the variable is unset.
- * @param var_name Name of variable to check (e.g. FIELDOPT_BUILD_ROOT).
+ * @brief Get the value of an environment variable.
+ * Throws an exception if the variable is unset.
+ * @param var_name Name of variable to check
+ * (e.g., FIELDOPT_BUILD_ROOT).
  * @return Value of environment variable as string.
  */
 inline std::string get_env_var_value(std::string var_name) {
   if (!is_env_var_set(var_name)) {
     throw std::runtime_error("Attempting to get unset environment variable " + var_name);
-  }
-  else {
+  } else {
     char const* var_value = getenv(var_name.c_str());
     std::string s(var_value);
     return var_value;

@@ -30,18 +30,17 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
-                             Model::Properties::VarPropContainer *variables,
-                             Settings::VerbParams vp)
-    : Constraint(vp) {
-
+ICVConstraint::
+ICVConstraint(const Settings::Optimizer::Constraint& settings,
+              Model::Properties::VarPropContainer *variables,
+              Settings::VerbParams vp) : Constraint(vp) {
   variables_ = variables;
-
   assert(settings.wells.size() > 0);
   assert(settings.min < settings.max);
 
-  if (vp_.vOPT >= 1) {
-    info("Adding ICV constraint for " + settings.well.toStdString());
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding ICV constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   min_ = settings.min;
@@ -50,7 +49,7 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
   icd_cnstrnd_well_nms_ = settings.wells;
   penalty_weight_ = settings.penalty_weight;
 
-  if (vp_.vOPT >= 1) {
+  if (vp_.vOPT >= 3) {
     im_ = "Adding ICV constraint with [min, max] = [";
     im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
     im_ += "] for well " + settings.well.toStdString() + " with variables: ";
@@ -71,7 +70,7 @@ ICVConstraint::ICVConstraint(const Settings::Optimizer::Constraint& settings,
     max_ = 1.0;
   }
 
-  ext_info(im_, md_, cl_, vp_.lnw);
+  if (vp_.vOPT >= 3) { ext_info(im_, md_, cl_, vp_.lnw); }
 }
 
 bool ICVConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {

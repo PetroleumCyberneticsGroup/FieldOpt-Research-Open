@@ -29,18 +29,21 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
+using ::Optimization::Constraints::BhpConstraint;
+
 class BhpConstraintTest : public ::testing::Test,
                           public TestResources::TestResourceOptimizer {
  protected:
   BhpConstraintTest() {
-    box_constraint_ = new ::Optimization::Constraints::BhpConstraint(settings_optimizer_->constraints()[0],
-                                                                     model_->variables(),
-                                                                     settings_full_->global()->verbParams());
+    box_constraint_ =
+      new BhpConstraint(settings_optimizer_->constraints()[0],
+                        model_->variables(),
+                        settings_full_->global()->verbParams());
   }
   virtual ~BhpConstraintTest() {}
   virtual void SetUp() {}
 
-  Optimization::Constraints::BhpConstraint *box_constraint_;
+  BhpConstraint *box_constraint_;
 };
 
 TEST_F(BhpConstraintTest, Constructor) {
@@ -57,6 +60,8 @@ TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
   for (auto var : model_->variables()->GetWellBHPVars("PROD")) {
     bhp_ids.append(var->id());
   }
+
+  cout << "bhp_ids.size(): " << bhp_ids.size() << endl;
 
   // set all bhps to 500 (which exceeds the max value defined, 300)
   for (QUuid key : bhp_ids) {

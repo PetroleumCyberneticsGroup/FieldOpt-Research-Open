@@ -849,17 +849,15 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
         so << term.showTerms();
         obj.terms.push_back(term);
       }
-      ext_info(so.str(), md_, cl_);
+      if (vp_.vSET > 3) { ext_info(so.str(), md_, cl_, vp_.lnw); }
 
     } else {
-      throw UnableToParseOptimizerObjectiveSectionException(
-          "Objective type " + objective_type.toStdString()
-              + " not recognized");
+      string em = "Objective type " + objective_type.toStdString() + " not recognized";
+      throw UnableToParseOptimizerObjectiveSectionException(em);
     }
 
     if (json_objective.contains("UsePenaltyFunction")) {
       obj.use_penalty_function = json_objective["UsePenaltyFunction"].toBool();
-
     } else {
       obj.use_penalty_function = false;
     }

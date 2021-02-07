@@ -39,7 +39,7 @@ namespace Constraints {
  * \brief The WellSplineConstraint class acts as a parent
  * class for constraints dealing with well splines.
  *
- * This class provides datastructures with initialization
+ * This class provides data structures with initialization
  * methods that ease the application of well spline
  * constraints.
  */
@@ -49,8 +49,8 @@ class WellSplineConstraint
   WellSplineConstraint() {}
 
   /*!
-   * \brief The Coord struct hodlds the UUIDs for the
-   * variables containing coordinate values of a WellSpline point.
+   * \brief The Coord struct holds UUIDs for the variables
+   *  containing coordinate values of a WellSpline point.
    */
   struct Coord {
     QUuid x;
@@ -95,12 +95,12 @@ class WellSplineConstraint
 
   double GetWellLength(Case *c, WellSplineConstraint::Well well);
 
-  string md_ = "Optimization::Constraints";
-  string cl_ = "WellSplineConstraint";
+  string xmd_ = "Optimization::Constraints";
+  string xcl_ = "WellSplineConstraint";
 
  private:
-  Settings::VerbParams vp__;
-  string im__ = "", wm__ = "", em__ = "";
+  Settings::VerbParams xvp_;
+  string xim_ = "", xwm_ = "", xem_ = "";
 
 };
 

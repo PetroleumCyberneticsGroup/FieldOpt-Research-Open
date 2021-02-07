@@ -224,7 +224,7 @@ int Property::get_spline_index(const QString prop_name) const {
     }
   }
 
-  // TODO Restructure function to give proper return int value
+  // \todo Restructure function to give proper return int value
   return STDMAX_I;
 }
 

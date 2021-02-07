@@ -37,8 +37,7 @@ WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
                              Model::Properties::VarPropContainer *variables,
                              Settings::VerbParams vp)
                              : Constraint(vp) {
-
-  if (vp_.vOPT >= 1) {
+  if (vp_.vOPT >= 3) {
     im_ = "Adding WSplineLength constraint for " + settings.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
@@ -49,9 +48,10 @@ WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
 
   affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp_);
 
-  if (vp_.vOPT>=3)
+  if (vp_.vOPT >= 3) {
     im_ = " -> initialized length constraint for well: " + settings.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
+  }
 }
 
 bool WSplineLength::CaseSatisfiesConstraint(Case *c) {
@@ -121,7 +121,7 @@ double WSplineLength::Penalty(Case *c) {
   double well_length =  (endpts.first - endpts.second).norm();
 
   if (well_length > max_length_) {
-    if (vp_.vOPT >= 2) {
+    if (vp_.vOPT >= 3) {
       im_ = "Well length penalty for case " + c->id().toString().toStdString();
       im_ += ": " + num2str(well_length - max_length_) + " m too long";
       ext_info(im_, md_, cl_);
@@ -129,7 +129,7 @@ double WSplineLength::Penalty(Case *c) {
     return well_length - max_length_;
 
   } else if (well_length < min_length_) {
-    if (vp_.vOPT >= 2) {
+    if (vp_.vOPT >= 3) {
       im_ = "Well length penalty for case " + c->id().toString().toStdString();
       im_ += ":" + num2str(min_length_ - well_length) + " m too short";
       ext_info(im_, md_, cl_);

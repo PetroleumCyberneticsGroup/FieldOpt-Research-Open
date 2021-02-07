@@ -32,8 +32,9 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The WSplineLength class defines a constraint on the maximum and minimum length
- * of a well defined by a WellSpline. It uses the WellIndexCalculation library.
+ * \brief The WSplineLength class defines a constraint on
+ * the maximum and minimum length of a well defined by a
+ * WellSpline. It uses the WellIndexCalculation library.
  */
 class WSplineLength : public Constraint, WellSplineConstraint
 {

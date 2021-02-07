@@ -49,6 +49,7 @@ class MxSplineLengthInterwDist : public Constraint
                            Settings::VerbParams vp);
 
   string name() override { return "MxSplineLengthInterwDist"; }
+
   // Constraint interface
  public:
   bool CaseSatisfiesConstraint(Case *c);

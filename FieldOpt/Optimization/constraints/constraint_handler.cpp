@@ -30,10 +30,10 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-using Printer::info;
-using Printer::ext_info;
-using Printer::ext_warn;
-using Printer::num2str;
+// using Printer::info;
+// using Printer::ext_info;
+// using Printer::ext_warn;
+// using Printer::num2str;
 
 ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
                                      Model::Properties::VarPropContainer *variables,
@@ -227,14 +227,16 @@ bool ConstraintHandler::CaseSatisfiesConstraints(Case *c) {
 }
 
 void ConstraintHandler::SnapCaseToConstraints(Case *c) {
+  // \todo Case c may contain other vars besides real vars
   auto vec_before = c->GetRealVarVector();
+
   for (Constraint *constraint : constraints_) {
     constraint->SnapCaseToConstraints(c);
   }
+
   if (vec_before != c->GetRealVarVector()) {
     c->state.cons = Case::CaseState::ConsStatus::C_PROJECTED;
-  }
-  else {
+  } else {
     c->state.cons = Case::CaseState::ConsStatus::C_FEASIBLE;
   }
 }

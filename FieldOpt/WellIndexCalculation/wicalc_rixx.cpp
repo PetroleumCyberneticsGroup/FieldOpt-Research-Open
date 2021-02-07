@@ -141,7 +141,7 @@ void wicalc_rixx::calculateWellPathIntersections(const WellPath& wellPath,
                                           wellPath.m_wellPathPoints);
 
   std::stringstream str;
-  if (vp_.vWIC >=3) {
+  if (vp_.vWIC >= 3) {
     string im = "Found " + num2str(intersections.size()) + " intersections.";
     ext_info(im, md_, cl_);
   }
@@ -282,7 +282,7 @@ void wicalc_rixx::collectIntersectedCells(vector<IntersectedCell> &isc_cells,
     isc_cells.push_back(icell);
   }
 
-  ext_info(sa.str(), md_, cl_);
+  if (vp_.vWIC >= 3) { ext_info(sa.str(), md_, cl_); }
 }
 
 // =========================================================

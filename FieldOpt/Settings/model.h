@@ -197,7 +197,7 @@ class Model
     std::vector<Completion> completions;        //!< List of completions. Used when using neither segmentation or trajectories.
     int seg_n_compartments = 0;                 //!< Number of packer-delimited compartments with ICDs to use.
 
-    string wseg_structure = "";
+    string wseg_structure;
 
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
     std::string toString(std::string sp="\n");
@@ -205,7 +205,7 @@ class Model
 
     VerbParams verb_params_;
     void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
-    VerbParams verbParams() { return verb_params_; };
+    VerbParams verbParams() const { return verb_params_; };
   };
 
   QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
@@ -213,7 +213,7 @@ class Model
   QList<int> start_date() const { return start_date_; }
 
   VerbParams vp_;
-  VerbParams verbParams() { return vp_; };
+  VerbParams verbParams() const { return vp_; };
 
  private:
   QList<Well> wells_;
@@ -226,8 +226,8 @@ class Model
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
-  void setImportedWellDefaults(QJsonObject json_model);
-  void parseImportedWellOverrides(QJsonArray json_wells);
+  // void setImportedWellDefaults(QJsonObject json_model);
+  // void parseImportedWellOverrides(QJsonArray json_wells);
 
   void parseSegmentation(const QJsonObject& json_seg, Well &well);
   void parseSegmentTubing(const QJsonObject &json_seg, Well &well) const;

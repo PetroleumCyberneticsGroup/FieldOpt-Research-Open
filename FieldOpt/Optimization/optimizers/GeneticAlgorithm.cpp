@@ -32,13 +32,14 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Optimizers {
 
-GeneticAlgorithm::GeneticAlgorithm(Settings::Optimizer *settings,
-                                   Case *base_case,
-                                   Model::Properties::VarPropContainer *variables,
-                                   Reservoir::Grid::Grid *grid,
-                                   Logger *logger,
-                                   CaseHandler *case_handler,
-                                   Constraints::ConstraintHandler *constraint_handler )
+GeneticAlgorithm::
+GeneticAlgorithm(Settings::Optimizer *settings,
+                 Case *base_case,
+                 Model::Properties::VarPropContainer *variables,
+                 Reservoir::Grid::Grid *grid,
+                 Logger *logger,
+                 CaseHandler *case_handler,
+                 Constraints::ConstraintHandler *constraint_handler)
   : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
 
   vp_ = settings->verbParams();
@@ -47,27 +48,44 @@ GeneticAlgorithm::GeneticAlgorithm(Settings::Optimizer *settings,
   gen_ = get_random_generator(settings->parameters().rng_seed);
   max_generations_ = settings->parameters().max_generations;
 
-  if (settings->parameters().population_size < 0)
+  if (settings->parameters().population_size < 0) {
     population_size_ = std::min(10*n_vars_, 100);
-  else population_size_ = settings->parameters().population_size;
-  if (population_size_ % 2 != 0) population_size_--; // Make sure its an even number
+  } else {
+    population_size_ = settings->parameters().population_size;
+  }
+
+  if (population_size_ % 2 != 0) {
+    population_size_--;   // Make sure its an even number
+  }
 
   p_crossover_ = settings->parameters().p_crossover;
   decay_rate_ = settings->parameters().decay_rate;
   mutation_strength_ = settings->parameters().mutation_strength;
 
-  if (constraint_handler_->HasBoundaryConstraints()) {
-    lower_bound_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
-    upper_bound_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
-    if (vp_.vOPT > 1) {
-      cout << "Using bounds from constraints: " << endl;
-      cout << vec_to_str(vector<double>(lower_bound_.data(), lower_bound_.data() + lower_bound_.size()));
-      cout << endl;
-      cout << vec_to_str(vector<double>(upper_bound_.data(), upper_bound_.data() + upper_bound_.size()));
-      cout << endl;
-    }
+  if (constraint_handler_ != nullptr) { // All actual cases
+    if (constraint_handler_->HasBoundaryConstraints()) {
 
-  } else {
+      lower_bound_ = constraint_handler_->GetLowerBounds(
+        base_case->GetRealVarIdVector());
+
+      upper_bound_ = constraint_handler_->GetUpperBounds(
+        base_case->GetRealVarIdVector());
+
+      if (vp_.vOPT > 1) {
+        cout << "Using bounds from constraints: " << endl;
+        cout << vec_to_str(vector<double>(lower_bound_.data(), lower_bound_.data() + lower_bound_.size()));
+        cout << endl;
+        cout << vec_to_str(vector<double>(upper_bound_.data(), upper_bound_.data() + upper_bound_.size()));
+        cout << endl;
+      }
+
+    } else {
+      lower_bound_.resize(n_vars_);
+      upper_bound_.resize(n_vars_);
+      lower_bound_.fill(settings->parameters().lower_bound);
+      upper_bound_.fill(settings->parameters().upper_bound);
+    }
+  } else { // constraint_handler_ == nullptr in unit tests
     lower_bound_.resize(n_vars_);
     upper_bound_.resize(n_vars_);
     lower_bound_.fill(settings->parameters().lower_bound);
@@ -88,10 +106,14 @@ GeneticAlgorithm::GeneticAlgorithm(Settings::Optimizer *settings,
 }
 Optimizer::TerminationCondition GeneticAlgorithm::IsFinished() {
   TerminationCondition tc = NOT_FINISHED;
-  if (case_handler_->CasesBeingEvaluated().size() > 0)
+  if (!case_handler_->CasesBeingEvaluated().empty()) {
     return tc;
-  if (iteration_ >= max_generations_)
+  }
+
+  if (iteration_ >= max_generations_) {
     tc = MAX_ITERATIONS_REACHED;
+  }
+
   if (tc != NOT_FINISHED) {
     population_ = sortPopulation(population_);
     if (enable_logging_) {
@@ -101,15 +123,18 @@ Optimizer::TerminationCondition GeneticAlgorithm::IsFinished() {
   }
   return tc;
 }
+
 GeneticAlgorithm::Chromosome::Chromosome(Case *c) {
   case_pointer = c;
   rea_vars = c->GetRealVarVector();
 }
+
 void GeneticAlgorithm::Chromosome::createNewCase() {
   Case *new_case = new Case(case_pointer);
   new_case->SetRealVarValues(rea_vars);
   case_pointer = new_case;
 }
+
 void GeneticAlgorithm::printPopulation(vector<Chromosome> population) const {
   if (population.size() == 0)
     population = population_;
@@ -119,6 +144,7 @@ void GeneticAlgorithm::printPopulation(vector<Chromosome> population) const {
     printChromosome(population[i]);
   }
 }
+
 void GeneticAlgorithm::printChromosome(Chromosome &chrom) const {
   printf("%4.2f\t\t", chrom.ofv());
   for (int i = 0; i < n_vars_; ++i) {
@@ -126,12 +152,15 @@ void GeneticAlgorithm::printChromosome(Chromosome &chrom) const {
   }
   cout << endl;
 }
-vector<GeneticAlgorithm::Chromosome> GeneticAlgorithm::sortPopulation(vector<Chromosome> population) {
+
+vector<GeneticAlgorithm::Chromosome>
+  GeneticAlgorithm::sortPopulation(vector<Chromosome> population) {
   std::sort(population.begin(), population.end(), [&](Chromosome c1, Chromosome c2) {
     return isBetter(c1.case_pointer, c2.case_pointer);
   });
   return population;
 }
+
 Case *GeneticAlgorithm::generateRandomCase() {
   auto new_case = new Case(GetTentativeBestCase());
 

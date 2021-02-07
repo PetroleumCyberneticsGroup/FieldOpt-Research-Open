@@ -50,6 +50,7 @@ namespace FileHandling {
 using Printer::ext_info;
 using Printer::info;
 using Printer::ext_warn;
+using Printer::num2str;
 using boost::filesystem::copy_file;
 
 /*!

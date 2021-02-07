@@ -30,17 +30,17 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
+
 PolarXYZBoundary::PolarXYZBoundary(
     const Settings::Optimizer::Constraint &settings,
     Model::Properties::VarPropContainer *variables,
     Reservoir::Grid::Grid *grid,
-    Settings::VerbParams vp)
-    : Constraint(vp) {
+    Settings::VerbParams vp) : Constraint(vp) {
 
   if (vp.vOPT >= 1) {
     im_ = "Adding PolarXYZBoundary constraint for ";
     im_ += settings.well.toStdString();
-    info(im_);
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   xmin_ = settings.box_xyz_xmin;

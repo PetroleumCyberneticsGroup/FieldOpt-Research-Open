@@ -40,8 +40,9 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(
     Settings::VerbParams vp)
     : Constraint(vp) {
 
-  if (vp_.vOPT >= 1) {
-    info("Adding ReservoirXYZBoundary constraint for " + settings.well.toStdString());
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding ReservoirXYZBoundary constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   xmin_ = settings.box_xyz_xmin;
@@ -70,7 +71,8 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(
     box_xyz_cnstrnd_well_ = initWSplineConstraint(wspline_vars, vp);
 
   } else {
-    ext_warn("GetWSplineVars for well " + settings.well.toStdString() + " is empty.", md_, cl_);
+    wm_ = "GetWSplineVars for well " + settings.well.toStdString() + " is empty.";
+    ext_warn(wm_, md_, cl_, vp_.lnw);
 
   }
 }

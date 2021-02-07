@@ -64,13 +64,19 @@ class ConstraintHandler
                     Model::Properties::VarPropContainer *variables,
                     Reservoir::Grid::Grid *grid);
 
-  bool CaseSatisfiesConstraints(Case *c); //!< Check if a Case satisfies _all_ constraints.
-  void SnapCaseToConstraints(Case *c); //!< Snap all variables to _all_ constraints.
+  //!< Check if a Case satisfies _all_ constraints.
+  bool CaseSatisfiesConstraints(Case *c);
 
-  QList<Constraint *> constraints() const { return constraints_; }
+  //!< Snap all variables to _all_ constraints.
+  void SnapCaseToConstraints(Case *c);
+
+  QList<Constraint *> constraints() const {
+    return constraints_;
+  }
 
   /*!
-   * @brief Check whether any of the constraints within are boundary constraints.
+   * @brief Check whether any of the constraints
+   * within are boundary constraints.
    */
   bool HasBoundaryConstraints() const;
 
@@ -81,7 +87,8 @@ class ConstraintHandler
   void InitializeNormalizers(QList<Case *> cases);
 
   /*!
-   * @brief Get the sum of all normalized penalties multiplied by their respective weights.
+   * @brief Get the sum of all normalized penalties
+   * multiplied by their respective weights.
    * @param c The case to get the penalties for.
    * @return Weighted sum of all normalized penalties
    */
@@ -96,7 +103,7 @@ class ConstraintHandler
   Model::Properties::VarPropContainer *vars_;
 
   Settings::VerbParams vp_;
-  string md_ = "Optimization::Constraints";
+  string md_ = "Optimization/constraints";
   string cl_ = "ConstraintHandler";
   string im_ = "", wm_ = "", em_ = "";
 

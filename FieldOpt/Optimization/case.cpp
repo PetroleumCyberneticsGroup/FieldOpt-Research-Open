@@ -191,8 +191,14 @@ void Case::set_binary_variable_value(const QUuid id, const bool val) {
 
 void Case::set_real_variable_value(const QUuid id, const double val) {
   for(int ii=0; ii < real_variables_.size(); ii++) {
+
+    cout << "real_variables_.at(ii).second: " << real_variables_.at(ii).second << endl;
+
     if (real_variables_.at(ii).first==id) {
       auto pair_int = qMakePair(real_variables_.at(ii).first, val);
+
+      cout << "pair_int: " << pair_int.second << endl;
+      cout << "----------------------------------" << endl;
       real_variables_.replace(ii, pair_int);
       return;
     }
