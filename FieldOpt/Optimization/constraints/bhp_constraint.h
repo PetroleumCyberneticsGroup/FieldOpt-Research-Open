@@ -62,6 +62,8 @@ class BhpConstraint : public Constraint
   QList<ContinuousProperty *> bhp_cnstrnd_real_vars_;
   QList<QUuid> bhp_cnstrnd_uuid_vars_;
 
+  Model::Properties::VarPropContainer *variables_;
+
   string md_ = "Optimizer::constraints";
   string cl_ = "BhpConstraint";
 };

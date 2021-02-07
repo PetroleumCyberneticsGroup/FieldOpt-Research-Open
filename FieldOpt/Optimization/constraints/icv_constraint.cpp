@@ -35,11 +35,16 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
               Model::Properties::VarPropContainer *variables,
               Settings::VerbParams vp) : Constraint(vp) {
   variables_ = variables;
-  assert(settings.wells.size() > 0);
+  assert(!settings.wells.empty());
   assert(settings.min < settings.max);
 
+  string ws;
+  if (settings.well.isEmpty()) {
+    for (const auto& wn : settings.wells) { ws += wn.toStdString() + "; "; }
+  } else { ws = settings.well.toStdString(); }
+
   if (vp_.vOPT >= 3) {
-    im_ = "Adding ICV constraint for " + settings.well.toStdString();
+    im_ = "Adding ICV constraint for " + ws;
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
@@ -52,17 +57,18 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
   if (vp_.vOPT >= 3) {
     im_ = "Adding ICV constraint with [min, max] = [";
     im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well " + settings.well.toStdString() + " with variables: ";
+    im_ += "] for well " + ws + " with variables: ";
   }
 
   for (auto &wname : icd_cnstrnd_well_nms_) {
     auto icd_vars = variables->GetWellICDVars(wname);
+    icd_cnstrnd_real_vars_.append(icd_vars);
+
     for (auto var : icd_vars) {
       var->setBounds(min_, max_);
       icd_cnstrnd_uuid_vars_.push_back(var->id());
       im_ += var->name().toStdString() + ", ";
     }
-    icd_cnstrnd_real_vars_.append(icd_vars);
   }
 
   if(settings.scaling_) {
@@ -73,10 +79,21 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
   if (vp_.vOPT >= 3) { ext_info(im_, md_, cl_, vp_.lnw); }
 }
 
-bool ICVConstraint::CaseSatisfiesConstraint(Optimization::Case *c) {
-  for (auto var : icd_cnstrnd_real_vars_) {
-    if (var->value() > max_ || var->value() < min_)
-      return false;
+// Keep for ref
+// bool ICVConstraint::CaseSatisfiesConstraint(Case *c) {
+//   for (auto id : affected_variables_) {
+//     if (c->real_variables()[id] > max_ || c->real_variables()[id] < min_) {
+//       return false;
+//     }
+//   }
+//   return true;
+// }
+
+bool ICVConstraint::CaseSatisfiesConstraint(Case *c) {
+  for (int ii=0; ii < icd_cnstrnd_real_vars_.size(); ii++ ) {
+    auto var_id = icd_cnstrnd_uuid_vars_[ii];
+    double c_val = c->get_real_variable_value(var_id);
+    if (c_val > max_ || c_val < min_) { return false; }
   }
   return true;
 }

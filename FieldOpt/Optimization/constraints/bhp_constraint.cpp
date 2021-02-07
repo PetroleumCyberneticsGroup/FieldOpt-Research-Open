@@ -29,23 +29,22 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
-                             Model::Properties::VarPropContainer *variables,
-                             Settings::VerbParams vp)
-                             : Constraint(vp) {
-
+BhpConstraint::
+BhpConstraint(const Settings::Optimizer::Constraint settings,
+              Model::Properties::VarPropContainer *variables,
+              Settings::VerbParams vp) : Constraint(vp) {
+  variables_ = variables;
   assert(settings.wells.size() > 0);
   assert(settings.min < settings.max);
 
   string ws;
   if (settings.well.isEmpty()) {
     for (auto wn : settings.wells) { ws += wn.toStdString() + "; "; }
-  } else {
-    ws = settings.well.toStdString();
-  }
+  } else { ws = settings.well.toStdString(); }
 
-  if (vp_.vOPT >= 1) {
-    ext_info("Adding BHP constraint for " + ws, md_, cl_, vp_.lnw);
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding BHP constraint for " + ws;
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   min_ = settings.min;
@@ -62,12 +61,13 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {
     auto bhp_vars = variables->GetWellBHPVars(wname);
+    bhp_cnstrnd_real_vars_.append(bhp_vars);
+
     for (auto var : bhp_vars) {
       var->setBounds(min_, max_);
       bhp_cnstrnd_uuid_vars_.push_back(var->id());
       im_ += var->name().toStdString() + ", ";
     }
-    bhp_cnstrnd_real_vars_.append(bhp_vars);
   }
 
   if(settings.scaling_) {
@@ -75,16 +75,26 @@ BhpConstraint::BhpConstraint(Settings::Optimizer::Constraint const settings,
     max_ = 1.0;
   }
 
-  ext_info(im_, md_, cl_, vp_.lnw);
+  if (vp_.vOPT >= 3) { ext_info(im_, md_, cl_, vp_.lnw); }
 }
 
+// Keep for ref
+// bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
+//   for (auto var : bhp_cnstrnd_real_vars_) {
+//     double case_value = c->get_real_variable_value(var->id());
+//     if (case_value > max_ || case_value < min_) {
+//       return false;
+//     }
+//   }
+//   return true;
+// }
+
 bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
-  for (auto var : bhp_cnstrnd_real_vars_) {
-    // double case_value = c->real_variables()[var->id()];
-    // double case_value = c->get_real_variable_value(var->id());
-    if (var->value() > max_ || var->value() < min_)
-      return false;
-  }
+    for (int ii=0; ii < bhp_cnstrnd_real_vars_.size(); ii++ ) {
+      auto var_id = bhp_cnstrnd_uuid_vars_[ii];
+      double c_val = c->get_real_variable_value(var_id);
+      if (c_val > max_ || c_val < min_) { return false; }
+    }
   return true;
 }
 
