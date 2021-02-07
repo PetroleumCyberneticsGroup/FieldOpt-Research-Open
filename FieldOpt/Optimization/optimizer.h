@@ -145,7 +145,7 @@ class Optimizer : public Loggable
   virtual QString GetStatusString() const;
 
   //!< Enable writing a text log for the constraint operations.
-  void EnableConstraintLogging(QString output_directory_path);
+  void EnableConstraintLogging(const QString& output_directory_path);
 
   //!< Check if the optimizer is asynchronous.
   bool IsAsync() const { return is_async_; }

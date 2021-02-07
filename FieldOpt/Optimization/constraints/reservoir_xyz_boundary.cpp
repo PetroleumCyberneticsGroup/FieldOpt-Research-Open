@@ -37,11 +37,11 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(
     const Settings::Optimizer::Constraint &settings,
     Model::Properties::VarPropContainer *variables,
     Reservoir::Grid::Grid *grid,
-    Settings::VerbParams vp)
-    : Constraint(vp) {
+    Settings::VerbParams vp) : Constraint(vp) {
 
   if (vp_.vOPT >= 3) {
-    im_ = "Adding ReservoirXYZBoundary constraint for " + settings.well.toStdString();
+    im_ = "Adding ReservoirXYZBoundary constraint for ";
+    im_ += settings.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
@@ -71,9 +71,9 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(
     box_xyz_cnstrnd_well_ = initWSplineConstraint(wspline_vars, vp);
 
   } else {
-    wm_ = "GetWSplineVars for well " + settings.well.toStdString() + " is empty.";
+    wm_ = "GetWSplineVars for well ";
+    wm_ += settings.well.toStdString() + " is empty.";
     ext_warn(wm_, md_, cl_, vp_.lnw);
-
   }
 }
 
@@ -117,14 +117,13 @@ void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
   Eigen::Vector3d projected_heel =
     WellConstraintProjections::well_domain_constraint_indices(
       Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val),
-      grid_,
-      index_list_
+      grid_,index_list_
     );
+
   Eigen::Vector3d projected_toe =
     WellConstraintProjections::well_domain_constraint_indices(
       Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val),
-      grid_,
-      index_list_
+      grid_,index_list_
     );
 
   c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.x, projected_heel(0));
@@ -146,6 +145,7 @@ Eigen::VectorXd ReservoirXYZBoundary::GetLowerBounds(QList<QUuid> id_vector) con
   int ind_toe_x = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.x);
   int ind_toe_y = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.y);
   int ind_toe_z = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.z);
+
   lbounds(ind_heel_x) = xmin_;
   lbounds(ind_toe_x) = xmin_;
   lbounds(ind_heel_y) = ymin_;

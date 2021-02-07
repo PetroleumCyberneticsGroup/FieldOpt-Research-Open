@@ -134,21 +134,27 @@ CMA_ES::CMA_ES(Settings::Optimizer *settings,
   for (int i = 0; i < D_.size(); i++) {
     temp_D[i] = D_(i) * D_(i);
   }
+
   C_ = B_ * (temp_D).asDiagonal() * B_.transpose();
   for (int i = 0; i < D_.size(); i++) {
     temp_D[i] = 1.0 / D_(i);
   }
+
   invsqrtC_ = B_ * (temp_D).asDiagonal() * B_.transpose();
   eigeneval_ = 0;
   chiN_ = pow(n_vars_, 0.5) * (1 - (float(1) / (4 * n_vars_)) + 1 / (21 * pow(n_vars_, 2)));
+
   for (int i = 0; i < lambda_; ++i) {
     auto new_case = generateCase(xmean_, i, 1);
     case_handler_->AddNewCase(new_case);
   }
 }
 
-CMA_ES::Individual::Individual(Optimization::Case *c, boost::random::mt19937 &gen, int index,
-                               Eigen::VectorXd erands_norm, double penalty_dist) {
+CMA_ES::Individual::Individual(Optimization::Case *c,
+                               boost::random::mt19937 &gen,
+                               int index,
+                               Eigen::VectorXd erands_norm,
+                               double penalty_dist) {
   case_pointer_ = c;
   rea_vars_ = c->GetRealVarVector();
   erands_norm_ = erands_norm;
@@ -219,13 +225,13 @@ void CMA_ES::iterate() {
 void CMA_ES::handleEvaluatedCase(Case *c) {
   if (isImprovement(c)) {
     updateTentativeBestCase(c);
-    if (VERB_OPT > 0) {
+    if (vp_.vOPT > 3) {
       stringstream ss;
       ss.precision(6);
       ss << scientific;
-      ss << "New best in population, iteration " << Printer::num2str(iteration_) << ": OFV "
-         << c->objf_value();
-      Printer::ext_info(ss.str(), "Optimization", "CMA_ES");
+      ss << "New best in population, iteration ";
+      ss << num2str(iteration_) << ": OFV " << c->objf_value();
+      ext_info(ss.str(), "Optimization", "CMA_ES");
     }
   }
 }

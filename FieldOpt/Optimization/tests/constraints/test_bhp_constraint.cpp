@@ -61,8 +61,6 @@ TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
     bhp_ids.append(var->id());
   }
 
-  cout << "bhp_ids.size(): " << bhp_ids.size() << endl;
-
   // set all bhps to 500 (which exceeds the max value defined, 300)
   for (QUuid key : bhp_ids) {
     base_case_->set_real_variable_value(key, 500);

@@ -56,6 +56,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
   max_evaluations_ = opt_settings->parameters().max_evaluations;
   tentative_best_case_iteration_ = 0;
+  seconds_spent_in_iterate_ = 0;
 
   // CONSTRAINT HANDLER ------------------------------------
   // Moved constraint handliner initialization to Model
@@ -116,19 +117,20 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
 Case *Optimizer::GetCaseForEvaluation() {
 
-  if (case_handler_->QueuedCases().size() == 0) {
+  if (case_handler_->QueuedCases().empty()) {
     time_t start, end;
     time(&start);
     iterate();
     time(&end);
-    seconds_spent_in_iterate_ = difftime(end, start);
+    seconds_spent_in_iterate_ = (int)difftime(end, start);
   }
 
-  if (IsFinished() || (case_handler_->QueuedCases().size() == 0)) {
+  if (IsFinished() || (case_handler_->QueuedCases().empty())) {
     if (vp_.vOPT >= 3) {
-      std::cout << "IsFinished() => " << IsFinished() << std::endl;
-      std::cout << "(case_handler_->QueuedCases().size() == 0) => "
-                << (case_handler_->QueuedCases().size() == 0) << std::endl;
+      im_ = "IsFinished() => ";
+      im_ += (IsFinished()==NOT_FINISHED) ? "NOT_FINISHED" : "FINISHED";
+      im_ += "(case_handler_->QueuedCases().size() == 0) => ";
+      im_ += case_handler_->QueuedCases().empty() ? "ENPTY" : "NOT-ENPTY";
     }
     if (type_ == ::Settings::Optimizer::OptimizerType::TrustRegionOptimization) {
       return nullptr;
@@ -193,7 +195,7 @@ QString Optimizer::GetStatusString() const {
       .arg(tentative_best_case_->objf_value());
 }
 
-void Optimizer::EnableConstraintLogging(QString output_directory_path) {
+void Optimizer::EnableConstraintLogging(const QString& output_directory_path) {
   for (Constraints::Constraint *con : constraint_handler_->constraints())
     con->EnableLogging(output_directory_path);
 }
@@ -238,18 +240,32 @@ Loggable::LogTarget Optimizer::Summary::GetLogTarget() {
 }
 
 map<string, string> Optimizer::Summary::GetState() {
+
   map<string, string> statemap  = ext_state_;
   statemap["Start"] = timestamp_string(opt_->start_time_);
   statemap["Duration"] = timespan_string(
       time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
   );
   statemap["End"] = timestamp_string(QDateTime::currentDateTime());
+
   switch (cond_) {
-    case MAX_EVALS_REACHED: statemap["Term. condition"] = "Reached max. sims"; break;
-    case MINIMUM_STEP_LENGTH_REACHED: statemap["Term. condition"] = "Reached min. step length"; break;
-    case MAX_ITERATIONS_REACHED: statemap["Term. condition"] = "Reached max. iterations"; break;
-    default: statemap["Term. condition"] = "Unknown";
+    case MAX_EVALS_REACHED: {
+      statemap["Term. condition"] = "Reached max. sims";
+      break;
+    }
+    case MINIMUM_STEP_LENGTH_REACHED: {
+      statemap["Term. condition"] = "Reached min. step length";
+      break;
+    }
+    case MAX_ITERATIONS_REACHED: {
+      statemap["Term. condition"] = "Reached max. iterations";
+      break;
+    }
+    default: {
+      statemap["Term. condition"] = "Unknown";
+    }
   }
+
   statemap["bc Best case found in iter"] = boost::lexical_cast<string>(opt_->tentative_best_case_iteration_);
   statemap["bc UUID"] = opt_->tentative_best_case_->GetId().toString().toStdString();
   statemap["bc Objective function value"] = boost::lexical_cast<string>(opt_->tentative_best_case_->objf_value());
@@ -286,8 +302,11 @@ void Optimizer::initializeNormalizers() {
 }
 
 void Optimizer::initializeOfvNormalizer() {
-  if (case_handler_->EvaluatedCases().size() == 0 || normalizer_ofv_.is_ready())
-    throw runtime_error("Unable to initialize normalizer with no evaluated cases available.");
+  if (case_handler_->EvaluatedCases().empty()
+  || normalizer_ofv_.is_ready()) {
+    em_ = "Unable to initialize normalizer with no evaluated cases available.";
+    throw runtime_error(em_);
+  }
 
   vector<double> abs_ofvs;
   for (auto c : case_handler_->EvaluatedCases()) {
@@ -306,7 +325,7 @@ double Optimizer::PenalizedOFV(Case *c) {
   long double norm_pen_ovf = norm_ofv - penalty;
   double denormalized_ofv = normalizer_ofv_.denormalize(norm_pen_ovf);
 
-  if (vp_.vOPT >= 2) {
+  if (vp_.vOPT >= 3) {
     im_ = "Penalized case " + c->id().toString().toStdString()  + ". ";
     im_ += "Initial OFV: " + num2str(c->objf_value()) + "; ";
     im_ += "Normalized OFV :" + num2str(norm_ofv) + "; ";
