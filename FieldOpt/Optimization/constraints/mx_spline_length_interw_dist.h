@@ -52,8 +52,8 @@ class MxSplineLengthInterwDist : public Constraint
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
  private:
   int max_iterations_;

@@ -36,10 +36,11 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
-Trajectory::Trajectory(Settings::Model::Well well_settings,
-                       Properties::VarPropContainer *variable_container,
-                       ::Reservoir::Grid::Grid *grid,
-                       Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
+Trajectory::
+Trajectory(Settings::Model::Well well_settings,
+           Properties::VarPropContainer *variable_container,
+           ::Reservoir::Grid::Grid *grid,
+           Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
   wsettings_ = well_settings;
   string wn = wsettings_.name.toStdString();
@@ -87,7 +88,7 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
 }
 
 int Trajectory::GetTimeSpentInWic() const {
-  if (well_spline_ != 0) {
+  if (well_spline_ != nullptr) {
     return well_spline_->GetTimeSpentInWIC();
   }
   else return 0;
@@ -108,9 +109,11 @@ QList<WellBlock *> *Trajectory::GetWellBlocks() {
 }
 
 void Trajectory::UpdateWellBlocks() {
-  // \todo This is the source of a memory leak: old well blocks are not deleted. Fix it.
+  // \todo This is the source of a memory leak:
+  //  old well blocks are not deleted. Fix it.
   if (well_spline_ != nullptr) {
-    if (well_spline_->HasGridChanged() || well_spline_->HasSplineChanged()) {
+    if (well_spline_->HasGridChanged()
+      || well_spline_->HasSplineChanged()) {
       well_blocks_ = well_spline_->GetWellBlocks();
     } else {
       if (vp_.vMOD >= 3) {
@@ -138,8 +141,9 @@ double Trajectory::GetLength() const {
   }
 }
 
-void Trajectory::initializeWellBlocks(Settings::Model::Well well,
-                                      Properties::VarPropContainer *variable_container) {
+void Trajectory::
+initializeWellBlocks(Settings::Model::Well well,
+                     Properties::VarPropContainer *variable_container) {
   QList<Settings::Model::Well::WellBlock> blocks = well.well_blocks;
   for (int i = 0; i < blocks.size(); ++i) {
     well_blocks_->append(new WellBlock(blocks[i].i, blocks[i].j, blocks[i].k));
@@ -152,7 +156,8 @@ void Trajectory::initializeWellBlocks(Settings::Model::Well well,
       variable_container->AddVariable(well_blocks_->last()->k_);
     }
     if (blocks[i].has_completion)
-      well_blocks_->last()->AddCompletion(new Completions::Perforation(blocks[i].completion, variable_container));
+      well_blocks_->last()->AddCompletion(
+        new Completions::Perforation(blocks[i].completion, variable_container));
   }
 }
 
@@ -221,8 +226,9 @@ WType Trajectory::GetDefinitionType() {
   return definition_type_;
 }
 
-void Trajectory::convertWellBlocksToWellSpline(Settings::Model::Well &well_settings,
-                                               Reservoir::Grid::Grid *grid) {
+void Trajectory::
+convertWellBlocksToWellSpline(Settings::Model::Well &well_settings,
+                              Reservoir::Grid::Grid *grid) {
   if (vp_.vMOD >= 2) {
     im_ = "Convering well " + well_settings.name.toStdString() + " to spline.";
     ext_info(im_, md_, cl_);
@@ -332,7 +338,8 @@ WellBlock * Trajectory::GetWellBlockByMd(double md, string dmsg) {
   // E("Unable to get well block by MD.");
 }
 
-std::vector<WellBlock *> Trajectory::GetWellBlocksByMdRange(double start_md, double end_md, string dmsg) const {
+std::vector<WellBlock *> Trajectory::
+GetWellBlocksByMdRange(double start_md, double end_md, string dmsg) const {
   std::vector<WellBlock *> affected_blocks;
   for (auto wb : *well_blocks_) {
     if (( start_md >= wb->getEntryMd() && start_md <= wb->getExitMd() ) || // Start md inside block

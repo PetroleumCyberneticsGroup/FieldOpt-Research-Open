@@ -37,14 +37,16 @@ namespace Optimization {
 namespace Optimizers {
 namespace BayesianOptimization {
 
-EGO::EGO(Settings::Optimizer *settings,
-         Case *base_case,
-         Model::Properties::VarPropContainer *variables,
-         Reservoir::Grid::Grid *grid,
-         Logger *logger,
-         CaseHandler *case_handler,
-         Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+EGO::
+EGO(Settings::Optimizer *settings,
+    Case *base_case,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Logger *logger,
+    CaseHandler *case_handler,
+    Constraints::ConstraintHandler *constraint_handler)
+    : Optimizer(settings, base_case, variables, grid,
+                logger, case_handler, constraint_handler) {
 
   time_fitting_ = 0;
   time_af_opt_ = 0;
@@ -68,8 +70,10 @@ EGO::EGO(Settings::Optimizer *settings,
 
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
-      lb_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
-      ub_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
+      lb_ = constraint_handler_->GetLowerBounds(
+        base_case->GetRealVarIdVector());
+      ub_ = constraint_handler_->GetUpperBounds(
+        base_case->GetRealVarIdVector());
     }
     else {
       lb_.resize(base_case->GetRealVarIdVector().size());
@@ -89,8 +93,10 @@ EGO::EGO(Settings::Optimizer *settings,
   }
 
   af_ = AcquisitionFunction(settings->parameters());
-  af_opt_ = AFOptimizers::AFPSO(lb_, ub_, settings->parameters().rng_seed);
-  gp_ = new libgp::GaussianProcess(n_cont_vars, settings->parameters().ego_kernel);
+  af_opt_ = AFOptimizers::AFPSO(lb_, ub_,
+                                settings->parameters().rng_seed);
+  gp_ = new libgp::GaussianProcess(n_cont_vars,
+                                   settings->parameters().ego_kernel);
 
 
   if (settings->parameters().ego_init_sampling_method == "Random") {

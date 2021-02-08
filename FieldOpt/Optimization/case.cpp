@@ -110,8 +110,8 @@ bool Case::Equals(const Case *other, double tolerance) const {
 
   // Check if number of variables are equal
   if (this->binary_variables().size() != other->binary_variables().size()
-      || this->integer_variables().size() != other->integer_variables().size()
-      || this->real_variables().size() != other->real_variables().size())
+    || this->integer_variables().size() != other->integer_variables().size()
+    || this->real_variables().size() != other->real_variables().size())
     return false;
 
   // for (QUuid key : this->binary_variables().keys()) {
@@ -158,7 +158,7 @@ bool Case::Equals(const Case *other, double tolerance) const {
 
 double Case::objf_value() const {
   if (objective_function_value_ == std::numeric_limits<double>::max()) {
-    QString em = "The objective function value has not been set in this Case.";
+    string em = "The objective function value has not been set in this Case.";
     throw ObjectiveFunctionException(em);
   } else {
     return objective_function_value_;
@@ -173,8 +173,8 @@ void Case::set_integer_variable_value(const QUuid id, const int val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 void Case::set_binary_variable_value(const QUuid id, const bool val) {
@@ -185,8 +185,8 @@ void Case::set_binary_variable_value(const QUuid id, const bool val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 void Case::set_real_variable_value(const QUuid id, const double val) {
@@ -197,8 +197,8 @@ void Case::set_real_variable_value(const QUuid id, const double val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude) {
@@ -349,7 +349,7 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
   str << "| Case:            " << id_stdstr() << " |" << endl;
   str << "|---------------------------------------------------------|" << endl;
 
-  if (real_variables_.size() > 0) {
+  if (!real_variables_.empty()) {
     str << "| Continuous variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetContinuousVariables()->at(ii).second->name().toStdString();
@@ -358,7 +358,7 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
     }
   }
 
-  if (integer_variables_.size() > 0) {
+  if (!integer_variables_.empty()) {
     str << "| Discrete variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetDiscreteVariables()->at(ii).second->name().toStdString();
@@ -367,7 +367,7 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
     }
   }
 
-  if (binary_variables_.size() > 0) {
+  if (!binary_variables_.empty()) {
     str << "| Discrete variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetBinaryVariables()->at(ii).second->name().toStdString();

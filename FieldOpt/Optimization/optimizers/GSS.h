@@ -54,9 +54,9 @@ namespace Optimizers {
  * specific algorithms (e.g. APPS).
  *
  * @note that this is an abstract class. It must be extended
- * by some other class (e.g. like the CompassSearch class) to
- * provide specific patterns and contraction/expansion parameter
- * values.
+ * by some other class (e.g. like the CompassSearch class)
+ * to provide specific patterns and contraction/expansion
+ * parameter values.
  */
 class GSS : public Optimizer {
  public:
@@ -70,8 +70,9 @@ class GSS : public Optimizer {
    *
    *      contr_fac_  : The contraction factor.
    *      expan_fac_  : The expansion factor.
-   *      directions_ : The set of search directions to be used.
-   *      step_lengths_ : Set of step lengths to be used (one per step direction).
+   *      directions_ : Set of search directions to be used.
+   *      step_lengths_ : Set of step lengths to be used
+   *      (one per step direction).
    */
   GSS(Settings::Optimizer *settings,
       Case *base_case,
@@ -111,7 +112,7 @@ class GSS : public Optimizer {
   vector<VectorXi> directions_;
 
   /*!
-   * @brief Contract the search pattern: step_lengths_ * contr_fac_
+   * @brief Contract search pattern: step_lengths_ * contr_fac_
    *
    * @param dirs (optional) The direction indices to expand.
    * If not provided, the expansion will be applied to all
@@ -120,7 +121,7 @@ class GSS : public Optimizer {
   void contract(vector<int> dirs = vector<int>{-1});
 
   /*!
-   * @brief Expand the search pattern: step_lengths_ * expan_fac_
+   * @brief Expand search pattern: step_lengths_ * expan_fac_
    *
    * @param dirs (optional) The direction indices to expand.
    * If not provided, the expansion will be applied to all
@@ -149,29 +150,31 @@ class GSS : public Optimizer {
    * step lengths len_i for each direction i are computed as
    * len_i = max(step_tol_i, min_i + S * (max_i - min_i)).
    *
-   * @param dir_idx The direction index that produced an improvement.
+   * @param dir_idx Direction index that produced an improvement.
    * @param len The step length that produced an improvement.
    */
   void set_step_lengths(int dir_idx, double len);
 
   /*!
    * @brief Generate a set of trial points.
-   * @param dirs (optional) The direction indices in which perturbations
-   * should be created.
+   * @param dirs (optional) The direction indices
+   * in which perturbations should be created.
    *
    * @return A list of new trial points.
    */
   QList<Case *> generate_trial_points(vector<int> dirs = vector<int>{-1});
 
   /*!
-   * @brief Check if the algorithm has converged, i.e. if all current step lengths
-   * are below the step length convergence tolerance.
+   * @brief Check if the algorithm has converged, i.e. if
+   * all current step lengths are below the step length
+   * convergence tolerance.
    * @return
    */
   bool is_converged();
 
   /*!
-   * @brief Remove the case that has the worst origin from the evaluation queue.
+   * @brief Remove the case that has the worst origin from
+   * the evaluation queue.
    * @return Return a pointer to the case that is removed.
    */
   Case *dequeue_case_with_worst_origin();
@@ -187,7 +190,8 @@ class GSS : public Optimizer {
  private:
 
   /*!
-   * @brief Create a perturbation from a point in the specified direction index.
+   * @brief Create a perturbation from a point
+   * in the specified direction index.
    * @tparam T An Eigen::VectorX object.
    * @param base The point to perturb from.
    * @param dir The direction index in which to perturb.

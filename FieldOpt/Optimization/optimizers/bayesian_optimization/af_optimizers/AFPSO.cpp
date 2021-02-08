@@ -42,13 +42,17 @@ AFPSO::AFPSO() {
   n_iterations_ = 500;
   iteration_ = 0;
 }
+
 AFPSO::AFPSO(VectorXd lb, VectorXd ub, int rng_seed) : AFPSO() {
   gen_ = get_random_generator(rng_seed*2);
   lb_ = lb;
   ub_ = ub;
   n_dims_ = lb.size();
 }
-Eigen::VectorXd AFPSO::Optimize(libgp::GaussianProcess *gp, AcquisitionFunction &af, double target) {
+
+Eigen::VectorXd AFPSO::Optimize(libgp::GaussianProcess *gp,
+                                AcquisitionFunction &af,
+                                double target) {
   pop_.clear();
 
   // Generate initial population
@@ -143,18 +147,25 @@ AFPSO::Particle::Particle(VectorXd &lb, VectorXd &ub, boost::mt19937 &gen) {
   fit_best_self = fit;
   fit_best_nbhd = fit;
 }
-void AFPSO::Particle::update_velocity(double intertia, double c1, double c2, boost::random::mt19937 &gen) {
+
+void AFPSO::Particle::update_velocity(double intertia,
+                                      double c1, double c2,
+                                      boost::random::mt19937 &gen) {
   for (int i = 0; i < pos.size(); ++i) {
     vel(i) = intertia * vel(i)
       + c1 * random_double(gen) * (pos_best_self(i) - pos(i))
       + c2 * random_double(gen) * (pos_best_nbhd(i) - pos(i));
   }
 }
-void AFPSO::Particle::update_position(VectorXd &lb, VectorXd &ub) {
+
+void AFPSO::Particle::update_position(VectorXd &lb,
+                                      VectorXd &ub) {
   pos = pos + vel;
   check_boundaries(lb, ub);
 }
-void AFPSO::Particle::check_boundaries(VectorXd &lb, VectorXd &ub) {
+
+void AFPSO::Particle::check_boundaries(VectorXd &lb,
+                                       VectorXd &ub) {
   for (int i = 0; i < lb.size(); ++i) {
     if (pos(i) < lb(i)) {
       pos(i) = lb(i);

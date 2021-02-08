@@ -44,9 +44,9 @@ class ContinuousProperty : public Property
  public:
   explicit ContinuousProperty(double value);
 
-  double value();
+  double value() const;
 
-  double valueSc();
+  double valueSc() const;
 
   void setValue(double value);
 

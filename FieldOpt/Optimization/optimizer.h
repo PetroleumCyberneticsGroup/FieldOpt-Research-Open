@@ -402,7 +402,7 @@ class Optimizer : public Loggable
   };
 
   /*!
-   * @brief Calculate penalized objf function value for a case.
+   * @brief Calculate penalized objf function value for case.
    * @param c Case to calculate the penalized objective function value for.
    * @return The penalized objective function value.
    */
@@ -415,8 +415,9 @@ class Optimizer : public Loggable
   int seconds_spent_in_iterate_;
 
   /*!
-   * @brief Initialize the OFV normalizer, setting the parameters for it
-   * from the cases that have been evaluated so far.
+   * @brief Initialize the OFV normalizer, setting the
+   * parameters for it from the cases that have been
+   * evaluated so far.
    */
   void initializeOfvNormalizer();
 };

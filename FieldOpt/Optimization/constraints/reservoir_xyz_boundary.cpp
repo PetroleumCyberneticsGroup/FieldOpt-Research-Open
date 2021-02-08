@@ -33,11 +33,11 @@ namespace Constraints {
 
 using Printer::ext_warn;
 
-ReservoirXYZBoundary::ReservoirXYZBoundary(
-    const Settings::Optimizer::Constraint &settings,
-    Model::Properties::VarPropContainer *variables,
-    Reservoir::Grid::Grid *grid,
-    Settings::VerbParams vp) : Constraint(vp) {
+ReservoirXYZBoundary::
+ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
+                     Model::Properties::VarPropContainer *variables,
+                     Reservoir::Grid::Grid *grid,
+                     Settings::VerbParams vp) : Constraint(vp) {
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding ReservoirXYZBoundary constraint for ";

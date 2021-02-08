@@ -34,10 +34,11 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The MxSplineLengthInterwDistResBound class combines
- * the ResBoundary constraint, the WSplineLength as
- * well as the InterwDist constraint into a routine that checks
- * for these constraints in a sequential manner within a loop.
+ * \brief The MxSplineLengthInterwDistResBound class
+ * combines the ResBoundary constraint, the WSplineLength
+ * as well as the InterwDist constraint into a routine
+ * that checks for these constraints in a sequential
+ * manner within a loop.
  *
  * The constraints are applied until all are satisfied
  *  or until a maximum number of iterations is reached.

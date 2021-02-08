@@ -48,10 +48,11 @@ using Printer::ext_warn;
 using std::string;
 using std::to_string;
 
-WellSpline::WellSpline(Settings::Model::Well well_settings,
-                       Properties::VarPropContainer *variable_container,
-                       Reservoir::Grid::Grid *grid,
-                       Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
+WellSpline::
+WellSpline(Settings::Model::Well well_settings,
+           Properties::VarPropContainer *variable_container,
+           Reservoir::Grid::Grid *grid,
+           Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
   vp_ = well_settings.verbParams();
   grid_ = grid;
   assert(grid_ != nullptr);

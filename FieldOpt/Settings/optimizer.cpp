@@ -104,8 +104,9 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     }
 
   } else {
-    string em = "A constraint must always specify either the Well or the Wells property.";
-    throw runtime_error(em);
+    em_ = "A constraint must always specify either the Well";
+    em_ = " or the Wells property.";
+    throw runtime_error(em_);
   }
 
   // Penalty function weight for the constraint
@@ -123,34 +124,42 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     optmzr_constraint.type = ConstraintType::BHP;
     if (json_constraint.contains("Max")) {
-      set_opt_prop_double(optmzr_constraint.max, json_constraint, "Max");
+      set_opt_prop_double(optmzr_constraint.max,
+                          json_constraint, "Max");
     }
     if (json_constraint.contains("Min")) {
-      set_opt_prop_double(optmzr_constraint.min, json_constraint, "Min");
+      set_opt_prop_double(optmzr_constraint.min,
+                          json_constraint, "Min");
     }
 
     // Packer- and ICV Constraints
   } else if (QString::compare(constraint_type, "ICVConstraint") == 0) {
 
     optmzr_constraint.type = ConstraintType::ICVConstraint;
-    set_opt_prop_double(optmzr_constraint.max, json_constraint, "Max");
+    set_opt_prop_double(optmzr_constraint.max,
+                        json_constraint, "Max");
 
     if (optmzr_constraint.max >= 7.8540E-03) {
       string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
       ext_warn(wm, md_, cl_, vp_.lnw);
       optmzr_constraint.max = 7.8539E-3;
     }
-    set_opt_prop_double(optmzr_constraint.min, json_constraint, "Min");
+    set_opt_prop_double(optmzr_constraint.min,
+                        json_constraint, "Min");
 
   } else if (CnstrCmp(constraint_type, "PackerConstraint")) {
     optmzr_constraint.type = ConstraintType::PackerConstraint;
 
   } else if (QString::compare(constraint_type, "Rate") == 0) {
     optmzr_constraint.type = ConstraintType::Rate;
-    if (json_constraint.contains("Max"))
-      set_opt_prop_double(optmzr_constraint.max, json_constraint, "Max");
-    if (json_constraint.contains("Min"))
-      set_opt_prop_double(optmzr_constraint.min, json_constraint, "Min");
+    if (json_constraint.contains("Max")) {
+      set_opt_prop_double(optmzr_constraint.max,
+                          json_constraint, "Max");
+    }
+    if (json_constraint.contains("Min")) {
+      set_opt_prop_double(optmzr_constraint.min,
+                          json_constraint, "Min");
+    }
 
   } else if (CnstrCmp(constraint_type, "Boundary2D")) {
 

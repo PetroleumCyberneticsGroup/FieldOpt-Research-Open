@@ -97,13 +97,16 @@ class Optimizer
     //!< Maximum size of evaluation queue.
     int max_queue_size;
 
-    //!< Automatically determine appropriate step lengths from bound constraints.
+    //!< Automatically determine appropriate step
+    //!< lengths from bound constraints.
     bool auto_step_lengths = false;
 
-    //!< Scaling factor for auto-determined initial step lengths (e.g. 0.25*(upper-lower)
+    //!< Scaling factor for auto-determined initial
+    //!< step lengths (e.g. 0.25*(upper-lower)
     double auto_step_init_scale = 0.25;
 
-    //!< Scaling factor for auto-determined convergence step lengths (e.g. 0.01*(upper-lower)
+    //!< Scaling factor for auto-determined convergence
+    //!< step lengths (e.g. 0.01*(upper-lower)
     double auto_step_conv_scale = 0.01;
 
     //!< Pattern to be used for GSS algorithms.
@@ -113,10 +116,13 @@ class Optimizer
     //!< Max iterations. Default: 50
     int max_generations;
 
-    //!< Optional. Can be determined automatically. Default: min(10*nvars, 100).
+    //!< Optional. Can be determined automatically.
+    //!< Default: min(10*nvars, 100).
     int population_size;
 
-    double discard_parameter; //!< Fraction to be discarded during selection. Defaults: 1/population.
+    //!< Fraction to be discarded during selection.
+    //!< Defaults: 1/population.
+    double discard_parameter;
 
     double p_crossover;       //!< Crossover probability. Default: 0.1.
     double decay_rate;        //!< Decay rate. Default: 4.0.
@@ -126,10 +132,12 @@ class Optimizer
     double upper_bound;       //!< Simple upper bound. This is applied to _all_ variables. Default: +10.0.
 
     // PSO parameters --------------------------------------
-    //!< Learning factor (c1), from the swarms best known perturbation. Default: 2
+    //!< Learning factor (c1), from the swarms
+    //!< best known perturbation. Default: 2
     double pso_learning_factor_1;
 
-    //!< Learning factor (c2), from the individual particle's best known perturbation. Default: 2
+    //!< Learning factor (c2), from the individual
+    //!< particle's best known perturbation. Default: 2
     double pso_learning_factor_2;
 
     //!< # of particles in the swarm. Default: 50
@@ -139,20 +147,22 @@ class Optimizer
     double pso_velocity_scale;
 
     // EGO Parameters --------------------------------------
-    //!< # of init guesses to be made (default is two times the number of variables).
+    //!< # of init guesses to be made (default
+    //!< is two times the number of variables).
     int ego_init_guesses = -1;
 
-    //!< Sampling method to be used for initial guesses (Random or Uniform)
+    //!< Sampling method to be used for initial guesses
+    //!< (Random or Uniform)
     std::string ego_init_sampling_method = "Random";
 
-    //!< Which kernel function to use for the gaussian process model.
+    //!< Which kernel function to use for gaussian process model.
     std::string ego_kernel = "CovMatern5iso";
 
     //!< Which acquisiton function to use.
     std::string ego_af = "ExpectedImprovement";
 
     // Trust Region parameters -----------------------------
-    double tr_initial_radius = 1; //!< The initial trust region radius
+    double tr_initial_radius = 1; //!< Initial trust region radius
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
@@ -195,19 +205,23 @@ class Optimizer
     //!< # number of iterations to be performed. Default: 50.
     int spsa_max_iterations = 50;
 
-    //!< Affects step length. Recommended 0.602 <= alpha <= 1.0. Default: 0.602.
+    //!< Affects step length. Recommended 0.602 <= alpha <= 1.0.
+    //!< Default: 0.602.
     double spsa_alpha = 0.602;
 
-    //!< Affects step length. Recommended 0.101 <= gamma <= 1/6. Default: 0.101.
+    //!< Affects step length. Recommended 0.101 <= gamma <= 1/6.
+    //!< Default: 0.101.
     double spsa_gamma = 0.101;
 
     //!< Used to account for noise. Default: 1.0.
     double spsa_c = 1.0;
 
-    //!< Affects step length in early iterations. Default: 10% of max iterations.
+    //!< Affects step length in early iterations.
+    //!< Default: 10% of max iterations.
     double spsa_A = 5;
 
-    //!< Affects step lengths. Default and recommended: automatically compute from spsa_init_step_magnitude.
+    //!< Affects step lengths. Default and recommended:
+    //!< automatically compute from spsa_init_step_magnitude.
     double spsa_a = 0.0;
 
     //!< Smallest desired step magnitude in early iterations.
@@ -215,9 +229,10 @@ class Optimizer
 
     // Hybrid parameters -----------------------------------
     /*!
-     * @brief How switching between component optimizers is handled.
+     * @brief How switching b/e component optimizers is handled.
      *
-     * Default: OnFinished -- switch between components when IsFinished() == true
+     * Default: OnFinished -- switch between components when
+     * IsFinished() == true
      *
      * Example: "Optimizer": { "Type": "Hybrid", "Parameters": { "HybridSwitchMode": "OnConvergence" } }
      */
@@ -255,10 +270,12 @@ class Optimizer
     //!< Whether or not to use penalty function (default: false).
     bool use_penalty_function;
 
-    //!<Whether or not to use costs associated to wells in calculation of the objective.
+    //!<Whether or not to use costs associated to
+    //!< wells in calculation of the objective.
     bool use_well_cost;
 
-    //!<Whether or not to use different values in the horizontal or vertical direction
+    //!<Whether or not to use different values
+    //!< in the horizontal or vertical direction
     bool separatehorizontalandvertical;
 
     //!<Cost associated with drilling in the horizontal plane [$/m]
@@ -267,7 +284,8 @@ class Optimizer
     //!<Cost associated with drilling in the vertical plane [$/m]
     double wellCostZ;
 
-    //!<Cost associated with drilling the well, independent of direction [$/m]
+    //!<Cost associated with drilling the well,
+    //!< independent of direction [$/m]
     double wellCost;
 
     //!< Weighted sum component
@@ -443,6 +461,7 @@ class Optimizer
 
   bool scaling_ = true;
 
+  string im_, wm_, em_;
   string md_ = "Settings";
   string cl_ = "Optimizer";
   VerbParams vp_;

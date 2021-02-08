@@ -41,16 +41,16 @@ using Printer::ext_warn;
 using Printer::num2str;
 using Printer::DBG_prntVecXdSz;
 
-GSS::GSS(Settings::Optimizer *settings,
-         Case *base_case,
-         Model::Properties::VarPropContainer *variables,
-         Reservoir::Grid::Grid *grid,
-         Logger *logger,
-         CaseHandler *case_handler,
-         Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid,
+GSS::
+GSS(Settings::Optimizer *settings,
+    Case *base_case,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Logger *logger,
+    CaseHandler *case_handler,
+    Constraints::ConstraintHandler *constraint_handler)
+  : Optimizer(settings, base_case, variables, grid,
               logger, case_handler, constraint_handler) {
-
   vp_ = settings->verbParams();
 
   contr_fac_ = settings->parameters().contraction_factor;
@@ -102,7 +102,6 @@ GSS::GSS(Settings::Optimizer *settings,
   }
   assert(step_lengths_.size() == directions_.size());
   assert(step_lengths_.size() == step_tol_.size());
-
 }
 
 Optimizer::TerminationCondition GSS::IsFinished() {
@@ -202,7 +201,8 @@ void GSS::set_step_lengths(int dir_idx, double len) {
 
     if (!constraint_handler_->HasBoundaryConstraints()) {
       if (vp_.vOPT >= 2) {
-        im_ = "No boundary constraints. Setting all step lengths to " + num2str(len);
+        im_ = "No boundary constraints. Setting all step ";
+        im_ += "lengths to " + num2str(len);
         ext_warn(im_, md_, cl_, vp_.lnw);
       }
       for (int i = 0; i < step_lengths_.size(); ++i) {
@@ -215,15 +215,15 @@ void GSS::set_step_lengths(int dir_idx, double len) {
   } else { // constraint_handler_ == nullptr in unit tests
 
     if (vp_.vOPT > 3) {
-        wm_ = "constraint_handler_ == nullptr.";
-        ext_warn(wm_, md_, cl_, vp_.lnw);
+      wm_ = "constraint_handler_ == nullptr.";
+      ext_warn(wm_, md_, cl_, vp_.lnw);
     }
     for (int i = 0; i < step_lengths_.size(); ++i) {
       step_lengths_[i] = max(step_tol_[i], len);
     }
     step_lengths_.fill(len);
     return;
- }
+  }
 
   // HasBoundaryConstraints == true
   Eigen::VectorXd lbs, ubs;

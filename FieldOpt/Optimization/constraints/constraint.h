@@ -58,13 +58,14 @@ class Constraint
    * \brief CaseSatisfiesConstraint checks whether a case
    * satisfies the constraints for all applicable variables.
    * \param c The case to be checked.
-   * \return True if the constraint is satisfied; otherwise false.
+   * \return True if constraint is satisfied; otherwise false.
    */
   virtual bool CaseSatisfiesConstraint(Case *c) = 0;
 
   /*!
-   * \brief SnapCaseToConstraints Snaps all variable values in
-   * the case to the closest value that satisfies the constraint.
+   * \brief SnapCaseToConstraints Snaps all variable values
+   * in the case to the closest value that satisfies the
+   * constraint.
    * \param c The case that should have it's variable values snapped.
    */
   virtual void SnapCaseToConstraints(Case *c) = 0;
@@ -110,7 +111,8 @@ class Constraint
   virtual Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const;
 
   /*!
-   * @brief Get the name of the constraint. All constraints should override this.
+   * @brief Get the name of the constraint.
+   * All constraints should override this.
    * @return Name of the constraint.
    */
   virtual string name() { return "NONAME"; }
@@ -118,22 +120,24 @@ class Constraint
   /*!
    * @brief Initialize the normalizer, setting the parameters.
    *
-   * This default implementation should be overridden by subclasses.
-   * This sets the parameters to
+   * This default implementation should be overridden by
+   * subclasses. This sets the parameters to
    *  - x_0 = 0.0
    *  - k = 1.0
    *  - L = 1.0
-   * @param cases A list of cases to be used for calculating the normalization parameters.
+   * @param cases A list of cases to be used for
+   * calculating the normalization parameters.
    */
   virtual void InitializeNormalizer(QList<Case *> cases);
 
   /*!
    * @brief Get the penalty term for a case.
    *
-   * This default implementation should be overridden by subclasses.
-   * This default implementation returns 0.0;
+   * This default implementation should be overridden by
+   * subclasses. This default implementation returns 0.0;
    * @param c Case to compute the violation for.
-   * @return The penalty term for a case (0.0 if it does not violate the constraint).
+   * @return The penalty term for a case (0.0 if
+   * it does not violate the constraint).
    */
   virtual double Penalty(Case *c);
 
@@ -154,11 +158,18 @@ class Constraint
   string cl_ = "Constraint";
   string im_ = "", wm_ = "", em_ = "";
 
-  Normalizer normalizer_; //!< Normalizer for constraint violation value; to be used with penalty functions.
-  long double penalty_weight_; //!< The weight to be used when considering the constraint in a penalty function. (default: 0.0)
+  //!< Normalizer for constraint violation value;
+  //!< to be used with penalty functions.
+  Normalizer normalizer_;
+
+  //!< The weight to be used when considering the
+  //!< constraint in a penalty function. (default: 0.0)
+  long double penalty_weight_;
 
  private:
-  QString constraint_log_path_; //!< Path to the constraint log path to be written.
+  //!< Path to the constraint log path to be written.
+  QString constraint_log_path_;
+
 };
 
 }

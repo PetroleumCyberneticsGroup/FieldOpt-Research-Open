@@ -67,6 +67,7 @@ TEST_F(CompassSearchTest, GetNewCases) {
   Optimization::Case *new_case_2 = maximizer->GetCaseForEvaluation();
   Optimization::Case *new_case_3 = maximizer->GetCaseForEvaluation();
   Optimization::Case *new_case_4 = maximizer->GetCaseForEvaluation();
+
   EXPECT_FALSE(new_case_1->id() == new_case_2->id());
   EXPECT_FALSE(new_case_3->id() == new_case_4->id());
 
@@ -136,7 +137,8 @@ TEST_F(CompassSearchTest, TestFunctionRosenbrock) {
   }
   auto best_case = minimizer->GetTentativeBestCase();
 
-  // The Rosenbrock function is hard. We don't expect Compass search to find the optimum exactly.
+  // The Rosenbrock function is hard. We don't expect
+  // Compass search to find the optimum exactly.
   EXPECT_NEAR(0.0, best_case->objf_value(), 5);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 2.5);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[1], 2.5);

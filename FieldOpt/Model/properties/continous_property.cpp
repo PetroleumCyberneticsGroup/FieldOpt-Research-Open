@@ -30,17 +30,17 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Properties {
 
-ContinuousProperty::ContinuousProperty(double value)
-  : Property(Continuous) {
+ContinuousProperty::
+ContinuousProperty(double value) : Property(Continuous) {
   value_ = value;
   value_sc_ = 0.0; // scaled values updated after bounds are set
 }
 
-double ContinuousProperty::value() {
+double ContinuousProperty::value() const {
   return value_;
 }
 
-double ContinuousProperty::valueSc() {
+double ContinuousProperty::valueSc() const {
   return value_sc_;
 }
 

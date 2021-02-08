@@ -56,7 +56,7 @@ class Global {
   double bookkeeper_tol_;
 
  private:
-  string im_ = "", wm_ = "", em_ = "";
+  string im_, wm_, em_;
   string md_ = "Settings";
   string cl_ = "Global";
   VerbParams verb_params_;

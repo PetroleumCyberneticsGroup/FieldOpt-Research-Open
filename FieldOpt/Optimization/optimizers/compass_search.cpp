@@ -32,14 +32,16 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Optimizers {
 
-CompassSearch::CompassSearch(Settings::Optimizer *settings,
-                             Case *base_case,
-                             Model::Properties::VarPropContainer *variables,
-                             Reservoir::Grid::Grid *grid,
-                             Logger *logger,
-                             CaseHandler *case_handler,
-                             Constraints::ConstraintHandler *constraint_handler)
-  : GSS(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+CompassSearch::
+CompassSearch(Settings::Optimizer *settings,
+              Case *base_case,
+              Model::Properties::VarPropContainer *variables,
+              Reservoir::Grid::Grid *grid,
+              Logger *logger,
+              CaseHandler *case_handler,
+              Constraints::ConstraintHandler *constraint_handler)
+  : GSS(settings, base_case, variables, grid,
+        logger, case_handler, constraint_handler) {
   vp_ = settings->verbParams();
   if (enable_logging_) {
     logger_->AddEntry(this);

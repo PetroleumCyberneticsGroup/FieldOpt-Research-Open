@@ -32,13 +32,13 @@ namespace Optimization {
 namespace Optimizers {
 
 /*!
- * @brief This implementation is based on the RGA-RDD (Real coded
- * Genetic Algorithm - Ranking selection, Direction-based crossover,
- * Dynamic random mutation) described in
+ * @brief This implementation is based on the RGA-RDD (Real
+ * coded Genetic Algorithm - Ranking selection, Direction-based
+ * crossover, Dynamic random mutation) described in
  *
- *  "A real-coded genetic algorithm with a selection-based crossover
- *  operator", Chuang, Chen & Hwang,  Elsevier Journal of Information
- *  Sciences (2015).
+ *  "A real-coded genetic algorithm with a selection-based
+ *  crossover operator", Chuang, Chen & Hwang,  Elsevier
+ *  Journal of Information Sciences (2015).
  *
  * It uses the following operators:
  *  - Selection: Ranking Selection (RS)
@@ -46,15 +46,17 @@ namespace Optimizers {
  *  - Mutation: Dynamic Random Mutation (DRM)
  *  - Replacement: Generational Replacement (GR) with elitism.
  *
- * Additionally, stagnation is alleviated by regenerating the population
- * (except for the best individual) whenever a stagnation indicator
- * passes below the stagnation limit. The stagnation indicator used
- * is the standard deviation of the population.
+ * Additionally, stagnation is alleviated by regenerating
+ * the population (except for the best individual) whenever
+ * a stagnation indicator passes below the stagnation limit.
+ * The stagnation indicator used is the standard deviation
+ * of the population.
  *
- * \note This algorithm requires either that simple max/min bounds are
- * given (i.e. single numbers applying to all variables) as an optimizer
- * argument or that some form of bound constraints are used (e.g. reservoir
- * boundary or pressure/rate constraints).
+ * \note This algorithm requires either that simple max/min
+ * bounds are given (i.e. single numbers applying to all
+ * variables) as an optimizer argument or that some form
+ * of bound constraints are used (e.g. reservoir boundary
+ * or pressure/rate constraints).
  */
 class RGARDD : public GeneticAlgorithm {
  public:
@@ -67,34 +69,41 @@ class RGARDD : public GeneticAlgorithm {
          Constraints::ConstraintHandler *constraint_handler=0
   );
  private:
-  vector<Chromosome> mating_pool_; //!< Holds the current mating pool.
-  double discard_parameter_; //!< Determines the fraction of parents to be discarded in selection.
-  double stagnation_limit_; //!< The threshold for when to regenerate the population.
+  //!< Holds the current mating pool.
+  vector<Chromosome> mating_pool_;
+
+  //!< Determines fraction of parents to be discarded in selection.
+  double discard_parameter_;
+
+  //!< Threshold for when to regenerate the population.
+  double stagnation_limit_;
 
   /*!
-   * @brief Perform the next iteration by generating a new mating pool
-   * from the current population, or, if the population has stagnated,
-   * repopulating it.
+   * @brief Perform the next iteration by generating a new
+   * mating pool from the current population, or, if the
+   * population has stagnated, repopulating it.
    */
   void iterate() override;
 
   /*!
    * @brief Handle an evaluated case.
    *
-   * Replaces the parent chromosome in the population with the offspring
-   * chromosome in the mating pool if it is better. Updates the tentative
-   * best case if necessary.
+   * Replaces the parent chromosome in the population with
+   * the offspring chromosome in the mating pool if it is
+   * better. Updates the tentative best case if necessary.
    * @param c The newly evaluated case.
    */
   void handleEvaluatedCase(Optimization::Case *c) override;
 
   /*!
-   * @brief Perform Ranking Selection on the population to generate a
-   * new mating pool. Expects a population from best to worst fitness.
-   * @param population The population to perform selection on.
+   * @brief Perform Ranking Selection on the population to
+   * generate a new mating pool. Expects a population from
+   * best to worst fitness.
+   * @param population Population to perform selection on.
    * @return A new mating pool.
    */
-  vector<Chromosome> selection(vector<Chromosome> population) override;
+  vector<Chromosome>
+  selection(vector<Chromosome> population) override;
 
   /*!
    * @brief Perform Direction-Based Crossover on two parents from the
@@ -102,11 +111,12 @@ class RGARDD : public GeneticAlgorithm {
    * @param mating_pool The two parents to be used.
    * @return Vector containing two new offspring.
    */
-  vector<Chromosome> crossover(vector<Chromosome> mating_pool) override;
+  vector<Chromosome>
+  crossover(vector<Chromosome> mating_pool) override;
 
   /*!
-   * @brief Perform Dynamic Random Mutation on two parents from the mating
-   * pool.
+   * @brief Perform Dynamic Random Mutation on two parents
+   * from the mating pool.
    * @param mating_pool The two parents to be used.
    * @return Vector containing two new offspring.
    */
@@ -115,23 +125,25 @@ class RGARDD : public GeneticAlgorithm {
   /*!
    * @brief Check if the population has stagnated.
    *
-   * This is done by calculating the standard deviation of a vector
-   * containing the sum of the variable values for each chromosome
-   * in the population and checking if it's below the stagnation
-   * threshold.
+   * This is done by calculating the standard deviation of
+   * a vector containing the sum of the variable values for
+   * each chromosome in the population and checking if it's
+   * below the stagnation threshold.
    * @return True if the population is stagnant; otherwise false.
    */
   bool is_stagnant();
 
   /*!
-   * @brief Replace all individuals except the best one (i.e. the
-   * first element in the sorted population list) with new, random
-   * chromosomes. Expects the population to be pre-sorted.
+   * @brief Replace all individuals except the best one (i.e.
+   * the first element in the sorted population list) with
+   * new, random chromosomes. Expects the population to be
+   * pre-sorted.
    */
   void repopulate();
 
   /*!
-   * @brief Snap the variable values in a chromosome to the upper and lower bounds.
+   * @brief Snap the variable values in a chromosome
+   * to the upper and lower bounds.
    * @param chrom The chromosome to be snapped.
    */
   void snap_to_bounds(Chromosome &chrom);
@@ -144,13 +156,19 @@ class RGARDD : public GeneticAlgorithm {
 
   class ConfigurationSummary : public Loggable {
    public:
-    ConfigurationSummary(RGARDD *opt) { opt_ = opt; }
+    explicit ConfigurationSummary(RGARDD *opt) { opt_ = opt; }
     LogTarget GetLogTarget() override;
     map<string, string> GetState() override;
     QUuid GetId() override;
     map<string, vector<double>> GetValues() override;
+
    private:
     RGARDD *opt_;
+
+    string im_, wm_, em_;
+    string md_ = "Optimization/optimizers";
+    string cl_ = "RGARDD";
+    Settings::VerbParams vp_;
   };
 
 };

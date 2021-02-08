@@ -149,7 +149,7 @@ class Trajectory
     throw runtime_error(m);
   };
 
-  string im_ = "", wm_ = "", em_ = "";
+  string im_, wm_, em_;
   string md_ = "Model/wells/wellbore";
   string cl_ = "Trajectory";
   Settings::VerbParams vp_;

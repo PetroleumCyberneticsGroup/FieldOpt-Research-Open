@@ -241,9 +241,11 @@ class Case : public Loggable
    * \param variabe_id The UUID of the variable to be perturbed.
    * \param sign The sign/direction of the perturbation.
    * \param magnitude The magnitude of the perturbaton.
-   * \return One or two cases where one variable has been perturbed.
+   * \return One or two cases where one variable has been
+   * perturbed.
    */
-  QList<Case *> Perturb(QUuid variabe_id, SIGN sign, double magnitude);
+  QList<Case *> Perturb(QUuid variabe_id, SIGN sign,
+                        double magnitude);
 
   /*!
    * Get the real variables of this case as a Vector.
@@ -364,7 +366,9 @@ class Case : public Loggable
     return ensemble_realization_;
   }
 
-  void SetRealizationOfv(const QString &alias, const double &ofv);
+  void SetRealizationOfv(const QString &alias,
+                         const double &ofv);
+
   bool HasRealizationOfv(const QString &alias);
   double GetRealizationOfv(const QString &alias);
   double GetEnsembleAverageOfv() const;
@@ -409,7 +413,7 @@ class Case : public Loggable
   //!< Number of seconds spent computing the well index.
   int wic_time_sec_;
 
-  string im_ = "", wm_ = "", em_ = "";
+  string im_, wm_, em_;
   string md_ = "Optimization";
   string cl_ = "Case";
   Settings::VerbParams vp_;

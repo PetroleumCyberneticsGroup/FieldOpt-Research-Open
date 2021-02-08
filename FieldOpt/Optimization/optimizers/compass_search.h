@@ -42,9 +42,10 @@ namespace Optimizers {
  *
  * Reference:
  *
- * Kolda, Tamara G., Robert Michael Lewis, and Virginia Torczon.
- * "Optimization by direct search: New perspectives on some
- * classical and modern methods." SIAM review 45.3 (2003): 385-482.
+ * Kolda, Tamara G., Robert Michael Lewis, and Virginia
+ * Torczon. "Optimization by direct search: New perspectives
+ * on some classical and modern methods." SIAM review 45.3
+ * (2003): 385-482.
  */
 class CompassSearch : public GSS
 {
@@ -58,14 +59,14 @@ class CompassSearch : public GSS
                 Constraints::ConstraintHandler *constraint_handler=nullptr
   );
 
-  QString GetStatusStringHeader() const;
-  QString GetStatusString() const;
+  QString GetStatusStringHeader() const override;
+  QString GetStatusString() const override;
 
  private:
 
   //!< Step or contract, perturb, and
   //!< clear list of recently evaluated cases.
-  void iterate();
+  void iterate() override;
 
   //!< Check if this iteration was successful (i.e., if the
   //!< current tent. best case was found in this iteration).
@@ -74,7 +75,7 @@ class CompassSearch : public GSS
  protected:
   void handleEvaluatedCase(Case *c) override;
 
-  string im_ = "", wm_ = "", em_ = "";
+  string im_, wm_, em_;
   ::Settings::VerbParams vp_;
   string md_ = "Optimization/optimizers";
   string cl_ = "CompassSearch";

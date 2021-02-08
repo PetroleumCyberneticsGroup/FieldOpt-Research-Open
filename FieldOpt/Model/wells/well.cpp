@@ -37,11 +37,12 @@ using Printer::num2str;
 
 using WType=Settings::Model::WellDefinitionType;
 
-Well::Well(const Settings::Model& model_settings,
-           int well_number,
-           Properties::VarPropContainer *variable_container,
-           Reservoir::Grid::Grid *grid,
-           Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
+Well::
+Well(const Settings::Model& model_settings,
+     int well_number,
+     Properties::VarPropContainer *variable_container,
+     Reservoir::Grid::Grid *grid,
+     Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
   well_settings_ = model_settings.wells()[well_number];
   well_settings_.copyVerbParams(model_settings.vp_);
@@ -58,7 +59,8 @@ Well::Well(const Settings::Model& model_settings,
 
   preferred_phase_ = well_settings_.preferred_phase;
 
-  wellbore_radius_ = new Properties::ContinuousProperty(well_settings_.wellbore_radius);
+  wellbore_radius_ =
+    new Properties::ContinuousProperty(well_settings_.wellbore_radius);
 
   controls_ = new QList<Control *>();
   for (const auto & control : well_settings_.controls) {
@@ -534,7 +536,7 @@ void Well::createAnnulusSegments(std::vector<Segment> &segments,
 
         outlet_md = compartments_[i].block_range_.at(0)->getEntryMd() + length_delta_; // 0 block (tubing)
         outlet_md += 0.08, // 1 block (ICD)
-        outlet_md += comp_blocks[j]->getLength();
+          outlet_md += comp_blocks[j]->getLength();
 
         assert(outlet_md != -1); // Ensure that the outlet md has been set
         aux_idx = outlet_index - 1;
@@ -610,7 +612,7 @@ std::vector<int> Well::createICDSegments(std::vector<Segment> &segments,
     // int index = tubing_indexes.back() + 1 + i;
     int index = i + 2;
     // if (i > 0) {
-      outlet = index + compartments_.size();
+    outlet = index + compartments_.size();
     // }
 
     if (vp_.vMOD >=5) {
@@ -726,8 +728,8 @@ std::vector<int> Well::createTubingSegments(std::vector<Segment> &segments) {
       seg_length,
       md_length,
       depth,
-    // compartments_[i].block_range_.back()->getExitMd() - compartments_[i].block_range_.front()->getEntryMd(),
-    //   compartments_[i].block_range_.back()->getExitPoint().z() - compartments_[i].block_range_.front()->getEntryPoint().z(),
+      // compartments_[i].block_range_.back()->getExitMd() - compartments_[i].block_range_.front()->getEntryMd(),
+      //   compartments_[i].block_range_.back()->getExitPoint().z() - compartments_[i].block_range_.front()->getEntryPoint().z(),
       //
       // compartments_[i].block_range_[0]->getLength(),
       // compartments_[i].block_range_[0]->getDepthChange(),
@@ -765,10 +767,10 @@ std::vector<Segment> Well::GetTubingSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
   auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
-    1, 1, -1, -1.0, -1.0,
-    compartments_.front().start_packer->tvd(),-1.0,
-    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
-    1, 1, -1);
+                              1, 1, -1, -1.0, -1.0,
+                              compartments_.front().start_packer->tvd(),-1.0,
+                              -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+                              1, 1, -1);
   segments.push_back(root_segment);
   std::vector<int> tubing_indexes = createTubingSegments(segments);
   return segments;
@@ -779,10 +781,10 @@ std::vector<Segment> Well::GetICDSegments() {
   std::vector<Segment> segments;
 
   auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
-    1, 1,-1, -1.0, -1.0,
-    compartments_.front().start_packer->tvd(),-1.0,
-    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
-    1, 1, -1);
+                              1, 1,-1, -1.0, -1.0,
+                              compartments_.front().start_packer->tvd(),-1.0,
+                              -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+                              1, 1, -1);
   segments.push_back(root_segment);
 
   std::vector<int> tubing_indexes = createTubingSegments(segments);
@@ -800,10 +802,10 @@ std::vector<Segment> Well::GetAnnulusSegments() {
   assert(is_segmented_);
   std::vector<Segment> segments;
   auto root_segment = Segment(Segment::SegType::TUBING_SEGMENT,
-    1, 1, -1, -1.0, -1.0,
-    compartments_.front().start_packer->tvd(),-1.0,
-    -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
-    1, 1, -1);
+                              1, 1, -1, -1.0, -1.0,
+                              compartments_.front().start_packer->tvd(),-1.0,
+                              -1.0, 0.0, 0.0, zero_pt_, zero_pt_,
+                              1, 1, -1);
   segments.push_back(root_segment);
 
   std::vector<int> tubing_indexes = createTubingSegments(segments);

@@ -31,9 +31,10 @@ using ECLProp = Simulation::Results::Results::Property;
 
 using std::runtime_error;
 
-Augmented::Augmented(Settings::Optimizer *settings,
-                     Simulation::Results::Results *results,
-                     Model::Model *model) : Objective(settings) {
+Augmented::
+Augmented(Settings::Optimizer *settings,
+          Simulation::Results::Results *results,
+          Model::Model *model) : Objective(settings) {
   settings_ = settings;
   results_ = results;
   model_ = model;

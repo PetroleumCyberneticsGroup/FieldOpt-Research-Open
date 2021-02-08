@@ -33,14 +33,17 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Optimizers {
-CMA_ES::CMA_ES(Settings::Optimizer *settings,
-               Case *base_case,
-               Model::Properties::VarPropContainer *variables,
-               Reservoir::Grid::Grid *grid,
-               Logger *logger,
-               CaseHandler *case_handler,
-               Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+
+CMA_ES::
+CMA_ES(Settings::Optimizer *settings,
+       Case *base_case,
+       Model::Properties::VarPropContainer *variables,
+       Reservoir::Grid::Grid *grid,
+       Logger *logger,
+       CaseHandler *case_handler,
+       Constraints::ConstraintHandler *constraint_handler)
+  : Optimizer(settings, base_case, variables, grid,
+              logger, case_handler, constraint_handler) {
   settings_ = settings;
   // User defined parameters (need to be edited)
   n_vars_ = variables->ContinuousVariableSize();
@@ -55,8 +58,10 @@ CMA_ES::CMA_ES(Settings::Optimizer *settings,
 
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
-      lower_bound_ = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
-      upper_bound_ = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
+      lower_bound_ = constraint_handler_->GetLowerBounds(
+        base_case->GetRealVarIdVector());
+      upper_bound_ = constraint_handler_->GetUpperBounds(
+        base_case->GetRealVarIdVector());
     } else {
       lower_bound_.resize(n_vars_);
       upper_bound_.resize(n_vars_);

@@ -30,16 +30,21 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Optimizers {
 
-RGARDD::RGARDD(Settings::Optimizer *settings,
-               Optimization::Case *base_case,
-               Model::Properties::VarPropContainer *variables,
-               Reservoir::Grid::Grid *grid,
-               Logger *logger,
-               CaseHandler *case_handler,
-               Constraints::ConstraintHandler *constraint_handler
-) : GeneticAlgorithm(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+RGARDD::
+RGARDD(Settings::Optimizer *settings,
+       Optimization::Case *base_case,
+       Model::Properties::VarPropContainer *variables,
+       Reservoir::Grid::Grid *grid,
+       Logger *logger,
+       CaseHandler *case_handler,
+       Constraints::ConstraintHandler *constraint_handler)
+  : GeneticAlgorithm(settings, base_case, variables, grid,
+                     logger, case_handler, constraint_handler) {
+  vp_ = settings->verbParams();
 
-  assert(population_size_ % 2 == 0); // Need an even number of chromosomes
+  // Need an even number of chromosomes
+  assert(population_size_ % 2 == 0);
+
   if (settings->parameters().discard_parameter < 0) {
     discard_parameter_ = 1.0/population_size_;
   } else {
@@ -57,9 +62,9 @@ RGARDD::RGARDD(Settings::Optimizer *settings,
 
 void RGARDD::iterate() {
   if (!case_handler_->QueuedCases().empty()
-  || !case_handler_->CasesBeingEvaluated().empty()) {
+    || !case_handler_->CasesBeingEvaluated().empty()) {
     wm_ = "Iteration requested while evaluation queue is not empty. Skipping call.";
-    ext_warn(wm_, "Optimization", "RGARDD");
+    ext_warn(wm_, md_, cl_, vp_.lnw);
     return;
   }
 
@@ -70,9 +75,9 @@ void RGARDD::iterate() {
 
   if (is_stagnant()) {
     if (vp_.vOPT >= 1) {
-      im_ = "The population has stagnated in generation"
-        + num2str(iteration_) + ". Repopulating";
-      ext_info(im_, "RGARDD", "Optimization");
+      im_ = "The population has stagnated in generation";
+      im_ += num2str(iteration_) + ". Repopulating";
+      ext_info(im_, md_, cl_, vp_.lnw);
     }
     repopulate();
     iteration_++;
@@ -118,7 +123,7 @@ void RGARDD::handleEvaluatedCase(Case *c) {
     } else {
       wm_ = "Unable to handle case (would not have been an improvement).";
     }
-    ext_warn(wm_, "Optimization", "RGARDD");
+    ext_warn(wm_, md_, cl_, vp_.lnw);
     return;
   }
 
@@ -139,7 +144,7 @@ void RGARDD::handleEvaluatedCase(Case *c) {
 }
 
 vector<GeneticAlgorithm::Chromosome>
-  RGARDD::selection(vector<Chromosome> population) {
+RGARDD::selection(vector<Chromosome> population) {
   auto mating_pool = population_;
   int n_repl = floor(population_size_ * discard_parameter_);
   for (int i = population_size_-n_repl; i < population_size_; ++i) {
@@ -149,7 +154,7 @@ vector<GeneticAlgorithm::Chromosome>
 }
 
 vector<GeneticAlgorithm::Chromosome>
-  RGARDD::crossover(vector<Chromosome> mating_pool) {
+RGARDD::crossover(vector<Chromosome> mating_pool) {
   assert(mating_pool.size() == 2);
 
   auto p1 = mating_pool[0];
@@ -177,17 +182,21 @@ vector<GeneticAlgorithm::Chromosome>
   return vector<Chromosome>{o1, o2};
 }
 
-vector<GeneticAlgorithm::Chromosome> RGARDD::mutate(vector<Chromosome> mating_pool) {
+vector<GeneticAlgorithm::Chromosome>
+RGARDD::mutate(vector<Chromosome> mating_pool) {
   assert(mating_pool.size() == 2);
   double s = pow(1.0 - (iteration_*1.0/max_generations_), decay_rate_);
   auto p1 = mating_pool[0];
   auto p2 = mating_pool[1];
   auto o1 = Chromosome(p1);
   auto o2 = Chromosome(p2);
-  Eigen::VectorXd dir = random_doubles_eigen(gen_,
-                                             -mutation_strength_,
-                                             mutation_strength_,
-                                             n_vars_);
+
+  Eigen::VectorXd
+    dir = random_doubles_eigen(gen_,
+                               -mutation_strength_,
+                               mutation_strength_,
+                               n_vars_);
+
   o1.rea_vars = p1.rea_vars + s * dir.cwiseProduct(upper_bound_ - lower_bound_);
   o2.rea_vars = p2.rea_vars + s * dir.cwiseProduct(upper_bound_ - lower_bound_);
 
@@ -199,10 +208,11 @@ vector<GeneticAlgorithm::Chromosome> RGARDD::mutate(vector<Chromosome> mating_po
 
 void RGARDD::snap_to_bounds(Chromosome &chrom) {
   for (int i = 0; i < chrom.rea_vars.size(); ++i) {
-    if (chrom.rea_vars(i) < lower_bound_(i))
+    if (chrom.rea_vars(i) < lower_bound_(i)) {
       chrom.rea_vars(i) = lower_bound_(i);
-    else if (chrom.rea_vars(i) > upper_bound_(i))
+    } else if (chrom.rea_vars(i) > upper_bound_(i)) {
       chrom.rea_vars(i) = upper_bound_(i);
+    }
   }
 }
 
@@ -264,10 +274,10 @@ map<string, vector<double>> RGARDD::ConfigurationSummary::GetValues() {
 void RGARDD::print_state(string header) {
   std::stringstream ss;
   ss << header << "|";
-  ss << "Iteration: " << iteration_ << "|";
-  ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
+  ss << "Iteration: " << iteration_ << "|" << "Current best case: ";
+  ss << tentative_best_case_->id().toString().toStdString() << "|";
   ss << "              OFV: " << tentative_best_case_->objf_value() << "|";
-  Printer::ext_info(ss.str(), "Optimization", "RGARDD");
+  ext_info(ss.str(), md_, cl_, vp_.lnw);
 }
 }
 }
