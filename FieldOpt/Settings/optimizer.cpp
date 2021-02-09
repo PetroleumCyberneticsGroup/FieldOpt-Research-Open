@@ -125,11 +125,11 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optmzr_constraint.type = ConstraintType::BHP;
     if (json_constraint.contains("Max")) {
       set_opt_prop_double(optmzr_constraint.max,
-                          json_constraint, "Max");
+                          json_constraint, "Max", vp_);
     }
     if (json_constraint.contains("Min")) {
       set_opt_prop_double(optmzr_constraint.min,
-                          json_constraint, "Min");
+                          json_constraint, "Min", vp_);
     }
 
     // Packer- and ICV Constraints
@@ -137,7 +137,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
     optmzr_constraint.type = ConstraintType::ICVConstraint;
     set_opt_prop_double(optmzr_constraint.max,
-                        json_constraint, "Max");
+                        json_constraint, "Max", vp_);
 
     if (optmzr_constraint.max >= 7.8540E-03) {
       string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
@@ -145,7 +145,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       optmzr_constraint.max = 7.8539E-3;
     }
     set_opt_prop_double(optmzr_constraint.min,
-                        json_constraint, "Min");
+                        json_constraint, "Min", vp_);
 
   } else if (CnstrCmp(constraint_type, "PackerConstraint")) {
     optmzr_constraint.type = ConstraintType::PackerConstraint;
@@ -154,20 +154,20 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     optmzr_constraint.type = ConstraintType::Rate;
     if (json_constraint.contains("Max")) {
       set_opt_prop_double(optmzr_constraint.max,
-                          json_constraint, "Max");
+                          json_constraint, "Max", vp_);
     }
     if (json_constraint.contains("Min")) {
       set_opt_prop_double(optmzr_constraint.min,
-                          json_constraint, "Min");
+                          json_constraint, "Min", vp_);
     }
 
   } else if (CnstrCmp(constraint_type, "Boundary2D")) {
 
     optmzr_constraint.type = ConstraintType::PseudoContBoundary2D;
-    set_opt_prop_double(optmzr_constraint.box_imin, json_constraint, "Imin");
-    set_opt_prop_double(optmzr_constraint.box_imax, json_constraint, "Imax");
-    set_opt_prop_double(optmzr_constraint.box_jmin, json_constraint, "Jmin");
-    set_opt_prop_double(optmzr_constraint.box_jmax, json_constraint, "Jmax");
+    set_opt_prop_double(optmzr_constraint.box_imin, json_constraint, "Imin", vp_);
+    set_opt_prop_double(optmzr_constraint.box_imax, json_constraint, "Imax", vp_);
+    set_opt_prop_double(optmzr_constraint.box_jmin, json_constraint, "Jmin", vp_);
+    set_opt_prop_double(optmzr_constraint.box_jmax, json_constraint, "Jmax", vp_);
 
     // Constraint type Well Spline Points
   } else if (CnstrCmp(constraint_type, "WellSplinePoints")) {
@@ -420,12 +420,12 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
 
     // GSS parameters :: InitialStepLength
     if (json_parameters.contains("InitialStepLength")) {
-      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength");
+      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength", vp_);
     }
 
     // GSS parameters :: MinimumStepLength
     if (json_parameters.contains("MinimumStepLength")) {
-      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength");
+      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength", vp_);
     }
 
     // GSS parameters :: ContractionFactor
@@ -440,7 +440,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
 
     // GSS parameters :: MaxQueueSize
     if (json_parameters.contains("MaxQueueSize"))
-      params.max_queue_size = json_parameters["MaxQueueSize"].toDouble();
+      params.max_queue_size = json_parameters["MaxQueueSize"].toInt();
     else { params.max_queue_size = 2; }
 
     // GSS parameters :: Pattern
@@ -812,11 +812,11 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
 
       for (int i = 0; i < json_components.size(); ++i) {
         Objective::NPVComponent component;
-        set_req_prop_double(component.coefficient, json_components[i].toObject(), "Coefficient");
-        set_req_prop_string(component.property, json_components[i].toObject(), "Property");
-        set_opt_prop_double(component.discount, json_components[i].toObject(), "DiscountFactor");
-        set_req_prop_string(component.interval, json_components[i].toObject(), "Interval");
-        set_opt_prop_bool(component.usediscountfactor, json_components[i].toObject(), "UseDiscountFactor");
+        set_req_prop_double(component.coefficient, json_components[i].toObject(), "Coefficient", vp_);
+        set_req_prop_string(component.property, json_components[i].toObject(), "Property", vp_);
+        set_opt_prop_double(component.discount, json_components[i].toObject(), "DiscountFactor", vp_);
+        set_req_prop_string(component.interval, json_components[i].toObject(), "Interval", vp_);
+        set_opt_prop_bool(component.usediscountfactor, json_components[i].toObject(), "UseDiscountFactor", vp_);
         obj.NPV_sum.append(component);
       }
 
@@ -831,11 +831,11 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
       for (int ii = 0; ii < terms.size(); ++ii) {
         Objective::AugTerms term;
         auto json_term = terms[ii].toObject();
-        set_req_prop_double(term.coefficient, json_term, "Coefficient");
-        set_req_prop_bool(term.active, json_term, "Active");
-        set_req_prop_string(term.prop_name, json_term, "PropName");
+        set_req_prop_double(term.coefficient, json_term, "Coefficient", vp_);
+        set_req_prop_bool(term.active, json_term, "Active", vp_);
+        set_req_prop_string(term.prop_name, json_term, "PropName", vp_);
 
-        if (!set_opt_prop_string(term.scaling, json_term, "Scaling")) {
+        if (!set_opt_prop_string(term.scaling, json_term, "Scaling", vp_)) {
           term.scaling = "None";
         }
 

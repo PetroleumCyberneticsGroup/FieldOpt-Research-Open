@@ -2,7 +2,7 @@
 Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2020 Mathias Bellout
+Modified 2021 Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
@@ -280,8 +280,8 @@ inline void CreateDir(std::string path,
 }
 
 /*!
- * Get the name of a file from a path (i.e. delete everyting up to
- * and including the final /).
+ * Get the name of a file from a path (i.e. delete
+ * everyting up to and including the final /).
  * @param file_path Path to a file
  * @return Name of a file, including extension.
  */
@@ -429,7 +429,7 @@ inline QString GetCurrentDirectoryPath() {
 }
 
 /*!
- * \brief GetAbsoluteFilePath Gets absolute path of file.
+ * \brief GetAbsFilePath Gets absolute path of file.
  * \param file (relative) path to file
  */
 inline QString GetAbsoluteFilePath(const QString &file) {
@@ -437,13 +437,13 @@ inline QString GetAbsoluteFilePath(const QString &file) {
   return fileInfo.absoluteFilePath();
 }
 
-inline std::string GetAbsoluteFilePath(const std::string &file) {
+inline std::string GetAbsFilePath(const std::string &file) {
   return GetAbsoluteFilePath(QString::fromStdString(file)).toStdString();
 }
 
 /*!
- * Get the path to a file's parent directory (i.e. remove everyting
- * after the final slash)
+ * Get the path to a file's parent directory
+ * (i.e. remove everyting after the final slash)
  */
 inline QString GetParentDirPath(const QString &file_path) {
   QStringList parts = file_path.split("/");

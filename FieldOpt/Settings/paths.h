@@ -89,7 +89,7 @@ class Paths {
   map<Path, string> paths_;
 
   string md_ = "Settings";
-  string cl_ = "paths";
+  string cl_ = "Paths";
   Settings::VerbParams vp_;
 };
 

@@ -89,7 +89,9 @@ void Simulator::PreSimWork() {
 
   if (settings_->simulator()->use_pre_sim_script()) {
 
-    ext_info("Executing presim script", md_, cl_, vp_.lnw);
+    if (vp_.vSIM >= 1) {
+      ext_info("Executing presim script", md_, cl_, vp_.lnw);
+    }
     sim_wrk_dir_ = GetAbsoluteFilePath(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
     QString presim_script = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
     QStringList pre_sim_args = *settings_->simulator()->pre_sim_args();
@@ -117,7 +119,9 @@ void Simulator::PostSimWork() {
 
   if (settings_->simulator()->use_post_sim_script()) {
 
-    ext_info("Executing postsim script", md_, cl_, vp_.lnw);
+    if (vp_.vSIM >= 1) {
+      ext_info("Executing postsim script", md_, cl_, vp_.lnw);
+    }
     QString expected_script_path = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_POSTSIM.sh";
     QStringList post_sim_args = *settings_->simulator()->post_sim_args();
     post_sim_args.prepend(sim_wrk_dir_);

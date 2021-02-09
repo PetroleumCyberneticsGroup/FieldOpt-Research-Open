@@ -223,6 +223,7 @@ class Model
 
   string md_ = "Settings";
   string cl_ = "Model";
+  string im_, em_, wm_;
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);

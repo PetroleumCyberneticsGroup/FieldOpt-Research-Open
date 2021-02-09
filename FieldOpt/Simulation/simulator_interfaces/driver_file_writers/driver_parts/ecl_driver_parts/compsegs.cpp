@@ -63,12 +63,13 @@ Compsegs::Compsegs(QList<Model::Wells::Well *> *wells, int ts) {
         }
       }
 
-      cout << "tsegs.sz(): " << tsegs.size() << endl;
-      cout << "isegs.sz(): " << isegs.size() << endl;
-      cout << "asegs.sz(): " << asegs.size() << endl;
-      for (int kk=0; kk < asegs.size(); kk++) {
-        cout << "asegs[kk=" << kk << "].sz(): " << asegs[kk].size() << endl;
-      }
+      // dbg
+      // cout << "tsegs.sz(): " << tsegs.size() << endl;
+      // cout << "isegs.sz(): " << isegs.size() << endl;
+      // cout << "asegs.sz(): " << asegs.size() << endl;
+      // for (int kk=0; kk < asegs.size(); kk++) {
+      //   cout << "asegs[kk=" << kk << "].sz(): " << asegs[kk].size() << endl;
+      // }
 
       int idx_icd = 0, idx_ann = 0;
 
