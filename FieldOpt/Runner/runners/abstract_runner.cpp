@@ -389,42 +389,53 @@ void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
   logger_ = new Logger(runtime_settings_, output_subdir, write_logs);
 }
 
-void AbstractRunner::PrintCompletionMessage() const {
+void AbstractRunner::PrintCompletionMessage() {
 
-  std::cout << "Optimization complete: ";
+  cout << "Optimization complete: ";
   switch (optimizer_->IsFinished()) {
     case Optimization::Optimizer::TerminationCondition::MAX_EVALS_REACHED:
-      std::cout << "maximum number of evaluations reached (not converged)." << std::endl;
+      cout << "maximum number of evaluations reached (not converged)." << endl;
       break;
     case Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED:
-      std::cout << "minimum step length reached (converged)." << std::endl;
+      cout << "minimum step length reached (converged)." << endl;
       break;
-    default: std::cout << "Unknown termination reason." << std::endl;
+    default: cout << "Unknown termination reason." << endl;
   }
 
-  std::cout << "Best case at termination:" << optimizer_->GetTentativeBestCase()->id().toString().toStdString() << std::endl;
-  std::cout << "Variable values: " << std::endl;
+  cout << "Best case at termination:" << endl;
+  cout << optimizer_->GetTentativeBestCase()->id().toString().toStdString() << endl;
+  cout << "Variable values: " << endl;
 
-  for (auto var : optimizer_->GetTentativeBestCase()->integer_variables()) {
+  auto opt_vars_int = optimizer_->GetTentativeBestCase()->integer_variables();
+  auto opt_vars_real = optimizer_->GetTentativeBestCase()->real_variables();
+  auto opt_vars_bin = optimizer_->GetTentativeBestCase()->binary_variables();
+
+  for (auto var : opt_vars_int) {
     auto prop_name = model_->variables()->GetDiscreteVariable(var.first)->name();
-    std::cout << "\t" << prop_name.toStdString() << "\t" << var.second << std::endl;
+    cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
 
-  for (auto var : optimizer_->GetTentativeBestCase()->real_variables()) {
+  for (auto var : opt_vars_real) {
     auto prop_name = model_->variables()->GetContinuousVariable(var.first)->name();
-    std::cout << "\t" << prop_name.toStdString() << "\t" << var.second << std::endl;
+    cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
 
-  for (auto var : optimizer_->GetTentativeBestCase()->binary_variables()) {
+  for (auto var : opt_vars_bin) {
     auto prop_name = model_->variables()->GetBinaryVariable(var.first)->name();
-    std::cout << "\t" << prop_name.toStdString() << "\t" << var.second << std::endl;
+    cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
+
+  cout << "Running simulation using optzd values" << endl;
+  optz_case_ = new Optimization::Case(opt_vars_bin, opt_vars_int, opt_vars_real);
+  model_->ApplyCase(optz_case_);
+  simulator_->Evaluate();
+
 }
 
 int AbstractRunner::timeoutValue() const {
-  if (simulation_times_.size() == 0 || runtime_settings_->simulation_timeout() == 0)
+  if (simulation_times_.empty() || runtime_settings_->simulation_timeout() == 0) {
     return 10000;
-  else {
+  } else {
     return calc_median(simulation_times_) * runtime_settings_->simulation_timeout();
   }
 }

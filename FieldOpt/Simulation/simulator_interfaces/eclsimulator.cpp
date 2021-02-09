@@ -90,9 +90,7 @@ void ECLSimulator::Evaluate() {
   PreSimWork();
   if (vp_.vSIM >= 2) { info("Starting unmonitored sim.", vp_.lnw); }
   ExecShellScript(paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
-                  script_args_,
-                  vp_
-  );
+                  script_args_,vp_);
   PostSimWork();
 
   if (vp_.vSIM >= 2) { info("Unmonitored sim done. Reading results.", vp_.lnw); }
@@ -132,9 +130,9 @@ bool ECLSimulator::Evaluate(int timeout, int threads) {
   return success;
 }
 
-bool ECLSimulator::Evaluate(
-  const Settings::Ensemble::Realization &realization,
-  int timeout, int threads) {
+bool ECLSimulator::
+Evaluate(const Settings::Ensemble::Realization &realization,
+         int timeout, int threads) {
 
   driver_file_name_ =
     QString::fromStdString(FileName(realization.data()));

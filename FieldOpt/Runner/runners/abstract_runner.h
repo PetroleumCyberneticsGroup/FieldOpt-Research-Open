@@ -87,6 +87,7 @@ class AbstractRunner
   Settings::Settings *settings_;
   RuntimeSettings *runtime_settings_;
   Optimization::Case *base_case_;
+  Optimization::Case *optz_case_;
 
   Optimization::Optimizer *optimizer_;
   Optimization::Objective::Objective *objf_;
@@ -104,7 +105,7 @@ class AbstractRunner
   string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
 
-  void PrintCompletionMessage() const;
+  void PrintCompletionMessage();
 
   /*!
    * \brief sentinelValue Get the sentinel value to be used
