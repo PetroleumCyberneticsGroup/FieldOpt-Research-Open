@@ -80,29 +80,31 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
 }
 
 double AbstractRunner::sentinelValue() const {
-  if (settings_->optimizer()->mode() == OptzrMod::Minimize)
+  if (settings_->optimizer()->mode() == OptzrMod::Minimize) {
     return -1*sentinel_value_;
+  }
   return sentinel_value_;
 }
 
 void AbstractRunner::InitializeSettings(QString output_subdir) {
+
   QString output_dir = runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR);
   if (output_subdir.length() > 0) {
     output_dir.append(QString("/%1/").arg(output_subdir));
   }
+
+  if (!DirExists(output_dir, vp_)) { CreateDir(output_dir, vp_); }
   runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
+
   settings_ = new Settings::Settings(runtime_settings_->paths());
   vp_ = settings_->global()->verbParams();
-  // settings_->global()->showVerbParams();
-
-  if (!DirExists(output_dir, vp_)) {
-    CreateDir(output_dir, vp_);
-  }
+  settings_->global()->showVerbParams();
 
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
-    ensemble_helper_ = EnsembleHelper(settings_->simulator()->get_ensemble(),
-                                      settings_->optimizer()->parameters().rng_seed);
+    ensemble_helper_ =
+      EnsembleHelper(settings_->simulator()->get_ensemble(),
+        settings_->optimizer()->parameters().rng_seed);
   } else {
     is_ensemble_run_ = false;
   }
@@ -121,8 +123,7 @@ void AbstractRunner::InitializeModel() {
 }
 
 void AbstractRunner::InitializeSimulator() {
-  if (model_ == nullptr)
-    throw std::runtime_error("Model must be initialized before Simulator.");
+  if (model_ == nullptr) { E("Model must be initialized b/f Simulator."); }
 
   switch (settings_->simulator()->type()) {
 
@@ -155,37 +156,33 @@ void AbstractRunner::InitializeSimulator() {
     }
 
     default: {
-      string em = "Unable to initialize runner: simulator ";
-      em += "type set in JSON driver file not recognized.";
-      throw runtime_error(em);
+      E("Simulator not initialized: type set in JSON driver not recognized.");
     }
   }
 }
 
 void AbstractRunner::EvaluateBaseModel() {
   if (simulator_ == nullptr) {
-    string em = "Simulator must be initialized before evaluating base model.";
-    throw runtime_error(em);
+    E("Simulator must be initialized before evaluating base model.");
   }
 
   if (is_ensemble_run_) {
-    auto tm = "Simulating ensemble base case.";
-    if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+    im_ = "Simulating ensemble base case.";
+    if (vp_.vRUN >= 1) { ext_info(im_, md_, cl_, vp_.lnw); }
 
     auto base_rlz = ensemble_helper_.GetBaseRealization();
     simulator_->Evaluate(base_rlz, 10000, 4);
 
   } else if (!simulator_->results()->isAvailable()) {
-    auto tm = "Simulating base case.";
-    if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+    im_ = "Simulating base case.";
+    if (vp_.vRUN >= 1) { ext_info(im_, md_, cl_, vp_.lnw); }
     simulator_->Evaluate();
   }
 }
 
 void AbstractRunner::InitializeObjectiveFunction() {
   if (simulator_ == nullptr || settings_ == nullptr) {
-    string em = "Simulator and Settings must be initialized before ObjectiveFunction.";
-    throw runtime_error(em);
+    E("Simulator & Settings must be initialized b/f ObjectiveFunction.");
   }
 
   switch (settings_->optimizer()->objective().type) {
@@ -212,8 +209,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
     }
 
     default: {
-      string em = "Unable to initialize Runner: ObjectiveFunction type not recognized.";
-      throw runtime_error(em);
+      E("Runner not initialized: ObjectiveFunction type not recognized.");
     }
   }
 }

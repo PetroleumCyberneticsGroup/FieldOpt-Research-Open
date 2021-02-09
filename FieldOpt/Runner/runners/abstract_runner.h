@@ -80,7 +80,7 @@ class AbstractRunner
   string cl_ = "AbstractRunner";
 
  protected:
-  AbstractRunner(RuntimeSettings *runtime_settings);
+  explicit AbstractRunner(RuntimeSettings *runtime_settings);
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
@@ -96,6 +96,12 @@ class AbstractRunner
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
 
   void PrintCompletionMessage() const;
