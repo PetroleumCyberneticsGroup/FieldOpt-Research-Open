@@ -242,9 +242,8 @@ bool Model::Well::ControlEntry::isDifferent(ControlEntry other) {
     return true;
   if (bhp != other.bhp)
     return true;
-  if (control_mode != other.control_mode)
-    return true;
-  return false; // Assume they're equal if none of the above hits.
+  return control_mode != other.control_mode;
+  // Assume they're equal if none of the above hits.
 }
 
 // COMPARTMENTS --------------------------------------------
