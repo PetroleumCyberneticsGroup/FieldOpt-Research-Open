@@ -162,20 +162,18 @@ void Drilling::runOptimization(int drilling_step) {
     runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
 
   //!<Trigger #1: model deviation>
+  double model_dev = abs((base_case_->objective_function_value() - best_objective_) / best_objective_);
   if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
     double min_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).min_model_deviation;
     double max_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).max_model_deviation;
     if (min_model_dev >=0) {
       runner->getOptimizer()->setMinModelDeviation(min_model_dev);
 
-      base_case_ = runner->evaluateBaseCase();
-
-      double model_dev = abs((base_case_->objective_function_value() - best_objective_) / best_objective_);
       if (model_dev <= min_model_dev) {
         skip_optimization_ = true;
-      } else if ((model_dev > min_model_dev)  && (model_dev <= max_model_dev)) {
+      } else if ((model_dev > min_model_dev)  && (model_dev <= max_model_dev ))   {
         runner->ReplaceOptimizer(local_optimizer_settings_);
-      } else if (model_dev > max_model_dev) {
+      } else if ((model_dev > max_model_dev) && (max_model_dev >=0)) {
         runner->ReplaceOptimizer(global_optimizer_settings_);
       }
     }
