@@ -55,6 +55,9 @@ void DrillingRunner::Execute() {
   QList<int> drilling_steps = drilling_->getDrillingSchedule()->getSteps();
 
   drilling_->setOptRuntimeSettings(0, runtime_settings_);
+
+  drilling_->createLogFile(0);
+
   for (int i: drilling_steps) {
     double ts = drilling_->getDrillingSchedule()->getTimeSteps().value(i);
 
