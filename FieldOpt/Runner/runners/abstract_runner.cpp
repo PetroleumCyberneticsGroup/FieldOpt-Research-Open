@@ -88,17 +88,23 @@ double AbstractRunner::sentinelValue() const {
 
 void AbstractRunner::InitializeSettings(QString output_subdir) {
 
+  // Output dir
   QString output_dir = runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR);
   if (output_subdir.length() > 0) {
     output_dir.append(QString("/%1/").arg(output_subdir));
   }
-
   if (!DirExists(output_dir, vp_)) { CreateDir(output_dir, vp_); }
   runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
 
+  // Optmzd dir
+  string optz_dir = output_dir.toStdString() + "../optcs";
+  if (!DirExists(optz_dir, vp_)) { CreateDir(optz_dir, vp_); }
+  runtime_settings_->paths().SetPath(Paths::OPTMZD_DIR, optz_dir);
+
+  // Settings
   settings_ = new Settings::Settings(runtime_settings_->paths());
   vp_ = settings_->global()->verbParams();
-  settings_->global()->showVerbParams();
+  // settings_->global()->showVerbParams();
 
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
@@ -111,8 +117,7 @@ void AbstractRunner::InitializeSettings(QString output_subdir) {
 }
 
 void AbstractRunner::InitializeModel() {
-  if (settings_ == nullptr)
-    throw std::runtime_error("Settings must be initialized before Model.");
+  if (settings_ == nullptr) { E("Settings must be initialized b/f Model."); }
 
   if (is_ensemble_run_) {
     settings_->paths().SetPath(Paths::GRID_FILE,
@@ -155,16 +160,12 @@ void AbstractRunner::InitializeSimulator() {
       break;
     }
 
-    default: {
-      E("Simulator not initialized: type set in JSON driver not recognized.");
-    }
+    default: { E("Simulator not initialized: type set in JSON driver not recognized."); }
   }
 }
 
 void AbstractRunner::EvaluateBaseModel() {
-  if (simulator_ == nullptr) {
-    E("Simulator must be initialized before evaluating base model.");
-  }
+  if (simulator_ == nullptr) { E("Simulator must be initialized b/f evaluating base model."); }
 
   if (is_ensemble_run_) {
     im_ = "Simulating ensemble base case.";
@@ -208,9 +209,7 @@ void AbstractRunner::InitializeObjectiveFunction() {
       break;
     }
 
-    default: {
-      E("Runner not initialized: ObjectiveFunction type not recognized.");
-    }
+    default: { E("Runner not initialized: ObjectiveFunction type not recognized."); }
   }
 }
 
@@ -247,8 +246,7 @@ void AbstractRunner::InitializeBaseCase() {
 
 void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
-    string em = "Base Case and Model must be initialized before the Optimizer";
-    throw runtime_error(em);
+    E("Base Case and Model must be initialized before the Optimizer");
   }
 
   switch (settings_->optimizer()->type()) {
@@ -367,7 +365,7 @@ void AbstractRunner::InitializeOptimizer() {
     default: {
       string em = "Unable to initialize runner: ";
       em += "Optimization algorithm set in driver file not recognized.";
-      throw runtime_error(em);
+      E(em);
     }
 
   }
@@ -377,8 +375,7 @@ void AbstractRunner::InitializeOptimizer() {
 
 void AbstractRunner::InitializeBookkeeper() {
   if (settings_ == nullptr || optimizer_ == nullptr) {
-    string em = "The Settings and Optimizer must be initialized before the Bookkeeper.";
-    throw runtime_error(em);
+    E("Settings and Optimizer must be initialized before the Bookkeeper.");
   }
 
   bookkeeper_ = new Bookkeeper(settings_,
@@ -390,7 +387,6 @@ void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
 }
 
 void AbstractRunner::PrintCompletionMessage() {
-
   cout << "Optimization complete: ";
   switch (optimizer_->IsFinished()) {
     case Optimization::Optimizer::TerminationCondition::MAX_EVALS_REACHED:
@@ -425,11 +421,29 @@ void AbstractRunner::PrintCompletionMessage() {
     cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
 
+  ComputeOptmzdCase();
+}
+
+void AbstractRunner::ComputeOptmzdCase() {
   cout << "Running simulation using optzd values" << endl;
+  auto opt_vars_int = optimizer_->GetTentativeBestCase()->integer_variables();
+  auto opt_vars_real = optimizer_->GetTentativeBestCase()->real_variables();
+  auto opt_vars_bin = optimizer_->GetTentativeBestCase()->binary_variables();
   optz_case_ = new Optimization::Case(opt_vars_bin, opt_vars_int, opt_vars_real);
+
+  settings_->paths().CopyPath(Paths::OUTPUT_DIR, Paths::OPTMZD_DIR);
+  cout << "OUTPUT_DIR:" << settings_->paths().GetPath(Paths::OUTPUT_DIR) << endl;
+
   model_->ApplyCase(optz_case_);
+  simulator_->UpdatePaths(settings_->paths());
   simulator_->Evaluate();
 
+  if (settings_->optimizer()->objective().type == ObjTyp::Augmented) {
+    optz_case_->set_objf_value(objf_->value(true));
+  } else {
+    optz_case_->set_objf_value(objf_->value());
+  }
+  cout << "objf_value: " << optz_case_->objf_value() << endl;
 }
 
 int AbstractRunner::timeoutValue() const {

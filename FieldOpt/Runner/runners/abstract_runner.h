@@ -107,6 +107,8 @@ class AbstractRunner
 
   void PrintCompletionMessage();
 
+  void ComputeOptmzdCase();
+
   /*!
    * \brief sentinelValue Get the sentinel value to be used
    * as objective function values for cases that fail.
