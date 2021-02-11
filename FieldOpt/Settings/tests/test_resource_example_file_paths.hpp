@@ -26,6 +26,7 @@ static std::string driver_example_           = base_path() + "/examples/driver.j
 static std::string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
 static std::string directory_output_         = base_path() + "/fieldopt-output";
 static std::string directory_output_icds_    = base_path() + "/fieldopt-output/5spot-ICD";
+static std::string directory_output_womud_    = base_path() + "/fieldopt-output/5spot-WOMUD";
 static std::string dir_5spot_SLB_output_     = base_path() + "/fieldopt-output/5spot-SLB";
 static std::string norne_test_output_        = base_path() + "/fieldopt-output/norne_test";
 static std::string norne_driver_example_     = base_path() + "/examples/ECLIPSE/norne-simplified/fo_driver.1_rate.cs.json";
@@ -46,6 +47,8 @@ static std::string grid_5spot_icds_          = base_path() + "/examples/ECLIPSE/
 static std::string driver_5pot_icds_         = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps.json";
 static std::string driver_5pot_icds_drilling = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling.json";
 static std::string driver_5pot_icds_drilling_simplified = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_simplified.json";
+static std::string driver_5pot_icds_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
+static std::string driver_5pot_womud_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-WOMUD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
 
 static std::string deck_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.DATA ";
 static std::string grid_5spot_SLB            = base_path() + "/examples/ECLIPSE/5spot-SLB/mods/5spot_c04_flow_en10_perm/r001/ECL_5SPOT_C04_FLOW__R001.EGRID";

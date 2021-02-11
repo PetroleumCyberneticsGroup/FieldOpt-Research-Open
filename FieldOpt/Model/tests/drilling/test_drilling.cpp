@@ -230,8 +230,8 @@ TEST_F(DrillingTest, DrillingRunner) {
 TEST_F(DrillingTest, DrillingRunnerWorkflow) {
   int argc = 16;
   const char *argv[16] = {"FieldOpt",
-                          TestResources::ExampleFilePaths::driver_5pot_icds_drilling.c_str(),
-                          TestResources::ExampleFilePaths::directory_output_icds_.c_str(),
+                          TestResources::ExampleFilePaths::driver_5pot_womud_drilling_triggers.c_str(),
+                          TestResources::ExampleFilePaths::directory_output_womud_.c_str(),
                           "-g", TestResources::ExampleFilePaths::grid_5spot_icds_.c_str(),
                           "-s", TestResources::ExampleFilePaths::deck_5spot_icds_.c_str(),
                           "-b", "./",
