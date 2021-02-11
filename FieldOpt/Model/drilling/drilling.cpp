@@ -31,12 +31,12 @@ Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContai
   drilling_variables_  = drilling_variables;
   settings_   = settings;
 
-
   well_name_ = settings->drilling().well_name;
-  local_optimizer_settings_ = settings->drilling().local_optimizer_settings;
-  global_optimizer_settings_ = settings->drilling().global_optimizer_settings;
 
   drilling_schedule_ = new DrillingSchedule(settings_, drilling_variables_);
+
+  local_optimizer_settings_ = settings->drilling().local_optimizer_settings;
+  global_optimizer_settings_ = settings->drilling().global_optimizer_settings;
 
   current_step_ = 0;
   current_model_ = 0;
@@ -161,6 +161,8 @@ void Drilling::runOptimization(int drilling_step) {
   if (drilling_schedule_->getOptimizerSettings().value(drilling_step) != nullptr)
     runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
 
+  base_case_ = runner->getOptimizer()->GetTentativeBestCase();
+
   //!<Trigger #1: model deviation>
   double model_dev = abs((base_case_->objective_function_value() - best_objective_) / best_objective_);
   if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
@@ -201,9 +203,46 @@ void Drilling::runOptimization(int drilling_step) {
   best_case_ = opt->GetTentativeBestCase();
   best_objective_ = best_case_->objective_function_value();
 
+  double obj_improvement = abs((best_objective_-base_case_->objective_function_value())/base_case_->objective_function_value());
+
+  printIteration(drilling_step, model_dev, obj_improvement, skip_optimization_);
+
+
   mso_ = new ModelSynchronizationObject(runner->getModel());
 
   skip_optimization_ = false;
 }
+
+void Drilling::createLogFile(int drilling_step) {
+  QString output_dir = QString::fromUtf8(runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR).c_str());
+
+  if (output_dir.length() > 0) {
+    Utilities::FileHandling::CreateDirectory(output_dir);
+  }
+
+  dw_log_path_ = output_dir + "/log_drilling_workflow.csv";
+
+  // Delete existing logs if --force flag is on
+  if (Utilities::FileHandling::FileExists(dw_log_path_)) {
+    Utilities::FileHandling::DeleteFile(dw_log_path_);
+  }
+
+  const QString tr_log_header = "ds dev obj skip";
+  Utilities::FileHandling::WriteLineToFile(tr_log_header, dw_log_path_);
+
+}
+
+void Drilling::printIteration(int drilling_step, double model_deviation, double obj_improvement, bool skip_opt) {
+    stringstream ss;
+
+    ss << setw(4) << right << drilling_step << setprecision(4)
+       << setw(6) << right << model_deviation << setprecision(8)
+       << setw(6) << right << obj_improvement << setprecision(8)
+       << setw(6)  << right << skip_opt;
+
+    string str = ss.str();
+    Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), dw_log_path_);
+}
+
 }
 }

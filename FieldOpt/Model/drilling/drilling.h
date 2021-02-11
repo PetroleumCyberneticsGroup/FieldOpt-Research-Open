@@ -68,8 +68,10 @@ class Drilling {
 
   void modelUpdate(int drilling_step);
   void runOptimization(int drilling_step);
+  void createLogFile(int drilling_step);
 
   double getBestObjective() { return best_objective_;}
+
 
 
  private:
@@ -80,6 +82,7 @@ class Drilling {
   double best_objective_;
 
   string original_output_dir_;
+  QString dw_log_path_;
 
   Properties::VariablePropertyContainer *drilling_variables_;
   Settings::Model  *settings_;
@@ -103,6 +106,9 @@ class Drilling {
 
   void setWellOptimalVariables(const QHash<QUuid, bool>& opt_bin_var,  const QHash<QUuid, int>& opt_int_var, const QHash<QUuid, double>& opt_var, int drilling_step);
   void setWellOptimizationValues(const std::map<string, std::vector<double>>& opt_val, int drilling_step);
+
+
+  void printIteration(int drilling_step, double model_deviation, double obj_improvement, bool skip_opt);
 
 };
 
