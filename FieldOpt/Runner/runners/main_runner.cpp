@@ -48,14 +48,14 @@ MainRunner::MainRunner(RuntimeSettings *rts) {
       runner_ = new MPI::SynchronousMPIRunner(runtime_settings_);
       break;
     }
-    default: {
-      throw std::runtime_error("Runner type not recognized.");
-    }
+    default: { E("Runner type not recognized."); }
   }
 }
 
 void MainRunner::Execute() {
-  ext_info("Starting optimization run.", md_, cl_);
+  if (runtime_settings_->verbParams().vRUN >= 1) {
+    ext_info("Starting optimization run.", md_, cl_);
+  }
   runner_->Execute();
 }
 

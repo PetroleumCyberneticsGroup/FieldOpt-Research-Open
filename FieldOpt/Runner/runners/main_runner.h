@@ -50,6 +50,11 @@ class MainRunner
   RuntimeSettings *runtime_settings_;
   AbstractRunner *runner_;
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
   string md_ = "Runner";
   string cl_ = "MainRunner";
 };
