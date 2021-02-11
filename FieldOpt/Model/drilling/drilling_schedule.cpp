@@ -81,7 +81,7 @@ void DrillingSchedule::assignOptimizationTriggers(QMap<int, Settings::Model::Dri
       if (opt_triggers.value(i).max_model_deviation >=0) {
         opt_trigger.max_model_deviation = opt_triggers.value(i).max_model_deviation;
       } else {
-        opt_trigger.max_model_deviation = -1;
+        opt_trigger.max_model_deviation = 100;
       }
 
       optimization_triggers_.insert(i, opt_trigger);
