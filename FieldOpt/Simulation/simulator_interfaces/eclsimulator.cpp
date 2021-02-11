@@ -98,7 +98,7 @@ void ECLSimulator::Evaluate() {
   updateResultsInModel();
 }
 
-bool ECLSimulator::Evaluate(int timeout, int threads) {
+bool ECLSimulator::Evaluate(int timeout, int threads=1) {
   copyDriverFiles();
   UpdateFilePaths();
 
@@ -132,7 +132,7 @@ bool ECLSimulator::Evaluate(int timeout, int threads) {
 
 bool ECLSimulator::
 Evaluate(const Settings::Ensemble::Realization &realization,
-         int timeout, int threads) {
+         int timeout, int threads=1) {
 
   driver_file_name_ =
     QString::fromStdString(FileName(realization.data()));
