@@ -184,7 +184,7 @@ class Model
     struct OptimizationTrigger {
       OptimizationTrigger() {}
         double min_model_deviation = -1;
-        double max_model_deviation = -1;
+        double max_model_deviation = 100;
         double max_objective_improvement = -1;
     };
 

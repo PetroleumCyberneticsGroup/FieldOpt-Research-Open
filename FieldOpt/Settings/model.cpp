@@ -597,13 +597,13 @@ void Model::readDrilling(QJsonObject json_drilling) {
           else {
             Drilling::OptimizationTrigger trigger;
 
-            if (json_trigger.contains("min_model_deviation")) {
+            if (json_trigger.contains("max_model_deviation")) {
               trigger.max_model_deviation = json_trigger.value("max_model_deviation").toDouble();
             } else {
               trigger.max_model_deviation = -1;
             }
 
-            if (json_trigger.contains("max_model_deviation")) {
+            if (json_trigger.contains("min_model_deviation")) {
               trigger.min_model_deviation = json_trigger.value("min_model_deviation").toDouble();
             } else {
               trigger.min_model_deviation = -1;
@@ -612,7 +612,7 @@ void Model::readDrilling(QJsonObject json_drilling) {
             if (json_trigger.contains("max_obj_improvement")) {
               trigger.max_objective_improvement = json_trigger.value("max_obj_improvement").toDouble();
             } else {
-              trigger.max_objective_improvement = -1;
+              trigger.max_objective_improvement = 100;
             }
 
             drilling_schedule.optimization_triggers.insert(i, trigger);
