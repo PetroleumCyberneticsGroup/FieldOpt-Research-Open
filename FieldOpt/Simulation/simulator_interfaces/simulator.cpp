@@ -47,6 +47,9 @@ Simulator::Simulator(Settings::Settings *settings) {
   vp_ = settings_->global()->verbParams();
   paths_ = settings_->paths();
 
+  results_ = nullptr;
+  model_ = nullptr;
+
   if (!paths_.IsSet(Paths::ENSEMBLE_FILE)) { // single realization
     driver_file_name_ = FileNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
     driver_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
