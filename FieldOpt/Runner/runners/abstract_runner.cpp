@@ -97,7 +97,13 @@ void AbstractRunner::InitializeSettings(QString output_subdir) {
   runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
 
   // Optmzd dir
-  string optz_dir = output_dir.toStdString() + "../optcs";
+  string optz_dir = output_dir.toStdString();
+  if(runtime_settings_->runner_type() == RuntimeSettings::SERIAL) {
+    optz_dir += "/optcs";
+  } else if(runtime_settings_->runner_type() == RuntimeSettings::MPISYNC) {
+    optz_dir += "../optcs";
+  }
+
   if (!DirExists(optz_dir, vp_)) { CreateDir(optz_dir, vp_); }
   runtime_settings_->paths().SetPath(Paths::OPTMZD_DIR, optz_dir);
 
