@@ -208,8 +208,11 @@ class Model
     VerbParams verbParams() const { return verb_params_; };
   };
 
-  QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
-  QList<double> control_times() const { return control_times_; } //!< Get the control times for the schedule
+  //!< Get struct containing settings for the well(s) in the model.
+  QList<Well> wells() const { return wells_; }
+
+  //!< Get control times for schedule
+  QList<double> control_times() const { return control_times_; }
   QList<int> start_date() const { return start_date_; }
 
   VerbParams vp_;

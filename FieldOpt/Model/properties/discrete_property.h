@@ -33,25 +33,28 @@ namespace Model {
 namespace Properties {
 
 /*!
- * \brief The DiscreteProperty class describes descibes discrete properties in the model,
- * such as locations in a discrete grid or the number of ICDs in the well. Discrete
- * values are held as integer numbers.
+ * \brief The DiscreteProperty class describes describes
+ * discrete properties in the model, such as locations in
+ * a discrete grid or the number of ICDs in the well.
+ * Discrete values are held as integer numbers.
  */
 class DiscreteProperty : public Property
 {
-public:
-    DiscreteProperty(int value);
+ public:
+  explicit DiscreteProperty(int value);
 
-    int value() const { return value_; }
-    void setValue(int value);
+  int value() const { return value_; }
+  void setValue(int value);
 
-    void Add(int i); //!< Add i to the value of this property.
-    bool Equals(const DiscreteProperty *other) const; // Check if the value of another variable equals the value of this variable.
+  void Add(int i); //!< Add i to the value of this property.
 
-    QString ToString() const;
+  // Check if value of another variable equals the value of this variable.
+  bool Equals(const DiscreteProperty *other) const;
 
-private:
-    int value_;
+  QString ToString() const;
+
+ private:
+  int value_;
 };
 
 }

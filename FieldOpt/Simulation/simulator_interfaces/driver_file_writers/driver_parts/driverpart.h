@@ -51,8 +51,8 @@ class DriverPart
   virtual QString GetPartString() const = 0;
 
  protected:
-  DriverPart() {}
-  DriverPart(Settings::Settings *settings) {
+  DriverPart() = default;
+  explicit DriverPart(Settings::Settings *settings) {
     vp_ = settings->global()->verbParams();
   }
 

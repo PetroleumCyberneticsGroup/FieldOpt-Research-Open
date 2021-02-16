@@ -43,8 +43,8 @@ class ECLDriverPart : public Simulation::DriverPart
  public:
 
  protected:
-  ECLDriverPart() {}
-  ECLDriverPart(Settings::Settings *settings) : DriverPart(settings) {}
+  ECLDriverPart() = default;
+  explicit ECLDriverPart(Settings::Settings *settings) : DriverPart(settings) {}
 
   /*!
    * \brief base_entry_line_ Represents a basic line entry
@@ -64,7 +64,7 @@ class ECLDriverPart : public Simulation::DriverPart
    */
   void initializeBaseEntryLine(int n);
 
-  QStringList GetBaseEntryLine(const int n) const;
+  QStringList GetBaseEntryLine(int n) const;
 
   //!< List containing the actual entries
   QList<QStringList> entries_;
@@ -77,7 +77,7 @@ class ECLDriverPart : public Simulation::DriverPart
   //!< content, e.g., a terminator ('/')
   QString foot_;
 
-  QString sepLine(int icd_num=0) {
+  static QString sepLine(int icd_num=0) {
     QString start_str = "  -- ";
     QString end_str;
     if (icd_num > 0) {
