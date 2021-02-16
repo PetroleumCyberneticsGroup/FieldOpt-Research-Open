@@ -85,8 +85,11 @@ void ContinuousProperty::Add(double d) {
   }
 }
 
-bool ContinuousProperty::Equals(ContinuousProperty *other,
-                                double epsilon) {
+bool ContinuousProperty::EqualsValue(double other_val, double epsilon) {
+  return std::abs(this->value() - other_val) <= epsilon;
+}
+
+bool ContinuousProperty::Equals(ContinuousProperty *other, double epsilon) {
   return std::abs(this->value() - other->value()) <= epsilon;
   // return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
 }
