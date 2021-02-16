@@ -39,7 +39,7 @@ WellControls::WellControls(const QList<Model::Wells::Well *> *wells,
 
 WellControls::WellControls(const QList<Model::Wells::Well *> *wells,
                            const QList<double> &control_times,
-                           const int &timestep) {
+                           const double &timestep) {
   specific_timestep_ = true;
   initializeBaseEntryLine(12);
   initializeTimeEntries(wells, control_times, timestep);
@@ -54,9 +54,11 @@ WellControls::WellSetting::WellSetting(const QString &well_name,
 }
 
 QString WellControls::getTimestepPartString() const {
-  // When this method is used, the time entries map should only contain two entries: one for the current
-  // timestep that includes well data, and one for the next that should only include the time to be used
-  // for time progression keywords.
+  // When this method is used, the time entries map should
+  // only contain two entries:
+  // -one for the current timestep that includes well data,
+  // and one for the next that should only include the time
+  // to be used for time progression keywords.
   QString part = "";
 
   // Add control entries
@@ -99,8 +101,8 @@ QStringList WellControls::GetWellEntryList() const {
 
 void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *wells,
                                          const QList<double> &control_times,
-                                         const int &timestep) {
-  time_entries_ = QMap<int, TimeEntry>();
+                                         const double &timestep) {
+  time_entries_ = QMap<double, TimeEntry>();
   TimeEntry time_entry;
   time_entry.time = timestep;
   time_entry.well_settings = QList<WellSetting>();
@@ -108,7 +110,7 @@ void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *well
 
   for (auto well : *wells) {
     for (auto control : *well->controls()) {
-      if (control->time_step() == timestep) {
+      if (control->tstep()->EqualsValue(timestep)) {
         time_entry.has_well_setting = true;
         WellSetting well_setting = WellSetting(well->name(), well->IsInjector(), *control);
         time_entry.well_settings.append(well_setting);
@@ -130,7 +132,8 @@ void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *well
   }
 }
 
-int WellControls::nextTimestep(const int &timestep, const QList<double> &control_times) const {
+double WellControls::nextTimestep(const double &timestep,
+                               const QList<double> &control_times) const {
   int current_index = control_times.indexOf(timestep);
   if (current_index + 1 < control_times.size()) {
     return control_times[current_index + 1];
@@ -150,10 +153,11 @@ QString WellControls::GetPartString() const {
       prev_time = time;
       if (time_entries_[time].has_well_setting) {
         for (WellSetting setting : time_entries_.value(time).well_settings) {
-          if (setting.is_injector)
+          if (setting.is_injector) {
             part.append(createInjectorEntry(setting));
-          else
+          } else {
             part.append(createProducerEntry(setting));
+          }
         }
       }
     }
@@ -163,11 +167,11 @@ QString WellControls::GetPartString() const {
 
 void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *wells,
                                          const QList<double> &control_times) {
-  time_entries_ = QMap<int, TimeEntry>();
+  time_entries_ = QMap<double, TimeEntry>();
   for (int i = 0; i < wells->size(); ++i) {
-    if (wells->at(i)->trajectory()->GetWellBlocks()->size() > 0) {
+    if (!wells->at(i)->trajectory()->GetWellBlocks()->empty()) {
       for (int j = 0; j < wells->at(i)->controls()->size(); ++j) {
-        int current_time_step = wells->at(i)->controls()->at(j)->time_step();
+        double current_time_step = wells->at(i)->controls()->at(j)->time_step();
         if (time_entries_.keys().contains(current_time_step)) {
           // Adding to existing time step
           auto extended_well_settings = time_entries_.value(current_time_step).well_settings;
@@ -175,8 +179,7 @@ void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *well
                                                     wells->at(i)->IsInjector(),
                                                     *wells->at(i)->controls()->at(j)));
           time_entries_[current_time_step].well_settings = extended_well_settings;
-        }
-        else {
+        } else {
           // Adding new time step
           TimeEntry time_entry = TimeEntry();
           time_entry.time = current_time_step;
@@ -190,8 +193,10 @@ void WellControls::initializeTimeEntries(const QList<Model::Wells::Well *> *well
       }
     }
   }
+
   for (int t = 0; t < control_times.size(); ++t) {
-    if (!time_entries_.contains(control_times[t])) { // Adding a control time without a well setting
+    // Adding a control time without a well setting
+    if (!time_entries_.contains(control_times[t])) {
       auto control_time_entry = TimeEntry();
       control_time_entry.time = control_times[t];
       time_entries_.insert(control_time_entry.time, control_time_entry);
@@ -216,7 +221,8 @@ QString WellControls::createTimeEntry(const double &time,
     return qs.join("");
 
   } else {
-    return QString("TSTEP\n %1 /\n\n").arg(delta_time);
+    return QString("TSTEP\n") + num2strQ(delta_time, 2) + "/\n\n";
+    // return QString("TSTEP\n %1 /\n\n").arg(delta_time);
   }
 }
 

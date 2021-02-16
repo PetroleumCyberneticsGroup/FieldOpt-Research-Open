@@ -31,7 +31,7 @@ Control::Control(::Settings::Model::Well::ControlEntry entry,
                  ::Settings::Model::Well well,
                  ::Model::Properties::VarPropContainer *variables) {
 
-  time_step_ = new Properties::DiscreteProperty(entry.time_step);
+  time_step_ = new Properties::ContinuousProperty(entry.time_step);
   tstep_ref_ = entry.tstep_ref_;
 
   if (well.type == ::Settings::Model::WellType::Injector)

@@ -68,11 +68,11 @@ class Schedule : public ECLDriverPart
   QString GetPartString() const override;
 
   void GetControlDate(time_DMY &ts_DMY,
-                      QList<int> start_date,
-                      int control_time) const;
+                      const QList<int>& start_date,
+                      double control_time) const;
 
   struct ScheduleTimeEntry {
-    ScheduleTimeEntry(int control_time,
+    ScheduleTimeEntry(double control_time,
                       time_DMY control_time_DMY,
                       Welspecs welspecs,
                       Compdat compdat,
@@ -81,7 +81,7 @@ class Schedule : public ECLDriverPart
                       Compsegs compsegs,
                       Wsegvalv wsegvalv
     );
-    int control_time;
+    double control_time;
     time_DMY control_time_DMY;
 
     Welspecs welspecs;
@@ -103,7 +103,9 @@ class Schedule : public ECLDriverPart
   QString schedule_;
 
  public:
-  QList<ScheduleTimeEntry> GetScheduleTimeEntries() { return schedule_time_entries_; }
+  QList<ScheduleTimeEntry> GetScheduleTimeEntries() {
+    return schedule_time_entries_;
+  }
 };
 
 }

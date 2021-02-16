@@ -81,7 +81,8 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
   }
 
   // [CONTROL TIMES] ---------------------------------------
-  if (!json_model.contains("ControlTimes") || !json_model["ControlTimes"].isArray()) {
+  if (!json_model.contains("ControlTimes")
+    || !json_model["ControlTimes"].isArray()) {
     string em = "ControlTimes array must be defined with at least one time step.";
     throw UnableToParseModelSectionException(em);
   }
@@ -111,8 +112,8 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
 
   // [CONTROL TIMES] -> adding remaining control times in ControlTimes array
   for (int i = 0; i < json_model["ControlTimes"].toArray().size(); ++i) {
-    if (!control_times_.contains(json_model["ControlTimes"].toArray().at(i).toInt())) {
-      control_times_.append(json_model["ControlTimes"].toArray().at(i).toInt());
+    if (!control_times_.contains(json_model["ControlTimes"].toArray().at(i).toDouble())) {
+      control_times_.append(json_model["ControlTimes"].toArray().at(i).toDouble());
     }
   }
   qSort(control_times_);
@@ -174,8 +175,8 @@ Model::Model(QJsonObject json_model, Paths &paths, VerbParams vp) {
       }
     }
 
-  // READ WELLS --------------------------------------------
-  // [WELLS] -> read wells using readSingleWell
+    // READ WELLS --------------------------------------------
+    // [WELLS] -> read wells using readSingleWell
   } else {
     try {
       QJsonArray json_wells = json_model["Wells"].toArray();
