@@ -65,8 +65,13 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   //                                               variables, grid);
   // } else {
   //   ext_info("Using shared ConstraintHandler.", md_, cl_);
-    constraint_handler_ = constraint_handler;
   // }
+  if (constraint_handler != nullptr) {
+    constraint_handler_ = constraint_handler;
+  } else {
+    im_ = "constraint_handler = nullptr in AbstractRunner init";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 
   // BASE CASE -> NEW CASE ---------------------------------
   tentative_best_case_ = base_case;
@@ -195,9 +200,10 @@ QString Optimizer::GetStatusString() const {
       .arg(tentative_best_case_->objf_value());
 }
 
-void Optimizer::EnableConstraintLogging(const QString& output_directory_path) {
-  for (Constraints::Constraint *con : constraint_handler_->constraints())
-    con->EnableLogging(output_directory_path);
+void Optimizer::EnableConstraintLogging(const QString& output_dir_path) {
+  for (Constraints::Constraint *con : constraint_handler_->constraints()) {
+    con->EnableLogging(output_dir_path);
+  }
 }
 
 int Optimizer::GetSimulationDuration(Case *c) {

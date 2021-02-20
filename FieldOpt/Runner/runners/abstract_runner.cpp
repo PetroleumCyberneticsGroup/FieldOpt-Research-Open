@@ -86,7 +86,7 @@ double AbstractRunner::sentinelValue() const {
   return sentinel_value_;
 }
 
-void AbstractRunner::InitializeSettings(QString output_subdir) {
+void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 
   // Output dir
   QString output_dir = runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR);
@@ -263,7 +263,9 @@ void AbstractRunner::InitializeOptimizer() {
                                             base_case_,
                                             model_->variables(),
                                             model_->grid(),
-                                            logger_
+                                            logger_,
+                                            nullptr,
+                                            model_->constraintHandler()
       );
       break;
     }
@@ -276,6 +278,18 @@ void AbstractRunner::InitializeOptimizer() {
                                    logger_,
                                    nullptr,
                                    model_->constraintHandler());
+      break;
+    }
+    case OptzrTyp::PSO: {
+      if (vp_.vRUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
+      optimizer_ = new Optzr::PSO(settings_->optimizer(),
+                                  base_case_,
+                                  model_->variables(),
+                                  model_->grid(),
+                                  logger_,
+                                  nullptr,
+                                  model_->constraintHandler()
+                                 );
       break;
     }
     case OptzrTyp::GeneticAlgorithm: {
@@ -325,16 +339,6 @@ void AbstractRunner::InitializeOptimizer() {
                                                       model_->variables(),
                                                       model_->grid(),
                                                       logger_
-      );
-      break;
-    }
-    case OptzrTyp::PSO: {
-      if (vp_.vRUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optzr::PSO(settings_->optimizer(),
-                                  base_case_,
-                                  model_->variables(),
-                                  model_->grid(),
-                                  logger_
       );
       break;
     }
@@ -473,6 +477,7 @@ void AbstractRunner::FinalizeRun(bool write_logs) {
     simulator_->WriteDriverFilesOnly();
     PrintCompletionMessage();
   }
+  cout << "model_->Finalize() " << endl;
   model_->Finalize();
   if (write_logs)
     logger_->FinalizePostrunSummary();
