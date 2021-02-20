@@ -132,7 +132,7 @@ class AbstractRunner
    */
   int timeoutValue() const;
 
-  void InitializeSettings(QString output_subdirectory="");
+  void InitializeSettings(const QString& output_subdirectory="");
   void InitializeModel();
   void InitializeSimulator();
   void EvaluateBaseModel();
