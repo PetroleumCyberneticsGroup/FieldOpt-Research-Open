@@ -38,6 +38,7 @@ using std::string;
 using std::map;
 using Printer::num2str;
 using Printer::pad_text;
+using Printer::E;
 
 /*!
  * \brief The Optimizer class contains optimizer-specific
@@ -192,11 +193,20 @@ class Optimizer
     std::string tr_init_sampling_method = "Random";
 
     // VFSA Parameters -------------------------------------
-    int vfsa_evals_pr_iteration = 1; //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
-    int vfsa_max_iterations = 50;    //!< Maximum number of iterations to be performed. Default: 50.
-    bool vfsa_parallel = false;      //!< Run generate evals_pr_iteration cases immedeately in each generation? Default: false.
-    double vfsa_init_temp = 1.0;     //!< Initial temperature (same used for all dimensions). Default: 1.0.
-    double vfsa_temp_scale = 1.0;    //!< Constant used in scaling temperature. Default: 1.0.
+    //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
+    int vfsa_evals_pr_iteration = 1;
+
+    //!< Maximum number of iterations to be performed. Default: 50.
+    int vfsa_max_iterations = 50;
+
+    //!< Run generate evals_pr_iteration cases immedeately in each generation? Default: false.
+    bool vfsa_parallel = false;
+
+    //!< Initial temperature (same used for all dimensions). Default: 1.0.
+    double vfsa_init_temp = 1.0;
+
+    //!< Constant used in scaling temperature. Default: 1.0.
+    double vfsa_temp_scale = 1.0;
 
     // CMA-ES Parameters -----------------------------------
     bool improve_base_case = false;
@@ -473,7 +483,7 @@ class Optimizer
   OptimizerType parseType(QString &type);
   Constraint parseSingleConstraint(QJsonObject json_constraint);
   OptimizerMode parseMode(QJsonObject &json_optimizer);
-  Parameters parseParameters(QJsonObject &json_parameters);
+  Parameters parseParameters(QJsonObject &json_params);
   Objective parseObjective(QJsonObject &json_objective);
   QList<HybridComponent> parseHybridComponents(QJsonObject &json_optimizer);
 

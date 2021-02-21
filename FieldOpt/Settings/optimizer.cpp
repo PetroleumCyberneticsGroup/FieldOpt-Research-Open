@@ -41,6 +41,7 @@ namespace Settings {
 
 using std::runtime_error;
 using Printer::ext_warn;
+using Printer::E;
 
 Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   vp_=vp;
@@ -393,7 +394,7 @@ Optimizer::OptimizerMode Optimizer::parseMode(QJsonObject &json_optimizer) {
 }
 
 
-Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
+Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
   Parameters params;
   string ind_val = "Invalid value for setting";
   string not_rec = "" + not_rec;
@@ -403,132 +404,132 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     // -----------------------------------------------------
     // GSS PARAMETERS
     // GSS parameters :: MaxEvaluations
-    if (json_parameters.contains("MaxEvaluations"))
-      params.max_evaluations = json_parameters["MaxEvaluations"].toInt();
+    if (json_params.contains("MaxEvaluations"))
+      params.max_evaluations = json_params["MaxEvaluations"].toInt();
 
     // GSS parameters :: AutoStepLengths
-    if (json_parameters.contains("AutoStepLengths"))
-      params.auto_step_lengths = json_parameters["AutoStepLengths"].toBool();
+    if (json_params.contains("AutoStepLengths"))
+      params.auto_step_lengths = json_params["AutoStepLengths"].toBool();
 
     // GSS parameters :: AutoStepInitScale
-    if (json_parameters.contains("AutoStepInitScale"))
-      params.auto_step_init_scale = json_parameters["AutoStepInitScale"].toDouble();
+    if (json_params.contains("AutoStepInitScale"))
+      params.auto_step_init_scale = json_params["AutoStepInitScale"].toDouble();
 
     // GSS parameters :: AutoStepConvScale
-    if (json_parameters.contains("AutoStepConvScale"))
-      params.auto_step_conv_scale = json_parameters["AutoStepConvScale"].toDouble();
+    if (json_params.contains("AutoStepConvScale"))
+      params.auto_step_conv_scale = json_params["AutoStepConvScale"].toDouble();
 
     // GSS parameters :: InitialStepLength
-    if (json_parameters.contains("InitialStepLength")) {
-      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength", vp_);
+    if (json_params.contains("InitialStepLength")) {
+      set_req_prop_double(params.initial_step_length, json_params, "InitialStepLength", vp_);
     }
 
     // GSS parameters :: MinimumStepLength
-    if (json_parameters.contains("MinimumStepLength")) {
-      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength", vp_);
+    if (json_params.contains("MinimumStepLength")) {
+      set_req_prop_double(params.minimum_step_length, json_params, "MinimumStepLength", vp_);
     }
 
     // GSS parameters :: ContractionFactor
-    if (json_parameters.contains("ContractionFactor"))
-      params.contraction_factor = json_parameters["ContractionFactor"].toDouble();
+    if (json_params.contains("ContractionFactor"))
+      params.contraction_factor = json_params["ContractionFactor"].toDouble();
     else { params.contraction_factor = 0.5; }
 
     // GSS parameters :: ExpansionFactor
-    if (json_parameters.contains("ExpansionFactor"))
-      params.expansion_factor = json_parameters["ExpansionFactor"].toDouble();
+    if (json_params.contains("ExpansionFactor"))
+      params.expansion_factor = json_params["ExpansionFactor"].toDouble();
     else { params.expansion_factor = 1.0; }
 
     // GSS parameters :: MaxQueueSize
-    if (json_parameters.contains("MaxQueueSize"))
-      params.max_queue_size = json_parameters["MaxQueueSize"].toInt();
+    if (json_params.contains("MaxQueueSize"))
+      params.max_queue_size = json_params["MaxQueueSize"].toInt();
     else { params.max_queue_size = 2; }
 
     // GSS parameters :: Pattern
-    if (json_parameters.contains("Pattern"))
-      params.pattern = json_parameters["Pattern"].toString();
+    if (json_params.contains("Pattern"))
+      params.pattern = json_params["Pattern"].toString();
     else params.pattern = "Compass";
 
     // -----------------------------------------------------
     // GA PARAMETERS
     // GA parameters :: MaxGenerations
-    if (json_parameters.contains("MaxGenerations"))
-      params.max_generations = json_parameters["MaxGenerations"].toInt();
+    if (json_params.contains("MaxGenerations"))
+      params.max_generations = json_params["MaxGenerations"].toInt();
     else { params.max_generations = 50; }
 
     // GA parameters :: PopulationSize
-    if (json_parameters.contains("PopulationSize"))
-      params.population_size = json_parameters["PopulationSize"].toInt();
+    if (json_params.contains("PopulationSize"))
+      params.population_size = json_params["PopulationSize"].toInt();
     else { params.population_size = -1; } // Will be properly set in optimizer.
 
     // GA parameters :: CrossoverProbability
-    if (json_parameters.contains("CrossoverProbability"))
-      params.p_crossover = json_parameters["CrossoverProbability"].toDouble();
+    if (json_params.contains("CrossoverProbability"))
+      params.p_crossover = json_params["CrossoverProbability"].toDouble();
     else { params.p_crossover = 0.1; }
 
     // GA parameters :: DiscardParameter
-    if (json_parameters.contains("DiscardParameter"))
-      params.discard_parameter = json_parameters["DiscardParameter"].toDouble();
+    if (json_params.contains("DiscardParameter"))
+      params.discard_parameter = json_params["DiscardParameter"].toDouble();
     else { params.discard_parameter = -1; } // Will be properly set in optimizer
 
     // GA parameters :: DecayRate
-    if (json_parameters.contains("DecayRate"))
-      params.decay_rate = json_parameters["DecayRate"].toDouble();
+    if (json_params.contains("DecayRate"))
+      params.decay_rate = json_params["DecayRate"].toDouble();
     else { params.decay_rate = 4.0; }
 
     // GA parameters :: MutationStrength
-    if (json_parameters.contains("MutationStrength"))
-      params.mutation_strength = json_parameters["MutationStrength"].toDouble();
+    if (json_params.contains("MutationStrength"))
+      params.mutation_strength = json_params["MutationStrength"].toDouble();
     else { params.mutation_strength = 0.25; }
 
     // GA parameters :: StagnationLimit
-    if (json_parameters.contains("StagnationLimit"))
-      params.stagnation_limit = json_parameters["StagnationLimit"].toDouble();
+    if (json_params.contains("StagnationLimit"))
+      params.stagnation_limit = json_params["StagnationLimit"].toDouble();
     else { params.stagnation_limit = 1e-10; }
 
     // GA parameters :: LowerBound
-    if (json_parameters.contains("LowerBound"))
-      params.lower_bound = json_parameters["LowerBound"].toDouble();
+    if (json_params.contains("LowerBound"))
+      params.lower_bound = json_params["LowerBound"].toDouble();
     else { params.lower_bound = -10; }
 
     // GA parameters :: UpperBound
-    if (json_parameters.contains("UpperBound"))
-      params.upper_bound = json_parameters["UpperBound"].toDouble();
+    if (json_params.contains("UpperBound"))
+      params.upper_bound = json_params["UpperBound"].toDouble();
     else { params.upper_bound = 10; }
 
     // -----------------------------------------------------
     // PSO PARAMETERS
     // PSO parameters :: PSO-LearningFactor1
-    if(json_parameters.contains("PSO-LearningFactor1")){
-      params.pso_learning_factor_1 = json_parameters["PSO-LearningFactor1"].toDouble();
+    if(json_params.contains("PSO-LearningFactor1")){
+      params.pso_learning_factor_1 = json_params["PSO-LearningFactor1"].toDouble();
     } else { params.pso_learning_factor_1 = 2; }
 
     // PSO parameters :: PSO-LearningFactor2
-    if(json_parameters.contains("PSO-LearningFactor2")){
-      params.pso_learning_factor_2 = json_parameters["PSO-LearningFactor2"].toDouble();
+    if(json_params.contains("PSO-LearningFactor2")){
+      params.pso_learning_factor_2 = json_params["PSO-LearningFactor2"].toDouble();
     } else { params.pso_learning_factor_2 = 2; }
 
     // PSO parameters :: PSO-SwarmSize
-    if(json_parameters.contains("PSO-SwarmSize")){
-      params.pso_swarm_size = json_parameters["PSO-SwarmSize"].toDouble();
+    if(json_params.contains("PSO-SwarmSize")){
+      params.pso_swarm_size = json_params["PSO-SwarmSize"].toDouble();
     } else { params.pso_swarm_size = 50; }
 
     // PSO parameters :: PSO-VelocityScale
-    if(json_parameters.contains("PSO-VelocityScale")){
-      params.pso_velocity_scale = json_parameters["PSO-VelocityScale"].toDouble();
+    if(json_params.contains("PSO-VelocityScale")){
+      params.pso_velocity_scale = json_params["PSO-VelocityScale"].toDouble();
     } else { params.pso_velocity_scale = 1.0; }
 
     // -----------------------------------------------------
     // EGO PARAMEETERS
     // EGO Parameters :: EGO-InitGuesses
-    if (json_parameters.contains("EGO-InitGuesses")) {
-      params.ego_init_guesses = json_parameters["EGO-InitGuesses"].toInt();
+    if (json_params.contains("EGO-InitGuesses")) {
+      params.ego_init_guesses = json_params["EGO-InitGuesses"].toInt();
     }
 
     // EGO Parameters :: EGO-InitSamplingMethod
-    if (json_parameters.contains("EGO-InitSamplingMethod")) {
-      QString method = json_parameters["EGO-InitSamplingMethod"].toString();
+    if (json_params.contains("EGO-InitSamplingMethod")) {
+      QString method = json_params["EGO-InitSamplingMethod"].toString();
       if (QString::compare(method, "Random") == 0 || QString::compare(method, "Uniform") == 0)
-        params.ego_init_sampling_method = json_parameters["EGO-InitSamplingMethod"].toString().toStdString();
+        params.ego_init_sampling_method = json_params["EGO-InitSamplingMethod"].toString().toStdString();
       else {
         Printer::error("EGO-InitSamplingMethod " + method.toStdString() + " not recognized.");
         throw std::runtime_error("Failed reading EGO settings.");
@@ -536,28 +537,28 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // EGO Parameters :: EGO-Kernel
-    if (json_parameters.contains("EGO-Kernel")) {
+    if (json_params.contains("EGO-Kernel")) {
       QStringList available_kernels = { "CovLinearard", "CovLinearone", "CovMatern3iso",
                                         "CovMatern5iso", "CovNoise", "CovRQiso", "CovSEard",
                                         "CovSEiso", "CovPeriodicMatern3iso", "CovPeriodic"};
-      if (available_kernels.contains(json_parameters["EGO-Kernel"].toString())) {
-        params.ego_kernel = json_parameters["EGO-Kernel"].toString().toStdString();
+      if (available_kernels.contains(json_params["EGO-Kernel"].toString())) {
+        params.ego_kernel = json_params["EGO-Kernel"].toString().toStdString();
       }
       else {
-        Printer::error("EGO-Kernel " + json_parameters["EGO-Kernel"].toString().toStdString() + " not recognized.");
+        Printer::error("EGO-Kernel " + json_params["EGO-Kernel"].toString().toStdString() + " not recognized.");
         Printer::info("Available kernels: " + available_kernels.join(", ").toStdString());
         throw std::runtime_error("Failed reading EGO settings.");
       }
     }
 
     // EGO Parameters :: EGO-AF
-    if (json_parameters.contains("EGO-AF")) {
+    if (json_params.contains("EGO-AF")) {
       QStringList available_afs = { "ExpectedImprovement", "ProbabilityOfImprovement" };
-      if (available_afs.contains(json_parameters["EGO-AF"].toString())) {
-        params.ego_af = json_parameters["EGO-AF"].toString().toStdString();
+      if (available_afs.contains(json_params["EGO-AF"].toString())) {
+        params.ego_af = json_params["EGO-AF"].toString().toStdString();
 
       } else {
-        Printer::error("EGO-AF " + json_parameters["EGO-AF"].toString().toStdString() + " not recognized.");
+        Printer::error("EGO-AF " + json_params["EGO-AF"].toString().toStdString() + " not recognized.");
         Printer::info("Available acquisition functions: " + available_afs.join(", ").toStdString());
         throw std::runtime_error("Failed reading EGO settings.");
       }
@@ -565,57 +566,57 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
 
     // -----------------------------------------------------
     // CMA-ES PARAMETERS
-    if (json_parameters.contains("ImproveBaseCase")) {
-      params.improve_base_case = json_parameters["ImproveBaseCase"].toBool();
+    if (json_params.contains("ImproveBaseCase")) {
+      params.improve_base_case = json_params["ImproveBaseCase"].toBool();
     }
 
     // -----------------------------------------------------
     // VFSA PARAMETERS
-    if (json_parameters.contains("VFSA-EvalsPrIteration")) {
-      params.vfsa_evals_pr_iteration = json_parameters["VFSA-EvalsPrIteration"].toInt();
+    if (json_params.contains("VFSA-EvalsPrIteration")) {
+      params.vfsa_evals_pr_iteration = json_params["VFSA-EvalsPrIteration"].toInt();
     }
-    if (json_parameters.contains("VFSA-MaxIterations")) {
-      params.vfsa_max_iterations = json_parameters["VFSA-MaxIterations"].toInt();
+    if (json_params.contains("VFSA-MaxIterations")) {
+      params.vfsa_max_iterations = json_params["VFSA-MaxIterations"].toInt();
     }
-    if (json_parameters.contains("VFSA-Parallel")) {
-      params.vfsa_parallel = json_parameters["VFSA-Parallel"].toBool();
+    if (json_params.contains("VFSA-Parallel")) {
+      params.vfsa_parallel = json_params["VFSA-Parallel"].toBool();
     }
-    if (json_parameters.contains("VFSA-InitTemp")) {
-      params.vfsa_init_temp = json_parameters["VFSA-InitTemp"].toDouble();
+    if (json_params.contains("VFSA-InitTemp")) {
+      params.vfsa_init_temp = json_params["VFSA-InitTemp"].toDouble();
     }
-    if (json_parameters.contains("VFSA-TempScale")) {
-      params.vfsa_temp_scale = json_parameters["VFSA-TempScale"].toDouble();
+    if (json_params.contains("VFSA-TempScale")) {
+      params.vfsa_temp_scale = json_params["VFSA-TempScale"].toDouble();
     }
 
     // -----------------------------------------------------
     // SPSA PARAMETERS
-    if (json_parameters.contains("SPSA-MaxIterations")) {
-      params.spsa_max_iterations = json_parameters["SPSA-MaxIterations"].toInt();
+    if (json_params.contains("SPSA-MaxIterations")) {
+      params.spsa_max_iterations = json_params["SPSA-MaxIterations"].toInt();
     }
-    if (json_parameters.contains("SPSA-gamma")) {
-      params.spsa_gamma = json_parameters["SPSA-gamma"].toDouble();
+    if (json_params.contains("SPSA-gamma")) {
+      params.spsa_gamma = json_params["SPSA-gamma"].toDouble();
     }
-    if (json_parameters.contains("SPSA-alpha")) {
-      params.spsa_alpha = json_parameters["SPSA-alpha"].toDouble();
+    if (json_params.contains("SPSA-alpha")) {
+      params.spsa_alpha = json_params["SPSA-alpha"].toDouble();
     }
-    if (json_parameters.contains("SPSA-c")) {
-      params.spsa_c = json_parameters["SPSA-c"].toDouble();
+    if (json_params.contains("SPSA-c")) {
+      params.spsa_c = json_params["SPSA-c"].toDouble();
     }
-    if (json_parameters.contains("SPSA-A")) {
-      params.spsa_A = json_parameters["SPSA-A"].toDouble();
+    if (json_params.contains("SPSA-A")) {
+      params.spsa_A = json_params["SPSA-A"].toDouble();
     } else params.spsa_A = 0.1 * params.spsa_max_iterations;
-    if (json_parameters.contains("SPSA_a")) {
-      params.spsa_a = json_parameters["SPSA_a"].toDouble();
+    if (json_params.contains("SPSA_a")) {
+      params.spsa_a = json_params["SPSA_a"].toDouble();
     }
-    if (json_parameters.contains("SPSA-InitStepMagnitude")) {
-      params.spsa_init_step_magnitude = json_parameters["SPSA-InitStepMagnitude"].toDouble();
+    if (json_params.contains("SPSA-InitStepMagnitude")) {
+      params.spsa_init_step_magnitude = json_params["SPSA-InitStepMagnitude"].toDouble();
     }
 
     // -----------------------------------------------------
     //  HYBRID PARAMETERS
     // Hybrid parameters :: HybridSwitchMode
-    if (json_parameters.contains("HybridSwitchMode")) {
-      if (json_parameters["HybridSwitchMode"].toString() == "OnConvergence") {
+    if (json_params.contains("HybridSwitchMode")) {
+      if (json_params["HybridSwitchMode"].toString() == "OnConvergence") {
         params.hybrid_switch_mode = "OnConvergence";
       } else {
         throw std::runtime_error("HybridSwitchMode " + not_rec);
@@ -623,8 +624,8 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // Hybrid parameters :: HybridTerminationCondition
-    if (json_parameters.contains("HybridTerminationCondition")) {
-      if (json_parameters["HybridTerminationCondition"].toString() == "NoImprovement") {
+    if (json_params.contains("HybridTerminationCondition")) {
+      if (json_params["HybridTerminationCondition"].toString() == "NoImprovement") {
         params.hybrid_termination_condition = "NoImprovement";
       } else {
         throw std::runtime_error("HybridTerminationCondition " + not_rec);
@@ -632,10 +633,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // Hybrid parameters :: HybridMaxIterations
-    if (json_parameters.contains("HybridMaxIterations")) {
-      if (json_parameters["HybridMaxIterations"].toInt() >= 1) {
+    if (json_params.contains("HybridMaxIterations")) {
+      if (json_params["HybridMaxIterations"].toInt() >= 1) {
         params.hybrid_max_iterations =
-            json_parameters["HybridMaxIterations"].toInt();
+            json_params["HybridMaxIterations"].toInt();
       } else {
         throw std::runtime_error(ind_val + "HybridMaxIterations");
       }
@@ -644,114 +645,81 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     // -----------------------------------------------------
     //  TRUST REGION PARAMETERS
     // Trust Region parameters :: Initial radius
-    if (json_parameters.contains("InitialTrustRegionRadius")) {
-      if (json_parameters["InitialTrustRegionRadius"].toDouble() >= 0.0) {
-        params.tr_initial_radius =
-            json_parameters["InitialTrustRegionRadius"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "InitialTrustRegionRadius");
-      }
-    }
-
+    set_opt_prop_double(params.tr_initial_radius, json_params, "InitTRRadius", vp_);
     // Trust Region parameters:: Trust region radius tolerance
-    if (json_parameters.contains("TrustRegionRadiusTolerance")) {
-      if (json_parameters["TrustRegionRadiusTolerance"].toDouble() >= 0.0) {
-        params.tr_tol_radius = json_parameters["TrustRegionRadiusTolerance"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "TrustRegionRadiusTolerance");
-      }
-    }
-
+    set_opt_prop_double(params.tr_tol_radius, json_params, "TRRadiusTol", vp_);
     // Trust Region parameters :: Max trust region radius
-    if (json_parameters.contains("MaxTrustRegionRadius")) {
-      if (json_parameters["MaxTrustRegionRadius"].toDouble() >= 0.0) {
-        params.tr_radius_max =
-            json_parameters["MaxTrustRegionRadius"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "MaxTrustRegionRadius");
-      }
-    }
+    set_opt_prop_double(params.tr_radius_max, json_params, "MaxTRRadius", vp_);
 
     // Trust Region parameters :: Lower bound
-    if (json_parameters.contains("TrustRegionLowerBound")) {
-      if (json_parameters.contains("TrustRegionUpperBound")) {
-        if (json_parameters["TrustRegionLowerBound"].toDouble() <
-            json_parameters["TrustRegionUpperBound"].toDouble()) {
-          params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
-        } else {
-          throw std::runtime_error(ind_val + "TrustRegionLowerBound");
-        }
+    if (json_params.contains("TRLowerBound")) {
+      if (json_params.contains("TRUpperBound")) {
+        if (json_params["TRLowerBound"].toDouble() <
+            json_params["TRUpperBound"].toDouble()) {
+          params.tr_lower_bound = json_params["TRLowerBound"].toDouble();
+        } else { E(ind_val + "TRLowerBound", md_, cl_); }
       } else {
-        params.tr_lower_bound =
-            json_parameters["TrustRegionLowerBound"].toDouble();
+        params.tr_lower_bound = json_params["TRLowerBound"].toDouble();
       }
     }
 
     // Trust Region parameters :: Upper bound
-    if (json_parameters.contains("TrustRegionUpperBound")) {
-      if (json_parameters.contains("TrustRegionLowerBound")) {
-        if (json_parameters["TrustRegionLowerBound"].toDouble() <
-            json_parameters["TrustRegionUpperBound"].toDouble()) {
-          params.tr_upper_bound =
-              json_parameters["TrustRegionUpperBound"].toDouble();
-        } else {
-          throw std::runtime_error(ind_val + "TrustRegionUpperBound");
-        }
+    if (json_params.contains("TRUpperBound")) {
+      if (json_params.contains("TRLowerBound")) {
+        if (json_params["TRLowerBound"].toDouble() <
+            json_params["TRUpperBound"].toDouble()) {
+          params.tr_upper_bound = json_params["TRUpperBound"].toDouble();
+        } else { E(ind_val + "TRUpperBound", md_, cl_); }
       } else {
-        params.tr_upper_bound =
-            json_parameters["TrustRegionUpperBound"].toDouble();
+        params.tr_upper_bound = json_params["TRUpperBound"].toDouble();
       }
     }
 
     // Trust Region parameters :: RNG seed
-    if (json_parameters.contains("RNGSeed")) {
-      params.rng_seed = json_parameters["RNGSeed"].toInt();
+    if (json_params.contains("RNGSeed")) {
+      params.rng_seed = json_params["RNGSeed"].toInt();
     } else {
       params.rng_seed = std::time(0);
     }
 
     // Trust Region parameters :: Max iter
-    if (json_parameters.contains("TRMaxIter")) {
-      params.tr_iter_max = json_parameters["TRMaxIter"].toInt();
+    if (json_params.contains("TRMaxIter")) {
+      params.tr_iter_max = json_params["TRMaxIter"].toInt();
     } else {
       params.tr_iter_max = 10000;
     }
 
     // Trust Region parameters :: Criticality Mu
-    if (json_parameters.contains("CriticalityMu")) {
-      if (json_parameters["CriticalityMu"].toDouble() >= 0.0) {
+    if (json_params.contains("CriticalityMu")) {
+      if (json_params["CriticalityMu"].toDouble() >= 0.0) {
         params.tr_criticality_mu =
-            json_parameters["CriticalityMu"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "CriticalityMu");
-      }
+            json_params["CriticalityMu"].toDouble();
+      } else { E(ind_val + "CriticalityMu", md_, cl_; }
     }
 
     // Trust Region parameters :: Criticality Omega
-    if (json_parameters.contains("CriticalityOmega")) {
-      if (json_parameters["CriticalityOmega"].toDouble() >= 0.0) {
+    if (json_params.contains("CriticalityOmega")) {
+      if (json_params["CriticalityOmega"].toDouble() >= 0.0) {
         params.tr_criticality_omega =
-            json_parameters["CriticalityOmega"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "CriticalityOmega");
-      }
+            json_params["CriticalityOmega"].toDouble();
+      } else { E(ind_val + "CriticalityOmega", md_, cl_); }
     }
 
     // Trust Region parameters :: Criticality Beta
-    if (json_parameters.contains("CriticalityBeta")) {
-      if (json_parameters["CriticalityBeta"].toDouble() >= 0.0) {
+    if (json_params.contains("CriticalityBeta")) {
+      if (json_params["CriticalityBeta"].toDouble() >= 0.0) {
         params.tr_criticality_beta =
-            json_parameters["CriticalityBeta"].toDouble();
+            json_params["CriticalityBeta"].toDouble();
       } else {
         throw std::runtime_error(ind_val + "CriticalityBeta");
       }
     }
 
     // Trust Region parameters :: Criticality problem name
-    if (json_parameters.contains("ProblemName")) {
-      if (json_parameters["ProblemName"].toDouble() >= 0.0) {
+    if (json_params.contains("ProblemName")) {
+      if (json_params["ProblemName"].toDouble() >= 0.0) {
         params.tr_prob_name =
-            json_parameters["ProblemName"].toString().toStdString();
+            json_params["ProblemName"].toString().toStdString();
       } else {
         throw std::runtime_error(ind_val + "ProblemName");
       }

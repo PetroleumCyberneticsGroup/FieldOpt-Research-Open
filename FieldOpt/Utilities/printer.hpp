@@ -61,12 +61,18 @@ using std::left;
 using std::setprecision;
 using std::fixed;
 using std::setw;
+using std::runtime_error;
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::Map;
 
 namespace Printer {
+
+inline void E(string m, string md, string cl) {
+  m = "[mod: " + md + "] [cls: " + cl + "] " + m;
+  throw runtime_error(m);
+};
 
 inline void DBG_prntToFile(string fn, string sout, const string mod="a") {
   FILE * pFile;
