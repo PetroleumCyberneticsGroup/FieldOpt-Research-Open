@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -32,22 +32,32 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
+using WellConstraintProjections::interwell_constraint_projection;
+
 InterwDist::InterwDist(Settings::Optimizer::Constraint settings,
                        Model::Properties::VarPropContainer *variables,
-                       Settings::VerbParams vp) : Constraint(vp) {
+                       Settings::VerbParams vp)
+                       : Constraint(vp) {
+
+  if (vp_.vOPT >= 3) { info("Adding WSplineInterwDist constraint."); }
+
   distance_ = settings.min;
   penalty_weight_ = settings.penalty_weight;
 
-  for (QString name : settings.wells) {
-    affected_wells_.append(initializeWell(variables->GetWellSplineVariables(name)));
+  for (const QString& name : settings.wells) {
+    affected_wells_.append(initWSplineConstraint(variables->GetWSplineVars(name), vp));
   }
+
   if (affected_wells_.length() != 2) {
-    throw std::runtime_error("Currently, the Interwell Distance constraint must be applied to exactly two wells. Found " + boost::lexical_cast<std::string>(affected_wells_.length()));
+    em_ = "Interwell Distance constraint only applies to exactly two wells.";
+    em_ += " Found " + num2str(affected_wells_.length());
+    throw std::runtime_error(em_);
   }
 }
 
 bool InterwDist::CaseSatisfiesConstraint(Case *c) {
   QList<Eigen::Vector3d> points;
+
   for (Well well : affected_wells_) {
     double heel_x_val = c->get_real_variable_value(well.heel.x);
     double heel_y_val = c->get_real_variable_value(well.heel.y);
@@ -65,10 +75,12 @@ bool InterwDist::CaseSatisfiesConstraint(Case *c) {
     points.append(toe_vals);
   }
   // Get the projection
-  QList<Eigen::Vector3d> projection = WellConstraintProjections::interwell_constraint_projection(
-    points, distance_);
+  QList<Eigen::Vector3d>
+    projection = interwell_constraint_projection(points, distance_);
 
-  if (projection.length() == 0) return false; // No solution was found
+  if (projection.length() == 0) {
+    return false; // No solution was found
+  }
 
   // Check if the projection is (approximately) equal to the input case
   for (int i = 0; i < projection.length(); ++i) {
@@ -78,8 +90,8 @@ bool InterwDist::CaseSatisfiesConstraint(Case *c) {
   return true;
 }
 
-void InterwDist::SnapCaseToConstraints(Case *c)
-{
+void InterwDist::SnapCaseToConstraints(Case *c) {
+
   QList<Eigen::Vector3d> points;
   for (Well well : affected_wells_) {
     double heel_x_val = c->get_real_variable_value(well.heel.x);
@@ -98,10 +110,12 @@ void InterwDist::SnapCaseToConstraints(Case *c)
     points.append(toe_vals);
   }
   // Get the projection
-  QList<Eigen::Vector3d> projection = WellConstraintProjections::interwell_constraint_projection(
-    points, distance_);
+  QList<Eigen::Vector3d>
+    projection = interwell_constraint_projection(points, distance_);
 
-  if (projection.length() == 0) return; // No solution was found
+  if (projection.length() == 0) {
+    return; // No solution was found
+  }
 
   for (int i = 0; i < affected_wells_.length(); ++i) {
     c->set_real_variable_value(affected_wells_[i].heel.x, projection[i*2](0));
@@ -113,6 +127,7 @@ void InterwDist::SnapCaseToConstraints(Case *c)
     c->set_real_variable_value(affected_wells_[i].toe.z, projection[i*2+1](2));
   }
 }
+
 void InterwDist::InitializeNormalizer(QList<Case *> cases) {
   long double minimum_distance = 1e20;
   for (auto c : cases) {
@@ -126,43 +141,63 @@ void InterwDist::InitializeNormalizer(QList<Case *> cases) {
   normalizer_.set_steepness(1.0L/minimum_distance);
   normalizer_.set_midpoint(minimum_distance/2.0L);
 }
+
 double InterwDist::Penalty(Case *c) {
   vector<double> endpoint_distances = endpointDistances(c);
   double violation = 0.0;
   for (auto distance : endpoint_distances) {
     if (distance < distance_) {
-      if (VERB_OPT >= 2) Printer::ext_info("Interwell distance penalty for case " + c->id().toString().toStdString()
-                                             + ": " + Printer::num2str(distance - distance_) + " m too close");
+      if (vp_.vOPT >= 3) {
+        im_ = "InterwDist penalty [c:" + c->id().toString().toStdString();
+        im_ += "] " + num2str(distance - distance_) + " m too close";
+        ext_info(im_, md_, cl_, vp_.lnw);
+      }
       violation += abs(distance - distance_);
     }
   }
-  if (VERB_OPT >= 2) Printer::ext_info("Interwell distance total violation for case "
-                                         + c->id().toString().toStdString() + ": " + Printer::num2str(violation));
+  if (vp_.vOPT >= 3) {
+    im_ = "Interwell distance total violation for case ";
+    im_ += c->id().toString().toStdString() + ": " + num2str(violation);
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   return violation;
 }
 
 vector<double> InterwDist::endpointDistances(Case *c) {
   vector<double> endpoint_distances;
+
   for (int i = 0; i < affected_wells_.size(); i += 2) { // Even numbers
-    if (i >= affected_wells_.size()) break;
+    if (i >= affected_wells_.size()) { break; }
+
     for (int j = 1; j < affected_wells_.size(); j += 2) { // Odd numbers
-      if (j >= affected_wells_.size()) break;
-      QPair<Eigen::Vector3d, Eigen::Vector3d> well_i = GetEndpointValueVectors(c, affected_wells_[i]);
-      QPair<Eigen::Vector3d, Eigen::Vector3d> well_j = GetEndpointValueVectors(c, affected_wells_[j]);
-      endpoint_distances.push_back( (well_i.first  - well_j.first).norm()  ); // heel_i -> heel_j
-      endpoint_distances.push_back( (well_i.second - well_j.second).norm() ); //  toe_i ->  toe_j
-      endpoint_distances.push_back( (well_i.first  - well_j.second).norm() ); // heel_i ->  toe_j
-      endpoint_distances.push_back( (well_i.second - well_j.first).norm()  ); //  toe_i -> heel_j
+      if (j >= affected_wells_.size()) { break; }
+
+      QPair<Eigen::Vector3d, Eigen::Vector3d>
+        well_i = GetEndpointValueVectors(c, affected_wells_[i]);
+
+      QPair<Eigen::Vector3d, Eigen::Vector3d>
+        well_j = GetEndpointValueVectors(c, affected_wells_[j]);
+
+      // heel_i -> heel_j
+      endpoint_distances.push_back( (well_i.first  - well_j.first).norm()  );
+      //  toe_i ->  toe_j
+      endpoint_distances.push_back( (well_i.second - well_j.second).norm() );
+      // heel_i ->  toe_j
+      endpoint_distances.push_back( (well_i.first  - well_j.second).norm() );
+      //  toe_i -> heel_j
+      endpoint_distances.push_back( (well_i.second - well_j.first).norm()  );
     }
   }
   return endpoint_distances;
 }
+
 long double InterwDist::PenaltyNormalized(Case *c) {
   double penalty = Penalty(c);
-  if (penalty > 0.0)
+  if (penalty > 0.0) {
     return normalizer_.normalize(penalty);
-  else
+  } else {
     return 0.0;
+  }
 }
 
 }

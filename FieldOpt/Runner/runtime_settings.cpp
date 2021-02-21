@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -33,82 +33,99 @@ using namespace Utilities::FileHandling;
 
 RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
   auto vm = createVariablesMap(argc, argv);
-  vp_ = {};
+
+  vp_ = {}; // Using default vp b/f initialized after Settings in AbstractRunner
   vp_.vUTI = 1;
 
   if (vm.count("input-file")) {
-    paths_.SetPath(Paths::DRIVER_FILE, vm["input-file"].as<std::string>());
-  } else throw std::runtime_error("An input file must be specified.");
+    paths_.SetPath(Paths::DRIVER_FILE,
+                   vm["input-file"].as<std::string>());
+  } else { E("An input file must be specified.");}
 
   if (vm.count("output-dir")) {
-    paths_.SetPath(Paths::OUTPUT_DIR, vm["output-dir"].as<std::string>());
-  } else throw std::runtime_error("An output directory must be specified.");
+    paths_.SetPath(Paths::OUTPUT_DIR,
+                   vm["output-dir"].as<std::string>());
+  } else { E("An output directory must be specified."); };
 
   if (vm.count("verbose")) verbosity_level_ = vm["verbose"].as<int>();
-  else verbosity_level_ = 0;
+  else { verbosity_level_ = 0; }
 
   if (vm.count("sim-delay")) simulation_delay_ = vm["sim-delay"].as<int>();
-  else simulation_delay_ = 0;
+  else { simulation_delay_ = 0; }
 
   overwrite_existing_ = vm.count("force") != 0;
-  if (!overwrite_existing_ && !DirIsEmpty(paths_.GetPath(Paths::OUTPUT_DIR), vp_))
-    throw std::runtime_error("Output directory is not empty. Use the --force flag to "
-                             "overwrite existing content in: " + paths_.GetPath(Paths::OUTPUT_DIR));
+  if (!overwrite_existing_ && !DirIsEmpty(paths_.GetPath(Paths::OUTPUT_DIR), vp_)) {
+    em_ = "Output directory is not empty. Use --force flag to ";
+    em_ += "overwrite existing content in: " + paths_.GetPath(Paths::OUTPUT_DIR);
+    E(em_);
+  }
 
   if (vm.count("max-parallel-simulations")) {
     max_parallel_sims_ = vm["max-parallel-simulations"].as<int>();
-  } else max_parallel_sims_ = 0;
+  } else { max_parallel_sims_ = 0; }
 
   if (vm.count("threads-per-simulation")) {
     threads_per_sim_ = vm["threads-per-simulation"].as<int>();
-  } else threads_per_sim_ = 1;
+  } else { threads_per_sim_ = 1; }
 
   if (vm.count("simulation-timeout")) {
     simulation_timeout_ = vm["simulation-timeout"].as<int>();
-  } else simulation_timeout_ = 0;
+  } else { simulation_timeout_ = 0; }
 
   if (vm.count("runner-type")) {
     QString runner_str = QString::fromStdString(vm["runner-type"].as<std::string>());
-    if (QString::compare(runner_str, "serial") == 0)
+    if (QString::compare(runner_str, "serial") == 0) {
       runner_type_ = RunnerType::SERIAL;
-    else if (QString::compare(runner_str, "oneoff") == 0)
+    } else if (QString::compare(runner_str, "oneoff") == 0) {
       runner_type_ = RunnerType::ONEOFF;
-    else if (QString::compare(runner_str, "mpisync") == 0)
+    } else if (QString::compare(runner_str, "mpisync") == 0) {
       runner_type_ = RunnerType::MPISYNC;
-  } else runner_type_ = RunnerType::SERIAL;
+    }
+  } else { runner_type_ = RunnerType::SERIAL; }
 
   if (vm.count("sim-drv-path")) {
-    paths_.SetPath(Paths::SIM_DRIVER_FILE, GetAbsoluteFilePath(vm["sim-drv-path"].as<std::string>()));
+    paths_.SetPath(Paths::SIM_DRIVER_FILE,
+                   GetAbsFilePath(vm["sim-drv-path"].as<std::string>()));
   }
 
   if (vm.count("ensemble-path")) {
-    paths_.SetPath(Paths::ENSEMBLE_FILE, GetAbsoluteFilePath(vm["ensemble-path"].as<std::string>()));
+    paths_.SetPath(Paths::ENSEMBLE_FILE,
+                   GetAbsFilePath(vm["ensemble-path"].as<std::string>()));
   }
 
   if (vm.count("traj-dir")) {
-    paths_.SetPath(Paths::TRAJ_DIR, GetAbsoluteFilePath(vm["traj-dir"].as<std::string>()));
+    paths_.SetPath(Paths::TRAJ_DIR,
+                   GetAbsFilePath(vm["traj-dir"].as<std::string>()));
   }
 
   if (vm.count("sim-exec-path")) {
-    std::string exec_script_path = GetAbsoluteFilePath(vm["sim-exec-path"].as<std::string>());
+    string exec_script_path = GetAbsFilePath(vm["sim-exec-path"].as<std::string>());
     paths_.SetPath(Paths::SIM_EXEC_SCRIPT_FILE, exec_script_path);
     paths_.SetPath(Paths::SIM_EXEC_DIR, GetParentDirPath(exec_script_path));
   }
 
   if (vm.count("sim-aux")) {
-    paths_.SetPath(Paths::SIM_AUX_DIR, GetAbsoluteFilePath(vm["sim-aux"].as<std::string>()));
+    paths_.SetPath(Paths::SIM_AUX_DIR,
+                   GetAbsFilePath(vm["sim-aux"].as<std::string>()));
   }
 
   if (vm.count("sim-inset")) {
-    paths_.SetPath(Paths::SIM_SCH_INSET_FILE, GetAbsoluteFilePath(vm["sim-inset"].as<std::string>()));
+    paths_.SetPath(Paths::SIM_SCH_INSET_FILE,
+                   GetAbsFilePath(vm["sim-inset"].as<std::string>()));
   }
 
+  // Set fieldopt-build-dir
   if (vm.count("fieldopt-build-dir")) {
-    paths_.SetPath(Paths::BUILD_DIR, vm["fieldopt-build-dir"].as<std::string>());
+    paths_.SetPath(Paths::BUILD_DIR,
+                   vm["fieldopt-build-dir"].as<std::string>());
+
   } else if (is_env_var_set("FIELDOPT_BUILD_ROOT")) {
-    paths_.SetPath(Paths::BUILD_DIR, get_env_var_value("FIELDOPT_BUILD_ROOT"));
+    paths_.SetPath(Paths::BUILD_DIR,
+                   get_env_var_value("FIELDOPT_BUILD_ROOT"));
+
   } else {
-    paths_.SetPath(Paths::BUILD_DIR, GetAbsoluteFilePath(QString("./")).toStdString());
+    paths_.SetPath(Paths::BUILD_DIR,
+                   GetAbsoluteFilePath(QString("./")).toStdString());
   }
 
   if (vm.count("grid-path")) {
@@ -133,46 +150,56 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
 
   if (verbosity_level_) {
     str_out = "FieldOpt runtime settings";
-    std::cout << "\n" << str_out << "\n" << std::string(str_out.length(),'=') << std::endl;
-    std::cout << "Verbosity level:  " << verbosity_level_ << std::endl;
-    std::cout << "Runner type:      " << runnerTypeString().toStdString() << std::endl;
-    std::cout << "Overwr. old out files: " << overwrite_existing_ << std::endl;
-    std::cout << "Max parallel sims:   " << (max_parallel_sims_ > 0 ? boost::lexical_cast<std::string>(max_parallel_sims_) : "default") << std::endl;
-    std::cout << "Simulation delay:    " << simulation_delay_ << " seconds" << std::endl;
-    std::cout << "Threads pr sim:      " << boost::lexical_cast<std::string>(threads_per_sim_) << std::endl;
-    str_out = "Current/specified paths:";
-    std::cout << "\n" << str_out << "\n" << std::string(str_out.length(),'-') << std::endl;
-    std::cout << "Current dir:-------" << GetCurrentDirectoryPath().toStdString() << std::endl;
-    std::cout << "Input file:--------" << paths_.GetPath(Paths::DRIVER_FILE) << std::endl;
-    std::cout << "Output dir:--------" << paths_.GetPath(Paths::OUTPUT_DIR) << std::endl;
-    std::cout << "Sim driver file:---" << paths_.GetPath(Paths::SIM_DRIVER_FILE) << std::endl;
-    std::cout << "Grid file path:----" << paths_.GetPath(Paths::GRID_FILE) << std::endl;
-    std::cout << "Ensemble file:-----" << paths_.GetPath(Paths::ENSEMBLE_FILE) << std::endl;
-    std::cout << "Trajectory dir:-----" << paths_.GetPath(Paths::TRAJ_DIR) << std::endl;
-    std::cout << "Exec file path:----" << paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE) << std::endl;
-    std::cout << "Sim. aux. files:---" << paths_.GetPath(Paths::SIM_AUX_DIR) << std::endl;
-    std::cout << "Build dir:---------" << paths_.GetPath(Paths::BUILD_DIR) << std::endl;
+    cout << "\n" << str_out << "\n" << std::string(str_out.length(),'=') << endl;
+    cout << "Verbosity level:  " << verbosity_level_ << endl;
+    cout << "Runner type:      " << runnerTypeString().toStdString() << endl;
+    cout << "Overwr. old out files: " << overwrite_existing_ << endl;
+
+    cout << "Max parallel sims:   " << endl;
+    cout << (max_parallel_sims_ > 0 ? num2str(max_parallel_sims_) : "default") << endl;
+
+    cout << "Simulation delay:    " << simulation_delay_ << " seconds" << endl;
+    cout << "Threads pr sim:      " << num2str(threads_per_sim_) << endl;
+
+    cout << endl << "Current/specified paths:" << endl;
+    cout << string(str_out.length(),'-') << endl;
+    cout << "Current dir:-------" << GetCurrentDirectoryPath().toStdString() << endl;
+    cout << "Input file:--------" << paths_.GetPath(Paths::DRIVER_FILE) << endl;
+    cout << "Output dir:--------" << paths_.GetPath(Paths::OUTPUT_DIR) << endl;
+    cout << "Sim driver file:---" << paths_.GetPath(Paths::SIM_DRIVER_FILE) << endl;
+    cout << "Grid file path:----" << paths_.GetPath(Paths::GRID_FILE) << endl;
+    cout << "Ensemble file:-----" << paths_.GetPath(Paths::ENSEMBLE_FILE) << endl;
+    cout << "Trajectory dir:-----" << paths_.GetPath(Paths::TRAJ_DIR) << endl;
+    cout << "Exec file path:----" << paths_.GetPath(Paths::SIM_EXEC_SCRIPT_FILE) << endl;
+    cout << "Sim. aux. files:---" << paths_.GetPath(Paths::SIM_AUX_DIR) << endl;
+    cout << "Build dir:---------" << paths_.GetPath(Paths::BUILD_DIR) << endl;
+
+    if (vm.count("well-prod-points")) {
+      cout << "Producer coordinates:   " << endl;
+      cout << wellSplineCoordinateString(prod_coords_).toStdString() << endl;
+    }
     if (vm.count("well-prod-points"))
-      std::cout << "Producer coordinates:   " << wellSplineCoordinateString(prod_coords_).toStdString() << std::endl;
-    if (vm.count("well-prod-points"))
-      std::cout << "Injector coordinates:   " << wellSplineCoordinateString(inje_coords_).toStdString() << std::endl;
+      cout << "Injector coordinates:   " << endl;
+    cout << wellSplineCoordinateString(inje_coords_).toStdString() << endl;
   }
 }
 
-QString RuntimeSettings::wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const {
+QString RuntimeSettings::
+wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const {
   return QString("(%1, %2, %3) - (%4, %5, %6)")
     .arg(spline.first[0]).arg(spline.first[1]).arg(spline.first[2])
     .arg(spline.second[0]).arg(spline.second[1]).arg(spline.second[2]);
 }
 
 QString RuntimeSettings::runnerTypeString() const {
-  if (runner_type_ == RunnerType::SERIAL)
+  if (runner_type_ == RunnerType::SERIAL) {
     return "serial";
-  else if (runner_type_ == RunnerType::ONEOFF)
+  } else if (runner_type_ == RunnerType::ONEOFF) {
     return "oneoff";
-  else if (runner_type_ == RunnerType::MPISYNC)
+  } else if (runner_type_ == RunnerType::MPISYNC) {
     return "mpisync";
-  else return "NOT SET";
+  }
+  else { return "NOT SET"; }
 }
 
 po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **argv) {
@@ -182,45 +209,45 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
   int verbosity_level;
   po::options_description desc("FieldOpt options");
   desc.add_options()
-    ("help,h", "print help message")
-    ("verbose,v", po::value<int>(&verbosity_level)->default_value(0),
-     "verbosity level for runtime console logging")
-    ("sim-delay", po::value<int>(&simulation_delay_)->default_value(0),
-     "Minimum delay between each simulation during initialization.")
-    ("force,f", po::value<int>()->implicit_value(0),
-     "overwrite existing output files")
-    ("max-parallel-simulations,m", po::value<int>(&max_par_sims)->default_value(0),
-     "start max <arg> parallel simulations")
-    ("threads-per-simulation,n", po::value<int>(&thr_per_sim)->default_value(1),
-     "number of threads allocated to each simulation")
-    ("runner-type,r", po::value<std::string>(),
-     "type of runner (serial/oneoff/mpisync)")
-    ("grid-path,g", po::value<std::string>(),
-     "path to model grid file (e.g. *.GRID)")
-    ("sim-exec-path,e", po::value<std::string>(),
-     "path to script that executes the reservoir simulation")
-    ("sim-aux", po::value<std::string>(),
-     "path to directory with additional auxilary simulation files")
-    ("sim-inset", po::value<std::string>(),
-     "path to simulator schedule inset file")
-    ("fieldopt-build-dir,b", po::value<std::string>(),
-     "path to FieldOpt build directory")
-    ("ensemble-path", po::value<std::string>(),
-     "Path to ensemble description file")
-    ("traj-dir", po::value<std::string>(),
-     "Path directory containing trajectory files for import")
-    ("sim-drv-path,s", po::value<std::string>(),
-     "path to simulator driver file (e.g. *.DATA)")
-    ("simulation-timeout,t", po::value<int>(&simulation_timeout)->default_value(0),
-     "Simulations will be terminated after running for t*(lowest_recorded_time)")
-    ("well-prod-points,p", po::value<std::vector<double>>()->multitoken(),
-     "Production well position coordinates")
-    ("well-inj-points,i", po::value<std::vector<double>>()->multitoken(),
-     "Injection well position coordinates")
-    ("input-file", po::value<std::string>(),
-     "path to FieldOpt driver file")
-    ("output-dir", po::value<std::string>(),
-     "path to folder in which to store the results.")
+        ("help,h", "print help message")
+        ("verbose,v", po::value<int>(&verbosity_level)->default_value(0),
+         "verbosity level for runtime console logging")
+        ("sim-delay", po::value<int>(&simulation_delay_)->default_value(0),
+         "Minimum delay between each simulation during initialization.")
+        ("force,f", po::value<int>()->implicit_value(0),
+         "overwrite existing output files")
+        ("max-parallel-simulations,m", po::value<int>(&max_par_sims)->default_value(0),
+         "start max <arg> parallel simulations")
+        ("threads-per-simulation,n", po::value<int>(&thr_per_sim)->default_value(1),
+         "number of threads allocated to each simulation")
+        ("runner-type,r", po::value<std::string>(),
+         "type of runner (serial/oneoff/mpisync)")
+        ("grid-path,g", po::value<std::string>(),
+         "path to model grid file (e.g. *.GRID)")
+        ("sim-exec-path,e", po::value<std::string>(),
+         "path to script that executes the reservoir simulation")
+        ("sim-aux", po::value<std::string>(),
+         "path to directory with additional auxilary simulation files")
+        ("sim-inset", po::value<std::string>(),
+         "path to simulator schedule inset file")
+        ("fieldopt-build-dir,b", po::value<std::string>(),
+         "path to FieldOpt build directory")
+        ("ensemble-path", po::value<std::string>(),
+         "Path to ensemble description file")
+        ("traj-dir", po::value<std::string>(),
+         "Path directory containing trajectory files for import")
+        ("sim-drv-path,s", po::value<std::string>(),
+         "path to simulator driver file (e.g. *.DATA)")
+        ("simulation-timeout,t", po::value<int>(&simulation_timeout)->default_value(0),
+         "Simulations will be terminated after running for t*(lowest_recorded_time)")
+        ("well-prod-points,p", po::value<std::vector<double>>()->multitoken(),
+         "Production well position coordinates")
+        ("well-inj-points,i", po::value<std::vector<double>>()->multitoken(),
+         "Injection well position coordinates")
+        ("input-file", po::value<std::string>(),
+         "path to FieldOpt driver file")
+        ("output-dir", po::value<std::string>(),
+         "path to folder in which to store the results.")
     ;
   // Positional arguments
   po::positional_options_description p;
@@ -229,28 +256,31 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
 
   // Process arguments to variable map
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-    options(desc).positional(p).run(), vm);
+  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
   po::notify(vm);
 
   // If called with --help or -h flag:
-  if (vm.count("help") || !vm.count("input-file") || !vm.count("output-dir")) { // Print help if --help present or input file/output dir not present
-    std::cout << "Usage: ./FieldOpt input-file output-dir [options]" << std::endl;
-    std::cout << desc << std::endl;
+  if (vm.count("help")
+    || !vm.count("input-file")
+    || !vm.count("output-dir")) { // Print help if --help present or input file/output dir not present
+    cout << "Usage: ./FieldOpt input-file output-dir [options]" << endl;
+    cout << desc << endl;
     exit(EXIT_SUCCESS);
   }
 
   return vm;
 }
+
 Loggable::LogTarget RuntimeSettings::GetLogTarget() {
   return Loggable::LogTarget::LOG_SUMMARY;
 }
+
 map<string, string> RuntimeSettings::GetState() {
   map<string, string> statemap;
-  statemap["verbosity"] = boost::lexical_cast<string>(verbosity_level_);
-  statemap["Max. parallel sims"] = boost::lexical_cast<string>(max_parallel_sims_);
-  statemap["Threads pr. sim"] = boost::lexical_cast<string>(threads_per_sim_);
-  statemap["Simulator timeout"] = boost::lexical_cast<string>(simulation_timeout_);
+  statemap["verbosity"] = num2str(verbosity_level_);
+  statemap["Max. parallel sims"] = num2str(max_parallel_sims_);
+  statemap["Threads pr. sim"] = num2str(threads_per_sim_);
+  statemap["Simulator timeout"] = num2str(simulation_timeout_);
 
   statemap["Overwrite existing files"] = overwrite_existing_ ? "Yes" : "No";
 
@@ -271,9 +301,11 @@ map<string, string> RuntimeSettings::GetState() {
   statemap["path Simulation auxilary directory"] = paths_.GetPath(Paths::SIM_AUX_DIR);
   return statemap;
 }
+
 QUuid RuntimeSettings::GetId() {
   return QUuid(); // Null UUID
 }
+
 map<string, vector<double>> RuntimeSettings::GetValues() {
   map<string, vector<double>> valmap;
   return valmap;

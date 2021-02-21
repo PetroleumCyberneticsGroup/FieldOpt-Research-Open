@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -34,10 +34,11 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The MxSplineLengthInterwDistResBound class combines
- * the ResBoundary constraint, the WSplineLength as
- * well as the InterwDist constraint into a routine that checks
- * for these constraints in a sequential manner within a loop.
+ * \brief The MxSplineLengthInterwDistResBound class
+ * combines the ResBoundary constraint, the WSplineLength
+ * as well as the InterwDist constraint into a routine
+ * that checks for these constraints in a sequential
+ * manner within a loop.
  *
  * The constraints are applied until all are satisfied
  *  or until a maximum number of iterations is reached.
@@ -63,8 +64,8 @@ class MxSplineLengthInterwDistResBound : public Constraint
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
  private:
   int max_iterations_;

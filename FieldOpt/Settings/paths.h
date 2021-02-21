@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -48,7 +48,7 @@ class Paths {
     BUILD_DIR = -1, OUTPUT_DIR = -2, SIM_DRIVER_DIR = -3,
     SIM_WORK_DIR = -4, SIM_AUX_DIR = -5, TRAJ_DIR = -6,
     CASE_ROOT_DIR = -7, CASE_DRVR_DIR = -8,
-    SIM_EXEC_DIR = -9
+    SIM_EXEC_DIR = -9, OPTMZD_DIR = -10
   };
 
   const string &GetPathDesc(Path path) const;
@@ -56,6 +56,8 @@ class Paths {
   void SetPath(Path path, const string& path_string,
                bool skip_check = false,
                Settings::VerbParams vp={});
+
+  void CopyPath(Path path0, Path path1);
 
   bool IsSet(Path path);
 
@@ -78,6 +80,7 @@ class Paths {
     pair<Path, string> {ENSEMBLE_FILE, "Ensemble description file"},
     pair<Path, string> {BUILD_DIR, "Build directory"},
     pair<Path, string> {OUTPUT_DIR, "Output directory"},
+    pair<Path, string> {OPTMZD_DIR, "Optimized result dir"},
     pair<Path, string> {SIM_DRIVER_DIR, "Sim driver parent directory"},
     pair<Path, string> {SIM_WORK_DIR, "Sim work directory"},
     pair<Path, string> {SIM_AUX_DIR, "Auxiliary files for simulation directory"},
@@ -89,7 +92,7 @@ class Paths {
   map<Path, string> paths_;
 
   string md_ = "Settings";
-  string cl_ = "paths";
+  string cl_ = "Paths";
   Settings::VerbParams vp_;
 };
 

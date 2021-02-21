@@ -6,7 +6,7 @@ Modified 2016-2017 Alin G. Chitu
 <alin.chitu@tno.nl, chitu_alin@yahoo.com>
 
 Modified 2017-2019 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file and the WellIndexCalculator as a whole is part of
 the FieldOpt project. However, unlike the rest of FieldOpt,
@@ -34,6 +34,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Reservoir/grid/eclgrid.h"
 #include "WellIndexCalculation/wicalc_rixx.h"
 #include "Settings/tests/test_resource_example_file_paths.hpp"
+#include "Settings/tests/test_resource_settings.hpp"
 
 using namespace Reservoir::Grid;
 using namespace Reservoir::WellIndexCalculation;
@@ -41,11 +42,12 @@ using namespace std;
 
 namespace {
 
-class IntersectedCellsTest : public ::testing::Test {
+class IntersectedCellsTest : public ::testing::Test,
+                             public TestResources::TestResourceSettings {
  protected:
   IntersectedCellsTest() {
       grid_ = new ECLGrid(file_path_);
-      wic_ = new wicalc_rixx(grid_);
+      wic_ = new wicalc_rixx(settings_well_, grid_);
   }
 
   virtual ~IntersectedCellsTest() {

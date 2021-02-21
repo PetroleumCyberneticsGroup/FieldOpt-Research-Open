@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -49,10 +49,11 @@ class MxSplineLengthInterwDist : public Constraint
                            Settings::VerbParams vp);
 
   string name() override { return "MxSplineLengthInterwDist"; }
+
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
  private:
   int max_iterations_;

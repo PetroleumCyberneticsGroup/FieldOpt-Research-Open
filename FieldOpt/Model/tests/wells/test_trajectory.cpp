@@ -3,7 +3,7 @@ Copyright (C) 2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -106,7 +106,7 @@ TEST_F(TrajectoryTest, MultisplineWell) {
   paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
   auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_adtl_pts(), paths, vp_);
   auto wsettings = settings.wells()[0];
-  auto varcont = new Model::Properties::VarPropContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::WellSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 

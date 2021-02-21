@@ -1,7 +1,7 @@
 /***********************************************************
 Created by Mathias C. Bellout on 27.11.18
 Copyright (C) 2018-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Modified 2018-2020 Thiago Lima Silva
 <thiagolims@gmail.com>
@@ -77,6 +77,8 @@ class TrustRegionTest : public ::testing::Test,
   VarPropContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
+  Settings::VerbParams vp_ = {};
+
   Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
       Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
 
@@ -94,7 +96,7 @@ class TrustRegionTest : public ::testing::Test,
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VarPropContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer(vp_);
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {

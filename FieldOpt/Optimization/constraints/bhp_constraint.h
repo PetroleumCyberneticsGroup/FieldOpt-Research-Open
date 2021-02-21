@@ -4,7 +4,7 @@ Einar J.M. Baumann <einar.baumann@gmail.com>
 Modified 2017/08/22 by Einar Einar J.M. Baumann
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -32,6 +32,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
+using Model::Properties::ContinuousProperty;
+
 /*!
  * \brief The BhpConstraint class Represents a is a simple
  * max/min constraint for BHP values for a well.
@@ -45,21 +47,25 @@ class BhpConstraint : public Constraint
                 ::Model::Properties::VarPropContainer *variables,
                 Settings::VerbParams vp);
 
-  string name() override { return "BhpConstraint"; }
+  string name() override { return cl_; }
 
-  // Constraint interface
- public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
+
   bool IsBoundConstraint() const override;
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
  private:
-  double min_;
-  double max_;
-  QStringList affected_well_names_;
-  QList<Model::Properties::ContinuousProperty *> affected_real_variables_;
+  double min_, max_;
+  QStringList bhp_cnstrnd_well_nms_;
+  QList<ContinuousProperty *> bhp_cnstrnd_real_vars_;
+  QList<QUuid> bhp_cnstrnd_uuid_vars_;
+
+  Model::Properties::VarPropContainer *variables_;
+
+  string md_ = "Optimizer::constraints";
+  string cl_ = "BhpConstraint";
 };
 
 }

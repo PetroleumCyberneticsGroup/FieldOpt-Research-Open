@@ -1,11 +1,10 @@
 /***********************************************************
-Created by Brage on 18/06/19.
-
 Copyright (C) 2019
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
+Created by Brage on 18/06/19.
 
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

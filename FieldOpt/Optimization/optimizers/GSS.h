@@ -7,7 +7,7 @@ Modified 02/19/19 Einar J. M. Baumann
 <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -40,33 +40,39 @@ namespace Optimization {
 namespace Optimizers {
 
 /*!
- * @brief The _abstract_ GSS class implements a generalized form of the
- * Generating Set Search algorithm presented by Kolda, Torczon and Lewis
- * in the 2003 paper Optimization By Direct Search: New perspectives on
- * some classical and modern methods (DOI: 10.1137/S003614450242889)
+ * @brief The _abstract_ GSS class implements a generalized
+ * form of the Generating Set Search algorithm presented by
+ * Kolda, Torczon and Lewis in the 2003 paper Optimization
+ * By Direct Search: New perspectives on some classical and
+ * modern methods (DOI: 10.1137/S003614450242889)
  *
- * This implementation also borrows some from the Kolda's 2005 paper on
- * the Asynchronous Parallel Pattern Search (APPS) (DOI: 0.1137/040603589)
- * in that it allows for multiple current step lengths (e.g. one per search
- * direction). This is to allow for more flexibility in the implementation
- * of specific algorithms (e.g. APPS).
+ * This implementation also borrows some from the Kolda's
+ * 2005 paper on the Asynchronous Parallel Pattern Search
+ * (APPS) (DOI: 0.1137/040603589) in that it allows multiple
+ * current step lengths (e.g. one per search direction). This
+ * is to allow for more flexibility in the implementation of
+ * specific algorithms (e.g. APPS).
  *
- * @note that this is an abstract class. It must be extended by some other
- * class (e.g. like the CompassSearch class) to provide specific patterns
- * and contraction/expansion parameter values.
+ * @note that this is an abstract class. It must be extended
+ * by some other class (e.g. like the CompassSearch class)
+ * to provide specific patterns and contraction/expansion
+ * parameter values.
  */
 class GSS : public Optimizer {
  public:
   /*!
-   * @brief General constructor for GSS algorithms. Sets the step_tol_ property and calls the primary
-   * Optimizer constructor.
+   * @brief General constructor for GSS algorithms. Sets
+   * the step_tol_ property and calls the primaryOptimizer
+   * constructor.
    *
-   * The following properties must be set in the constructor by classes extending this class:
+   * The following properties must be set in the constructor
+   * by classes extending this class:
    *
    *      contr_fac_  : The contraction factor.
    *      expan_fac_  : The expansion factor.
-   *      directions_ : The set of search directions to be used.
-   *      step_lengths_ : The set of step lengts to be used (one per step direction).
+   *      directions_ : Set of search directions to be used.
+   *      step_lengths_ : Set of step lengths to be used
+   *      (one per step direction).
    */
   GSS(Settings::Optimizer *settings,
       Case *base_case,
@@ -84,7 +90,7 @@ class GSS : public Optimizer {
    * of objective function evaluations and min step length.
    * \return True if the algorithm has finished, otherwise false.
    */
-  TerminationCondition IsFinished();
+  TerminationCondition IsFinished() override;
 
  protected:
   //!< # of variables in the problem. Used in initialization.
@@ -106,7 +112,7 @@ class GSS : public Optimizer {
   vector<VectorXi> directions_;
 
   /*!
-   * @brief Contract the search pattern: step_lengths_ * contr_fac_
+   * @brief Contract search pattern: step_lengths_ * contr_fac_
    *
    * @param dirs (optional) The direction indices to expand.
    * If not provided, the expansion will be applied to all
@@ -115,7 +121,7 @@ class GSS : public Optimizer {
   void contract(vector<int> dirs = vector<int>{-1});
 
   /*!
-   * @brief Expand the search pattern: step_lengths_ * expan_fac_
+   * @brief Expand search pattern: step_lengths_ * expan_fac_
    *
    * @param dirs (optional) The direction indices to expand.
    * If not provided, the expansion will be applied to all
@@ -144,29 +150,31 @@ class GSS : public Optimizer {
    * step lengths len_i for each direction i are computed as
    * len_i = max(step_tol_i, min_i + S * (max_i - min_i)).
    *
-   * @param dir_idx The direction index that produced an improvement.
+   * @param dir_idx Direction index that produced an improvement.
    * @param len The step length that produced an improvement.
    */
   void set_step_lengths(int dir_idx, double len);
 
   /*!
    * @brief Generate a set of trial points.
-   * @param dirs (optional) The direction indices in which perturbations
-   * should be created.
+   * @param dirs (optional) The direction indices
+   * in which perturbations should be created.
    *
    * @return A list of new trial points.
    */
   QList<Case *> generate_trial_points(vector<int> dirs = vector<int>{-1});
 
   /*!
-   * @brief Check if the algorithm has converged, i.e. if all current step lengths
-   * are below the step length convergence tolerance.
+   * @brief Check if the algorithm has converged, i.e. if
+   * all current step lengths are below the step length
+   * convergence tolerance.
    * @return
    */
   bool is_converged();
 
   /*!
-   * @brief Remove the case that has the worst origin from the evaluation queue.
+   * @brief Remove the case that has the worst origin from
+   * the evaluation queue.
    * @return Return a pointer to the case that is removed.
    */
   Case *dequeue_case_with_worst_origin();
@@ -182,7 +190,8 @@ class GSS : public Optimizer {
  private:
 
   /*!
-   * @brief Create a perturbation from a point in the specified direction index.
+   * @brief Create a perturbation from a point
+   * in the specified direction index.
    * @tparam T An Eigen::VectorX object.
    * @param base The point to perturb from.
    * @param dir The direction index in which to perturb.

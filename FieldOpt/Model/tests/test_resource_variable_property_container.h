@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -34,6 +34,7 @@ class TestResourceVariablePropertyContainer {
 
  public:
   TestResourceVariablePropertyContainer() {
+
     prod_heel_x_ = new ContinuousProperty(5.0);
     prod_heel_y_ = new ContinuousProperty(5.0);
     prod_heel_z_ = new ContinuousProperty(200.0);
@@ -67,8 +68,10 @@ class TestResourceVariablePropertyContainer {
 
     pseudocont_x_->setName("PseudoContVert#TESTW#x");
     pseudocont_y_->setName("PseudoContVert#TESTW#y");
+    
+    Settings::VerbParams vp_ = {};
 
-    varcont_prod_spline_ = new VarPropContainer();
+    varcont_prod_spline_ = new VarPropContainer(vp_);
     varcont_prod_spline_->AddVariable(prod_heel_x_);
     varcont_prod_spline_->AddVariable(prod_heel_y_);
     varcont_prod_spline_->AddVariable(prod_heel_z_);
@@ -76,7 +79,7 @@ class TestResourceVariablePropertyContainer {
     varcont_prod_spline_->AddVariable(prod_toe_y_);
     varcont_prod_spline_->AddVariable(prod_toe_z_);
 
-    varcont_two_spline_wells_ = new VarPropContainer();
+    varcont_two_spline_wells_ = new VarPropContainer(vp_);
     varcont_two_spline_wells_->AddVariable(prod_heel_x_);
     varcont_two_spline_wells_->AddVariable(prod_heel_y_);
     varcont_two_spline_wells_->AddVariable(prod_heel_z_);
@@ -90,7 +93,7 @@ class TestResourceVariablePropertyContainer {
     varcont_two_spline_wells_->AddVariable(inje_toe_y_);
     varcont_two_spline_wells_->AddVariable(inje_toe_z_);
 
-    varcont_pseudocont_ = new VarPropContainer();
+    varcont_pseudocont_ = new VarPropContainer(vp_);
     varcont_pseudocont_->AddVariable(pseudocont_x_);
     varcont_pseudocont_->AddVariable(pseudocont_y_);
 
@@ -98,7 +101,8 @@ class TestResourceVariablePropertyContainer {
     prod_bhp_10_ = new ContinuousProperty(1.0);
     prod_bhp_0_->setName("BHP#PRODUCER#0");
     prod_bhp_10_->setName("BHP#PRODUCER#10");
-    varcont_prod_bhp_ = new VarPropContainer();
+
+    varcont_prod_bhp_ = new VarPropContainer(vp_);
     varcont_prod_bhp_->AddVariable(prod_bhp_0_);
     varcont_prod_bhp_->AddVariable(prod_bhp_10_);
   }
@@ -128,6 +132,7 @@ class TestResourceVariablePropertyContainer {
 
   ContinuousProperty *pseudocont_x_;
   ContinuousProperty *pseudocont_y_;
+
 };
 }
 

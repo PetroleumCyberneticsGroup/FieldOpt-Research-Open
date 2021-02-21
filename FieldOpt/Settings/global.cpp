@@ -1,6 +1,6 @@
 /***********************************************************
 Copyright (C) 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Created by bellout on 8/10/20.
 
@@ -32,13 +32,14 @@ Global::Global(QJsonObject json_global) {
   name_ = json_global["Name"].toString().toStdString();
   bookkeeper_tol_ = json_global["BookkeeperTol"].toDouble();
   if (bookkeeper_tol_ < 0.0) {
-    string em = "Bookkeeper tolerance must larger than zero.";
-    throw UnableToParseGlobalSectionException(em);
+    em_ = "Bookkeeper tolerance must larger than zero.";
+    throw UnableToParseGlobalSectionException(em_);
   }
 
   if (json_global.contains("VerbConf")) {
     QJsonObject json_verb = json_global["VerbConf"].toObject();
     parseVerbParams(json_verb);
+    // showVerbParams(name_); // dbg
   } else {
     im_ = "JSON driver file contains no \"VerbConf\" parameter.";
     im_ += "\"VerbConf\" parameter set to default:";
@@ -46,7 +47,7 @@ Global::Global(QJsonObject json_global) {
   }
 }
 
-VerbParams Global::parseVerbParams(QJsonObject json_verb) {
+void Global::parseVerbParams(QJsonObject json_verb) {
   verb_params_.lnw=json_verb["iBoxLineWidth"].toInt();
   verb_params_.vMOD=json_verb["Model"].toInt();
   verb_params_.vOPT=json_verb["Optim"].toInt();
@@ -58,7 +59,7 @@ VerbParams Global::parseVerbParams(QJsonObject json_verb) {
   verb_params_.vUTI=json_verb["Utils"].toInt();
 }
 
-void Global::showVerbParams(string sin) {
+void Global::showVerbParams(string sin) const {
   stringstream ss;
   if(!sin.empty()) { ss << sin << endl; }
   // ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;
@@ -74,7 +75,7 @@ void Global::showVerbParams(string sin) {
   cout << ss.str();
 }
 
-void Global::showVerbParams(VerbParams &vp, string sin) {
+void Global::showVerbParams(VerbParams &vp, string sin) const {
   stringstream ss;
   if(!sin.empty()) { ss << sin << endl; }
   // ss << "[mod: " << md_ << "] [cls: " << cl_ << "]" << endl;

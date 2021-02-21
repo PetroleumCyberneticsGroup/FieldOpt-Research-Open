@@ -4,7 +4,7 @@ Copyright (C) 2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -35,8 +35,9 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * @brief The PseudoContBoundary2D constraint must be used alongside the pseudo-continuous
- * vertical well variable type. It only works with flat reservoirs.
+ * @brief The PseudoContBoundary2D constraint must be used
+ * alongside the pseudo-continuous vertical well variable
+ * type. It only works with flat reservoirs.
  */
 class PseudoContBoundary2D : public Constraint {
  public:

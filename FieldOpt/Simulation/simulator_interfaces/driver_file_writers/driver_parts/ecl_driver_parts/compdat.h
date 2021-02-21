@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -48,9 +48,9 @@ class Compdat : public ECLDriverPart
    * are opened (i.e. have defined controls) at the first
    * time step.
    */
-  Compdat(QList<Model::Wells::Well *> *wells);
+  explicit Compdat(QList<Model::Wells::Well *> *wells);
 
-  Compdat(){}
+  Compdat()= default;
 
   /*!
    * Generate the compdat table for all wells opened at a
@@ -58,9 +58,9 @@ class Compdat : public ECLDriverPart
    * @param timestep Time step at which to generate table
    * for newly opened wells.
    */
-  Compdat(QList<Model::Wells::Well *> *wells, int timestep);
+  Compdat(QList<Model::Wells::Well *> *wells, double timestep);
 
-  QString GetPartString() const;
+  QString GetPartString() const override;
 
  private:
   QList<QStringList> createWellEntries(Model::Wells::Well *well);
@@ -68,10 +68,10 @@ class Compdat : public ECLDriverPart
                                double wellbore_radius,
                                Model::Wells::Wellbore::WellBlock *well_block);
 
-  void E(string m) const {
-    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
-    throw runtime_error(m);
-  };
+  // void E(string m) const {
+  //   m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+  //   throw runtime_error(m);
+  // };
 
   string im_ = "", wm_ = "", em_ = "";
   string md_ = "Simulation/sim_interfaces/driver_file_writers/ecl_driver_parts";

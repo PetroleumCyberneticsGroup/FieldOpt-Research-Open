@@ -5,7 +5,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -50,7 +50,7 @@ class EclDriverFileWriter
   EclDriverFileWriter(::Settings::Settings *settings,
                       Model::Model *model);
 
-  void WriteDriverFile(QString schedule_file_path);
+  void WriteDriverFile(const QString& schedule_file_path);
   std::string buildActionStrings();
 
   Model::Model *model_;

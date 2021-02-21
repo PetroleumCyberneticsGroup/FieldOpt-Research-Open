@@ -2,8 +2,8 @@
 Copyright (C) 2015-2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -29,18 +29,21 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
+using ::Optimization::Constraints::BhpConstraint;
+
 class BhpConstraintTest : public ::testing::Test,
                           public TestResources::TestResourceOptimizer {
  protected:
   BhpConstraintTest() {
-    box_constraint_ = new ::Optimization::Constraints::BhpConstraint(settings_optimizer_->constraints()[0],
-                                                                     model_->variables(),
-                                                                     settings_full_->global()->verbParams());
+    box_constraint_ =
+      new BhpConstraint(settings_optimizer_->constraints()[0],
+                        model_->variables(),
+                        settings_full_->global()->verbParams());
   }
   virtual ~BhpConstraintTest() {}
   virtual void SetUp() {}
 
-  Optimization::Constraints::BhpConstraint *box_constraint_;
+  BhpConstraint *box_constraint_;
 };
 
 TEST_F(BhpConstraintTest, Constructor) {
@@ -54,7 +57,7 @@ TEST_F(BhpConstraintTest, BaseCaseSatisfaction) {
 TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
   // get the bhp variable ids
   QList<QUuid> bhp_ids;
-  for (auto var : model_->variables()->GetWellBHPVariables("PROD")) {
+  for (auto var : model_->variables()->GetWellBHPVars("PROD")) {
     bhp_ids.append(var->id());
   }
 
@@ -80,7 +83,7 @@ TEST_F(BhpConstraintTest, SatisfactionAfterModification) {
 TEST_F(BhpConstraintTest, SnappingValues) {
   // get the bhp variable ids
   QList<QUuid> bhp_ids;
-  for (auto var : model_->variables()->GetWellBHPVariables("PROD")) {
+  for (auto var : model_->variables()->GetWellBHPVars("PROD")) {
     bhp_ids.append(var->id());
   }
 

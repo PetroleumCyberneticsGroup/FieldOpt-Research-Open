@@ -3,7 +3,7 @@ Copyright (C) 2015-2016
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -27,18 +27,25 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-RateConstraint::RateConstraint(Settings::Optimizer::Constraint settings,
-                               Model::Properties::VarPropContainer *variables,
-                               Settings::VerbParams vp) : Constraint(vp) {
-  assert(settings.wells.size() > 0);
+RateConstraint::
+RateConstraint(Settings::Optimizer::Constraint const settings,
+               Model::Properties::VarPropContainer *variables,
+               Settings::VerbParams vp) : Constraint(vp) {
+  assert(!settings.wells.empty());
   assert(settings.min < settings.max);
+
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding Rate constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 
   affected_well_names_ = settings.wells;
   min_ = settings.min;
   max_ = settings.max;
   penalty_weight_ = settings.penalty_weight;
-  for (auto wname : affected_well_names_) {
-    affected_real_variables_.append(variables->GetWellRateVariables(wname));
+
+  for (auto &wname : affected_well_names_) {
+    affected_real_variables_.append(variables->GetWellRateVars(wname));
   }
 }
 

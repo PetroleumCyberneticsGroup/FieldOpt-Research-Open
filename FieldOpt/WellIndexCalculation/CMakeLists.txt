@@ -13,6 +13,7 @@ message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(WIC_LIB_TARGET wellindexcalculator)
 set(WIC_LIB_TARGET_ADG _wic-rixx)
+set(WIC_EXE_TARGET wic_rixx)
 
 # ResInsight ===========================================================
 set(CVF_ENABLE_ASSERTS 1)
@@ -26,7 +27,6 @@ include_directories(${Qt5Core_INCLUDE_DIRS})
 set(CMAKE_CXX_STANDARD 11)
 add_compile_options(-std=c++11)
 
-
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/resinxx/rixx_app_fwk
     ${CMAKE_CURRENT_SOURCE_DIR}/resinxx/rixx_core_geom
@@ -37,41 +37,37 @@ include_directories(
 message(".............................................................")
 if (NOT BUILD_WIC_ADGPRS)
 
-# controls ricasedata delete
-add_definitions(-DFIELDOPT_BUILD)
+  # controls ricasedata delete
+  add_definitions(-DFIELDOPT_BUILD)
 
-add_library(${WIC_LIB_TARGET} ${WELLINDEXCALCULATION_HEADERS} ${WELLINDEXCALCULATION_SOURCES}
-    ${RIXX_ALL_CPP_FILES})
+  add_library(${WIC_LIB_TARGET}
+      ${WELLINDEXCALCULATION_HEADERS}
+      ${WELLINDEXCALCULATION_SOURCES}
+      ${RIXX_ALL_CPP_FILES})
 
-add_library(fieldopt::${WIC_LIB_TARGET}
-    ALIAS ${PROJECT_NAME})
+  add_library(fieldopt::${WIC_LIB_TARGET}
+      ALIAS ${PROJECT_NAME})
 
-message(STATUS "Set WIC_LIB_TARGET: ${WIC_LIB_TARGET}")
+  message(STATUS "Set WIC_LIB_TARGET: ${WIC_LIB_TARGET}")
 
+  set_target_properties(${WIC_LIB_TARGET}
+      PROPERTIES COMPILE_FLAGS "-fPIC")
 
-endif()
+  target_link_libraries(${WIC_LIB_TARGET}
+      PUBLIC fieldopt::reservoir
+      PUBLIC fieldopt::settings
+      PUBLIC ${Boost_LIBRARIES}
+      PUBLIC Qt5::Core
+      PUBLIC ri:ert_ecl
+      )
 
-if (NOT BUILD_WIC_ADGPRS)
-
-set_target_properties(${WIC_LIB_TARGET}
-    PROPERTIES COMPILE_FLAGS "-fPIC")
-
-target_link_libraries(${WIC_LIB_TARGET}
-    PUBLIC fieldopt::reservoir
-    PUBLIC ${Boost_LIBRARIES}
-    PUBLIC Qt5::Core
-    PUBLIC ri:ert_ecl
-    )
-
-install(TARGETS wellindexcalculator
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    )
-
+  install(TARGETS ${WIC_LIB_TARGET}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib/static
+      )
 
 endif()
-
 
 # Testing ==============================================================
 if (BUILD_TESTING AND NOT BUILD_WIC_ADGPRS AND NOT USE_SANITIZING)
@@ -80,17 +76,20 @@ if (BUILD_TESTING AND NOT BUILD_WIC_ADGPRS AND NOT USE_SANITIZING)
   include_directories(${GTEST_INCLUDE_DIRS}
       ${EIGEN3_INCLUDE_DIR} tests)
 
-  add_executable(test_wellindexcalculator ${WELLINDEXCALCULATION_TESTS})
-  target_link_libraries(test_wellindexcalculator
+  add_executable(test_${WIC_LIB_TARGET}
+      ${WELLINDEXCALCULATION_TESTS})
+
+  target_link_libraries(test_${WIC_LIB_TARGET}
       ${WIC_LIB_TARGET}
+      fieldopt::runner
       ${GTEST_BOTH_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-          )
+      )
 
   add_test(NAME test_wellindexcalculator
-      COMMAND $<TARGET_FILE:test_wellindexcalculator>)
-endif()
+      COMMAND $<TARGET_FILE:test_${WIC_LIB_TARGET}>)
 
+endif()
 
 # Debug: include dirs ==================================================
 include(../InclDirDbg.cmake)

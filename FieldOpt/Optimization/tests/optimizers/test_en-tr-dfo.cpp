@@ -1,7 +1,7 @@
 /***********************************************************
 Created by bellout on 5/7/20.
 Copyright (C) 2020- Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Modified 2020 Amanda Machado
 <amanda.automacaoufsc@gmail.com>

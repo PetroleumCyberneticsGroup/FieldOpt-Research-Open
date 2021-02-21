@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QStringList>
 #include <Settings/settings.h>
 #include "Utilities/verbosity.h"
+#include "Utilities/printer.hpp"
 
 namespace Simulation {
 
@@ -50,8 +51,8 @@ class DriverPart
   virtual QString GetPartString() const = 0;
 
  protected:
-  DriverPart() {}
-  DriverPart(Settings::Settings *settings) {
+  DriverPart() = default;
+  explicit DriverPart(Settings::Settings *settings) {
     vp_ = settings->global()->verbParams();
   }
 

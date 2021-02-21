@@ -1,11 +1,10 @@
 /***********************************************************
+Copyright (C) 2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 Created by einar on 11/23/18.
 
-Copyright (C) 2018
-Einar J.M. Baumann <einar.baumann@gmail.com>
-
-Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

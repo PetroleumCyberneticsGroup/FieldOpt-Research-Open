@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_WOKER_H
 #define FIELDOPT_WOKER_H
@@ -25,8 +30,9 @@
 namespace Runner {
 namespace MPI {
 /*!
- * @brief The Worker class is responsible for receiving and sending from/to an overseer object.
- * The runner taken as a parameter in the constructor is primarily used for the common MPI helpers.
+ * @brief The Worker class is responsible for receiving and
+ * sending from/to an overseer object. The runner taken as
+ * a parameter in the constructor is primarily used for the common MPI helpers.
  */
 class Worker {
  public:

@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -70,7 +70,7 @@ TEST_F(ModelTest, ApplyCase) {
                                                    model_->variables()->GetContVarValues());
 
   // Set all continous variables for the PROD well to 1. Should affect BHP and transmissibilty.
-  auto producer_vars = model_->variables()->GetWellBHPVariables("PROD");
+  auto producer_vars = model_->variables()->GetWellBHPVars("PROD");
   producer_vars.append(model_->variables()->GetTransmissibilityVariables("PROD"));
   for (auto var : producer_vars) {
     c->set_real_variable_value(var->id(), 1.0);
@@ -109,7 +109,7 @@ TEST_F(ModelTest, Logging) {
                                                    model_->variables()->GetContVarValues());
 
   // Set all continous variables for the PROD well to 1. Should affect BHP and transmissibilty.
-  auto producer_vars = model_->variables()->GetWellBHPVariables("PROD");
+  auto producer_vars = model_->variables()->GetWellBHPVars("PROD");
   producer_vars.append(model_->variables()->GetTransmissibilityVariables("PROD"));
   for (auto var : producer_vars) {
     c->set_real_variable_value(var->id(), 1.0);

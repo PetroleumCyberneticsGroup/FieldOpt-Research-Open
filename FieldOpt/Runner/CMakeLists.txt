@@ -49,7 +49,6 @@ if(MPI_LINK_FLAGS)
 			LINK_FLAGS "${MPI_LINK_FLAGS}")
 endif()
 
-
 target_include_directories(FieldOpt PUBLIC
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runners>)

@@ -9,7 +9,7 @@
 
  Modified by Mathias C. Bellout on Feb 28 2019
  <mathias.bellout@petroleumcyberneticsgroup.no>
- <chakibbb-pcg@gmail.com> 
+ <chakibbb.pcg@gmail.com> 
 */
 
 #ifndef LIBRARYHANDLER_H_

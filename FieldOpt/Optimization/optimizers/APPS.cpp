@@ -7,7 +7,7 @@ Modified 02/19/19
 Einar J. M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -38,14 +38,16 @@ namespace Optimizers {
 
 using Printer::DBG_prntVecXd;
 
-APPS::APPS(Settings::Optimizer *settings,
-           Case *base_case,
-           Model::Properties::VarPropContainer *variables,
-           Reservoir::Grid::Grid *grid,
-           Logger *logger,
-           CaseHandler *case_handler,
-           Constraints::ConstraintHandler *constraint_handler
-) : GSS(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+APPS::
+APPS(Settings::Optimizer *settings,
+     Case *base_case,
+     Model::Properties::VarPropContainer *variables,
+     Reservoir::Grid::Grid *grid,
+     Logger *logger,
+     CaseHandler *case_handler,
+     Constraints::ConstraintHandler *constraint_handler)
+  : GSS(settings, base_case, variables, grid, logger,
+        case_handler, constraint_handler) {
 
   assert(settings->parameters().max_queue_size >= 1.0);
   max_queue_length_ = directions_.size() * settings->parameters().max_queue_size;

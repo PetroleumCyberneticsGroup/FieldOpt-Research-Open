@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -216,58 +216,58 @@ void ECLSummaryReader::populateKeyLists() {
     }
     ext_info(swells.str(), md_, cl_, vp_.lnw);
 
-    sseg << "Segment SOFR keys: ";
+    sseg << "Segment SOFR keys: |";
     for (const auto& ckey : seg_sofr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SWFR keys: ";
+    sseg << "Segment SWFR keys: |";
     for (const auto& ckey : seg_swfr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SGFR keys: ";
+    sseg << "Segment SGFR keys: |";
     for (const auto& ckey : seg_sgfr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SOFR keys: ";
+    sseg << "Segment SOFR keys: |";
     for (const auto& ckey : seg_sofr_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 130 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SPR keys: ";
+    sseg << "Segment SPR keys: |";
     for (const auto& ckey : seg_sprp_keys_) {
-      if(sseg.str().size() % 130 <= 20) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SPRD keys: ";
+    sseg << "Segment SPRD keys: |";
     for (const auto& ckey : seg_sprd_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SWCT keys: ";
+    sseg << "Segment SWCT keys: |";
     for (const auto& ckey : seg_swct_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
 
-    sseg << "Segment SCSA keys: ";
+    sseg << "Segment SCSA keys: |";
     for (const auto& ckey : seg_scsa_keys_) {
-      if(sseg.str().size() % 130 <= 10) { sseg << ckey << " "; } else { sseg << ckey << "_"; }
+      if(sseg.str().size() % 150 <= 10) { sseg << ckey << "|"; } else { sseg << ckey << " "; }
     }
     ext_info(sseg.str(), md_, cl_, vp_.lnw);
     sseg.str("");
@@ -285,7 +285,17 @@ void ECLSummaryReader::populateKeyLists() {
     && !seg_scsa_keys_.empty()) {
     read_segments_ = true;
   } else if (vp_.vSIM > 1) {
-    ext_warn("Not reading all segment data!", md_, cl_, vp_.lnw);
+    im_ = "Not reading all segment data! |";
+    im_ += "seg_sofr_keys_:" + num2str(seg_sofr_keys_.size(), 0) + " ";
+    im_ += "seg_swfr_keys_:" + num2str(seg_swfr_keys_.size(), 0) + " ";
+    im_ += "seg_sgfr_keys_:" + num2str(seg_sgfr_keys_.size(), 0) + " ";
+    im_ += "seg_sprp_keys_:" + num2str(seg_sprp_keys_.size(), 0) + " ";
+    im_ += "seg_sprd_keys_:" + num2str(seg_sprd_keys_.size(), 0) + " ";
+    im_ += "seg_swct_keys_:" + num2str(seg_swct_keys_.size(), 0) + " ";
+    im_ += "seg_scsa_keys_:" + num2str(seg_scsa_keys_.size(), 0) + " ";
+    ext_warn(im_, md_, cl_, vp_.lnw);
+  } else {
+    ext_warn("Some or all segment result keywords empty - not read.", md_, cl_, vp_.lnw);
   }
 
   stringlist_free(keys);
@@ -1692,6 +1702,7 @@ void ECLSummaryReader::initWellSegRates() {
                 cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk],3, 0, 8);
                 cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk],3, 0, 8);
                 cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk],3, 1, 8);
+                cout << " ]";
                 cout << endl;
               }
             }
@@ -1716,6 +1727,7 @@ void ECLSummaryReader::initWellSegRates() {
                 cout << "] -- [ sprd: " << num2str(seg_sprd_[wname][jj][kk], 3, 0, 8);
                 cout << "] -- [ swct: " << num2str(seg_swct_[wname][jj][kk], 3, 0, 8);
                 cout << "] -- [ scsa: " << num2str(seg_scsa_[wname][jj][kk], 3, 1, 8);
+                cout << " ]";
                 cout << endl;
               }
             }

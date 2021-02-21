@@ -4,7 +4,7 @@ Copyright (C) 2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -50,12 +50,21 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #define LINEWDTH 165
 
+// Move these definitions to somewhere fitting
+#define STDMIN_D std::numeric_limits<double>::min();
+#define STDMAX_D std::numeric_limits<double>::max();
+#define STDINF_D std::numeric_limits<double>::infinity();
+
+#define STDMIN_I std::numeric_limits<int>::min();
+#define STDMAX_I std::numeric_limits<int>::max();
+#define STDINF_I std::numeric_limits<int>::infinity();
+
 namespace Settings {
 
 struct VerbParams {
-  int lnw = 141;
+  int lnw = 163;
   int vMOD = 0;
-  int vOPT = 3;
+  int vOPT = 0;
   int vWIC = 0;
   int vSIM = 0;
   int vRUN = 0;

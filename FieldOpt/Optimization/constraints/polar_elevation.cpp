@@ -4,7 +4,7 @@ Einar J.M. Baumann <einar.baumann@gmail.com>
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -27,9 +27,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PolarElevation::PolarElevation(Settings::Optimizer::Constraint settings,
+PolarElevation::PolarElevation(Settings::Optimizer::Constraint const settings,
                                Model::Properties::VarPropContainer *variables,
-                               Settings::VerbParams vp) : Constraint(vp) {
+                               Settings::VerbParams vp)
+                               : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding PolarElevation constraint for " + settings.well.toStdString());
+  }
+
   min_elevation_ = settings.min;
   max_elevation_ = settings.max;
   for (auto var : *variables->GetContinuousVariables()){
@@ -40,7 +46,10 @@ PolarElevation::PolarElevation(Settings::Optimizer::Constraint settings,
       break;
     }
   }
-  if (affected_variable_.isNull()) throw std::runtime_error("Affected variable null in PolarElevation constraint.");
+  if (affected_variable_.isNull()) {
+    string em = "Affected variable null in PolarElevation constraint.";
+    throw std::runtime_error(em);
+  }
 }
 
 bool PolarElevation::CaseSatisfiesConstraint(Optimization::Case *c) {
@@ -63,18 +72,21 @@ void PolarElevation::SnapCaseToConstraints(Optimization::Case *c) {
 bool PolarElevation::IsBoundConstraint() const {
   return true;
 }
+
 Eigen::VectorXd PolarElevation::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
   lbounds[id_vector.indexOf(affected_variable_)] = min_elevation_;
   return lbounds;
 }
+
 Eigen::VectorXd PolarElevation::GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
   ubounds[id_vector.indexOf(affected_variable_)] = max_elevation_;
   return ubounds;
 }
+
 string PolarElevation::name() {
   return "PolarElevation";
 }

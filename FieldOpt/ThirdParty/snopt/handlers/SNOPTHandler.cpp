@@ -3,7 +3,7 @@ Created by bellout on 2/10/18 from SNOPT template
 
 Copyright (C) 2017-2019 Mathias Bellout
 <mathias.bellout@petroleumcyberneticsgroup.no>
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

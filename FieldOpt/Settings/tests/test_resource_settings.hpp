@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<mathias.bellout@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -52,13 +52,14 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_full_(";
       im += paths_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
 
     settings_full_ = new Settings::Settings(paths_);
     settings_optimizer_ = settings_full_->optimizer();
     settings_simulator_ = settings_full_->simulator();
     settings_model_ = settings_full_->model();
+    settings_well_ = settings_full_->model()->wells().at(0);
 
     // -----------------------------------------------------
     paths_hybridopt_.SetPath(Paths::DRIVER_FILE,
@@ -76,7 +77,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_hybridopt_full_(";
       im += paths_hybridopt_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
 
     settings_hybridopt_full_ = new Settings::Settings(paths_hybridopt_);
@@ -91,7 +92,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: settings_en_5spot_full_(";
       im += en_paths.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
     settings_en_5spot_full_ = new Settings::Settings(en_paths);
 
@@ -100,7 +101,7 @@ class TestResourceSettings {
     if(vp_.vSET >= 5) {
       string im = "test: paths_olympr37_full_(";
       im += paths_olympr37_.GetPath(Paths::DRIVER_FILE) + ")";
-      info(im, vp_.lnw);
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
     }
     settings_olympr37_ = new Settings::Settings(paths_olympr37_);
     settings_olympr37_opt_ = settings_olympr37_->optimizer();
@@ -115,6 +116,7 @@ class TestResourceSettings {
   Settings::Optimizer *settings_optimizer_;
   Settings::Simulator *settings_simulator_;
   Settings::Model *settings_model_;
+  Settings::Model::Well settings_well_;
   Paths paths_;
 
   Settings::Settings *settings_hybridopt_full_;

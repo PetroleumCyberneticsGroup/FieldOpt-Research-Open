@@ -4,7 +4,7 @@ Einar J.M. Baumann <einar.baumann@gmail.com>
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -28,9 +28,15 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint settings,
+PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint const settings,
                                  Model::Properties::VarPropContainer *variables,
-                                 Settings::VerbParams vp) : Constraint(vp) {
+                                 Settings::VerbParams vp)
+                                 : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding PolarWellLength constraint for " + settings.well.toStdString());
+  }
+
   minimum_length_ = settings.min_length;
   maximum_length_ = settings.max_length;
 

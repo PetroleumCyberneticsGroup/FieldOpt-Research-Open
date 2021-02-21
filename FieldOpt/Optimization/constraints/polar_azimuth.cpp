@@ -4,7 +4,7 @@ Einar J.M. Baumann <einar.baumann@gmail.com>
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -27,9 +27,15 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
+PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint const settings,
                            Model::Properties::VarPropContainer *variables,
-                           Settings::VerbParams vp) : Constraint(vp) {
+                           Settings::VerbParams vp)
+                           : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding PolarAzimuth constraint for " + settings.well.toStdString());
+  }
+
   min_azimuth_ = settings.min;
   max_azimuth_ = settings.max;
 

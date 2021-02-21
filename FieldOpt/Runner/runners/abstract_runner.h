@@ -5,7 +5,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -80,13 +80,14 @@ class AbstractRunner
   string cl_ = "AbstractRunner";
 
  protected:
-  AbstractRunner(RuntimeSettings *runtime_settings);
+  explicit AbstractRunner(RuntimeSettings *runtime_settings);
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
   Settings::Settings *settings_;
   RuntimeSettings *runtime_settings_;
   Optimization::Case *base_case_;
+  Optimization::Case *optz_case_;
 
   Optimization::Optimizer *optimizer_;
   Optimization::Objective::Objective *objf_;
@@ -96,9 +97,17 @@ class AbstractRunner
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
 
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
 
-  void PrintCompletionMessage() const;
+  void PrintCompletionMessage();
+
+  void ComputeOptmzdCase();
 
   /*!
    * \brief sentinelValue Get the sentinel value to be used
@@ -123,7 +132,7 @@ class AbstractRunner
    */
   int timeoutValue() const;
 
-  void InitializeSettings(QString output_subdirectory="");
+  void InitializeSettings(const QString& output_subdirectory="");
   void InitializeModel();
   void InitializeSimulator();
   void EvaluateBaseModel();

@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -54,7 +54,7 @@ void Simulator::setStructure(QJsonObject json_simulator) {
     if (QString::compare(type, "Branched") == 0) {
       file_structure_.type_ = FileStructType::Branched;
       set_opt_prop_int(file_structure_.levels_num_,
-                       json_simulator, "BranchLevels");
+        json_simulator, "BranchLevels", vp_);
       for (int ii=0; ii < file_structure_.levels_num_; ii++) {
         file_structure_.levels_str_ = file_structure_.levels_str_ + "../";
       }
@@ -104,7 +104,7 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
         schedule_path = paths.GetPath(Paths::SIM_DRIVER_DIR) + "/"
             + file_structure_.levels_str_ + sched_file_name_.toStdString();
         paths.SetPath(Paths::CASE_ROOT_DIR,
-                      GetParentDirPath(GetAbsoluteFilePath(schedule_path)));
+                      GetParentDirPath(GetAbsFilePath(schedule_path)));
       }
 
       paths.SetPath(Paths::SIM_SCH_FILE, schedule_path, true);
@@ -142,13 +142,13 @@ void Simulator::setType(QJsonObject json_simulator) {
 
 void Simulator::setParams(QJsonObject json_simulator) {
   if(vp_.vSET >= 5) { info("Setting Simulator parameters.", vp_.lnw); }
-  set_opt_prop_int(max_minutes_, json_simulator, "MaxMinutes");
-  set_opt_prop_bool(ecl_use_actionx_, json_simulator, "UseACTIONX");
-  set_opt_prop_bool(use_post_sim_script_, json_simulator, "UsePostSimScript");
-  set_opt_prop_bool(use_pre_sim_script_, json_simulator, "UsePreSimScript");
-  set_opt_prop_bool(add_sim_scripts_, json_simulator, "AddSimScripts");
-  set_opt_prop_bool(read_external_json_results_, json_simulator, "ReadExternalJsonResults");
-  set_opt_prop_bool(read_adj_grad_data_, json_simulator, "ReadAdjGrads");
+  set_opt_prop_int(max_minutes_, json_simulator, "MaxMinutes", vp_);
+  set_opt_prop_bool(ecl_use_actionx_, json_simulator, "UseACTIONX", vp_);
+  set_opt_prop_bool(use_post_sim_script_, json_simulator, "UsePostSimScript", vp_);
+  set_opt_prop_bool(use_pre_sim_script_, json_simulator, "UsePreSimScript", vp_);
+  set_opt_prop_bool(add_sim_scripts_, json_simulator, "AddSimScripts", vp_);
+  set_opt_prop_bool(read_external_json_results_, json_simulator, "ReadExternalJsonResults", vp_);
+  set_opt_prop_bool(read_adj_grad_data_, json_simulator, "ReadAdjGrads", vp_);
 }
 
 void Simulator::setCommands(QJsonObject json_simulator) {

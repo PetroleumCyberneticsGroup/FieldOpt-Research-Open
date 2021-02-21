@@ -3,7 +3,7 @@ Copyright (C) 2016-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -39,7 +39,7 @@ namespace Constraints {
  * \brief The WellSplineConstraint class acts as a parent
  * class for constraints dealing with well splines.
  *
- * This class provides datastructures with initialization
+ * This class provides data structures with initialization
  * methods that ease the application of well spline
  * constraints.
  */
@@ -49,8 +49,8 @@ class WellSplineConstraint
   WellSplineConstraint() {}
 
   /*!
-   * \brief The Coord struct hodlds the UUIDs for the
-   * variables containing coordinate values of a WellSpline point.
+   * \brief The Coord struct holds UUIDs for the variables
+   *  containing coordinate values of a WellSpline point.
    */
   struct Coord {
     QUuid x;
@@ -59,8 +59,8 @@ class WellSplineConstraint
   };
 
   /*!
-   * \brief The Well struct Holds the heel and toe coordinates for a well defined by
-   * a WellSpline.
+   * \brief The Well struct Holds the heel and toe
+   * coordinates for a well defined by a WellSpline.
    */
   struct Well {
     Coord heel;
@@ -70,11 +70,12 @@ class WellSplineConstraint
   };
 
   /*!
-   * \brief initializeWell Initialize the Well and Coord datastructures using the provided
-   * variables.
+   * \brief initializeWell Initialize the Well and Coord
+   * datastructures using the provided variables.
    * \param vars the six variables defining the spline for a well.
    */
-  Well initializeWell(QList<Model::Properties::ContinuousProperty *> vars);
+  Well initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
+                             Settings::VerbParams vp);
 
   /*!
    * @brief Get the vectors containing the endpoint (heel/toe) coordinate values for a case.
@@ -93,6 +94,13 @@ class WellSplineConstraint
   std::vector<Eigen::Vector3d> GetPointValueVectors(Case *c, Well well);
 
   double GetWellLength(Case *c, WellSplineConstraint::Well well);
+
+  string xmd_ = "Optimization::Constraints";
+  string xcl_ = "WellSplineConstraint";
+
+ private:
+  Settings::VerbParams xvp_;
+  string xim_ = "", xwm_ = "", xem_ = "";
 
 };
 

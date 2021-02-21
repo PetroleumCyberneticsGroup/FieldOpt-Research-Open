@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -60,12 +60,12 @@ class ECLSimulator : public Simulator {
    * the current model. The evaluation is blocking.
    */
   void Evaluate() override;
-  bool Evaluate(int timeout, int threads = 1) override;
+  bool Evaluate(int timeout, int threads) override;
 
   void EvalXWrapper();
 
   bool Evaluate(const Settings::Ensemble::Realization &realization,
-      int timeout, int threads = 1) override;
+      int timeout, int threads) override;
   
   void WriteDriverFilesOnly() override;
   /*!
@@ -88,6 +88,7 @@ class ECLSimulator : public Simulator {
   // Simulator interface
  protected:
   void UpdateFilePaths() override;
+
 };
 
 }

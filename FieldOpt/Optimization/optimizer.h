@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 Modified 2019-2020 Thiago Lima Silva
 <thiagolims@gmail.com>
@@ -145,7 +145,7 @@ class Optimizer : public Loggable
   virtual QString GetStatusString() const;
 
   //!< Enable writing a text log for the constraint operations.
-  void EnableConstraintLogging(QString output_directory_path);
+  void EnableConstraintLogging(const QString& output_dir_path);
 
   //!< Check if the optimizer is asynchronous.
   bool IsAsync() const { return is_async_; }
@@ -184,8 +184,8 @@ class Optimizer : public Loggable
             Model::Properties::VarPropContainer *variables,
             Reservoir::Grid::Grid *grid,
             Logger *logger,
-            CaseHandler *case_handler=0,
-            Constraints::ConstraintHandler *constraint_handler=0
+            CaseHandler *case_handler = nullptr,
+            Constraints::ConstraintHandler *constraint_handler = nullptr
   );
 
   /*!
@@ -402,7 +402,7 @@ class Optimizer : public Loggable
   };
 
   /*!
-   * @brief Calculate penalized objf function value for a case.
+   * @brief Calculate penalized objf function value for case.
    * @param c Case to calculate the penalized objective function value for.
    * @return The penalized objective function value.
    */
@@ -415,8 +415,9 @@ class Optimizer : public Loggable
   int seconds_spent_in_iterate_;
 
   /*!
-   * @brief Initialize the OFV normalizer, setting the parameters for it
-   * from the cases that have been evaluated so far.
+   * @brief Initialize the OFV normalizer, setting the
+   * parameters for it from the cases that have been
+   * evaluated so far.
    */
   void initializeOfvNormalizer();
 };

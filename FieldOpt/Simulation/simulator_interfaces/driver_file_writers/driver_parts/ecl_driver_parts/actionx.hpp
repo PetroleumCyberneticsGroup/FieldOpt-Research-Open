@@ -81,7 +81,6 @@ std::map<ACTX_Operator, std::string> OperatorString = {
   std::pair<ACTX_Operator, std::string> {AND, "AND"}
 };
 
-
 /*!
  * @brief Generate teh ACTIONX keyword string with
  * the provided action properly placed inside it.

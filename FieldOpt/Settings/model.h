@@ -4,7 +4,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -34,7 +34,6 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QList>
 #include <QJsonArray>
 #include <assert.h>
-
 
 namespace Settings {
 
@@ -79,6 +78,7 @@ class Model
 
   struct Well {
     Well(){}
+
     struct Completion {
       Completion(){}
       WellCompletionType type;               //!< Which type of completion this is (Perforation/ICD)
@@ -91,16 +91,26 @@ class Model
       double placement               = -1.0; //!< Placement as a fraction of the well length.
       double true_vertical_depth     = -1.0; //!< True vertical depth for the location of the completion.
       int time_step                  = -1;   //!< Time step for completion to activate/be modified.
-      int segment_index              = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
-      std::string device_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
-      std::vector<std::string> device_names; //< List of device names that have common settings.
-      std::vector<int> segment_indexes; //!< List of segment indexes matching the device_names list.
-      double min_valve_size         = 0.0;    //!< Minimum valve size (needed for simulator input)
-      double max_valve_size         = 7.854E-3; //!< Maximum valve size (needed for simulator input)
+      int icd_segment                = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
+      std::string icd_name           = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
+      std::vector<std::string> icd_names; //< List of device names that have common settings.
+      std::vector<int> icd_segments; //!< List of segment indexes matching the icd_names list.
+      double icd_segment_length      = -1.0; // Set length of ICD equal to trajectory through 1st block
+      double min_valve_size          = 0.0;    //!< Minimum valve size (needed for simulator input)
+      double max_valve_size          = 7.854E-3; //!< Maximum valve size (needed for simulator input)
       bool is_variable               = false; //!< True if all viable properties are variable. Otherwise false.
       bool variable_placement        = false; //!< Whether the placement of a comp. along the trajectory should be variable.
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
+
+      double friction_drop  = 0.0;
+      double pipe_diameter  = 0.0;
+      double abs_roughness  = 0.0;
+      double pipe_xsec_area = 0.0;
+      std::string device_stat = "open";
+      double max_xsec_area = 0.0;
+
+      VerbParams verb_params_;
     };
 
     /*!
@@ -156,6 +166,9 @@ class Model
       QString name;
       bool isDifferent(ControlEntry other);
       std::string toString();
+
+      double tstep_ref_;
+
     };
 
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
@@ -176,40 +189,49 @@ class Model
     bool is_variable_spline;                    //!< Whether the whole spline should be variable.
     PseudoContPosition pseudo_cont_position;    //!< Initial position when using pseudo-continous positioning variables.
     QList<ControlEntry> controls;               //!< List of well controls
+
     bool use_segmented_model = false;           //!< Whether the segmented well model should be used.
     Completion seg_tubing;                      //!< Tubing settings when the segmented well model is used.
     Completion seg_annulus;                     //!< Annulus settings when the segmented well model is used.
     Completion seg_compartment_params;          //!< Parameters to be used for automatically generated ICDs.
     std::vector<Completion> completions;        //!< List of completions. Used when using neither segmentation or trajectories.
     int seg_n_compartments = 0;                 //!< Number of packer-delimited compartments with ICDs to use.
+
+    string wseg_structure;
+
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
-    std::string toString();
-    std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
+    std::string toString(std::string sp="\n");
+    std::vector<ICVGroup> icv_compartments;     //!< Grouping of ICVs into named comparments.
 
     VerbParams verb_params_;
     void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
-    VerbParams verbParams() { return verb_params_; };
+    VerbParams verbParams() const { return verb_params_; };
   };
 
-  QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
-  QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
+  //!< Get struct containing settings for the well(s) in the model.
+  QList<Well> wells() const { return wells_; }
+
+  //!< Get control times for schedule
+  QList<double> control_times() const { return control_times_; }
   QList<int> start_date() const { return start_date_; }
 
   VerbParams vp_;
-  VerbParams verbParams() { return vp_; };
+  VerbParams verbParams() const { return vp_; };
 
  private:
   QList<Well> wells_;
-  QList<int> control_times_;
+  QList<double> control_times_;
   QList<int> start_date_;
+  int tstep_refinement_;
 
   string md_ = "Settings";
   string cl_ = "Model";
+  string im_, em_, wm_;
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
-  void setImportedWellDefaults(QJsonObject json_model);
-  void parseImportedWellOverrides(QJsonArray json_wells);
+  // void setImportedWellDefaults(QJsonObject json_model);
+  // void parseImportedWellOverrides(QJsonArray json_wells);
 
   void parseSegmentation(const QJsonObject& json_seg, Well &well);
   void parseSegmentTubing(const QJsonObject &json_seg, Well &well) const;
@@ -220,6 +242,10 @@ class Model
   void parseICVCompartmentalization(QJsonArray &icv_compartmentalization, Well &well);
 
   bool controlTimeIsDeclared(int time) const;
+
+  void printModelParams() {
+
+  }
 
 };
 

@@ -4,7 +4,7 @@ Copyright (C) 2019
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -46,6 +46,7 @@ class ReservoirBoundaryToe : public ResBoundary {
                        Settings::VerbParams vp);
 
   string name() override { return "ReservoirBoundaryToe"; }
+
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;

@@ -76,6 +76,7 @@ struct WellPathCellIntersectionInfo {
   double endMD;
   cvf::Vec3d intersectionLengthsInCellCS;
   Eigen::Vector3d dxdydz;
+  size_t i, j, k;
 
   cvf::StructGridInterface::FaceType intersectedCellFaceIn;
   cvf::StructGridInterface::FaceType intersectedCellFaceOut;

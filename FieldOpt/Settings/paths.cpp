@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -62,6 +62,11 @@ void Paths::SetPath(Paths::Path path, const string& path_string,
     paths_[path] = path_string;
   }
 }
+
+void Paths::CopyPath(Paths::Path path0, Paths::Path path1) {
+  paths_[path0] = paths_[path1];
+}
+
 
 bool Paths::IsSet(Paths::Path path) {
   return paths_.count(path) > 0;

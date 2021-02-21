@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -31,18 +31,27 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
+using Printer::num2str;
+
 WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
                              Model::Properties::VarPropContainer *variables,
-                             Settings::VerbParams vp) : Constraint(vp) {
+                             Settings::VerbParams vp)
+                             : Constraint(vp) {
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding WSplineLength constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
+
   min_length_ = settings.min;
   max_length_ = settings.max;
   penalty_weight_ = settings.penalty_weight;
 
-  affected_well_ = initializeWell(variables->GetWellSplineVariables(settings.well));
+  affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp_);
 
-  if (vp_.vOPT>=1)
-    std::cout << "... ... initialized length constraint for well: "
-              << settings.well.toStdString() << std::endl;
+  if (vp_.vOPT >= 3) {
+    im_ = " -> initialized length constraint for well: " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 }
 
 bool WSplineLength::CaseSatisfiesConstraint(Case *c) {
@@ -110,14 +119,21 @@ void WSplineLength::InitializeNormalizer(QList<Case *> cases) {
 double WSplineLength::Penalty(Case *c) {
   auto endpts = GetEndpointValueVectors(c, affected_well_);
   double well_length =  (endpts.first - endpts.second).norm();
+
   if (well_length > max_length_) {
-    if (VERB_OPT >= 2) Printer::ext_info("Well length penalty for case " + c->id().toString().toStdString()
-                                           + ": " + Printer::num2str(well_length - max_length_) + " m too long", "Optimization", "WSplineLength");
+    if (vp_.vOPT >= 3) {
+      im_ = "Well length penalty for case " + c->id().toString().toStdString();
+      im_ += ": " + num2str(well_length - max_length_) + " m too long";
+      ext_info(im_, md_, cl_);
+    }
     return well_length - max_length_;
-  }
-  else if (well_length < min_length_) {
-    if (VERB_OPT >= 2) Printer::ext_info("Well length penalty for case " + c->id().toString().toStdString()
-                                           + ":" + Printer::num2str(min_length_ - well_length) + " m too short", "Optimization", "WSplineLength");
+
+  } else if (well_length < min_length_) {
+    if (vp_.vOPT >= 3) {
+      im_ = "Well length penalty for case " + c->id().toString().toStdString();
+      im_ += ":" + num2str(min_length_ - well_length) + " m too short";
+      ext_info(im_, md_, cl_);
+    }
     return min_length_ - well_length;
   }
   else

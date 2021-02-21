@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -42,6 +42,14 @@ class ModelSynchronizationObject;
 namespace Model {
 namespace Properties {
 
+using std::runtime_error;
+
+using Printer::info;
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::ext_error;
+using Printer::num2str;
+
 /*!
  * \brief VarPropContainer class facilitates the handling
  * of variable properties.
@@ -57,7 +65,9 @@ class VarPropContainer
 {
   friend class ::Model::ModelSynchronizationObject;
  public:
-  VarPropContainer();
+  // VarPropContainer();
+
+  VarPropContainer(Settings::VerbParams vp);
 
   //!< Add a property to the container and mark it as variable
   void AddVariable(BinaryProperty *var);
@@ -117,7 +127,8 @@ class VarPropContainer
   //!< Get all continous variables
   // QHash<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
   // QMap<QUuid, ContinuousProperty *> *GetContinuousVariables() const { return continuous_variables_; }
-  QList<QPair<QUuid, ContinuousProperty *>> *GetContinuousVariables() const { return continuous_variables_; }
+  QList<QPair<QUuid, ContinuousProperty *>>
+  *GetContinuousVariables() const { return continuous_variables_; }
 
   //!< Get a hashmap containing all binary variable values.
   //!< The key represents each variable's ID.
@@ -143,6 +154,9 @@ class VarPropContainer
   //!< Get all BHP variables.
   QList<ContinuousProperty *> GetWellBHPVariables() const;
 
+  //!< Get all ICD variables.
+  QList<ContinuousProperty *> GetWellICDVariables() const;
+
   //!< Get all BHP variables.
   QList<ContinuousProperty *> GetWellRateVariables() const;
 
@@ -150,13 +164,18 @@ class VarPropContainer
   QList<ContinuousProperty *> GetWellControlVariables(QString well_name) const;
 
   //!< Get all BHP variables for a specific well.
-  QList<ContinuousProperty *> GetWellBHPVariables(QString well_name) const;
+  QList<ContinuousProperty *>
+  GetWellBHPVars(QString const &well_name) const;
 
-  //!< Get all BHP variables for a specific well.
-  QList<ContinuousProperty *> GetWellRateVariables(QString well_name) const;
+  //!< Get all ICD variables for a specific well.
+  QList<ContinuousProperty *>
+  GetWellICDVars(QString const &well_name) const;
+
+  //!< Get all Rates variables for a specific well.
+  QList<ContinuousProperty *> GetWellRateVars(QString well_name) const;
 
   //!< Get all variables for the spline defining a well.
-  QList<ContinuousProperty *> GetWellSplineVariables(QString well_name) const;
+  QList<ContinuousProperty *> GetWSplineVars(QString well_name) const;
 
   //!< Get all variables defining a polar well spline.
   QList<ContinuousProperty *> GetPolarSplineVariables(QString well_name) const;
@@ -187,7 +206,18 @@ class VarPropContainer
   //!< Check that all variable names are unique. If they are not, throw an error.
   void CheckVariableNameUniqueness();
 
+  // Call only after constraints have been initialized,
+  // which set necessary variables bounds,
+  void ScaleVariables();
+
+
  private:
+  Settings::VerbParams vp_;
+
+  string md_ = "Model::Properties";
+  string cl_ = "VarPropContainer";
+  string im_ = "", wm_ = "", em_ = "";
+
 //  QHash<QUuid, BinaryProperty *> *binary_variables_;
 //  QHash<QUuid, DiscreteProperty *> *discrete_variables_;
 //  QHash<QUuid, ContinuousProperty *> *continuous_variables_;
@@ -199,6 +229,10 @@ class VarPropContainer
   QList<QPair<QUuid, BinaryProperty *>> *binary_variables_;
   QList<QPair<QUuid, DiscreteProperty *>> *discrete_variables_;
   QList<QPair<QUuid, ContinuousProperty *>> *continuous_variables_;
+
+//  QList<QPair<QUuid, BinaryProperty *>> *bin_vars_scl__;
+//  QList<QPair<QUuid, DiscreteProperty *>> *dis_vars_scl_;
+//   QList<QPair<QUuid, ContinuousProperty *>> *con_vars_scl_;
 
 };
 

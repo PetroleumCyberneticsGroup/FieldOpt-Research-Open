@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -30,16 +30,19 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 
 Model::Model(Settings::Settings settings, Logger *logger) {
-  if (settings.paths().IsSet(Paths::GRID_FILE)) {
-    grid_ = new Reservoir::Grid::ECLGrid(settings.paths().GetPath(Paths::GRID_FILE));
-    wic_ = new Reservoir::WellIndexCalculation::wicalc_rixx(grid_);
+
+  if (settings.paths().IsSet(Paths::GRID_FILE)
+    && !settings.model()->wells().empty()) {
+    grid_ = new ECLGrid(settings.paths().GetPath(Paths::GRID_FILE));
+    wic_ = new wicalc_rixx(settings.model()->wells().at(0), grid_);
   } else {
-    grid_ = 0;
+    grid_ = nullptr;
     wic_ = nullptr;
   }
   current_case_ = nullptr;
 
-  variable_container_ = new Properties::VarPropContainer();
+  vp_ = settings.model()->verbParams();
+  variable_container_ = new Properties::VarPropContainer(vp_);
 
   wells_ = new QList<Wells::Well *>();
   for (int well_nr = 0; well_nr < settings.model()->wells().size(); ++well_nr) {
@@ -49,12 +52,16 @@ Model::Model(Settings::Settings settings, Logger *logger) {
   }
 
   variable_container_->CheckVariableNameUniqueness();
+
+  constraint_handler_ = new ConstraintHandler(settings.optimizer(),
+                                              variable_container_, grid_);
+
   logger_ = logger;
   logger_->AddEntry(new Summary(this));
 }
 
 void Model::Finalize() {
-  if (current_case_->GetRealizationOFVMap().size() > 0) {
+  if (!current_case_->GetRealizationOFVMap().empty()) {
     realization_ofv_map_ = current_case_->GetRealizationOFVMap();
     ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
     ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;
@@ -64,9 +71,10 @@ void Model::Finalize() {
 }
 
 void Model::ApplyCase(Optimization::Case *c) {
+
   // Notify the logger to log previous case.
-  if (current_case_ != nullptr && current_case_->state.eval != Optimization::Case::CaseState::EvalStatus::E_PENDING) {
-    if (current_case_->GetRealizationOFVMap().size() > 0) {
+  if (current_case_ != nullptr && current_case_->state.eval != EvalStat::E_PENDING) {
+    if (!current_case_->GetRealizationOFVMap().empty()) {
       realization_ofv_map_ = current_case_->GetRealizationOFVMap();
       ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
       ensemble_ofv_st_dev_ = current_case_->GetEnsembleExpectedOfv().second;
@@ -108,7 +116,7 @@ void Model::ApplyCase(Optimization::Case *c) {
   bool wic_used = false;
   for (Wells::Well *w : *wells_) {
     w->Update();
-    if (w->trajectory()->GetDefinitionType() == Settings::Model::WellDefinitionType::WellSpline) {
+    if (w->trajectory()->GetDefinitionType() == WDefType::WellSpline) {
       cumulative_wic_time += w->GetTimeSpentInWIC();
       wic_used = true;
     }
@@ -234,13 +242,17 @@ map<string, vector<double>> Model::GetValues() {
 
 void Model::set_grid_path(const std::string &grid_path) {
   if (wic_->HasGrid(grid_path) == false) {
-    if (VERB_MOD >= 2) Printer::ext_info("Initializing new Grid: " + grid_path, "Model", "Model");
+    if (vp_.vMOD >= 2) {
+      ext_info("Initializing new Grid: " + grid_path, md_, cl_);
+    }
     grid_ = new Reservoir::Grid::ECLGrid(grid_path);
     wic_->AddGrid(grid_);
     wic_->SetGridActive(grid_);
   }
   else {
-    if (VERB_MOD >= 2) Printer::ext_info("Getting existing grid object from WIC: " + grid_path, "Model", "Model");
+    if (vp_.vMOD >= 2) {
+      ext_info("Getting existing grid object from WIC: " + grid_path, md_, cl_);
+    }
     grid_ = wic_->GetGrid(grid_path);
     wic_->SetGridActive(grid_);
   }
@@ -318,9 +330,9 @@ map<string, Loggable::WellDescription> Model::Summary::GetWellDescriptions() {
     }
 
     // Spline
-    if (model_->variables()->GetWellSplineVariables(well->name()).size() > 0) {
+    if (model_->variables()->GetWSplineVars(well->name()).size() > 0) {
       wdesc.def_type = "Spline";
-      for (auto prop : model_->variables()->GetWellSplineVariables(well->name())) {
+      for (auto prop : model_->variables()->GetWSplineVars(well->name())) {
         if (prop->propertyInfo().spline_end == Properties::Property::SplineEnd::Heel) {
           switch (prop->propertyInfo().coord) {
             case Properties::Property::Coordinate::x: wdesc.spline.heel_x = prop->value(); break;

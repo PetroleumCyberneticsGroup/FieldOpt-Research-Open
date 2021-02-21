@@ -3,7 +3,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -47,6 +47,9 @@ Simulator::Simulator(Settings::Settings *settings) {
   vp_ = settings_->global()->verbParams();
   paths_ = settings_->paths();
 
+  results_ = nullptr;
+  model_ = nullptr;
+
   if (!paths_.IsSet(Paths::ENSEMBLE_FILE)) { // single realization
     driver_file_name_ = FileNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
     driver_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::SIM_DRIVER_FILE));
@@ -89,10 +92,14 @@ void Simulator::PreSimWork() {
 
   if (settings_->simulator()->use_pre_sim_script()) {
 
-    ext_info("Executing presim script", md_, cl_, vp_.lnw);
+    if (vp_.vSIM >= 1) {
+      ext_info("Executing presim script", md_, cl_, vp_.lnw);
+    }
     sim_wrk_dir_ = GetAbsoluteFilePath(paths_.GetPathQstr(Paths::SIM_WORK_DIR));
     QString presim_script = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_PRESIM.sh";
     QStringList pre_sim_args = *settings_->simulator()->pre_sim_args();
+    pre_sim_args.append(settings_->simulator()->use_actionx_str());
+    pre_sim_args.append(settings_->simulator()->file_structure_str());
     pre_sim_args.prepend(sim_wrk_dir_);
 
     if (vp_.vSIM >= 3) {
@@ -102,7 +109,8 @@ void Simulator::PreSimWork() {
       }
     }
 
-    if (settings_->simulator()->use_pre_sim_script() && FileExists(presim_script, vp_, md_, cl_)) {
+    if (settings_->simulator()->use_pre_sim_script()
+    && FileExists(presim_script, vp_, md_, cl_)) {
       ExecShellScript(presim_script, pre_sim_args, vp_);
     } else { ext_warn("Presim script not found."); }
 
@@ -114,7 +122,9 @@ void Simulator::PostSimWork() {
 
   if (settings_->simulator()->use_post_sim_script()) {
 
-    ext_info("Executing postsim script", md_, cl_, vp_.lnw);
+    if (vp_.vSIM >= 1) {
+      ext_info("Executing postsim script", md_, cl_, vp_.lnw);
+    }
     QString expected_script_path = paths_.GetPathQstr(Paths::SIM_WORK_DIR) + "/FO_POSTSIM.sh";
     QStringList post_sim_args = *settings_->simulator()->post_sim_args();
     post_sim_args.prepend(sim_wrk_dir_);
@@ -150,13 +160,14 @@ void Simulator::PostSimWork() {
   }
 }
 
-::Simulation::Results::Results::EclAjdGData Simulator::ReadEclAdjG() {
-  QString data_root = FileNameQstr(paths_.GetPath(Paths::SIM_OUT_DRIVER_FILE));
-  string adjg_file = data_root.split(".DATA").first().toStdString() + ".GRD";
-
-  string tm = "Reading gradient from e300 file: " + adjg_file;
-  ext_info(tm, md_, cl_, vp_.lnw);
-}
+// Check if obsolete: Reading e300 gradients done by PostSimWork:
+//::Simulation::Results::Results::EclAjdGData Simulator::ReadEclAdjG() {
+//  QString data_root = FileNameQstr(paths_.GetPath(Paths::SIM_OUT_DRIVER_FILE));
+//  string adjg_file = data_root.split(".DATA").first().toStdString() + ".GRD";
+//
+//  string tm = "Reading gradient from e300 file: " + adjg_file;
+//  ext_info(tm, md_, cl_, vp_.lnw);
+//}
 
 void Simulator::updateResultsInModel() {
   model_->SetResult("Time", results_->GetValueVector(Results::Results::Property::Time));

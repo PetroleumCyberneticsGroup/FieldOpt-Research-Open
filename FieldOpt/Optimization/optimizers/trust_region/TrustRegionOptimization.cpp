@@ -1,23 +1,27 @@
-/*********************************************************************
- Created by thiagols on 26.11.18
- Copyright (C) 2018 Thiago Lima Silva<thiagolims@gmail.com>
- Modified 2018-2019 Mathias Bellout <mathias.bellout@ntnu.no>
+/***********************************************************
+Created by thiagols on 26.11.18
+Copyright (C) 2018
+Thiago Lima Silva <thiagolims@gmail.com>
 
- This file is part of the FieldOpt project.
+Modified 2018-2019 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published
- by the Free Software Foundation, either version 3 of the License,
- or (at your option) any later version.
+This file is part of the FieldOpt project.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt. If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <Utilities/verbosity.h>
 #include "Utilities/printer.hpp"
@@ -536,66 +540,72 @@ void TrustRegionOptimization::computeInitialPoints() {
 
 void TrustRegionOptimization::setLowerUpperBounds() {
 
-  if (constraint_handler_->HasBoundaryConstraints()) {
+  lb_.conservativeResize(base_case_->GetRealVarIdVector().size());
+  ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
 
-    // Use constraint_handler lower/upper bounds
-    lb_ = constraint_handler_->GetLowerBounds(
+  if (constraint_handler_ != nullptr) { // All actual cases
+
+    if (constraint_handler_->HasBoundaryConstraints()) {
+      // Use constraint_handler lower/upper bounds
+      lb_ = constraint_handler_->GetLowerBounds(
         base_case_->GetRealVarIdVector());
-    ub_ = constraint_handler_->GetUpperBounds(
+      ub_ = constraint_handler_->GetUpperBounds(
         base_case_->GetRealVarIdVector());
-
-  } else {
-
-    // Use lower/upper bounds specified in tr-params
-    if (settings_->parameters().tr_lower_bound
-        && settings_->parameters().tr_upper_bound) {
-
-      lb_.conservativeResize(base_case_->GetRealVarIdVector().size());
-      ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
-      lb_.fill(settings_->parameters().tr_lower_bound);
-      ub_.fill(settings_->parameters().tr_upper_bound);
-
-      // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
-      // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
 
     } else {
+      // Use lower/upper bounds specified in tr-params
+      if (settings_->parameters().tr_lower_bound > 0
+        && settings_->parameters().tr_upper_bound > 0) {
+        lb_.fill(settings_->parameters().tr_lower_bound);
+        ub_.fill(settings_->parameters().tr_upper_bound);
 
-      // Printer::ext_warn(
-      //     "Lower/upper bounds for DF-TR algorithm not specified.",
-      //     "Optimization", "TrustRegionOptimization");
-      // throw std::runtime_error(
-      //    "Lower/upper bounds for DF-TR algorithm not specified.");
+        // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
+        // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
 
+      } else {
+        wm_ = "Lower/upper bounds for DF-TR algorithm not specified.";
+        ext_warn(wm_, md_, cl_, vp_.lnw);
+        throw std::runtime_error(wm_);
+      }
     }
+
+  } else { // constraint_handler_ == nullptr in unit tests
+    lb_.fill(settings_->parameters().tr_lower_bound);
+    ub_.fill(settings_->parameters().tr_upper_bound);
   }
 }
 
 bool TrustRegionOptimization::ensureImprovementPostProcessing(){
-  auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
-  auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
+  //<improve model>
+  auto improvement_cases = tr_model_->getImprovementCases();
+  //<replace point>
+  auto replacement_cases = tr_model_->getReplacementCases();
 
-  if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
+  if (tr_model_->isImprovementNeeded() && improvement_cases.empty() == 0) {
     case_handler_->AddNewCases(improvement_cases);
     return true;
   }
 
-  if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
+  if (tr_model_->isReplacementNeeded() && replacement_cases.empty() == 0) {
     case_handler_->AddNewCases(replacement_cases);
     return true;
   }
 
   if (criticality_step_execution_ongoing_) {
-    // Printer::ext_warn(
-    //      "criticality step did not generate a case.",
-    //      "ensureImprovementPostProcessing", "TrustRegionOptimization");
+    if (vp_.vOPT > 1) {
+      wm_ = "Criticality step did not generate a case.";
+      string fn = "ensureImprovementPostProcessing()";
+      ext_warn(wm_,md_ + fn, cl_, vp_.lnw);
+    }
   }
 
-  if ((improvement_cases.size() == 0)
-      && (replacement_cases.size() == 0)
+  if ((improvement_cases.empty())
+      && (replacement_cases.empty())
       && !criticality_step_execution_ongoing_) {
     updateRadius();
     return false;
   }
+  return false;
 }
 
 Optimization::Optimizer::TerminationCondition

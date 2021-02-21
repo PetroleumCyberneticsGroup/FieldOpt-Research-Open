@@ -3,7 +3,7 @@ Copyright (C) 2015-2020
 Brage S. Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 

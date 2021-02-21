@@ -1,26 +1,24 @@
 /***********************************************************
- Copyright (C) 2017
- Mathias C. Bellout <mathias.bellout@ntnu.no>
+Created by bellout on 5/6/18.
 
- Created by bellout on 5/6/18.
+Copyright (C) 2018-2021 Mathias Bellout
+<mathias.bellout@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it
- and/or modify it under the terms of the GNU General
- Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at
- your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be
- useful, but WITHOUT ANY WARRANTY; without even the
- implied warranty of MERCHANTABILITY or FITNESS FOR
- A PARTICULAR PURPOSE.  See the GNU General Public
- License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the GNU
- General Public License along with FieldOpt.
- If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 // ---------------------------------------------------------
@@ -47,7 +45,8 @@ class wicalc_rixx
 {
  public:
   // -------------------------------------------------------
-  wicalc_rixx(Grid::Grid *grid = nullptr,
+  wicalc_rixx(Settings::Model::Well well_settings,
+              Grid::Grid *grid = nullptr,
               RICaseData *ricasedata = nullptr);
 
   // -------------------------------------------------------
@@ -124,6 +123,18 @@ class wicalc_rixx
   map<string, cvf::ref<RICaseData>> dict_casedata_;
   map<string, Grid::Grid*> dict_grids_;
   map<string, vector<double>> dict_intersections_;
+
+  Settings::Settings settings_;
+
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string im_ = "", wm_ = "", em_ = "";
+  Settings::VerbParams vp_;
+  string md_ = "s1_rix-wic";
+  string cl_ = "wicalc_rixw";
 
 };
 

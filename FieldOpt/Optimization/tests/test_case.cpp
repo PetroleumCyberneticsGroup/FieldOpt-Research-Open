@@ -35,8 +35,6 @@ class CaseTest : public ::testing::Test, public TestResources::TestResourceCases
  protected:
   virtual void TearDown() { }
   virtual void SetUp() { }
-
-
 };
 
 TEST_F(CaseTest, Constructor) {

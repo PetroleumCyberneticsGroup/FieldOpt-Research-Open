@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -46,12 +46,11 @@ ScheduleInsets::ScheduleInsets(const std::string &inset_file_path,
 }
 
 bool ScheduleInsets::HasInset(const int &time) const {
-    if (insets_.count(time) > 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
+  if (insets_.count(time) > 0) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 std::string ScheduleInsets::GetInset(const int &time) const {
@@ -60,6 +59,10 @@ std::string ScheduleInsets::GetInset(const int &time) const {
   } else {
     return "";
   }
+}
+
+QString ScheduleInsets::GetInsetQStr(const int &time) const {
+  return QString::fromStdString(GetInset(time));
 }
 
 std::pair<int, std::string> ScheduleInsets::parseNextInset(std::deque<std::string> &lines) const {

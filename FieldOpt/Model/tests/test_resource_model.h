@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -40,7 +40,7 @@ class TestResourceModel : public TestResourceSettings,
   TestResourceModel() {
     settings_full_->paths().SetPath(Paths::GRID_FILE,
                                     ExampleFilePaths::grid_5spot_);
-    model_ = new Model::Model(*settings_full_,logger_);
+    model_ = new Model::Model(*settings_full_, logger_);
     model_en_5spot_ = new Model::Model(*settings_en_5spot_full_,
                                        logger_);
   }

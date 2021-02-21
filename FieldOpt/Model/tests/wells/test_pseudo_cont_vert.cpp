@@ -5,7 +5,7 @@ Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -31,7 +31,8 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace {
 
-class PseudoContVertTest : public ::testing::Test, public TestResources::TestResourceGrids {
+class PseudoContVertTest
+    : public ::testing::Test, public TestResources::TestResourceGrids {
 
  protected:
   PseudoContVertTest() {
@@ -45,7 +46,7 @@ TEST_F(PseudoContVertTest, ConstructorAndGetter) {
   Paths paths;
   auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_pseudocont_2_prods_var_pos_and_bhp(), paths, vp_);
   auto wsettings = settings.wells()[0];
-  auto varcont = new Model::Properties::VarPropContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::PseudoContVert(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_);
 
   auto block = well.GetWellBlock();

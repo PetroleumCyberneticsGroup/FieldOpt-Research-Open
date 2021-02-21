@@ -4,7 +4,7 @@ Einar J.M. Baumann <einar.baumann@gmail.com>
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -31,7 +31,12 @@ PolarSplineBoundary::PolarSplineBoundary(const Settings::Optimizer::Constraint &
                                          Model::Properties::VarPropContainer *variables,
                                          Reservoir::Grid::Grid *grid,
                                          Settings::VerbParams vp)
-                                         : ResBoundary(settings, variables, grid, vp){}
+                                         : ResBoundary(settings, variables, grid, vp){
+  if (vp.vOPT >= 1) {
+    info("Adding PolarSplineBoundary constraint for " + settings.well.toStdString());
+  }
+
+}
 
 bool PolarSplineBoundary::CaseSatisfiesConstraint(Case *c) {
   double midpoint_x_val = c->get_real_variable_value(affected_well_.midpoint.x);

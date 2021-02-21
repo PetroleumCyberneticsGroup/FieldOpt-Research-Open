@@ -28,7 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef PRINTER_FUNCTIONS_H
 #define PRINTER_FUNCTIONS_H
 
-//#include <QString>
+#include <QString>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -61,12 +61,18 @@ using std::left;
 using std::setprecision;
 using std::fixed;
 using std::setw;
+using std::runtime_error;
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::Map;
 
 namespace Printer {
+
+inline void E(string m, string md, string cl) {
+  m = "[mod: " + md + "] [cls: " + cl + "] " + m;
+  throw runtime_error(m);
+};
 
 inline void DBG_prntToFile(string fn, string sout, const string mod="a") {
   FILE * pFile;
@@ -76,8 +82,8 @@ inline void DBG_prntToFile(string fn, string sout, const string mod="a") {
 }
 
 inline string DBG_prntDbl(double argout,
-                              const string& fd="% 10.3e ",
-                              string fn="") {
+                          const string& fd="% 10.3e ",
+                          string fn="") {
   stringstream ss;
   char buffer [100];
   sprintf(buffer, fd.c_str(), argout);
@@ -87,8 +93,8 @@ inline string DBG_prntDbl(double argout,
 }
 
 inline string DBG_prntVecXd(VectorXd vec, const string& mv="",
-                                const string& fv="% 10.3e ",
-                                string fn="", int sz=0) {
+                            const string& fv="% 10.3e ",
+                            string fn="", int sz=0) {
   stringstream ss;
   if ( vec.size() > 0 ) {
     if (mv != "" && mv != ",") ss << mv;
@@ -116,7 +122,7 @@ inline string DBG_prntVecXdSz(VectorXd vec, const string& mv="",
 }
 
 inline string DBG_prntMatXd(MatrixXd mat, string mm="",
-                                string fm="% 10.3e ") {
+                            string fm="% 10.3e ") {
   stringstream ss;
   for (int ii = 0; ii < mat.cols(); ii++) {
     if (mm != "") ss << "\n" << mm << "#" << ii;
@@ -238,6 +244,11 @@ inline std::string num2str(const T num, int prc=2, int sci=0, int wdt=0) {
   return ss.str();
 }
 
+template<typename T>
+inline QString num2strQ(const T num, int prc=2, int sci=0, int wdt=0) {
+  return QString::fromStdString(num2str(num, prc, sci, wdt));
+}
+
 //template<typename T>
 //inline QString num2Qstr(const T num, int prc=2) {
 //  return QString::fromStdString(num2str(num, prc));
@@ -345,7 +356,8 @@ inline void ext_info(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
                      const int &lw=163,
-                     const int &lb=2) {
+                     const int &lb=2,
+                     const int &cl=0) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 30);
@@ -354,9 +366,17 @@ inline void ext_info(const std::string &text,
   pad_text(class_name, 30);
 
   auto lines = split_line(text, lw - lb);
-
   std::stringstream ss;
-  ss << FLGREEN;
+
+  if (cl==0) {
+    ss << FLGREEN;
+  } else if (cl==1) {
+    ss << FLRED;
+  } else if (cl==2) {
+    ss << FLBLUE;
+  } else if (cl==3) {
+    ss << FLMAGENTA;
+  }
 
   // auto width = floor(lw * 25/60);
   auto width = floor((lw-31) * 1/2) + 1;
@@ -394,7 +414,8 @@ Example:
 inline void ext_warn(const std::string &text,
                      const std::string &modulen="",
                      const std::string &classn="",
-                     const int &lw=163) {
+                     const int &lw=163,
+                     const int &cl=0) {
   std::string module_name = modulen;
   std::string class_name = classn;
   truncate_text(module_name, 30);
@@ -404,14 +425,30 @@ inline void ext_warn(const std::string &text,
 
   auto lines = split_line(text, lw - 2);
   std::stringstream ss;
-  ss << FLYELLOW;
+
+  if (cl==0) {
+    ss << FLYELLOW;
+  } else if (cl==1) {
+    ss << FLRED;
+  } else if (cl==2) {
+    ss << FLBLUE;
+  } else if (cl==3) {
+    ss << FLMAGENTA;
+  }
 
   // auto width = floor(lw * 25/60);
   auto width = floor((lw-31) * 1/2) + 1;
   BoxSym bS = bSym(lw);
   ss << bS.ulnl;
   pad_text(module_name, width);
-  pad_text(class_name, width+1);
+  if (lw == 163) {
+    pad_text(class_name, width);
+  } else if (lw == 144) {
+    pad_text(class_name, width+1);
+  } else {
+    pad_text(class_name, width+1);
+  }
+
   ss << "│ ■ WARN │ Module: " << module_name << " │ Class: " << class_name << " │" << "\n"; // #chars: 31
   for (auto line : lines) {
     pad_text(line, lw - 2);

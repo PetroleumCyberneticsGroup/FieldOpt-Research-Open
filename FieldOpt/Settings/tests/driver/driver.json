@@ -3,7 +3,7 @@
     "Name": "TestRun",
     "BookkeeperTolerance": 0.0,
     "VerbConf": {
-      "iBoxLineWidth": 140,
+      "iBoxLineWidth": 163,
       "Model": 1,
       "Optim": 1,
       "WICal": 1,

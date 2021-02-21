@@ -49,9 +49,10 @@ class ICD : public SegmentedCompletion {
    * It should applied using the INVERSE_SQUARE method.
    * It is calculated from the current- and min- and max valve size.
    */
-  double setting() const;
+  double setting();
   double valveSize() const { return valve_size_->value(); }
   double flowCoefficient() const { return flow_coefficient_; }
+  double length() const { return length_; }
   int timeStep() const { return time_step_; }
   int segmentIdx() const { return segment_idx_; }
   std::string deviceName() const { return device_name_; }
@@ -66,11 +67,16 @@ class ICD : public SegmentedCompletion {
   Properties::ContinuousProperty *valve_size_;
   double min_valve_size_, max_valve_size_;
   double flow_coefficient_;
+  double length_ = -1.0;
   int time_step_;
   int segment_idx_;
+
   std::string device_name_;
   std::vector<std::string> device_names_; //!< Used if this ICD objects represents multiple ICVs in the simulation.
   std::vector<int> segment_idxs_; //!< Used if this ICD objects represents multiple ICVs in the simulation.
+
+  string md_ = "Model::Wells::Wellbore::Completions";
+  string cl_ = "ICD";
 
 };
 

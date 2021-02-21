@@ -3,7 +3,7 @@ Copyright (C) 2016-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -32,92 +32,145 @@ namespace Constraints {
 
 using namespace Model::Properties;
 
-WellSplineConstraint::Well
-WellSplineConstraint::initializeWell(QList<Model::Properties::ContinuousProperty *> vars) {
+// using Printer::ext_info;
+// using Printer::ext_warn;
+
+WellSplineConstraint::Well WellSplineConstraint::
+initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
+                      Settings::VerbParams vp) {
+  xvp_ = vp;
+
   Well well;
-  if (vars.length() >= 6 && (vars.length() % 3) == 0 && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
-    if (VERB_OPT >= 2) Printer::ext_info("Using heel-toe parameterization for well spline constraint", "Optimization", "WellSplineConstraint");
+  if ((vars.length() >= 6)
+    && (vars.length() % 3) == 0
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+
+    if (xvp_.vOPT >= 3) {
+      xim_ = "Using heel-toe parameterization for well spline constraint";
+      ext_info(xim_, xmd_, xcl_, xvp_.lnw);
+    }
+
     for (auto var : vars) {
       if (var->propertyInfo().spline_end == Property::SplineEnd::Heel) {
-        if (var->propertyInfo().coord == Property::Coordinate::x)
+
+        if (var->propertyInfo().coord == Property::Coordinate::x) {
           well.heel.x = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::y)
+        } else if (var->propertyInfo().coord == Property::Coordinate::y) {
           well.heel.y = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::z)
+        } else if (var->propertyInfo().coord == Property::Coordinate::z) {
           well.heel.z = var->id();
-        else throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+        } else {
+          xem_ = "Unable to parse variable " + var->name().toStdString();
+          throw std::runtime_error(xem_);
+        }
+
       } else if (var->propertyInfo().spline_end == Property::SplineEnd::Toe) {
-        if (var->propertyInfo().coord == Property::Coordinate::x)
+
+        if (var->propertyInfo().coord == Property::Coordinate::x) {
           well.toe.x = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::y)
+        } else if (var->propertyInfo().coord == Property::Coordinate::y) {
           well.toe.y = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::z)
+        } else if (var->propertyInfo().coord == Property::Coordinate::z) {
           well.toe.z = var->id();
-        else throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
-      } else throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
+        } else {
+          xem_ = "Unable to parse variable " + var->name().toStdString();
+          throw std::runtime_error(xem_);
+        }
+
+      } else {
+        xem_ = "Unable to parse variable " + var->name().toStdString();
+        throw std::runtime_error(xem_);
+      }
     }
-    if (vars.length() > 6 && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) { // Adding additional points
-      if (VERB_OPT >= 2) Printer::ext_info("Using multi-point parameterization for well spline constraint", "Optimization", "WellSplineConstraint");
+
+    // Adding additional points
+    if ((vars.length() > 6)
+      && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+      if (xvp_.vOPT >= 3) {
+        xim_ = "Using multi-point parameterization for well spline constraint";
+        ext_info(xim_, xmd_, xcl_, xvp_.lnw);
+      }
+
       std::map<int, Coord> addtl_points;
       for (auto var : vars) {
-        // use hash/map when creating the ponts (it will autosort them alphabeticaly, which is what we want)
+        // use hash/map when creating the ponts (it will autosort them alphabeticaly,
+        // which is what we want)
         if (var->propertyInfo().spline_end == Property::SplineEnd::Middle) {
-          if (var->propertyInfo().coord == Property::Coordinate::x)
+          if (var->propertyInfo().coord == Property::Coordinate::x) {
             addtl_points[var->propertyInfo().index].x = var->id();
-          else if (var->propertyInfo().coord == Property::Coordinate::y)
+          } else if (var->propertyInfo().coord == Property::Coordinate::y) {
             addtl_points[var->propertyInfo().index].y = var->id();
-          else if (var->propertyInfo().coord == Property::Coordinate::z)
+          } else if (var->propertyInfo().coord == Property::Coordinate::z) {
             addtl_points[var->propertyInfo().index].z = var->id();
+          }
         }
       }
+
       for (int i = 0; i < addtl_points.size(); ++i) {
         well.additional_points.push_back(addtl_points[i+1]);
       }
     }
-  } else if (vars.length() == 3 && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
+
+  } else if ((vars.length() == 3)
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::SplinePoint) {
     for (auto var : vars) {
-      if (var->propertyInfo().coord == Property::Coordinate::x)
+      if (var->propertyInfo().coord == Property::Coordinate::x) {
         well.toe.x = var->id();
-      else if (var->propertyInfo().coord == Property::Coordinate::y)
+      } else if (var->propertyInfo().coord == Property::Coordinate::y) {
         well.toe.y = var->id();
-      else if (var->propertyInfo().coord == Property::Coordinate::z)
+      } else if (var->propertyInfo().coord == Property::Coordinate::z) {
         well.toe.z = var->id();
-      else throw std::runtime_error("Unable to parse variable " + var->name().toStdString());
-    }
-  }
-  else if (vars.length() > 0 && vars[0]->propertyInfo().prop_type == Property::PropertyType::PolarSpline) {
-    if (VERB_OPT >= 2) Printer::ext_info("Using PolarSpline parameterization for well spline constraint", "Optimization", "WellSplineConstraint");
-    for (auto var : vars) {
-      if (var->propertyInfo().polar_prop == Property::PolarProp::Midpoint) {
-        if (var->propertyInfo().coord == Property::Coordinate::x)
-          well.midpoint.x = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::y)
-          well.midpoint.y = var->id();
-        else if (var->propertyInfo().coord == Property::Coordinate::z)
-          well.midpoint.z = var->id();
+      } else {
+        xem_ = "Unable to parse variable " + var->name().toStdString();
+        throw std::runtime_error(xem_);
       }
     }
-  }
-  else {
-    throw std::runtime_error("Incorrect number of variables (" + boost::lexical_cast<std::string>(vars.length())
-                               + ")passed to the initialize well method.");
+
+  } else if ((vars.length() > 0)
+    && vars[0]->propertyInfo().prop_type == Property::PropertyType::PolarSpline) {
+    if (xvp_.vOPT >= 2) {
+      xim_ = "Using PolarSpline parameterization for well spline constraint";
+      ext_info(xim_, xmd_, xcl_, xvp_.lnw);
+    }
+    for (auto var : vars) {
+      if (var->propertyInfo().polar_prop == Property::PolarProp::Midpoint) {
+        if (var->propertyInfo().coord == Property::Coordinate::x) {
+          well.midpoint.x = var->id();
+        } else if (var->propertyInfo().coord == Property::Coordinate::y) {
+          well.midpoint.y = var->id();
+        } else if (var->propertyInfo().coord == Property::Coordinate::z) {
+          well.midpoint.z = var->id();
+        }
+      }
+    }
+
+  } else {
+    xem_  = "Incorrect number of variables (" + num2str(vars.length());
+    xem_ += ") passed to the initialize well method.";
+    throw std::runtime_error(xem_);
   }
   return well;
 }
 
-QPair<Eigen::Vector3d, Eigen::Vector3d> WellSplineConstraint::GetEndpointValueVectors(Case *c, Well well) {
+QPair<Eigen::Vector3d, Eigen::Vector3d>
+WellSplineConstraint::GetEndpointValueVectors(Case *c,
+                                              Well well) {
   double hx = c->get_real_variable_value(well.heel.x);
   double hy = c->get_real_variable_value(well.heel.y);
   double hz = c->get_real_variable_value(well.heel.z);
   double tx = c->get_real_variable_value(well.toe.x);
   double ty = c->get_real_variable_value(well.toe.y);
   double tz = c->get_real_variable_value(well.toe.z);
+
   Eigen::Vector3d heel(hx, hy, hz);
   Eigen::Vector3d toe(tx, ty, tz);
   return qMakePair(heel, toe);
 }
 
-std::vector<Eigen::Vector3d> WellSplineConstraint::GetPointValueVectors(Case *c, WellSplineConstraint::Well well) {
+std::vector<Eigen::Vector3d>
+WellSplineConstraint::GetPointValueVectors(Case *c,
+                                           WellSplineConstraint::Well well) {
+
   std::vector<Eigen::Vector3d> points;
   auto endpoints = GetEndpointValueVectors(c, well);
   points.push_back(endpoints.first);
@@ -134,7 +187,8 @@ std::vector<Eigen::Vector3d> WellSplineConstraint::GetPointValueVectors(Case *c,
   return points;
 }
 
-double WellSplineConstraint::GetWellLength(Case *c, WellSplineConstraint::Well well) {
+double WellSplineConstraint::GetWellLength(Case *c,
+                                           WellSplineConstraint::Well well) {
   double length = 0.0;
   auto points = GetPointValueVectors(c, well);
   for (int i = 0; i < points.size() - 1; ++i) {

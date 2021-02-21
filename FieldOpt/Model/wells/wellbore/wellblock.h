@@ -3,7 +3,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -33,6 +33,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Wells {
 namespace Wellbore {
+
+using Printer::num2str;
 
 /*!
  * \brief The WellBlock class represents a single well block.
@@ -95,13 +97,36 @@ class WellBlock
 
   void setEntryPoint(const Eigen::Vector3d& entry_point) { entry_point_ = entry_point; }
   void setExitPoint(const Eigen::Vector3d& exit_point) { exit_point_ = exit_point; }
+
   Eigen::Vector3d getEntryPoint() const { return entry_point_; }
   Eigen::Vector3d getExitPoint() const { return exit_point_; }
 
   void setEntryMd(const double entry_md) { entry_md_ = entry_md; }
   void setExitMd(const double exit_md) { exit_md_ = exit_md; }
+  void setLength(const double length) { length_ = length; }
+  void setDxDyDz(const Eigen::VectorXd dxdydz) { dxdydz_ = dxdydz; }
+
   double getEntryMd() const { return entry_md_; }
   double getExitMd() const { return exit_md_; }
+  double getLength() const { return length_; }
+
+  double getDepthChange() const { return exit_point_[2] - entry_point_[2]; }
+  double getDepth() const { return entry_point_[2] + (exit_point_[2] - entry_point_[2])/2; }
+  Eigen::VectorXd getDxDyDz() { return dxdydz_; }
+
+  string getPropString(double md=0) {
+    stringstream ss;
+    if (md > 0) {
+      ss << "md:[" << num2str(md, 3, 1, 7)  << "] -- ";
+    }
+    ss << "block:[";
+    ss << num2str(this->i(), 0, 0, 4) + ",";
+    ss << num2str(this->j(), 0, 0, 4) + ",";
+    ss << num2str(this->k(), 0, 0, 4) + "] ";
+    ss << "entry_md:[" << num2str(this->entry_md_, 3, 1, 7)  << "] ";
+    ss << "exit_md:[" << num2str(this->exit_md_, 3, 1, 7)  << "] ";
+    return ss.str();
+  }
 
  private:
   Model::Properties::DiscreteProperty *i_;
@@ -110,9 +135,13 @@ class WellBlock
 
   Eigen::Vector3d entry_point_; //!< Entry point for splines through this block.
   Eigen::Vector3d exit_point_;  //!< Exit point for splines through this block.
+
   double entry_md_;
   double exit_md_;
+  double length_;
   Completions::Completion *completion_;
+
+  Eigen::VectorXd dxdydz_;
 
   //!< Well's direction of penetration through block.
   DirOfPenetration dir_of_penetration_;

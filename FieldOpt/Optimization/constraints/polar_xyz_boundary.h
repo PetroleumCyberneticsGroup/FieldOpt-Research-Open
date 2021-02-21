@@ -4,7 +4,7 @@ Copyright (C) 2018
 Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
 Modified 2020-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -33,14 +33,17 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * @brief This class implements the box-constraint with the PolarSpline well definition.
- * The purpose is to contain the midpoint within the specified box.
- *
- * Note: Works well with the 3d box intersection generator found in ResInsight
- * @ ResInsight.org
- */
+* @brief This class implements the box-constraint with the
+* PolarSpline well definition. The purpose is to contain
+* the midpoint within the specified box.
+*
+* Note: Works well with the 3d box intersection generator
+* found in ResInsight @ ResInsight.org
+*/
 
-class PolarXYZBoundary : public Constraint, WellSplineConstraint {
+class PolarXYZBoundary : public Constraint, WellSplineConstraint
+  {
+
  public:
   PolarXYZBoundary(const Settings::Optimizer::Constraint &settings,
                    Model::Properties::VarPropContainer *variables,
@@ -51,17 +54,23 @@ class PolarXYZBoundary : public Constraint, WellSplineConstraint {
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
   bool IsBoundConstraint() const override { return true; }
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
  protected:
-  double xmin_, xmax_, ymin_, ymax_, zmin_, zmax_; //!< Constraint limits for the box
-  QList<int> index_list_; //!< Index list for the cells in the reservoir that are within the box
-  Reservoir::Grid::Grid *grid_; //!< Grid, as defined in Reservoir/grid.h
-  Well affected_well_; //!< The affected well
+  //!< Constraint limits for the box
+  double xmin_, xmax_, ymin_, ymax_, zmin_, zmax_;
+
+  //!< Index list for cells in the reservoir that are within the box
+  QList<int> index_list_;
+
+  //!< Grid, as defined in Reservoir/grid.h
+  Reservoir::Grid::Grid *grid_;
+
+  Well affected_well_; //!< Affected well
 
 };
 }

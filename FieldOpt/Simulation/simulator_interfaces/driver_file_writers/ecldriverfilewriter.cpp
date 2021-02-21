@@ -4,7 +4,7 @@ Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2020 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
@@ -49,16 +49,19 @@ EclDriverFileWriter::EclDriverFileWriter(Settings::Settings *settings,
   use_actionx_ = settings->simulator()->use_actionx();
 
   if (settings->paths().IsSet(Paths::SIM_SCH_INSET_FILE)) {
-    insets_ = ECLDriverParts::ScheduleInsets(settings->paths().GetPath(Paths::SIM_SCH_INSET_FILE), vp_);
+    auto sched = settings->paths().GetPath(Paths::SIM_SCH_INSET_FILE);
+    insets_ = ECLDriverParts::ScheduleInsets(sched, vp_);
   }
 }
 
-void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
-  if (VERB_SIM >= 2) {
-    auto fp = schedule_file_path.toStdString();
-    Printer::ext_info("Writing driver file to " + fp + ".", "Simulation", "EclDriverFileWriter");
+void EclDriverFileWriter::WriteDriverFile(const QString& sched_file_path) {
+  string sched_file = sched_file_path.toStdString();
+
+  if (vp_.vSIM >= 2) {
+    im_ = "Writing sched file: " + sched_file + ".";
+    ext_info(im_, md_, cl_);
   }
-  assert(FileExists(schedule_file_path, vp_, md_, cl_));
+  assert(FileExists(sched_file_path, vp_, md_, cl_));
 
   if (!use_actionx_) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
@@ -66,14 +69,17 @@ void EclDriverFileWriter::WriteDriverFile(QString schedule_file_path) {
                                                  settings_->model()->start_date(),
                                                  insets_,
                                                  settings_);
+
     model_->SetCompdatString(schedule.GetPartString());
-    Utilities::FileHandling::WriteStringToFile(schedule.GetPartString(), schedule_file_path);
+    Utilities::FileHandling::WriteStringToFile(schedule.GetPartString(),
+                                               sched_file);
+
+  } else {
+    Utilities::FileHandling::WriteStringToFile(buildActionStrings(),
+                                               sched_file);
   }
-  else {
-    Utilities::FileHandling::WriteStringToFile(QString::fromStdString(buildActionStrings()), schedule_file_path);
-  }
-  if (VERB_SIM >= 2) {
-    Printer::ext_info("Wrote driver string to" + schedule_file_path.toStdString(), "Simulation", "EclDriverFileWriter");
+  if (vp_.vSIM >= 2) {
+    ext_info("Wrote driver string to" + sched_file, md_, cl_);
   }
 }
 
@@ -86,6 +92,7 @@ std::string EclDriverFileWriter::buildActionStrings() {
   std::string icv_actions;
   std::string ctrl_actions;
 
+  // wsegvalv string
   for (auto well : *model_->wells()) {
     if (well->HasSimpleICVs()) {
       auto wsegv = ECLDriverParts::Wsegvalv(well);
@@ -93,6 +100,14 @@ std::string EclDriverFileWriter::buildActionStrings() {
     }
   }
 
+  // start main action string for SimpleICVs
+  actions += ActionX::ACTIONX("ICVS_T0",
+                              ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
+                              ECLDriverParts::ActionX::ACTX_Operator::GE,
+                              0,
+                              icv_actions);
+
+  // cntrl string
   if (model_->wells()->first()->controls()->size() > 0) {
     Schedule schedule = ECLDriverParts::Schedule(model_->wells(),
                                                  settings_->model()->control_times(),
@@ -102,8 +117,11 @@ std::string EclDriverFileWriter::buildActionStrings() {
 
     auto schedule_time_entries = schedule.GetScheduleTimeEntries();
     for (auto entry : schedule_time_entries) {
+
+      // obsolete?
       int ctrl_time = 0;
       entry.control_time == 0 ? ctrl_time = 1 : ctrl_time = entry.control_time;
+
       for (QString entry_part : entry.well_controls.GetWellEntryList()) {
 
         ctrl_actions += ActionX::ACTIONX("CTR_" + num2str(entry.control_time, 0),
@@ -114,21 +132,15 @@ std::string EclDriverFileWriter::buildActionStrings() {
                                          ECLDriverParts::ActionX::ACTX_LHQuantity::Year,
                                          ECLDriverParts::ActionX::ACTX_Operator::EQ,
                                          entry.control_time_DMY,
-                                         entry_part.toStdString()
-        );
+                                         entry_part.toStdString());
         ctrl_actions += "\n";
       }
     }
 
-  } else if (vp_.vSIM >= 2) {
+  } else {
     ext_warn("First well did not have controls; assuming none do.", md_, cl_);
   }
 
-  actions += ActionX::ACTIONX("ICVS_T0",
-                              ECLDriverParts::ActionX::ACTX_LHQuantity::Day,
-                              ECLDriverParts::ActionX::ACTX_Operator::GE,
-                              0,
-                              icv_actions);
   actions += ctrl_actions;
   return actions;
 }
