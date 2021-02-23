@@ -143,8 +143,13 @@ void Drilling::runOptimization(int drilling_step) {
 
   runtime_settings_.value(drilling_step)->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
 
-  // warm-starting optimization
-  Runner::MainRunner* runner = new Runner::MainRunner(runtime_settings_.value(drilling_step), best_case_, mso_);
+  Runner::MainRunner* runner;
+  if (drilling_schedule_->isWarmStart().value(current_step_)) {
+    // warm-starting optimization
+    runner = new Runner::MainRunner(runtime_settings_.value(drilling_step), best_case_, mso_);
+  } else {
+    runner = new Runner::MainRunner(runtime_settings_.value(drilling_step));
+  }
 
   //   Configure the optimization with the drilling workflow settings.
   for (auto well: runner->getSettings()->model()->wells()) {

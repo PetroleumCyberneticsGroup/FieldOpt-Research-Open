@@ -37,6 +37,7 @@ DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::Variab
     is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
     is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
     is_model_updates_.insert(i, settings->drilling().drilling_schedule.is_model_updates.value(i));
+    is_warm_start_.insert(i, settings->drilling().drilling_schedule.is_warm_start.value(i));
   }
 
   assignDrillingPoints(settings->drilling().drilling_schedule.drilling_points);

@@ -207,6 +207,7 @@ class Model
       QMap<int, bool> is_variable_drilling_points;
       QMap<int, bool> is_variable_completions;
       QMap<int, bool> is_model_updates;
+      QMap<int, bool> is_warm_start;
     };
 
     DrillingSchedule drilling_schedule;

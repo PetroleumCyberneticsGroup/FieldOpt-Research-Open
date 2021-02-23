@@ -68,6 +68,7 @@ class DrillingSchedule {
   QMap<int, bool> isVariableDrillingPoints() { return is_variable_drilling_points_; }
   QMap<int, bool> isVariableCompletions() { return is_variable_completions_; }
   QMap<int, bool> isModelUpdates() { return is_model_updates_;}
+  QMap<int, bool> isWarmStart() { return is_warm_start_;}
 
  private:
   QList<int> drilling_steps_;
@@ -82,6 +83,7 @@ class DrillingSchedule {
   QMap<int, bool> is_variable_drilling_points_;      //!< Indexed by the drilling steps
   QMap<int, bool> is_variable_completions_;          //!< Indexed by the drilling steps
   QMap<int, bool> is_model_updates_;                 //!< Indexed by the drilling steps
+  QMap<int, bool> is_warm_start_;                    //!< Indexed by the drilling steps
 
   void printDrillingPoints();
 };

@@ -586,6 +586,10 @@ void Model::readDrilling(QJsonObject json_drilling) {
             drilling_schedule.model_types.insert(i, Drilling::DrillingSchedule::ModelType::Surrogate);
         }
 
+        if (json_drilling_step.contains("WarmStart")) {
+          drilling_schedule.is_warm_start.insert(i, json_drilling_step["WarmStart"].toBool());
+        }
+
         if (json_drilling_step.contains("Trigger")) {
           QJsonObject json_trigger = json_drilling_step["Trigger"].toObject();
 
