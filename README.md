@@ -4,7 +4,7 @@ for efficient prototyping and testing of optimization methodologies
 for problems involving large-scale numerical simulations.
 
 The FieldOpt framework serves as a multi-disciplinary knowledge
-repository of optimization and petroleum domain expertise.
+repository of optimization and domain expertise.
 Technology development is based on efficient knowledge
 retention and integration of project work and synergy
 through mining of implemented iterative procedures and
