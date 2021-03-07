@@ -183,6 +183,30 @@ inline void set_req_prop_int_array(std::vector<int> &prop, const QJsonObject &co
     }
 }
 
+/*!
+* @brief Set an optional double array property. Will return true if property is found, otherwise false.
+* @param prop The property that should have its value set.
+* @param container The JSON object that should contain the property.
+* @param prop_name The name of the property to find in the container.
+*/
+inline bool set_opt_prop_double_array(std::vector<double> &prop, const QJsonObject &container, const QString &prop_name) {
+  if (container.contains(prop_name) && container[prop_name].isArray() && container[prop_name].toArray()[0].isDouble()) {
+    for (auto elem : container[prop_name].toArray()) {
+      prop.push_back(elem.toDouble());
+    }
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+inline void set_req_prop_double_array(std::vector<double> &prop, const QJsonObject &container, const QString &prop_name) {
+  if (!set_opt_prop_double_array(prop, container, prop_name)) {
+    throw std::runtime_error("Required property " + prop_name.toStdString() + " not found.");
+  }
+}
+
 
 }
 

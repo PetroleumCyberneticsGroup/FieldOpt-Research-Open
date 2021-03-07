@@ -791,7 +791,14 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
             set_req_prop_string_array(comp.device_names, json_icv, "DeviceNames");
         }
 
-        set_req_prop_double(comp.valve_size, json_icv, "ValveSize");
+        if (set_opt_prop_double(comp.valve_size, json_icv, "ValveSize")) {
+          comp.valve_sizes.push_back(comp.valve_size);
+        }
+        else {
+          set_opt_prop_double_array(comp.valve_sizes, json_icv, "ValveSizes");
+          assert(comp.device_names.size() == comp.valve_sizes.size());
+        }
+
         set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize");
         set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize");
         set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient");
@@ -837,7 +844,9 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization, W
         set_req_prop_string(grp.icv_group_name, comp.toObject(), "CompName");
         set_req_prop_string_array(grp.icvs, comp.toObject(), "ICVs");
         grp.name = "ICD#" + well.name + "#" + QString::fromStdString(grp.icv_group_name);
+
         grp.valve_size = well.completions[0].valve_size;
+        grp.valve_sizes = well.completions[0].valve_sizes;
         grp.min_valve_size = well.completions[0].min_valve_size;
         grp.max_valve_size = well.completions[0].max_valve_size;
         grp.valve_flow_coeff = well.completions[0].valve_flow_coeff;

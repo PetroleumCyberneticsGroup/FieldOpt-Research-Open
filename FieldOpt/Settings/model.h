@@ -83,6 +83,7 @@ class Model
       std::string device_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
       std::vector<std::string> device_names; //< List of device names that have common settings.
       std::vector<int> segment_indexes; //!< List of segment indexes matching the device_names list.
+      std::vector<double> valve_sizes; //!< List of valve size for nozzle ICDs.
       double min_valve_size         = 0.0;    //!< Minimum valve size (needed for simulator input)
       double max_valve_size         = 7.854E-3; //!< Maximum valve size (needed for simulator input)
       bool is_variable               = false; //!< True if all viable properties are variable. Otherwise false.
