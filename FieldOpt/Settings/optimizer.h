@@ -56,7 +56,8 @@ class Optimizer
 
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
-    EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization
+    EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
+    DFTR
   };
 
   enum OptimizerMode { Maximize, Minimize };
@@ -125,12 +126,23 @@ class Optimizer
     //!< Defaults: 1/population.
     double discard_parameter;
 
-    double p_crossover;       //!< Crossover probability. Default: 0.1.
-    double decay_rate;        //!< Decay rate. Default: 4.0.
-    double mutation_strength; //!< Mutation strength. Default: 0.25.
-    double stagnation_limit;  //!< Stagnation limit. Default: 1e-10.
-    double lower_bound;       //!< Simple lower bound. This is applied to _all_ variables. Default: -10.0.
-    double upper_bound;       //!< Simple upper bound. This is applied to _all_ variables. Default: +10.0.
+    //!< Crossover probability. Default: 0.1.
+    double p_crossover;
+
+    //!< Decay rate. Default: 4.0.
+    double decay_rate;
+
+    //!< Mutation strength. Default: 0.25.
+    double mutation_strength;
+
+    //!< Stagnation limit. Default: 1e-10.
+    double stagnation_limit;
+
+    //!< Lower bound. Applied to _all_ variables. Default: -10.0.
+    double lower_bound;
+
+    //!< Upper bound. Applied to _all_ variables. Default: +10.0.
+    double upper_bound;
 
     // PSO parameters --------------------------------------
     //!< Learning factor (c1), from the swarms
@@ -163,34 +175,34 @@ class Optimizer
     std::string ego_af = "ExpectedImprovement";
 
     // Trust Region parameters -----------------------------
-    double tr_initial_radius = 1; //!< Initial trust region radius
+    double tr_init_rad = 1; //!< Initial TR radius
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
     double tr_eta_1 = 0.05;
-    double tr_pivot_threshold = 0.0625;
-    double tr_add_threshold = 100;
-    double tr_exchange_threshold = 1000;
+    double tr_pivot_thld = 0.0625;
+    double tr_add_thld = 100;
+    double tr_exch_thld = 1000;
     double tr_radius_max = 1e3;
-    double tr_radius_factor = 6;
+    double tr_radius_fac = 6;
     double tr_tol_radius = 1e-5;
     double tr_gamma_inc = 2;
     double tr_gamma_dec = 0.5;
-    double tr_criticality_mu = 100;
-    double tr_criticality_omega = 0.5;
-    double tr_criticality_beta = 10;
-    double tr_lower_bound = -std::numeric_limits<double>::infinity();
-    double tr_upper_bound = std::numeric_limits<double>::infinity();
-    std::string tr_prob_name = "prob0";
+    double tr_crit_mu = 100;
+    double tr_crit_omega = 0.5;
+    double tr_crit_beta = 10;
+    double tr_lower_bnd = -std::numeric_limits<double>::infinity();
+    double tr_upper_bnd = std::numeric_limits<double>::infinity();
 
+    //!< # initial guesses provided to build the TR (def.=1)
+    int tr_num_init_x = -1;
     int tr_iter_max = 10000;
 
-    //!< Number of initial guesses provided to build the Trust Region (default is 1)
-    int tr_init_guesses = -1;
     std::string tr_basis = "diagonalHessian";
+    std::string tr_prob_name = "prob0"; // dbg
 
-    //!< Sampling method to be used for initial guesses (Random or Uniform)
-    std::string tr_init_sampling_method = "Random";
+    //!< Sampling method for initial guesses (Random or Uniform)
+    std::string tr_init_smpln = "Random";
 
     // VFSA Parameters -------------------------------------
     //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
