@@ -66,11 +66,11 @@ class WellControls : public ECLDriverPart
    */
   WellControls(const QList<Model::Wells::Well *> *wells,
                const QList<double> &control_times,
-               const int &timestep);
+               const double &timestep);
 
-  WellControls(){}
+  WellControls()= default;
 
-  virtual QString GetPartString() const;
+  QString GetPartString() const override;
 
   /*!
    * Get list of well entries for this specific time step.
@@ -86,7 +86,7 @@ class WellControls : public ECLDriverPart
    * GetPartString to call the getTimestepPartString() method
    * instead of using its old mode of operation.
    */
-  bool specific_timestep_;
+  bool specific_timestep_{};
 
   /*!
    * Get the part string when this instance only specifies
@@ -99,7 +99,7 @@ class WellControls : public ECLDriverPart
    * argument. Returns -1 if the one provided is the last
    * timestep.
    */
-  int nextTimestep(const int &timestep,
+  double nextTimestep(const double &timestep,
                    const QList<double> &control_times) const;
 
   /*!
@@ -110,9 +110,14 @@ class WellControls : public ECLDriverPart
     WellSetting(const QString &well_name,
                 const bool &is_injector,
                 const Model::Wells::Control &control);
-    QString well_name; //!< Name of the well this setting belongs to.
-    bool is_injector; //!< True if this setting is for an injector, otherwise false.
-    Model::Wells::Control control; //!< The control entry for this setting.
+
+    QString well_name; //!< Name of well for this setting.
+
+    //!< True if  setting is for injector, otherwise false.
+    bool is_injector;
+
+    //!< Control entry for setting.
+    Model::Wells::Control control;
   };
 
   /*!
@@ -121,20 +126,20 @@ class WellControls : public ECLDriverPart
    * for that time.
    */
   struct TimeEntry {
-    int time;
+    double time;
     bool has_well_setting = false;
     QList<WellSetting> well_settings;
     double tstep_refinement;
   };
 
-  QMap<int, TimeEntry> time_entries_;
+  QMap<double, TimeEntry> time_entries_;
 
   void initializeTimeEntries(const QList<Model::Wells::Well *> *wells,
                              const QList<double> &control_times);
 
   void initializeTimeEntries(const QList<Model::Wells::Well *> *wells,
                              const QList<double> &control_times,
-                             const int &timestep);
+                             const double &timestep);
 
   /*!
    * \brief createTimeEntry Creates a string on the form

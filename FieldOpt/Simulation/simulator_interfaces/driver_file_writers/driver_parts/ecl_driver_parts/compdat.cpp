@@ -42,12 +42,12 @@ Compdat::Compdat(QList<Model::Wells::Well *> *wells) {
   }
 }
 
-Compdat::Compdat(QList<Model::Wells::Well *> *wells, int timestep) {
+Compdat::Compdat(QList<Model::Wells::Well *> *wells, double timestep) {
   initializeBaseEntryLine(13);
   head_ = "COMPDAT";
   foot_ = "/\n\n";
   for (auto well : *wells) {
-    if (well->controls()->first()->time_step() == timestep) {
+    if (well->controls()->first()->tstep()->EqualsValue(timestep)) {
       entries_.append(createWellEntries(well));
     }
   }
@@ -55,7 +55,7 @@ Compdat::Compdat(QList<Model::Wells::Well *> *wells, int timestep) {
 
 QString Compdat::GetPartString() const {
   // Return empty string if there are no entries (at this timestep)
-  if (entries_.size() == 0) {
+  if (entries_.empty()) {
     return "";
   }
 

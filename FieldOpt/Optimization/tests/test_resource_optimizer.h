@@ -108,6 +108,10 @@ class TestResourceOptimizer :
     settings_tr_opt_max_ =
       new Settings::Optimizer(
         get_json_settings_tr_opt_maximize_, vp_);
+
+    settings_dftr_max_ =
+      new Settings::Optimizer(
+        get_json_settings_dftr_max_, vp_);
   }
 
   Optimization::Case *base_case_;
@@ -125,6 +129,7 @@ class TestResourceOptimizer :
   Settings::Optimizer *settings_ego_max_;
   Settings::Optimizer *settings_cma_es_min_;
   Settings::Optimizer *settings_tr_opt_max_;
+  Settings::Optimizer *settings_dftr_max_;
 
   Settings::VerbParams vp_ = {};
 
@@ -350,6 +355,25 @@ class TestResourceOptimizer :
 
   QJsonObject get_json_settings_tr_opt_maximize_{
     {"Type", "TrustRegionOptimization"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 3},
+      {"InitialTrustRegionRadius", 1},
+      // {"TrustRegionLowerBound", -1e3},
+      // {"TrustRegionUpperBound", 1e3},
+      {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
+      {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
+      {"RNGSeed", 25},
+      {"CriticalityMu", 100},
+      {"CriticalityOmega", 0.5},
+      {"CriticalityBeta", 10},
+      {"ProblemName", "prob0"}
+    }},
+    {"Objective", obj_fun_},
+  };
+
+  QJsonObject get_json_settings_dftr_max_{
+    {"Type", "DFTR"},
     {"Mode", "Minimize"},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},

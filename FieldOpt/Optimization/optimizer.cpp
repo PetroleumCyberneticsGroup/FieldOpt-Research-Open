@@ -65,8 +65,14 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   //                                               variables, grid);
   // } else {
   //   ext_info("Using shared ConstraintHandler.", md_, cl_);
-    constraint_handler_ = constraint_handler;
   // }
+  if (constraint_handler != nullptr) {
+    constraint_handler_ = constraint_handler;
+  } else {
+    im_ = "constraint_handler == nullptr in constructor call ";
+    im_ += "(ok for tests).";
+    ext_warn(im_, md_, cl_, vp_.lnw);
+  }
 
   // BASE CASE -> NEW CASE ---------------------------------
   tentative_best_case_ = base_case;
@@ -115,8 +121,13 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   }
 }
 
-Case *Optimizer::GetCaseForEvaluation() {
+Settings::Optimizer::OptimizerType TR_DFO =
+  Settings::Optimizer::OptimizerType::TrustRegionOptimization;
 
+Settings::Optimizer::OptimizerType DFTR =
+  Settings::Optimizer::OptimizerType::DFTR;
+
+Case *Optimizer::GetCaseForEvaluation() {
   if (case_handler_->QueuedCases().empty()) {
     time_t start, end;
     time(&start);
@@ -128,15 +139,15 @@ Case *Optimizer::GetCaseForEvaluation() {
   if (IsFinished() || (case_handler_->QueuedCases().empty())) {
     if (vp_.vOPT >= 3) {
       im_ = "IsFinished() => ";
-      im_ += (IsFinished()==NOT_FINISHED) ? "NOT_FINISHED" : "FINISHED";
+      im_ += (IsFinished() == NOT_FINISHED) ? "NOT_FINISHED" : "FINISHED";
       im_ += "(case_handler_->QueuedCases().size() == 0) => ";
       im_ += case_handler_->QueuedCases().empty() ? "ENPTY" : "NOT-ENPTY";
+      ext_info(im_, md_, cl_);
     }
-    if (type_ == ::Settings::Optimizer::OptimizerType::TrustRegionOptimization) {
+    if (type_ == TR_DFO || type_ == DFTR) {
       return nullptr;
     }
   }
-
   return case_handler_->GetNextCaseForEvaluation();
 }
 
@@ -195,9 +206,10 @@ QString Optimizer::GetStatusString() const {
       .arg(tentative_best_case_->objf_value());
 }
 
-void Optimizer::EnableConstraintLogging(const QString& output_directory_path) {
-  for (Constraints::Constraint *con : constraint_handler_->constraints())
-    con->EnableLogging(output_directory_path);
+void Optimizer::EnableConstraintLogging(const QString& output_dir_path) {
+  for (Constraints::Constraint *con : constraint_handler_->constraints()) {
+    con->EnableLogging(output_dir_path);
+  }
 }
 
 int Optimizer::GetSimulationDuration(Case *c) {
@@ -253,11 +265,11 @@ map<string, string> Optimizer::Summary::GetState() {
       statemap["Term. condition"] = "Reached max. sims";
       break;
     }
-    case MINIMUM_STEP_LENGTH_REACHED: {
+    case MIN_STEP_LENGTH_REACHED: {
       statemap["Term. condition"] = "Reached min. step length";
       break;
     }
-    case MAX_ITERATIONS_REACHED: {
+    case MAX_ITERS_REACHED: {
       statemap["Term. condition"] = "Reached max. iterations";
       break;
     }

@@ -40,20 +40,21 @@ Welspecs::Welspecs(QList<Model::Wells::Well *> *wells) {
   }
 }
 
-Welspecs::Welspecs(QList<Model::Wells::Well *> *wells, int timestep) {
+Welspecs::Welspecs(QList<Model::Wells::Well *> *wells, double timestep) {
   initializeBaseEntryLine(10);
   head_ = "WELSPECS";
   foot_ = "/\n\n";
   for (auto well : *wells) {
-    if (well->controls()->first()->time_step() == timestep) {
+    // if (well->controls()->first()->time_step() == timestep) {
+    if (well->controls()->first()->tstep()->EqualsValue(timestep)) {
       entries_.append(createWellEntry(well));
     }
   }
 }
 
 QString Welspecs::GetPartString() const {
-  // Return an empty string if there are no entries (at the timestep)
-  if (entries_.size() == 0){
+  // returns empty string if no entries at given timestep
+  if (entries_.empty()){
     return "";
   }
 

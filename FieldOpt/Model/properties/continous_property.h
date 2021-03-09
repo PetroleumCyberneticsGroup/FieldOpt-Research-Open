@@ -66,8 +66,9 @@ class ContinuousProperty : public Property
    * \param epsilon Optional tolerance. Default: 0.0
    * \return True if abs(this->value() - other->value()) <= epsilon; otherwise false.
    */
-  bool Equals(ContinuousProperty *other,
-              double epsilon=0.0);
+  bool Equals(ContinuousProperty *other, double epsilon=0.0);
+
+  bool EqualsValue(double other_val, double epsilon=1e-6);
 
   string ToString();
 

@@ -111,7 +111,7 @@ Optimizer::TerminationCondition GeneticAlgorithm::IsFinished() {
   }
 
   if (iteration_ >= max_generations_) {
-    tc = MAX_ITERATIONS_REACHED;
+    tc = MAX_ITERS_REACHED;
   }
 
   if (tc != NOT_FINISHED) {

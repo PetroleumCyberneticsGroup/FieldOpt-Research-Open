@@ -44,7 +44,7 @@ Ensemble::Ensemble() {}
 Ensemble::Ensemble(const std::string &ens_path, VerbParams vp) {
   vp_=vp;
 
-  ensemble_parent_dir_ = GetAbsoluteFilePath(GetParentDirPath(ens_path));
+  ensemble_parent_dir_ = GetAbsFilePath(GetParentDirPath(ens_path));
   assert(FileExists(ens_path, vp_));
   assert(DirExists(Ensemble::ensemble_parent_dir_, vp_, md_, cl_));
 

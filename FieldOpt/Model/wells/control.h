@@ -64,7 +64,8 @@ class Control
   Control();
 
 
-  int time_step() const { return time_step_->value(); }
+  Properties::ContinuousProperty* tstep() const { return time_step_; }
+  double time_step() const { return time_step_->value(); }
 
   bool open() const { return open_->value(); }
   void setOpen(bool open) { open_->setValue(open); }
@@ -88,7 +89,7 @@ class Control
   double TStepRefinement() { return tstep_ref_; }
 
  private:
-  Properties::DiscreteProperty *time_step_;
+  Properties::ContinuousProperty *time_step_;
   Properties::BinaryProperty *open_;
   Properties::ContinuousProperty *bhp_;
   Properties::ContinuousProperty *liq_rate_;

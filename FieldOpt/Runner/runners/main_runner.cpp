@@ -33,23 +33,28 @@ MainRunner::MainRunner(RuntimeSettings *rts) {
   runtime_settings_ = rts;
 
   switch (runtime_settings_->runner_type()) {
-    case RuntimeSettings::RunnerType::SERIAL:
+
+    case RuntimeSettings::RunnerType::SERIAL: {
       runner_ = new SerialRunner(runtime_settings_);
       break;
-    case RuntimeSettings::RunnerType::ONEOFF:
+    }
+
+    case RuntimeSettings::RunnerType::ONEOFF: {
       runner_ = new OneOffRunner(runtime_settings_);
       break;
-    case RuntimeSettings::RunnerType::MPISYNC:
+    }
+
+    case RuntimeSettings::RunnerType::MPISYNC: {
       runner_ = new MPI::SynchronousMPIRunner(runtime_settings_);
       break;
-    default:
-      throw std::runtime_error("Runner type not recognized.");
+    }
+    default: { E("Runner type not recognized."); }
   }
 }
 
 void MainRunner::Execute() {
-  if (runtime_settings_->verbosity_level()) {
-    std::cout << "Starting optimization run." << std::endl;
+  if (runtime_settings_->verbParams().vRUN >= 1) {
+    ext_info("Starting optimization run.", md_, cl_);
   }
   runner_->Execute();
 }

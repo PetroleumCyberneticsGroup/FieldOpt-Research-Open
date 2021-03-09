@@ -100,19 +100,24 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       block.j = json_well_block_i["j"].toDouble();
       block.k = json_well_block_i["k"].toDouble();
 
-      if (json_well_block_i.contains("IsVariable")
-        && json_well_block_i["IsVariable"].toBool()) {
-        block.is_variable = true;
-      } else {
-        block.is_variable = false;
-      }
+
+      // if (json_well_block_i.contains("IsVariable")
+      //   && json_well_block_i["IsVariable"].toBool()) {
+      //   block.is_variable = true;
+      // } else {
+      //   block.is_variable = false;
+      // }
+      // Replaces above block:
+      block.is_variable = json_well_block_i.contains("IsVariable")
+        && json_well_block_i["IsVariable"].toBool();
 
       if (json_well_block_i.contains("Completion")) {
         QJsonObject json_well_block_i_completion = json_well_block_i["Completion"].toObject();
         block.completion.type = WellCompletionType::Perforation;
 
         if (json_well_block_i_completion.contains("TransmissibilityFactor")) {
-          block.completion.transmissibility_factor = json_well_block_i_completion["TransmissibilityFactor"].toDouble();
+          block.completion.transmissibility_factor =
+            json_well_block_i_completion["TransmissibilityFactor"].toDouble();
         }
 
         if (json_well_block_i_completion.contains("IsVariable")) {
@@ -139,12 +144,15 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   } else if (QString::compare(definition_type, "PolarSpline") == 0) {
 
     well.definition_type = WellDefinitionType::PolarSpline;
-    if (json_well.contains("UseBezierSpline")
-      && json_well["UseBezierSpline"].toBool()) {
-      well.use_bezier_spline = true;
-    } else {
-      well.use_bezier_spline = false;
-    }
+    // if (json_well.contains("UseBezierSpline")
+    //   && json_well["UseBezierSpline"].toBool()) {
+    //   well.use_bezier_spline = true;
+    // } else {
+    //   well.use_bezier_spline = false;
+    // }
+    // Replaces above block:
+    well.use_bezier_spline = json_well.contains("UseBezierSpline")
+      && json_well["UseBezierSpline"].toBool();
 
     QJsonObject json_pspline = json_well["PolarSpline"].toObject();
     if (!json_pspline.contains("Midpoint")) {
@@ -160,8 +168,12 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     polar_spline.midpoint.y = json_midpoint["y"].toDouble();
     polar_spline.midpoint.z = json_midpoint["z"].toDouble();
 
-    if (json_pspline.contains("IsVariable")
-      && json_pspline["IsVariable"].toBool() == true){
+    // if (json_pspline.contains("IsVariable")
+    //   && json_pspline["IsVariable"].toBool() == true){
+    //   polar_spline.is_variable = true;
+    // }
+    // Replaces above block:
+    if (json_pspline["IsVariable"].toBool()){
       polar_spline.is_variable = true;
     }
     well.polar_spline = polar_spline;
@@ -171,12 +183,15 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   } else if (QString::compare(definition_type, "WellSpline") == 0) {
 
     well.definition_type = WellDefinitionType::WellSpline;
-    if (json_well.contains("UseBezierSpline")
-      && json_well["UseBezierSpline"].toBool()) {
-      well.use_bezier_spline = true;
-    } else {
-      well.use_bezier_spline = false;
-    }
+    // if (json_well.contains("UseBezierSpline")
+    //   && json_well["UseBezierSpline"].toBool()) {
+    //   well.use_bezier_spline = true;
+    // } else {
+    //   well.use_bezier_spline = false;
+    // }
+    // Replaces above block:
+    well.use_bezier_spline = json_well.contains("UseBezierSpline")
+      && json_well["UseBezierSpline"].toBool();
 
     // SplinePointArray defined
     if (json_well.contains("SplinePointArray")) {
@@ -189,12 +204,15 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
         point.y = json_point["y"].toDouble();
         point.z = json_point["z"].toDouble();
 
-        if (json_point.contains("IsVariable")
-          && json_point["IsVariable"].toBool()) {
-          point.is_variable = true;
-        } else {
-          point.is_variable = false;
-        }
+        // if (json_point.contains("IsVariable")
+        //   && json_point["IsVariable"].toBool()) {
+        //   point.is_variable = true;
+        // } else {
+        //   point.is_variable = false;
+        // }
+        // Replaces above block:
+        point.is_variable = json_point.contains("IsVariable")
+          && json_point["IsVariable"].toBool();
 
         if (i == 0) {
           point.name = "SplinePoint#" + well.name + "#heel";
@@ -227,19 +245,25 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
       well.spline_toe.y = json_toe["y"].toDouble();
       well.spline_toe.z = json_toe["z"].toDouble();
 
-      if (json_heel.contains("IsVariable")
-        && json_heel["IsVariable"].toBool()) {
-        well.spline_heel.is_variable = true;
-      } else {
-        well.spline_heel.is_variable = false;
-      }
+      // if (json_heel.contains("IsVariable")
+      //   && json_heel["IsVariable"].toBool()) {
+      //   well.spline_heel.is_variable = true;
+      // } else {
+      //   well.spline_heel.is_variable = false;
+      // }
+      // Replaces above block:
+      well.spline_heel.is_variable = json_heel.contains("IsVariable")
+        && json_heel["IsVariable"].toBool();
 
-      if (json_toe.contains("IsVariable")
-        && json_toe["IsVariable"].toBool()) {
-        well.spline_toe.is_variable = true;
-      } else {
-        well.spline_toe.is_variable = false;
-      }
+      // if (json_toe.contains("IsVariable")
+      //   && json_toe["IsVariable"].toBool()) {
+      //   well.spline_toe.is_variable = true;
+      // } else {
+      //   well.spline_toe.is_variable = false;
+      // }
+      // Replaces above block:
+      well.spline_toe.is_variable = json_toe.contains("IsVariable")
+        && json_toe["IsVariable"].toBool();
 
       if ((well.spline_heel.is_variable && well.spline_toe.is_variable)
         || (json_points.contains("IsVariable")
@@ -295,9 +319,10 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   }
 
   // Wellbore radius
-  if (json_well.contains("WellboreRadius"))
-    well.wellbore_radius = json_well["WellboreRadius"].toDouble();
-  else {
+  if (json_well.contains("WellboreRadius")) {
+    // well.wellbore_radius = json_well["WellboreRadius"].toDouble();
+    set_opt_prop_double(well.wellbore_radius, json_well, "WellboreRadius", vp_);
+  } else {
     if (vp_.vSET > 1) {
       string im = "WellBoreRadius not set. Defaulting to 0.01905";
       ext_warn(im, md_, cl_, vp_.lnw);
@@ -306,12 +331,21 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
   }
 
   // Direction of penetration
-  if (json_well.contains("Direction")) { // Direction must be specified for horizontal wells
-    if (well.definition_type == WellDefinitionType::WellSpline)
-      throw std::runtime_error("Direction should not be specified for spline-defined wells");
-    if (QString::compare("X", json_well["Direction"].toString()) == 0) well.direction = Direction::X;
-    if (QString::compare("Y", json_well["Direction"].toString()) == 0) well.direction = Direction::Y;
-    if (QString::compare("Z", json_well["Direction"].toString()) == 0) well.direction = Direction::Z;
+  // Direction must be specified for horizontal wells
+  if (json_well.contains("Direction")) {
+    if (well.definition_type == WellDefinitionType::WellSpline) {
+      em_ = "Direction should not be specified for spline-defined wells";
+      throw std::runtime_error(em_);
+    }
+    if (QString::compare("X", json_well["Direction"].toString()) == 0) {
+      well.direction = Direction::X;
+    }
+    if (QString::compare("Y", json_well["Direction"].toString()) == 0) {
+      well.direction = Direction::Y;
+    }
+    if (QString::compare("Z", json_well["Direction"].toString()) == 0) {
+      well.direction = Direction::Z;
+    }
   }
 
 
@@ -343,7 +377,7 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
 
     // State (Open or shut)
     if (json_controls[i].toObject().contains("State")
-    && QString::compare("Shut", json_controls.at(i).toObject()["State"].toString()) == 0)
+      && QString::compare("Shut", json_controls.at(i).toObject()["State"].toString()) == 0)
       control.state = WellState::WellShut;
     else
       control.state = WellState::WellOpen;
@@ -382,13 +416,13 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
     }
 
     // Control targets/limits
-    set_opt_prop_double(control.liq_rate, json_controls[i].toObject(), "Rate");
-    set_opt_prop_double(control.liq_rate, json_controls[i].toObject(), "LRAT");
-    set_opt_prop_double(control.oil_rate, json_controls[i].toObject(), "ORAT");
-    set_opt_prop_double(control.gas_rate, json_controls[i].toObject(), "GRAT");
-    set_opt_prop_double(control.wat_rate, json_controls[i].toObject(), "WRAT");
-    set_opt_prop_double(control.res_rate, json_controls[i].toObject(), "RESV");
-    set_opt_prop_double(control.bhp, json_controls[i].toObject(), "BHP");
+    set_opt_prop_double(control.liq_rate, json_controls[i].toObject(), "Rate", vp_);
+    set_opt_prop_double(control.liq_rate, json_controls[i].toObject(), "LRAT", vp_);
+    set_opt_prop_double(control.oil_rate, json_controls[i].toObject(), "ORAT", vp_);
+    set_opt_prop_double(control.gas_rate, json_controls[i].toObject(), "GRAT", vp_);
+    set_opt_prop_double(control.wat_rate, json_controls[i].toObject(), "WRAT", vp_);
+    set_opt_prop_double(control.res_rate, json_controls[i].toObject(), "RESV", vp_);
+    set_opt_prop_double(control.bhp, json_controls[i].toObject(), "BHP", vp_);
 
     // Injection type
     if (well.type == WellType::Injector) {
@@ -400,11 +434,13 @@ Model::Well Model::readSingleWell(QJsonObject json_well) {
         control.injection_type = InjectionType::GasInjection;
     }
 
-    if (json_controls[i].toObject()["IsVariable"].toBool()) {
-      control.is_variable = true;
-    } else {
-      control.is_variable = false;
-    }
+    // if (json_controls[i].toObject()["IsVariable"].toBool()) {
+    //   control.is_variable = true;
+    // } else {
+    //   control.is_variable = false;
+    // }
+    // Replaces above block:
+    control.is_variable = json_controls[i].toObject()["IsVariable"].toBool();
     well.controls.append(control);
   }
 

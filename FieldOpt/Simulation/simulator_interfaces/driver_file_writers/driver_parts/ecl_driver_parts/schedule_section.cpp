@@ -38,22 +38,23 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
                    const QList<int>& start_date,
                    ScheduleInsets &insets,
                    Settings::Settings *settings) : ECLDriverPart(settings) {
+  stringstream ss; // dbg
 
   // setting up sched_time_entries
   schedule_time_entries_ = QList<ScheduleTimeEntry>();
-  for (int ts : control_times) {
+  for (double ts : control_times) {
     time_DMY ts_DMY;
     GetControlDate(ts_DMY, start_date, ts);
 
-    ScheduleTimeEntry time_entry =
-        ScheduleTimeEntry(ts,
-                          ts_DMY,
-                          Welspecs(wells, ts),
-                          Compdat(wells, ts),
-                          WellControls(wells, control_times, ts),
-                          Welsegs(wells, ts),
-                          Compsegs(wells, ts),
-                          Wsegvalv(wells, ts));
+    ScheduleTimeEntry
+      time_entry = ScheduleTimeEntry(ts,
+                                     ts_DMY,
+                                     Welspecs(wells, ts),
+                                     Compdat(wells, ts),
+                                     WellControls(wells, control_times, ts),
+                                     Welsegs(wells, ts),
+                                     Compsegs(wells, ts),
+                                     Wsegvalv(wells, ts));
     schedule_time_entries_.append(time_entry);
   }
 
@@ -62,8 +63,8 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     schedule_.append(insets.GetInsetQStr(-1));
   }
 
-  stringstream ss; // dbg
-  for (auto time_entry : schedule_time_entries_) {
+  // get string for each previously set up sched_time_entries
+  for (const auto& time_entry : schedule_time_entries_) {
 
     schedule_.append(time_entry.welspecs.GetPartString());
 
@@ -75,28 +76,33 @@ Schedule::Schedule(QList<Model::Wells::Well *> *wells,
     schedule_.append(time_entry.welsegs.GetPartString());
     schedule_.append(time_entry.compsegs.GetPartString());
     schedule_.append(time_entry.wsegvalv.GetPartString());
-    schedule_.append(time_entry.well_controls.GetPartString());
 
-    if (vp_.vSIM >= 3) {
-      ss << "TIME: " << time_entry.control_time << "|";
-      ss << "WELLSPEC |" << time_entry.welspecs.GetPartStdStr();
-      ss << "COMPDAT |" << time_entry.compdat.GetPartString().toStdString();
-      ss << "WELSEGS |" << time_entry.welsegs.GetPartString().toStdString();
-      ss << "COMPSEGS |" << time_entry.compsegs.GetPartString().toStdString();
-      ss << "WSEGVALV |" << time_entry.wsegvalv.GetPartString().toStdString();
-      ss << "WCNTRLS |" << time_entry.well_controls.GetPartString().toStdString();
+    // hack to avoid setting unnecessary well controls at the end
+    if(abs(time_entry.control_time - control_times.last()) >= 1e-9) {
+      schedule_.append(time_entry.well_controls.GetPartString());
     }
 
+    if (vp_.vSIM >= 5) {
+      ss << setprecision(2);
+      ss << "TIME: " << time_entry.control_time << "|";
+      ss << "WELLSPEC | " << time_entry.welspecs.GetPartStdStr();
+      ss << "COMPDAT | " << time_entry.compdat.GetPartString().toStdString();
+      ss << "WELSEGS | " << time_entry.welsegs.GetPartString().toStdString();
+      ss << "COMPSEGS | " << time_entry.compsegs.GetPartString().toStdString();
+      ss << "WSEGVALV | " << time_entry.wsegvalv.GetPartString().toStdString();
+      ss << "WCNTRLS | " << time_entry.well_controls.GetPartString().toStdString();
+      ss << "\n";
+      ext_info(ss.str(), md_, cl_, vp_.lnw);
+    }
   }
   schedule_.append("\n\n");
-
 }
 
 QString Schedule::GetPartString() const {
   return schedule_;
 }
 
-Schedule::ScheduleTimeEntry::ScheduleTimeEntry(int control_time,
+Schedule::ScheduleTimeEntry::ScheduleTimeEntry(double control_time,
                                                time_DMY control_time_DMY,
                                                Welspecs welspecs,
                                                Compdat compdat,
@@ -115,12 +121,12 @@ Schedule::ScheduleTimeEntry::ScheduleTimeEntry(int control_time,
 }
 
 void Schedule::GetControlDate(time_DMY &ts_DMY,
-                              QList<int> sd,
-                              int control_time) const {
+                              const QList<int>& sd,
+                              double control_time) const {
 
   const time_t sec_per_day = 24*60*60;
 
-  tm start_date;
+  tm start_date{};
   time_t start_date_secs;
   time_t new_date_secs;
 
@@ -158,15 +164,15 @@ void Schedule::GetControlDate(time_DMY &ts_DMY,
   else if (ts_DMY.month == 11) { ts_DMY.month_str = "NOV"; }
   else if (ts_DMY.month == 12) { ts_DMY.month_str = "DEC"; }
 
-  if (vp_.vRUN >= 3) {
+  if (vp_.vSIM >= 6) {
     stringstream im;
     im << "TIME: " << num2str(control_time);
     im << " -- D: " << ts_DMY.day_str << " " << ts_DMY.month_str << " " << ts_DMY.year_str;
-    string linux_date = "date '+%d %b %Y' -d \"1 Oct 2019+" + num2str(control_time) + " days\" | tr -d '\\n'";
+    string linux_date = "date '+%d %b %Y' -d \"1 Oct 2019+" + num2str(control_time,0) + " days\" | tr -d '\\n'";
     im << " -- " << Utilities::Unix::ExecStr(linux_date.c_str());
 
     // im << " -- asctime date: " << asctime(localtime(&new_date_secs));
-    info(im.str(), vp_.lnw);
+    ext_info(im.str(), md_, cl_, vp_.lnw);
   }
 }
 

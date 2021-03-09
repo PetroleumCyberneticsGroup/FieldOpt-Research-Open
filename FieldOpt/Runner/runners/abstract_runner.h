@@ -45,6 +45,12 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Runner {
 
+using Printer::info;
+using Printer::ext_info;
+using Printer::num2str;
+using Printer::E;
+using std::runtime_error;
+
 class MainRunner;
 
 /*!
@@ -80,13 +86,14 @@ class AbstractRunner
   string cl_ = "AbstractRunner";
 
  protected:
-  AbstractRunner(RuntimeSettings *runtime_settings);
+  explicit AbstractRunner(RuntimeSettings *runtime_settings);
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
   Settings::Settings *settings_;
   RuntimeSettings *runtime_settings_;
   Optimization::Case *base_case_;
+  Optimization::Case *optz_case_;
 
   Optimization::Optimizer *optimizer_;
   Optimization::Objective::Objective *objf_;
@@ -96,9 +103,17 @@ class AbstractRunner
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
 
+  // void E(string m) const {
+  //   m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+  //   throw runtime_error(m);
+  // };
+
+  string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
 
-  void PrintCompletionMessage() const;
+  void PrintCompletionMessage();
+
+  void ComputeOptmzdCase();
 
   /*!
    * \brief sentinelValue Get the sentinel value to be used
@@ -123,7 +138,7 @@ class AbstractRunner
    */
   int timeoutValue() const;
 
-  void InitializeSettings(QString output_subdirectory="");
+  void InitializeSettings(const QString& output_subdirectory="");
   void InitializeModel();
   void InitializeSimulator();
   void EvaluateBaseModel();

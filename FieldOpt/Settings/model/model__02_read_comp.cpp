@@ -49,33 +49,33 @@ void Model::parseICVs(QJsonArray &json_icvs, Model::Well &well) {
 
     // device names
     //bool name_set = set_opt_prop_string(comp.icd_name, json_icv, "DeviceName");
-    if (set_opt_prop_string(comp.icd_name, json_icv, "ICDName")) {
+    if (set_opt_prop_string(comp.icd_name, json_icv, "ICDName", vp_)) {
       comp.icd_names.push_back(comp.icd_name);
     } else {
-      set_req_prop_string_array(comp.icd_names, json_icv, "ICDNames");
+      set_req_prop_string_array(comp.icd_names, json_icv, "ICDNames", vp_);
     }
 
     // segment indices
-    if (set_opt_prop_int(comp.icd_segment, json_icv, "ICDSegment")) {
+    if (set_opt_prop_int(comp.icd_segment, json_icv, "ICDSegment", vp_)) {
       comp.icd_segments.push_back(comp.icd_segment);
     } else {
-      set_req_prop_int_array(comp.icd_segments, json_icv, "ICDSegments");
+      set_req_prop_int_array(comp.icd_segments, json_icv, "ICDSegments", vp_);
       assert(comp.icd_segments.size() == comp.icd_names.size());
     }
 
-    set_req_prop_double(comp.valve_size,       json_icv, "ValveSize");
-    set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient");
+    set_req_prop_double(comp.valve_size, json_icv, "ValveSize", vp_);
+    set_opt_prop_double(comp.valve_flow_coeff, json_icv, "FlowCoefficient", vp_);
 
-    set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize");
-    set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize");
+    set_opt_prop_double(comp.min_valve_size, json_icv, "MinValveSize", vp_);
+    set_opt_prop_double(comp.max_valve_size, json_icv, "MaxValveSize", vp_);
 
-    set_opt_prop_double(comp.friction_drop, json_icv, "FrictionDrop");
-    set_opt_prop_double(comp.pipe_diameter,     json_icv, "PipeDiameter");
-    set_opt_prop_double(comp.abs_roughness,     json_icv, "AbsRoughness");
+    set_opt_prop_double(comp.friction_drop, json_icv, "FrictionDrop", vp_);
+    set_opt_prop_double(comp.pipe_diameter, json_icv, "PipeDiameter", vp_);
+    set_opt_prop_double(comp.abs_roughness, json_icv, "AbsRoughness", vp_);
 
-    set_opt_prop_double(comp.pipe_xsec_area, json_icv, "PipeXsecArea");
-    set_opt_prop_string(comp.device_stat,    json_icv, "DeviceStatus");
-    set_opt_prop_double(comp.max_xsec_area,  json_icv, "MaxXsectArea");
+    set_opt_prop_double(comp.pipe_xsec_area, json_icv, "PipeXsecArea", vp_);
+    set_opt_prop_string(comp.device_stat, json_icv, "DeviceStatus", vp_);
+    set_opt_prop_double(comp.max_xsec_area, json_icv, "MaxXsectArea", vp_);
 
     well.completions.push_back(comp);
 
@@ -107,9 +107,9 @@ void Model::parseICVCompartmentalization(QJsonArray &icv_compartmentalization,
       grp.is_variable = true;
     }
 
-    set_req_prop_string(grp.icv_group_name, comp.toObject(), "CompName");
-    set_req_prop_string_array(grp.icvs, comp.toObject(), "ICVs");
-    if (!set_opt_prop_double(grp.valve_size, comp.toObject(), "ValveSize")) {
+    set_req_prop_string(grp.icv_group_name, comp.toObject(), "CompName", vp_);
+    set_req_prop_string_array(grp.icvs, comp.toObject(), "ICVs", vp_);
+    if (!set_opt_prop_double(grp.valve_size, comp.toObject(), "ValveSize", vp_)) {
       grp.valve_size = well.completions[0].valve_size;
     }
 

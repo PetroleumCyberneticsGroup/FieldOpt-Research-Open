@@ -1,13 +1,15 @@
 /***********************************************************
-Created by Mathias C. Bellout on 27.11.18
-Copyright (C) 2018-2020 Mathias Bellout
-<chakibbb.pcg@gmail.com>
+Created by bellout on 08.03.21
+Copyright (C) 2021
+Mathias Bellout <chakibbb.pcg@gmail.com>
 
-Modified 2018-2020 Thiago Lima Silva
-<thiagolims@gmail.com>
-
-Modified 2018-2020 Caio Giuliani
-<caiogiuliani@gmail.com>
+--
+test_dftr built from test_tr-dfo.cpp
+Copyright (C) 2018
+Mathias Bellout <chakibbb.pcg@gmail.com>
+Thiago Lima Silva <thiagolims@gmail.com>
+Caio Giuliani <caiogiuliani@gmail.com>
+--
 
 This file is part of the FieldOpt project.
 
@@ -28,26 +30,20 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include <gtest/gtest.h>
 #include <Eigen/Core>
-#include <Eigen/Dense>
 #include <objective/objective.h>
 
 #include "Runner/tests/test_resource_runner.hpp"
 #include "Reservoir/tests/test_resource_grids.h"
 #include "Optimization/tests/test_resource_test_functions.h"
 #include "Optimization/tests/test_resource_optimizer.h"
-#include "Optimization/tests/test_resource_cases.h"
 #include "Settings/tests/test_resource_settings.hpp"
 
 #include "Optimization/optimizers/trust_region/TrustRegionOptimization.h"
+#include "Optimization/optimizers/dftr/DFTR.h"
 #include "Runner/runners/ensemble_helper.h"
-#include "Simulation/simulator_interfaces/eclsimulator.h"
-#include "Optimization/objective/weightedsum.h"
 
-#include "Utilities/math.hpp"
 #include "Utilities/printer.hpp"
-#include "Utilities/debug.hpp"
 #include "Utilities/colors.hpp"
-// #include "Utilities/stringhelpers.hpp"
 
 #include "test_tr-model-data.hpp"
 #include "test_tr-support.hpp"
@@ -62,37 +58,41 @@ using namespace std;
 
 namespace {
 
-class TrustRegionTest : public ::testing::Test,
-                        public ::TestResourceOptimizer,
-                        public ::TestResourceGrids {
+class DFTRTest : public ::testing::Test,
+                 public ::TestResourceOptimizer,
+                 public ::TestResourceGrids {
 
  protected:
-  TrustRegionTest() {}
+  DFTRTest() {}
 
-  virtual ~TrustRegionTest() {}
+  virtual ~DFTRTest() {}
   virtual void SetUp() {}
 
   TrustRegionOptimization *tr_dfo_;
+  DFTR *dftr_;
   Optimization::Case *test_case_tr_dfo_probs_;
   VarPropContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
   Settings::VerbParams vp_ = {};
+  double eps = std::numeric_limits<double>::epsilon();
 
   Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
-      Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
+    Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
 
   Optimization::Optimizer::TerminationCondition TC_MAX_ITERS_ =
-      Optimization::Optimizer::TerminationCondition::MAX_ITERS_REACHED;
+    Optimization::Optimizer::TerminationCondition::MAX_ITERS_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_MIN_STEP_ =
-      Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED;
+    Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_OPT_CRIT =
-      Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED;
+    Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED;
 
-  void SetUpOptimizer(::TrustRegionModelData::prob &prob,
-                      double (*tr_dfo_prob)(VectorXd xs)) {
+  // _________________________________________________________
+  // TRDFO/DFTR OPTIMIZERS
+  void SetUpOptimizers(::TrustRegionModelData::prob &prob,
+                       double (*tr_dfo_prob)(VectorXd xs)) {
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
@@ -108,9 +108,9 @@ class TrustRegionTest : public ::testing::Test,
 
     // Set up base case using dummy var containter
     test_case_tr_dfo_probs_ = new Optimization::Case(
-        QList<QPair<QUuid, bool>>(),
-        QList<QPair<QUuid, int>>(),
-        varcont_tr_dfo_probs_->GetContVarValues());
+      QList<QPair<QUuid, bool>>(),
+      QList<QPair<QUuid, int>>(),
+      varcont_tr_dfo_probs_->GetContVarValues());
     TestResources::FindVarSequence(prob,
                                    *test_case_tr_dfo_probs_);
 
@@ -124,12 +124,16 @@ class TrustRegionTest : public ::testing::Test,
     // Use initial point (objf) from Matlab data
     test_case_tr_dfo_probs_->set_objf_value(tr_dfo_prob(x0));
 
+    settings_tr_opt_max_->setTRProbName(prob.name);
+    settings_dftr_max_->setTRProbName(prob.name);
+
     tr_dfo_ = new TrustRegionOptimization(
-        settings_tr_opt_max_,
-        test_case_tr_dfo_probs_,
-        varcont_tr_dfo_probs_,
-        grid_5spot_,
-        logger_);
+      settings_tr_opt_max_, test_case_tr_dfo_probs_,
+      varcont_tr_dfo_probs_, grid_5spot_, logger_);
+
+    dftr_ = new DFTR(
+      settings_dftr_max_, test_case_tr_dfo_probs_,
+      varcont_tr_dfo_probs_, grid_5spot_, logger_);
   }
 
   bool RunnerSubs(TestResources::TrustRegionModelData::prob prob,
@@ -141,12 +145,22 @@ class TrustRegionTest : public ::testing::Test,
     // Start opt loop --------------------------------------
     while (tr_dfo_->IsFinished() == TC_NOT_FIN_) {
 
-      auto next_case = tr_dfo_->GetCaseForEvaluation();
-      while (next_case == nullptr) {
+      auto nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation();
+      auto nxt_cs_dftr = dftr_->GetCaseForEvaluation();
+
+      while (nxt_cs_dfo == nullptr) {
         if (tr_dfo_->IsFinished()) {
           break;
         } else {
-          next_case = tr_dfo_->GetCaseForEvaluation();
+          nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation();
+        }
+      }
+
+      while (nxt_cs_dftr == nullptr) {
+        if (dftr_->IsFinished()) {
+          break;
+        } else {
+          nxt_cs_dftr = dftr_->GetCaseForEvaluation();
         }
       }
 
@@ -154,70 +168,103 @@ class TrustRegionTest : public ::testing::Test,
         break;
       }
 
+      if (dftr_->IsFinished()) {
+        break;
+      }
+
       // Compute obj.function value for case
-      next_case->set_objf_value(
-        tr_dfo_prob(next_case->GetRealVarVector()));
+      nxt_cs_dfo->set_objf_value(
+        tr_dfo_prob(nxt_cs_dfo->GetRealVarVector()));
+
+      nxt_cs_dftr->set_objf_value(
+        tr_dfo_prob(nxt_cs_dftr->GetRealVarVector()));
 
       // Override 2nd point
       if (p_count == 1 && prob.xm.cols() > 1) {
-        TestResources::OverrideSecondPoint(prob, *next_case);
+        TestResources::OverrideSecondPoint(prob, *nxt_cs_dfo);
+        TestResources::OverrideSecondPoint(prob, *nxt_cs_dftr);
       }
 
       // Finish Runner
-      tr_dfo_->SubmitEvaluatedCase(next_case);
+      tr_dfo_->SubmitEvaluatedCase(nxt_cs_dfo);
+      dftr_->SubmitEvaluatedCase(nxt_cs_dftr);
 
-      if (tr_dfo_->getTrustRegionModel()->isInitialized() && (p_count < 2)) {
+      // Tests
+      if (tr_dfo_->getTrustRegionModel()->isInitialized()
+        && dftr_->getTRMod()->isModInit()) {
+        auto XA = tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose();
+        auto XB = dftr_->getTRMod()->getCurrPt().transpose();
 
+        auto DX = ((XA.array() - XB.array()).abs() < eps).all();
+        EXPECT_TRUE(DX);
+
+        auto FA = tr_dfo_->getTrustRegionModel()->getCurrentFval();
+        auto FB = dftr_->getTRMod()->getCurrFval();
+        EXPECT_NEAR(FA, FB, eps);
       }
+
       p_count++;
     }
 
     stringstream sx;
-    string cc;
+    string cc_trdfo, cc_dftr;
 
     if (tr_dfo_->IsFinished() == TC_OPT_CRIT) {
-      cc = "OPT_CRITERIA_REACHED";
+      cc_trdfo = "OPT_CRITERIA_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MIN_STEP_) {
-      cc = "MIN_STEP_LENGTH_REACHED";
+      cc_trdfo = "MIN_STEP_LENGTH_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MAX_ITERS_) {
-      cc = "MAX_ITERS_REACHED";
+      cc_trdfo = "MAX_ITERS_REACHED";
+    }
+
+    if (dftr_->IsFinished() == TC_OPT_CRIT) {
+      cc_dftr += "OPT_CRITERIA_REACHED";
+
+    } else if (dftr_->IsFinished() == TC_MIN_STEP_) {
+      cc_dftr += "MIN_STEP_LENGTH_REACHED";
+
+    } else if (dftr_->IsFinished() == TC_MAX_ITERS_) {
+      cc_dftr += "MAX_ITERS_REACHED";
     }
 
     sx << setw(12) << scientific << right << setprecision(6)
        << "---------------------------------------------" << endl
-       << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
-       << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
-       << "tc: " << cc.c_str() << endl;
+       << "TR_DFO: x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
+       << "TR_DFO: f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
+       << "TR_DFO: tc: " << cc_trdfo.c_str() << endl
+       << "DFTR:   x* = " << dftr_->getTRMod()->getCurrPt().transpose() << endl
+       << "DFTR:   f* = " << dftr_->getTRMod()->getCurrFval() << endl
+       << "DFTR:   tc: " << cc_dftr.c_str() << endl;
     cout << sx.str();
 
     return true;
   }
 };
 
-TEST_F(TrustRegionTest, trHS1) {
+TEST_F(DFTRTest, trHS1) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
-         << "[ HS1 ] "
-         << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
+       << "[ HS1 ] "
+       << " 100*pow(x(1) - pow(x(0), 2), 2) + pow(1 - x(0), 2)" << END << endl;
 
-    SetUpOptimizer(tr_mdata.prob_hs1, hs1);
-    EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
+  SetUpOptimizers(tr_mdata.prob_hs1, hs1);
+  EXPECT_TRUE(RunnerSubs(tr_mdata.prob_hs1, hs1));
 }
 
-TEST_F(TrustRegionTest, trDfoProb1) {
+TEST_F(DFTRTest, Prob1) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob1 ] "
        << " f = @(x) (1 - x(0))^2; x0=[-1.2 2.0]" << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob1, tr_dfo_prob1);
+  SetUpOptimizers(tr_mdata.prob1, tr_dfo_prob1);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob1, tr_dfo_prob1));
 }
 
-TEST_F(TrustRegionTest, trDfoProb2) {
+TEST_F(DFTRTest, trDfoProb2) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob2 ] "
@@ -225,11 +272,11 @@ TEST_F(TrustRegionTest, trDfoProb2) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob2, tr_dfo_prob2);
+  SetUpOptimizers(tr_mdata.prob2, tr_dfo_prob2);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob2, tr_dfo_prob2));
 }
 
-TEST_F(TrustRegionTest, trDfoProb3) {
+TEST_F(DFTRTest, trDfoProb3) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob3 ] "
@@ -237,11 +284,11 @@ TEST_F(TrustRegionTest, trDfoProb3) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob3, tr_dfo_prob3);
+  SetUpOptimizers(tr_mdata.prob3, tr_dfo_prob3);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob3, tr_dfo_prob3));
 }
 
-TEST_F(TrustRegionTest, trDfoProb4) {
+TEST_F(DFTRTest, trDfoProb4) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob4 ] "
@@ -249,11 +296,11 @@ TEST_F(TrustRegionTest, trDfoProb4) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob4, tr_dfo_prob4);
+  SetUpOptimizers(tr_mdata.prob4, tr_dfo_prob4);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob4, tr_dfo_prob4));
 }
 
-TEST_F(TrustRegionTest, trDfoProb5) {
+TEST_F(DFTRTest, trDfoProb5) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob5 ] "
@@ -261,11 +308,11 @@ TEST_F(TrustRegionTest, trDfoProb5) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob5, tr_dfo_prob5);
+  SetUpOptimizers(tr_mdata.prob5, tr_dfo_prob5);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob5, tr_dfo_prob5));
 }
 
-TEST_F(TrustRegionTest, trDfoProb6) {
+TEST_F(DFTRTest, trDfoProb6) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob6 ] "
@@ -273,11 +320,11 @@ TEST_F(TrustRegionTest, trDfoProb6) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob6, tr_dfo_prob6);
+  SetUpOptimizers(tr_mdata.prob6, tr_dfo_prob6);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob6, tr_dfo_prob6));
 }
 
-TEST_F(TrustRegionTest, trDfoProb7) {
+TEST_F(DFTRTest, trDfoProb7) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob7 ] "
@@ -287,11 +334,11 @@ TEST_F(TrustRegionTest, trDfoProb7) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob7, tr_dfo_prob7);
+  SetUpOptimizers(tr_mdata.prob7, tr_dfo_prob7);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob7, tr_dfo_prob7));
 }
 
-TEST_F(TrustRegionTest, trDfoProb8) {
+TEST_F(DFTRTest, trDfoProb8) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob8 ] "
@@ -299,11 +346,11 @@ TEST_F(TrustRegionTest, trDfoProb8) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob8, tr_dfo_prob8);
+  SetUpOptimizers(tr_mdata.prob8, tr_dfo_prob8);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob8, tr_dfo_prob8));
 }
 
-TEST_F(TrustRegionTest, trDfoProb9) {
+TEST_F(DFTRTest, trDfoProb9) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob9 ] "
@@ -311,11 +358,11 @@ TEST_F(TrustRegionTest, trDfoProb9) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob9, tr_dfo_prob9);
+  SetUpOptimizers(tr_mdata.prob9, tr_dfo_prob9);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob9, tr_dfo_prob9));
 }
 
-TEST_F(TrustRegionTest, trDfoProb10) {
+TEST_F(DFTRTest, trDfoProb10) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob10 ] "
@@ -324,11 +371,11 @@ TEST_F(TrustRegionTest, trDfoProb10) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob10, tr_dfo_prob10);
+  SetUpOptimizers(tr_mdata.prob10, tr_dfo_prob10);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob10, tr_dfo_prob10));
 }
 
-TEST_F(TrustRegionTest, trDfoProb11) {
+TEST_F(DFTRTest, trDfoProb11) {
   cout << endl << FMAGENTA << "[          ] =============="
        << "=========================================== " << endl
        << "[ CG.prob11 ] "
@@ -336,7 +383,7 @@ TEST_F(TrustRegionTest, trDfoProb11) {
        << END << endl;
 
   // -------------------------------------------------------
-  SetUpOptimizer(tr_mdata.prob11, tr_dfo_prob11);
+  SetUpOptimizers(tr_mdata.prob11, tr_dfo_prob11);
   EXPECT_TRUE(RunnerSubs(tr_mdata.prob11, tr_dfo_prob11));
 }
 

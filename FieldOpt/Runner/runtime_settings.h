@@ -2,7 +2,7 @@
 Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2020 Mathias Bellout
+Modified 2020- Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
@@ -64,31 +64,68 @@ class RuntimeSettings : public Loggable
   int threads_per_sim() const { return threads_per_sim_; }
   int simulation_timeout() const { return simulation_timeout_; }
   int simulation_delay() const { return simulation_delay_; }
+
   RunnerType runner_type() const { return runner_type_; }
   QPair<QVector<double>, QVector<double>> prod_coords() const { return prod_coords_; }
   QPair<QVector<double>, QVector<double>> inje_coords() const { return inje_coords_; }
+
   LogTarget GetLogTarget() override;
   map<string, string> GetState() override;
   QUuid GetId() override;
   map<string, vector<double>> GetValues() override;
 
+  Settings::VerbParams verbParams() { return vp_; }
+
  private:
   Paths paths_;
   std::string str_out; //!< Temporary variable for verbosity function
-  int verbosity_level_; //!< Verbose mode (i.e. whether or not to print detailed/debug/diagnostic info to the console while running).
-  bool overwrite_existing_; //!< Whether or not files in the specified output directory should be overwritten (only relevant if the directory is not empty).
-  int simulation_delay_; //!< Minimum delay between start of each simulation (in seconds).
-  int max_parallel_sims_; //!< Maximum number of parallel simulations to start. This is important to define if you for example have a limited number of simulator licenses.
-  int threads_per_sim_; //!< Number of threads to be used pr. simulation. Only works for ADGPRS.
-  int simulation_timeout_; //!< Simulations will be terminated after running for simulation_timeout_ times the lowest recorded simulation time up to that point.
-  RunnerType runner_type_; //!< The type of runner to be used (e.g. serial or parallel).
-  QPair<QVector<double>, QVector<double>> prod_coords_; //!< The spline coordinates for the production well
-  QPair<QVector<double>, QVector<double>> inje_coords_; //!< The spline coordinates for the injection well
 
+  //!< Verbose mode (i.e. whether or not to print
+  //!< detailed/debug/diagnostic info to the console while running).
+  int verbosity_level_;
+
+  //!< Whether or not files in the specified output directory
+  //!< should be overwritten (only relevant if the directory is not empty).
+  bool overwrite_existing_;
+
+  //!< Minimum delay between start of each simulation (in seconds).
+  int simulation_delay_;
+
+  //!< Maximum number of parallel simulations to start. This is important to define if you for example have a limited number of simulator licenses.
+  int max_parallel_sims_;
+
+  //!< Number of threads to be used pr. simulation. Only works for ADGPRS.
+  int threads_per_sim_;
+
+  //!< Simulations will be terminated after running for
+  //!< simulation_timeout_ times the lowest recorded simulation time up to that point.
+  int simulation_timeout_;
+
+  //!< Type of runner to be used (e.g. serial or parallel).
+  RunnerType runner_type_;
+
+  QPair<QVector<double>, QVector<double>> prod_coords_;
+  //!< The spline coordinates for the production well
+
+  //!< The spline coordinates for the injection well
+  QPair<QVector<double>, QVector<double>> inje_coords_;
+
+  void E(string m) const {
+    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+    throw runtime_error(m);
+  };
+
+  string md_ = "Runner";
+  string cl_ = "RuntimeSettings";
+  string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;
 
-  QString runnerTypeString() const; //!< Get a string representation of the runner type (used when printing settings to the terminal).
-  QString wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const;
+  //!< Get a string representation of the runner type (used
+  //!< when printing settings to the terminal).
+  QString runnerTypeString() const;
+
+  QString wellSplineCoordinateString(
+    const QPair<QVector<double>, QVector<double>> spline) const;
 
   po::variables_map createVariablesMap(int argc, const char *argv[]);
 };

@@ -59,7 +59,7 @@ class Welspecs : public ECLDriverPart
    * @param wells List of all wells.
    * @param timestep Timestep to generate data for.
    */
-  Welspecs(QList<Model::Wells::Well *> *wells, int timestep);
+  Welspecs(QList<Model::Wells::Well *> *wells, double timestep);
 
   QString GetPartString() const;
   string GetPartStdStr() const;

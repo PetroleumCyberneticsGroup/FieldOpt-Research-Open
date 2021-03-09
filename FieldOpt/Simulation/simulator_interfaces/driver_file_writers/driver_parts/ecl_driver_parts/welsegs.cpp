@@ -99,7 +99,7 @@ Welsegs::Welsegs(QList<Model::Wells::Well *> *wells, int ts) {
 }
 
 QString Welsegs::GetPartString() const {
-  if (keywords_.size() == 0)
+  if (keywords_.empty())
     return "";
 
   QString all_keywords = "";

@@ -77,7 +77,7 @@ Optimization::Optimizer::TerminationCondition SPSA::IsFinished() {
     im_ = "Max iterations reached. Terminating";
     ext_info(im_, "Optimization", "SPSA");
     logger_->AddEntry(this);
-    return MAX_ITERATIONS_REACHED;
+    return MAX_ITERS_REACHED;
   }
   else {
     return NOT_FINISHED;
