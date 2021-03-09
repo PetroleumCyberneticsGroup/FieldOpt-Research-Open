@@ -56,8 +56,7 @@ class CompassSearch : public GSS
                 Reservoir::Grid::Grid *grid,
                 Logger *logger,
                 CaseHandler *case_handler=nullptr,
-                Constraints::ConstraintHandler *constraint_handler=nullptr
-  );
+                Constraints::ConstraintHandler *constraint_handler=nullptr);
 
   QString GetStatusStringHeader() const override;
   QString GetStatusString() const override;

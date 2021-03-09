@@ -58,8 +58,7 @@ TEST_F(CompassSearchTest, GetNewCases) {
                       test_case_1_3i_,
                       varcont_prod_bhp_,
                       grid_5spot_,
-                      logger_
-    );
+                      logger_);
 
   // These four cases should change the values of the two first int vars,
   // +50 then -50
