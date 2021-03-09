@@ -73,7 +73,7 @@ Optimizer::TerminationCondition HybridOptimizer::IsFinished() {
         if (enable_logging_) {
             logger_->AddEntry(this);
         }
-        return TerminationCondition::MINIMUM_STEP_LENGTH_REACHED;
+        return TerminationCondition::MIN_STEP_LENGTH_REACHED;
     }
     else if (iteration_ < max_hybrid_iterations_) {
         return TerminationCondition::NOT_FINISHED;

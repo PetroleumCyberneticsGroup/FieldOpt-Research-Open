@@ -83,13 +83,13 @@ class TrustRegionTest : public ::testing::Test,
       Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
 
   Optimization::Optimizer::TerminationCondition TC_MAX_ITERS_ =
-      Optimization::Optimizer::TerminationCondition::MAX_ITERATIONS_REACHED;
+      Optimization::Optimizer::TerminationCondition::MAX_ITERS_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_MIN_STEP_ =
-      Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED;
+      Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_OPT_CRIT =
-      Optimization::Optimizer::TerminationCondition::OPTIMALITY_CRITERIA_REACHED;
+      Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED;
 
   void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
@@ -176,13 +176,13 @@ class TrustRegionTest : public ::testing::Test,
     string cc;
 
     if (tr_dfo_->IsFinished() == TC_OPT_CRIT) {
-      cc = "OPTIMALITY_CRITERIA_REACHED";
+      cc = "OPT_CRITERIA_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MIN_STEP_) {
-      cc = "MINIMUM_STEP_LENGTH_REACHED";
+      cc = "MIN_STEP_LENGTH_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MAX_ITERS_) {
-      cc = "MAX_ITERATIONS_REACHED";
+      cc = "MAX_ITERS_REACHED";
     }
 
     sx << setw(12) << scientific << right << setprecision(6)

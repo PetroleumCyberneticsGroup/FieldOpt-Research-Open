@@ -126,7 +126,7 @@ void PSO::handleEvaluatedCase(Case *c) {
 
 Optimizer::TerminationCondition PSO::IsFinished() {
   if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
-  if (is_stagnant()) return MINIMUM_STEP_LENGTH_REACHED;
+  if (is_stagnant()) return MIN_STEP_LENGTH_REACHED;
   if (iteration_ < max_iterations_) return NOT_FINISHED;
   else return MAX_EVALS_REACHED;
 }
