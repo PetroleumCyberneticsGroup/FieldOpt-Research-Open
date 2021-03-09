@@ -45,6 +45,12 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Runner {
 
+using Printer::info;
+using Printer::ext_info;
+using Printer::num2str;
+using Printer::E;
+using std::runtime_error;
+
 class MainRunner;
 
 /*!
@@ -97,10 +103,10 @@ class AbstractRunner
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
 
-  void E(string m) const {
-    m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
-    throw runtime_error(m);
-  };
+  // void E(string m) const {
+  //   m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
+  //   throw runtime_error(m);
+  // };
 
   string im_ = "", wm_ = "", em_ = "";
   Settings::VerbParams vp_;

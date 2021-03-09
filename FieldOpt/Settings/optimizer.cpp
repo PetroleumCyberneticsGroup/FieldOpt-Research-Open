@@ -645,7 +645,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // -----------------------------------------------------
     //  TRUST REGION PARAMETERS
     // Trust Region parameters :: Initial radius
-    set_opt_prop_double(params.tr_initial_radius, json_params, "InitTRRadius", vp_);
+    set_opt_prop_double(params.tr_init_rad, json_params, "InitTRRadius", vp_);
     // Trust Region parameters:: Trust region radius tolerance
     set_opt_prop_double(params.tr_tol_radius, json_params, "TRRadiusTol", vp_);
     // Trust Region parameters :: Max trust region radius
@@ -656,10 +656,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
       if (json_params.contains("TRUpperBound")) {
         if (json_params["TRLowerBound"].toDouble() <
             json_params["TRUpperBound"].toDouble()) {
-          params.tr_lower_bound = json_params["TRLowerBound"].toDouble();
+          params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
         } else { E(ind_val + "TRLowerBound", md_, cl_); }
       } else {
-        params.tr_lower_bound = json_params["TRLowerBound"].toDouble();
+        params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
       }
     }
 
@@ -668,10 +668,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
       if (json_params.contains("TRLowerBound")) {
         if (json_params["TRLowerBound"].toDouble() <
             json_params["TRUpperBound"].toDouble()) {
-          params.tr_upper_bound = json_params["TRUpperBound"].toDouble();
+          params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
         } else { E(ind_val + "TRUpperBound", md_, cl_); }
       } else {
-        params.tr_upper_bound = json_params["TRUpperBound"].toDouble();
+        params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
       }
     }
 
@@ -692,15 +692,15 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // Trust Region parameters :: Criticality Mu
     if (json_params.contains("CriticalityMu")) {
       if (json_params["CriticalityMu"].toDouble() >= 0.0) {
-        params.tr_criticality_mu =
+        params.tr_crit_mu =
             json_params["CriticalityMu"].toDouble();
-      } else { E(ind_val + "CriticalityMu", md_, cl_; }
+      } else { E(ind_val + "CriticalityMu", md_, cl_); }
     }
 
     // Trust Region parameters :: Criticality Omega
     if (json_params.contains("CriticalityOmega")) {
       if (json_params["CriticalityOmega"].toDouble() >= 0.0) {
-        params.tr_criticality_omega =
+        params.tr_crit_omega =
             json_params["CriticalityOmega"].toDouble();
       } else { E(ind_val + "CriticalityOmega", md_, cl_); }
     }
@@ -708,7 +708,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // Trust Region parameters :: Criticality Beta
     if (json_params.contains("CriticalityBeta")) {
       if (json_params["CriticalityBeta"].toDouble() >= 0.0) {
-        params.tr_criticality_beta =
+        params.tr_crit_beta =
             json_params["CriticalityBeta"].toDouble();
       } else {
         throw std::runtime_error(ind_val + "CriticalityBeta");
@@ -924,12 +924,16 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
 
   } else if (QString::compare(type, "Hybrid") == 0) {
     opt_type = OptimizerType::Hybrid;
+
   } else if (QString::compare(type, "TrustRegionOptimization") == 0) {
     opt_type = OptimizerType::TrustRegionOptimization;
+
+  } else if (QString::compare(type, "DFTR") == 0) {
+    opt_type = OptimizerType::DFTR;
+
   } else {
-    throw OptimizerTypeNotRecognizedException(
-        "The optimizer type " + type.toStdString()
-            + " was not recognized.");
+    em_ = "Optimizer type " + type.toStdString() + " not recognized.";
+    throw OptimizerTypeNotRecognizedException(em_);
   }
   return opt_type;
 }

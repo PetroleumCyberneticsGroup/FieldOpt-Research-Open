@@ -80,7 +80,7 @@ Optimization::Optimizer::TerminationCondition VFSA::IsFinished() {
     return NOT_FINISHED;
   }
   else {
-    return MAX_ITERATIONS_REACHED;
+    return MAX_ITERS_REACHED;
   }
 }
 

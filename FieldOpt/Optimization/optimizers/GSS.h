@@ -79,9 +79,8 @@ class GSS : public Optimizer {
       Model::Properties::VarPropContainer *variables,
       Reservoir::Grid::Grid *grid,
       Logger *logger,
-      CaseHandler *case_handler=0,
-      Constraints::ConstraintHandler *constraint_handler=0
-  );
+      CaseHandler *case_handler = nullptr,
+      Constraints::ConstraintHandler *constraint_handler = nullptr);
 
   /*!
    * \brief IsFinished Check if the optimization is finished.

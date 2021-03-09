@@ -161,7 +161,7 @@ class TrustRegionModel {
   int getNumFvals() { return static_cast<int>(fvalues_.rows()); }
 
   double getRadius() { return radius_; }
-  void setRadius(double r) { radius_ = r;}
+  void setRadius(double r) { radius_ = r; }
 
   Matrix<double,Dynamic,Dynamic> getPoints() { return points_abs_; }
   Matrix<double,Dynamic,Dynamic> getCachedPoints() { return cached_points_; }

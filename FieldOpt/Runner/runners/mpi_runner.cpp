@@ -99,7 +99,7 @@ void MPIRunner::RecvMessage(Message &message) {
 
     em_ = "RecvMessage is unable to handle model synchronization objects. ";
     em_ += "This should be handled by the RecvModelSynchronizationObject method.";
-    E(em_);
+    E(em_, md_, cl_);
 
   } else if (message.tag == CASE_UNEVAL) {
     printMessage("Received an unevaluated case.", 2);
@@ -118,13 +118,13 @@ void MPIRunner::RecvMessage(Message &message) {
 
   } else {
     printMessage("Received message with an unrecognized tag. Throwing exception.");
-    E("RecvMessage received a message with an unrecognized tag.");
+    E("RecvMessage received a message with an unrecognized tag.", md_, cl_);
   }
 }
 
 void MPIRunner::BroadcastModel() {
   if (rank() != 0) {
-    throw std::runtime_error("BroadcastModel should only be called on the root process.");
+    E("BroadcastModel should only be called on the root process.", md_, cl_);
   }
   auto mso = Model::ModelSynchronizationObject(model_);
   std::ostringstream oss;
@@ -138,7 +138,7 @@ void MPIRunner::BroadcastModel() {
 
 void MPIRunner::RecvModelSynchronizationObject() {
   if (rank() == 0) {
-    E("RecvModelSynchronizationObject should not be called on the root process.");
+    E("RecvModelSynchronizationObject should not be called on the root process.", md_, cl_);
   }
   Model::ModelSynchronizationObject mso;
   std::string s;

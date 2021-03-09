@@ -81,9 +81,9 @@ TrustRegionModel::TrustRegionModel(VectorXd& lb,
     base_case_->set_objf_value(-base_case_->objf_value());
   }
 
-  radius_ = settings_->parameters().tr_initial_radius;
+  radius_ = settings_->parameters().tr_init_rad;
   tr_center_ = 0;
-  cache_max_ = (int)3*pow(dim_,2);
+  // cache_max_ = (int)3*pow(dim_,2);
 
   pivot_values_.conservativeResize(0);
   cached_fvalues_.conservativeResize(0);
@@ -99,15 +99,26 @@ TrustRegionModel::TrustRegionModel(VectorXd& lb,
 
   // dbg
   auto pn = settings_->parameters().tr_prob_name;
-  DBG_fn_pivp_ = "FOEx_PivotPolyns_" + pn + ".txt";
-  DBG_fn_mdat_ = "FOEx_ModelData_" + pn + ".txt";
-  DBG_fn_sdat_ = "FOEx_SettingsData_" + pn + ".txt";
-  DBG_fn_xchp_ = "FOEx_ExchPoint_" + pn + ".txt";
-  DBG_fn_co2m_ = "FOEx_Coeffs2Mat_" + pn + ".txt";
+  string dn =  "tr-dfo-dbg/";
+  DBG_fn_pivp_ = dn + "TRDFO_PivotPolyns_" + pn + ".txt";
+  DBG_fn_mdat_ = dn + "TRDFO_ModelData_" + pn + ".txt";
+  DBG_fn_sdat_ = dn + "TRDFO_SettingsData_" + pn + ".txt";
+  DBG_fn_xchp_ = dn + "TRDFO_ExchPoint_" + pn + ".txt";
+  DBG_fn_co2m_ = dn + "TRDFO_Coeffs2Mat_" + pn + ".txt";
+  DBG_fn_pcfs_ = dn + "TRDFO_PolyCoeffs_" + pn + ".txt";
 
-  DBG_fn_pcfs_ = "FOEx_PolyCoeffs_" + pn + ".txt";
-  string cmdstr = "rm *" + pn + ".txt";
+  string cmdstr = "mkdir " + dn;
   std::system(cmdstr.c_str());
+
+  cmdstr = "rm " + dn + "*" + pn + ".txt";
+  std::system(cmdstr.c_str());
+
+  DBG_printToFile(DBG_fn_pivp_, DBG_fn_pivp_ + "\n");
+  DBG_printToFile(DBG_fn_mdat_, DBG_fn_mdat_ + "\n");
+  DBG_printToFile(DBG_fn_sdat_, DBG_fn_sdat_ + "\n");
+  DBG_printToFile(DBG_fn_xchp_, DBG_fn_xchp_ + "\n");
+  DBG_printToFile(DBG_fn_co2m_, DBG_fn_co2m_ + "\n");
+  DBG_printToFile(DBG_fn_pcfs_, DBG_fn_pcfs_ + "\n");
 }
 
 void TrustRegionModel::moveToBestPoint() {
@@ -128,11 +139,11 @@ VectorXd TrustRegionModel::measureCriticality() {
   VectorXd xmin = ub_.cwiseMin(xmax);
   VectorXd xdiff = xmin - tr_center_pt;
 
-  DBG_printVectorXd(mMatrix.g,    "mMatrix.g:    ", "% 10.3e ", DBG_fn_mdat_);
-  DBG_printVectorXd(tr_center_pt, "tr_center_pt: ", "% 10.3e ", DBG_fn_mdat_);
-  DBG_printVectorXd(xmax,         "xmax:         ", "% 10.3e ", DBG_fn_mdat_);
-  DBG_printVectorXd(xmin,         "xmin:         ", "% 10.3e ", DBG_fn_mdat_);
-  DBG_printVectorXd(xdiff,        "xdiff:        ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(mMatrix.g,    "mMat.g:  ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(tr_center_pt, "ctr_pt:  ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xmax,         "xmax:    ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xmin,         "xmin:    ", "% 10.3e ", DBG_fn_mdat_);
+  DBG_printVectorXd(xdiff,        "xdiff:   ", "% 10.3e ", DBG_fn_mdat_);
 
   return xdiff;
 }
@@ -163,13 +174,13 @@ ModelMatrix TrustRegionModel::getModelMatrices(int m) {
 bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
 
   // factor b/e radius & criticality measure
-  double mu = settings_->parameters().tr_criticality_mu;
+  double mu = settings_->parameters().tr_crit_mu;
 
   // factor used to reduce radius
-  double omega = settings_->parameters().tr_criticality_omega;
+  double omega = settings_->parameters().tr_crit_omega;
 
   // Ensure the final radius reduction is not drastic
-  double beta = settings_->parameters().tr_criticality_beta;
+  double beta = settings_->parameters().tr_crit_beta;
 
   // Tolerance of TR algorithm
   double tol_radius = settings_->parameters().tr_tol_radius;
@@ -345,6 +356,7 @@ bool TrustRegionModel::rebuildModel() {
 
   int dim = (int)all_points_.rows();
   int n_points = (int)all_points_.cols();
+
   if (tr_center_ != 0) {
     //!<Center will be first>
     all_points_.col(0).swap(all_points_.col(tr_center_));
@@ -390,7 +402,7 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<Starting rowPivotGaussianElimination>
 
-  double pivot_threshold = settings_->parameters().tr_pivot_threshold * std::fmin(1, radius_);
+  double pivot_threshold = settings_->parameters().tr_pivot_thld * std::fmin(1, radius_);
 
   int polynomials_num = pivot_polynomials_.size();
   pivot_values_.conservativeResize(polynomials_num);
@@ -418,7 +430,7 @@ bool TrustRegionModel::rebuildModel() {
       block_beginning = 1;
       block_end = dim;
 
-      max_layer = std::min(2 * settings_->parameters().tr_radius_factor, distance_farthest_point);
+      max_layer = std::min(2 * settings_->parameters().tr_radius_fac, distance_farthest_point);
       if (iter > dim) {
         //!< We already tested all linear terms.
         //!< We do not have points to build a FL model.
@@ -427,7 +439,7 @@ bool TrustRegionModel::rebuildModel() {
       }
 
     } else { //!<Quadratic block -- being more carefull>
-      max_layer = min(settings_->parameters().tr_radius_factor, distance_farthest_point);
+      max_layer = min(settings_->parameters().tr_radius_fac, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
     }
@@ -536,9 +548,9 @@ bool TrustRegionModel::rebuildModel() {
 
 bool TrustRegionModel::improveModelNfp() {
 
-  auto rel_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  auto rel_pivot_threshold = settings_->parameters().tr_pivot_thld;
   auto tol_radius = settings_->parameters().tr_tol_radius;
-  auto radius_factor = settings_->parameters().tr_radius_factor;
+  auto radius_factor = settings_->parameters().tr_radius_fac;
 
   auto radius = radius_;
   auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);
@@ -772,7 +784,7 @@ int TrustRegionModel::ensureImprovement() {
       cerr << "success: " << success << endl; // dbg
       cerr << "improvement_cases size: " << improvement_cases_.size() << endl; // dbg
     } // dbg
-      
+
 
     if ((success) || (!success && improvement_cases_.size() > 0)) {
       exit_flag = 1;
@@ -831,7 +843,7 @@ bool TrustRegionModel::isLambdaPoised() {
   int dim = (int)points_abs_.rows();
   int points_num = (int)points_abs_.cols();
 
-  double pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  double pivot_threshold = settings_->parameters().tr_pivot_thld;
   bool result = false;
 
   if (!settings_->parameters().tr_basis.compare("dummy")) {
@@ -841,7 +853,7 @@ bool TrustRegionModel::isLambdaPoised() {
     //!<Fully linear, already>
     result = true;
     //!<but lets double check>
-//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_pivot_threshold) {
+//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_pivot_thld) {
 //            Printer::ext_warn("Low pivot values.", "Optimization", "TrustRegionOptimization");
 //        }
   } else {
@@ -857,7 +869,7 @@ int TrustRegionModel::changeTrCenter(
   int pt_i = 0;
   bool point_added = false;
   bool point_exchanged = false;
-  double relative_pivot_threshold = settings_->parameters().tr_pivot_threshold;
+  double relative_pivot_threshold = settings_->parameters().tr_pivot_thld;
   int exit_flag = 0;
 
   if (!isComplete()) {
@@ -940,7 +952,7 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
 int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
   int exit_flag = 0;
   bool point_added = false;
-  double relative_pivot_threshold = settings_->parameters().tr_add_threshold;
+  double relative_pivot_threshold = settings_->parameters().tr_add_thld;
 
   if (!isComplete()) {
     //!<Add this point>
@@ -1515,7 +1527,6 @@ double TrustRegionModel::evaluatePolynomial(
   DBG_printVectorXd(xt, "c --    gx    --    xHx:    ", "% 10.3e ", DBG_fn_pivp_);
 
   return terms[0] + terms[1] + terms[2];
-
 }
 
 Polynomial TrustRegionModel::addPolynomial(
@@ -1704,24 +1715,24 @@ string TrustRegionModel::DBG_printSettingsData(string msg) {
 
   ss << "tr parameters      " << " & " << "value" << "\\\\ \\toprule \n";
   // ss << "tr\\_prob\\_name:  " << " &  " << getParams().tr_prob_name << " \\\\ \n";
-  ss << "tr\\_init\\_rad:   " << " & $" << DBG_printDouble(getParams().tr_initial_radius) << " $ \\\\ \n";
+  ss << "tr\\_init\\_rad:   " << " & $" << DBG_printDouble(getParams().tr_init_rad) << " $ \\\\ \n";
   ss << "tr\\_tol\\_f:      " << " & $" << DBG_printDouble(getParams().tr_tol_f) << " $ \\\\ \n";
   ss << "tr\\_eps\\_c:      " << " & $" << DBG_printDouble(getParams().tr_eps_c) << " $ \\\\ \n";
   ss << "tr\\_eta\\_0:      " << " & $" << DBG_printDouble(getParams().tr_eta_0) << " $ \\\\ \n";
   ss << "tr\\_eta\\_1:      " << " & $" << DBG_printDouble(getParams().tr_eta_1) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_piv\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_pivot_threshold) << " $ \\\\ \n";
-  ss << "tr\\_add\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_add_threshold) << " $ \\\\ \n";
-  ss << "tr\\_exch\\_thresh:" << " & $" << DBG_printDouble(getParams().tr_exchange_threshold) << " $ \\\\ \n";
+  ss << "tr\\_piv\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_pivot_thld) << " $ \\\\ \n";
+  ss << "tr\\_add\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_add_thld) << " $ \\\\ \n";
+  ss << "tr\\_exch\\_thresh:" << " & $" << DBG_printDouble(getParams().tr_exch_thld) << " $ \\\\ \n";
   ss << "tr\\_rad\\_max:    " << " & $" << DBG_printDouble(getParams().tr_radius_max) << " $ \\\\ \n";
-  ss << "tr\\_rad\\_factor: " << " & $" << DBG_printDouble(getParams().tr_radius_factor) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_rad\\_factor: " << " & $" << DBG_printDouble(getParams().tr_radius_fac) << " $ \\\\ \\midrule \n";
   ss << "tr\\_tol\\_rad:    " << " & $" << DBG_printDouble(getParams().tr_tol_radius) << " $ \\\\ \n";
   ss << "tr\\_gamma\\_inc:  " << " & $" << DBG_printDouble(getParams().tr_gamma_inc) << " $ \\\\ \n";
   ss << "tr\\_gamma\\_dec:  " << " & $" << DBG_printDouble(getParams().tr_gamma_dec) << " $ \\\\ \n";
-  ss << "tr\\_crit\\_mu:    " << " & $" << DBG_printDouble(getParams().tr_criticality_mu) << " $ \\\\ \n";
-  ss << "tr\\_crit\\_omega: " << " & $" << DBG_printDouble(getParams().tr_criticality_omega) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_crit\\_beta:  " << " & $" << DBG_printDouble(getParams().tr_criticality_beta) << " $ \\\\ \n";
-  ss << "tr\\_lower\\_b:    " << " & $" << DBG_printDouble(getParams().tr_lower_bound) << " $ \\\\ \n";
-  ss << "tr\\_upper\\_b:    " << " & $" << DBG_printDouble(getParams().tr_upper_bound) << " $ \\\\ \\bottomrule";
+  ss << "tr\\_crit\\_mu:    " << " & $" << DBG_printDouble(getParams().tr_crit_mu) << " $ \\\\ \n";
+  ss << "tr\\_crit\\_omega: " << " & $" << DBG_printDouble(getParams().tr_crit_omega) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_crit\\_beta:  " << " & $" << DBG_printDouble(getParams().tr_crit_beta) << " $ \\\\ \n";
+  ss << "tr\\_lower\\_b:    " << " & $" << DBG_printDouble(getParams().tr_lower_bnd) << " $ \\\\ \n";
+  ss << "tr\\_upper\\_b:    " << " & $" << DBG_printDouble(getParams().tr_upper_bnd) << " $ \\\\ \\bottomrule";
 
   DBG_printToFile(DBG_fn_sdat_, ss.str());
   return ss.str();
@@ -1864,14 +1875,14 @@ bool TrustRegionModel::isOld() {
   distance = points_abs_.col(0) - points_abs_.col(tr_center_);
 
   auto dist = distance.lpNorm<Infinity>();
-  auto tr_rad_fac = settings_->parameters().tr_radius_factor;
+  auto tr_rad_fac = settings_->parameters().tr_radius_fac;
   auto is_old = (dist > tr_rad_fac);
 
   return is_old;
 }
 
 bool TrustRegionModel::chooseAndReplacePoint() {
-  double pivot_threshold = settings_->parameters().tr_exchange_threshold;
+  double pivot_threshold = settings_->parameters().tr_exch_thld;
   double radius = radius_;
 
   int dim = (int)points_shifted_.rows();

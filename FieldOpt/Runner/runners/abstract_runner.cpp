@@ -47,11 +47,6 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Runner {
 
-using Printer::info;
-using Printer::ext_info;
-using Printer::num2str;
-using std::runtime_error;
-
 using OptzrMod = Settings::Optimizer::OptimizerMode;
 using OptzrTyp = Settings::Optimizer::OptimizerType;
 
@@ -114,16 +109,16 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
-    ensemble_helper_ =
-      EnsembleHelper(settings_->simulator()->get_ensemble(),
-        settings_->optimizer()->parameters().rng_seed);
+    ensemble_helper_ = EnsembleHelper(
+      settings_->simulator()->get_ensemble(),
+      settings_->optimizer()->parameters().rng_seed);
   } else {
     is_ensemble_run_ = false;
   }
 }
 
 void AbstractRunner::InitializeModel() {
-  if (settings_ == nullptr) { E("Settings must be initialized b/f Model."); }
+  if (settings_ == nullptr) { E("Settings must be initialized b/f Model.", md_, cl_); }
 
   if (is_ensemble_run_) {
     settings_->paths().SetPath(Paths::GRID_FILE,
@@ -134,7 +129,7 @@ void AbstractRunner::InitializeModel() {
 }
 
 void AbstractRunner::InitializeSimulator() {
-  if (model_ == nullptr) { E("Model must be initialized b/f Simulator."); }
+  if (model_ == nullptr) { E("Model must be initialized b/f Simulator.", md_, cl_); }
 
   switch (settings_->simulator()->type()) {
 
@@ -166,12 +161,14 @@ void AbstractRunner::InitializeSimulator() {
       break;
     }
 
-    default: { E("Simulator not initialized: type set in JSON driver not recognized."); }
+    default: { E("Simulator not initialized: type set in JSON driver not recognized.", md_, cl_); }
   }
 }
 
 void AbstractRunner::EvaluateBaseModel() {
-  if (simulator_ == nullptr) { E("Simulator must be initialized b/f evaluating base model."); }
+  if (simulator_ == nullptr) {
+    E("Simulator must be initialized b/f evaluating base model.", md_, cl_);
+  }
 
   if (is_ensemble_run_) {
     im_ = "Simulating ensemble base case.";
@@ -189,7 +186,7 @@ void AbstractRunner::EvaluateBaseModel() {
 
 void AbstractRunner::InitializeObjectiveFunction() {
   if (simulator_ == nullptr || settings_ == nullptr) {
-    E("Simulator & Settings must be initialized b/f ObjectiveFunction.");
+    E("Simulator & Settings must be initialized b/f ObjectiveFunction.", md_, cl_);
   }
 
   switch (settings_->optimizer()->objective().type) {
@@ -215,14 +212,13 @@ void AbstractRunner::InitializeObjectiveFunction() {
       break;
     }
 
-    default: { E("Runner not initialized: ObjectiveFunction type not recognized."); }
+    default: { E("Runner not initialized: ObjectiveFunction type not recognized.", md_, cl_); }
   }
 }
 
 void AbstractRunner::InitializeBaseCase() {
   if (objf_ == nullptr || model_ == nullptr) {
-    string em = "ObjectiveFunction and Model must be initialized before BaseCase.";
-    throw runtime_error(em);
+    E("ObjectiveFunction and Model must be initialized before BaseCase.", md_, cl_);
   }
   base_case_ = new Optimization::Case(model_->variables()->GetBinVarValues(),
                                       model_->variables()->GetDiscVarValues(),
@@ -252,25 +248,24 @@ void AbstractRunner::InitializeBaseCase() {
 
 void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
-    E("Base Case and Model must be initialized before the Optimizer");
+    E("Base Case and Model must be initialized before the Optimizer", md_, cl_);
   }
 
   switch (settings_->optimizer()->type()) {
 
     case OptzrTyp::Compass: {
-      if (vp_.vRUN >= 1) info("Using CompassSearch optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using CompassSearch.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
                                             base_case_,
                                             model_->variables(),
                                             model_->grid(),
                                             logger_,
                                             nullptr,
-                                            model_->constraintHandler()
-      );
+                                            model_->constraintHandler());
       break;
     }
     case OptzrTyp::APPS: {
-      if (vp_.vRUN >= 1) info("Using APPS optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using APPS.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::APPS(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
@@ -281,19 +276,30 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::PSO: {
-      if (vp_.vRUN >= 1) info("Using PSO optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using PSO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::PSO(settings_->optimizer(),
                                   base_case_,
                                   model_->variables(),
                                   model_->grid(),
                                   logger_,
                                   nullptr,
-                                  model_->constraintHandler()
-                                 );
+                                  model_->constraintHandler());
+      break;
+    }
+    case OptzrTyp::TrustRegionOptimization: {
+      if (vp_.vRUN >= 1) { ext_info("Using Trust Region DFO.", md_, cl_, vp_.lnw); }
+      optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
+                                                      base_case_,
+                                                      model_->variables(),
+                                                      model_->grid(),
+                                                      logger_,
+                                                      nullptr,
+                                                      model_->constraintHandler()
+      );
       break;
     }
     case OptzrTyp::GeneticAlgorithm: {
-      if (vp_.vRUN >= 1) info("Using GeneticAlgorithm optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using GA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::RGARDD(settings_->optimizer(),
                                      base_case_,
                                      model_->variables(),
@@ -303,7 +309,7 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::EGO: {
-      if (vp_.vRUN >= 1) info("Using EGO optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using EGO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::BayesianOptimization::EGO(settings_->optimizer(),
                                                         base_case_,
                                                         model_->variables(),
@@ -313,7 +319,7 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::ExhaustiveSearch2DVert: {
-      if (vp_.vRUN >= 1) info("Using ExhaustiveSearch2DVert optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using ExhaustiveSearch2DVert.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::ExhaustiveSearch2DVert(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
@@ -323,7 +329,7 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::Hybrid: {
-      if (vp_.vRUN >= 1) info("Using Hybrid optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using Hybrid optimization.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
@@ -332,18 +338,8 @@ void AbstractRunner::InitializeOptimizer() {
       );
       break;
     }
-    case OptzrTyp::TrustRegionOptimization: {
-      if (vp_.vRUN >= 1) info("Using Trust Region optimization algorithm.", vp_.lnw);
-      optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
-                                                      base_case_,
-                                                      model_->variables(),
-                                                      model_->grid(),
-                                                      logger_
-      );
-      break;
-    }
     case OptzrTyp::CMA_ES: {
-      if (vp_.vRUN >= 1) info("Using CMA_ES optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using CMA_ES.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::CMA_ES(settings_->optimizer(),
                                      base_case_,
                                      model_->variables(),
@@ -353,7 +349,7 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::VFSA: {
-      if (vp_.vRUN >= 1) info("Using VFSA optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using VFSA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::VFSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
@@ -363,7 +359,7 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::SPSA: {
-      if (vp_.vRUN >= 1) info("Using SPSA optimization algorithm.", vp_.lnw);
+      if (vp_.vRUN >= 1) { ext_info("Using SPSA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::SPSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
@@ -374,8 +370,8 @@ void AbstractRunner::InitializeOptimizer() {
     }
     default: {
       string em = "Unable to initialize runner: ";
-      em += "Optimization algorithm set in driver file not recognized.";
-      E(em);
+      em += "Algorithm type in driver file not recognized.";
+      E(em, md_, cl_);
     }
 
   }
@@ -385,11 +381,9 @@ void AbstractRunner::InitializeOptimizer() {
 
 void AbstractRunner::InitializeBookkeeper() {
   if (settings_ == nullptr || optimizer_ == nullptr) {
-    E("Settings and Optimizer must be initialized before the Bookkeeper.");
+    E("Settings and Optimizer must be initialized before the Bookkeeper.", md_, cl_);
   }
-
-  bookkeeper_ = new Bookkeeper(settings_,
-                               optimizer_->case_handler());
+  bookkeeper_ = new Bookkeeper(settings_,optimizer_->case_handler());
 }
 
 void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
@@ -402,7 +396,7 @@ void AbstractRunner::PrintCompletionMessage() {
     case Optimization::Optimizer::TerminationCondition::MAX_EVALS_REACHED:
       cout << "maximum number of evaluations reached (not converged)." << endl;
       break;
-    case Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED:
+    case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
       cout << "minimum step length reached (converged)." << endl;
       break;
     default: cout << "Unknown termination reason." << endl;
