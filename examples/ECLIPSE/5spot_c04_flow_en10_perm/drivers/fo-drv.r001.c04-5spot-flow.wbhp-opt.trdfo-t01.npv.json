@@ -3,7 +3,7 @@
     "Name": "c04-5spot-flow.wbhp-opt.trdfo-test",
     "BookkeeperTolerance": 1e-12,
     "VerbConf": {
-      "iBoxLineWidth": 140,
+      "iBoxLineWidth": 163,
       "Model": 1,
       "Optim": 1,
       "WICal": 1,

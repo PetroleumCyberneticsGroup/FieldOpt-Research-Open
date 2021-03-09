@@ -32,13 +32,18 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 
+using Printer::ext_info;
+using Printer::num2str;
+
+using Constraints::ConstraintHandler;
+
 Optimizer::Optimizer(Settings::Optimizer *opt_settings,
-    Case *base_case,
-    Model::Properties::VarPropContainer *variables,
-    Reservoir::Grid::Grid *grid,
-    Logger *logger,
-    CaseHandler *case_handler,
-    Constraints::ConstraintHandler *constraint_handler) {
+                     Case *base_case,
+                     Model::Properties::VarPropContainer *variables,
+                     Reservoir::Grid::Grid *grid,
+                     Logger *logger,
+                     CaseHandler *case_handler,
+                     Constraints::ConstraintHandler *constraint_handler) {
 
   // Verify that the base case has been evaluated.
   try {
@@ -50,27 +55,37 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   }
 
   max_evaluations_ = opt_settings->parameters().max_evaluations;
-  tentative_best_case_ = base_case;
   tentative_best_case_iteration_ = 0;
-  if (case_handler == 0) {
-    case_handler_ = new CaseHandler(tentative_best_case_);
+  seconds_spent_in_iterate_ = 0;
 
+  // CONSTRAINT HANDLER ------------------------------------
+  // Moved constraint handliner initialization to Model
+  // if (constraint_handler == nullptr) {
+  //   constraint_handler_ = new ConstraintHandler(opt_settings,
+  //                                               variables, grid);
+  // } else {
+  //   ext_info("Using shared ConstraintHandler.", md_, cl_);
+  // }
+  if (constraint_handler != nullptr) {
+    constraint_handler_ = constraint_handler;
   } else {
-    Printer::ext_info("Using shared CaseHandler.",
-                      "Optimizer", "Optimization");
+    im_ = "constraint_handler == nullptr in constructor call ";
+    im_ += "(ok for tests).";
+    ext_warn(im_, md_, cl_, vp_.lnw);
+  }
+
+  // BASE CASE -> NEW CASE ---------------------------------
+  tentative_best_case_ = base_case;
+
+  if (case_handler == nullptr) {
+    case_handler_ = new CaseHandler(tentative_best_case_);
+  } else {
+    ext_info("Using shared CaseHandler.", md_, cl_);
     case_handler_ = case_handler;
     is_hybrid_component_ = true;
   }
 
-  if (constraint_handler == 0) {
-    // constraint_handler_ = new Constraints::ConstraintHandler(opt_settings->constraints(), variables, grid);
-    constraint_handler_ = new Constraints::ConstraintHandler(opt_settings, variables, grid);
-
-  } else {
-    Printer::ext_info("Using shared ConstraintHandler.",
-                      "Optimizer", "Optimization");
-    constraint_handler_ = constraint_handler;
-  }
+  // ITERATION ---------------------------------------------
   iteration_ = 0;
   evaluated_cases_ = 0;
   mode_ = opt_settings->mode();
@@ -80,13 +95,16 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   start_time_ = QDateTime::currentDateTime();
   logger_ = logger;
   enable_logging_ = true;
-  verbosity_level_ = 0;
+
+  vp_ = opt_settings->verbParams();
+
+  // PENALIZATION ------------------------------------------
   penalize_ = opt_settings->objective().use_penalty_function;
 
   if (penalize_) {
     if (!normalizer_ofv_.is_ready()) {
-      if (VERB_OPT >=1) {
-        Printer::ext_info("Initializing normalizers", "Optimization", "Optimizer");
+      if (vp_.vOPT >= 1) {
+        ext_info("Initializing normalizers", md_, cl_);
       }
       initializeNormalizers();
 
@@ -94,36 +112,42 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
       double org_ofv = tentative_best_case_->objf_value();
       double pen_ofv = PenalizedOFV(tentative_best_case_);
       tentative_best_case_->set_objf_value(pen_ofv);
-      if (VERB_OPT >=1) {
-        Printer::ext_info("Penalized base case. "
-                          "Original value: " + Printer::num2str(org_ofv) + "; "
-                              + "Penalized value: " + Printer::num2str(pen_ofv), "Optimization", "Optimizer");
+      if (vp_.vOPT >= 1) {
+        im_ = "Penalized base case. Orig.val=" + num2str(org_ofv);
+        im_ += "; Pen.val=" + num2str(pen_ofv);
+        ext_info(im_, md_, cl_);
       }
     }
   }
 }
 
-Case *Optimizer::GetCaseForEvaluation() {
+Settings::Optimizer::OptimizerType TR_DFO =
+  Settings::Optimizer::OptimizerType::TrustRegionOptimization;
 
-  if (case_handler_->QueuedCases().size() == 0) {
+Settings::Optimizer::OptimizerType DFTR =
+  Settings::Optimizer::OptimizerType::DFTR;
+
+Case *Optimizer::GetCaseForEvaluation() {
+  if (case_handler_->QueuedCases().empty()) {
     time_t start, end;
     time(&start);
     iterate();
     time(&end);
-    seconds_spent_in_iterate_ = difftime(end, start);
+    seconds_spent_in_iterate_ = (int)difftime(end, start);
   }
 
-  if (IsFinished() || (case_handler_->QueuedCases().size() == 0)) {
-    if (VERB_OPT >= 3) {
-      std::cout << "IsFinished() => " << IsFinished() << std::endl;
-      std::cout << "(case_handler_->QueuedCases().size() == 0) => "
-                << (case_handler_->QueuedCases().size() == 0) << std::endl;
+  if (IsFinished() || (case_handler_->QueuedCases().empty())) {
+    if (vp_.vOPT >= 3) {
+      im_ = "IsFinished() => ";
+      im_ += (IsFinished() == NOT_FINISHED) ? "NOT_FINISHED" : "FINISHED";
+      im_ += "(case_handler_->QueuedCases().size() == 0) => ";
+      im_ += case_handler_->QueuedCases().empty() ? "ENPTY" : "NOT-ENPTY";
+      ext_info(im_, md_, cl_);
     }
-    if (type_ == ::Settings::Optimizer::OptimizerType::TrustRegionOptimization) {
+    if (type_ == TR_DFO || type_ == DFTR) {
       return nullptr;
     }
   }
-
   return case_handler_->GetNextCaseForEvaluation();
 }
 
@@ -182,9 +206,10 @@ QString Optimizer::GetStatusString() const {
       .arg(tentative_best_case_->objf_value());
 }
 
-void Optimizer::EnableConstraintLogging(QString output_directory_path) {
-  for (Constraints::Constraint *con : constraint_handler_->constraints())
-    con->EnableLogging(output_directory_path);
+void Optimizer::EnableConstraintLogging(const QString& output_dir_path) {
+  for (Constraints::Constraint *con : constraint_handler_->constraints()) {
+    con->EnableLogging(output_dir_path);
+  }
 }
 
 int Optimizer::GetSimulationDuration(Case *c) {
@@ -227,18 +252,32 @@ Loggable::LogTarget Optimizer::Summary::GetLogTarget() {
 }
 
 map<string, string> Optimizer::Summary::GetState() {
+
   map<string, string> statemap  = ext_state_;
   statemap["Start"] = timestamp_string(opt_->start_time_);
   statemap["Duration"] = timespan_string(
       time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
   );
   statemap["End"] = timestamp_string(QDateTime::currentDateTime());
+
   switch (cond_) {
-    case MAX_EVALS_REACHED: statemap["Term. condition"] = "Reached max. sims"; break;
-    case MINIMUM_STEP_LENGTH_REACHED: statemap["Term. condition"] = "Reached min. step length"; break;
-    case MAX_ITERATIONS_REACHED: statemap["Term. condition"] = "Reached max. iterations"; break;
-    default: statemap["Term. condition"] = "Unknown";
+    case MAX_EVALS_REACHED: {
+      statemap["Term. condition"] = "Reached max. sims";
+      break;
+    }
+    case MIN_STEP_LENGTH_REACHED: {
+      statemap["Term. condition"] = "Reached min. step length";
+      break;
+    }
+    case MAX_ITERS_REACHED: {
+      statemap["Term. condition"] = "Reached max. iterations";
+      break;
+    }
+    default: {
+      statemap["Term. condition"] = "Unknown";
+    }
   }
+
   statemap["bc Best case found in iter"] = boost::lexical_cast<string>(opt_->tentative_best_case_iteration_);
   statemap["bc UUID"] = opt_->tentative_best_case_->GetId().toString().toStdString();
   statemap["bc Objective function value"] = boost::lexical_cast<string>(opt_->tentative_best_case_->objf_value());
@@ -269,12 +308,17 @@ void Optimizer::updateTentativeBestCase(Case *c) {
 
 void Optimizer::initializeNormalizers() {
   initializeOfvNormalizer();
-  constraint_handler_->InitializeNormalizers(case_handler_->AllCases());
+  if (constraint_handler_ != nullptr) { // All actual cases, i.e., not unit tests
+    constraint_handler_->InitializeNormalizers(case_handler_->AllCases());
+  }
 }
 
 void Optimizer::initializeOfvNormalizer() {
-  if (case_handler_->EvaluatedCases().size() == 0 || normalizer_ofv_.is_ready())
-    throw runtime_error("Unable to initialize normalizer with no evaluated cases available.");
+  if (case_handler_->EvaluatedCases().empty()
+  || normalizer_ofv_.is_ready()) {
+    em_ = "Unable to initialize normalizer with no evaluated cases available.";
+    throw runtime_error(em_);
+  }
 
   vector<double> abs_ofvs;
   for (auto c : case_handler_->EvaluatedCases()) {
@@ -288,27 +332,24 @@ void Optimizer::initializeOfvNormalizer() {
 }
 
 double Optimizer::PenalizedOFV(Case *c) {
-    long double norm_ofv = normalizer_ofv_.normalize(c->objf_value());
-    long double penalty = constraint_handler_->GetWeightedNormalizedPenalties(c);
-    long double norm_pen_ovf = norm_ofv - penalty;
-    double denormalized_ofv = normalizer_ofv_.denormalize(norm_pen_ovf);
+  long double norm_ofv = normalizer_ofv_.normalize(c->objf_value());
+  long double penalty = constraint_handler_->GetWeightedNormalizedPenalties(c);
+  long double norm_pen_ovf = norm_ofv - penalty;
+  double denormalized_ofv = normalizer_ofv_.denormalize(norm_pen_ovf);
 
-    if (VERB_OPT >= 2) {
-        Printer::ext_info("Penalized case "     + c->id().toString().toStdString()                + ". "
-                "Initial OFV: "                 + Printer::num2str(c->objf_value()) + "; "
-                "Normalized OFV :"              + Printer::num2str(norm_ofv)                      + "; "
-                "Normalized penalty: "          + Printer::num2str(penalty)                       + "; "
-                "Penalized, normalized OFV: "   + Printer::num2str(norm_pen_ovf)                  + "; "
-                "Denormalized, penalized OFV: " + Printer::num2str(denormalized_ofv), "Optimization", "Optimizer");
-    }
+  if (vp_.vOPT >= 3) {
+    im_ = "Penalized case " + c->id().toString().toStdString()  + ". ";
+    im_ += "Initial OFV: " + num2str(c->objf_value()) + "; ";
+    im_ += "Normalized OFV :" + num2str(norm_ofv) + "; ";
+    ext_info(im_, md_, cl_);
+  }
 
-    if (norm_pen_ovf <= 0.0L) {
-        cout << "RETURNING ZERO OFV" << endl;
-        return 0.0;
-    }
-    else {
-        return denormalized_ofv;
-    }
+  if (norm_pen_ovf <= 0.0L) {
+    cout << "RETURNING ZERO OFV" << endl;
+    return 0.0;
+  } else {
+    return denormalized_ofv;
+  }
 }
 
 void Optimizer::DisableLogging() {

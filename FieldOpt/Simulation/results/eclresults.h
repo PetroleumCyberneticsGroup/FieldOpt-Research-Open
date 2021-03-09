@@ -67,7 +67,7 @@ class ECLResults : public Results
   Settings::Settings* settings_;
 
   string im_ = "", wm_ = "", em_ = "";
-  string cl_ = "eclresults";
+  string cl_ = "ECLResults";
 };
 
 }

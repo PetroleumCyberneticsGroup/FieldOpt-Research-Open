@@ -31,7 +31,13 @@ namespace Constraints {
 MxSplineLengthInterwDist::
 MxSplineLengthInterwDist(Settings::Optimizer::Constraint settings,
                          Model::Properties::VarPropContainer *variables,
-                         Settings::VerbParams vp) : Constraint(vp) {
+                         Settings::VerbParams vp)
+                         : Constraint(vp) {
+
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding MxWSplineLengthInterwDist constraint.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 
   max_iterations_ = settings.max_iterations;
   Settings::Optimizer::Constraint dist_constr_settings;
@@ -39,12 +45,12 @@ MxSplineLengthInterwDist(Settings::Optimizer::Constraint settings,
   dist_constr_settings.min = settings.min_distance;
   distance_constraint_ = new InterwDist(dist_constr_settings, variables, vp);
 
-  if (vp_.vOPT >= 2){
-    std::cout << "... ... initialized distance constraint for wells: ";
-    for (QString wname : settings.wells) {
-      std::cout << wname.toStdString() << ", ";
+  if (vp_.vOPT >= 3) {
+    im_ = "... ... initialized distance constraint for wells: ";
+    for (const QString& wname : settings.wells) {
+      im_ += wname.toStdString() + ", ";
     }
-    std::cout << std::endl;
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   length_constraints_ = QList<WSplineLength *>();

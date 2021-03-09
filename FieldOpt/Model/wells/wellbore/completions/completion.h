@@ -32,6 +32,9 @@ namespace Wells {
 namespace Wellbore {
 namespace Completions {
 
+using Printer::ext_warn;
+using Printer::num2str;
+
 /*!
  * \brief The Completion class is the superclass for all
  * completions, e.g. perforations and ICDs.
@@ -42,17 +45,26 @@ namespace Completions {
  */
 class Completion
 {
-public:
+ public:
 
-    enum CompletionType : int { Perforation=1001, ICV=1002, Packer=1003, Tubing=1004, Annulus=1005 };
-    CompletionType type() const { return type_; } //!< Get the type of completion, e.g. Perforation.
+  enum CompletionType : int { Perforation=1001,
+    ICV=1002, Packer=1003, Tubing=1004, Annulus=1005 };
 
-protected:
-    Completion(::Settings::Model::Well::Completion completion_settings);
-    Completion(CompletionType type);
+  //!< Get the type of completion, e.g. Perforation.
+  CompletionType type() const { return type_; }
 
-private:
-    CompletionType type_;
+ protected:
+  explicit Completion(::Settings::Model::Well::Completion completion_settings);
+  explicit Completion(CompletionType type);
+
+  Settings::VerbParams vp_;
+
+  string md_ = "Model::Wells::Wellbore::Completions";
+  string cl_ = "Completion";
+  string im_ = "", wm_ = "", em_ = "";
+
+ private:
+  CompletionType type_;
 };
 
 }

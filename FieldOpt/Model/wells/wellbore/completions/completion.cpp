@@ -30,17 +30,28 @@ namespace Wellbore {
 namespace Completions {
 
 Completion::Completion(Settings::Model::Well::Completion completion_settings) {
+  vp_ = completion_settings.verb_params_;
+
   switch (completion_settings.type) {
     case Settings::Model::WellCompletionType::Perforation:
-      type_ = CompletionType::Perforation; break;
+      type_ = CompletionType::Perforation;
+      break;
+
     case Settings::Model::WellCompletionType::ICV:
-      type_ = CompletionType::ICV; break;
+      type_ = CompletionType::ICV;
+      break;
+
     case Settings::Model::WellCompletionType::Packer:
-      type_ = CompletionType::Packer; break;
+      type_ = CompletionType::Packer;
+      break;
+
     case Settings::Model::WellCompletionType::Annulus:
-      type_ = CompletionType::Annulus; break;
+      type_ = CompletionType::Annulus;
+      break;
+
     case Settings::Model::WellCompletionType::Tubing:
-      type_ = CompletionType::Tubing; break;
+      type_ = CompletionType::Tubing;
+      break;
     default:
       throw std::runtime_error("Completion type not recognized.");
   }

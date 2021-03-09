@@ -34,8 +34,9 @@ class ConstraintHandlerTest : public ::testing::Test,
                               public TestResources::TestResourceGrids {
  protected:
   ConstraintHandlerTest() {
-    constraint_handler_ = new Optimization::Constraints::ConstraintHandler(
-      settings_optimizer_, model_->variables(), grid_5spot_);
+    constraint_handler_ = new ::Optimization::Constraints::ConstraintHandler(settings_optimizer_,
+                                                                             model_->variables(),
+                                                                             grid_5spot_);
   }
   virtual ~ConstraintHandlerTest() {}
   virtual void SetUp() {}

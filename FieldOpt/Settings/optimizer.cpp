@@ -41,6 +41,7 @@ namespace Settings {
 
 using std::runtime_error;
 using Printer::ext_warn;
+using Printer::E;
 
 Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   vp_=vp;
@@ -50,6 +51,8 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   QJsonObject json_objective = json_optimizer["Objective"].toObject();
   QJsonArray json_constraints = json_optimizer["Constraints"].toArray();
   QString type = json_optimizer["Type"].toString();
+
+  scaling_ = json_optimizer["ScaleVars"].toBool();
 
   type_ = parseType(type);
 
@@ -81,102 +84,112 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
 Optimizer::Constraint
 Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
-  Constraint optimizer_constraint = Constraint();
+  Constraint optmzr_constraint = Constraint();
+
+  optmzr_constraint.scaling_ = scaling_;
 
   if (json_constraint.contains("Well")) {
-    optimizer_constraint.well = json_constraint["Well"].toString();
-    optimizer_constraint.wells.append(optimizer_constraint.well);
+    optmzr_constraint.well = json_constraint["Well"].toString();
+    optmzr_constraint.wells.append(optmzr_constraint.well);
 
   } else if (json_constraint.contains("Wells") &&
       json_constraint["Wells"].isArray()) {
 
     if (json_constraint["Wells"].toArray().size() == 1) {
-      optimizer_constraint.well =
+      optmzr_constraint.well =
           json_constraint["Wells"].toArray()[0].toString();
     }
 
     for (auto wname : json_constraint["Wells"].toArray()) {
-      optimizer_constraint.wells.append(wname.toString());
+      optmzr_constraint.wells.append(wname.toString());
     }
 
   } else {
-    string em = "A constraint must always specify either the Well or the Wells property.";
-    throw runtime_error(em);
+    em_ = "A constraint must always specify either the Well";
+    em_ = " or the Wells property.";
+    throw runtime_error(em_);
   }
 
   // Penalty function weight for the constraint
   if (json_constraint.contains("PenaltyWeight")) {
-    optimizer_constraint.penalty_weight =
+    optmzr_constraint.penalty_weight =
         json_constraint["PenaltyWeight"].toDouble();
 
   } else {
-    optimizer_constraint.penalty_weight = 0.0;
+    optmzr_constraint.penalty_weight = 0.0;
   }
 
   // Constraint types BHP, Rate and Boundary2D
   QString constraint_type = json_constraint["Type"].toString();
   if (QString::compare(constraint_type, "BHP") == 0) {
 
-    optimizer_constraint.type = ConstraintType::BHP;
+    optmzr_constraint.type = ConstraintType::BHP;
     if (json_constraint.contains("Max")) {
-      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
+      set_opt_prop_double(optmzr_constraint.max,
+                          json_constraint, "Max", vp_);
     }
     if (json_constraint.contains("Min")) {
-      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
+      set_opt_prop_double(optmzr_constraint.min,
+                          json_constraint, "Min", vp_);
     }
 
     // Packer- and ICV Constraints
   } else if (QString::compare(constraint_type, "ICVConstraint") == 0) {
 
-    optimizer_constraint.type = ConstraintType::ICVConstraint;
-    set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
+    optmzr_constraint.type = ConstraintType::ICVConstraint;
+    set_opt_prop_double(optmzr_constraint.max,
+                        json_constraint, "Max", vp_);
 
-    if (optimizer_constraint.max >= 7.8540E-03) {
+    if (optmzr_constraint.max >= 7.8540E-03) {
       string wm = "Maximum valve size is too big. Setting it to 7.8539-3.";
       ext_warn(wm, md_, cl_, vp_.lnw);
-      optimizer_constraint.max = 7.8539E-3;
+      optmzr_constraint.max = 7.8539E-3;
     }
-    set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
+    set_opt_prop_double(optmzr_constraint.min,
+                        json_constraint, "Min", vp_);
 
-  } else if (QString::compare(constraint_type, "PackerConstraint") == 0) {
-    optimizer_constraint.type = ConstraintType::PackerConstraint;
+  } else if (CnstrCmp(constraint_type, "PackerConstraint")) {
+    optmzr_constraint.type = ConstraintType::PackerConstraint;
 
   } else if (QString::compare(constraint_type, "Rate") == 0) {
-    optimizer_constraint.type = ConstraintType::Rate;
-    if (json_constraint.contains("Max"))
-      set_opt_prop_double(optimizer_constraint.max, json_constraint, "Max");
-    if (json_constraint.contains("Min"))
-      set_opt_prop_double(optimizer_constraint.min, json_constraint, "Min");
+    optmzr_constraint.type = ConstraintType::Rate;
+    if (json_constraint.contains("Max")) {
+      set_opt_prop_double(optmzr_constraint.max,
+                          json_constraint, "Max", vp_);
+    }
+    if (json_constraint.contains("Min")) {
+      set_opt_prop_double(optmzr_constraint.min,
+                          json_constraint, "Min", vp_);
+    }
 
-  } else if (QString::compare(constraint_type, "Boundary2D") == 0) {
+  } else if (CnstrCmp(constraint_type, "Boundary2D")) {
 
-    optimizer_constraint.type = ConstraintType::PseudoContBoundary2D;
-    set_opt_prop_double(optimizer_constraint.box_imin, json_constraint, "Imin");
-    set_opt_prop_double(optimizer_constraint.box_imax, json_constraint, "Imax");
-    set_opt_prop_double(optimizer_constraint.box_jmin, json_constraint, "Jmin");
-    set_opt_prop_double(optimizer_constraint.box_jmax, json_constraint, "Jmax");
+    optmzr_constraint.type = ConstraintType::PseudoContBoundary2D;
+    set_opt_prop_double(optmzr_constraint.box_imin, json_constraint, "Imin", vp_);
+    set_opt_prop_double(optmzr_constraint.box_imax, json_constraint, "Imax", vp_);
+    set_opt_prop_double(optmzr_constraint.box_jmin, json_constraint, "Jmin", vp_);
+    set_opt_prop_double(optmzr_constraint.box_jmax, json_constraint, "Jmax", vp_);
 
     // Constraint type Well Spline Points
-  } else if (QString::compare(constraint_type, "WellSplinePoints") == 0) {
-    optimizer_constraint.type = ConstraintType::SplinePoints;
+  } else if (CnstrCmp(constraint_type, "WellSplinePoints")) {
+
+    optmzr_constraint.type = ConstraintType::SplinePoints;
 
     // Spline points constraint input type
-    QString optimizer_constraints_spline_points_type =
+    QString optmzr_cnstrnt_spline_pnts_type =
         json_constraint["WellSplinePointsInputType"].toString();
 
-    if (QString::compare(
-        optimizer_constraints_spline_points_type, "Function") == 0) {
+    if (CnstrCmp(optmzr_cnstrnt_spline_pnts_type, "Function")) {
 
-      optimizer_constraint.spline_points_type = ConstraintWellSplinePointsType::Function;
+      optmzr_constraint.spline_points_type = ConstraintWellSplinePointsType::Function;
       json_constraint["Function"].toString();
 
-    } else if (QString::compare(
-        optimizer_constraints_spline_points_type, "MaxMin") == 0) {
+    } else if (CnstrCmp(optmzr_cnstrnt_spline_pnts_type, "MaxMin")) {
 
-      optimizer_constraint.spline_points_type =
+      optmzr_constraint.spline_points_type =
           ConstraintWellSplinePointsType::MaxMin;
 
-      optimizer_constraint.spline_points_limits =
+      optmzr_constraint.spline_points_limits =
           QList<Constraint::RealMaxMinLimit>();
 
       QJsonArray well_spline_point_limits =
@@ -199,7 +212,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
         Constraint::RealMaxMinLimit limit{};
         limit.min = min;
         limit.max = max;
-        optimizer_constraint.spline_points_limits.append(limit);
+        optmzr_constraint.spline_points_limits.append(limit);
       }
 
     } else {
@@ -211,18 +224,18 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       || QString::compare(constraint_type, "PolarWellLength") == 0 ) {
 
     if (constraint_type == "WSplineLength"){
-      optimizer_constraint.type = ConstraintType::WSplineLength;
+      optmzr_constraint.type = ConstraintType::WSplineLength;
     } else {
-      optimizer_constraint.type = ConstraintType::PolarWellLength;
+      optmzr_constraint.type = ConstraintType::PolarWellLength;
     }
 
     if (json_constraint.contains("Min")) {
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
-      optimizer_constraint.min_length = json_constraint["Min"].toDouble();
+      optmzr_constraint.min = json_constraint["Min"].toDouble();
+      optmzr_constraint.min_length = json_constraint["Min"].toDouble();
 
     } else if (json_constraint.contains("MinLength")) {
-      optimizer_constraint.min = json_constraint["MinLength"].toDouble();
-      optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
+      optmzr_constraint.min = json_constraint["MinLength"].toDouble();
+      optmzr_constraint.min_length = json_constraint["MinLength"].toDouble();
     }
     else {
       throw std::runtime_error(
@@ -230,12 +243,12 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
     }
 
     if (json_constraint.contains("Max")) {
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
-      optimizer_constraint.max_length = json_constraint["Max"].toDouble();
+      optmzr_constraint.max = json_constraint["Max"].toDouble();
+      optmzr_constraint.max_length = json_constraint["Max"].toDouble();
 
     } else if (json_constraint.contains("MaxLength")) {
-      optimizer_constraint.max = json_constraint["MaxLength"].toDouble();
-      optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
+      optmzr_constraint.max = json_constraint["MaxLength"].toDouble();
+      optmzr_constraint.max_length = json_constraint["MaxLength"].toDouble();
 
     } else {
       throw std::runtime_error(
@@ -244,18 +257,18 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
   } else if (QString::compare(constraint_type, "WSplineInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::WSplineInterwDist;
+    optmzr_constraint.type = ConstraintType::WSplineInterwDist;
 
     if (json_constraint.contains("Min")) {
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
-      optimizer_constraint.min_distance = json_constraint["Min"].toDouble();
+      optmzr_constraint.min = json_constraint["Min"].toDouble();
+      optmzr_constraint.min_distance = json_constraint["Min"].toDouble();
 
     } else if (json_constraint.contains("MinDistance")) {
-      optimizer_constraint.min = json_constraint["MinDistance"].toDouble();
-      optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
+      optmzr_constraint.min = json_constraint["MinDistance"].toDouble();
+      optmzr_constraint.min_distance = json_constraint["MinDistance"].toDouble();
     }
 
-    if (optimizer_constraint.wells.length() != 2) {
+    if (optmzr_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
           "WSplineInterwDist constraint needs"
           " a Wells array with exactly two well names specified.");
@@ -265,15 +278,15 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       || QString::compare(constraint_type, "PolarElevation") == 0) {
 
     if (constraint_type == "PolarAzimuth") {
-      optimizer_constraint.type = ConstraintType::PolarAzimuth;
+      optmzr_constraint.type = ConstraintType::PolarAzimuth;
     } else {
-      optimizer_constraint.type = ConstraintType::PolarElevation;
+      optmzr_constraint.type = ConstraintType::PolarElevation;
     }
     if (json_constraint.contains("Max")){
-      optimizer_constraint.max = json_constraint["Max"].toDouble();
+      optmzr_constraint.max = json_constraint["Max"].toDouble();
     }
     if (json_constraint.contains("Min")){
-      optimizer_constraint.min = json_constraint["Min"].toDouble();
+      optmzr_constraint.min = json_constraint["Min"].toDouble();
     }
 
   } else if (QString::compare(constraint_type, "ResBoundary") == 0
@@ -281,71 +294,76 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
       || QString::compare(constraint_type, "ReservoirBoundaryToe") == 0) {
 
     if (QString::compare(constraint_type, "ResBoundary") == 0){
-      optimizer_constraint.type = ConstraintType::ReservoirBoundary;
+      optmzr_constraint.type = ConstraintType::ReservoirBoundary;
 
     } else if (QString::compare(constraint_type, "PolarSplineBoundary") == 0){
-      optimizer_constraint.type = ConstraintType::PolarSplineBoundary;
+      optmzr_constraint.type = ConstraintType::PolarSplineBoundary;
 
     } else if (QString::compare(constraint_type, "ReservoirBoundaryToe") == 0){
-      optimizer_constraint.type = ConstraintType::ReservoirBoundaryToe;
+      optmzr_constraint.type = ConstraintType::ReservoirBoundaryToe;
     }
 
-    optimizer_constraint.box_imin = json_constraint["BoxImin"].toInt();
-    optimizer_constraint.box_imax = json_constraint["BoxImax"].toInt();
-    optimizer_constraint.box_jmin = json_constraint["BoxJmin"].toInt();
-    optimizer_constraint.box_jmax = json_constraint["BoxJmax"].toInt();
-    optimizer_constraint.box_kmin = json_constraint["BoxKmin"].toInt();
-    optimizer_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
+    optmzr_constraint.box_imin = json_constraint["BoxImin"].toInt();
+    optmzr_constraint.box_imax = json_constraint["BoxImax"].toInt();
+    optmzr_constraint.box_jmin = json_constraint["BoxJmin"].toInt();
+    optmzr_constraint.box_jmax = json_constraint["BoxJmax"].toInt();
+    optmzr_constraint.box_kmin = json_constraint["BoxKmin"].toInt();
+    optmzr_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
 
   } else if (QString::compare(constraint_type, "PolarXYZBoundary") == 0
-      || QString::compare(constraint_type, "ReservoirXYZBoundary") == 0){
+      || QString::compare(constraint_type, "ReservoirXYZBoundary") == 0
+      || QString::compare(constraint_type, "WellXYZBox") == 0) {
 
 
-    if(QString::compare(constraint_type, "PolarXYZBoundary") == 0){
-      optimizer_constraint.type = ConstraintType::PolarXYZBoundary;
-    } else {
-      optimizer_constraint.type = ConstraintType::ReservoirXYZBoundary;
+    if(QString::compare(constraint_type, "PolarXYZBoundary") == 0) {
+      optmzr_constraint.type = ConstraintType::PolarXYZBoundary;
+
+    } else if(QString::compare(constraint_type, "ReservoirXYZBoundary") == 0) {
+      optmzr_constraint.type = ConstraintType::ReservoirXYZBoundary;
+
+    } else if(QString::compare(constraint_type, "WellXYZBox") == 0) {
+      optmzr_constraint.type = ConstraintType::WellXYZBox;
     }
 
-    optimizer_constraint.box_xyz_xmin = json_constraint["xMin"].toDouble();
-    optimizer_constraint.box_xyz_ymin = json_constraint["yMin"].toDouble();
-    optimizer_constraint.box_xyz_zmin = json_constraint["zMin"].toDouble();
-    optimizer_constraint.box_xyz_xmax = json_constraint["xMax"].toDouble();
-    optimizer_constraint.box_xyz_ymax = json_constraint["yMax"].toDouble();
-    optimizer_constraint.box_xyz_zmax = json_constraint["zMax"].toDouble();
+    optmzr_constraint.box_xyz_xmin = json_constraint["xMin"].toDouble();
+    optmzr_constraint.box_xyz_ymin = json_constraint["yMin"].toDouble();
+    optmzr_constraint.box_xyz_zmin = json_constraint["zMin"].toDouble();
+    optmzr_constraint.box_xyz_xmax = json_constraint["xMax"].toDouble();
+    optmzr_constraint.box_xyz_ymax = json_constraint["yMax"].toDouble();
+    optmzr_constraint.box_xyz_zmax = json_constraint["zMax"].toDouble();
 
   } else if (QString::compare(constraint_type,
-      "MxWSplineLengthInterwDist") == 0) {
+                              "MxWSplineLengthInterwDist") == 0) {
 
-    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDist;
-    optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
-    optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
-    optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
-    optimizer_constraint.max_iterations = json_constraint["MaxIterations"].toInt();
+    optmzr_constraint.type = ConstraintType::MxWSplineLengthInterwDist;
+    optmzr_constraint.min_length = json_constraint["MinLength"].toDouble();
+    optmzr_constraint.max_length = json_constraint["MaxLength"].toDouble();
+    optmzr_constraint.min_distance = json_constraint["MinDistance"].toDouble();
+    optmzr_constraint.max_iterations = json_constraint["MaxIterations"].toInt();
 
-    if (optimizer_constraint.wells.length() != 2) {
+    if (optmzr_constraint.wells.length() != 2) {
       throw UnableToParseOptimizerConstraintsSectionException(
           "WSplineInterwDist constraint"
           " needs a Wells array with exactly two well names specified.");
     }
 
   } else if (QString::compare(constraint_type,
-      "MxWSplineLengthInterwDistResBound") == 0) {
+                              "MxWSplineLengthInterwDistResBound") == 0) {
 
-    optimizer_constraint.type = ConstraintType::MxWSplineLengthInterwDistResBound;
-    optimizer_constraint.min_length = json_constraint["MinLength"].toDouble();
-    optimizer_constraint.max_length = json_constraint["MaxLength"].toDouble();
-    optimizer_constraint.min_distance = json_constraint["MinDistance"].toDouble();
-    optimizer_constraint.max_iterations = json_constraint["MaxIterations"].toInt();
+    optmzr_constraint.type = ConstraintType::MxWSplineLengthInterwDistResBound;
+    optmzr_constraint.min_length = json_constraint["MinLength"].toDouble();
+    optmzr_constraint.max_length = json_constraint["MaxLength"].toDouble();
+    optmzr_constraint.min_distance = json_constraint["MinDistance"].toDouble();
+    optmzr_constraint.max_iterations = json_constraint["MaxIterations"].toInt();
 
-    optimizer_constraint.box_imin = json_constraint["BoxImin"].toInt();
-    optimizer_constraint.box_imax = json_constraint["BoxImax"].toInt();
-    optimizer_constraint.box_jmin = json_constraint["BoxJmin"].toInt();
-    optimizer_constraint.box_jmax = json_constraint["BoxJmax"].toInt();
-    optimizer_constraint.box_kmin = json_constraint["BoxKmin"].toInt();
-    optimizer_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
+    optmzr_constraint.box_imin = json_constraint["BoxImin"].toInt();
+    optmzr_constraint.box_imax = json_constraint["BoxImax"].toInt();
+    optmzr_constraint.box_jmin = json_constraint["BoxJmin"].toInt();
+    optmzr_constraint.box_jmax = json_constraint["BoxJmax"].toInt();
+    optmzr_constraint.box_kmin = json_constraint["BoxKmin"].toInt();
+    optmzr_constraint.box_kmax = json_constraint["BoxKmax"].toInt();
 
-    if (optimizer_constraint.wells.length() != 2) {
+    if (optmzr_constraint.wells.length() != 2) {
       string em = "MxWSplineLengthInterwDistResBound constraint ";
       em += "needs a Wells array with exactly two well names specified.";
       throw UnableToParseOptimizerConstraintsSectionException(em);
@@ -356,7 +374,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
         "Constraint type " + constraint_type.toStdString()
             + " not recognized.");
   }
-  return optimizer_constraint;
+  return optmzr_constraint;
 }
 
 Optimizer::OptimizerMode Optimizer::parseMode(QJsonObject &json_optimizer) {
@@ -376,7 +394,7 @@ Optimizer::OptimizerMode Optimizer::parseMode(QJsonObject &json_optimizer) {
 }
 
 
-Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
+Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
   Parameters params;
   string ind_val = "Invalid value for setting";
   string not_rec = "" + not_rec;
@@ -386,132 +404,132 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     // -----------------------------------------------------
     // GSS PARAMETERS
     // GSS parameters :: MaxEvaluations
-    if (json_parameters.contains("MaxEvaluations"))
-      params.max_evaluations = json_parameters["MaxEvaluations"].toInt();
+    if (json_params.contains("MaxEvaluations"))
+      params.max_evaluations = json_params["MaxEvaluations"].toInt();
 
     // GSS parameters :: AutoStepLengths
-    if (json_parameters.contains("AutoStepLengths"))
-      params.auto_step_lengths = json_parameters["AutoStepLengths"].toBool();
+    if (json_params.contains("AutoStepLengths"))
+      params.auto_step_lengths = json_params["AutoStepLengths"].toBool();
 
     // GSS parameters :: AutoStepInitScale
-    if (json_parameters.contains("AutoStepInitScale"))
-      params.auto_step_init_scale = json_parameters["AutoStepInitScale"].toDouble();
+    if (json_params.contains("AutoStepInitScale"))
+      params.auto_step_init_scale = json_params["AutoStepInitScale"].toDouble();
 
     // GSS parameters :: AutoStepConvScale
-    if (json_parameters.contains("AutoStepConvScale"))
-      params.auto_step_conv_scale = json_parameters["AutoStepConvScale"].toDouble();
+    if (json_params.contains("AutoStepConvScale"))
+      params.auto_step_conv_scale = json_params["AutoStepConvScale"].toDouble();
 
     // GSS parameters :: InitialStepLength
-    if (json_parameters.contains("InitialStepLength")) {
-      set_req_prop_double(params.initial_step_length, json_parameters, "InitialStepLength");
+    if (json_params.contains("InitialStepLength")) {
+      set_req_prop_double(params.initial_step_length, json_params, "InitialStepLength", vp_);
     }
 
     // GSS parameters :: MinimumStepLength
-    if (json_parameters.contains("MinimumStepLength")) {
-      set_req_prop_double(params.minimum_step_length, json_parameters, "MinimumStepLength");
+    if (json_params.contains("MinimumStepLength")) {
+      set_req_prop_double(params.minimum_step_length, json_params, "MinimumStepLength", vp_);
     }
 
     // GSS parameters :: ContractionFactor
-    if (json_parameters.contains("ContractionFactor"))
-      params.contraction_factor = json_parameters["ContractionFactor"].toDouble();
+    if (json_params.contains("ContractionFactor"))
+      params.contraction_factor = json_params["ContractionFactor"].toDouble();
     else { params.contraction_factor = 0.5; }
 
     // GSS parameters :: ExpansionFactor
-    if (json_parameters.contains("ExpansionFactor"))
-      params.expansion_factor = json_parameters["ExpansionFactor"].toDouble();
+    if (json_params.contains("ExpansionFactor"))
+      params.expansion_factor = json_params["ExpansionFactor"].toDouble();
     else { params.expansion_factor = 1.0; }
 
     // GSS parameters :: MaxQueueSize
-    if (json_parameters.contains("MaxQueueSize"))
-      params.max_queue_size = json_parameters["MaxQueueSize"].toDouble();
+    if (json_params.contains("MaxQueueSize"))
+      params.max_queue_size = json_params["MaxQueueSize"].toInt();
     else { params.max_queue_size = 2; }
 
     // GSS parameters :: Pattern
-    if (json_parameters.contains("Pattern"))
-      params.pattern = json_parameters["Pattern"].toString();
+    if (json_params.contains("Pattern"))
+      params.pattern = json_params["Pattern"].toString();
     else params.pattern = "Compass";
 
     // -----------------------------------------------------
     // GA PARAMETERS
     // GA parameters :: MaxGenerations
-    if (json_parameters.contains("MaxGenerations"))
-      params.max_generations = json_parameters["MaxGenerations"].toInt();
+    if (json_params.contains("MaxGenerations"))
+      params.max_generations = json_params["MaxGenerations"].toInt();
     else { params.max_generations = 50; }
 
     // GA parameters :: PopulationSize
-    if (json_parameters.contains("PopulationSize"))
-      params.population_size = json_parameters["PopulationSize"].toInt();
+    if (json_params.contains("PopulationSize"))
+      params.population_size = json_params["PopulationSize"].toInt();
     else { params.population_size = -1; } // Will be properly set in optimizer.
 
     // GA parameters :: CrossoverProbability
-    if (json_parameters.contains("CrossoverProbability"))
-      params.p_crossover = json_parameters["CrossoverProbability"].toDouble();
+    if (json_params.contains("CrossoverProbability"))
+      params.p_crossover = json_params["CrossoverProbability"].toDouble();
     else { params.p_crossover = 0.1; }
 
     // GA parameters :: DiscardParameter
-    if (json_parameters.contains("DiscardParameter"))
-      params.discard_parameter = json_parameters["DiscardParameter"].toDouble();
+    if (json_params.contains("DiscardParameter"))
+      params.discard_parameter = json_params["DiscardParameter"].toDouble();
     else { params.discard_parameter = -1; } // Will be properly set in optimizer
 
     // GA parameters :: DecayRate
-    if (json_parameters.contains("DecayRate"))
-      params.decay_rate = json_parameters["DecayRate"].toDouble();
+    if (json_params.contains("DecayRate"))
+      params.decay_rate = json_params["DecayRate"].toDouble();
     else { params.decay_rate = 4.0; }
 
     // GA parameters :: MutationStrength
-    if (json_parameters.contains("MutationStrength"))
-      params.mutation_strength = json_parameters["MutationStrength"].toDouble();
+    if (json_params.contains("MutationStrength"))
+      params.mutation_strength = json_params["MutationStrength"].toDouble();
     else { params.mutation_strength = 0.25; }
 
     // GA parameters :: StagnationLimit
-    if (json_parameters.contains("StagnationLimit"))
-      params.stagnation_limit = json_parameters["StagnationLimit"].toDouble();
+    if (json_params.contains("StagnationLimit"))
+      params.stagnation_limit = json_params["StagnationLimit"].toDouble();
     else { params.stagnation_limit = 1e-10; }
 
     // GA parameters :: LowerBound
-    if (json_parameters.contains("LowerBound"))
-      params.lower_bound = json_parameters["LowerBound"].toDouble();
+    if (json_params.contains("LowerBound"))
+      params.lower_bound = json_params["LowerBound"].toDouble();
     else { params.lower_bound = -10; }
 
     // GA parameters :: UpperBound
-    if (json_parameters.contains("UpperBound"))
-      params.upper_bound = json_parameters["UpperBound"].toDouble();
+    if (json_params.contains("UpperBound"))
+      params.upper_bound = json_params["UpperBound"].toDouble();
     else { params.upper_bound = 10; }
 
     // -----------------------------------------------------
     // PSO PARAMETERS
     // PSO parameters :: PSO-LearningFactor1
-    if(json_parameters.contains("PSO-LearningFactor1")){
-      params.pso_learning_factor_1 = json_parameters["PSO-LearningFactor1"].toDouble();
+    if(json_params.contains("PSO-LearningFactor1")){
+      params.pso_learning_factor_1 = json_params["PSO-LearningFactor1"].toDouble();
     } else { params.pso_learning_factor_1 = 2; }
 
     // PSO parameters :: PSO-LearningFactor2
-    if(json_parameters.contains("PSO-LearningFactor2")){
-      params.pso_learning_factor_2 = json_parameters["PSO-LearningFactor2"].toDouble();
+    if(json_params.contains("PSO-LearningFactor2")){
+      params.pso_learning_factor_2 = json_params["PSO-LearningFactor2"].toDouble();
     } else { params.pso_learning_factor_2 = 2; }
 
     // PSO parameters :: PSO-SwarmSize
-    if(json_parameters.contains("PSO-SwarmSize")){
-      params.pso_swarm_size = json_parameters["PSO-SwarmSize"].toDouble();
+    if(json_params.contains("PSO-SwarmSize")){
+      params.pso_swarm_size = json_params["PSO-SwarmSize"].toDouble();
     } else { params.pso_swarm_size = 50; }
 
     // PSO parameters :: PSO-VelocityScale
-    if(json_parameters.contains("PSO-VelocityScale")){
-      params.pso_velocity_scale = json_parameters["PSO-VelocityScale"].toDouble();
+    if(json_params.contains("PSO-VelocityScale")){
+      params.pso_velocity_scale = json_params["PSO-VelocityScale"].toDouble();
     } else { params.pso_velocity_scale = 1.0; }
 
     // -----------------------------------------------------
     // EGO PARAMEETERS
     // EGO Parameters :: EGO-InitGuesses
-    if (json_parameters.contains("EGO-InitGuesses")) {
-      params.ego_init_guesses = json_parameters["EGO-InitGuesses"].toInt();
+    if (json_params.contains("EGO-InitGuesses")) {
+      params.ego_init_guesses = json_params["EGO-InitGuesses"].toInt();
     }
 
     // EGO Parameters :: EGO-InitSamplingMethod
-    if (json_parameters.contains("EGO-InitSamplingMethod")) {
-      QString method = json_parameters["EGO-InitSamplingMethod"].toString();
+    if (json_params.contains("EGO-InitSamplingMethod")) {
+      QString method = json_params["EGO-InitSamplingMethod"].toString();
       if (QString::compare(method, "Random") == 0 || QString::compare(method, "Uniform") == 0)
-        params.ego_init_sampling_method = json_parameters["EGO-InitSamplingMethod"].toString().toStdString();
+        params.ego_init_sampling_method = json_params["EGO-InitSamplingMethod"].toString().toStdString();
       else {
         Printer::error("EGO-InitSamplingMethod " + method.toStdString() + " not recognized.");
         throw std::runtime_error("Failed reading EGO settings.");
@@ -519,28 +537,28 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // EGO Parameters :: EGO-Kernel
-    if (json_parameters.contains("EGO-Kernel")) {
+    if (json_params.contains("EGO-Kernel")) {
       QStringList available_kernels = { "CovLinearard", "CovLinearone", "CovMatern3iso",
                                         "CovMatern5iso", "CovNoise", "CovRQiso", "CovSEard",
                                         "CovSEiso", "CovPeriodicMatern3iso", "CovPeriodic"};
-            if (available_kernels.contains(json_parameters["EGO-Kernel"].toString())) {
-        params.ego_kernel = json_parameters["EGO-Kernel"].toString().toStdString();
+      if (available_kernels.contains(json_params["EGO-Kernel"].toString())) {
+        params.ego_kernel = json_params["EGO-Kernel"].toString().toStdString();
       }
       else {
-        Printer::error("EGO-Kernel " + json_parameters["EGO-Kernel"].toString().toStdString() + " not recognized.");
+        Printer::error("EGO-Kernel " + json_params["EGO-Kernel"].toString().toStdString() + " not recognized.");
         Printer::info("Available kernels: " + available_kernels.join(", ").toStdString());
         throw std::runtime_error("Failed reading EGO settings.");
       }
     }
 
     // EGO Parameters :: EGO-AF
-    if (json_parameters.contains("EGO-AF")) {
+    if (json_params.contains("EGO-AF")) {
       QStringList available_afs = { "ExpectedImprovement", "ProbabilityOfImprovement" };
-      if (available_afs.contains(json_parameters["EGO-AF"].toString())) {
-        params.ego_af = json_parameters["EGO-AF"].toString().toStdString();
+      if (available_afs.contains(json_params["EGO-AF"].toString())) {
+        params.ego_af = json_params["EGO-AF"].toString().toStdString();
 
       } else {
-        Printer::error("EGO-AF " + json_parameters["EGO-AF"].toString().toStdString() + " not recognized.");
+        Printer::error("EGO-AF " + json_params["EGO-AF"].toString().toStdString() + " not recognized.");
         Printer::info("Available acquisition functions: " + available_afs.join(", ").toStdString());
         throw std::runtime_error("Failed reading EGO settings.");
       }
@@ -548,57 +566,57 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
 
     // -----------------------------------------------------
     // CMA-ES PARAMETERS
-    if (json_parameters.contains("ImproveBaseCase")) {
-      params.improve_base_case = json_parameters["ImproveBaseCase"].toBool();
+    if (json_params.contains("ImproveBaseCase")) {
+      params.improve_base_case = json_params["ImproveBaseCase"].toBool();
     }
 
     // -----------------------------------------------------
     // VFSA PARAMETERS
-    if (json_parameters.contains("VFSA-EvalsPrIteration")) {
-      params.vfsa_evals_pr_iteration = json_parameters["VFSA-EvalsPrIteration"].toInt();
+    if (json_params.contains("VFSA-EvalsPrIteration")) {
+      params.vfsa_evals_pr_iteration = json_params["VFSA-EvalsPrIteration"].toInt();
     }
-    if (json_parameters.contains("VFSA-MaxIterations")) {
-      params.vfsa_max_iterations = json_parameters["VFSA-MaxIterations"].toInt();
+    if (json_params.contains("VFSA-MaxIterations")) {
+      params.vfsa_max_iterations = json_params["VFSA-MaxIterations"].toInt();
     }
-    if (json_parameters.contains("VFSA-Parallel")) {
-      params.vfsa_parallel = json_parameters["VFSA-Parallel"].toBool();
+    if (json_params.contains("VFSA-Parallel")) {
+      params.vfsa_parallel = json_params["VFSA-Parallel"].toBool();
     }
-    if (json_parameters.contains("VFSA-InitTemp")) {
-      params.vfsa_init_temp = json_parameters["VFSA-InitTemp"].toDouble();
+    if (json_params.contains("VFSA-InitTemp")) {
+      params.vfsa_init_temp = json_params["VFSA-InitTemp"].toDouble();
     }
-    if (json_parameters.contains("VFSA-TempScale")) {
-      params.vfsa_temp_scale = json_parameters["VFSA-TempScale"].toDouble();
+    if (json_params.contains("VFSA-TempScale")) {
+      params.vfsa_temp_scale = json_params["VFSA-TempScale"].toDouble();
     }
 
     // -----------------------------------------------------
     // SPSA PARAMETERS
-    if (json_parameters.contains("SPSA-MaxIterations")) {
-      params.spsa_max_iterations = json_parameters["SPSA-MaxIterations"].toInt();
+    if (json_params.contains("SPSA-MaxIterations")) {
+      params.spsa_max_iterations = json_params["SPSA-MaxIterations"].toInt();
     }
-    if (json_parameters.contains("SPSA-gamma")) {
-      params.spsa_gamma = json_parameters["SPSA-gamma"].toDouble();
+    if (json_params.contains("SPSA-gamma")) {
+      params.spsa_gamma = json_params["SPSA-gamma"].toDouble();
     }
-    if (json_parameters.contains("SPSA-alpha")) {
-      params.spsa_alpha = json_parameters["SPSA-alpha"].toDouble();
+    if (json_params.contains("SPSA-alpha")) {
+      params.spsa_alpha = json_params["SPSA-alpha"].toDouble();
     }
-    if (json_parameters.contains("SPSA-c")) {
-      params.spsa_c = json_parameters["SPSA-c"].toDouble();
+    if (json_params.contains("SPSA-c")) {
+      params.spsa_c = json_params["SPSA-c"].toDouble();
     }
-    if (json_parameters.contains("SPSA-A")) {
-      params.spsa_A = json_parameters["SPSA-A"].toDouble();
+    if (json_params.contains("SPSA-A")) {
+      params.spsa_A = json_params["SPSA-A"].toDouble();
     } else params.spsa_A = 0.1 * params.spsa_max_iterations;
-    if (json_parameters.contains("SPSA_a")) {
-      params.spsa_a = json_parameters["SPSA_a"].toDouble();
+    if (json_params.contains("SPSA_a")) {
+      params.spsa_a = json_params["SPSA_a"].toDouble();
     }
-    if (json_parameters.contains("SPSA-InitStepMagnitude")) {
-      params.spsa_init_step_magnitude = json_parameters["SPSA-InitStepMagnitude"].toDouble();
+    if (json_params.contains("SPSA-InitStepMagnitude")) {
+      params.spsa_init_step_magnitude = json_params["SPSA-InitStepMagnitude"].toDouble();
     }
 
     // -----------------------------------------------------
     //  HYBRID PARAMETERS
     // Hybrid parameters :: HybridSwitchMode
-    if (json_parameters.contains("HybridSwitchMode")) {
-      if (json_parameters["HybridSwitchMode"].toString() == "OnConvergence") {
+    if (json_params.contains("HybridSwitchMode")) {
+      if (json_params["HybridSwitchMode"].toString() == "OnConvergence") {
         params.hybrid_switch_mode = "OnConvergence";
       } else {
         throw std::runtime_error("HybridSwitchMode " + not_rec);
@@ -606,8 +624,8 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // Hybrid parameters :: HybridTerminationCondition
-    if (json_parameters.contains("HybridTerminationCondition")) {
-      if (json_parameters["HybridTerminationCondition"].toString() == "NoImprovement") {
+    if (json_params.contains("HybridTerminationCondition")) {
+      if (json_params["HybridTerminationCondition"].toString() == "NoImprovement") {
         params.hybrid_termination_condition = "NoImprovement";
       } else {
         throw std::runtime_error("HybridTerminationCondition " + not_rec);
@@ -615,10 +633,10 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     }
 
     // Hybrid parameters :: HybridMaxIterations
-    if (json_parameters.contains("HybridMaxIterations")) {
-      if (json_parameters["HybridMaxIterations"].toInt() >= 1) {
+    if (json_params.contains("HybridMaxIterations")) {
+      if (json_params["HybridMaxIterations"].toInt() >= 1) {
         params.hybrid_max_iterations =
-            json_parameters["HybridMaxIterations"].toInt();
+            json_params["HybridMaxIterations"].toInt();
       } else {
         throw std::runtime_error(ind_val + "HybridMaxIterations");
       }
@@ -627,114 +645,81 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_parameters) {
     // -----------------------------------------------------
     //  TRUST REGION PARAMETERS
     // Trust Region parameters :: Initial radius
-    if (json_parameters.contains("InitialTrustRegionRadius")) {
-      if (json_parameters["InitialTrustRegionRadius"].toDouble() >= 0.0) {
-        params.tr_initial_radius =
-            json_parameters["InitialTrustRegionRadius"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "InitialTrustRegionRadius");
-      }
-    }
-
+    set_opt_prop_double(params.tr_init_rad, json_params, "InitTRRadius", vp_);
     // Trust Region parameters:: Trust region radius tolerance
-    if (json_parameters.contains("TrustRegionRadiusTolerance")) {
-      if (json_parameters["TrustRegionRadiusTolerance"].toDouble() >= 0.0) {
-        params.tr_tol_radius = json_parameters["TrustRegionRadiusTolerance"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "TrustRegionRadiusTolerance");
-      }
-    }
-
+    set_opt_prop_double(params.tr_tol_radius, json_params, "TRRadiusTol", vp_);
     // Trust Region parameters :: Max trust region radius
-    if (json_parameters.contains("MaxTrustRegionRadius")) {
-      if (json_parameters["MaxTrustRegionRadius"].toDouble() >= 0.0) {
-        params.tr_radius_max =
-            json_parameters["MaxTrustRegionRadius"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "MaxTrustRegionRadius");
-      }
-    }
+    set_opt_prop_double(params.tr_radius_max, json_params, "MaxTRRadius", vp_);
 
     // Trust Region parameters :: Lower bound
-    if (json_parameters.contains("TrustRegionLowerBound")) {
-      if (json_parameters.contains("TrustRegionUpperBound")) {
-        if (json_parameters["TrustRegionLowerBound"].toDouble() <
-            json_parameters["TrustRegionUpperBound"].toDouble()) {
-          params.tr_lower_bound = json_parameters["TrustRegionLowerBound"].toDouble();
-        } else {
-          throw std::runtime_error(ind_val + "TrustRegionLowerBound");
-        }
+    if (json_params.contains("TRLowerBound")) {
+      if (json_params.contains("TRUpperBound")) {
+        if (json_params["TRLowerBound"].toDouble() <
+            json_params["TRUpperBound"].toDouble()) {
+          params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
+        } else { E(ind_val + "TRLowerBound", md_, cl_); }
       } else {
-        params.tr_lower_bound =
-            json_parameters["TrustRegionLowerBound"].toDouble();
+        params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
       }
     }
 
     // Trust Region parameters :: Upper bound
-    if (json_parameters.contains("TrustRegionUpperBound")) {
-      if (json_parameters.contains("TrustRegionLowerBound")) {
-        if (json_parameters["TrustRegionLowerBound"].toDouble() <
-            json_parameters["TrustRegionUpperBound"].toDouble()) {
-          params.tr_upper_bound =
-              json_parameters["TrustRegionUpperBound"].toDouble();
-        } else {
-          throw std::runtime_error(ind_val + "TrustRegionUpperBound");
-        }
+    if (json_params.contains("TRUpperBound")) {
+      if (json_params.contains("TRLowerBound")) {
+        if (json_params["TRLowerBound"].toDouble() <
+            json_params["TRUpperBound"].toDouble()) {
+          params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
+        } else { E(ind_val + "TRUpperBound", md_, cl_); }
       } else {
-        params.tr_upper_bound =
-            json_parameters["TrustRegionUpperBound"].toDouble();
+        params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
       }
     }
 
     // Trust Region parameters :: RNG seed
-    if (json_parameters.contains("RNGSeed")) {
-      params.rng_seed = json_parameters["RNGSeed"].toInt();
+    if (json_params.contains("RNGSeed")) {
+      params.rng_seed = json_params["RNGSeed"].toInt();
     } else {
       params.rng_seed = std::time(0);
     }
 
     // Trust Region parameters :: Max iter
-    if (json_parameters.contains("TRMaxIter")) {
-      params.tr_iter_max = json_parameters["TRMaxIter"].toInt();
+    if (json_params.contains("TRMaxIter")) {
+      params.tr_iter_max = json_params["TRMaxIter"].toInt();
     } else {
       params.tr_iter_max = 10000;
     }
 
     // Trust Region parameters :: Criticality Mu
-    if (json_parameters.contains("CriticalityMu")) {
-      if (json_parameters["CriticalityMu"].toDouble() >= 0.0) {
-        params.tr_criticality_mu =
-            json_parameters["CriticalityMu"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "CriticalityMu");
-      }
+    if (json_params.contains("CriticalityMu")) {
+      if (json_params["CriticalityMu"].toDouble() >= 0.0) {
+        params.tr_crit_mu =
+            json_params["CriticalityMu"].toDouble();
+      } else { E(ind_val + "CriticalityMu", md_, cl_); }
     }
 
     // Trust Region parameters :: Criticality Omega
-    if (json_parameters.contains("CriticalityOmega")) {
-      if (json_parameters["CriticalityOmega"].toDouble() >= 0.0) {
-        params.tr_criticality_omega =
-            json_parameters["CriticalityOmega"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "CriticalityOmega");
-      }
+    if (json_params.contains("CriticalityOmega")) {
+      if (json_params["CriticalityOmega"].toDouble() >= 0.0) {
+        params.tr_crit_omega =
+            json_params["CriticalityOmega"].toDouble();
+      } else { E(ind_val + "CriticalityOmega", md_, cl_); }
     }
 
     // Trust Region parameters :: Criticality Beta
-    if (json_parameters.contains("CriticalityBeta")) {
-      if (json_parameters["CriticalityBeta"].toDouble() >= 0.0) {
-        params.tr_criticality_beta =
-            json_parameters["CriticalityBeta"].toDouble();
+    if (json_params.contains("CriticalityBeta")) {
+      if (json_params["CriticalityBeta"].toDouble() >= 0.0) {
+        params.tr_crit_beta =
+            json_params["CriticalityBeta"].toDouble();
       } else {
         throw std::runtime_error(ind_val + "CriticalityBeta");
       }
     }
 
     // Trust Region parameters :: Criticality problem name
-    if (json_parameters.contains("ProblemName")) {
-      if (json_parameters["ProblemName"].toDouble() >= 0.0) {
+    if (json_params.contains("ProblemName")) {
+      if (json_params["ProblemName"].toDouble() >= 0.0) {
         params.tr_prob_name =
-            json_parameters["ProblemName"].toString().toStdString();
+            json_params["ProblemName"].toString().toStdString();
       } else {
         throw std::runtime_error(ind_val + "ProblemName");
       }
@@ -795,15 +780,17 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
 
       for (int i = 0; i < json_components.size(); ++i) {
         Objective::NPVComponent component;
-        set_req_prop_double(component.coefficient, json_components[i].toObject(), "Coefficient");
-        set_req_prop_string(component.property, json_components[i].toObject(), "Property");
-        set_opt_prop_double(component.discount, json_components[i].toObject(), "DiscountFactor");
-        set_req_prop_string(component.interval, json_components[i].toObject(), "Interval");
-        set_opt_prop_bool(component.usediscountfactor, json_components[i].toObject(), "UseDiscountFactor");
+        set_req_prop_double(component.coefficient, json_components[i].toObject(), "Coefficient", vp_);
+        set_req_prop_string(component.property, json_components[i].toObject(), "Property", vp_);
+        set_opt_prop_double(component.discount, json_components[i].toObject(), "DiscountFactor", vp_);
+        set_req_prop_string(component.interval, json_components[i].toObject(), "Interval", vp_);
+        set_opt_prop_bool(component.usediscountfactor, json_components[i].toObject(), "UseDiscountFactor", vp_);
         obj.NPV_sum.append(component);
       }
 
     } else if (QString::compare(objective_type, "Augmented") == 0) {
+      stringstream so;
+
       obj.type = ObjectiveType::Augmented;
       obj.terms = vector<Objective::AugTerms>();
 
@@ -812,11 +799,11 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
       for (int ii = 0; ii < terms.size(); ++ii) {
         Objective::AugTerms term;
         auto json_term = terms[ii].toObject();
-        set_req_prop_double(term.coefficient, json_term, "Coefficient");
-        set_req_prop_bool(term.active, json_term, "Active");
-        set_req_prop_string(term.prop_name, json_term, "PropName");
+        set_req_prop_double(term.coefficient, json_term, "Coefficient", vp_);
+        set_req_prop_bool(term.active, json_term, "Active", vp_);
+        set_req_prop_string(term.prop_name, json_term, "PropName", vp_);
 
-        if (!set_opt_prop_string(term.scaling, json_term, "Scaling")) {
+        if (!set_opt_prop_string(term.scaling, json_term, "Scaling", vp_)) {
           term.scaling = "None";
         }
 
@@ -836,19 +823,18 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
             term.segments[term.wells[ii]] = segs_vec;
           }
         }
-        term.showTerms();
+        so << term.showTerms();
         obj.terms.push_back(term);
       }
+      if (vp_.vSET > 3) { ext_info(so.str(), md_, cl_, vp_.lnw); }
 
     } else {
-      throw UnableToParseOptimizerObjectiveSectionException(
-          "Objective type " + objective_type.toStdString()
-              + " not recognized");
+      string em = "Objective type " + objective_type.toStdString() + " not recognized";
+      throw UnableToParseOptimizerObjectiveSectionException(em);
     }
 
     if (json_objective.contains("UsePenaltyFunction")) {
       obj.use_penalty_function = json_objective["UsePenaltyFunction"].toBool();
-
     } else {
       obj.use_penalty_function = false;
     }
@@ -938,12 +924,16 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
 
   } else if (QString::compare(type, "Hybrid") == 0) {
     opt_type = OptimizerType::Hybrid;
+
   } else if (QString::compare(type, "TrustRegionOptimization") == 0) {
     opt_type = OptimizerType::TrustRegionOptimization;
+
+  } else if (QString::compare(type, "DFTR") == 0) {
+    opt_type = OptimizerType::DFTR;
+
   } else {
-    throw OptimizerTypeNotRecognizedException(
-        "The optimizer type " + type.toStdString()
-            + " was not recognized.");
+    em_ = "Optimizer type " + type.toStdString() + " not recognized.";
+    throw OptimizerTypeNotRecognizedException(em_);
   }
   return opt_type;
 }

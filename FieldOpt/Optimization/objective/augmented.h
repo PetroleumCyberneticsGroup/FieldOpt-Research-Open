@@ -34,6 +34,18 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Objective {
 
+using Printer::ext_warn;
+using Printer::ext_info;
+using Printer::info;
+using Printer::ext_error;
+using Printer::num2str;
+using Printer::pad_text;
+
+using Printer::DBG_prntDbl;
+using Printer::DBG_prntVecXd;
+using Printer::DBG_prntMatXd;
+using Printer::DBG_prntToFile;
+
 using std::string;
 using std::vector;
 using std::accumulate;
@@ -55,16 +67,16 @@ class Augmented : public Objective {
 
   void setDbgFileName(string fl) { fl_ = fl; }
 
- private:
-  void setUpAugTerms();
-  void setUpWaterCutLimit();
-
-  void dbg(const int dm=0,
+  void dbg(int dm=0,
            const VectorXd& v0 = VectorXd::Zero(0),
            const VectorXd& v1 = VectorXd::Zero(0),
            const VectorXd& v2 = VectorXd::Zero(0),
            const VectorXd& v3 = VectorXd::Zero(0),
            const double& d0 = 0.0) const;
+
+ private:
+  void setUpAugTerms();
+  void setUpWaterCutLimit();
 
   struct Term {
     string prop_name_str;
@@ -87,6 +99,34 @@ class Augmented : public Objective {
   double wcut_limit_ = 1.0;
   double wbreakthrough_ = 0.1;
   vector<double>  objf_scal_;
+
+  string printTerm(Augmented::Term *term, double t_val, int lvl) {
+    string pn, pt, ps, pc, im;
+    int pad = 20;
+
+    pn = term->prop_name_str;
+    pt = results_->GetPropertyKey(term->prop_type);
+    ps = results_->GetPropertyKey(term->prop_spec);
+    pc = num2str(term->coeff, 5, 1, 12);
+
+    pad_text(pn, pad);
+    pad_text(pt, pad);
+    pad_text(ps, pad);
+    pad_text(pc, pad);
+
+    im = "prop_name: "+ pn;
+    if(lvl == 0) {
+      im += "prop_coeff: "+ pc;
+      im += "prop_spec: "+ ps + "|";
+
+    } else if(lvl == 1) {
+      im += "prop_active: " + to_string(term->active) + "    ";
+      im += "prop_type: "+ pt;
+      im += "prop_spec: "+ ps;
+      im += "term value: " + num2str(t_val, 5, 1, 12) + "|";
+    }
+    return im;
+  }
 
   string im_ = "", wm_ = "", em_ = "";
   string cl_ = "Augmented";

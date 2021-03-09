@@ -31,34 +31,34 @@ namespace Wells {
 namespace Wellbore {
 namespace Completions {
 
-using Printer::ext_warn;
-using Printer::num2str;
-
 ICD::ICD(const Settings::Model::Well::Completion &completion_settings,
-         Properties::VarPropContainer *variable_container) : SegmentedCompletion(completion_settings,
-                                                                                 variable_container) {
+         Properties::VarPropContainer *variable_container)
+         : SegmentedCompletion(completion_settings, variable_container) {
+
   flow_coefficient_ = completion_settings.valve_flow_coeff;
   valve_size_ = new Properties::ContinuousProperty(completion_settings.valve_size);
   valve_size_->setName(completion_settings.name);
 
   min_valve_size_ = completion_settings.min_valve_size;
   max_valve_size_ = completion_settings.max_valve_size;
+
   assert(min_valve_size_ < max_valve_size_);
   assert(min_valve_size_ >= 0.0);
 
   time_step_ = completion_settings.time_step;
-  segment_idx_ = completion_settings.segment_index;
-  device_name_ = completion_settings.device_name;
+  segment_idx_ = completion_settings.icd_segment;
+  device_name_ = completion_settings.icd_name;
 
-
-  if (completion_settings.variable_strength == true || completion_settings.is_variable == true) {
+  if (completion_settings.variable_strength
+  || completion_settings.is_variable) {
     variable_container->AddVariable(valve_size_);
   }
 }
 
 ICD::ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
-         Properties::VarPropContainer *variable_container) : SegmentedCompletion(icv_group_settings,
-                                                                                 variable_container) {
+         Properties::VarPropContainer *variable_container)
+         : SegmentedCompletion(icv_group_settings, variable_container) {
+
   flow_coefficient_ = icv_group_settings.valve_flow_coeff;
   valve_size_ = new Properties::ContinuousProperty(icv_group_settings.valve_size);
   valve_size_->setName(icv_group_settings.name);
@@ -70,29 +70,28 @@ ICD::ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
   assert(min_valve_size_ >= 0.0);
 
   time_step_ = icv_group_settings.time_step;
-  segment_idxs_ = icv_group_settings.segment_indexes;
+  segment_idxs_ = icv_group_settings.icd_segments;
   device_names_ = icv_group_settings.icvs;
 
-
-  if (icv_group_settings.is_variable == true) {
+  if (icv_group_settings.is_variable) {
     variable_container->AddVariable(valve_size_);
   }
 }
 
-double ICD::setting() const {
+double ICD::setting() {
   if (valveSize() < min_valve_size_ || valveSize() > max_valve_size_) {
-    Printer::ext_warn("Valve size " + Printer::num2str(valveSize()) + "outside bounds, throwing exception.",
-                      "Model", "ICD");
+    wm_ = "Valve size " + num2str(valveSize()) + "outside bounds, throwing exception.";
+    ext_warn(wm_, md_, cl_);
     throw std::runtime_error("Valve size outside bounds.");
   }
 
   double setting = (valveSize() - min_valve_size_) / (max_valve_size_ - min_valve_size_);
 
-  if (VERB_MOD >= 1) {
+  if (vp_.vMOD >= 1) {
     std::stringstream ss;
     ss << "Computed setting " << setting << " from valve size " << valveSize()
        << ". [min, max] = [ " << min_valve_size_ << " , " << max_valve_size_ << " ]";
-    Printer::ext_info(ss.str(), "Model", "ICD");
+    ext_info(ss.str(), md_, cl_);
   }
 
   return setting;

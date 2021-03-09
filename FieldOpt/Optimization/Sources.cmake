@@ -66,6 +66,9 @@ SET(OPTIMIZATION_HEADERS
 	optimizers/trust_region/TrustRegionOptimization.h
 	optimizers/trust_region/TrustRegionModel.h
 	optimizers/trust_region/TrustRegionMath.h
+	optimizers/dftr/DFTR.h
+	optimizers/dftr/TRFrame.h
+	optimizers/dftr/TRDebug.h
 	optimizers/ensemble_exp_value.h
 	#
 	# algorithms: hybrid
@@ -141,6 +144,9 @@ SET(OPTIMIZATION_SOURCES
 	optimizers/trust_region/TrustRegionOptimization.cpp
 	optimizers/trust_region/TrustRegionModel.cpp
 	optimizers/trust_region/TrustRegionMath.cpp
+	optimizers/dftr/DFTR.cpp
+	optimizers/dftr/TRFrame.cpp
+	optimizers/dftr/TRDebug.cpp
 	optimizers/ensemble_exp_value.cpp
 	#
 	# algorithms: hybrid
@@ -169,13 +175,13 @@ SET(OPTIMIZATION_TESTS
 	tests/objective/test_weightedsum.cpp
 	tests/objective/test_augmented.cpp
 	#
-	# case, case-handling
+	## case, case-handling
 	tests/test_case.cpp
 	tests/test_case_handler.cpp
 	tests/test_case_transfer_object.cpp
 	tests/test_normalizer.cpp
 	#
-	# constraints, constraint-handling
+	## constraints, constraint-handling
 	tests/constraints/test_bhp_constraint.cpp
 	tests/constraints/test_rate_constraint.cpp
 	tests/constraints/test_reservoir_boundary.cpp
@@ -197,9 +203,13 @@ SET(OPTIMIZATION_TESTS
 	tests/optimizers/test_ego.cpp
 	#
 	# algorithms: df-tr
-	# tests/optimizers/test_tr-dfo.cpp
-	#### tests/optimizers/test_en-tr-dfo.cpp (warn: may be mutually exclusive with test_tr-dfo.cpp)
-	#		tests/optimizers/test_tr-dfo_exp-value.cpp
-	#		tests/optimizers/test_tr-model-data.hpp
-	#		tests/optimizers/test_tr-support.hpp
+	tests/optimizers/test_tr-dfo_exp-value.cpp
+	tests/optimizers/test_tr-model-data.hpp
+	tests/optimizers/test_tr-support.hpp
+	#
+	# warning: these three  tests are mutually exclusive,
+	# however, test_dftr also runs test_tr-dfo.cpp tests:
+	tests/optimizers/test_dftr.cpp
+	#### tests/optimizers/test_tr-dfo.cpp
+	#### tests/optimizers/test_en-tr-dfo.cpp
 	)

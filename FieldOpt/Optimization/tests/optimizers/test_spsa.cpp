@@ -77,7 +77,11 @@ TEST_F(SPSATest, TestFunctionSphericalMinimize) {
 TEST_F(SPSATest, TestFunctionSphericalMaximize) {
   test_case_ga_spherical_6r_->set_objf_value(-1*abs(Sphere(test_case_ga_spherical_6r_->GetRealVarVector())));
   settings_spsa_min_->SetRngSeed(5);
-  Optimization::Optimizer *maximizer = new SPSA(settings_spsa_max_, test_case_ga_spherical_6r_, varcont_6r_, grid_5spot_, logger_ );
+  Optimization::Optimizer *maximizer = new SPSA(settings_spsa_max_,
+                                                test_case_ga_spherical_6r_,
+                                                varcont_6r_,
+                                                grid_5spot_,
+                                                logger_ );
 
   while (!maximizer->IsFinished()) {
     auto next_case = maximizer->GetCaseForEvaluation();

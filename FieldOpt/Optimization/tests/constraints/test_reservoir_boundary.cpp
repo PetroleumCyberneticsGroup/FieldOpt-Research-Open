@@ -47,13 +47,14 @@ class ReservoirBoundaryTest : public ::testing::Test,
     bound_settings_.box_kmin = settings_optimizer_->constraints()[5].box_kmin;
     bound_settings_.box_kmax = settings_optimizer_->constraints()[5].box_kmax;
 
-    boundary_constraint_ = new Optimization::Constraints::ResBoundary(
-      bound_settings_, varcont_prod_spline_, grid_5spot_, vp);
+    boundary_constraint_ = new Optimization::Constraints::ResBoundary(bound_settings_,
+                                                                      varcont_prod_spline_,
+                                                                      grid_5spot_,
+                                                                      settings_full_->global()->verbParams());
   }
 
   Settings::Optimizer::Constraint bound_settings_;
   Optimization::Constraints::ResBoundary *boundary_constraint_;
-  Settings::VerbParams vp = settings_full_->global()->verbParams();
 
   virtual ~ReservoirBoundaryTest() { }
   virtual void TearDown() { }

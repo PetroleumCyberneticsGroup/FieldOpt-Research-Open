@@ -31,6 +31,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QStringList>
 #include <QDateTime>
 #include <QUuid>
+
 #include "Optimization/case.h"
 #include "Optimization/optimizer.h"
 #include "runtime_settings.h"

@@ -32,6 +32,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Model/properties/var_prop_container.h"
 #include "Model/properties/discrete_property.h"
 #include "Model/wells/control.h"
+#include "Model/wells/wellbore/wellblock.h"
 #include "Model/wells/wellbore/trajectory.h"
 #include "Model/wells/wellbore/completions/icd.h"
 #include "Reservoir/grid/eclgrid.h"
@@ -53,9 +54,10 @@ class Well
  public:
   /*!
    * \brief Well Default constructor.
-   * \param settings The settings object to create a well from.
-   * \param well_number The index of the sepcific well in the Model.Wells list to create a well from.
-   * \param variables The variables object to add all new variable variables to.
+   * \param settings Settings object to create a well from.
+   * \param well_number The index of the sepcific well
+   * in the Model.Wells list to create a well from.
+   * \param variables Variables object to add all new variables to.
    */
   Well(const Settings::Model& model_settings,
        int well_number,
@@ -63,22 +65,33 @@ class Well
        ::Reservoir::Grid::Grid *grid,
        ::Reservoir::WellIndexCalculation::wicalc_rixx *wic);
 
-  struct Heel { int i; int j; int k; };
+  struct Heel {
+    int i = std::numeric_limits<int>::min();
+    int j = std::numeric_limits<int>::min();
+    int k = std::numeric_limits<int>::min();
+  };
+
+  template<typename T>
+  std::vector<std::vector<T>> SplitVector(const std::vector<T>& vec, size_t n, bool dbg);
 
   enum PreferredPhase { Oil, Gas, Water, Liquid };
 
   QString name() const { return name_; }
   ::Settings::Model::WellType type() const { return type_; }
   QString group() const { return group_; }
+
   bool IsProducer();
   bool IsInjector();
+
   ::Settings::Model::PreferredPhase preferred_phase() const { return preferred_phase_; }
   double wellbore_radius() const { return wellbore_radius_->value(); }
   Wellbore::Trajectory *trajectory() { return trajectory_; }
   QList<Control *> *controls() { return controls_; }
+
   int heel_i() const { return heel_.i; }
   int heel_j() const { return heel_.j; }
   int heel_k() const { return heel_.k; }
+
   void Update();
   int GetTimeSpentInWIC() const { return trajectory_->GetTimeSpentInWic(); }
 
@@ -88,6 +101,9 @@ class Well
   // Methods for segmented wells
   virtual bool IsSegmented() const { return is_segmented_; }
   std::vector<Compartment> GetCompartments() const;
+
+  int GetNumCompartments() const { return compartments_.size(); };
+
   std::vector<Packer *> GetPackers() const;
   std::vector<ICD *> GetICDs() const;
   std::vector<Segment> GetSegments();
@@ -105,7 +121,15 @@ class Well
   Properties::ContinuousProperty *wellbore_radius_;
   Wellbore::Trajectory *trajectory_;
 
+  Eigen::Vector3d zero_pt_ = Eigen::Vector3d::Zero(3);
+
+  QList<Wellbore::WellBlock *> *well_blocks_;
+
+  string im_ = "", wm_ = "", em_ = "";
+  string md_ = "Model";
+  string cl_ = "Well";
   Settings::VerbParams vp_;
+
 
   //!< Whether the trajectory is defined. It does not
   //!< need to be for, e.g., control optimization.
@@ -117,19 +141,34 @@ class Well
   // Fields for segmented wells
   bool is_segmented_ = false;
   void initializeSegmentedWell(Properties::VarPropContainer *variable_container);
+  void initSegWellStruct(Properties::VarPropContainer *variable_container);
+
   double tub_diam_;            //!< Tubing (inner) diameter.
   double ann_diam_;            //!< Annular diameter.
+  double icd_diam_;            //!< ICD diameter.
+
   double tub_cross_sect_area_; //!< Tubing cross section area.
   double ann_cross_sect_area_; //!< Annular cross section area.
+  double icd_cross_sect_area_; //!< ICD cross section area.
+
+
   double tub_roughness_;       //!< Roughness for tubing segments.
   double ann_roughness_;       //!< Roughness for annulus segments.
+  double icd_roughness_;       //!< Roughness for ICD.
   std::vector<Compartment> compartments_; //!< List of compartments.
-  std::vector<Wellbore::Completions::ICD> icds_; //!< List of icds for when we have neither a defined compartmentalization or a trajectory.
+
+  //!< List of icds for when we have neither a
+  //!< defined compartmentalization or a trajectory.
+  std::vector<Wellbore::Completions::ICD> icds_;
 
   // Methods for segmented wells
-  std::vector<int> createTubingSegments(std::vector<Segment> &segments) const;
+  std::vector<int> createTubingSegments(std::vector<Segment> &segments);
   std::vector<int> createICDSegments(std::vector<Segment> &segments, std::vector<int> &tubing_indexes) const;
   void createAnnulusSegments(std::vector<Segment> &segments, const std::vector<int> &icd_indexes);
+
+  double length_delta_ = 2131.06288;
+  double depth_delta_ = 2034.43714;
+
 };
 
 }

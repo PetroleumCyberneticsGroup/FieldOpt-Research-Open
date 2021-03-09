@@ -27,26 +27,27 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "constraints/interw_dist.h"
 #include "Optimization/tests/test_resource_cases.h"
 #include "Optimization/tests/test_resource_optimizer.h"
+#include "Settings/tests/test_resource_settings.hpp"
 
 namespace {
 
 class InterwellDistanceTest : public ::testing::Test,
-                              public TestResources::TestResourceCases,
-                              public TestResources::TestResourceSettings
+                              public TestResources::TestResourceCases
 {
  public:
   InterwellDistanceTest() {
     iwd_settings_.type = Settings::Optimizer::ConstraintType::WSplineInterwDist;
     iwd_settings_.min = 100;
     iwd_settings_.wells << "TESTW" << "INJE";
-    iwd_constraint_ = new Optimization::Constraints::InterwDist(iwd_settings_, varcont_two_spline_wells_, vp);
+    iwd_constraint_ = new Optimization::Constraints::InterwDist(iwd_settings_,
+                                                                varcont_two_spline_wells_,
+                                                                vp_);
   }
 
   Settings::Optimizer::Constraint iwd_settings_;
   Optimization::Constraints::InterwDist *iwd_constraint_;
   Optimization::Case *test_case = test_case_two_well_splines_;
-
-  Settings::VerbParams vp = settings_full_->global()->verbParams();
+  Settings::VerbParams vp_ = {};
 
   virtual ~InterwellDistanceTest() {}
   virtual void TearDown() {}
@@ -58,7 +59,9 @@ TEST_F(InterwellDistanceTest, Penalty) {
   EXPECT_EQ(160, penalty);
 
   iwd_settings_.min = 10;
-  iwd_constraint_ = new Optimization::Constraints::InterwDist(iwd_settings_, varcont_two_spline_wells_, vp);
+  iwd_constraint_ = new Optimization::Constraints::InterwDist(iwd_settings_,
+                                                              varcont_two_spline_wells_,
+                                                              vp_);
   penalty = iwd_constraint_->Penalty(test_case);
   EXPECT_EQ(0, penalty);
 }

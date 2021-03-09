@@ -1,5 +1,6 @@
 /***********************************************************
 Created by einar on 11/22/16.
+
 Copyright (C) 2019
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
@@ -59,33 +60,39 @@ TEST_F(APPSTest, Constructor) {
 
 TEST_F(APPSTest, GetNewCases) {
   test_case_1_3i_->set_objf_value(
-      Sphere(test_case_1_3i_->GetRealVarVector()));
+    Sphere(test_case_1_3i_->GetRealVarVector()));
 
-  Optimization::Optimizer *maximizer = new APPS(settings_apps_max_unconstr_,
-                                                test_case_1_3i_,
-                                                varcont_prod_bhp_,
-                                                grid_5spot_,
-                                                logger_);
+  Optimization::Optimizer *maximizer =
+    new APPS(settings_apps_max_unconstr_,
+             test_case_1_3i_,
+             varcont_prod_bhp_,
+             grid_5spot_,
+             logger_);
 
   // These four cases should change the values of the two first int vars, +50 then -50
   Optimization::Case *new_case_1 = maximizer->GetCaseForEvaluation();
   Optimization::Case *new_case_2 = maximizer->GetCaseForEvaluation();
   Optimization::Case *new_case_3 = maximizer->GetCaseForEvaluation();
   Optimization::Case *new_case_4 = maximizer->GetCaseForEvaluation();
+
   EXPECT_FALSE(new_case_1->id() == new_case_2->id());
   EXPECT_FALSE(new_case_3->id() == new_case_4->id());
 
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[0] + 8,
             new_case_1->GetIntegerVarVector()[0]);
+
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[1] + 0,
             new_case_1->GetIntegerVarVector()[1]);
+
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[2] + 0,
             new_case_1->GetIntegerVarVector()[2]);
 
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[1] + 8,
             new_case_2->GetIntegerVarVector()[1]);
+
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[2] + 8,
             new_case_3->GetIntegerVarVector()[2]);
+
   EXPECT_EQ(test_case_1_3i_->GetIntegerVarVector()[0] - 8,
             new_case_4->GetIntegerVarVector()[0]);
 }
@@ -93,7 +100,7 @@ TEST_F(APPSTest, GetNewCases) {
 TEST_F(APPSTest, TestFunctionSpherical) {
   auto gen = get_random_generator(10);
   test_case_2r_->set_objf_value(
-      Sphere(test_case_2r_->GetRealVarVector()));
+    Sphere(test_case_2r_->GetRealVarVector()));
 
   Optimization::Optimizer *minimizer = new APPS(settings_apps_min_unconstr_,
                                                 test_case_2r_,
@@ -111,16 +118,17 @@ TEST_F(APPSTest, TestFunctionSpherical) {
   while (minimizer->IsFinished() == tcNF) {
     try {
       under_eval.append(minimizer->GetCaseForEvaluation());
-
     } catch (Optimization::CaseHandlerException e) {
-      if (VERB_OPT >= 2)
-        std::cout << "Unable to get new case. Waiting for completed." << std::endl;
+      if (vp_.vOPT >= 2)
+        ext_info("Unable to get new case. Waiting for completed.");
     }
 
     auto random_evaluated_case = under_eval.takeAt(
         random_integer(gen, 0, under_eval.size()-1));
 
-    random_evaluated_case->set_objf_value(Sphere(random_evaluated_case->GetRealVarVector()));
+    random_evaluated_case->set_objf_value(
+      Sphere(random_evaluated_case->GetRealVarVector()));
+
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
 
@@ -156,8 +164,13 @@ TEST_F(APPSTest, TestFunctionRosenbrock) {
     } catch (Optimization::CaseHandlerException e) {
       std::cout << "Unable to get new case. Waiting for completed.";
     }
-    auto random_evaluated_case = under_eval.takeAt(random_integer(gen, 0, under_eval.size()-1));
-    random_evaluated_case->set_objf_value(Rosenbrock(random_evaluated_case->GetRealVarVector()));
+
+    auto random_evaluated_case = under_eval.takeAt(
+      random_integer(gen, 0, under_eval.size()-1));
+
+    random_evaluated_case->set_objf_value(
+      Rosenbrock(random_evaluated_case->GetRealVarVector()));
+
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
   auto best_case = minimizer->GetTentativeBestCase();

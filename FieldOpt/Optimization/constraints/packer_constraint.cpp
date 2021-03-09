@@ -36,7 +36,13 @@ using Printer::ext_info;
 
 PackerConstraint::PackerConstraint(Settings::Optimizer::Constraint settings,
                                    Model::Properties::VarPropContainer *variables,
-                                   Settings::VerbParams vp) : Constraint(vp) {
+                                   Settings::VerbParams vp)
+                                   : Constraint(vp) {
+
+  if (vp_.vOPT >= 1) {
+    info("Adding Packer constraint for " + settings.well.toStdString());
+  }
+
   for (auto var : *variables->GetContinuousVariables()) {
     auto lvar = var.second;
     if (lvar->propertyInfo().prop_type == Property::PropertyType::Packer
@@ -86,7 +92,9 @@ void PackerConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   for (int i = 1; i < affected_variables_.size(); ++i) {
     if (c->get_real_variable_value(affected_variables_[i]) < c->get_real_variable_value(affected_variables_[i-1])) {
       c->set_real_variable_value(affected_variables_[i], c->get_real_variable_value(affected_variables_[i-1]));
-      if (vp_.vOPT >= 2) ext_info("Enforced packer-ordering.", md_, cl_, vp_.lnw);
+      if (vp_.vOPT >= 2) {
+        ext_info("Enforced packer-ordering.", md_, cl_, vp_.lnw);
+      }
     }
   }
 }

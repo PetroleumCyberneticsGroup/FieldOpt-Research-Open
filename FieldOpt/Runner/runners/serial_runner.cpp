@@ -108,7 +108,17 @@ void SerialRunner::Execute() {
         int sim_time = time_span_seconds(start, end);
         if (simulation_success) {
           model_->wellCost(settings_->optimizer());
-          new_case->set_objf_value(objf_->value());
+
+          if (settings_->optimizer()->objective().type == Settings::Optimizer::ObjectiveType::Augmented) {
+            new_case->set_objf_value(objf_->value(false));
+          } else {
+            new_case->set_objf_value(objf_->value());
+          }
+
+          string tm = "Objective function value set to ";
+          tm += Printer::num2str(new_case->objf_value(), 8, 1);
+          if (vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
+
           new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
           new_case->SetSimTime(sim_time);
           simulation_times_.push_back((sim_time));

@@ -1,3 +1,27 @@
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FILEHANDLING_H
 #define FILEHANDLING_H
 
@@ -25,6 +49,8 @@ namespace FileHandling {
 
 using Printer::ext_info;
 using Printer::info;
+using Printer::ext_warn;
+using Printer::num2str;
 using boost::filesystem::copy_file;
 
 /*!
@@ -190,6 +216,15 @@ inline void WriteStringToFile(QString string, QString file_path) {
   file.close();
 }
 
+inline void WriteStringToFile(string str, string file_path) {
+  WriteStringToFile(QString::fromStdString(str),
+                    QString::fromStdString(file_path));
+}
+
+inline void WriteStringToFile(QString str, string file_path) {
+  WriteStringToFile(str, QString::fromStdString(file_path));
+}
+
 /*!
  * \brief WriteLineToFile Append a string to a file.
  *
@@ -245,8 +280,8 @@ inline void CreateDir(std::string path,
 }
 
 /*!
- * Get the name of a file from a path (i.e. delete everyting up to
- * and including the final /).
+ * Get the name of a file from a path (i.e. delete
+ * everyting up to and including the final /).
  * @param file_path Path to a file
  * @return Name of a file, including extension.
  */
@@ -394,7 +429,7 @@ inline QString GetCurrentDirectoryPath() {
 }
 
 /*!
- * \brief GetAbsoluteFilePath Gets absolute path of file.
+ * \brief GetAbsFilePath Gets absolute path of file.
  * \param file (relative) path to file
  */
 inline QString GetAbsoluteFilePath(const QString &file) {
@@ -402,13 +437,13 @@ inline QString GetAbsoluteFilePath(const QString &file) {
   return fileInfo.absoluteFilePath();
 }
 
-inline std::string GetAbsoluteFilePath(const std::string &file) {
+inline std::string GetAbsFilePath(const std::string &file) {
   return GetAbsoluteFilePath(QString::fromStdString(file)).toStdString();
 }
 
 /*!
- * Get the path to a file's parent directory (i.e. remove everyting
- * after the final slash)
+ * Get the path to a file's parent directory
+ * (i.e. remove everyting after the final slash)
  */
 inline QString GetParentDirPath(const QString &file_path) {
   QStringList parts = file_path.split("/");

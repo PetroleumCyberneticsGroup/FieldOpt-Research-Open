@@ -1,3 +1,27 @@
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include <gtest/gtest.h>
 #include "test_resource_cases.h"
 #include <Optimization/case_transfer_object.h>
@@ -9,16 +33,17 @@
 namespace {
 using namespace Optimization;
 using namespace boost::archive;
+
 class CaseTransferObjectTest : public ::testing::Test, public TestResources::TestResourceCases {
  protected:
   CaseTransferObjectTest() {}
   virtual void SetUp() {}
   virtual void TearDown() {}
 
-  boost::uuids::uuid qUuidToBoostUuid(const QUuid quuid) const {
-    boost::uuids::uuid uuid(string_generator()(quuid.toString().toStdString()));
-    return uuid;
-  }
+  // boost::uuids::uuid qUuidToBoostUuid(const QUuid quuid) const {
+  //   boost::uuids::uuid uuid(string_generator()(quuid.toString().toStdString()));
+  //   return uuid;
+  // }
 };
 
 TEST_F(CaseTransferObjectTest, BaseConstructor) {

@@ -42,6 +42,15 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::info;
+
+using Printer::num2str;
+using std::runtime_error;
+
+using WType=Settings::Model::WellDefinitionType;
+
 class WellSpline;
 
 /*!
@@ -78,9 +87,12 @@ class Trajectory
   double GetLength() const;
 
   //!< Get the wellblock surrounding the given MD.
-  WellBlock * GetWellBlockByMd(double md);
+  WellBlock * GetWellBlockByMd(double md, string dmsg="");
   std::vector<WellBlock *> GetWellBlocksByMdRange(double start_md,
-                                                  double end_md) const;
+                                                  double end_md,
+                                                  string dmsg="") const;
+
+  WellBlock* dummy_block = new WellBlock(0,0,0);
 
   //!< Get the measured depth for the entry point to the block.
   double GetEntryMd(const WellBlock *wb) const;
@@ -94,6 +106,7 @@ class Trajectory
 
 
  private:
+  Settings::Model::Well wsettings_;
   Settings::Model::WellDefinitionType definition_type_;
   QList<WellBlock *> *well_blocks_;
 
@@ -136,7 +149,7 @@ class Trajectory
     throw runtime_error(m);
   };
 
-  string im_ = "", wm_ = "", em_ = "";
+  string im_, wm_, em_;
   string md_ = "Model/wells/wellbore";
   string cl_ = "Trajectory";
   Settings::VerbParams vp_;

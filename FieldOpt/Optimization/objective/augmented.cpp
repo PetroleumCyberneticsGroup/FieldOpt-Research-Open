@@ -24,33 +24,23 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "augmented.h"
 #include <Utilities/printer.hpp>
 
-
 namespace Optimization {
 namespace Objective {
-
-using Printer::ext_warn;
-using Printer::ext_info;
-using Printer::info;
-using Printer::ext_error;
-using Printer::num2str;
-
-using Printer::DBG_prntDbl;
-using Printer::DBG_prntVecXd;
-using Printer::DBG_prntMatXd;
-using Printer::DBG_prntToFile;
 
 using ECLProp = Simulation::Results::Results::Property;
 
 using std::runtime_error;
 
-Augmented::Augmented(Settings::Optimizer *settings,
-                     Simulation::Results::Results *results,
-                     Model::Model *model) : Objective(settings) {
+Augmented::
+Augmented(Settings::Optimizer *settings,
+          Simulation::Results::Results *results,
+          Model::Model *model) : Objective(settings) {
   settings_ = settings;
   results_ = results;
   model_ = model;
-  if (model_ == nullptr)
+  if (model_ == nullptr) {
     ext_error("Initialize model", md_, cl_, vp_.lnw);
+  }
 
   setUpAugTerms();
   setUpWaterCutLimit();
@@ -89,7 +79,8 @@ double Augmented::value(bool base_case) {
             // VectorXd wlft = results_->GetValueVectorXd(ECLProp::WellLiqProdTotal, wn); // not used, keep-for-ref
             vector<VectorXd> slft = results_->GetValVectorSegXd(ECLProp::WellSegLiqFlowTotal, wn);
             if (slft.size() == 0) {
-              ext_error("One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.", md_, cl_);
+              em_ = "One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.";
+              ext_error(em_, md_, cl_, vp_.lnw);
               assert(slft.size() > 0);
             }
 
@@ -197,10 +188,13 @@ double Augmented::value(bool base_case) {
             }
 
             t_val *= objf_scal;
-            ss << "scal.type: " << term->scaling << " -- ";
-            ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
-            ss << "t_val (scaled) = " << num2str(t_val, 8, 1);
-            info(ss.str(), vp_.lnw); ss.str("");
+            if (vp_.vOPT >= 3) {
+              ss << "scal.type: " << term->scaling << " -- ";
+              ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
+              ss << "t_val (scaled) = " << num2str(t_val, 8, 1) << "|";
+              // info(ss.str(), vp_.lnw);
+              // ss.str("");
+            }
           }
         }
 
@@ -220,18 +214,15 @@ double Augmented::value(bool base_case) {
       }
 
       if (vp_.vOPT >= 3) {
-        string im = "prop_name: "+ term->prop_name_str;
-        im += ", prop_type: "+ results_->GetPropertyKey(term->prop_type);
-        im += ", prop_spec: "+ results_->GetPropertyKey(term->prop_spec);
-        im += ", term value: " + num2str(t_val, 5, 1);
-        info(im, vp_.lnw);
+        ss << printTerm(term, t_val, 1);
       }
-
       value += t_val;
     }
+    if (vp_.vOPT >= 3) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 
   } catch (std::exception const &ex) {
-    em_ = "Failed to compute Augmented function " + string(ex.what()) + " Returning 0.0";
+    em_ = "Failed to compute Augmented function ";
+    em_ += string(ex.what()) + " Returning 0.0";
     ext_error(em_, md_, cl_, vp_.lnw);
   }
   return value;
@@ -253,16 +244,21 @@ void Augmented::setUpWaterCutLimit() {
   if (npv_coeffs_[0] != 0.0 && npv_coeffs_[1] != 0.0) {
     auto po_cwp = npv_coeffs_[0] / npv_coeffs_[1];
     wcut_limit_ = abs(po_cwp) / (abs(po_cwp) + 1);
-    im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
-    info(im_, vp_.lnw);
+    if (vp_.vOPT >= 3) {
+      im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
+      ext_info(im_, md_, cl_, vp_.lnw);
+    }
 
-  } else {
+  } else if (vp_.vOPT >= 3) {
     im_ = "Water cut limit not computed (def: 1.0)";
     ext_warn(im_, md_, cl_, vp_.lnw);
   }
 }
 
 void Augmented::setUpAugTerms() {
+  stringstream ss;
+  ss << "Setting up terms in augmeted formulation|";
+
   for (int ii = 0; ii < settings_->objective().terms.size(); ++ii) {
     auto *term = new Augmented::Term();
     term->prop_name_str = settings_->objective().terms.at(ii).prop_name;
@@ -312,18 +308,13 @@ void Augmented::setUpAugTerms() {
       term->prop_type = ECLProp::AuxProp;
       term->prop_spec = ECLProp::AuxProp;
     }
-
-    if (vp_.vOPT >= 4) {
-      string im = "Term: " + term->prop_name_str;
-      im += ", coeff: " + num2str(term->coeff, 5);
-      im += ", prop_type: " + results_->GetPropertyKey(term->prop_type);
-      im += ", prop_spec: " + results_->GetPropertyKey(term->prop_spec);
-      info(im, vp_.lnw);
-    }
+    ss << printTerm(term, 0, 0);
   }
+
+  if (vp_.vOPT >= 4) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 }
 
-void Augmented::dbg(int dm,
+void Augmented::dbg(const int dm,
                     const VectorXd& v0,
                     const VectorXd& v1,
                     const VectorXd& v2,

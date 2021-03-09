@@ -37,6 +37,12 @@ ResBoundary::ResBoundary(
   Model::Properties::VarPropContainer *variables,
   Reservoir::Grid::Grid *grid,
   Settings::VerbParams vp) : Constraint(vp) {
+
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding ResBoundary constraint for " + settings.well.toStdString();
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
+
   imin_ = settings.box_imin;
   imax_ = settings.box_imax;
   jmin_ = settings.box_jmin;
@@ -47,10 +53,11 @@ ResBoundary::ResBoundary(
   penalty_weight_ = settings.penalty_weight;
 
   index_list_ = getListOfCellIndices();
-  if (variables->GetWellSplineVariables(settings.well).size() > 0)
-    affected_well_ = initializeWell(variables->GetWellSplineVariables(settings.well));
-  else
-    affected_well_ = initializeWell(variables->GetPolarSplineVariables(settings.well));
+  if (variables->GetWSplineVars(settings.well).size() > 0) {
+    affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp);
+  } else {
+    affected_well_ = initWSplineConstraint(variables->GetPolarSplineVariables(settings.well), vp);
+  }
 
   // QList with indices of box edge cells
   index_list_edge_ = getIndicesOfEdgeCells();
@@ -88,14 +95,25 @@ void ResBoundary::findCornerCells() {
   //        0   1
 
   // Get corner cells of box
-  std::vector<Eigen::Vector3d> upper_plane_left_bottom_cell_xyz = grid_->GetCell(imin_, jmin_, kmax_).corners();
-  std::vector<Eigen::Vector3d> upper_plane_left_top_cell_xyz = grid_->GetCell(imin_, jmax_, kmax_).corners();
+  std::vector<Eigen::Vector3d>
+    upper_plane_left_bottom_cell_xyz = grid_->GetCell(imin_, jmin_, kmax_).corners();
+
+  std::vector<Eigen::Vector3d>
+    upper_plane_left_top_cell_xyz = grid_->GetCell(imin_, jmax_, kmax_).corners();
+
   // Get cell vertex amounting to true box corner
-  Eigen::Vector3d upper_plane_left_bottom_corner_xyz = upper_plane_left_bottom_cell_xyz[0];
-  Eigen::Vector3d upper_plane_left_top_corner_xyz = upper_plane_left_top_cell_xyz[2];
+  Eigen::Vector3d
+  upper_plane_left_bottom_corner_xyz = upper_plane_left_bottom_cell_xyz[0];
+
+  Eigen::Vector3d
+  upper_plane_left_top_corner_xyz = upper_plane_left_top_cell_xyz[2];
+
   // Print coordinates
-  printCornerXYZ("upper plane, left edge, bottom corner: ", upper_plane_left_bottom_corner_xyz);
-  printCornerXYZ("upper plane, left edge, top corner:    ", upper_plane_left_top_corner_xyz);
+  printCornerXYZ("upper plane, left edge, bottom corner: ",
+                 upper_plane_left_bottom_corner_xyz);
+
+  printCornerXYZ("upper plane, left edge, top corner:    ",
+                 upper_plane_left_top_corner_xyz);
 
   // UPPER BOX PLANE: RIGHT EDGE
   std::cout << std::setfill('-') << std::setw(80) << "-" << std::endl;

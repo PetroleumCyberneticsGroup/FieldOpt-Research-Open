@@ -32,8 +32,9 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The WSplineLength class defines a constraint on the maximum and minimum length
- * of a well defined by a WellSpline. It uses the WellIndexCalculation library.
+ * \brief The WSplineLength class defines a constraint on
+ * the maximum and minimum length of a well defined by a
+ * WellSpline. It uses the WellIndexCalculation library.
  */
 class WSplineLength : public Constraint, WellSplineConstraint
 {
@@ -46,8 +47,9 @@ class WSplineLength : public Constraint, WellSplineConstraint
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
+
   void InitializeNormalizer(QList<Case *> cases) override;
   double Penalty(Case *c) override;
   long double PenaltyNormalized(Case *c) override;
@@ -56,6 +58,9 @@ class WSplineLength : public Constraint, WellSplineConstraint
   double min_length_;
   double max_length_;
   Well affected_well_;
+
+  string md_ = "Optimization::Constraints";
+  string cl_ = "WSplineLength";
 
 };
 

@@ -79,7 +79,11 @@ TEST_F(VFSATest, TestFunctionSpherical) {
 
 TEST_F(VFSATest, TestFunctionRosenbrock) {
   test_case_ga_spherical_6r_->set_objf_value(-1.0 * abs(Rosenbrock(test_case_ga_spherical_6r_->GetRealVarVector())));
-  Optimization::Optimizer *maximizer = new VFSA(settings_vfsa_max_, test_case_ga_spherical_6r_, varcont_6r_, grid_5spot_, logger_ );
+  Optimization::Optimizer *maximizer = new VFSA(settings_vfsa_max_,
+                                                test_case_ga_spherical_6r_,
+                                                varcont_6r_,
+                                                grid_5spot_,
+                                                logger_ );
   settings_spsa_min_->SetRngSeed(5);
 
   int iter = 0;

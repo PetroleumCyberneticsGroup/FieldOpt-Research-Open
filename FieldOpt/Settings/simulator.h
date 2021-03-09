@@ -77,6 +77,14 @@ class Simulator
    * some functionality. */
   bool use_actionx() const { return ecl_use_actionx_; }
 
+  QString use_actionx_str() const {
+    if (ecl_use_actionx_) {
+      return "true";
+    } else {
+      return "false";
+    }
+  }
+
   /*! @brief Check whether or not to call a script named
    * FO_POSTSIM.sh in the same directory as the simulator
    * DATA file after simulation, if the script is found. */
@@ -101,8 +109,19 @@ class Simulator
     string levels_str_ = "";
   };
 
-  /*! @brief Get the fluid model. */
+  /*! @brief Get file structure. */
   FileStructure file_structure() { return file_structure_; }
+
+  QStringList file_structure_str() const {
+    QStringList sl;
+    if (file_structure_.type_ == FileStructType::Flat) {
+      sl << "Flat" << "0" << " ";
+    } else if (file_structure_.type_ == FileStructType::Branched) {
+      sl << "Branched" << QString::number(file_structure_.levels_num_)
+      << QString::fromStdString(file_structure_.levels_str_);
+    }
+    return sl;
+  }
 
   VerbParams verbParams() { return vp_; };
 

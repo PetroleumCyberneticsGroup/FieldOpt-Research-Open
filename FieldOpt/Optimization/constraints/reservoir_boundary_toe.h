@@ -46,6 +46,7 @@ class ReservoirBoundaryToe : public ResBoundary {
                        Settings::VerbParams vp);
 
   string name() override { return "ReservoirBoundaryToe"; }
+
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;

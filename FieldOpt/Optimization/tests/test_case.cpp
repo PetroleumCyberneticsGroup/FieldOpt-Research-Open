@@ -1,3 +1,27 @@
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include <gtest/gtest.h>
 #include "test_resource_cases.h"
 #include <QList>
@@ -62,15 +86,16 @@ TEST_F(CaseTest, CopyConstructor) {
 
 TEST_F(CaseTest, PerturbMethod) {
   // Perturb the first case's first integer variable in positive direction
-  QList<Optimization::Case *> perturbations_1 = test_case_1_3i_->Perturb(test_case_1_3i_->integer_variables().at(0).first,
+  QList<Optimization::Case *> perturbations_1 = test_case_1_3i_->Perturb(test_case_1_3i_->integer_variables().value(0).first,
                                                                          Optimization::Case::SIGN::PLUS, 7);
   EXPECT_EQ(1, perturbations_1.size());
   EXPECT_FALSE(perturbations_1.first()->id() == test_case_1_3i_->id());
   EXPECT_FALSE(perturbations_1.first()->Equals(test_case_1_3i_));
-  EXPECT_TRUE(test_case_1_3i_->integer_variables().at(0).second + 7 == perturbations_1.first()->integer_variables().at(0).second);
+
+  EXPECT_TRUE(test_case_1_3i_->integer_variables().value(0).second + 7 == perturbations_1.first()->integer_variables().value(0).second);
 
   // Perturb the second case's first real variable in both directions
-  QList<Optimization::Case *> perturbations_2 = test_case_2_3r_->Perturb(test_case_2_3r_->real_variables().at(0).first,
+  QList<Optimization::Case *> perturbations_2 = test_case_2_3r_->Perturb(test_case_2_3r_->real_variables().value(0).first,
                                                                          Optimization::Case::SIGN::PLUSMINUS, 5);
   EXPECT_EQ(2, perturbations_2.size());
   EXPECT_FALSE(perturbations_2[0]->id() == test_case_2_3r_->id());
@@ -78,8 +103,8 @@ TEST_F(CaseTest, PerturbMethod) {
   EXPECT_FALSE(perturbations_2[0]->Equals(test_case_2_3r_));
   EXPECT_FALSE(perturbations_2[1]->Equals(test_case_2_3r_));
   EXPECT_FALSE(perturbations_2[0]->Equals(perturbations_2[1]));
-  EXPECT_TRUE(test_case_2_3r_->real_variables().at(0).second + 5 == perturbations_2[0]->real_variables().at(0).second);
-  EXPECT_TRUE(test_case_2_3r_->real_variables().at(0).second - 5 == perturbations_2[1]->real_variables().at(0).second);
+  EXPECT_TRUE(test_case_2_3r_->real_variables().value(0).second + 5 == perturbations_2[0]->real_variables().value(0).second);
+  EXPECT_TRUE(test_case_2_3r_->real_variables().value(0).second - 5 == perturbations_2[1]->real_variables().value(0).second);
 }
 
 TEST_F(CaseTest, VectorHelpers) {

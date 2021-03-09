@@ -3,6 +3,9 @@ Created by thiagols on 26.11.18
 Copyright (C) 2018
 Thiago Lima Silva <thiagolims@gmail.com>
 
+Modified 2018-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
+
 Modified 2018-2019 Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
@@ -44,7 +47,8 @@ TrustRegionOptimization::TrustRegionOptimization(
     Logger *logger,
     CaseHandler *case_handler,
     Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, variables, grid,
+              logger, case_handler, constraint_handler) {
 
   settings_ = settings;
   variables_ = variables;
@@ -75,6 +79,7 @@ TrustRegionOptimization::TrustRegionOptimization(
   sum_rho_sqr_ = 0;
   delay_reduction_ = 0;
   gamma_dec_ = settings_->parameters().tr_gamma_dec;
+  tr_prob_name_ = settings_->parameters().tr_prob_name;
 
   // Log configuration
   if (enable_logging_) {
@@ -86,7 +91,6 @@ TrustRegionOptimization::TrustRegionOptimization(
 
 void TrustRegionOptimization::iterate() {
   if (iteration_ == 0) {
-
     if (!tr_model_->areInitPointsComputed() //_if-1
         && !tr_model_->isInitialized()) {
       auto init_cases = tr_model_->getInitializationCases();
@@ -299,19 +303,19 @@ void TrustRegionOptimization::iterate() {
 }
 
 void TrustRegionOptimization::createLogFile() {
-  QString output_dir = logger_->getOutputDir();
+  QString output_dir = logger_->getOutputDir() + "/tr-dfo-out";
   if (output_dir.length() > 0) {
     Utilities::FileHandling::CreateDir(output_dir, vp_);
   }
-  tr_log_path_ = output_dir + "/log_trust_region.csv";
+  tr_log_ = output_dir + "/tr-dfo_" + QString::fromStdString(tr_prob_name_) + ".csv";
 
   // Delete existing logs if --force flag is on
-  if (Utilities::FileHandling::FileExists(tr_log_path_, vp_)) {
-    Utilities::FileHandling::DeleteFile(tr_log_path_, vp_);
+  if (Utilities::FileHandling::FileExists(tr_log_, vp_)) {
+    Utilities::FileHandling::DeleteFile(tr_log_, vp_);
   }
 
   const QString tr_log_header = "iter        fval         rho      radius  pts";
-  Utilities::FileHandling::WriteLineToFile(tr_log_header, tr_log_path_);
+  Utilities::FileHandling::WriteLineToFile(tr_log_header, tr_log_);
 }
 
 void TrustRegionOptimization::printIteration(double fval_current) {
@@ -322,7 +326,7 @@ void TrustRegionOptimization::printIteration(double fval_current) {
      << setw(12) << scientific << right << tr_model_->getRadius()
      << setw(5) << right << tr_model_->getNumPts();
   string str = ss.str();
-  Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), tr_log_path_);
+  Utilities::FileHandling::WriteLineToFile(QString::fromStdString(str), tr_log_);
 }
 
 
@@ -332,7 +336,6 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
   }
 
   if (iteration_ == 0) {
-
     // Collect init points
     if (!tr_model_->areInitPointsComputed()
         && !tr_model_->isInitialized()) {
@@ -374,6 +377,7 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 
   } else { // Initialization is done; handling "normal" case
     if (tr_model_->isImprovementNeeded() || tr_model_->isReplacementNeeded()) {
+
       // All improvement cases have been evaluated
       if (tr_model_->isImprovementNeeded()) {
         // Collect case
@@ -490,8 +494,8 @@ void TrustRegionOptimization::computeInitialPoints() {
   tr_model_->addInitializationCase(base_case_);
 
   //!<Find another point since only one initial guess provided
-  if (settings_->parameters().tr_init_guesses == -1) {
-    if (settings_->parameters().tr_init_sampling_method == "Random") {
+  if (settings_->parameters().tr_num_init_x == -1) {
+    if (settings_->parameters().tr_init_smpln == "Random") {
 
       //!<Find (random) 2nd initial point>
       auto rng = get_random_generator(settings_->parameters().rng_seed);
@@ -504,12 +508,17 @@ void TrustRegionOptimization::computeInitialPoints() {
 
       //!<Second point must not be too close>
       while (second_point.lpNorm<Infinity>()
-          < settings_->parameters().tr_pivot_threshold) {
+          < settings_->parameters().tr_pivot_thld) {
         second_point << 2*second_point.array();
       }
 
       second_point << (second_point.array() - 0.5);
-      second_point *= settings_->parameters().tr_initial_radius;
+      second_point *= settings_->parameters().tr_init_rad;
+
+      if(vp_.vOPT >= 2) {
+        cout << "initial_point: " << Printer::DBG_prntVecXd(initial_point, "", "% 10.2f ") << endl;
+        cout << "second_point: " << Printer::DBG_prntVecXd(second_point, "", "% 10.2f ") << endl;
+      }
       second_point << initial_point.array() + second_point.array();
       if(lb_.size()>0 && ub_.size() >0) {
         projectToBounds(&second_point);
@@ -535,66 +544,72 @@ void TrustRegionOptimization::computeInitialPoints() {
 
 void TrustRegionOptimization::setLowerUpperBounds() {
 
-  if (constraint_handler_->HasBoundaryConstraints()) {
+  lb_.conservativeResize(base_case_->GetRealVarIdVector().size());
+  ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
 
-    // Use constraint_handler lower/upper bounds
-    lb_ = constraint_handler_->GetLowerBounds(
+  if (constraint_handler_ != nullptr) { // All actual cases
+
+    if (constraint_handler_->HasBoundaryConstraints()) {
+      // Use constraint_handler lower/upper bounds
+      lb_ = constraint_handler_->GetLowerBounds(
         base_case_->GetRealVarIdVector());
-    ub_ = constraint_handler_->GetUpperBounds(
+      ub_ = constraint_handler_->GetUpperBounds(
         base_case_->GetRealVarIdVector());
-
-  } else {
-
-    // Use lower/upper bounds specified in tr-params
-    if (settings_->parameters().tr_lower_bound
-        && settings_->parameters().tr_upper_bound) {
-
-      lb_.conservativeResize(base_case_->GetRealVarIdVector().size());
-      ub_.conservativeResize(base_case_->GetRealVarIdVector().size());
-      lb_.fill(settings_->parameters().tr_lower_bound);
-      ub_.fill(settings_->parameters().tr_upper_bound);
-
-      // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
-      // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
 
     } else {
+      // Use lower/upper bounds specified in tr-params
+      if (settings_->parameters().tr_lower_bnd > 0
+        && settings_->parameters().tr_upper_bnd > 0) {
+        lb_.fill(settings_->parameters().tr_lower_bnd);
+        ub_.fill(settings_->parameters().tr_upper_bnd);
 
-      // Printer::ext_warn(
-      //     "Lower/upper bounds for DF-TR algorithm not specified.",
-      //     "Optimization", "TrustRegionOptimization");
-      // throw std::runtime_error(
-      //    "Lower/upper bounds for DF-TR algorithm not specified.");
+        // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
+        // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
 
+      } else {
+        wm_ = "Lower/upper bounds for DF-TR algorithm not specified.";
+        ext_warn(wm_, md_, cl_, vp_.lnw);
+        throw std::runtime_error(wm_);
+      }
     }
+
+  } else { // constraint_handler_ == nullptr in unit tests
+    lb_.fill(settings_->parameters().tr_lower_bnd);
+    ub_.fill(settings_->parameters().tr_upper_bnd);
   }
 }
 
 bool TrustRegionOptimization::ensureImprovementPostProcessing(){
-  auto improvement_cases = tr_model_->getImprovementCases(); //<improve model>
-  auto replacement_cases = tr_model_->getReplacementCases(); //<replace point>
+  //<improve model>
+  auto improvement_cases = tr_model_->getImprovementCases();
+  //<replace point>
+  auto replacement_cases = tr_model_->getReplacementCases();
 
-  if (tr_model_->isImprovementNeeded() && !improvement_cases.size() == 0) {
+  if (tr_model_->isImprovementNeeded() && improvement_cases.empty() == 0) {
     case_handler_->AddNewCases(improvement_cases);
     return true;
   }
 
-  if (tr_model_->isReplacementNeeded() && !replacement_cases.size() == 0) {
+  if (tr_model_->isReplacementNeeded() && replacement_cases.empty() == 0) {
     case_handler_->AddNewCases(replacement_cases);
     return true;
   }
 
   if (criticality_step_execution_ongoing_) {
-    // Printer::ext_warn(
-    //      "criticality step did not generate a case.",
-    //      "ensureImprovementPostProcessing", "TrustRegionOptimization");
+    if (vp_.vOPT > 1) {
+      wm_ = "Criticality step did not generate a case.";
+      string fn = "ensureImprPostProc()";
+      ext_warn(wm_,md_ + fn, cl_, vp_.lnw);
+    }
   }
 
-  if ((improvement_cases.size() == 0)
-      && (replacement_cases.size() == 0)
+  if ((improvement_cases.empty())
+      && (replacement_cases.empty())
       && !criticality_step_execution_ongoing_) {
     updateRadius();
     return false;
   }
+  return false;
 }
 
 Optimization::Optimizer::TerminationCondition
@@ -606,16 +621,16 @@ TrustRegionOptimization::IsFinished() {
     auto model_criticality = tr_model_->measureCriticality();
 
     if (model_criticality.norm() < settings_->parameters().tr_tol_f) {
-      tc =  OPTIMALITY_CRITERIA_REACHED;
+      tc =  OPT_CRITERIA_REACHED;
     }
   }
 
   if (tr_model_->getRadius() < settings_->parameters().tr_tol_radius) {
-    tc = MINIMUM_STEP_LENGTH_REACHED;
+    tc = MIN_STEP_LENGTH_REACHED;
   }
 
   if (iteration_ == settings_->parameters().tr_iter_max) {
-    tc = MAX_ITERATIONS_REACHED;
+    tc = MAX_ITERS_REACHED;
   }
 
   if (tc != NOT_FINISHED) {

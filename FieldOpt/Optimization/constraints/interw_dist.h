@@ -43,15 +43,17 @@ class InterwDist : public Constraint, WellSplineConstraint
 
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
   /*!
    * @brief Set the normalizer parameters.
    *
    * - The max value (L) is set to 1.0.
-   * - The steepness (k) is set to 1.0 divided by the smallest distance found between two endpoints.
-   * - The midpoint (x_0) is set to the smallest distance found between two endpoints divided by 2.0.
+   * - The steepness (k) is set to 1.0 divided by
+   * the smallest distance found between two endpoints.
+   * - The midpoint (x_0) is set to the smallest
+   * distance found between two endpoints divided by 2.0.
    * @param cases Cases to be used to determine parameter values.
    */
   void InitializeNormalizer(QList<Case *> cases) override;

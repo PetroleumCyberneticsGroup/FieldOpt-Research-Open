@@ -36,28 +36,27 @@ namespace Model {
 namespace Wells {
 namespace Wellbore {
 
-using Printer::ext_info;
-using Printer::ext_warn;
-using Printer::info;
-using std::runtime_error;
+Trajectory::
+Trajectory(Settings::Model::Well well_settings,
+           Properties::VarPropContainer *variable_container,
+           ::Reservoir::Grid::Grid *grid,
+           Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
 
-using WDefType = Settings::Model::WellDefinitionType;
+  wsettings_ = well_settings;
+  string wn = wsettings_.name.toStdString();
+  vp_ = wsettings_.verbParams();
 
-Trajectory::Trajectory(Settings::Model::Well well_settings,
-                       Properties::VarPropContainer *variable_container,
-                       ::Reservoir::Grid::Grid *grid,
-                       Reservoir::WellIndexCalculation::wicalc_rixx *wic) {
-  vp_ = well_settings.verbParams();
   well_blocks_ = new QList<WellBlock *>();
   well_spline_ = nullptr;
   pseudo_cont_vert_ = nullptr;
   definition_type_ = well_settings.definition_type;
 
-  if (well_settings.definition_type == WDefType::WellBlocks) {
+  if (well_settings.definition_type == WType::WellBlocks) {
+    if (vp_.vMOD >= 5) { ext_warn("BLOCK WELL: " + wn); }
     initializeWellBlocks(well_settings, variable_container);
-    calculateDirectionOfPenetration();
 
-  } else if (well_settings.definition_type == WDefType::WellSpline) {
+  } else if (well_settings.definition_type == WType::WellSpline) {
+    if (vp_.vMOD >= 5) { ext_warn("WELLSPLINE: " + wn); }
     if (well_settings.convert_well_blocks_to_spline) {
       convertWellBlocksToWellSpline(well_settings, grid);
     }
@@ -65,29 +64,31 @@ Trajectory::Trajectory(Settings::Model::Well well_settings,
                                   variable_container,
                                   grid, wic);
     well_blocks_ = well_spline_->GetWellBlocks();
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
 
-  } else if (well_settings.definition_type == WDefType::PolarSpline) {
+  } else if (well_settings.definition_type == WType::PolarSpline) {
+    if (vp_.vMOD >= 5) { ext_warn("POLARSPLINE: " + wn); }
     well_spline_ = new PolarSpline(well_settings,
                                    variable_container,
                                    grid, wic);
     well_blocks_ = well_spline_->GetWellBlocks();
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
 
-  } else if (well_settings.definition_type == WDefType::PseudoContVertical2D) {
+  } else if (well_settings.definition_type == WType::PseudoContVertical2D) {
+    if (vp_.vMOD >= 5) { ext_warn("VERT3D: " + wn); }
     pseudo_cont_vert_ = new PseudoContVert(well_settings,
                                            variable_container,
                                            grid);
     well_blocks_->append(pseudo_cont_vert_->GetWellBlock());
-    calculateDirectionOfPenetration();
-    if (vp_.vMOD >= 3) { printWellBlocks(); }
   }
+
+  if (well_settings.definition_type != WType::UNDEFINED) {
+    calculateDirectionOfPenetration();
+  }
+
+  if (vp_.vMOD >= 5) { printWellBlocks(); }
 }
 
 int Trajectory::GetTimeSpentInWic() const {
-  if (well_spline_ != 0) {
+  if (well_spline_ != nullptr) {
     return well_spline_->GetTimeSpentInWIC();
   }
   else return 0;
@@ -96,8 +97,8 @@ int Trajectory::GetTimeSpentInWic() const {
 WellBlock *Trajectory::GetWellBlock(int i, int j, int k) {
   for (int idx = 0; idx < well_blocks_->size(); ++idx) {
     if (well_blocks_->at(idx)->i() == i
-        && well_blocks_->at(idx)->j() == j
-        && well_blocks_->at(idx)->k() == k)
+      && well_blocks_->at(idx)->j() == j
+      && well_blocks_->at(idx)->k() == k)
       return well_blocks_->at(idx);
   }
   throw WellBlockNotFoundException(i, j, k);
@@ -108,19 +109,22 @@ QList<WellBlock *> *Trajectory::GetWellBlocks() {
 }
 
 void Trajectory::UpdateWellBlocks() {
-  // \todo This is the source of a memory leak: old well blocks are not deleted. Fix it.
-  if (well_spline_ != 0) {
-    if (well_spline_->HasGridChanged() || well_spline_->HasSplineChanged()) {
+  // \todo This is the source of a memory leak:
+  //  old well blocks are not deleted. Fix it.
+  if (well_spline_ != nullptr) {
+    if (well_spline_->HasGridChanged()
+      || well_spline_->HasSplineChanged()) {
       well_blocks_ = well_spline_->GetWellBlocks();
     } else {
       if (vp_.vMOD >= 3) {
+        im_ = "@[Trajectory::UpdateWellBlocks] ";
         im_ = "The well spline has not changed.";
         im_ += "well indices will not be recomputed.";
         info(im_, vp_.lnw);
       }
     }
-  }
-  else if (pseudo_cont_vert_ != 0) {
+
+  } else if (pseudo_cont_vert_ != 0) {
     well_blocks_ = new QList<WellBlock *>();
     well_blocks_->append(pseudo_cont_vert_->GetWellBlock());
   }
@@ -128,7 +132,7 @@ void Trajectory::UpdateWellBlocks() {
 }
 
 double Trajectory::GetLength() const {
-  if (definition_type_ == WDefType::WellSpline) {
+  if (definition_type_ == WType::WellSpline) {
     return GetSplineLength();
   }
   else { // Block-defined
@@ -137,8 +141,9 @@ double Trajectory::GetLength() const {
   }
 }
 
-void Trajectory::initializeWellBlocks(Settings::Model::Well well,
-                                      Properties::VarPropContainer *variable_container) {
+void Trajectory::
+initializeWellBlocks(Settings::Model::Well well,
+                     Properties::VarPropContainer *variable_container) {
   QList<Settings::Model::Well::WellBlock> blocks = well.well_blocks;
   for (int i = 0; i < blocks.size(); ++i) {
     well_blocks_->append(new WellBlock(blocks[i].i, blocks[i].j, blocks[i].k));
@@ -151,7 +156,8 @@ void Trajectory::initializeWellBlocks(Settings::Model::Well well,
       variable_container->AddVariable(well_blocks_->last()->k_);
     }
     if (blocks[i].has_completion)
-      well_blocks_->last()->AddCompletion(new Completions::Perforation(blocks[i].completion, variable_container));
+      well_blocks_->last()->AddCompletion(
+        new Completions::Perforation(blocks[i].completion, variable_container));
   }
 }
 
@@ -162,7 +168,7 @@ void Trajectory::calculateDirectionOfPenetration() {
   }
   // All but the last block use forward direction
   int delta_i, delta_j, delta_k;
-  stringstream ss; ss << "delta ijk -- Trajectory::calculateDirectionOfPenetration():" << endl;
+  stringstream ss; ss << "@[Trajectory::calculateDirectionOfPenetration] delta ijk:" << endl;
 
   for (int i = 0; i < well_blocks_->size()-1; ++i) {
     delta_i = std::abs(well_blocks_->at(i)->i() - well_blocks_->at(i+1)->i());
@@ -216,12 +222,13 @@ void Trajectory::calculateDirectionOfPenetration() {
   }
 }
 
-WDefType Trajectory::GetDefinitionType() {
+WType Trajectory::GetDefinitionType() {
   return definition_type_;
 }
 
-void Trajectory::convertWellBlocksToWellSpline(Settings::Model::Well &well_settings,
-                                               Reservoir::Grid::Grid *grid) {
+void Trajectory::
+convertWellBlocksToWellSpline(Settings::Model::Well &well_settings,
+                              Reservoir::Grid::Grid *grid) {
   if (vp_.vMOD >= 2) {
     im_ = "Convering well " + well_settings.name.toStdString() + " to spline.";
     ext_info(im_, md_, cl_);
@@ -290,18 +297,58 @@ void Trajectory::convertWellBlocksToWellSpline(Settings::Model::Well &well_setti
   cout << "Done Converting well " << well_settings.name.toStdString() << " to spline." << endl;
 }
 
-WellBlock * Trajectory::GetWellBlockByMd(double md) {
+WellBlock * Trajectory::GetWellBlockByMd(double md, string dmsg) {
   assert(well_blocks_->size() > 0);
   if (md > GetLength()) {
     E("Attempting to get well block at MD grater than well length.");
   }
 
+  if (dmsg != "") {
+    cout << dmsg << endl;
+  }
+
   for (auto block : *well_blocks_) {
+    if (vp_.vMOD >=3) { cout << block->getPropString(md) << endl; }
     if (md <= block->getExitMd() && md >= block->getEntryMd()) {
+      if (vp_.vMOD >=3) {
+        cout << "Returning block: [" << block->i() << " " << block->j() << " " << block->k() << "]" << endl;
+      }
       return block;
     }
   }
-  throw runtime_error("Unable to get well block by MD.");
+
+  return dummy_block;
+
+  // for (int ii=1; ii < well_blocks_->size()-1; ++ii) {
+  //   auto curr_block = well_blocks_->at(ii);
+  //   auto prev_block = well_blocks_->at(ii-1);
+  //   if (md >= curr_block->getEntryMd() && md <= curr_block->getExitMd()) {
+  //     return curr_block;
+  //   } else if (md >= prev_block->getExitMd() && md <= curr_block->getEntryMd()) {
+  //     if (vp_.vMOD >=3) {
+  //       cout << "Returning block: ["
+  //       << prev_block->i() << " " << prev_block->j() << " " << prev_block->k()
+  //       << "] instead of block ["
+  //       << curr_block->i() << " " << curr_block->j() << " " << curr_block->k()
+  //       << "]" << endl;
+  //     }
+  //     return prev_block;
+  //   }
+  // }
+  // E("Unable to get well block by MD.");
+}
+
+std::vector<WellBlock *> Trajectory::
+GetWellBlocksByMdRange(double start_md, double end_md, string dmsg) const {
+  std::vector<WellBlock *> affected_blocks;
+  for (auto wb : *well_blocks_) {
+    if (( start_md >= wb->getEntryMd() && start_md <= wb->getExitMd() ) || // Start md inside block
+      (   end_md >= wb->getEntryMd() &&   end_md <= wb->getExitMd() ) || // End md inside block
+      ( start_md <= wb->getEntryMd() &&   end_md >= wb->getExitMd() )) { // Block between start and end blocks
+      affected_blocks.push_back(wb);
+    }
+  }
+  return affected_blocks;
 }
 
 double Trajectory::GetEntryMd(const WellBlock *wb) const {
@@ -313,16 +360,50 @@ double Trajectory::GetExitMd(const WellBlock *wb) const {
 }
 
 void Trajectory::printWellBlocks() {
+  ext_info(wsettings_.toString("|"), md_, cl_, vp_.lnw);
+
   cout << endl << "well blocks -- Trajectory::printWellBlocks():" << endl;
-  cout << "I,\tJ,\tK,\tINX,\tINY,\tINZ,\tOUTX,\tOUTY,\tOUTZ" << endl;
+  // cout << "I,\tJ,\tK,\tINX,\t\t\tINY,\t\t\tINZ,\t\t\tOUTX,\t\t\tOUTY,\t\t\tOUTZ" << endl;
+
+  string sep = "         ";
+  string lbl;
+  lbl = "[    I    J    K ] [ Xin" + sep + "Yin" + sep + "Zin         ] ";
+  lbl += "[ Xou" + sep + "You" + sep + "Zou" + sep + "] ";
+  lbl +=  "[    Len EntryMd  ExitMd  DepthD ] ";
+  lbl +=  "[      Dx      Dy     Dz ]";
+  cout << lbl << endl;
+
   for (auto wb : *well_blocks_) {
     stringstream entry;
-    entry << wb->i() << ",\t" << wb->j() << ",\t" << wb->k() << ",\t";
-    entry.precision(12);
-    entry << std::scientific;
-    entry << wb->getEntryPoint().x() << ",\t" << wb->getEntryPoint().y() << ",\t" << wb->getEntryPoint().z() << ",\t"
-          << wb->getExitPoint().x() << ",\t" << wb->getExitPoint().y() << ",\t" << wb->getExitPoint().z()
-          << std::endl;
+    entry << "[ "
+          << num2str(wb->i(), 0, 0, 4) << " "
+          << num2str(wb->j(), 0, 0, 4) << " "
+          << num2str(wb->k(), 0, 0, 4) << " ] ";
+    // entry.precision(3);
+    // entry << std::scientific;
+
+    entry << "[ "
+          << num2str(wb->getEntryPoint().x(), 5, 1, 9) << " "
+          << num2str(wb->getEntryPoint().y(), 5, 1, 9) << " "
+          << num2str(wb->getEntryPoint().z(), 5, 1, 9) << " ] [ "
+          << num2str(wb->getExitPoint().x(), 5, 1, 9) << " "
+          << num2str(wb->getExitPoint().y(), 5, 1, 9) << " "
+          << num2str(wb->getExitPoint().z(), 5, 1, 9) << " ] ";
+
+    entry << "[ "
+          << num2str(wb->getLength(), 1, 0, 6) << " "
+          << num2str(wb->getEntryMd(), 1, 0, 7) << " "
+          << num2str(wb->getExitMd(), 1, 0, 7) << " "
+          << num2str(wb->getDepthChange(), 1, 0, 7) << " ] ";
+
+    auto dxdydz = wb->getDxDyDz();
+    if (dxdydz.size() != 0) {
+      entry << "[ "
+            << num2str(dxdydz(0), 1, 0, 7) << " "
+            << num2str(dxdydz(1), 1, 0, 7) << " "
+            << num2str(dxdydz(2), 1, 0, 6) << " ]"
+            << std::endl;
+    }
     cout << entry.str();
   }
 }
@@ -331,17 +412,7 @@ double Trajectory::GetSplineLength() const {
   return well_blocks_->back()->getExitMd();
 }
 
-std::vector<WellBlock *> Trajectory::GetWellBlocksByMdRange(double start_md, double end_md) const {
-  std::vector<WellBlock *> affected_blocks;
-  for (auto wb : *well_blocks_) {
-    if (( start_md >= wb->getEntryMd() && start_md <= wb->getExitMd() ) || // Start md inside block
-      (   end_md >= wb->getEntryMd() &&   end_md <= wb->getExitMd() ) || // End md inside block
-      ( start_md <= wb->getEntryMd() &&   end_md >= wb->getExitMd() )) { // Block between start and end blocks
-      affected_blocks.push_back(wb);
-    }
-  }
-  return affected_blocks;
-}
+
 
 }
 }

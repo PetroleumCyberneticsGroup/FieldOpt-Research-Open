@@ -49,7 +49,9 @@
 #include "Reservoir/grid/cell.h"
 #include "Reservoir/grid/grid.h"
 #include "Reservoir/grid/eclgrid.h"
+
 #include "Settings/model.h"
+
 #include "WellIndexCalculation/intersected_cell.h"
 #include "Utilities/debug.hpp"
 #include "Utilities/time.hpp"
@@ -195,7 +197,7 @@ class WellPath : public cvf::Object
                                            double cDarcyForRelevantUnit);
 
   CellDir calculateDirectionInCell(// RICaseData* eclipseCase,
-                                   WellPathCellIntersectionInfo cellInfo,
+                                   WellPathCellIntersectionInfo &cellInfo,
                                    IntersectedCell &icell);
 
  private:

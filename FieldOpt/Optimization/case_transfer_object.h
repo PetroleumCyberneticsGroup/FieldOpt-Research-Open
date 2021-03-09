@@ -35,10 +35,10 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/serialization/list.hpp>
 #include <map>
 
+namespace Optimization {
+
 using namespace boost::uuids;
 using namespace std;
-
-namespace Optimization {
 
 /*!
 * \brief The CaseTransferObject class can contain all the
@@ -75,7 +75,7 @@ class CaseTransferObject {
    * @param c The case to be represented.
    * @return CaseTransferObject containing the same ids and values as the input Case.
    */
-  CaseTransferObject(Case *c);
+  explicit CaseTransferObject(Case *c);
 
   /*!
    * @brief Create a Case object corresponding to this CaseTransferObject.
@@ -104,7 +104,7 @@ class CaseTransferObject {
   string  ensemble_realization_stdstr() const { return ensemble_realization_; }
 
  private:
-  boost::uuids::uuid id_;
+  boost::uuids::uuid id_{};
   double objective_function_value_;
   int wic_time_secs_;
   int sim_time_secs_;

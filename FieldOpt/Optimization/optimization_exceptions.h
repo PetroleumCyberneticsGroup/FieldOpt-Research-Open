@@ -34,26 +34,26 @@ namespace Optimization {
 
 class ObjectiveFunctionException : public std::runtime_error {
  public:
-  ObjectiveFunctionException(const QString &message)
-    : std::runtime_error(message.toStdString()) {}
+  explicit ObjectiveFunctionException(const string &message)
+    : std::runtime_error(message) {}
 };
 
 class VariableException : public std::runtime_error {
  public:
-  VariableException(const QString &message)
-    : std::runtime_error(message.toStdString()) {}
+  explicit VariableException(const string &message)
+    : std::runtime_error(message) {}
 };
 
 class CaseHandlerException : public std::runtime_error {
  public:
-  CaseHandlerException(const QString &message)
-    : std::runtime_error(message.toStdString()) {}
+  explicit CaseHandlerException(const string &message)
+    : std::runtime_error(message) {}
 };
 
 class OptimizerInitializationException : public std::runtime_error {
  public:
-  OptimizerInitializationException(const QString &message)
-    : std::runtime_error("Unable to initialize the optimizer: " + message.toStdString()) {}
+  explicit OptimizerInitializationException(const string &message)
+    : std::runtime_error("Unable to initialize the optimizer: " + message) {}
 };
 
 }

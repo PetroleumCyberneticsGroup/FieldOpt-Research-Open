@@ -49,10 +49,11 @@ class MxSplineLengthInterwDist : public Constraint
                            Settings::VerbParams vp);
 
   string name() override { return "MxSplineLengthInterwDist"; }
+
   // Constraint interface
  public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
  private:
   int max_iterations_;

@@ -3,14 +3,14 @@
     "Name": "TestRun",
     "BookkeeperTolerance": 0.0,
     "VerbConf": {
-      "iBoxLineWidth": 140,
+      "iBoxLineWidth": 163,
       "Model": 1,
       "Optim": 1,
       "WICal": 1,
       "Simul": 1,
       "Runnr": 1,
       "Resvr": 1,
-      "Setng": 5,
+      "Setng": 1,
       "Utils": 1
     }
   },

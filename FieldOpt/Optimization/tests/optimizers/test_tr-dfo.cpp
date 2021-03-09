@@ -77,24 +77,26 @@ class TrustRegionTest : public ::testing::Test,
   VarPropContainer *varcont_tr_dfo_probs_;
   ::TrustRegionModelData tr_mdata;
 
+  Settings::VerbParams vp_ = {};
+
   Optimization::Optimizer::TerminationCondition TC_NOT_FIN_ =
       Optimization::Optimizer::TerminationCondition::NOT_FINISHED;
 
   Optimization::Optimizer::TerminationCondition TC_MAX_ITERS_ =
-      Optimization::Optimizer::TerminationCondition::MAX_ITERATIONS_REACHED;
+      Optimization::Optimizer::TerminationCondition::MAX_ITERS_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_MIN_STEP_ =
-      Optimization::Optimizer::TerminationCondition::MINIMUM_STEP_LENGTH_REACHED;
+      Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED;
 
   Optimization::Optimizer::TerminationCondition TC_OPT_CRIT =
-      Optimization::Optimizer::TerminationCondition::OPTIMALITY_CRITERIA_REACHED;
+      Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED;
 
   void SetUpOptimizer(::TrustRegionModelData::prob &prob,
                       double (*tr_dfo_prob)(VectorXd xs)) {
     VectorXd x0 = prob.xm.col(0);
 
     // Dummy var container based on initial point
-    varcont_tr_dfo_probs_ = new VarPropContainer();
+    varcont_tr_dfo_probs_ = new VarPropContainer(vp_);
     QString base_varname = "BHP#PRODUCER#"; // dummy var name
 
     for (int i = 0; i < x0.rows(); ++i) {
@@ -174,20 +176,20 @@ class TrustRegionTest : public ::testing::Test,
     string cc;
 
     if (tr_dfo_->IsFinished() == TC_OPT_CRIT) {
-      cc = "OPTIMALITY_CRITERIA_REACHED";
+      cc = "OPT_CRITERIA_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MIN_STEP_) {
-      cc = "MINIMUM_STEP_LENGTH_REACHED";
+      cc = "MIN_STEP_LENGTH_REACHED";
 
     } else if (tr_dfo_->IsFinished() == TC_MAX_ITERS_) {
-      cc = "MAX_ITERATIONS_REACHED";
+      cc = "MAX_ITERS_REACHED";
     }
 
     sx << setw(12) << scientific << right << setprecision(6)
        << "---------------------------------------------" << endl
        << "x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
        << "f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
-       << "tc: " << cc.c_str();
+       << "tc: " << cc.c_str() << endl;
     cout << sx.str();
 
     return true;

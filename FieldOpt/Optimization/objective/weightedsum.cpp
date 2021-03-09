@@ -30,6 +30,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Objective {
 
+using Printer::num2str;
+
 WeightedSum::WeightedSum(Settings::Optimizer *settings,
                          Simulation::Results::Results *results,
                          Model::Model *model) : Objective(settings) {
@@ -42,6 +44,12 @@ WeightedSum::WeightedSum(Settings::Optimizer *settings,
     comp->property = results_->GetPropertyKey(settings->objective().weighted_sum.at(i).property);
     comp->coefficient = settings->objective().weighted_sum.at(i).coefficient;
     comp->time_step = settings->objective().weighted_sum.at(i).time_step;
+
+    if (vp_.vOPT >= 3) {
+      string im = "comp.prop: "+ results_->GetPropertyKey(comp->property);
+      im += ", comp.time_step: " + num2str(comp->time_step);
+      ext_info(im, md_, cl_, vp_.lnw);
+    }
 
     if (settings->objective().weighted_sum.at(i).is_well_prop) {
       comp->is_well_property = true;

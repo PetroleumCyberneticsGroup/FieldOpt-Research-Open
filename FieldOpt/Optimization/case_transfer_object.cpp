@@ -25,11 +25,12 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/lexical_cast.hpp>
 #include "case_transfer_object.h"
 #include <QString>
+#include <iostream>
 
 namespace Optimization {
+
 using namespace boost::uuids;
 using namespace std;
-
 
 CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   id_ = qUuidToBoostUuid(c->id_);

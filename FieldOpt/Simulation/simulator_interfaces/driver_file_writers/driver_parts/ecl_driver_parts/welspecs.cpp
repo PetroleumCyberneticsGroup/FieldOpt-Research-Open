@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "welspecs.h"
 #include <iostream>
@@ -23,8 +28,9 @@
 namespace Simulation {
 namespace ECLDriverParts {
 
-Welspecs::Welspecs(QList<Model::Wells::Well *> *wells)
-{
+using Printer::num2strQ;
+
+Welspecs::Welspecs(QList<Model::Wells::Well *> *wells) {
   initializeBaseEntryLine(10);
   head_ = "WELSPECS";
   foot_ = "/\n\n";
@@ -34,39 +40,43 @@ Welspecs::Welspecs(QList<Model::Wells::Well *> *wells)
   }
 }
 
-Welspecs::Welspecs(QList<Model::Wells::Well *> *wells, int timestep) {
+Welspecs::Welspecs(QList<Model::Wells::Well *> *wells, double timestep) {
   initializeBaseEntryLine(10);
   head_ = "WELSPECS";
   foot_ = "/\n\n";
   for (auto well : *wells) {
-    if (well->controls()->first()->time_step() == timestep) {
+    // if (well->controls()->first()->time_step() == timestep) {
+    if (well->controls()->first()->tstep()->EqualsValue(timestep)) {
       entries_.append(createWellEntry(well));
     }
   }
 }
 
 QString Welspecs::GetPartString() const {
-  // Return an empty string if there are no entries (at the timestep)
-  if (entries_.size() == 0){
+  // returns empty string if no entries at given timestep
+  if (entries_.empty()){
     return "";
   }
 
   QString entries = head_ + "\n";
   for (QStringList entry : entries_) {
-    entries.append("    " + entry.join(" ") + " /\n");
+    entries.append("  " + entry.join(" ") + " /\n");
   }
-  entries.append("\n" + foot_);
+  entries.append("" + foot_);
   return entries;
 }
 
-QStringList Welspecs::createWellEntry(Model::Wells::Well *well)
-{
+string Welspecs::GetPartStdStr() const {
+  return GetPartString().toStdString();
+}
+
+QStringList Welspecs::createWellEntry(Model::Wells::Well *well) {
   QStringList entry = QStringList(base_entry_line_);
   entry[0] = well->name();
   if (well->group().length() >= 1)
     entry[1] = well->group();
-  entry[2] = QString::number(well->heel_i());
-  entry[3] = QString::number(well->heel_j());
+  entry[2] = num2strQ(well->heel_i(), 0, 0, 4) + "";
+  entry[3] = num2strQ(well->heel_j(), 0, 0, 4) + "";
 
   switch (well->preferred_phase()) {
     case Settings::Model::PreferredPhase::Oil:

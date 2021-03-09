@@ -1,22 +1,26 @@
-/******************************************************************************
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2019 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Copyright (C) 2015-2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb-pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef SCHEDULE_SECTION_H
 #define SCHEDULE_SECTION_H
@@ -35,20 +39,41 @@
 namespace Simulation {
 namespace ECLDriverParts {
 
+struct time_DMY {
+  int day = 0;
+  int month = 0;
+  int year = 0;
+  string day_str = "";
+  string month_str = "";
+  string year_str = "";
+};
+
 class Schedule : public ECLDriverPart
 {
  public:
   /*!
-   * @brief Constructor. Generate the time entries and build the complete schedule string.
+   * @brief Constructor. Generate the time entries
+   * and build the complete schedule string.
    * @param wells List of wells from the model.
    * @param control_times List of control times.
-   * @param insets Text snippets to be inserted at specific time steps in the schedule.
+   * @param insets Text snippets to be inserted
+   * at specific time steps in the schedule.
    */
-  Schedule(QList<Model::Wells::Well *> *wells, QList<int> control_times, ScheduleInsets &insets);
-  QString GetPartString() const;
+  Schedule(QList<Model::Wells::Well *> *wells,
+           const QList<double>& control_times,
+           const QList<int>& start_date,
+           ScheduleInsets &insets,
+           Settings::Settings *settings);
+
+  QString GetPartString() const override;
+
+  void GetControlDate(time_DMY &ts_DMY,
+                      const QList<int>& start_date,
+                      double control_time) const;
 
   struct ScheduleTimeEntry {
-    ScheduleTimeEntry(int control_time,
+    ScheduleTimeEntry(double control_time,
+                      time_DMY control_time_DMY,
                       Welspecs welspecs,
                       Compdat compdat,
                       WellControls well_controls,
@@ -56,7 +81,8 @@ class Schedule : public ECLDriverPart
                       Compsegs compsegs,
                       Wsegvalv wsegvalv
     );
-    int control_time;
+    double control_time;
+    time_DMY control_time_DMY;
 
     Welspecs welspecs;
     Compdat compdat;
@@ -77,7 +103,9 @@ class Schedule : public ECLDriverPart
   QString schedule_;
 
  public:
-  QList<ScheduleTimeEntry> GetScheduleTimeEntries() { return schedule_time_entries_; }
+  QList<ScheduleTimeEntry> GetScheduleTimeEntries() {
+    return schedule_time_entries_;
+  }
 };
 
 }

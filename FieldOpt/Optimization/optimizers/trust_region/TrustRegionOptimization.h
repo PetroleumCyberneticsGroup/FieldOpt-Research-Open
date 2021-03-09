@@ -3,7 +3,7 @@ Created by thiagols on 26.11.18
 Copyright (C) 2018
 Thiago Lima Silva <thiagolims@gmail.com>
 
-Modified 2018-2019 Mathias Bellout
+Modified 2018-2020 Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
@@ -104,7 +104,8 @@ class TrustRegionOptimization : public Optimizer {
   bool improve_model_ = false;
   bool criticality_step_execution_ongoing_ = false;
 
-  QString tr_log_path_;
+  QString tr_log_;
+  string tr_prob_name_;
   Settings::VerbParams vp_;
 
   // -------------------------------------------------------

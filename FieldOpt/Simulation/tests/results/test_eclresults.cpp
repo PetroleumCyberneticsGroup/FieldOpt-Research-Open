@@ -41,8 +41,8 @@ namespace {
 using ECLProp = Simulation::Results::ECLResults::Property;
 
 class ECLResultsTest : public TestResources::TestResourceResults {
- protected:
 
+ protected:
   ECLResultsTest() {
     results_ = new ECLResults(settings_full_);
   }
@@ -58,66 +58,66 @@ class ECLResultsTest : public TestResources::TestResourceResults {
   Results *results_;
 };
 
-// TEST_F(ECLResultsTest, ReadSummary) {
-//   EXPECT_THROW(results_->ReadResults("a"),
-//                RsltFileNotFoundExc);
-//   auto fp = QString::fromStdString(ecl_base_horzwell);
-//   EXPECT_NO_THROW(results_->ReadResults(fp));
-// }
+TEST_F(ECLResultsTest, ReadSummary) {
+  EXPECT_THROW(results_->ReadResults("a"),
+               RsltFileNotFoundExc);
+  auto fp = QString::fromStdString(ecl_base_horzwell);
+  EXPECT_NO_THROW(results_->ReadResults(fp));
+}
 
-// TEST_F(ECLResultsTest, DumpingAndAvailability) {
-//   // Make results available
-//   auto fp = QString::fromStdString(ecl_base_horzwell);
-//   results_->ReadResults(fp);
-//   EXPECT_TRUE(results_->isAvailable());
-//   EXPECT_NO_THROW(results_->GetValue(ECLProp::Time));
+TEST_F(ECLResultsTest, DumpingAndAvailability) {
+  // Make results available
+  auto fp = QString::fromStdString(ecl_base_horzwell);
+  results_->ReadResults(fp);
+  EXPECT_TRUE(results_->isAvailable());
+  EXPECT_NO_THROW(results_->GetValue(ECLProp::Time));
 
-//   // Make results unavailable
-//   results_->DumpResults();
-//   EXPECT_FALSE(results_->isAvailable());
-//   EXPECT_THROW(results_->GetValue(ECLProp::Time),
-//                RsltsNotAvailExc);
+  // Make results unavailable
+  results_->DumpResults();
+  EXPECT_FALSE(results_->isAvailable());
+  EXPECT_THROW(results_->GetValue(ECLProp::Time),
+               RsltsNotAvailExc);
 
-//   // Make results available again
-//   results_->ReadResults(fp);
-//   EXPECT_TRUE(results_->isAvailable());
-//   EXPECT_NO_THROW(results_->GetValue(ECLProp::Time));
-// }
+  // Make results available again
+  results_->ReadResults(fp);
+  EXPECT_TRUE(results_->isAvailable());
+  EXPECT_NO_THROW(results_->GetValue(ECLProp::Time));
+}
 
-// TEST_F(ECLResultsTest, FieldVariables) {
-//   auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
-//   results_->ReadResults(fp);
-//   EXPECT_FLOAT_EQ(187866.44, results_->GetValue(ECLProp::FieldOilProdTotal));
-//   EXPECT_FLOAT_EQ(115870.73, results_->GetValue(ECLProp::FieldOilProdTotal, 10));
-//   EXPECT_THROW(results_->GetValue(ECLProp::FieldOilProdTotal, 30),
-//                std::runtime_error);
+TEST_F(ECLResultsTest, FieldVariables) {
+  auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
+  results_->ReadResults(fp);
+  EXPECT_FLOAT_EQ(187866.44, results_->GetValue(ECLProp::FieldOilProdTotal));
+  EXPECT_FLOAT_EQ(115870.73, results_->GetValue(ECLProp::FieldOilProdTotal, 10));
+  EXPECT_THROW(results_->GetValue(ECLProp::FieldOilProdTotal, 30),
+               std::runtime_error);
 
-//   std::vector<double> fopt_vec = results_->GetValueVector(ECLProp::FieldOilProdTotal);
-//   EXPECT_EQ(21, fopt_vec.size());
-//   EXPECT_FLOAT_EQ(0, fopt_vec.front());
-//   EXPECT_FLOAT_EQ(187866.44, fopt_vec.back());
-// }
+  std::vector<double> fopt_vec = results_->GetValueVector(ECLProp::FieldOilProdTotal);
+  EXPECT_EQ(21, fopt_vec.size());
+  EXPECT_FLOAT_EQ(0, fopt_vec.front());
+  EXPECT_FLOAT_EQ(187866.44, fopt_vec.back());
+}
 
-// TEST_F(ECLResultsTest, MiscVariables) {
-//   auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
-//   results_->ReadResults(fp);
-//   EXPECT_FLOAT_EQ(200, results_->GetValue(ECLProp::Time));
-//   EXPECT_FLOAT_EQ(100, results_->GetValue(ECLProp::Time, 10));
-//   EXPECT_THROW(results_->GetValue(ECLProp::Time, 30),
-//                std::runtime_error);
+TEST_F(ECLResultsTest, MiscVariables) {
+  auto fp = QString::fromStdString(TestResources::ExampleFilePaths::ecl_base_horzwell);
+  results_->ReadResults(fp);
+  EXPECT_FLOAT_EQ(200, results_->GetValue(ECLProp::Time));
+  EXPECT_FLOAT_EQ(100, results_->GetValue(ECLProp::Time, 10));
+  EXPECT_THROW(results_->GetValue(ECLProp::Time, 30),
+               std::runtime_error);
 
-//   std::vector<double> time_vec = results_->GetValueVector(ECLProp::Time);
-//   EXPECT_EQ(21, time_vec.size());
-//   EXPECT_EQ(0, time_vec.front());
-//   EXPECT_EQ(200, time_vec.back());
-// }
+  std::vector<double> time_vec = results_->GetValueVector(ECLProp::Time);
+  EXPECT_EQ(21, time_vec.size());
+  EXPECT_EQ(0, time_vec.front());
+  EXPECT_EQ(200, time_vec.back());
+}
 
-// TEST_F(ECLResultsTest, WellVariables) {
-//   auto fp = QString::fromStdString(ecl_base_horzwell);
-//   results_->ReadResults(fp);
-//   EXPECT_FLOAT_EQ(1116.8876, results_->GetValue(ECLProp::WellWatProdTotal, "PROD"));
-//   EXPECT_FLOAT_EQ(524.5061, results_->GetValue(ECLProp::WellWatProdTotal, "PROD", 10));
-// }
+TEST_F(ECLResultsTest, WellVariables) {
+  auto fp = QString::fromStdString(ecl_base_horzwell);
+  results_->ReadResults(fp);
+  EXPECT_FLOAT_EQ(1116.8876, results_->GetValue(ECLProp::WellWatProdTotal, "PROD"));
+  EXPECT_FLOAT_EQ(524.5061, results_->GetValue(ECLProp::WellWatProdTotal, "PROD", 10));
+}
 
 TEST_F(ECLResultsTest, ReadFieldWellSegData) {
   string ln;
@@ -642,6 +642,10 @@ TEST_F(ECLResultsTest, MatchRMSDataSegs) {
 }
 
 TEST_F(ECLResultsTest, TestTotalComputation) {
+  // TODO Check for deletion 
+  // auto fp = QString::fromStdString(olympr37_T02_base_);
+  // results_olympr37_->ReadResults(fp);
+
   string wn = "PRODX2";
   auto time = results_olympr37_->GetValueVectorXd(ECLProp::Time);
   auto step = results_olympr37_->GetValueVectorXd(ECLProp::Step);

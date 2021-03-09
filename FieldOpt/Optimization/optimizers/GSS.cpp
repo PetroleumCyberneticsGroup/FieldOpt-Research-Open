@@ -38,31 +38,37 @@ namespace Optimizers {
 
 using Printer::ext_info;
 using Printer::ext_warn;
+using Printer::num2str;
 using Printer::DBG_prntVecXdSz;
 
-GSS::GSS(Settings::Optimizer *settings,
-         Case *base_case,
-         Model::Properties::VarPropContainer *variables,
-         Reservoir::Grid::Grid *grid,
-         Logger *logger,
-         CaseHandler *case_handler,
-         Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
-
+GSS::
+GSS(Settings::Optimizer *settings,
+    Case *base_case,
+    Model::Properties::VarPropContainer *variables,
+    Reservoir::Grid::Grid *grid,
+    Logger *logger,
+    CaseHandler *case_handler,
+    Constraints::ConstraintHandler *constraint_handler)
+  : Optimizer(settings, base_case, variables, grid,
+              logger, case_handler, constraint_handler) {
   vp_ = settings->verbParams();
-
-  int numRvars = base_case->GetRealVarVector().size();
-  int numIvars = base_case->GetIntegerVarVector().size();
-  num_vars_ = numRvars + numIvars;
-  if (numRvars > 0 && numIvars > 0) {
-    ext_warn("CS cannot handle both continuous and discrete variables at the same time", md_, cl_);
-  }
 
   contr_fac_ = settings->parameters().contraction_factor;
   assert(contr_fac_ < 1.0);
 
   expan_fac_ = settings->parameters().expansion_factor;
   assert(expan_fac_ >= 1.0);
+
+  int numRvars = base_case->GetRealVarVector().size();
+  int numIvars = base_case->GetIntegerVarVector().size();
+  num_vars_ = numRvars + numIvars;
+
+  if (numRvars > 0 && numIvars > 0) {
+    im_ = "CS cannot handle both continuous and discrete variables at the same time";
+  } else {
+    im_ = "#.Rvars=" + num2str(numRvars) + "; #.Ivars=" + num2str(numIvars);
+  }
+  if (vp_.vOPT >= 3) { ext_info(im_, md_, cl_); }
 
   directions_ = GSSPatterns::Compass(num_vars_);
 
@@ -74,8 +80,11 @@ GSS::GSS(Settings::Optimizer *settings,
 
   } else {
     assert(constraint_handler_->HasBoundaryConstraints());
-    auto lower_bound = constraint_handler_->GetLowerBounds(base_case->GetRealVarIdVector());
-    auto upper_bound = constraint_handler_->GetUpperBounds(base_case->GetRealVarIdVector());
+    auto lower_bound = constraint_handler_->GetLowerBounds(
+      base_case->GetRealVarIdVector());
+    auto upper_bound = constraint_handler_->GetUpperBounds(
+      base_case->GetRealVarIdVector());
+
     auto difference = upper_bound - lower_bound;
     Eigen::VectorXd base = Eigen::VectorXd(directions_.size());
     for (int i = 0; i < 2; ++i) {
@@ -93,17 +102,19 @@ GSS::GSS(Settings::Optimizer *settings,
   }
   assert(step_lengths_.size() == directions_.size());
   assert(step_lengths_.size() == step_tol_.size());
-
 }
 
 Optimizer::TerminationCondition GSS::IsFinished() {
   TerminationCondition tc = NOT_FINISHED;
-  if (case_handler_->CasesBeingEvaluated().size() > 0)
+  if (!case_handler_->CasesBeingEvaluated().empty()) {
     return tc;
-  if (evaluated_cases_ >= max_evaluations_)
+  }
+
+  if (evaluated_cases_ >= max_evaluations_) {
     tc = MAX_EVALS_REACHED;
-  else if (is_converged())
-    tc = MINIMUM_STEP_LENGTH_REACHED;
+  } else if (is_converged()) {
+    tc = MIN_STEP_LENGTH_REACHED;
+  }
 
   if (tc != NOT_FINISHED) {
     if (enable_logging_) {
@@ -117,8 +128,7 @@ Optimizer::TerminationCondition GSS::IsFinished() {
 void GSS::expand(vector<int> dirs) {
   if (dirs[0] == -1) {
     step_lengths_ = step_lengths_ * expan_fac_;
-  }
-  else {
+  } else {
     for (int dir : dirs)
       step_lengths_(dir) = step_lengths_(dir) * expan_fac_;
   }
@@ -127,8 +137,7 @@ void GSS::expand(vector<int> dirs) {
 void GSS::contract(vector<int> dirs) {
   if (dirs[0] == -1) {
     step_lengths_ = step_lengths_ * contr_fac_;
-  }
-  else {
+  } else {
     for (int dir : dirs)
       step_lengths_(dir) = step_lengths_(dir) * contr_fac_;
   }
@@ -136,26 +145,35 @@ void GSS::contract(vector<int> dirs) {
 
 QList<Case *> GSS::generate_trial_points(vector<int> dirs) {
   auto trial_points = QList<Case *>();
-  if (dirs[0] == -1)
+  if (dirs[0] == -1) {
     dirs = range(0, (int)directions_.size(), 1);
+  }
 
   VectorXi int_base = GetTentativeBestCase()->GetIntegerVarVector();
   VectorXd rea_base = GetTentativeBestCase()->GetRealVarVector();
 
   for (int dir : dirs) {
     auto trial_point = new Case(GetTentativeBestCase());
+
     if (int_base.size() > 0) {
       trial_point->SetIntegerVarValues(perturb(int_base, dir));
-    }
-    else if (rea_base.size() > 0) {
+    } else if (rea_base.size() > 0) {
       trial_point->SetRealVarValues(perturb(rea_base, dir));
     }
-    trial_point->set_origin_data(GetTentativeBestCase(), dir, step_lengths_(dir));
+
+    trial_point->set_origin_data(GetTentativeBestCase(),
+                                 dir, step_lengths_(dir));
     trial_points.append(trial_point);
   }
 
-  for (Case *c : trial_points)
-    constraint_handler_->SnapCaseToConstraints(c);
+  if (constraint_handler_ != nullptr) {
+    for (Case *c : trial_points) {
+      constraint_handler_->SnapCaseToConstraints(c);
+    }
+  } else if (vp_.vOPT > 3) {
+    wm_ = "No constraints (constraint_handler_ == nullptr).";
+    ext_warn(wm_, md_, cl_, vp_.lnw);
+  }
 
   return trial_points;
 }
@@ -170,19 +188,35 @@ Matrix<T, Dynamic, 1> GSS::perturb(Matrix<T, Dynamic, 1> base, int dir) {
 
 bool GSS::is_converged() {
   for (int i = 0; i < step_lengths_.size(); ++i) {
-    if (step_lengths_(i) >= step_tol_(i))
+    if (step_lengths_(i) >= step_tol_(i)) {
       return false;
+    }
   }
   return true;
 }
 
 void GSS::set_step_lengths(int dir_idx, double len) {
 
-  if (!constraint_handler_->HasBoundaryConstraints()) {
-    if (VERB_OPT >= 2) {
-      Printer::ext_warn(
-          "No boundary constraints. Setting all step lengths to " +
-          Printer::num2str(len),"Optimization","GSS");
+  if (constraint_handler_ != nullptr) { // All actual cases
+
+    if (!constraint_handler_->HasBoundaryConstraints()) {
+      if (vp_.vOPT >= 2) {
+        im_ = "No boundary constraints. Setting all step ";
+        im_ += "lengths to " + num2str(len);
+        ext_warn(im_, md_, cl_, vp_.lnw);
+      }
+      for (int i = 0; i < step_lengths_.size(); ++i) {
+        step_lengths_[i] = max(step_tol_[i], len);
+      }
+      step_lengths_.fill(len);
+      return;
+    }
+
+  } else { // constraint_handler_ == nullptr in unit tests
+
+    if (vp_.vOPT > 3) {
+      wm_ = "constraint_handler_ == nullptr.";
+      ext_warn(wm_, md_, cl_, vp_.lnw);
     }
     for (int i = 0; i < step_lengths_.size(); ++i) {
       step_lengths_[i] = max(step_tol_[i], len);
@@ -191,8 +225,13 @@ void GSS::set_step_lengths(int dir_idx, double len) {
     return;
   }
 
-  auto lbs = constraint_handler_->GetLowerBounds(tentative_best_case_->GetRealVarIdVector());
-  auto ubs = constraint_handler_->GetUpperBounds(tentative_best_case_->GetRealVarIdVector());
+  // HasBoundaryConstraints == true
+  Eigen::VectorXd lbs, ubs;
+  lbs = constraint_handler_->GetLowerBounds(
+    tentative_best_case_->GetRealVarIdVector());
+
+  ubs = constraint_handler_->GetUpperBounds(
+    tentative_best_case_->GetRealVarIdVector());
 
   int dir = dir_idx > num_vars_ - 1 ? dir_idx - num_vars_ : dir_idx;
   double S = (len - lbs[dir]) / (ubs[dir] - lbs[dir]);

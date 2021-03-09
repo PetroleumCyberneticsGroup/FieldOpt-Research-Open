@@ -44,7 +44,6 @@ class PseudoContBoundary2DTest : public ::testing::Test,
 
   Settings::Optimizer::Constraint bound_settings_;
   Optimization::Constraints::PseudoContBoundary2D *pseudocont_constraint_;
-  Settings::VerbParams vp = settings_full_->global()->verbParams();
 
   virtual ~PseudoContBoundary2DTest() { }
   virtual void TearDown() { }
@@ -56,8 +55,10 @@ TEST_F(PseudoContBoundary2DTest, Initialization) {
   bound_settings_.box_imax = 29;
   bound_settings_.box_jmin = 0;
   bound_settings_.box_jmax = 29;
-  pseudocont_constraint_ = new Optimization::Constraints::PseudoContBoundary2D(
-    bound_settings_, varcont_pseudocont_, grid_5spot_, vp);
+  pseudocont_constraint_ = new Optimization::Constraints::PseudoContBoundary2D(bound_settings_,
+                                                                               varcont_pseudocont_,
+                                                                               grid_5spot_,
+                                                                               settings_full_->global()->verbParams());
 }
 
 }

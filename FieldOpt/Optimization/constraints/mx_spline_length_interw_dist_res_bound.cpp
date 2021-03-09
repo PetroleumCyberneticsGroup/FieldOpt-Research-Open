@@ -28,12 +28,17 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-MxSplineLengthInterwDistResBound
-::MxSplineLengthInterwDistResBound(
+MxSplineLengthInterwDistResBound::
+MxSplineLengthInterwDistResBound(
   Settings::Optimizer::Constraint settings,
   Model::Properties::VarPropContainer *variables,
   Reservoir::Grid::Grid *grid,
   Settings::VerbParams vp) : Constraint(vp) {
+
+  if (vp_.vOPT >= 3) {
+    im_ = "Adding MxWSplineLengthInterwDistResBound constraint.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
 
   max_iterations_ = settings.max_iterations;
   Settings::Optimizer::Constraint dist_constr_settings;
@@ -48,7 +53,8 @@ MxSplineLengthInterwDistResBound
     len_constr_settings.well = wname;
     len_constr_settings.min = settings.min_length;
     len_constr_settings.max = settings.max_length;
-    length_constraints_.append(new WSplineLength(len_constr_settings, variables, vp));
+    length_constraints_.append(
+      new WSplineLength(len_constr_settings, variables, vp));
 
     Settings::Optimizer::Constraint boundary_constraint_settings;
     boundary_constraint_settings.box_imin = settings.box_imin;
@@ -58,12 +64,13 @@ MxSplineLengthInterwDistResBound
     boundary_constraint_settings.box_kmin = settings.box_kmin;
     boundary_constraint_settings.box_kmax = settings.box_kmax;
     boundary_constraint_settings.well = wname;
-    boundary_constraints_.append(new ResBoundary(boundary_constraint_settings, variables, grid, vp));
+    boundary_constraints_.append(
+      new ResBoundary(boundary_constraint_settings, variables, grid, vp));
   }
 }
 
-bool MxSplineLengthInterwDistResBound
-::CaseSatisfiesConstraint(Case *c) {
+bool MxSplineLengthInterwDistResBound::
+CaseSatisfiesConstraint(Case *c) {
   if (!distance_constraint_->CaseSatisfiesConstraint(c))
     return false;
   for (WSplineLength *wsl : length_constraints_) {
@@ -77,8 +84,8 @@ bool MxSplineLengthInterwDistResBound
   return true;
 }
 
-void MxSplineLengthInterwDistResBound
-::SnapCaseToConstraints(Case *c) {
+void MxSplineLengthInterwDistResBound::
+SnapCaseToConstraints(Case *c) {
   for (int i = 0; i < max_iterations_; ++i) {
     if (CaseSatisfiesConstraint(c)) {
       return;
@@ -95,11 +102,13 @@ void MxSplineLengthInterwDistResBound
   }
 }
 
-bool MxSplineLengthInterwDistResBound::IsBoundConstraint() const {
+bool MxSplineLengthInterwDistResBound::
+IsBoundConstraint() const {
   return true;
 }
 
-Eigen::VectorXd MxSplineLengthInterwDistResBound::GetLowerBounds(QList<QUuid> id_vector) const {
+Eigen::VectorXd MxSplineLengthInterwDistResBound::
+GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
   for (auto con : boundary_constraints_) {
@@ -108,7 +117,8 @@ Eigen::VectorXd MxSplineLengthInterwDistResBound::GetLowerBounds(QList<QUuid> id
   return lbounds;
 }
 
-Eigen::VectorXd MxSplineLengthInterwDistResBound::GetUpperBounds(QList<QUuid> id_vector) const {
+Eigen::VectorXd MxSplineLengthInterwDistResBound::
+GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
   for (auto con : boundary_constraints_) {

@@ -29,12 +29,12 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QJsonDocument>
 #include <iostream>
 
-
 namespace Settings {
 
 Settings::Settings(Paths &paths) {
-  if(vp_.vSET >= 5) {
-    info("JSON -> " + paths.GetPath(Paths::DRIVER_FILE), vp_.lnw);
+  if(vp_.vSET >= 6) {
+    im_ = "JSON -> " + paths.GetPath(Paths::DRIVER_FILE);
+    ext_info(im_, md_, cl_, vp_.lnw);
   }
   paths_ = paths;
   readDriverFile();
@@ -58,24 +58,27 @@ QString Settings::GetLogCsvString() const {
 
 void Settings::readDriverFile() {
 
-  if(vp_.vSET >= 5) { info("Reading driver file.", vp_.lnw); }
+  if(vp_.vSET >= 5) {
+    im_ = "Reading driver file.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   QFile *file = new QFile(paths_.GetPathQstr(Paths::DRIVER_FILE));
 
   if (!file->open(QIODevice::ReadOnly)) {
-    string em = "Unable to open the driver file";
-    throw DriverFileReadException(em);
+    em_ = "Unable to open the driver file";
+    throw DriverFileReadException(em_);
   }
   QByteArray data = file->readAll();
 
   QJsonDocument json = QJsonDocument::fromJson(data);
   if (json.isNull()) {
-    string em = "Unable to parse the input file to JSON.";
-    throw DriverFileJsonParsingException(em);
+    em_ = "Unable to parse the input file to JSON.";
+    throw DriverFileJsonParsingException(em_);
   }
 
   if (!json.isObject()) {
-    string em = "Driver file format incorrect. Must be a JSON object.";
-    throw DriverFileFormatException(em);
+    em_= "Driver file format incorrect. Must be a JSON object.";
+    throw DriverFileFormatException(em_);
   }
   json_driver_ = new QJsonObject(json.object());
 
@@ -85,49 +88,65 @@ void Settings::readDriverFile() {
   readOptimizerSection();
 
   file->close();
+  if(vp_.vSET >= 5) {
+    im_ = "Finished reading JSON.";
+    ext_info(im_, md_, cl_, vp_.lnw, 2, 2);
+  }
 }
 
 void Settings::readGlobalSection() {
-  if(vp_.vSET >= 5) { info("Reading Global section.", vp_.lnw); }
+  if(vp_.vSET >= 5) {
+    im_ = "Reading Global section.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   try {
     QJsonObject json_global = json_driver_->value("Global").toObject();
     global_ = new Global(json_global);
   } catch (std::exception const &ex) {
-    string em = "Unable to parse Global section: " + string(ex.what());
-    throw UnableToParseGlobalSectionException(em);
+    em_ = "Unable to parse Global section: " + string(ex.what());
+    throw UnableToParseGlobalSectionException(em_);
   }
 }
 
 void Settings::readSimulatorSection() {
-  if(vp_.vSET >= 5) { info("Reading Simulator section.", vp_.lnw); }
+  if(vp_.vSET >= 5) {
+    im_ = "Reading Simulator section.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   try {
     QJsonObject json_simulator = json_driver_->value("Simulator").toObject();
     simulator_ = new Simulator(json_simulator, paths_,global()->verbParams());
   } catch (std::exception const &ex) {
-    string em = "Unable to parse Simulator section: " + string(ex.what());
-    throw UnableToParseSimulatorSectionException(em);
+    em_ = "Unable to parse Simulator section: " + string(ex.what());
+    throw UnableToParseSimulatorSectionException(em_);
   }
 }
 
 void Settings::readOptimizerSection() {
-  if(vp_.vSET >= 5) { info("Reading Optimizer section.", vp_.lnw); }
+  if(vp_.vSET >= 5) {
+    im_ = "Reading Optimizer section.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   try {
     QJsonObject optimizer = json_driver_->value("Optimizer").toObject();
     optimizer_ = new Optimizer(optimizer,global()->verbParams());
   } catch (std::exception const &ex) {
-    string em = "Unable to parse Optimizer section: " + string(ex.what());
-    throw UnableToParseOptimizerSectionException(em);
+    em_ = "Unable to parse Optimizer section: " + string(ex.what());
+    throw UnableToParseOptimizerSectionException(em_);
   }
 }
 
 void Settings::readModelSection() {
-  if(vp_.vSET >= 5) { info("Reading Model section.", vp_.lnw); }
+  if(vp_.vSET >= 5) {
+    im_ = "Reading Model section.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
   try {
     QJsonObject model = json_driver_->value("Model").toObject();
     model_ = new Model(model, paths_,global()->verbParams());
   } catch (std::exception const &ex) {
-    string em = "Unable to parse Model section: " + string(ex.what());
-    throw UnableToParseModelSectionException(em);
+    em_ = "Unable to parse Model section: " + string(ex.what());
+    throw UnableToParseModelSectionException(em_);
   }
 }
 

@@ -36,14 +36,18 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Optimizers {
 
-APPS::APPS(Settings::Optimizer *settings,
-           Case *base_case,
-           Model::Properties::VarPropContainer *variables,
-           Reservoir::Grid::Grid *grid,
-           Logger *logger,
-           CaseHandler *case_handler,
-           Constraints::ConstraintHandler *constraint_handler
-) : GSS(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+using Printer::DBG_prntVecXd;
+
+APPS::
+APPS(Settings::Optimizer *settings,
+     Case *base_case,
+     Model::Properties::VarPropContainer *variables,
+     Reservoir::Grid::Grid *grid,
+     Logger *logger,
+     CaseHandler *case_handler,
+     Constraints::ConstraintHandler *constraint_handler)
+  : GSS(settings, base_case, variables, grid, logger,
+        case_handler, constraint_handler) {
 
   assert(settings->parameters().max_queue_size >= 1.0);
   max_queue_length_ = directions_.size() * settings->parameters().max_queue_size;
@@ -80,7 +84,7 @@ void APPS::successful_iteration(Case *c) {
   expand();
   reset_active();
   prune_queue();
-  if (VERB_OPT >= 2) print_state("Successful iteration");
+  if (vp_.vOPT >= 2) { print_state("Successful iteration"); }
   iterate();
 }
 
@@ -91,7 +95,7 @@ void APPS::unsuccessful_iteration(Case *c) {
     set_inactive(unsuccessful_direction);
     contract(unsuccessful_direction);
   }
-  if (VERB_OPT >= 3) print_state("Unsuccessful iteration");
+  if (vp_.vOPT >= 3) { print_state("Unsuccessful iteration"); }
   if (!is_converged()) iterate();
 }
 
@@ -113,8 +117,9 @@ void APPS::reset_active() {
 vector<int> APPS::inactive() {
   vector<int> inactive;
   for (int i = 0; i < directions_.size(); ++i) {
-    if (active_.count(i) == 0 && step_lengths_(i) >= step_tol_(i))
+    if (active_.count(i) == 0 && step_lengths_(i) >= step_tol_(i)) {
       inactive.push_back(i);
+    }
   }
   return inactive;
 }
@@ -122,8 +127,7 @@ vector<int> APPS::inactive() {
 void APPS::prune_queue() {
   if (case_handler_->QueuedCases().size() <= max_queue_length_ - directions_.size()) {
     return;
-  }
-  else {
+  } else {
     int queue_size = max_queue_length_ - directions_.size();
     if (evaluated_cases_ >= max_evaluations_) queue_size = 1;
     while (case_handler_->QueuedCases().size() > queue_size) {
@@ -142,9 +146,9 @@ void APPS::print_state(string header) {
   ss << "Evaluated cases:   " << evaluated_cases_ << "|";
   ss << "Queued cases:      " << case_handler_->QueuedCases().size() << "|";
   ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
-  ss << "OFV:               " << tentative_best_case_->objf_value();
-  ss << "Step lengths  :    " << vec_to_str(vector<double>(step_lengths_.data(), step_lengths_.data() + step_lengths_.size())) << "|";
-  Printer::ext_info(ss.str(), "Optimization", "APPS");
+  ss << "OFV:               " << tentative_best_case_->objf_value() << "|";
+  ss << "Step lengths  :    " << DBG_prntVecXd(step_lengths_);
+  ext_info(ss.str(), md_, cl_);
 }
 }
 }

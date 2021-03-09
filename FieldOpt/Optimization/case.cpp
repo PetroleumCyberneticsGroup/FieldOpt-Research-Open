@@ -33,10 +33,6 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 
-using Printer::ext_warn;
-using Printer::ext_info;
-using Printer::info;
-
 Case::Case() {
   id_ = QUuid::createUuid();
 
@@ -67,20 +63,20 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
   binary_variables_ = binary_variables;
   integer_variables_ = integer_variables;
   real_variables_ = real_variables;
-  objective_function_value_ = std::numeric_limits<double>::max();
 
-  for(int ii=0; ii < real_variables_.size(); ii++) {
-    real_id_index_map_.append(real_variables_.at(ii).first);
+  for(int ii=0; ii < binary_variables_.size(); ii++) {
+    binary_id_index_map_.append(binary_variables_.at(ii).first);
   }
 
   for(int ii=0; ii < integer_variables_.size(); ii++) {
     integer_id_index_map_.append(integer_variables_.at(ii).first);
   }
 
-  for(int ii=0; ii < binary_variables_.size(); ii++) {
-    binary_id_index_map_.append(binary_variables_.at(ii).first);
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    real_id_index_map_.append(real_variables_.at(ii).first);
   }
 
+  objective_function_value_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -88,22 +84,22 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
 }
 
 Case::Case(const Case *c) {
+
   id_ = QUuid::createUuid();
   binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
   integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
 
-  objective_function_value_ = c->objective_function_value_;
-
-  real_id_index_map_ = c->real_id_index_map_;
-  integer_id_index_map_ = c->integer_id_index_map_;
   binary_id_index_map_ = c->binary_id_index_map_;
+  integer_id_index_map_ = c->integer_id_index_map_;
+  real_id_index_map_ = c->real_id_index_map_;
 
   // integer_id_index_map_ = c->integer_variables_.keys();
   // for(int ii=0; ii < integer_variables_.size(); ii++) {
   //   integer_id_index_map_.append(integer_variables_.at(ii).first);
   // }
 
+  objective_function_value_ = c->objective_function_value_;
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -111,6 +107,7 @@ Case::Case(const Case *c) {
 }
 
 bool Case::Equals(const Case *other, double tolerance) const {
+
   // Check if number of variables are equal
   if (this->binary_variables().size() != other->binary_variables().size()
     || this->integer_variables().size() != other->integer_variables().size()
@@ -125,9 +122,9 @@ bool Case::Equals(const Case *other, double tolerance) const {
   for(int ii=0; ii < binary_variables_.size(); ii++) {
     auto lhs = this->binary_variables_.at(ii).second;
     auto rhs = other->binary_variables_.at(ii).second;
-      if (std::abs(lhs - rhs) > tolerance) {
-        return false;
-      }
+    if (std::abs(lhs - rhs) > tolerance) {
+      return false;
+    }
   }
 
   // for (QUuid key : this->integer_variables().keys()) {
@@ -160,12 +157,13 @@ bool Case::Equals(const Case *other, double tolerance) const {
 }
 
 double Case::objf_value() const {
-  if (objective_function_value_ == std::numeric_limits<double>::max())
-    throw ObjectiveFunctionException("The objective function value has not been set in this Case.");
-  else
+  if (objective_function_value_ == std::numeric_limits<double>::max()) {
+    string em = "The objective function value has not been set in this Case.";
+    throw ObjectiveFunctionException(em);
+  } else {
     return objective_function_value_;
+  }
 }
-
 
 void Case::set_integer_variable_value(const QUuid id, const int val) {
   for(int ii=0; ii < integer_variables_.size(); ii++) {
@@ -175,8 +173,8 @@ void Case::set_integer_variable_value(const QUuid id, const int val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 void Case::set_binary_variable_value(const QUuid id, const bool val) {
@@ -187,8 +185,8 @@ void Case::set_binary_variable_value(const QUuid id, const bool val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 void Case::set_real_variable_value(const QUuid id, const double val) {
@@ -199,8 +197,8 @@ void Case::set_real_variable_value(const QUuid id, const double val) {
       return;
     }
   }
-  QString tm = "Unable to set value of variable " + id.toString();
-  throw VariableException(tm);
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
 }
 
 QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude) {
@@ -232,7 +230,7 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
       new_cases.append(new_case_m);
     }
 
-  // } else if (real_variables_.contains(variabe_id)) {
+    // } else if (real_variables_.contains(variabe_id)) {
   } else if (real_vars_contain(var_indx, variabe_id)) {
     if (sign == PLUS || sign == PLUSMINUS) {
       Case *new_case_p = new Case(this);
@@ -351,16 +349,16 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
   str << "| Case:            " << id_stdstr() << " |" << endl;
   str << "|---------------------------------------------------------|" << endl;
 
-  if (real_variables_.size() > 0) {
+  if (!real_variables_.empty()) {
     str << "| Continuous variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetContinuousVariables()->at(ii).second->name().toStdString();
       double vv = real_variables_.at(ii).second;
-        str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
+      str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
   }
 
-  if (integer_variables_.size() > 0) {
+  if (!integer_variables_.empty()) {
     str << "| Discrete variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetDiscreteVariables()->at(ii).second->name().toStdString();
@@ -369,14 +367,14 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
     }
   }
 
-  if (binary_variables_.size() > 0) {
+  if (!binary_variables_.empty()) {
     str << "| Discrete variable values:                             |" << endl;
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetBinaryVariables()->at(ii).second->name().toStdString();
       double vv = binary_variables_.at(ii).second;
       str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
-      }
+  }
   str << "|=========================================================|" << endl;
   return str.str();
 
@@ -402,8 +400,9 @@ double Case::GetRealizationOfv(const QString &alias) {
   if (HasRealizationOfv(alias)) {
     return ensemble_ofvs_[alias];
   } else {
-    Printer::ext_warn("In Case - Attempting to get unrecorded OFV for alias "+alias.toStdString()
-                        +"Returning sentinel value (-1.0)", "Case", "Optimization");
+    wm_ = "In Case - Attempting to get unrecorded OFV for alias ";
+    wm_ += alias.toStdString() + ". Returning sentinel value (-1.0).";
+    ext_warn(wm_, md_, cl_);
     return -1.0;
   }
 }
@@ -414,10 +413,11 @@ bool Case::HasRealizationOfv(const QString &alias) {
 
 double Case::GetEnsembleAverageOfv() const {
   if (ensemble_ofvs_.size() == 1) {
-    Printer::ext_warn("Only one realization case was successfully "
-                      "evaluated. You should consider tweaking well/reservoir"
-                      " parameters or increasing the number of realizations"
-                      " considered for each case.", "Case", "Optimization");
+    string wm = "Only one realization case was successfully ";
+    wm += "evaluated. You should consider tweaking well/reservoir ";
+    wm += "parameters or increasing the number of realizations ";
+    wm += "considered for each case.";
+    ext_warn(wm, md_, cl_);
   }
   double sum = 0;
   for (double value : ensemble_ofvs_.values()) {
@@ -428,16 +428,19 @@ double Case::GetEnsembleAverageOfv() const {
 
 QPair<double, double> Case::GetEnsembleExpectedOfv() const {
   if (ensemble_ofvs_.size() == 1) {
-    Printer::ext_warn("Only one realization case was successfully "
-                      "evaluated. You should consider tweaking well/reservoir"
-                      " parameters or increasing the number of realizations"
-                      " considered for each case.", "Case", "Optimization");
+    string wm = "Only one realization case was successfully ";
+    wm += "evaluated. You should consider tweaking well/reservoir ";
+    wm += "parameters or increasing the number of realizations ";
+    wm += "considered for each case.";
+    ext_warn(wm, md_, cl_);
   }
   vector<double> list_of_ofvs;
   for (double value : ensemble_ofvs_.values()){
     list_of_ofvs.push_back(value);
   }
-  auto pair = QPair<double, double>(calc_average(list_of_ofvs),calc_standard_deviation(list_of_ofvs));
+  auto ofvs_avg = calc_average(list_of_ofvs);
+  auto ofvs_dev = calc_standard_deviation(list_of_ofvs);
+  auto pair = QPair<double, double>(ofvs_avg, ofvs_dev);
   return pair;
 }
 

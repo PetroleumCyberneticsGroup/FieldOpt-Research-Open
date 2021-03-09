@@ -103,7 +103,7 @@ class TestResourceCases :
             real_variables_sph_rand_30d_);
 
     std::vector<double> rand_reals_6 = random_doubles(gen, -5.12, 5.12, 6);
-    varcont_6r_ = new VarPropContainer();
+    varcont_6r_ = new VarPropContainer(vp_);
 
     QString base_name = "BHP#PRODUCER#";
 
@@ -201,6 +201,8 @@ class TestResourceCases :
   QList<QPair<QUuid, double>> real_variables_sph_rand_30d_;
 
   QList<QPair<QUuid, double>> real_variables_sph_rand_6d_;
+
+  Settings::VerbParams vp_ = {};
 
 };
 

@@ -53,63 +53,65 @@ class TestResourceOptimizer :
 
     base_case_->set_objf_value(1000.0);
 
-    auto vp = settings_full_->global()->verbParams();
-
     settings_compass_search_min_unconstr_ =
       new Settings::Optimizer(
-        get_json_settings_compass_search_minimize_, vp);
+        get_json_settings_compass_search_minimize_, vp_);
 
     settings_compass_search_max_unconstr_ =
       new Settings::Optimizer(
-        get_json_settings_compass_search_maximize_, vp);
+        get_json_settings_compass_search_maximize_, vp_);
 
     settings_apps_min_unconstr_ =
       new Settings::Optimizer(
-        get_json_settings_apps_minimize_, vp);
+        get_json_settings_apps_minimize_, vp_);
 
     settings_apps_max_unconstr_ =
       new Settings::Optimizer(
-        get_json_settings_apps_maximize_, vp);
+        get_json_settings_apps_maximize_, vp_);
 
     settings_cma_es_min_ =
       new Settings::Optimizer(
-        get_json_settings_cma_es_minimize_, vp);
+        get_json_settings_cma_es_minimize_, vp_);
 
     settings_ga_min_ =
       new Settings::Optimizer(
-        get_json_settings_ga_minimize_, vp);
+        get_json_settings_ga_minimize_, vp_);
 
     settings_ga_max_ =
       new Settings::Optimizer(
-        get_json_settings_ga_maximize_, vp);
+        get_json_settings_ga_maximize_, vp_);
 
     settings_ego_max_ = new
       Settings::Optimizer(
-      get_json_settings_ego_maximize_, vp);
+      get_json_settings_ego_maximize_, vp_);
 
     settings_pso_min_ =
       new Settings::Optimizer(
-        get_json_settings_pso_minimize_, vp);
+        get_json_settings_pso_minimize_, vp_);
 
     settings_vfsa_min_ =
       new Settings::Optimizer(
-        get_json_settings_vfsa_minimize_, vp);
+        get_json_settings_vfsa_minimize_, vp_);
 
     settings_vfsa_max_ =
       new Settings::Optimizer(
-        get_json_settings_vfsa_maximize_, vp);
+        get_json_settings_vfsa_maximize_, vp_);
 
     settings_spsa_min_ =
       new Settings::Optimizer(
-        get_json_settings_spsa_minimize_, vp);
+        get_json_settings_spsa_minimize_, vp_);
 
     settings_spsa_max_ =
       new Settings::Optimizer(
-        get_json_settings_spsa_maximize_, vp);
+        get_json_settings_spsa_maximize_, vp_);
 
     settings_tr_opt_max_ =
       new Settings::Optimizer(
-        get_json_settings_tr_opt_maximize_, vp);
+        get_json_settings_tr_opt_maximize_, vp_);
+
+    settings_dftr_max_ =
+      new Settings::Optimizer(
+        get_json_settings_dftr_max_, vp_);
   }
 
   Optimization::Case *base_case_;
@@ -127,6 +129,9 @@ class TestResourceOptimizer :
   Settings::Optimizer *settings_ego_max_;
   Settings::Optimizer *settings_cma_es_min_;
   Settings::Optimizer *settings_tr_opt_max_;
+  Settings::Optimizer *settings_dftr_max_;
+
+  Settings::VerbParams vp_ = {};
 
  private:
   QJsonObject obj_fun_{
@@ -350,6 +355,25 @@ class TestResourceOptimizer :
 
   QJsonObject get_json_settings_tr_opt_maximize_{
     {"Type", "TrustRegionOptimization"},
+    {"Mode", "Minimize"},
+    {"Parameters", QJsonObject{
+      {"MaxEvaluations", 3},
+      {"InitialTrustRegionRadius", 1},
+      // {"TrustRegionLowerBound", -1e3},
+      // {"TrustRegionUpperBound", 1e3},
+      {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
+      {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
+      {"RNGSeed", 25},
+      {"CriticalityMu", 100},
+      {"CriticalityOmega", 0.5},
+      {"CriticalityBeta", 10},
+      {"ProblemName", "prob0"}
+    }},
+    {"Objective", obj_fun_},
+  };
+
+  QJsonObject get_json_settings_dftr_max_{
+    {"Type", "DFTR"},
     {"Mode", "Minimize"},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},

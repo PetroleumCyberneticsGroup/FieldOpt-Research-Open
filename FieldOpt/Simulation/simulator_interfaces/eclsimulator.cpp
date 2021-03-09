@@ -25,7 +25,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <Utilities/printer.hpp>
-#include <Utilities/verbosity.h>
+// #include <Utilities/verbosity.h>
 
 #include "eclsimulator.h"
 #include "Utilities/execution.hpp"
@@ -35,6 +35,7 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Simulation {
 
 using namespace Utilities::FileHandling;
+using Utilities::Unix::ExecShellScript;
 using Printer::ext_info;
 using Printer::info;
 
@@ -54,19 +55,31 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
   results_ = new Results::ECLResults(settings);
 }
 
+void ECLSimulator::EvalXWrapper() {
+
+  if (vp_.vSIM >= 2) {
+    im_ = "Starting EvalXWrapper [SNOPT].";
+    ext_info(im_,md_, cl_, vp_.lnw);
+  }
+  copyDriverFiles();
+  UpdateFilePaths();
+  script_args_ = (QStringList() << paths_.GetPathQstr(Paths::SIM_WORK_DIR) << deck_name_);
+
+  auto driver_file_writer = EclDriverFileWriter(settings_, model_);
+
+}
+
 void ECLSimulator::Evaluate() {
 
   if (vp_.vSIM >= 2) {
-    im_ = "Starting unmonitored evaluation.";
-    im_ += "Copying driver files.";
+    im_ = "Starting unmonitored evaluation. Copying driver files.";
     ext_info(im_,md_, cl_, vp_.lnw);
   }
   copyDriverFiles();
 
   if (vp_.vSIM >= 2) { info("Updating file paths.", vp_.lnw); }
   UpdateFilePaths();
-  script_args_ = (QStringList()
-    << paths_.GetPathQstr(Paths::SIM_WORK_DIR) << deck_name_);
+  script_args_ = (QStringList() << paths_.GetPathQstr(Paths::SIM_WORK_DIR) << deck_name_);
 
   auto driver_file_writer = EclDriverFileWriter(settings_, model_);
 
@@ -76,10 +89,8 @@ void ECLSimulator::Evaluate() {
 
   PreSimWork();
   if (vp_.vSIM >= 2) { info("Starting unmonitored sim.", vp_.lnw); }
-  Utilities::Unix::ExecShellScript(
-    paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
-    script_args_, vp_
-  );
+  ExecShellScript(paths_.GetPathQstr(Paths::SIM_EXEC_SCRIPT_FILE),
+                  script_args_,vp_);
   PostSimWork();
 
   if (vp_.vSIM >= 2) { info("Unmonitored sim done. Reading results.", vp_.lnw); }
@@ -87,7 +98,7 @@ void ECLSimulator::Evaluate() {
   updateResultsInModel();
 }
 
-bool ECLSimulator::Evaluate(int timeout, int threads) {
+bool ECLSimulator::Evaluate(int timeout, int threads=1) {
   copyDriverFiles();
   UpdateFilePaths();
 
@@ -119,9 +130,9 @@ bool ECLSimulator::Evaluate(int timeout, int threads) {
   return success;
 }
 
-bool ECLSimulator::Evaluate(
-  const Settings::Ensemble::Realization &realization,
-  int timeout, int threads) {
+bool ECLSimulator::
+Evaluate(const Settings::Ensemble::Realization &realization,
+         int timeout, int threads=1) {
 
   driver_file_name_ =
     QString::fromStdString(FileName(realization.data()));

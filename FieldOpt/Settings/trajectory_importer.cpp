@@ -42,7 +42,7 @@ TrajectoryImporter::TrajectoryImporter(const std::string &traj_dir_path,
   if(vp_.vSET >= 1) { info("Importing well trajectories ... ", vp_.lnw); }
   assert(DirExists(traj_dir_path, vp_, md_, cl_));
 
-  traj_dir_path_ = GetAbsoluteFilePath(traj_dir_path);
+  traj_dir_path_ = GetAbsFilePath(traj_dir_path);
   well_names_ = wells;
   findTrajectoryFiles();
 

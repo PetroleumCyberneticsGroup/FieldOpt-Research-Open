@@ -1,5 +1,5 @@
 /***********************************************************
-Copyright (C) 2015+2017
+Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
 Modified 2017-2021 Mathias Bellout
@@ -63,18 +63,21 @@ void CaseHandler::AddNewCases(QList<Case *> cases) {
 }
 
 Case *CaseHandler::GetNextCaseForEvaluation() {
-  if (evaluation_queue_.size() == 0)
-    throw CaseHandlerException(
-      "The evaluation queue contains no cases.");
+  if (evaluation_queue_.size() == 0) {
+    em_ = "The evaluation queue contains no cases.";
+    throw CaseHandlerException(em_);
+  }
   evaluating_.append(evaluation_queue_.head());
-  cases_[evaluation_queue_.head()]->state.queue = Case::CaseState::QueueStatus::Q_DEQUEUED;
+  cases_[evaluation_queue_.head()]->state.queue =
+    Case::CaseState::QueueStatus::Q_DEQUEUED;
   return cases_[evaluation_queue_.dequeue()];
 }
 
 void CaseHandler::SetCaseEvaluated(const QUuid id) {
-  if (!evaluating_.contains(id))
-    throw CaseHandlerException(
-      "The case id is not found in the list of cases being evaluated.");
+  if (!evaluating_.contains(id)) {
+    em_ = "The case id is not found in the list of cases being evaluated.";
+    throw CaseHandlerException(em_);
+  }
   evaluating_.removeAll(id);
   evaluated_.append(id);
   evaluated_recently_.append(id);
@@ -90,11 +93,13 @@ void CaseHandler::SetCaseEvaluated(const QUuid id) {
   }
 }
 
-void CaseHandler::UpdateCaseObjectiveFunctionValue(const QUuid id, const double ofv) {
+void CaseHandler::UpdateCaseObjectiveFunctionValue(const QUuid id,
+                                                   const double ofv) {
   cases_[id]->set_objf_value(ofv);
 }
 
-void CaseHandler::SetCaseState(QUuid id, Case::CaseState state, int wic_time, int sim_time) {
+void CaseHandler::SetCaseState(QUuid id, Case::CaseState state,
+                               int wic_time, int sim_time) {
   cases_[id]->state = state;
   cases_[id]->SetWICTime(wic_time);
   cases_[id]->SetSimTime(sim_time);
@@ -109,7 +114,7 @@ QList<Case *> CaseHandler::RecentlyEvaluatedCases() const {
 }
 
 void CaseHandler::ClearRecentlyEvaluatedCases() {
-  if (evaluated_recently_.size() > 0)
+  if (!evaluated_recently_.empty())
     evaluated_recently_.clear();
 }
 

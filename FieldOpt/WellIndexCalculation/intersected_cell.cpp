@@ -1,28 +1,33 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Hilmar M. Magnusson <hilmarmag@gmail.com>
-   Modified by Einar J.M. Baumann (2016) <einar.baumann@gmail.com>
-   Modified by Alin G. Chitu (2016-2017) <alin.chitu@tno.nl, chitu_alin@yahoo.com>
-   Modified by Einar J.M. Baumann (2017) <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2016
+Hilmar M. Magnusson <hilmarmag@gmail.com>
 
-   This file and the WellIndexCalculator as a whole is part of the
-   FieldOpt project. However, unlike the rest of FieldOpt, the
-   WellIndexCalculator is provided under the GNU Lesser General Public
-   License.
+Modified 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   WellIndexCalculator is free software: you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public License
-   as published by the Free Software Foundation, either version 3 of
-   the License, or (at your option) any later version.
+Modified 2016-2017
+Alin G. Chitu <alin.chitu@tno.nl, chitu_alin@yahoo.com>
 
-   WellIndexCalculator is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+Modified 2017-2021
+Mathias Bellout <mathias.bellout@gmail.no>
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with WellIndexCalculator.  If not, see
-   <http://www.gnu.org/licenses/>.
-******************************************************************************/
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include "intersected_cell.h"
 #include <iostream>
 #include <stdexcept>
@@ -80,6 +85,10 @@ double IntersectedCell::get_segment_skin(int segment_index) const {
   return segment_skin_[segment_index];
 }
 
+double IntersectedCell::get_segment_length(int segment_index) const {
+  return segment_length_[segment_index];
+}
+
 void IntersectedCell::update_last_segment_exit_point(Vector3d exit_point) {
   exit_points_[exit_points_.size()-1] = exit_point;
 }
@@ -88,13 +97,18 @@ int IntersectedCell::num_segments() const{
   return entry_points_.size();
 }
 
-void IntersectedCell::add_new_segment(Vector3d entry_point, Vector3d exit_point,
-                                      double entry_md, double exit_md,
-                                      double radius, double skin_factor) {
+void IntersectedCell::add_new_segment(Vector3d entry_point,
+                                      Vector3d exit_point,
+                                      double entry_md,
+                                      double exit_md,
+                                      double length,
+                                      double radius,
+                                      double skin_factor) {
   entry_points_.push_back(entry_point);
   exit_points_.push_back(exit_point);
   entry_mds_.push_back(entry_md);
   exit_mds_.push_back(exit_md);
+  segment_length_.push_back(length);
   segment_radius_.push_back(radius);
   segment_skin_.push_back(skin_factor);
 }
@@ -142,11 +156,11 @@ map<string, vector<double>>& IntersectedCell::get_calculation_data() {
 }
 
 void IntersectedCell::set_segment_calculation_data_3d(int segment_index,
-                                                   string name,
+                                                      string name,
                                                       Vector3d value3d) {
   // Check if this name already exists
   map<string, vector<Vector3d>>::iterator
-      it = calculation_data_3d_.find(name);
+    it = calculation_data_3d_.find(name);
 
   if(it != calculation_data_3d_.end()) {
     if (segment_index >= 0 && segment_index < calculation_data_3d_[name].size()) {

@@ -35,16 +35,16 @@ class RateConstraintTest : public ::testing::Test,
     auto *rate_var = new Model::Properties::ContinuousProperty(1200.0);
     rate_var->setName("Rate#INJ#0");
     model_->variables()->AddVariable(rate_var);
+    Settings::VerbParams vp_ = {};
     constraint_ = new Optimization::Constraints::RateConstraint(settings_optimizer_->constraints()[2],
                                                                 model_->variables(),
-                                                                vp);
+                                                                vp_);
     c = new Optimization::Case(model_->variables()->GetBinVarValues(),
                                model_->variables()->GetDiscVarValues(),
                                model_->variables()->GetContVarValues());
   }
   Optimization::Constraints::RateConstraint *constraint_;
   Optimization::Case *c;
-  Settings::VerbParams vp = settings_full_->global()->verbParams();
 };
 
 
@@ -58,7 +58,7 @@ TEST_F(RateConstraintTest, Initial) {
 
 TEST_F(RateConstraintTest, AfterModification) {
   EXPECT_TRUE(constraint_->CaseSatisfiesConstraint(c));
-  auto rate_vars = model_->variables()->GetWellRateVariables("INJ");
+  auto rate_vars = model_->variables()->GetWellRateVars("INJ");
   for (auto var : rate_vars) {
     c->set_real_variable_value(var->id(), 900);
   }
@@ -76,17 +76,15 @@ TEST_F(RateConstraintTest, AfterModification) {
 
 TEST_F(RateConstraintTest, Snapping) {
   EXPECT_TRUE(constraint_->CaseSatisfiesConstraint(c));
-  auto rate_vars = model_->variables()->GetWellRateVariables("INJ");
+  auto rate_vars = model_->variables()->GetWellRateVars("INJ");
 
   // Testing snap to minimum
   for (auto var : rate_vars) {
     c->set_real_variable_value(var->id(), 900);
   }
-
   EXPECT_FALSE(constraint_->CaseSatisfiesConstraint(c));
   constraint_->SnapCaseToConstraints(c);
   EXPECT_TRUE(constraint_->CaseSatisfiesConstraint(c));
-
   for (auto var : rate_vars) {
     EXPECT_FLOAT_EQ(1200, c->get_real_variable_value(var->id()));
   }
@@ -95,11 +93,9 @@ TEST_F(RateConstraintTest, Snapping) {
   for (auto var : rate_vars) {
     c->set_real_variable_value(var->id(), 1800);
   }
-
   EXPECT_FALSE(constraint_->CaseSatisfiesConstraint(c));
   constraint_->SnapCaseToConstraints(c);
   EXPECT_TRUE(constraint_->CaseSatisfiesConstraint(c));
-
   for (auto var : rate_vars) {
     EXPECT_FLOAT_EQ(1400, c->get_real_variable_value(var->id()));
   }

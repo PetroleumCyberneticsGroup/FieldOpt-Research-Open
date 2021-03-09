@@ -60,10 +60,12 @@ class ECLSimulator : public Simulator {
    * the current model. The evaluation is blocking.
    */
   void Evaluate() override;
-  bool Evaluate(int timeout, int threads = 1) override;
-  
+  bool Evaluate(int timeout, int threads) override;
+
+  void EvalXWrapper();
+
   bool Evaluate(const Settings::Ensemble::Realization &realization,
-      int timeout, int threads = 1) override;
+      int timeout, int threads) override;
   
   void WriteDriverFilesOnly() override;
   /*!
@@ -86,6 +88,7 @@ class ECLSimulator : public Simulator {
   // Simulator interface
  protected:
   void UpdateFilePaths() override;
+
 };
 
 }

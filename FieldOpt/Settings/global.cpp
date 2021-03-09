@@ -32,13 +32,14 @@ Global::Global(QJsonObject json_global) {
   name_ = json_global["Name"].toString().toStdString();
   bookkeeper_tol_ = json_global["BookkeeperTol"].toDouble();
   if (bookkeeper_tol_ < 0.0) {
-    string em = "Bookkeeper tolerance must larger than zero.";
-    throw UnableToParseGlobalSectionException(em);
+    em_ = "Bookkeeper tolerance must larger than zero.";
+    throw UnableToParseGlobalSectionException(em_);
   }
 
   if (json_global.contains("VerbConf")) {
     QJsonObject json_verb = json_global["VerbConf"].toObject();
     parseVerbParams(json_verb);
+    // showVerbParams(name_); // dbg
   } else {
     im_ = "JSON driver file contains no \"VerbConf\" parameter.";
     im_ += "\"VerbConf\" parameter set to default:";

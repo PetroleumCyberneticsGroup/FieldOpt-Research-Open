@@ -30,6 +30,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QJsonObject>
 
 #include "Utilities/verbosity.h"
+
 #include "global.h"
 #include "simulator.h"
 #include "optimizer.h"
@@ -86,7 +87,8 @@ class Settings {
   Paths paths_;
   QJsonObject *json_driver_;
 
-  string md_ = "Settings";
+  string im_, wm_, em_;
+  string md_ = "Settings/settings";
   string cl_ = "Settings";
   VerbParams vp_;
 

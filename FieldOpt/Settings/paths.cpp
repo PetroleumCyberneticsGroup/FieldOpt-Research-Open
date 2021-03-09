@@ -63,6 +63,11 @@ void Paths::SetPath(Paths::Path path, const string& path_string,
   }
 }
 
+void Paths::CopyPath(Paths::Path path0, Paths::Path path1) {
+  paths_[path0] = paths_[path1];
+}
+
+
 bool Paths::IsSet(Paths::Path path) {
   return paths_.count(path) > 0;
 }
