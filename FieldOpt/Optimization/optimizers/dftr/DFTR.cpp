@@ -295,7 +295,6 @@ bool DFTR::submitTempCases() {
     } else { // trm_ has two points
       trm_->setIsModInit(true);
       iteration_++;
-      // return false;
     }
   }
 
@@ -307,19 +306,7 @@ bool DFTR::submitTempCases() {
       iteration_++;
     }
     if (enable_logging_) { logger_->AddEntry(this); }
-    // return false;
   }
-
-  // // iteration_ == 0
-  // if (PY && RC) {
-  //   mchange_ = trm_->ensureImpr();
-  //   if(!trm_->isReplNeeded()) {
-  //     trm_->setIsModInit(true);
-  //     iteration_++;
-  //   }
-  //   if (enable_logging_) { logger_->AddEntry(this); }
-  //   return false;
-  // }
   return false;
 }
 
@@ -373,11 +360,7 @@ void DFTR::handleEvaluatedCase(Case *c) {
   if (isImprovement(c)) { updateTentativeBestCase(c); }
 
   if (!handleTempCases(c)) {
-    // OUT: VectorXd x_current = trm_->getCurrPt();
-    // OUT: double fval_current = trm_->getCurrFval();
-
     fval_trial_ = fmult_ * c->objf_value();
-
     ared_ = trm_->getCurrFval() - fval_trial_; // Actual reduction
     rho_ = ared_ / (pred_red_); // Agreement factor
 
@@ -385,9 +368,6 @@ void DFTR::handleEvaluatedCase(Case *c) {
       if (isImprovement(c)) { // Successful iteration
         updateTentativeBestCase(c);
       }
-
-      // OUT: fval_current = fval_trial_;
-      // OUT: x_current = trial_point_;
 
       // Including new point as TR center
       mchange_ = trm_->changeTrCenter(trial_point_, fval_trial_);
@@ -498,9 +478,6 @@ void DFTR::setLowerUpperBounds() {
         && settings_->parameters().tr_upper_bnd > 0) {
         lb_.fill(settings_->parameters().tr_lower_bnd);
         ub_.fill(settings_->parameters().tr_upper_bnd);
-
-        // lb_.fill(-std::numeric_limits<double>::infinity()); // dbg
-        // ub_.fill(std::numeric_limits<double>::infinity()); // dbg
 
       } else {
         wm_ = "Lower/upper bounds for DF-TR algorithm not specified.";
