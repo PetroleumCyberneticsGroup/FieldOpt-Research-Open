@@ -60,7 +60,7 @@ using Optimization::Objective::Augmented;
 namespace Optzr = Optimization::Optimizers;
 
 AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
-  runtime_settings_ = runtime_settings;
+  rts_ = runtime_settings;
 
   settings_ = nullptr;
   model_ = nullptr;
@@ -84,26 +84,26 @@ double AbstractRunner::sentinelValue() const {
 void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 
   // Output dir
-  QString output_dir = runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR);
+  QString output_dir = rts_->paths().GetPathQstr(Paths::OUTPUT_DIR);
   if (output_subdir.length() > 0) {
     output_dir.append(QString("/%1/").arg(output_subdir));
   }
   if (!DirExists(output_dir, vp_)) { CreateDir(output_dir, vp_); }
-  runtime_settings_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
+  rts_->paths().SetPath(Paths::OUTPUT_DIR, output_dir.toStdString());
 
   // Optmzd dir
   string optz_dir = output_dir.toStdString();
-  if(runtime_settings_->runner_type() == RuntimeSettings::SERIAL) {
+  if(rts_->runner_type() == RuntimeSettings::SERIAL) {
     optz_dir += "/optcs";
-  } else if(runtime_settings_->runner_type() == RuntimeSettings::MPISYNC) {
+  } else if(rts_->runner_type() == RuntimeSettings::MPISYNC) {
     optz_dir += "../optcs";
   }
 
   if (!DirExists(optz_dir, vp_)) { CreateDir(optz_dir, vp_); }
-  runtime_settings_->paths().SetPath(Paths::OPTMZD_DIR, optz_dir);
+  rts_->paths().SetPath(Paths::OPTMZD_DIR, optz_dir);
 
   // Settings
-  settings_ = new Settings::Settings(runtime_settings_->paths());
+  settings_ = new Settings::Settings(rts_->paths());
   vp_ = settings_->global()->verbParams();
   // settings_->global()->showVerbParams();
 
@@ -386,7 +386,7 @@ void AbstractRunner::InitializeOptimizer() {
 
   }
   optimizer_->EnableConstraintLogging(
-    runtime_settings_->paths().GetPathQstr(Paths::OUTPUT_DIR));
+    rts_->paths().GetPathQstr(Paths::OUTPUT_DIR));
 }
 
 void AbstractRunner::InitializeBookkeeper() {
@@ -397,7 +397,7 @@ void AbstractRunner::InitializeBookkeeper() {
 }
 
 void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
-  logger_ = new Logger(runtime_settings_, output_subdir, write_logs);
+  logger_ = new Logger(rts_, output_subdir, write_logs);
 }
 
 void AbstractRunner::PrintCompletionMessage() {
@@ -460,17 +460,17 @@ void AbstractRunner::ComputeOptmzdCase() {
   cout << "objf_value: " << optz_case_->objf_value() << endl;
 }
 
-int AbstractRunner::timeoutValue() const {
-  if (simulation_times_.empty() || runtime_settings_->simulation_timeout() == 0) {
+int AbstractRunner::timeoutVal() const {
+  if (sim_times_.empty() || rts_->sim_timeout() == 0) {
     return 10000;
   } else {
-    return calc_median(simulation_times_) * runtime_settings_->simulation_timeout();
+    return calc_median(sim_times_) * rts_->sim_timeout();
   }
 }
 
 void AbstractRunner::FinalizeInitialization(bool write_logs) {
   if (write_logs) {
-    logger_->AddEntry(runtime_settings_);
+    logger_->AddEntry(rts_);
     logger_->FinalizePrerunSummary();
   }
 }

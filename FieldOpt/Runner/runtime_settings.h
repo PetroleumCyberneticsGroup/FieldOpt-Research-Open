@@ -62,7 +62,7 @@ class RuntimeSettings : public Loggable
   bool overwrite_existing() const { return overwrite_existing_; }
   int max_parallel_sims() const { return max_parallel_sims_; }
   int threads_per_sim() const { return threads_per_sim_; }
-  int simulation_timeout() const { return simulation_timeout_; }
+  int sim_timeout() const { return simulation_timeout_; }
   int simulation_delay() const { return simulation_delay_; }
 
   RunnerType runner_type() const { return runner_type_; }

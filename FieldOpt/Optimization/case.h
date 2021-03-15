@@ -362,7 +362,7 @@ class Case : public Loggable
     ensemble_realization_ = alias;
   }
 
-  QString GetEnsembleRealization() const {
+  QString GetEnsembleRlz() const {
     return ensemble_realization_;
   }
 

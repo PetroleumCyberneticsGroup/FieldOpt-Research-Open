@@ -91,7 +91,7 @@ class AbstractRunner
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
   Settings::Settings *settings_;
-  RuntimeSettings *runtime_settings_;
+  RuntimeSettings *rts_;
   Optimization::Case *base_case_;
   Optimization::Case *optz_case_;
 
@@ -99,7 +99,7 @@ class AbstractRunner
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;
-  std::vector<int> simulation_times_;
+  std::vector<int> sim_times_;
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
 
@@ -136,7 +136,7 @@ class AbstractRunner
    * will be returned.
    * @return
    */
-  int timeoutValue() const;
+  int timeoutVal() const;
 
   void InitializeSettings(const QString& output_subdirectory="");
   void InitializeModel();
