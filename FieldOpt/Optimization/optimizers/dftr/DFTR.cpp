@@ -66,7 +66,7 @@ TermCond DFTR::IsFinished() {
       tc = OPT_CRITERIA_REACHED;
     }
   }
-  if (trm_->getRad() < tr_tol_rad_) {
+  if (trm_->getRad() < tr_rad_tol_) {
     tc = MIN_STEP_LENGTH_REACHED;
   }
   if (iteration_ == tr_iter_max_) {
@@ -99,7 +99,7 @@ void DFTR::updateRadius() {
     // rho == -inf -> too short step size
     // mchange_ == 4 -> Couldn't add point, had to rebuild model
 
-    if (trm_->getRad() <= 2 * tr_tol_rad_ / tr_gamma_dec_) {
+    if (trm_->getRad() <= 2 * tr_rad_tol_ / tr_gamma_dec_) {
       delay_reduc_ = delay_reduc_ + 1;
     } else {
       delay_reduc_ = 0;
@@ -143,7 +143,7 @@ void DFTR::iterate() {
     if (enable_logging_) { logger_->AddEntry(this); }
 
     // CODE ->
-    if ((trm_->getRad() < tr_tol_rad_) || (iteration_ == tr_iter_max_)) {
+    if ((trm_->getRad() < tr_rad_tol_) || (iteration_ == tr_iter_max_)) {
       return; // end of the algorithm
 
     } else {
@@ -186,9 +186,9 @@ void DFTR::iterate() {
 
       trial_step_ = trial_point_ - x_curr;
 
-      if ((pred_red_ < tr_tol_rad_ * 1e-2) ||
-        (pred_red_ < tr_tol_rad_ * abs(f_curr) &&
-          (trial_step_.norm()) < tr_tol_rad_) ||
+      if ((pred_red_ < tr_rad_tol_ * 1e-2) ||
+        (pred_red_ < tr_rad_tol_ * abs(f_curr) &&
+          (trial_step_.norm()) < tr_rad_tol_) ||
         (pred_red_ < tr_tol_f_ * abs(f_curr) * 1e-3)) {
 
         rho_ = trm_->infd_;
@@ -421,12 +421,12 @@ void DFTR::setSettings(Settings::Optimizer *settings) {
   tr_eps_c_      = settings_->parameters().tr_eps_c;
   tr_eta_0_      = settings_->parameters().tr_eta_0;
   tr_eta_1_      = settings_->parameters().tr_eta_1;
-  tr_pivot_thld_ = settings_->parameters().tr_pivot_thld;
+  tr_piv_thld_ = settings_->parameters().tr_piv_thld;
   tr_add_thld_   = settings_->parameters().tr_add_thld;
-  tr_exch_thld_  = settings_->parameters().tr_exch_thld;
-  tr_rad_max_    = settings_->parameters().tr_radius_max;
-  tr_rad_fac_    = settings_->parameters().tr_radius_fac;
-  tr_tol_rad_    = settings_->parameters().tr_tol_radius;
+  tr_xch_thld_  = settings_->parameters().tr_xch_thld;
+  tr_rad_max_    = settings_->parameters().tr_rad_max;
+  tr_rad_fac_    = settings_->parameters().tr_rad_fac;
+  tr_rad_tol_    = settings_->parameters().tr_rad_tol;
   tr_gamma_inc_  = settings_->parameters().tr_gamma_inc;
   tr_gamma_dec_  = settings_->parameters().tr_gamma_dec;
   tr_crit_mu_    = settings_->parameters().tr_crit_mu;
@@ -514,7 +514,7 @@ void DFTR::computeInitPts() {
       }
 
       //!<Second point must not be too close>
-      while (scnd_pt.lpNorm<Infinity>() < tr_pivot_thld_) {
+      while (scnd_pt.lpNorm<Infinity>() < tr_piv_thld_) {
         scnd_pt << 2*scnd_pt.array();
       }
 

@@ -722,9 +722,9 @@ bool TRFrame::chooseNReplacePt() {
 // IMPROVEMODELNFP
 bool TRFrame::improveModelNfp() {
 
-  auto rel_pivot_threshold = settings_->parameters().tr_pivot_thld;
-  auto tol_radius = settings_->parameters().tr_tol_radius;
-  auto radius_factor = settings_->parameters().tr_radius_fac;
+  auto rel_pivot_threshold = settings_->parameters().tr_piv_thld;
+  auto tol_radius = settings_->parameters().tr_rad_tol;
+  auto radius_factor = settings_->parameters().tr_rad_fac;
 
   auto radius = radius_;
   auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);

@@ -95,7 +95,7 @@ bool TRFrame::critStep(double rad_bf_crit_step) {
   double beta = settings_->parameters().tr_crit_beta;
 
   // Tolerance of TR algorithm
-  double tol_radius = settings_->parameters().tr_tol_radius;
+  double tol_radius = settings_->parameters().tr_rad_tol;
   double tol_f = settings_->parameters().tr_tol_f;
 
   int exit_flag = 0;
@@ -167,7 +167,7 @@ bool TRFrame::isLambdaPoised() {
     //!<Fully linear, already>
     result = true;
     //!<but lets double check>
-//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_pivot_thld) {
+//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_piv_thld) {
 //            Printer::ext_warn("Low pivot values.", "Optimization", "TrustRegionOptimization");
 //        }
   } else {
@@ -197,7 +197,7 @@ bool TRFrame::isModOld() {
   distance = pts_abs_.col(0) - pts_abs_.col(tr_center_);
 
   auto dist = distance.lpNorm<Infinity>();
-  auto tr_rad_fac = settings_->parameters().tr_radius_fac;
+  auto tr_rad_fac = settings_->parameters().tr_rad_fac;
   auto is_old = (dist > tr_rad_fac);
 
   return is_old;

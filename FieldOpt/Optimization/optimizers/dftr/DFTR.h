@@ -93,9 +93,9 @@ class DFTR : public Optimizer {
 
   // TR core properties
   double tr_init_rad_;
-  double tr_tol_f_, tr_eps_c_, tr_eta_0_, tr_eta_1_; // tols
-  double tr_pivot_thld_, tr_add_thld_, tr_exch_thld_; // Thesholds
-  double tr_rad_max_, tr_rad_fac_, tr_tol_rad_; // Radii
+  double tr_tol_f_, tr_eps_c_, tr_eta_0_, tr_eta_1_; // Tols
+  double tr_piv_thld_, tr_add_thld_, tr_xch_thld_; // Thesholds
+  double tr_rad_max_, tr_rad_fac_, tr_rad_tol_; // Radii
   double tr_gamma_inc_, tr_gamma_dec_; // Gamma factors
   double tr_crit_mu_, tr_crit_omega_, tr_crit_beta_; // Criticality
   double tr_lower_bnd_, tr_upper_bnd_;
