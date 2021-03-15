@@ -25,25 +25,25 @@ If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 #include <Simulation/simulator_interfaces/flowsimulator.h>
-#include <Optimization/optimizers/APPS.h>
-#include <Optimization/optimizers/GeneticAlgorithm.h>
-#include <Optimization/optimizers/RGARDD.h>
+#include <APPS.h>
+#include <PSO.h>
+#include <trust_region/TrustRegionOptimization.h>
+#include <dftr/DFTR.h>
+#include <GeneticAlgorithm.h>
+#include <RGARDD.h>
+#include <bayesian_optimization/EGO.h>
+#include <ExhaustiveSearch2DVert.h>
+#include <compass_search.h>
+#include <CMA_ES.h>
+#include <VFSA.h>
+#include <SPSA.h>
 #include <Optimization/hybrid_optimizer.h>
-#include <Optimization/optimizers/bayesian_optimization/EGO.h>
-#include <Optimization/optimizers/trust_region/TrustRegionOptimization.h>
-#include "Optimization/optimizers/PSO.h"
-#include "Optimization/optimizers/CMA_ES.h"
-#include "Optimization/optimizers/VFSA.h"
-#include "Optimization/optimizers/SPSA.h"
 #include "Simulation/simulator_interfaces/ix_simulator.h"
 #include "abstract_runner.h"
-#include "Optimization/optimizers/compass_search.h"
-#include "Optimization/optimizers/ExhaustiveSearch2DVert.h"
 #include "Simulation/simulator_interfaces/eclsimulator.h"
 #include "Simulation/simulator_interfaces/adgprssimulator.h"
 #include "Utilities/math.hpp"
 #include "Utilities/printer.hpp"
-#include "Utilities/verbosity.h"
 
 namespace Runner {
 
@@ -287,15 +287,25 @@ void AbstractRunner::InitializeOptimizer() {
       break;
     }
     case OptzrTyp::TrustRegionOptimization: {
-      if (vp_.vRUN >= 1) { ext_info("Using Trust Region DFO.", md_, cl_, vp_.lnw); }
+      if (vp_.vRUN >= 1) { ext_info("Using TR-DFO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
                                                       base_case_,
                                                       model_->variables(),
                                                       model_->grid(),
                                                       logger_,
                                                       nullptr,
-                                                      model_->constraintHandler()
-      );
+                                                      model_->constraintHandler());
+      break;
+    }
+    case OptzrTyp::DFTR: {
+      if (vp_.vRUN >= 1) { ext_info("Using TR-DFO [DFTR].", md_, cl_, vp_.lnw); }
+      optimizer_ = new Optzr::DFTR(settings_->optimizer(),
+                                   base_case_,
+                                   model_->variables(),
+                                   model_->grid(),
+                                   logger_,
+                                   nullptr,
+                                   model_->constraintHandler());
       break;
     }
     case OptzrTyp::GeneticAlgorithm: {
@@ -305,7 +315,7 @@ void AbstractRunner::InitializeOptimizer() {
                                      model_->variables(),
                                      model_->grid(),
                                      logger_
-      );
+                                    );
       break;
     }
     case OptzrTyp::EGO: {
@@ -315,7 +325,7 @@ void AbstractRunner::InitializeOptimizer() {
                                                         model_->variables(),
                                                         model_->grid(),
                                                         logger_
-      );
+                                                       );
       break;
     }
     case OptzrTyp::ExhaustiveSearch2DVert: {
@@ -325,7 +335,7 @@ void AbstractRunner::InitializeOptimizer() {
                                                      model_->variables(),
                                                      model_->grid(),
                                                      logger_
-      );
+                                                    );
       break;
     }
     case OptzrTyp::Hybrid: {
@@ -335,7 +345,7 @@ void AbstractRunner::InitializeOptimizer() {
                                                      model_->variables(),
                                                      model_->grid(),
                                                      logger_
-      );
+                                                    );
       break;
     }
     case OptzrTyp::CMA_ES: {
@@ -345,7 +355,7 @@ void AbstractRunner::InitializeOptimizer() {
                                      model_->variables(),
                                      model_->grid(),
                                      logger_
-      );
+                                    );
       break;
     }
     case OptzrTyp::VFSA: {
@@ -355,7 +365,7 @@ void AbstractRunner::InitializeOptimizer() {
                                    model_->variables(),
                                    model_->grid(),
                                    logger_
-      );
+                                  );
       break;
     }
     case OptzrTyp::SPSA: {
@@ -365,7 +375,7 @@ void AbstractRunner::InitializeOptimizer() {
                                    model_->variables(),
                                    model_->grid(),
                                    logger_
-      );
+                                  );
       break;
     }
     default: {
