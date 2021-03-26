@@ -103,7 +103,7 @@ void TRFrame::setSettings(Settings::Optimizer *settings) {
   tr_eps_c_      = settings_->parameters().tr_eps_c;
   tr_eta_0_      = settings_->parameters().tr_eta_0;
   tr_eta_1_      = settings_->parameters().tr_eta_1;
-  tr_pivot_thld_ = settings_->parameters().tr_piv_thld;
+  tr_piv_thld_ = settings_->parameters().tr_piv_thld;
   tr_add_thld_   = settings_->parameters().tr_add_thld;
   tr_exch_thld_  = settings_->parameters().tr_xch_thld;
   tr_rad_max_    = settings_->parameters().tr_rad_max;

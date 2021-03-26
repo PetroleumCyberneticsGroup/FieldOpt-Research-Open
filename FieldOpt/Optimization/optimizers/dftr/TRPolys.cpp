@@ -290,9 +290,7 @@ poly TRFrame::matricesToPoly(double c0, const VectorXd &g0,
       }
     }
   }
-  if (non_symmetric_H) {
-    ext_info("H non-symmetric: ", md_, cl_);
-  }
+  if (non_symmetric_H) { info("[@matricesToPoly] H is non-symmetric"); }
 
   poly p; p.dim = dim; p.coeffs = coeffs;
   return p;
@@ -374,11 +372,11 @@ void TRFrame::sortMatrixByIndex(Matrix<double, Dynamic, Dynamic> &points,
 // _________________________________________________________
 // NFPBASIS
 void TRFrame::nfpBasis(int dim) {
-  //!<Number of terms>
+  //! Number of terms
   int poly_num = (dim+1)*(dim+2)/2;
   int linear_size = dim+1;
 
-  //!<Calculating basis of polynomials>
+  //! Calculating basis of polynomials
   pivot_polys_.resize(poly_num);
   pivot_polys_[poly_num-1].dim = dim;
   pivot_polys_[poly_num-1].coeffs.conservativeResize(poly_num);
@@ -391,7 +389,7 @@ void TRFrame::nfpBasis(int dim) {
     pivot_polys_[i].coeffs(i) = 1;
   }
 
-  //!<Quadratic entries>
+  //! Quadratic entries
   int c0 = 0;
   int m = 0;
   int n = 0;
