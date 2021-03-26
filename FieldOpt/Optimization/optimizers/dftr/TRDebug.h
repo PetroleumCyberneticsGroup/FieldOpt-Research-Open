@@ -49,8 +49,7 @@ class TRDebug {
   string prntDbl(double out, string fd="% 10.3e ", string fn="");
 
   string prntVecXd(VectorXd vec, string mv="",
-                   string fv="% 10.3e ",
-                   string fn="");
+                   string fv="% 10.3e ", string fn="");
 
   string prntMatXd(MatrixXd mat, string mm="",
                    string fm="% 10.3e ");
@@ -66,6 +65,34 @@ class TRDebug {
   void prntModelData(string msg);
 
   string prntSettingsData(string msg);
+
+  void prntTempCases(int cs=0, bool c1=false, bool c2=false, bool c3=false,
+                     bool c4=false, bool c5=false, bool c6=false);
+
+  void prntProgIter(int cs=0,
+                    bool c1=false, bool c2=false,
+                    bool c3=false, bool c4=false,
+                    VectorXd v0 = VectorXd::Zero(0),
+                    VectorXd v1 = VectorXd::Zero(0),
+                    VectorXd v2 = VectorXd::Zero(0),
+                    double d1 = 0.0);
+
+  void prntProgInit(int cs=0, VectorXd v0 = VectorXd::Zero(0),
+                    VectorXd v1 = VectorXd::Zero(0),
+                    double d1 = 0.0);
+
+  void prntCritStep(int cs=0, int s1=0, int s2=0, int s3=0,
+                    bool c1=false, bool c2=false, bool c3=false);
+
+  void prntRebuildMod(int cs=0, double d1 = 0.0,
+                      double d2 = 0.0, double d3 = 0.0,
+                      int s1=0, int s2=0, int s3=0,
+                      VectorXd v0 = VectorXd::Zero(0),
+                      VectorXd v1 = VectorXd::Zero(0),
+                      VectorXd v2 = VectorXd::Zero(0));
+
+  void prntEnsureImpr(int cs=0, int s1=0, int s2=0, int s3=0,
+                      bool c1=false, bool c2=false, bool c3=false);
 
   void prntFunctionData(
     string fnm = "none", string msg = "",
@@ -84,3 +111,69 @@ class TRDebug {
 }
 }
 #endif //FIELDOPT_OPTIMIZATION_OPTIMIZERS_DFTR_TRDEBUG_H_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
