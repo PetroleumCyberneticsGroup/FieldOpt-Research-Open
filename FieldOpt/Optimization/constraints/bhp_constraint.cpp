@@ -29,35 +29,13 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-BhpConstraint::
-BhpConstraint(SO& seto, VPC *vars, SV vp)
+BhpConstraint::BhpConstraint(SO& seto, VPC *vars, SV vp)
   : Constraint(seto, vars, vp) {
 
-  variables_ = vars;
-  assert(seto.wells.size() > 0);
-  assert(seto.min < seto.max);
+  bhp_cnstrnd_well_nms_ = seto_.wells;
+  penalty_weight_ = seto_.penalty_weight;
 
-  string ws;
-  if (seto.well.isEmpty()) {
-    for (auto wn : seto.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = seto.well.toStdString(); }
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding BHP constraint for " + ws;
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
-
-  min_ = seto.min;
-  max_ = seto.max;
-
-  bhp_cnstrnd_well_nms_ = seto.wells;
-  penalty_weight_ = seto.penalty_weight;
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding BHP constraint with [min, max] = [";
-    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well(s) " + ws + " with variables: ";
-  }
+  PrntWellInfo("Rate", 1);
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {
     auto bhp_vars = vars->GetWellBHPVars(wname);
@@ -90,16 +68,40 @@ BhpConstraint(SO& seto, VPC *vars, SV vp)
 // }
 
 bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
-    for (int ii=0; ii < bhp_cnstrnd_real_vars_.size(); ii++ ) {
-      auto var_id = bhp_cnstrnd_uuid_vars_[ii];
-      double c_val = c->get_real_variable_value(var_id);
-      if (c_val > max_ || c_val < min_) { return false; }
-    }
+  for (int ii=0; ii < bhp_cnstrnd_real_vars_.size(); ii++ ) {
+    auto var_id = bhp_cnstrnd_uuid_vars_[ii];
+    double c_val = c->get_real_variable_value(var_id);
+    if (c_val > max_ || c_val < min_) { return false; }
+  }
   return true;
 }
 
-bool BhpConstraint::IsBoundConstraint() const {
-  return true;
+void BhpConstraint::SnapCaseToConstraints(Case *c) {
+  string tm;
+  if (vp_.vOPT >= 4) {
+    tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm += "for case: " + c->id_stdstr();
+    pad_text(tm, vp_.lnw );
+    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    ext_info(tm, md_, cl_, vp_.lnw);
+  }
+
+  tm = "";
+  for (auto id : bhp_cnstrnd_uuid_vars_) {
+    if (c->get_real_variable_value(id) > max_) {
+      c->set_real_variable_value(id, max_);
+      tm = "Upper bound active";
+    } else if (c->get_real_variable_value(id) < min_) {
+      c->set_real_variable_value(id, min_);
+      tm = "Lower bound active";
+    }
+  }
+
+  if (vp_.vOPT >= 4 && tm.size() > 0) {
+    pad_text(tm, vp_.lnw );
+    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    ext_info(tm, md_, cl_, vp_.lnw);
+  }
 }
 
 Eigen::VectorXd BhpConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
@@ -120,15 +122,7 @@ Eigen::VectorXd BhpConstraint::GetUpperBounds(QList<QUuid> id_vector) const {
   return ubounds;
 }
 
-void BhpConstraint::SnapCaseToConstraints(Case *c) {
-  for (auto var : bhp_cnstrnd_real_vars_) {
-    if (c->get_real_variable_value(var->id()) > max_) {
-      c->set_real_variable_value(var->id(), max_);
-    } else if (c->get_real_variable_value(var->id()) < min_) {
-      c->set_real_variable_value(var->id(), min_);
-    }
-  }
-}
+
 
 }
 }

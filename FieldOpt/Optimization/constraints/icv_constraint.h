@@ -43,17 +43,14 @@ class ICVConstraint : public Constraint
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
 
-  bool IsBoundConstraint() const override;
+  bool IsBoundConstraint() const override  { return true; };
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
  private:
-  double min_, max_;
   QStringList icd_cnstrnd_well_nms_;
   QList<ContinuousProperty *> icd_cnstrnd_real_vars_;
   QList<QUuid> icd_cnstrnd_uuid_vars_;
-
-  // Model::Properties::VarPropContainer *variables_;
 
   string md_ = "Optimizer::constraints";
   string cl_ = "ICVConstraint";

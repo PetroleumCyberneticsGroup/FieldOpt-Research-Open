@@ -227,7 +227,7 @@ class Case : public Loggable
     return STDMIN_D;
   };
 
-  enum SIGN { PLUS, MINUS, PLUSMINUS};
+  enum SIGN { PLUS, MINUS, PLUSMINUS };
 
   /*!
    * \brief Perturb Creates variations of this Case,

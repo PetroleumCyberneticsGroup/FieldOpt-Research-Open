@@ -80,8 +80,8 @@ void ContinuousProperty::Add(double d) {
   if (IsLocked()) {
     throw PropertyLockedException("Can't add to locked real variable");
   } else {
-    value_ += d;
-    // value_sc_ += d;
+    // value_ += d;
+    value_sc_ += d;
   }
 }
 
@@ -90,8 +90,8 @@ bool ContinuousProperty::EqualsValue(double other_val, double epsilon) {
 }
 
 bool ContinuousProperty::Equals(ContinuousProperty *other, double epsilon) {
-  return std::abs(this->value() - other->value()) <= epsilon;
-  // return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
+  // return std::abs(this->value() - other->value()) <= epsilon;
+  return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
 }
 
 string ContinuousProperty::ToString() {

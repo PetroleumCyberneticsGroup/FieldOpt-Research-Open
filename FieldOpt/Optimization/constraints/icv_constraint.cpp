@@ -33,30 +33,10 @@ namespace Constraints {
 ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
   : Constraint(seto, vars, vp) {
 
-  assert(!seto.wells.empty());
-  assert(seto.min < seto.max);
+  icd_cnstrnd_well_nms_ = seto_.wells;
+  penalty_weight_ = seto_.penalty_weight;
 
-  string ws;
-  if (seto.well.isEmpty()) {
-    for (const auto& wn : seto.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = seto.well.toStdString(); }
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding ICV constraint for " + ws;
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
-
-  min_ = seto.min;
-  max_ = seto.max;
-
-  icd_cnstrnd_well_nms_ = seto.wells;
-  penalty_weight_ = seto.penalty_weight;
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding ICV constraint with [min, max] = [";
-    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well " + ws + " with variables: ";
-  }
+  PrntWellInfo("Rate", 1);
 
   for (auto &wname : icd_cnstrnd_well_nms_) {
     auto icd_vars = vars->GetWellICDVars(wname);
@@ -69,7 +49,7 @@ ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
     }
   }
 
-  if(seto.scaling_) {
+  if(seto_.scaling_) {
     min_ = -1.0;
     max_ = 1.0;
   }
@@ -123,8 +103,6 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 }
-
-bool ICVConstraint::IsBoundConstraint() const { return true; }
 
 Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());

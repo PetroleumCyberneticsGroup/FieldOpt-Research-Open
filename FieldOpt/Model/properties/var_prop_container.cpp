@@ -132,8 +132,8 @@ void VarPropContainer::SetDiscreteVariableValue(QUuid id, int val) {
 void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     if (continuous_variables_->at(ii).first==id) {
-      // continuous_variables_->at(ii).second->setValueSc(val);
-      continuous_variables_->at(ii).second->setValue(val);
+      continuous_variables_->at(ii).second->setValueSc(val);
+      // continuous_variables_->at(ii).second->setValue(val);
       return;
     }
   }
@@ -211,10 +211,10 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscVarValues() const {
 QList<QPair<QUuid, double>> VarPropContainer::GetContVarValues() const {
   QList<QPair<QUuid, double>> cont_vals = QList<QPair<QUuid, double>>();
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
-    // cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-    //                            continuous_variables_->at(ii).second->valueSc()));
     cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-                               continuous_variables_->at(ii).second->value()));
+                               continuous_variables_->at(ii).second->valueSc()));
+    // cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
+    //                            continuous_variables_->at(ii).second->value()));
   }
   return cont_vals;
 }
@@ -476,7 +476,7 @@ VarPropContainer::GetDiscreteVariable(QString name) const {
 // GET CONTINUOUS VAR --------------------------------------
 ContinuousProperty*
 VarPropContainer::GetContinousVariable(QString name) const {
-  string tm = "Unable to find continous variable with name ";
+  string tm = "Unable to find continuous variable with name ";
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
     if (QString::compare(var->name(), name) == 0)
