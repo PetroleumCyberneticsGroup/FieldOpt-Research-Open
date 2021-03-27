@@ -46,7 +46,7 @@ using namespace Eigen;
 using Model::Properties::VarPropContainer;
 using Optimization::Constraints::ConstraintHandler;
 
-using TermCond = Optimization::Optimizer::TerminationCondition;
+using TC = Optimization::Optimizer::TerminationCondition;
 
 using Utilities::FileHandling::CreateDir;
 using Utilities::FileHandling::FileExists;
@@ -87,9 +87,16 @@ class DFTR : public Optimizer {
   void setSettings(Settings::Optimizer *settings);
   void setLowerUpperBounds();
   void computeInitPts();
-  void projectToBounds(VectorXd *point);
+  void projToBnds(VectorXd *point);
   void createLogFile();
   void printIteration(double fval_current);
+
+  // DFTR dbg
+  void dbgUpdateRad(int c, double step_sz, double rad_inc);
+  bool F = false;
+  bool T = true;
+  double D = 0.0;
+  VectorXd V = VectorXd::Zero(0);
 
   // TR core properties
   double tr_init_rad_;
@@ -118,11 +125,11 @@ class DFTR : public Optimizer {
   VectorXd trial_step_;
   double fval_trial_, pred_red_, crit_init_rad_;
 
-  int mchange_;
+  int mchange_ = 0;
   bool iter_modl_fl_ = false;
-  bool crit_step_pd_ = false;
   bool impr_modl_nx_ = false;
-  bool crit_step_exec_on_ = false;
+  bool crit_prfd_ = false;
+  bool crit_exec_ = false;
 
   // FO constructs
   Settings::Optimizer *settings_;
