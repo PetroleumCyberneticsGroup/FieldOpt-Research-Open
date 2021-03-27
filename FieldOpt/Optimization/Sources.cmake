@@ -171,41 +171,41 @@ SET(OPTIMIZATION_TESTS
 	tests/test_resource_optimizer.h
 	tests/test_resource_test_functions.h
 	#
-	# objective
-	tests/objective/test_weightedsum.cpp
-	tests/objective/test_augmented.cpp
-	#
-	## case, case-handling
-	tests/test_case.cpp
-	tests/test_case_handler.cpp
-	tests/test_case_transfer_object.cpp
-	tests/test_normalizer.cpp
-	#
-	## constraints, constraint-handling
-	tests/constraints/test_bhp_constraint.cpp
-	tests/constraints/test_rate_constraint.cpp
-	tests/constraints/test_reservoir_boundary.cpp
-	tests/constraints/test_interwell_distance.cpp
-	tests/constraints/test_spline_well_length.cpp
-	tests/constraints/test_pseudo_cont_boundary_2d.cpp
-	tests/constraints/test_constraint_handler.cpp
-	#
-	# optimizers: pattern, stochastic
-	tests/optimizers/test_compass_search.cpp
-	tests/optimizers/test_apps.cpp
-	tests/optimizers/test_ga.cpp
-	tests/optimizers/test_pso.cpp
-	tests/optimizers/test_cma_es.cpp
-	tests/optimizers/test_vfsa.cpp
-	tests/optimizers/test_spsa.cpp
-	#
-	# algorithms: bayesian
-	tests/optimizers/test_ego.cpp
-	#
-	# algorithms: df-tr
-	tests/optimizers/test_tr-dfo_exp-value.cpp
-	tests/optimizers/test_tr-model-data.hpp
-	tests/optimizers/test_tr-support.hpp
+#	# objective
+#	tests/objective/test_weightedsum.cpp
+#	tests/objective/test_augmented.cpp
+#	#
+#	## case, case-handling
+#	tests/test_case.cpp
+#	tests/test_case_handler.cpp
+#	tests/test_case_transfer_object.cpp
+#	tests/test_normalizer.cpp
+#	#
+#	## constraints, constraint-handling
+#	tests/constraints/test_bhp_constraint.cpp
+#	tests/constraints/test_rate_constraint.cpp
+#	tests/constraints/test_reservoir_boundary.cpp
+#	tests/constraints/test_interwell_distance.cpp
+#	tests/constraints/test_spline_well_length.cpp
+#	tests/constraints/test_pseudo_cont_boundary_2d.cpp
+#	tests/constraints/test_constraint_handler.cpp
+#	#
+#	# optimizers: pattern, stochastic
+#	tests/optimizers/test_compass_search.cpp
+#	tests/optimizers/test_apps.cpp
+#	tests/optimizers/test_ga.cpp
+#	tests/optimizers/test_pso.cpp
+#	tests/optimizers/test_cma_es.cpp
+#	tests/optimizers/test_vfsa.cpp
+#	tests/optimizers/test_spsa.cpp
+#	#
+#	# algorithms: bayesian
+#	tests/optimizers/test_ego.cpp
+#	#
+#	# algorithms: df-tr
+#	tests/optimizers/test_tr-dfo_exp-value.cpp
+#	tests/optimizers/test_tr-model-data.hpp
+#	tests/optimizers/test_tr-support.hpp
 	#
 	# warning: these three  tests are mutually exclusive,
 	# however, test_dftr also runs test_tr-dfo.cpp tests:
