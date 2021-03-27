@@ -30,33 +30,31 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PseudoContBoundary2D::
-PseudoContBoundary2D(const Settings::Optimizer::Constraint &settings,
-                     Model::Properties::VarPropContainer *variables,
-                     Reservoir::Grid::Grid *grid, Settings::VerbParams vp)
-                     : Constraint(vp) {
+PseudoContBoundary2D::PseudoContBoundary2D(SO& seto, VPC *vars,
+  Reservoir::Grid::Grid *grid, SV vp)
+: Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) {
-    im_ = "Adding PseudoContBoundary2D constraint for " + settings.well.toStdString();
+    im_ = "Adding PseudoContBoundary2D constraint for " + seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  assert(settings.well.size() > 0);
-  assert(settings.box_imin < settings.box_imax);
-  assert(settings.box_jmin < settings.box_jmax);
-  assert(settings.box_imin >= 0);
-  assert(settings.box_jmin >= 0);
-  assert(settings.box_imax < grid->Dimensions().nx);
-  assert(settings.box_jmax < grid->Dimensions().ny);
+  assert(seto.well.size() > 0);
+  assert(seto.box_imin < seto.box_imax);
+  assert(seto.box_jmin < seto.box_jmax);
+  assert(seto.box_imin >= 0);
+  assert(seto.box_jmin >= 0);
+  assert(seto.box_imax < grid->Dimensions().nx);
+  assert(seto.box_jmax < grid->Dimensions().ny);
 
-  well_name_ = settings.well;
+  well_name_ = seto.well;
 
   // determine x, y, z; min, max
   try {
-    i_min_ = settings.box_imin;
-    i_max_ = settings.box_imax;
-    j_min_ = settings.box_jmin;
-    j_max_ = settings.box_jmax;
+    i_min_ = seto.box_imin;
+    i_max_ = seto.box_imax;
+    j_min_ = seto.box_jmin;
+    j_max_ = seto.box_jmax;
     auto min_block = grid->GetCell(i_min_, j_min_, 0);
     auto max_block = grid->GetCell(i_max_, j_max_, 0);
 
@@ -69,7 +67,7 @@ PseudoContBoundary2D(const Settings::Optimizer::Constraint &settings,
     y_max_ = max(min_block.center().y(), max_block.center().y());
     assert(x_min_ != x_max_ && y_min_ != y_max_);
 
-    auto affected_vars = variables->GetPseudoContVertVariables(well_name_);
+    auto affected_vars = vars->GetPseudoContVertVariables(well_name_);
     affected_x_var_id_ = affected_vars[0]->id();
     affected_y_var_id_ = affected_vars[1]->id();
   } catch (std::exception const &e) {

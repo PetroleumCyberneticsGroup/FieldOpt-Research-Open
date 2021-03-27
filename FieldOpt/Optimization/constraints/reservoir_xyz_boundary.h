@@ -45,10 +45,8 @@ namespace Constraints {
 
 class ReservoirXYZBoundary : public Constraint, WellSplineConstraint {
  public:
-  ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                       Model::Properties::VarPropContainer *variables,
-                       Reservoir::Grid::Grid *grid,
-                       Settings::VerbParams vp);
+  ReservoirXYZBoundary(SO& seto, VPC *vars,
+                       Reservoir::Grid::Grid *grid, SV vp);
 
   string name() override { return "ReservoirXYZBoundary"; }
   // Constraint interface

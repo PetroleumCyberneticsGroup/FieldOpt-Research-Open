@@ -27,15 +27,13 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-PolarSplineBoundary::PolarSplineBoundary(const Settings::Optimizer::Constraint &settings,
-                                         Model::Properties::VarPropContainer *variables,
-                                         Reservoir::Grid::Grid *grid,
-                                         Settings::VerbParams vp)
-                                         : ResBoundary(settings, variables, grid, vp){
-  if (vp.vOPT >= 1) {
-    info("Adding PolarSplineBoundary constraint for " + settings.well.toStdString());
-  }
 
+PolarSplineBoundary::PolarSplineBoundary(SO& seto, VPC *vars,
+                                         Reservoir::Grid::Grid *grid, SV vp)
+                                         : ResBoundary(seto, vars, grid, vp) {
+  if (vp.vOPT >= 1) {
+    info("Adding PolarSplineBoundary constraint for " + seto.well.toStdString());
+  }
 }
 
 bool PolarSplineBoundary::CaseSatisfiesConstraint(Case *c) {

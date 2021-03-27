@@ -36,9 +36,7 @@ using Model::Properties::ContinuousProperty;
 class ICVConstraint : public Constraint
 {
  public:
-  ICVConstraint(const Settings::Optimizer::Constraint& settings,
-                Model::Properties::VarPropContainer *variables,
-                Settings::VerbParams vp);
+  ICVConstraint(SO& seto, VPC *vars, SV vp);
 
   string name() override { return cl_; }
 
@@ -55,7 +53,7 @@ class ICVConstraint : public Constraint
   QList<ContinuousProperty *> icd_cnstrnd_real_vars_;
   QList<QUuid> icd_cnstrnd_uuid_vars_;
 
-  Model::Properties::VarPropContainer *variables_;
+  // Model::Properties::VarPropContainer *variables_;
 
   string md_ = "Optimizer::constraints";
   string cl_ = "ICVConstraint";

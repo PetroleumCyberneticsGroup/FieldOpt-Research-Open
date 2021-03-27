@@ -30,28 +30,28 @@ namespace Optimization {
 namespace Constraints {
 
 BhpConstraint::
-BhpConstraint(const Settings::Optimizer::Constraint settings,
-              Model::Properties::VarPropContainer *variables,
-              Settings::VerbParams vp) : Constraint(vp) {
-  variables_ = variables;
-  assert(settings.wells.size() > 0);
-  assert(settings.min < settings.max);
+BhpConstraint(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
+
+  variables_ = vars;
+  assert(seto.wells.size() > 0);
+  assert(seto.min < seto.max);
 
   string ws;
-  if (settings.well.isEmpty()) {
-    for (auto wn : settings.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = settings.well.toStdString(); }
+  if (seto.well.isEmpty()) {
+    for (auto wn : seto.wells) { ws += wn.toStdString() + "; "; }
+  } else { ws = seto.well.toStdString(); }
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding BHP constraint for " + ws;
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  min_ = settings.min;
-  max_ = settings.max;
+  min_ = seto.min;
+  max_ = seto.max;
 
-  bhp_cnstrnd_well_nms_ = settings.wells;
-  penalty_weight_ = settings.penalty_weight;
+  bhp_cnstrnd_well_nms_ = seto.wells;
+  penalty_weight_ = seto.penalty_weight;
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding BHP constraint with [min, max] = [";
@@ -60,7 +60,7 @@ BhpConstraint(const Settings::Optimizer::Constraint settings,
   }
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {
-    auto bhp_vars = variables->GetWellBHPVars(wname);
+    auto bhp_vars = vars->GetWellBHPVars(wname);
     bhp_cnstrnd_real_vars_.append(bhp_vars);
 
     for (auto var : bhp_vars) {
@@ -70,7 +70,7 @@ BhpConstraint(const Settings::Optimizer::Constraint settings,
     }
   }
 
-  if(settings.scaling_) {
+  if(seto.scaling_) {
     min_ = -1.0;
     max_ = 1.0;
   }

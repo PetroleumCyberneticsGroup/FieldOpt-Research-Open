@@ -34,9 +34,7 @@ namespace Constraints {
 
 class PackerConstraint : public Constraint {
  public:
-  PackerConstraint(Settings::Optimizer::Constraint settings,
-                   Model::Properties::VarPropContainer *variables,
-                   Settings::VerbParams vp);
+  PackerConstraint(SO& seto, VPC *vars, SV vp);
 
   string name() override;
   bool CaseSatisfiesConstraint(Case *c) override;

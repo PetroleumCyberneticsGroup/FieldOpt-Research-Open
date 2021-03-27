@@ -30,29 +30,27 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-ICVConstraint::
-ICVConstraint(const Settings::Optimizer::Constraint& settings,
-              Model::Properties::VarPropContainer *variables,
-              Settings::VerbParams vp) : Constraint(vp) {
-  variables_ = variables;
-  assert(!settings.wells.empty());
-  assert(settings.min < settings.max);
+ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
+
+  assert(!seto.wells.empty());
+  assert(seto.min < seto.max);
 
   string ws;
-  if (settings.well.isEmpty()) {
-    for (const auto& wn : settings.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = settings.well.toStdString(); }
+  if (seto.well.isEmpty()) {
+    for (const auto& wn : seto.wells) { ws += wn.toStdString() + "; "; }
+  } else { ws = seto.well.toStdString(); }
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding ICV constraint for " + ws;
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  min_ = settings.min;
-  max_ = settings.max;
+  min_ = seto.min;
+  max_ = seto.max;
 
-  icd_cnstrnd_well_nms_ = settings.wells;
-  penalty_weight_ = settings.penalty_weight;
+  icd_cnstrnd_well_nms_ = seto.wells;
+  penalty_weight_ = seto.penalty_weight;
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding ICV constraint with [min, max] = [";
@@ -61,7 +59,7 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
   }
 
   for (auto &wname : icd_cnstrnd_well_nms_) {
-    auto icd_vars = variables->GetWellICDVars(wname);
+    auto icd_vars = vars->GetWellICDVars(wname);
     icd_cnstrnd_real_vars_.append(icd_vars);
 
     for (auto var : icd_vars) {
@@ -71,7 +69,7 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
     }
   }
 
-  if(settings.scaling_) {
+  if(seto.scaling_) {
     min_ = -1.0;
     max_ = 1.0;
   }

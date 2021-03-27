@@ -29,37 +29,35 @@ namespace Optimization {
 namespace Constraints {
 
 MxSplineLengthInterwDist::
-MxSplineLengthInterwDist(Settings::Optimizer::Constraint settings,
-                         Model::Properties::VarPropContainer *variables,
-                         Settings::VerbParams vp)
-                         : Constraint(vp) {
+MxSplineLengthInterwDist(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding MxWSplineLengthInterwDist constraint.";
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  max_iterations_ = settings.max_iterations;
+  max_iterations_ = seto.max_iterations;
   Settings::Optimizer::Constraint dist_constr_settings;
-  dist_constr_settings.wells = settings.wells;
-  dist_constr_settings.min = settings.min_distance;
-  distance_constraint_ = new InterwDist(dist_constr_settings, variables, vp);
+  dist_constr_settings.wells = seto.wells;
+  dist_constr_settings.min = seto.min_distance;
+  distance_constraint_ = new InterwDist(dist_constr_settings, vars, vp);
 
   if (vp_.vOPT >= 3) {
     im_ = "... ... initialized distance constraint for wells: ";
-    for (const QString& wname : settings.wells) {
+    for (const QString& wname : seto.wells) {
       im_ += wname.toStdString() + ", ";
     }
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
   length_constraints_ = QList<WSplineLength *>();
-  for (QString wname : settings.wells) {
+  for (QString wname : seto.wells) {
     Settings::Optimizer::Constraint len_constr_settings;
     len_constr_settings.well = wname;
-    len_constr_settings.min = settings.min_length;
-    len_constr_settings.max = settings.max_length;
-    length_constraints_.append(new WSplineLength(len_constr_settings, variables, vp));
+    len_constr_settings.min = seto.min_length;
+    len_constr_settings.max = seto.max_length;
+    length_constraints_.append(new WSplineLength(len_constr_settings, vars, vp));
   }
 }
 

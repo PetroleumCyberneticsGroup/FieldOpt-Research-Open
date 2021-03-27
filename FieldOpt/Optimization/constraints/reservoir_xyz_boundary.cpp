@@ -33,30 +33,28 @@ namespace Constraints {
 
 using Printer::ext_warn;
 
-ReservoirXYZBoundary::
-ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                     Model::Properties::VarPropContainer *variables,
-                     Reservoir::Grid::Grid *grid,
-                     Settings::VerbParams vp) : Constraint(vp) {
+ReservoirXYZBoundary::ReservoirXYZBoundary(SO& seto, VPC *vars,
+                                           Reservoir::Grid::Grid *grid, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding ReservoirXYZBoundary constraint for ";
-    im_ += settings.well.toStdString();
+    im_ += seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  xmin_ = settings.box_xyz_xmin;
-  xmax_ = settings.box_xyz_xmax;
-  ymin_ = settings.box_xyz_ymin;
-  ymax_ = settings.box_xyz_ymax;
-  zmin_ = settings.box_xyz_zmin;
-  zmax_ = settings.box_xyz_zmax;
+  xmin_ = seto.box_xyz_xmin;
+  xmax_ = seto.box_xyz_xmax;
+  ymin_ = seto.box_xyz_ymin;
+  ymax_ = seto.box_xyz_ymax;
+  zmin_ = seto.box_xyz_zmin;
+  zmax_ = seto.box_xyz_zmax;
 
   grid_ = grid;
-  penalty_weight_ = settings.penalty_weight;
+  penalty_weight_ = seto.penalty_weight;
 
-  if (!variables->GetWSplineVars(settings.well).empty()) {
-    auto wspline_vars = variables->GetWSplineVars(settings.well);
+  if (!vars->GetWSplineVars(seto.well).empty()) {
+    auto wspline_vars = vars->GetWSplineVars(seto.well);
 
     for (auto var : wspline_vars) {
       if (var->propertyInfo().coord == Model::Properties::Property::x) {
@@ -72,7 +70,7 @@ ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
 
   } else {
     wm_ = "GetWSplineVars for well ";
-    wm_ += settings.well.toStdString() + " is empty.";
+    wm_ += seto.well.toStdString() + " is empty.";
     ext_warn(wm_, md_, cl_, vp_.lnw);
   }
 }
@@ -118,13 +116,13 @@ void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
     WellConstraintProjections::well_domain_constraint_indices(
       Eigen::Vector3d(heel_x_val, heel_y_val, heel_z_val),
       grid_,index_list_
-    );
+                                                             );
 
   Eigen::Vector3d projected_toe =
     WellConstraintProjections::well_domain_constraint_indices(
       Eigen::Vector3d(toe_x_val, toe_y_val, toe_z_val),
       grid_,index_list_
-    );
+                                                             );
 
   c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.x, projected_heel(0));
   c->set_real_variable_value(box_xyz_cnstrnd_well_.heel.y, projected_heel(1));

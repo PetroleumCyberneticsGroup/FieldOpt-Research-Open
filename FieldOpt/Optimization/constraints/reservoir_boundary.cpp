@@ -32,31 +32,29 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-ResBoundary::ResBoundary(
-  const Settings::Optimizer::Constraint &settings,
-  Model::Properties::VarPropContainer *variables,
-  Reservoir::Grid::Grid *grid,
-  Settings::VerbParams vp) : Constraint(vp) {
+ResBoundary::ResBoundary(SO& seto, VPC *vars,
+                         Reservoir::Grid::Grid *grid, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) {
-    im_ = "Adding ResBoundary constraint for " + settings.well.toStdString();
+    im_ = "Adding ResBoundary constraint for " + seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  imin_ = settings.box_imin;
-  imax_ = settings.box_imax;
-  jmin_ = settings.box_jmin;
-  jmax_ = settings.box_jmax;
-  kmin_ = settings.box_kmin;
-  kmax_ = settings.box_kmax;
+  imin_ = seto.box_imin;
+  imax_ = seto.box_imax;
+  jmin_ = seto.box_jmin;
+  jmax_ = seto.box_jmax;
+  kmin_ = seto.box_kmin;
+  kmax_ = seto.box_kmax;
   grid_ = grid;
-  penalty_weight_ = settings.penalty_weight;
+  penalty_weight_ = seto.penalty_weight;
 
   index_list_ = getListOfCellIndices();
-  if (variables->GetWSplineVars(settings.well).size() > 0) {
-    affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp);
+  if (vars->GetWSplineVars(seto.well).size() > 0) {
+    affected_well_ = initWSplineConstraint(vars->GetWSplineVars(seto.well), vp);
   } else {
-    affected_well_ = initWSplineConstraint(variables->GetPolarSplineVariables(settings.well), vp);
+    affected_well_ = initWSplineConstraint(vars->GetPolarSplineVariables(seto.well), vp);
   }
 
   // QList with indices of box edge cells

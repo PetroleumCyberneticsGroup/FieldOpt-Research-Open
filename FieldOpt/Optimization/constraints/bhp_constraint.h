@@ -43,9 +43,7 @@ class BhpConstraint : public Constraint
  public:
   //!< This class' constructor should not be used directly.
   //!< The constructors of subclasses should be used.
-  BhpConstraint(::Settings::Optimizer::Constraint settings,
-                ::Model::Properties::VarPropContainer *variables,
-                Settings::VerbParams vp);
+  BhpConstraint(SO& seto, VPC *vars, SV vp);
 
   string name() override { return cl_; }
 

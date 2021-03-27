@@ -36,6 +36,9 @@ namespace Optimization {
 namespace Constraints {
 
 using namespace Model::Properties;
+using VPC = Model::Properties::VarPropContainer;
+using SO = Settings::Optimizer::Constraint;
+using SV = Settings::VerbParams;
 
 using Printer::info;
 using Printer::ext_info;
@@ -52,7 +55,7 @@ using Printer::pad_text;
 class Constraint
 {
  public:
-  explicit Constraint(Settings::VerbParams vp);
+  explicit Constraint(SO& seto, VPC *vars, SV vp);
 
   /*!
    * \brief CaseSatisfiesConstraint checks whether a case
@@ -150,6 +153,8 @@ class Constraint
 
   long double GetPenaltyWeight() { return penalty_weight_; }
 
+  void PrntWellInfo(string wi, int cs);
+
  protected:
   bool logging_enabled_;
   Settings::VerbParams vp_;
@@ -165,6 +170,11 @@ class Constraint
   //!< The weight to be used when considering the
   //!< constraint in a penalty function. (default: 0.0)
   long double penalty_weight_;
+
+  SO seto_;
+  VPC *vars_;
+
+  double min_, max_;
 
  private:
   //!< Path to the constraint log path to be written.

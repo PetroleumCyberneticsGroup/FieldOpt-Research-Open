@@ -28,7 +28,16 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-Constraint::Constraint(Settings::VerbParams vp) {
+Constraint::Constraint(SO& seto, VPC *vars, SV vp) {
+  seto_ = seto;
+  vars_ = vars;
+
+  min_ = seto_.min;
+  max_ = seto_.max;
+
+  assert(!seto_.wells.empty());
+  assert(seto_.min < seto_.max);
+
   logging_enabled_ = false;
   penalty_weight_ = 0.0;
   vp_ = vp;
@@ -60,6 +69,26 @@ void Constraint::InitializeNormalizer(QList<Case *> cases) {
     normalizer_.set_max(1.0L);
     normalizer_.set_steepness(1.0L);
   }
+}
+
+void Constraint::PrntWellInfo(string wi, int cs) {
+
+  if (cs == 1) {
+    string ws;
+    if (seto_.well.isEmpty()) {
+      for (const auto& wn : seto_.wells) { ws += wn.toStdString() + "; "; }
+    } else { ws = seto_.well.toStdString(); }
+
+    if (vp_.vOPT >= 3) {
+      im_ = "Adding " + wi + " constraint for " + seto_.well.toStdString();
+      ext_info(im_, md_, cl_, vp_.lnw);
+
+      im_ = "Adding " + wi + " constraint with [min, max] = [";
+      im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
+      im_ += "] for well " + ws + " with variables: ";
+    }
+  }
+
 }
 
 }
