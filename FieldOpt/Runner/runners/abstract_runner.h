@@ -51,6 +51,8 @@ using Printer::num2str;
 using Printer::E;
 using std::runtime_error;
 
+using TC = Optimization::Optimizer::TerminationCondition;
+
 class MainRunner;
 
 /*!

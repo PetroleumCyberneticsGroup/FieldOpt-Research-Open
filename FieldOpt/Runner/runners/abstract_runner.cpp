@@ -402,13 +402,21 @@ void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
 
 void AbstractRunner::PrintCompletionMessage() {
   cout << "Optimization complete: ";
+
   switch (optimizer_->IsFinished()) {
+
     case Optimization::Optimizer::TerminationCondition::MAX_EVALS_REACHED:
-      cout << "maximum number of evaluations reached (not converged)." << endl;
+      cout << "Max # fevals reached (not converged)." << endl;
       break;
-    case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
-      cout << "minimum step length reached (converged)." << endl;
+
+      case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
+      cout << "Min step length reached (converged)." << endl;
       break;
+
+    case Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED:
+      cout << "Opt criteria reached (check DFTR criteria)" << endl;
+      break;
+
     default: cout << "Unknown termination reason." << endl;
   }
 
@@ -427,7 +435,11 @@ void AbstractRunner::PrintCompletionMessage() {
 
   for (auto var : opt_vars_real) {
     auto prop_name = model_->variables()->GetContinuousVariable(var.first)->name();
-    cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
+    auto vre = model_->variables()->GetContinuousVariable(var.first)->value();
+    auto vsc = model_->variables()->GetContinuousVariable(var.first)->valueSc();
+    cout << "\t" << prop_name.toStdString();
+    cout << "\t" << num2str(vsc, 3, 1);
+    cout << "\t" << num2str(vre, 3, 1) << endl;
   }
 
   for (auto var : opt_vars_bin) {
