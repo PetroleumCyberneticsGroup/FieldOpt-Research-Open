@@ -33,10 +33,14 @@ namespace Constraints {
 ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
   : Constraint(seto, vars, vp) {
 
+  min_ = seto_.min;
+  max_ = seto_.max;
+  assert(min_ < max_);
+
   icd_cnstrnd_well_nms_ = seto_.wells;
   penalty_weight_ = seto_.penalty_weight;
 
-  PrntWellInfo("Rate", 1);
+  PrntWellInfo("ICV", 1);
 
   for (auto &wname : icd_cnstrnd_well_nms_) {
     auto icd_vars = vars->GetWellICDVars(wname);
@@ -48,6 +52,8 @@ ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
       im_ += var->name().toStdString() + ", ";
     }
   }
+
+  if(!icd_cnstrnd_real_vars_.empty()) { isEnabled_ = true; }
 
   if(seto_.scaling_) {
     min_ = -1.0;

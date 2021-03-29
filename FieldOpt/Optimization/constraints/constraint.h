@@ -153,6 +153,7 @@ class Constraint
 
   long double GetPenaltyWeight() { return penalty_weight_; }
 
+  bool isEnabled() { return isEnabled_; }
   void PrntWellInfo(string wi, int cs);
 
  protected:
@@ -174,6 +175,7 @@ class Constraint
   SO seto_;
   VPC *vars_;
 
+  bool isEnabled_ = false;
   double min_, max_;
 
  private:

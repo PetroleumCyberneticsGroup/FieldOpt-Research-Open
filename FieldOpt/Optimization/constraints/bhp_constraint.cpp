@@ -32,10 +32,14 @@ namespace Constraints {
 BhpConstraint::BhpConstraint(SO& seto, VPC *vars, SV vp)
   : Constraint(seto, vars, vp) {
 
+  min_ = seto_.min;
+  max_ = seto_.max;
+  assert(min_ < max_);
+
   bhp_cnstrnd_well_nms_ = seto_.wells;
   penalty_weight_ = seto_.penalty_weight;
 
-  PrntWellInfo("Rate", 1);
+  PrntWellInfo("BHP", 1);
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {
     auto bhp_vars = vars->GetWellBHPVars(wname);
@@ -47,6 +51,8 @@ BhpConstraint::BhpConstraint(SO& seto, VPC *vars, SV vp)
       im_ += var->name().toStdString() + ", ";
     }
   }
+
+  if(!bhp_cnstrnd_real_vars_.empty()) { isEnabled_ = true; }
 
   if(seto.scaling_) {
     min_ = -1.0;

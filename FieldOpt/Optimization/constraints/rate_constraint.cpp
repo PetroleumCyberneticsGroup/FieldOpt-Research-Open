@@ -30,6 +30,10 @@ namespace Constraints {
 RateConstraint::RateConstraint(SO& seto, VPC *vars, SV vp)
   : Constraint(seto, vars, vp) {
 
+  min_ = seto_.min;
+  max_ = seto_.max;
+  assert(min_ < max_);
+
   rate_cnstrnd_well_nms_ = seto_.wells;
   penalty_weight_ = seto_.penalty_weight;
 

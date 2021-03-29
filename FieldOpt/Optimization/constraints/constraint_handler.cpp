@@ -270,7 +270,7 @@ Eigen::VectorXd ConstraintHandler::GetLowerBounds(QList<QUuid> id_vector) const 
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
   for (auto con : constraints_) {
-    if (con->IsBoundConstraint()) {
+    if (con->IsBoundConstraint() && con->isEnabled()) {
       lbounds = lbounds + con->GetLowerBounds(id_vector);
     }
   }
@@ -281,7 +281,7 @@ Eigen::VectorXd ConstraintHandler::GetUpperBounds(QList<QUuid> id_vector) const 
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
   for (auto con : constraints_) {
-    if (con->IsBoundConstraint()) {
+    if (con->IsBoundConstraint() && con->isEnabled()) {
       ubounds = ubounds + con->GetUpperBounds(id_vector);
     }
   }

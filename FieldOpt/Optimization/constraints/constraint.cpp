@@ -31,12 +31,7 @@ namespace Constraints {
 Constraint::Constraint(SO& seto, VPC *vars, SV vp) {
   seto_ = seto;
   vars_ = vars;
-
-  min_ = seto_.min;
-  max_ = seto_.max;
-
   assert(!seto_.wells.empty());
-  assert(seto_.min < seto_.max);
 
   logging_enabled_ = false;
   penalty_weight_ = 0.0;

@@ -50,6 +50,10 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(SO& seto, VPC *vars,
   zmin_ = seto_.box_xyz_zmin;
   zmax_ = seto_.box_xyz_zmax;
 
+  assert(xmin_ < xmax_);
+  assert(ymin_ < ymax_);
+  assert(zmin_ < zmax_);
+
   grid_ = grid;
   penalty_weight_ = seto_.penalty_weight;
 
@@ -91,6 +95,8 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(SO& seto, VPC *vars,
     wm_ += seto_.well.toStdString() + " is empty.";
     ext_warn(wm_, md_, cl_, vp_.lnw);
   }
+
+  if(!wspline_cnstrnd_uuid_vars_.empty()) { isEnabled_ = true; }
 }
 
 bool ReservoirXYZBoundary::CaseSatisfiesConstraint(Case *c) {
@@ -159,6 +165,10 @@ Eigen::VectorXd ReservoirXYZBoundary::GetLowerBounds(QList<QUuid> id_vector) con
   int ind_toe_x = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.x);
   int ind_toe_y = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.y);
   int ind_toe_z = id_vector.indexOf(box_xyz_cnstrnd_well_.toe.z);
+
+  cout << "ind_heel_x: " << ind_heel_x << endl;
+  cout << "ind_heel_y: " << ind_heel_y << endl;
+  cout << "ind_heel_z: " << ind_heel_z << endl;
 
   lbounds(ind_heel_x) = xmin_;
   lbounds(ind_toe_x) = xmin_;
