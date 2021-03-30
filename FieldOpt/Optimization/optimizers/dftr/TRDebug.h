@@ -106,6 +106,7 @@ class TRDebug {
   string fn_xchp_, fn_co2m_, fn_pcfs_;
 
   TRFrame* trm_;
+  bool prntDbg_ = false;
 };
 
 }

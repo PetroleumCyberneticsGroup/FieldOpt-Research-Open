@@ -95,10 +95,12 @@ string TRDebug::prntMatXd(MatrixXd mat, string mm, string fm) {
 }
 
 void TRDebug::prntToFl(string fn, string sout) {
-  FILE * pFile;
-  pFile = std::fopen(fn.c_str(), "a");
-  std::fprintf(pFile, "%s", sout.c_str());
-  fclose (pFile);
+  if (prntDbg_) {
+    FILE * pFile;
+    pFile = std::fopen(fn.c_str(), "a");
+    std::fprintf(pFile, "%s", sout.c_str());
+    fclose (pFile);
+  }
 }
 
 void TRDebug::prntPolys(string msg, poly p) {
