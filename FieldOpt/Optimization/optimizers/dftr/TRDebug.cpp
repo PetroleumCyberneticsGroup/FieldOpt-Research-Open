@@ -273,7 +273,7 @@ void TRDebug::prntTempCases(int cs, bool c1, bool c2, bool c3,
   } else if (cs == 7) {
     ss << "submitTempCases returns false (temp init stage passed)";
   }
-  if (trm_->vp_.vOPT >= 3) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 void TRDebug::prntEnsureImpr(int cs, int s1, int s2, int s3,
@@ -298,7 +298,7 @@ void TRDebug::prntEnsureImpr(int cs, int s1, int s2, int s3,
   } else if (cs == 6) {
     ss << "final exit_flag: " + num2str(s1,0);
   }
-  if (trm_->vp_.vOPT >= 3) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 void TRDebug::prntCritStep(int cs, int s1, int s2, int s3,
@@ -316,7 +316,7 @@ void TRDebug::prntCritStep(int cs, int s1, int s2, int s3,
     ss << " -- areImprPtsCd()? => " << c1;
 
   }
-  if (trm_->vp_.vOPT >= 3) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
@@ -353,13 +353,13 @@ void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
   } else if (cs == 9) {
 
   }
-  if (trm_->vp_.vOPT >= 3) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT >= 4) { idbg(ss.str()); }
 }
 
 void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
   stringstream ss;
   if (cs == 1) {
-    idbg(trm_->dbg_->prntSettingsData(""));
+    if (trm_->vp_.vOPT >= 4) { idbg(trm_->dbg_->prntSettingsData("")); }
     ss << "[@setLowUprBnds] ";
     ss << prntVecXd(v0, "bnd_lwr  ");
     ss << "|[@setLowUprBnds] " << prntVecXd(v1, "bnd_upr  ");
@@ -387,7 +387,7 @@ void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
     ss << " -- tr_init_rad_ = " << num2str(d1, 3, 1);
   }
 
-  if (trm_->vp_.vOPT >= 3) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
@@ -413,7 +413,7 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
     ss << "Then computePolyMods. (Interp is checked but not used.)";
 
   } else if (cs == 5) {
-    ss << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step";
+    ss << FRED << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step" << AEND;
 
   } else if (cs == 6) {
     ss << "Checking if model isLambdaPoised";
@@ -430,6 +430,7 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
   } else if (cs == 10) {
     ss << prntVecXd(v0, "mod_crit ");
     ss << " -- mod_crit.norm(): " + num2str(v0.norm(), 5, 1);
+    ss << " -- tr_eps_c_ = " + num2str(trm_->tr_eps_c_, 5, 1);
     ss << "|[@iterate] " << prntVecXd(v1, "x_curr   ");
     ss << " -- f_curr: " + num2str(d1, 5, 1);
 
@@ -437,7 +438,7 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
 
   }
 
-  if (trm_->vp_.vOPT >= 3) {
+  if (trm_->vp_.vOPT == 3) {
     if (cs <= 20) {
       idbg(ss.str());
     // } else if (cs > 20 && cs <= 40) {
