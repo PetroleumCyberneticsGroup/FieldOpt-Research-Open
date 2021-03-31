@@ -53,6 +53,7 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(SO& seto, VPC *vars,
   assert(xmin_ < xmax_);
   assert(ymin_ < ymax_);
   assert(zmin_ < zmax_);
+  assert(!seto_.wells.empty());
 
   grid_ = grid;
   penalty_weight_ = seto_.penalty_weight;

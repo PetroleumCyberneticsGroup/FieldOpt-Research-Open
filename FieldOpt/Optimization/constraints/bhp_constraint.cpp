@@ -35,6 +35,7 @@ BhpConstraint::BhpConstraint(SO& seto, VPC *vars, SV vp)
   min_ = seto_.min;
   max_ = seto_.max;
   assert(min_ < max_);
+  assert(!seto_.wells.empty());
 
   bhp_cnstrnd_well_nms_ = seto_.wells;
   penalty_weight_ = seto_.penalty_weight;

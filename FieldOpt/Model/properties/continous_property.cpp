@@ -33,7 +33,7 @@ namespace Properties {
 ContinuousProperty::
 ContinuousProperty(double value) : Property(Continuous) {
   value_ = value;
-  value_sc_ = 0.0; // scaled values updated after bounds are set
+  value_sc_ = value; // scaled values updated after bounds are set
 }
 
 double ContinuousProperty::value() const {

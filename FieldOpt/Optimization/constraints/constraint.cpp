@@ -31,7 +31,6 @@ namespace Constraints {
 Constraint::Constraint(SO& seto, VPC *vars, SV vp) {
   seto_ = seto;
   vars_ = vars;
-  assert(!seto_.wells.empty());
 
   logging_enabled_ = false;
   penalty_weight_ = 0.0;
