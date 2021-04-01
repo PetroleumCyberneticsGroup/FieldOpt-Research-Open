@@ -77,6 +77,11 @@ class TRDebug {
                     VectorXd v2 = VectorXd::Zero(0),
                     double d1 = 0.0);
 
+  void prntUpdateRad(int cs=0,
+                    bool c1=false, bool c2=false,
+                    double d1 = 0.0, double d2 = 0.0,
+                    double d3 = 0.0, double d4 = 0.0);
+
   void prntProgInit(int cs=0, VectorXd v0 = VectorXd::Zero(0),
                     VectorXd v1 = VectorXd::Zero(0),
                     double d1 = 0.0);
@@ -106,7 +111,7 @@ class TRDebug {
   string fn_xchp_, fn_co2m_, fn_pcfs_;
 
   TRFrame* trm_;
-  bool prntDbg_ = false;
+  bool prntDbg_ = true;
 };
 
 }

@@ -189,7 +189,7 @@ void DFTR::iterate() {
       } else {
         crit_exec_ = false;
       }
-      
+
       //! -> Check LambdaPoised
       trm_->dbg_->prntProgIter(6, crit_prfd_,crit_exec_);
       iter_modl_fl_ = trm_->isLambdaPoised();

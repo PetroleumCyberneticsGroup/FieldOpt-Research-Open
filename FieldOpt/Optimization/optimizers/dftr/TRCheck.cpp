@@ -61,27 +61,6 @@ void TRFrame::moveToBestPt() {
 }
 
 // _________________________________________________________
-// GETCRITGRAD
-VectorXd TRFrame::getCritGrad() {
-  dbg_->prntPolys("getCriticality [grad]", modeling_polys_[0]);
-  auto mMat = getModMatrix(0);
-
-  // Projected gradient? -> get page # from DFBook
-  VectorXd ctr_pt = pts_abs_.col(tr_center_);
-  VectorXd xmax = lb_.cwiseMax(ctr_pt - mMat.g);
-  VectorXd xmin = ub_.cwiseMin(xmax);
-  VectorXd xdiff = xmin - ctr_pt;
-
-  dbg_->prntVecXd(mMat.g, "mMat.g: ", "% 10.3e ", dbg_->fn_mdat_);
-  dbg_->prntVecXd(ctr_pt, "ctr_pt: ", "% 10.3e ", dbg_->fn_mdat_);
-  dbg_->prntVecXd(xmax,   "xmax:   ", "% 10.3e ", dbg_->fn_mdat_);
-  dbg_->prntVecXd(xmin,   "xmin:   ", "% 10.3e ", dbg_->fn_mdat_);
-  dbg_->prntVecXd(xdiff,  "xdiff:  ", "% 10.3e ", dbg_->fn_mdat_);
-
-  return xdiff;
-}
-
-// _________________________________________________________
 // CRITSTEP
 bool TRFrame::critStep(double rad_bf_crit_step) {
 

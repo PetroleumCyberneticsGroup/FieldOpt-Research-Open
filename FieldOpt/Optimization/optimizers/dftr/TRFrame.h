@@ -133,7 +133,6 @@ class TRFrame {
   //  ╩   ╩╚═    ╚═╝  ╩ ╩  ╚═╝  ╚═╝  ╩ ╩
   int findBestPt();
   void moveToBestPt();
-  VectorXd getCritGrad(); // Mod grad (abs coords) at current pt
   bool critStep(double rad_bf_crit_step);
   bool isLambdaPoised();
   bool isModComplete();

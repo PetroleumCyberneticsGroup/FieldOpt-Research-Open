@@ -140,7 +140,7 @@ double TRFrame::evaluatePoly(poly p1, VectorXd x) {
   VectorXd g(p1.dim);
   MatrixXd H(p1.dim, p1.dim);
 
-  dbg_->prntPolys("evaluatePolynomial", p1);
+  dbg_->prntPolys("evaluatePoly", p1);
   tie(c, g, H) = coeffsToMatrices(p1.dim, p1.coeffs);
 
   VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
@@ -196,7 +196,7 @@ poly TRFrame::multiplyPoly(poly p1, double factor) {
 // _________________________________________________________
 // COMBINEPOLYS
 poly TRFrame::combinePolys(int npts, RowVectorXd coeffs) {
-  dbg_->prntPivotPolys("combinePolynomials");
+  dbg_->prntPivotPolys("combinePolys");
 
   auto polys = vector<poly>(pivot_polys_.begin(),
                             pivot_polys_.begin() + npts);
@@ -222,7 +222,7 @@ poly TRFrame::shiftPoly(poly p, VectorXd s) {
   double terms[3], c;
   VectorXd g(p.dim);
   MatrixXd H(p.dim, p.dim);
-  dbg_->prntPolys("shiftPolynomial", p);
+  dbg_->prntPolys("shiftPoly", p);
 
   tie(c, g, H) = coeffsToMatrices(p.dim, p.coeffs);
   double c_mod = c + (double)(g.transpose()*s);

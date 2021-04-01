@@ -64,7 +64,7 @@ namespace Settings {
 struct VerbParams {
   int lnw = 163;
   int vMOD = 0;
-  int vOPT = 3;
+  int vOPT = 0;
   int vWIC = 0;
   int vSIM = 0;
   int vRUN = 0;

@@ -390,6 +390,30 @@ void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
   if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
+void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
+                           double d1, double d2, double d3, double d4) {
+  stringstream ss;
+  ss << "[@updateRadius] (rho_ > eta_1_)=(";
+  ss << num2str(d1, 3, 1) << "," << num2str(d2, 3, 1) << ")";
+
+  if (cs == 1) {
+    if(c1) { ss << " rho == -inf -> too short step size "; }
+    if(c2) { ss << " mchange_ == 4 -> Couldn't add point, had to rebuild model "; }
+
+  } else if (cs == 2) {
+
+  } else if (cs == 4) {
+
+  } else if (cs == 5) {
+
+  }
+
+  ss << "[step.sz = " << num2str(d3, 3, 1) << "] ";
+  ss << "[inc_fac = " << num2str(d4, 3, 1) << "]";
+
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
 void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
                            VectorXd v0, VectorXd v1, VectorXd v2,
                            double d1) {
@@ -416,13 +440,15 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
     ss << FRED << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step" << AEND;
 
   } else if (cs == 6) {
-    ss << "Checking if model isLambdaPoised";
+    ss << "[@iterate] Checking if model isLambdaPoised";
+    ss << " [crit_prfd_= " << c1 << "] [crit_exec_=" << c2 << "]";
 
   } else if (cs == 7) {
     ss << "Computing step";
 
   } else if (cs == 8) {
-    ss << "Predicted reduction less than some tolerances";
+    ss << "Predicted reduction less than some tols";
+    ss <<"; setting rho=-inf; launching -> mchange_ = trm_->ensureImpr();";
 
   } else if (cs == 9) {
     ss << "Evaluating objective at trial point";
@@ -433,6 +459,8 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
     ss << " -- tr_eps_c_ = " + num2str(trm_->tr_eps_c_, 5, 1);
     ss << "|[@iterate] " << prntVecXd(v1, "x_curr   ");
     ss << " -- f_curr: " + num2str(d1, 5, 1);
+    ss << "|[@iterate] [crit_prfd_= " << c1;
+    ss << "] [crit_exec_=" << c2 << "]";
 
   } else if (cs == 11) {
 

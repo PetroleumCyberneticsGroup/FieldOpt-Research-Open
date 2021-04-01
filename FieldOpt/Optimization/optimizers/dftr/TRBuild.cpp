@@ -952,7 +952,6 @@ int TRFrame::ensureImpr() {
   bool success = false;
   dbg_->prntModelData("EnsureImpr-00");
 
-
   //! Find new point to add/replace
   if (!isModComplete() && (!isModOld() || !isLambdaPoised())) {
     //! improve model
