@@ -45,7 +45,6 @@ namespace Properties {
 using std::runtime_error;
 
 using Printer::info;
-using Printer::idbg;
 using Printer::ext_info;
 using Printer::ext_warn;
 using Printer::ext_error;
