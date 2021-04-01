@@ -49,6 +49,7 @@ void ContinuousProperty::setValue(double value) {
     throw PropertyLockedException("Can't change locked real variable.");
   } else {
     value_ = value;
+    this->scaleValue();
   }
 }
 
@@ -80,8 +81,9 @@ void ContinuousProperty::Add(double d) {
   if (IsLocked()) {
     throw PropertyLockedException("Can't add to locked real variable");
   } else {
-    // value_ += d;
+    // value_ += d; // obsolete, all d's are now scaled
     value_sc_ += d;
+    this->UpdateValue();
   }
 }
 
