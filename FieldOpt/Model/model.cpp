@@ -86,6 +86,8 @@ void Model::ApplyCase(Optimization::Case *c) {
   //   var_container_->SetBinaryVariableValue(key, c->binary_variables()[key]);
   // }
 
+  im_ = "[@ApplyCase] ";
+  if (vp_.vMOD >= 5) { im_ += "bin.vars: " + num2str(c->binary_variables().size(),0); }
   for(int ii=0; ii < c->binary_variables().size(); ii++) {
     auto key = c->binary_variables().at(ii).first;
     auto val = c->binary_variables().at(ii).second;
@@ -96,6 +98,7 @@ void Model::ApplyCase(Optimization::Case *c) {
   //   var_container_->SetDiscreteVariableValue(key, c->integer_variables()[key]);
   // }
 
+  if (vp_.vMOD >= 5) { im_ += " -- int.vars: " + num2str(c->integer_variables().size(),0); }
   for(int ii=0; ii < c->integer_variables().size(); ii++) {
     auto key = c->integer_variables().at(ii).first;
     auto val = c->integer_variables().at(ii).second;
@@ -106,11 +109,14 @@ void Model::ApplyCase(Optimization::Case *c) {
   //   var_container_->SetContinuousVariableValue(key, c->real_variables()[key]);
   // }
 
+  // Values entering here are assumed to be scaled...
+  if (vp_.vMOD >= 5) { im_ += " -- rea.vars: " + num2str(c->real_variables().size(),0); }
   for(int ii=0; ii < c->real_variables().size(); ii++) {
     auto key = c->real_variables().at(ii).first;
     auto val = c->real_variables().at(ii).second;
     var_container_->SetContinuousVariableValue(key, val);
   }
+  if (vp_.vMOD >= 5) { idbg(im_, vp_.lnw); }
 
   int cumulative_wic_time = 0;
   bool wic_used = false;

@@ -403,6 +403,12 @@ void Trajectory::printWellBlocks() {
             << num2str(dxdydz(1), 1, 0, 7) << " "
             << num2str(dxdydz(2), 1, 0, 6) << " ]"
             << std::endl;
+    } else {
+      entry << "[ "
+            << num2str(0, 1, 0, 7) << " "
+            << num2str(0, 1, 0, 7) << " "
+            << num2str(0, 1, 0, 6) << " ]"
+            << std::endl;
     }
     cout << entry.str();
   }
