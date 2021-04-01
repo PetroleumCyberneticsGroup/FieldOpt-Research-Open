@@ -194,10 +194,10 @@ void Property::UpdateId(QUuid new_id) {
 }
 
 void Property::setBounds(double min, double max) {
-  if (vp_.vMOD >= 3) {
+  if (vp_.vMOD >= 6) {
     im_ = "[property.cpp] Setting [min, max] bounds = [";
     im_ += num2str(min, 5) + ", " + num2str(max, 5) + "]";
-    ext_info(im_, md_, cl_, vp_.lnw);
+    idbg(im_, vp_.lnw);
   }
   bounds_ << min, max;
 }

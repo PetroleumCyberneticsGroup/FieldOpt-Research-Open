@@ -38,6 +38,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Model {
 namespace Properties {
 
+using Printer::info;
+using Printer::idbg;
 using Printer::ext_warn;
 using Printer::ext_info;
 using Printer::num2str;
@@ -221,9 +223,9 @@ class Property
     is_variable_ = false;
     name_ = "";
 
-    bounds_ << 0, 0;
-    bnds_b_mns_a_ = 1.0;
-    bnds_a_pls_b_ = 1.0;
+    bounds_ << -1, 1;
+    bnds_b_mns_a_ = 2.0; // D
+    bnds_a_pls_b_ = 0.0; // c
   }
 
   double bnds_b_mns_a_;

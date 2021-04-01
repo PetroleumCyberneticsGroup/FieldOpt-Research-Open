@@ -141,6 +141,12 @@ bool Well::IsInjector() {
 
 void Well::Update() {
   if (trajectory_defined_) {
+    if (vp_.vMOD >= 5) {
+      im_ = "Updating wellblocks of well: " + this->name_.toStdString();
+      im_ += " (trajectory_defined_=true)";
+      info(im_, vp_.lnw);
+    }
+
     trajectory_->UpdateWellBlocks();
     heel_.i = trajectory_->GetWellBlocks()->first()->i();
     heel_.j = trajectory_->GetWellBlocks()->first()->j();
