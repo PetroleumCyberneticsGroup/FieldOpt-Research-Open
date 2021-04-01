@@ -507,7 +507,7 @@ void VarPropContainer::ScaleVariables(){
   // constraint_handler constructor inserts the bounds
   // of each variable in the variable container
 
-  double D = 2.0, c = 0.0;
+  double D = 1.0, c = 1.0;
   // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2
   // y = 2*x/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_
 
