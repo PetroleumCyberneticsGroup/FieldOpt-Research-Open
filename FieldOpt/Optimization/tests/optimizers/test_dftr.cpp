@@ -251,20 +251,26 @@ class DFTRTest : public ::testing::Test,
       ccA = cc_trdfo;
     }
 
+    bool prntDbg = false;
     stringstream so;
-    so << FYELLOW << setw(12) << scientific << right << setprecision(6);
-    so << "" << endl;
+    if (prntDbg) {
+      so << FYELLOW << setw(12) << scientific << right << setprecision(6);
+      so << "" << endl;
+    }
 
     for (int ii=0; ii < vXA.size(); ii++) {
-      so << lbl[0] << " x = " << vXA[ii].transpose() << " | f = " << vFA[ii] << endl;
+      if (prntDbg) {
+        so << lbl[0] << " x = " << vXA[ii].transpose() << " | f = " << vFA[ii] << endl;
+      }
       if(ii < vXB.size()) {
         DX = ((vXA[ii].head(vXA[ii].rows()-1) - vXB[ii].head(vXB[ii].rows()-1)).array().abs() < 2*eps).all();
         DR = ((vXA[ii].tail(1) - vXB[ii].tail(1)).array().abs() < 2*eps).all();
         DF = (abs(vFA[ii] - vFB[ii]) < 2*eps);
-        if (DX && DR && DF) {
+
+        if (DX && DR && DF && prntDbg) {
           so << lbl[1] << " x = " << vXB[ii].transpose() << " | f = " << vFB[ii];
           so << " -> DX=" << DX << " -- DF=" << DF << " -- DR=" << DR << endl;
-        } else {
+        } else if (prntDbg) {
           so << FRED << lbl[1] << " x = " << vXB[ii].transpose() << " | f = " << vFB[ii] << AEND;
           if (!DX) { so << FRED << " -> DX=" << DX << AEND; } else { so << " -> DX=" << DX; }
           if (!DF) { so << FRED << " -- DF=" << DF << AEND; } else { so << " -> DF=" << DF; }
