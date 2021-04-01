@@ -948,11 +948,12 @@ bool TRFrame::improveModelNfp() {
 // _________________________________________________________
 // ENSUREIMPROVEMENT
 int TRFrame::ensureImpr() {
+  bool model_old = isModOld(); // old behavior [for tests only]
   int exit_flag = 0;
   bool success = false;
   dbg_->prntModelData("EnsureImpr-00");
 
-  //! Find new point to add/replace
+  //! -> Find new point to add/replace
   if (!isModComplete() && (!isModOld() || !isLambdaPoised())) {
     //! improve model
     success = improveModelNfp();
@@ -968,7 +969,7 @@ int TRFrame::ensureImpr() {
   dbg_->prntModelData("EnsureImpr-01");
 
 
-  //! No new point found/replaced -> rebuilding model
+  //! -> No new point found/replaced -> rebuilding model
   if (!success && (impr_cases_.size() == 0) && (repl_cases_.size() == 0)) {
     bool model_changed = rebuildModel();
     dbg_->prntEnsureImpr(3, 0, 0, 0, model_changed);
@@ -991,7 +992,7 @@ int TRFrame::ensureImpr() {
     } else { success = true; }
 
     //! if model is old
-    if (isModOld()) { exit_flag = 3;
+    if (model_old) { exit_flag = 3;
     } else { exit_flag = 4; }
   }
 
