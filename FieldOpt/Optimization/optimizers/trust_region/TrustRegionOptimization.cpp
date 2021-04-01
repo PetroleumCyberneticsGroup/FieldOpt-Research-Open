@@ -204,9 +204,11 @@ void TrustRegionOptimization::iterate() {
         //!<Print summary>
         printIteration(fval_current);
 
-        //!<Criticality step -- if we are possibly close to the optimum>
+        //! -> Measure criticality
         criticality_step_performed_ = false;
         auto model_criticality = tr_model_->measureCriticality();
+
+        //! -> Crit step (possibly close to x*)
         if (model_criticality.norm() <= eps_c) {
           if (!criticality_step_execution_ongoing_) {
             criticality_init_radius_ = tr_model_->getRadius();
