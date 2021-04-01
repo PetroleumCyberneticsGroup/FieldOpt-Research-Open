@@ -99,6 +99,7 @@ class DFTR : public Optimizer {
   VectorXd V = VectorXd::Zero(0);
 
   // TR core properties
+  double infd_ = -std::numeric_limits<double>::infinity();
   double tr_init_rad_;
   double tr_tol_f_, tr_eps_c_, tr_eta_0_, tr_eta_1_; // Tols
   double tr_piv_thld_, tr_add_thld_, tr_xch_thld_; // Thesholds

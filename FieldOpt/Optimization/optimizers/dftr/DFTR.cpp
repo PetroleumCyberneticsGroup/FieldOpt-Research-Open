@@ -62,7 +62,7 @@ DFTR::DFTR(Settings::Optimizer *settings,
 TC DFTR::IsFinished() {
   TC tc = NOT_FINISHED;
   if (trm_->isModInit() && !trm_->getModPolys().empty()) {
-    if (trm_->getCritGrad().norm() < tr_tol_f_) {
+    if (trm_->measureCrit().norm() < tr_tol_f_) {
       tc = OPT_CRITERIA_REACHED;
     }
   }
@@ -84,14 +84,14 @@ void DFTR::updateRadius() {
   double step_sz = min(trm_->getRad(), trial_step_.lpNorm<Infinity>());
   double inc_fac = 0.0;
 
-  auto A = (rho_ == -std::numeric_limits<double>::infinity());
+  auto A = (rho_ == infd_);
   auto B = (mchange_ == 4);
 
   // Radius update>
   if (rho_ > tr_eta_1_) {
     inc_fac = max(1.0, tr_gamma_inc_ * (step_sz / trm_->getRad()));
     trm_->setRad(min(inc_fac * trm_->getRad(), tr_rad_max_));
-    dbgUpdateRad(1, step_sz, inc_fac);
+    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
 
   } else if (iter_modl_fl_ && (A || B || crit_prfd_)) {
     // A good model should have provided a better point.
@@ -111,9 +111,10 @@ void DFTR::updateRadius() {
       trm_->setRad(tr_gamma_dec_ * trm_->getRad());
       delay_reduc_ = 0;
     }
-    dbgUpdateRad(2, step_sz, inc_fac);
+
+    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
   } else {
-    dbgUpdateRad(3, step_sz, inc_fac);
+    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
   }
   iteration_++;
 }
@@ -168,31 +169,29 @@ void DFTR::iterate() {
       printIteration(f_curr);
 
       //! -> Measure criticality
-      auto mod_crit = trm_->measureCrit();
-      trm_->dbg_->prntProgIter(10,F,F,F,F, mod_crit, x_curr, V, f_curr);
-
       crit_prfd_ = false;
+      auto mod_crit = trm_->measureCrit();
+      trm_->dbg_->prntProgIter(10,crit_prfd_,crit_exec_,F,F, mod_crit, x_curr, V, f_curr);
+
       //! -> Crit step (possibly close to x*)
       if (mod_crit.norm() <= tr_eps_c_) {
         trm_->dbg_->prntProgIter(5);
-
         if (!crit_exec_) { crit_init_rad_ = trm_->getRad(); }
-
         crit_exec_ = trm_->critStep(crit_init_rad_);
-        impr_modl_nx_ = ensureImprPostProc();
-        if (crit_exec_) { crit_prfd_ = true; }
-
+        if (crit_exec_) {
+          ensureImprPostProc();
+          return;
+        }
+        crit_prfd_ = true;
+        if (mod_crit.norm() < tr_tol_f_) { return; }
         trm_->dbg_->prntProgIter(21,F,F,F,F, mod_crit);
-        return;
 
       } else {
         crit_exec_ = false;
       }
-
-
-
+      
       //! -> Check LambdaPoised
-      trm_->dbg_->prntProgIter(6);
+      trm_->dbg_->prntProgIter(6, crit_prfd_,crit_exec_);
       iter_modl_fl_ = trm_->isLambdaPoised();
 
       //! -> Compute step
