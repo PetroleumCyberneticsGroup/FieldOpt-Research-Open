@@ -33,10 +33,8 @@ namespace Optimization {
 namespace Constraints {
 class PolarSplineBoundary  : public ResBoundary {
  public:
-  PolarSplineBoundary(const Settings::Optimizer::Constraint &settings,
-                      Model::Properties::VarPropContainer *variables,
-                      Reservoir::Grid::Grid *grid,
-                      Settings::VerbParams vp);
+  PolarSplineBoundary(SO& seto, VPC *vars,
+                      Reservoir::Grid::Grid *grid, SV vp);
 
   string name() override { return "PolarSplineBoundary"; }
   bool CaseSatisfiesConstraint(Case *c) override;

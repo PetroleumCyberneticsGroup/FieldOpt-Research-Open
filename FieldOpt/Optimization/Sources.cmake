@@ -207,7 +207,7 @@ SET(OPTIMIZATION_TESTS
 	tests/optimizers/test_tr-model-data.hpp
 	tests/optimizers/test_tr-support.hpp
 	#
-	# warning: these three  tests are mutually exclusive,
+	# warning: these three tests are mutually exclusive,
 	# however, test_dftr also runs test_tr-dfo.cpp tests:
 	tests/optimizers/test_dftr.cpp
 	#### tests/optimizers/test_tr-dfo.cpp

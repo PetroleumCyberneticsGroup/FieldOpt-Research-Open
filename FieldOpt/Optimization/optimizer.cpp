@@ -50,8 +50,8 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
     base_case->objf_value();
   } catch (ObjectiveFunctionException) {
     throw OptimizerInitializationException(
-        "The objective function value of the base case "
-        "must be set before initializing an Optimizer.");
+      "The objective function value of the base case "
+      "must be set before initializing an Optimizer.");
   }
 
   max_evaluations_ = opt_settings->parameters().max_evaluations;
@@ -137,14 +137,14 @@ Case *Optimizer::GetCaseForEvaluation() {
   }
 
   if (IsFinished() || (case_handler_->QueuedCases().empty())) {
-    if (vp_.vOPT >= 3) {
-      im_ = "IsFinished() => ";
-      im_ += (IsFinished() == NOT_FINISHED) ? "NOT_FINISHED" : "FINISHED";
-      im_ += "(case_handler_->QueuedCases().size() == 0) => ";
-      im_ += case_handler_->QueuedCases().empty() ? "ENPTY" : "NOT-ENPTY";
-      ext_info(im_, md_, cl_);
-    }
+    im_ = "(IsFinished() == NOT_FINISHED) => ";
+    im_ += (IsFinished() == NOT_FINISHED) ? "true" : "false";
+    im_ += " (case_handler_->QueuedCases()..empty() == 0) => ";
+    im_ += case_handler_->QueuedCases().empty() ? "true" : "false";
+    im_ += " Returning nullptr";
+
     if (type_ == TR_DFO || type_ == DFTR) {
+      if (vp_.vOPT >= 3) { ext_info(im_, md_, cl_); }
       return nullptr;
     }
   }
@@ -188,22 +188,22 @@ bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
 
 QString Optimizer::GetStatusStringHeader() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
-      .arg("Iteration")
-      .arg("EvaluatedCases")
-      .arg("QueuedCases")
-      .arg("RecentlyEvaluatedCases")
-      .arg("TentativeBestCaseID")
-      .arg("TentativeBestCaseOFValue");
+    .arg("Iteration")
+    .arg("EvaluatedCases")
+    .arg("QueuedCases")
+    .arg("RecentlyEvaluatedCases")
+    .arg("TentativeBestCaseID")
+    .arg("TentativeBestCaseOFValue");
 }
 
 QString Optimizer::GetStatusString() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
-      .arg(iteration_)
-      .arg(nr_evaluated_cases())
-      .arg(nr_queued_cases())
-      .arg(nr_recently_evaluated_cases())
-      .arg(tentative_best_case_->id().toString())
-      .arg(tentative_best_case_->objf_value());
+    .arg(iteration_)
+    .arg(nr_evaluated_cases())
+    .arg(nr_queued_cases())
+    .arg(nr_recently_evaluated_cases())
+    .arg(tentative_best_case_->id().toString())
+    .arg(tentative_best_case_->objf_value());
 }
 
 void Optimizer::EnableConstraintLogging(const QString& output_dir_path) {
@@ -256,8 +256,8 @@ map<string, string> Optimizer::Summary::GetState() {
   map<string, string> statemap  = ext_state_;
   statemap["Start"] = timestamp_string(opt_->start_time_);
   statemap["Duration"] = timespan_string(
-      time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
-  );
+    time_span_seconds(opt_->start_time_, QDateTime::currentDateTime())
+                                        );
   statemap["End"] = timestamp_string(QDateTime::currentDateTime());
 
   switch (cond_) {
@@ -315,7 +315,7 @@ void Optimizer::initializeNormalizers() {
 
 void Optimizer::initializeOfvNormalizer() {
   if (case_handler_->EvaluatedCases().empty()
-  || normalizer_ofv_.is_ready()) {
+    || normalizer_ofv_.is_ready()) {
     em_ = "Unable to initialize normalizer with no evaluated cases available.";
     throw runtime_error(em_);
   }

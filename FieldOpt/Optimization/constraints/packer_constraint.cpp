@@ -34,19 +34,17 @@ using namespace Model::Properties;
 using Printer::info;
 using Printer::ext_info;
 
-PackerConstraint::PackerConstraint(Settings::Optimizer::Constraint settings,
-                                   Model::Properties::VarPropContainer *variables,
-                                   Settings::VerbParams vp)
-                                   : Constraint(vp) {
+PackerConstraint::PackerConstraint(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 1) {
-    info("Adding Packer constraint for " + settings.well.toStdString());
+    info("Adding Packer constraint for " + seto.well.toStdString());
   }
 
-  for (auto var : *variables->GetContinuousVariables()) {
+  for (auto var : *vars->GetContinuousVariables()) {
     auto lvar = var.second;
     if (lvar->propertyInfo().prop_type == Property::PropertyType::Packer
-      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0) {
+      && QString::compare(lvar->propertyInfo().parent_well_name, seto.well) == 0) {
       affected_variables_.push_back(lvar->id());
       affected_var_props_[lvar->id()] = lvar->propertyInfo();
     }

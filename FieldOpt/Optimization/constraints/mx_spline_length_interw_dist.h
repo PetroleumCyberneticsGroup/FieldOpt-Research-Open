@@ -44,9 +44,7 @@ namespace Constraints {
 class MxSplineLengthInterwDist : public Constraint
 {
  public:
-  MxSplineLengthInterwDist(Settings::Optimizer::Constraint settings,
-                           Model::Properties::VarPropContainer *variables,
-                           Settings::VerbParams vp);
+  MxSplineLengthInterwDist(SO& seto, VPC *vars, SV vp);
 
   string name() override { return "MxSplineLengthInterwDist"; }
 

@@ -133,12 +133,12 @@ class WellBlock
   Model::Properties::DiscreteProperty *j_;
   Model::Properties::DiscreteProperty *k_;
 
-  Eigen::Vector3d entry_point_; //!< Entry point for splines through this block.
-  Eigen::Vector3d exit_point_;  //!< Exit point for splines through this block.
+  Eigen::Vector3d entry_point_ = Eigen::Vector3d::Zero(); //!< Entry point for splines through this block.
+  Eigen::Vector3d exit_point_ = Eigen::Vector3d::Zero();  //!< Exit point for splines through this block.
 
-  double entry_md_;
-  double exit_md_;
-  double length_;
+  double entry_md_ = 0.0;
+  double exit_md_ = 0.0;
+  double length_ = 0.0;
   Completions::Completion *completion_;
 
   Eigen::VectorXd dxdydz_;

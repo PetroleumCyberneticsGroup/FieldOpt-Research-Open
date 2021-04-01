@@ -45,10 +45,8 @@ class PolarXYZBoundary : public Constraint, WellSplineConstraint
   {
 
  public:
-  PolarXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                   Model::Properties::VarPropContainer *variables,
-                   Reservoir::Grid::Grid *grid,
-                   Settings::VerbParams vp);
+  PolarXYZBoundary(SO& seto, VPC *vars,
+                   Reservoir::Grid::Grid *grid, SV vp);
 
   string name() override { return "PolarXYZBoundary"; }
 

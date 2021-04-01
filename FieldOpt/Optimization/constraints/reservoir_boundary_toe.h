@@ -40,10 +40,8 @@ namespace Constraints {
 
 class ReservoirBoundaryToe : public ResBoundary {
  public:
-  ReservoirBoundaryToe(const Settings::Optimizer::Constraint &settings,
-                       Model::Properties::VarPropContainer *variables,
-                       Reservoir::Grid::Grid *grid,
-                       Settings::VerbParams vp);
+  ReservoirBoundaryToe(SO& seto, VPC *vars,
+                       Reservoir::Grid::Grid *grid, SV vp);
 
   string name() override { return "ReservoirBoundaryToe"; }
 

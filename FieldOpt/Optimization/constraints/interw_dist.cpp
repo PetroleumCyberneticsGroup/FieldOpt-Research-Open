@@ -34,18 +34,16 @@ namespace Constraints {
 
 using WellConstraintProjections::interwell_constraint_projection;
 
-InterwDist::InterwDist(Settings::Optimizer::Constraint settings,
-                       Model::Properties::VarPropContainer *variables,
-                       Settings::VerbParams vp)
-                       : Constraint(vp) {
+InterwDist::InterwDist(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) { info("Adding WSplineInterwDist constraint."); }
 
-  distance_ = settings.min;
-  penalty_weight_ = settings.penalty_weight;
+  distance_ = seto.min;
+  penalty_weight_ = seto.penalty_weight;
 
-  for (const QString& name : settings.wells) {
-    affected_wells_.append(initWSplineConstraint(variables->GetWSplineVars(name), vp));
+  for (const QString& name : seto.wells) {
+    affected_wells_.append(initWSplineConstraint(vars->GetWSplineVars(name), vp));
   }
 
   if (affected_wells_.length() != 2) {

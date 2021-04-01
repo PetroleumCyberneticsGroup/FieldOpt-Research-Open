@@ -31,32 +31,31 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PolarXYZBoundary::
-PolarXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                 Model::Properties::VarPropContainer *variables,
-                 Reservoir::Grid::Grid *grid, Settings::VerbParams vp)
-                 : Constraint(vp) {
+PolarXYZBoundary::PolarXYZBoundary(SO& seto, VPC *vars,
+                 Reservoir::Grid::Grid *grid, SV vp)
+  : Constraint(seto, vars, vp) {
+
   if (vp.vOPT >= 3) {
     im_ = "Adding PolarXYZBoundary constraint for ";
-    im_ += settings.well.toStdString();
+    im_ += seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  xmin_ = settings.box_xyz_xmin;
-  xmax_ = settings.box_xyz_xmax;
-  ymin_ = settings.box_xyz_ymin;
-  ymax_ = settings.box_xyz_ymax;
-  zmin_ = settings.box_xyz_zmin;
-  zmax_ = settings.box_xyz_zmax;
+  xmin_ = seto.box_xyz_xmin;
+  xmax_ = seto.box_xyz_xmax;
+  ymin_ = seto.box_xyz_ymin;
+  ymax_ = seto.box_xyz_ymax;
+  zmin_ = seto.box_xyz_zmin;
+  zmax_ = seto.box_xyz_zmax;
   grid_ = grid;
-  penalty_weight_ = settings.penalty_weight;
+  penalty_weight_ = seto.penalty_weight;
 
-  if (!variables->GetPolarSplineVariables(settings.well).empty()) {
+  if (!vars->GetPolarSplineVariables(seto.well).empty()) {
     affected_well_ = initWSplineConstraint(
-      variables->GetPolarSplineVariables(settings.well), vp_);
+      vars->GetPolarSplineVariables(seto.well), vp_);
   } else {
     affected_well_ = initWSplineConstraint(
-      variables->GetPolarSplineVariables(settings.well), vp_);
+      vars->GetPolarSplineVariables(seto.well), vp_);
   }
 }
 

@@ -42,19 +42,19 @@ Model::Model(Settings::Settings settings, Logger *logger) {
   current_case_ = nullptr;
 
   vp_ = settings.model()->verbParams();
-  variable_container_ = new Properties::VarPropContainer(vp_);
+  var_container_ = new Properties::VarPropContainer(vp_);
 
   wells_ = new QList<Wells::Well *>();
   for (int well_nr = 0; well_nr < settings.model()->wells().size(); ++well_nr) {
     wells_->append(new Wells::Well(*settings.model(), well_nr,
-                                   variable_container_,
+                                   var_container_,
                                    grid_, wic_));
   }
 
-  variable_container_->CheckVariableNameUniqueness();
+  var_container_->CheckVariableNameUniqueness();
 
   constraint_handler_ = new ConstraintHandler(settings.optimizer(),
-                                              variable_container_, grid_);
+                                              var_container_, grid_);
 
   logger_ = logger;
   logger_->AddEntry(new Summary(this));
@@ -73,7 +73,7 @@ void Model::Finalize() {
 void Model::ApplyCase(Optimization::Case *c) {
 
   // Notify the logger to log previous case.
-  if (current_case_ != nullptr && current_case_->state.eval != EvalStat::E_PENDING) {
+  if (current_case_ != nullptr && current_case_->state.eval != ES::E_PENDING) {
     if (!current_case_->GetRealizationOFVMap().empty()) {
       realization_ofv_map_ = current_case_->GetRealizationOFVMap();
       ensemble_avg_ofv_ = current_case_->GetEnsembleExpectedOfv().first;
@@ -83,34 +83,40 @@ void Model::ApplyCase(Optimization::Case *c) {
   }
 
   // for (QUuid key : c->binary_variables().keys()) {
-  //   variable_container_->SetBinaryVariableValue(key, c->binary_variables()[key]);
+  //   var_container_->SetBinaryVariableValue(key, c->binary_variables()[key]);
   // }
 
+  im_ = "[@ApplyCase] ";
+  if (vp_.vMOD >= 5) { im_ += "bin.vars: " + num2str(c->binary_variables().size(),0); }
   for(int ii=0; ii < c->binary_variables().size(); ii++) {
     auto key = c->binary_variables().at(ii).first;
     auto val = c->binary_variables().at(ii).second;
-    variable_container_->SetBinaryVariableValue(key, val);
+    var_container_->SetBinaryVariableValue(key, val);
   }
 
   // for (QUuid key : c->integer_variables().keys()) {
-  //   variable_container_->SetDiscreteVariableValue(key, c->integer_variables()[key]);
+  //   var_container_->SetDiscreteVariableValue(key, c->integer_variables()[key]);
   // }
 
+  if (vp_.vMOD >= 5) { im_ += " -- int.vars: " + num2str(c->integer_variables().size(),0); }
   for(int ii=0; ii < c->integer_variables().size(); ii++) {
     auto key = c->integer_variables().at(ii).first;
     auto val = c->integer_variables().at(ii).second;
-    variable_container_->SetDiscreteVariableValue(key, val);
+    var_container_->SetDiscreteVariableValue(key, val);
   }
 
   // for (QUuid key : c->real_variables().keys()) {
-  //   variable_container_->SetContinuousVariableValue(key, c->real_variables()[key]);
+  //   var_container_->SetContinuousVariableValue(key, c->real_variables()[key]);
   // }
 
+  // Values entering here are assumed to be scaled...
+  if (vp_.vMOD >= 5) { im_ += " -- rea.vars: " + num2str(c->real_variables().size(),0); }
   for(int ii=0; ii < c->real_variables().size(); ii++) {
     auto key = c->real_variables().at(ii).first;
     auto val = c->real_variables().at(ii).second;
-    variable_container_->SetContinuousVariableValue(key, val);
+    var_container_->SetContinuousVariableValue(key, val);
   }
+  if (vp_.vMOD >= 5) { idbg(im_, vp_.lnw); }
 
   int cumulative_wic_time = 0;
   bool wic_used = false;
@@ -123,15 +129,14 @@ void Model::ApplyCase(Optimization::Case *c) {
   }
   if (wic_used) {
     c->SetWICTime(cumulative_wic_time);
-  }
-  else {
+  } else {
     c->SetWICTime(0);
   }
   verify();
 
   current_case_id_ = c->id();
   current_case_ = c;
-//    results_.clear();
+  // results_.clear();
 }
 
 void Model::verify() {
@@ -188,9 +193,9 @@ void Model::verifyWellBlock(Wells::Wellbore::WellBlock *wb) {
     wb->j() < 1 || wb->j() > grid()->Dimensions().ny ||
     wb->k() < 1 || wb->k() > grid()->Dimensions().nz)
     throw std::runtime_error("Invalid well block detected: ("
-                               + boost::lexical_cast<std::string>(wb->i()) + ", "
-                               + boost::lexical_cast<std::string>(wb->j()) + ", "
-                               + boost::lexical_cast<std::string>(wb->k()) + ")"
+                               + std::to_string(wb->i()) + ", "
+                               + std::to_string(wb->j()) + ", "
+                               + std::to_string(wb->k()) + ")"
     );
 }
 
@@ -218,15 +223,15 @@ map<string, vector<double>> Model::GetValues() {
     valmap["Res#"+item.first] = item.second;
   }
 
-  for (auto const var : *variable_container_->GetContinuousVariables()) {
+  for (auto const var : *var_container_->GetContinuousVariables()) {
     valmap["Var#"+var.second->name().toStdString()] = vector<double>{var.second->value()};
   }
 
-  for (auto const var : *variable_container_->GetDiscreteVariables()) {
+  for (auto const var : *var_container_->GetDiscreteVariables()) {
     valmap["Var#"+var.second->name().toStdString()] = vector<double>{var.second->value()};
   }
 
-  for (auto const var : *variable_container_->GetBinaryVariables()) {
+  for (auto const var : *var_container_->GetBinaryVariables()) {
     valmap["Var#"+var.second->name().toStdString()] = vector<double>{var.second->value()};
   }
 

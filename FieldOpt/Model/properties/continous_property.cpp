@@ -33,7 +33,7 @@ namespace Properties {
 ContinuousProperty::
 ContinuousProperty(double value) : Property(Continuous) {
   value_ = value;
-  value_sc_ = 0.0; // scaled values updated after bounds are set
+  value_sc_ = value; // scaled values updated after bounds are set
 }
 
 double ContinuousProperty::value() const {
@@ -49,6 +49,7 @@ void ContinuousProperty::setValue(double value) {
     throw PropertyLockedException("Can't change locked real variable.");
   } else {
     value_ = value;
+    this->scaleValue();
   }
 }
 
@@ -80,8 +81,9 @@ void ContinuousProperty::Add(double d) {
   if (IsLocked()) {
     throw PropertyLockedException("Can't add to locked real variable");
   } else {
-    value_ += d;
-    // value_sc_ += d;
+    // value_ += d; // obsolete, all d's are now scaled
+    value_sc_ += d;
+    this->UpdateValue();
   }
 }
 
@@ -90,8 +92,8 @@ bool ContinuousProperty::EqualsValue(double other_val, double epsilon) {
 }
 
 bool ContinuousProperty::Equals(ContinuousProperty *other, double epsilon) {
-  return std::abs(this->value() - other->value()) <= epsilon;
-  // return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
+  // return std::abs(this->value() - other->value()) <= epsilon;
+  return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
 }
 
 string ContinuousProperty::ToString() {

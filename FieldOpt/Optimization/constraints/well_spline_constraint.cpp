@@ -32,9 +32,6 @@ namespace Constraints {
 
 using namespace Model::Properties;
 
-// using Printer::ext_info;
-// using Printer::ext_warn;
-
 WellSplineConstraint::Well WellSplineConstraint::
 initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
                       Settings::VerbParams vp) {
@@ -155,9 +152,11 @@ initWSplineConstraint(QList<Model::Properties::ContinuousProperty *> vars,
 QPair<Eigen::Vector3d, Eigen::Vector3d>
 WellSplineConstraint::GetEndpointValueVectors(Case *c,
                                               Well well) {
+
   double hx = c->get_real_variable_value(well.heel.x);
   double hy = c->get_real_variable_value(well.heel.y);
   double hz = c->get_real_variable_value(well.heel.z);
+
   double tx = c->get_real_variable_value(well.toe.x);
   double ty = c->get_real_variable_value(well.toe.y);
   double tz = c->get_real_variable_value(well.toe.z);
