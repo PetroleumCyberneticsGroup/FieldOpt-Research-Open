@@ -50,6 +50,13 @@ using Optimization::Constraints::ConstraintHandler;
 using WDefType = Settings::Model::WellDefinitionType;
 using ES = Optimization::Case::CaseState::EvalStatus;
 
+using Printer::info;
+using Printer::idbg;
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::ext_error;
+using Printer::num2str;
+
 /*!
  * \brief The Model class represents the reservoir model
  * as a whole, including wells and any related variables,
