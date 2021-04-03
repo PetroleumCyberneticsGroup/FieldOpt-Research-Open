@@ -47,23 +47,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
 
     switch (constraint.type) {
 
-      // BHP
-      case Settings::Optimizer::ConstraintType::BHP: {
-        constraints_.append(new BhpConstraint(constraint, vars_, vp_));
-        break;
-      }
-
-        // RESERVOIR XYZ BOUNDARY
-      case Settings::Optimizer::ConstraintType::ReservoirXYZBoundary: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new ReservoirXYZBoundary(cons, vars_, grid, vp_));
-        }
-        break;
-      }
-
-        // ICD CONSTRAINTS
+      //! -- ICD CONSTRAINTS
       case Settings::Optimizer::ConstraintType::ICVConstraint: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
@@ -73,98 +57,33 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         break;
       }
 
+        //! -- BHP
+      case Settings::Optimizer::ConstraintType::BHP: {
+        constraints_.append(new BhpConstraint(constraint, vars_, vp_));
+        break;
+      }
 
-
-
-
-        // RATE
+        //! -- RATE
       case Settings::Optimizer::ConstraintType::Rate: {
         constraints_.append(new RateConstraint(constraint, vars_, vp_));
         break;
       }
 
-        // WELL SPLINE LENGTH
-      case Settings::Optimizer::ConstraintType::WSplineLength: {
+
+      // !----
+
+
+        //! -- RESERVOIR XYZ BOUNDARY
+      case Settings::Optimizer::ConstraintType::ReservoirXYZBoundary: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
           cons.well = wname;
-          constraints_.append(new WSplineLength(cons, variables, vp_));
+          constraints_.append(new ReservoirXYZBoundary(cons, vars_, grid, vp_));
         }
         break;
       }
 
-        // POLAR AZIMUTH
-      case Settings::Optimizer::ConstraintType::PolarAzimuth: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new PolarAzimuth(cons, vars_, vp_));
-        }
-        break;
-      }
-
-        // POLAR ELEVATION
-      case Settings::Optimizer::ConstraintType::PolarElevation: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new PolarElevation(cons, vars_, vp_));
-        }
-        break;
-      }
-
-        // POLAR WELL LENGTH
-      case Settings::Optimizer::ConstraintType::PolarWellLength: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new PolarWellLength(cons, vars_, vp_));
-        }
-        break;
-      }
-
-        // POLAR SPLINE BOUNDARY
-      case Settings::Optimizer::ConstraintType::PolarSplineBoundary: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new PolarSplineBoundary(cons, vars_, grid, vp_));
-        }
-        break;
-      }
-
-
-
-        // PACKER CONSTRAINTS
-      case Settings::Optimizer::ConstraintType::PackerConstraint: {
-        for (auto &wname : constraint.wells) {
-          auto cons = Settings::Optimizer::Constraint(constraint);
-          cons.well = wname;
-          constraints_.append(new PackerConstraint(cons, vars_, vp_));
-        }
-        break;
-      }
-
-        // WELLSPLINE INTERWELL DISTANCE
-      case Settings::Optimizer::ConstraintType::WSplineInterwDist: {
-        constraints_.append(new InterwDist(constraint, variables, vp_));
-        break;
-      }
-
-        // WSPLINE + WSPLINE LENGTH + INTERWELL DISTANCE
-      case Settings::Optimizer::ConstraintType::MxWSplineLengthInterwDist: {
-        constraints_.append(new MxSplineLengthInterwDist(constraint, vars_, vp_));
-        break;
-      }
-
-        // WSPLINE + WSPLINE LENGTH + INTERW DISTANCE + RESERVOIR BOUND
-      case Settings::Optimizer::ConstraintType::
-        MxWSplineLengthInterwDistResBound: {
-        constraints_.append(new MxSplineLengthInterwDistResBound(constraint, vars_, grid, vp_));
-        break;
-      }
-
-        // RESERVOIR BOUNDARY
+        //! -- RESERVOIR BOUNDARY
       case Settings::Optimizer::ConstraintType::ReservoirBoundary: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
@@ -174,7 +93,94 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         break;
       }
 
-        // POLAR XYZ BOUNDARY
+
+
+        //! -- WELL SPLINE LENGTH
+      case Settings::Optimizer::ConstraintType::WSplineLength: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new WSplineLength(cons, variables, vp_));
+        }
+        break;
+      }
+
+        //! -- WELLSPLINE INTERWELL DISTANCE
+      case Settings::Optimizer::ConstraintType::WSplineInterwDist: {
+        constraints_.append(new InterwDist(constraint, variables, vp_));
+        break;
+      }
+
+        //! -- WSPLINE + WSPLINE LENGTH + INTERWELL DISTANCE
+      case Settings::Optimizer::ConstraintType::MxWSplineLengthInterwDist: {
+        constraints_.append(new MxSplineLengthInterwDist(constraint, vars_, vp_));
+        break;
+      }
+
+        //! -- WSPLINE + WSPLINE LENGTH + INTERW DISTANCE + RESERVOIR BOUND
+      case Settings::Optimizer::ConstraintType::
+        MxWSplineLengthInterwDistResBound: {
+        constraints_.append(new MxSplineLengthInterwDistResBound(constraint, vars_, grid, vp_));
+        break;
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // !----
+
+
+        //! -- POLAR AZIMUTH
+      case Settings::Optimizer::ConstraintType::PolarAzimuth: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new PolarAzimuth(cons, vars_, vp_));
+        }
+        break;
+      }
+
+        //! -- POLAR ELEVATION
+      case Settings::Optimizer::ConstraintType::PolarElevation: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new PolarElevation(cons, vars_, vp_));
+        }
+        break;
+      }
+
+        //! -- POLAR WELL LENGTH
+      case Settings::Optimizer::ConstraintType::PolarWellLength: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new PolarWellLength(cons, vars_, vp_));
+        }
+        break;
+      }
+
+        //! -- POLAR SPLINE BOUNDARY
+      case Settings::Optimizer::ConstraintType::PolarSplineBoundary: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new PolarSplineBoundary(cons, vars_, grid, vp_));
+        }
+        break;
+      }
+
+        //! -- POLAR XYZ BOUNDARY
       case Settings::Optimizer::ConstraintType::PolarXYZBoundary: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
@@ -184,7 +190,17 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         break;
       }
 
-        // RESERVOIR BOUNDARY TOE
+        //! -- PACKER CONSTRAINTS
+      case Settings::Optimizer::ConstraintType::PackerConstraint: {
+        for (auto &wname : constraint.wells) {
+          auto cons = Settings::Optimizer::Constraint(constraint);
+          cons.well = wname;
+          constraints_.append(new PackerConstraint(cons, vars_, vp_));
+        }
+        break;
+      }
+
+        //! -- RESERVOIR BOUNDARY TOE
       case Settings::Optimizer::ConstraintType::ReservoirBoundaryToe: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
@@ -194,7 +210,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
         break;
       }
 
-        // PSEUDO CONTINUOUS BOUNDARY 2D
+        //! -- PSEUDO CONTINUOUS BOUNDARY 2D
       case Settings::Optimizer::ConstraintType::PseudoContBoundary2D: {
         for (auto &wname : constraint.wells) {
           auto cons = Settings::Optimizer::Constraint(constraint);
@@ -210,7 +226,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
   }
 
   if (opt_settings->Scaling() && !constraint_set_.empty()) {
-    // variables->ScaleVariables();
+    variables->ScaleVariables();
   }
 
 }
@@ -254,7 +270,7 @@ Eigen::VectorXd ConstraintHandler::GetLowerBounds(QList<QUuid> id_vector) const 
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
   for (auto con : constraints_) {
-    if (con->IsBoundConstraint()) {
+    if (con->IsBoundConstraint() && con->isEnabled()) {
       lbounds = lbounds + con->GetLowerBounds(id_vector);
     }
   }
@@ -265,7 +281,7 @@ Eigen::VectorXd ConstraintHandler::GetUpperBounds(QList<QUuid> id_vector) const 
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
   for (auto con : constraints_) {
-    if (con->IsBoundConstraint()) {
+    if (con->IsBoundConstraint() && con->isEnabled()) {
       ubounds = ubounds + con->GetUpperBounds(id_vector);
     }
   }

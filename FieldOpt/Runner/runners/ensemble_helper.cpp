@@ -124,7 +124,7 @@ void EnsembleHelper::SubmitEvaluatedRealization(Optimization::Case *c) {
   long alias_pos =
       distance(rzn_busy_.begin(),
                find(rzn_busy_.begin(), rzn_busy_.end(),
-                    c->GetEnsembleRealization().toStdString()));
+                    c->GetEnsembleRlz().toStdString()));
 
   if (alias_pos < 0 || alias_pos >= rzn_busy_.size()) {
     std::cerr
@@ -136,12 +136,12 @@ void EnsembleHelper::SubmitEvaluatedRealization(Optimization::Case *c) {
   if (c->state.eval == Optimization::Case::CaseState::E_DONE) {
 
     current_case_->SetRealizationOfv(
-        c->GetEnsembleRealization(),
+      c->GetEnsembleRlz(),
         c->objf_value());
 
   } else {
     std::cout << "WARNING: Ensemble realization case "
-              << c->GetEnsembleRealization().toStdString()
+              << c->GetEnsembleRlz().toStdString()
               << " was not successfully evaluated. It will "
                  "not be further considered."
               << std::endl;
@@ -212,7 +212,7 @@ void EnsembleHelper::selectRealizations() {
   }
 }
 
-Settings::Ensemble::Realization EnsembleHelper::GetRealization(
+Settings::Ensemble::Realization EnsembleHelper::GetRlz(
     const std::string &alias) const {
   return ensemble_.GetRealization(alias);
 }

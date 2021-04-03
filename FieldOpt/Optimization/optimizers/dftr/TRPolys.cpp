@@ -140,7 +140,7 @@ double TRFrame::evaluatePoly(poly p1, VectorXd x) {
   VectorXd g(p1.dim);
   MatrixXd H(p1.dim, p1.dim);
 
-  dbg_->prntPolys("evaluatePolynomial", p1);
+  dbg_->prntPolys("evaluatePoly", p1);
   tie(c, g, H) = coeffsToMatrices(p1.dim, p1.coeffs);
 
   VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
@@ -196,7 +196,7 @@ poly TRFrame::multiplyPoly(poly p1, double factor) {
 // _________________________________________________________
 // COMBINEPOLYS
 poly TRFrame::combinePolys(int npts, RowVectorXd coeffs) {
-  dbg_->prntPivotPolys("combinePolynomials");
+  dbg_->prntPivotPolys("combinePolys");
 
   auto polys = vector<poly>(pivot_polys_.begin(),
                             pivot_polys_.begin() + npts);
@@ -222,7 +222,7 @@ poly TRFrame::shiftPoly(poly p, VectorXd s) {
   double terms[3], c;
   VectorXd g(p.dim);
   MatrixXd H(p.dim, p.dim);
-  dbg_->prntPolys("shiftPolynomial", p);
+  dbg_->prntPolys("shiftPoly", p);
 
   tie(c, g, H) = coeffsToMatrices(p.dim, p.coeffs);
   double c_mod = c + (double)(g.transpose()*s);
@@ -290,9 +290,7 @@ poly TRFrame::matricesToPoly(double c0, const VectorXd &g0,
       }
     }
   }
-  if (non_symmetric_H) {
-    ext_info("H non-symmetric: ", md_, cl_);
-  }
+  if (non_symmetric_H) { info("[@matricesToPoly] H is non-symmetric"); }
 
   poly p; p.dim = dim; p.coeffs = coeffs;
   return p;
@@ -374,11 +372,11 @@ void TRFrame::sortMatrixByIndex(Matrix<double, Dynamic, Dynamic> &points,
 // _________________________________________________________
 // NFPBASIS
 void TRFrame::nfpBasis(int dim) {
-  //!<Number of terms>
+  //! Number of terms
   int poly_num = (dim+1)*(dim+2)/2;
   int linear_size = dim+1;
 
-  //!<Calculating basis of polynomials>
+  //! Calculating basis of polynomials
   pivot_polys_.resize(poly_num);
   pivot_polys_[poly_num-1].dim = dim;
   pivot_polys_[poly_num-1].coeffs.conservativeResize(poly_num);
@@ -391,7 +389,7 @@ void TRFrame::nfpBasis(int dim) {
     pivot_polys_[i].coeffs(i) = 1;
   }
 
-  //!<Quadratic entries>
+  //! Quadratic entries
   int c0 = 0;
   int m = 0;
   int n = 0;

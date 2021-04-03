@@ -130,7 +130,7 @@ void TrustRegionModel::moveToBestPoint() {
 
 VectorXd TrustRegionModel::measureCriticality() {
   // g is just the gradient, measured on the tr_center
-  DBG_printPolynomials("measureCriticality", modeling_polynomials_[0]);
+  DBG_printPolynomials("measureCrit", modeling_polynomials_[0]);
   auto mMatrix = getModelMatrices(0);
 
   // Projected gradient
@@ -183,7 +183,7 @@ bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
   double beta = settings_->parameters().tr_crit_beta;
 
   // Tolerance of TR algorithm
-  double tol_radius = settings_->parameters().tr_tol_radius;
+  double tol_radius = settings_->parameters().tr_rad_tol;
   double tol_f = settings_->parameters().tr_tol_f;
 
   int exit_flag = 0;
@@ -220,8 +220,8 @@ bool TrustRegionModel::criticalityStep(double radius_before_criticality_step) {
     }
 
     if ((radius_ < tol_radius) ||
-        (beta * crit_measure.norm() < tol_f) &&
-            (radius_ < 100 * tol_radius)) {
+      (beta * crit_measure.norm() < tol_f) &&
+        (radius_ < 100 * tol_radius)) {
 
       // Note: condition structured as: ((A || C) && B)
       // whereas in CG it is: (A || C && B) (CLion complains)
@@ -402,7 +402,7 @@ bool TrustRegionModel::rebuildModel() {
 
   //!<Starting rowPivotGaussianElimination>
 
-  double pivot_threshold = settings_->parameters().tr_pivot_thld * std::fmin(1, radius_);
+  double pivot_threshold = settings_->parameters().tr_piv_thld * std::fmin(1, radius_);
 
   int polynomials_num = pivot_polynomials_.size();
   pivot_values_.conservativeResize(polynomials_num);
@@ -430,7 +430,7 @@ bool TrustRegionModel::rebuildModel() {
       block_beginning = 1;
       block_end = dim;
 
-      max_layer = std::min(2 * settings_->parameters().tr_radius_fac, distance_farthest_point);
+      max_layer = std::min(2 * settings_->parameters().tr_rad_fac, distance_farthest_point);
       if (iter > dim) {
         //!< We already tested all linear terms.
         //!< We do not have points to build a FL model.
@@ -439,7 +439,7 @@ bool TrustRegionModel::rebuildModel() {
       }
 
     } else { //!<Quadratic block -- being more carefull>
-      max_layer = min(settings_->parameters().tr_radius_fac, distance_farthest_point);
+      max_layer = min(settings_->parameters().tr_rad_fac, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
     }
@@ -461,7 +461,7 @@ bool TrustRegionModel::rebuildModel() {
         }
 
         auto val = evaluatePolynomial(
-            pivot_polynomials_[poly_i], points_shifted_.col(n));
+          pivot_polynomials_[poly_i], points_shifted_.col(n));
         val = val / dist_max; //!<minor adjustment>
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
@@ -548,9 +548,9 @@ bool TrustRegionModel::rebuildModel() {
 
 bool TrustRegionModel::improveModelNfp() {
 
-  auto rel_pivot_threshold = settings_->parameters().tr_pivot_thld;
-  auto tol_radius = settings_->parameters().tr_tol_radius;
-  auto radius_factor = settings_->parameters().tr_radius_fac;
+  auto rel_pivot_threshold = settings_->parameters().tr_piv_thld;
+  auto tol_radius = settings_->parameters().tr_rad_tol;
+  auto radius_factor = settings_->parameters().tr_rad_fac;
 
   auto radius = radius_;
   auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);
@@ -618,7 +618,7 @@ bool TrustRegionModel::improveModelNfp() {
 
             nfp_polynomial_ = orthogonalizeToOtherPolynomials(poly_i, p_ini);
             std::tie(nfp_new_points_shifted_, nfp_new_pivots_, nfp_point_found_) =
-                pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
+              pointNew(nfp_polynomial_, tr_center_pt, radius_used, bl_shifted, bu_shifted, pivot_threshold);
 
           } else if(areImprovementPointsComputed()) {
             // Using previously computed points/pivot-points
@@ -843,7 +843,7 @@ bool TrustRegionModel::isLambdaPoised() {
   int dim = (int)points_abs_.rows();
   int points_num = (int)points_abs_.cols();
 
-  double pivot_threshold = settings_->parameters().tr_pivot_thld;
+  double pivot_threshold = settings_->parameters().tr_piv_thld;
   bool result = false;
 
   if (!settings_->parameters().tr_basis.compare("dummy")) {
@@ -853,7 +853,7 @@ bool TrustRegionModel::isLambdaPoised() {
     //!<Fully linear, already>
     result = true;
     //!<but lets double check>
-//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_pivot_thld) {
+//        if (pivot_values_.lpNorm<Infinity>() > settings_->parameters().tr_piv_thld) {
 //            Printer::ext_warn("Low pivot values.", "Optimization", "TrustRegionOptimization");
 //        }
   } else {
@@ -863,13 +863,13 @@ bool TrustRegionModel::isLambdaPoised() {
 }
 
 int TrustRegionModel::changeTrCenter(
-    VectorXd new_point,
-    double new_fvalue) {
+  VectorXd new_point,
+  double new_fvalue) {
 
   int pt_i = 0;
   bool point_added = false;
   bool point_exchanged = false;
-  double relative_pivot_threshold = settings_->parameters().tr_pivot_thld;
+  double relative_pivot_threshold = settings_->parameters().tr_piv_thld;
   int exit_flag = 0;
 
   if (!isComplete()) {
@@ -934,7 +934,7 @@ std::tuple<VectorXd, double> TrustRegionModel::solveTrSubproblem() {
   VectorXd tol_interp(1);
   tol_interp(0) = 1e-8;
   tol_interp.cwiseMax(std::numeric_limits<double>::epsilon());
-    double val, error_interp;
+  double val, error_interp;
 
   for (int ii=0; ii < getNumPts(); ii++) {
     val = evaluatePolynomial(ps, getPoints().col(ii));
@@ -970,9 +970,9 @@ int TrustRegionModel::tryToAddPoint(VectorXd new_point, double new_fvalue) {
 
     MatrixXd P(nr, nc+1);
     if (cached_points_.cols() > 0) {
-        P << cached_points_, new_point;
+      P << cached_points_, new_point;
     } else {
-        P << new_point;
+      P << new_point;
     }
     cached_points_.conservativeResize(P.rows(), P.cols());
     cached_points_.swap(P);
@@ -1103,9 +1103,9 @@ int TrustRegionModel::addPoint(VectorXd new_point, double new_fvalue, double rel
 
 
 std::tuple<bool,int> TrustRegionModel::exchangePoint(
-    VectorXd new_point,
-    double new_fvalue,
-    double relative_pivot_threshold) {
+  VectorXd new_point,
+  double new_fvalue,
+  double relative_pivot_threshold) {
 
   bool succeeded = false;
   int pt_i = 0;
@@ -1244,13 +1244,13 @@ void TrustRegionModel::computePolynomialModels() {
     }
   }
   modeling_polynomials_ = polynomials;
-  DBG_printPolynomials("computePolynomialModels", modeling_polynomials_[0]);
+  DBG_printPolynomials("computePolyMods", modeling_polynomials_[0]);
   DBG_printPivotPolynomials("computePolynomialModels-01");
 }
 
 void TrustRegionModel::shiftPolynomialToEndBlock(
-    int point_index,
-    int block_end) {
+  int point_index,
+  int block_end) {
 
   std::swap(pivot_polynomials_[point_index], pivot_polynomials_[block_end]);
   for (int pi=block_end-1; pi>point_index; pi--) {
@@ -1259,8 +1259,8 @@ void TrustRegionModel::shiftPolynomialToEndBlock(
 }
 
 void TrustRegionModel::sortVectorByIndex(
-    VectorXd &vec,
-    const VectorXd &ind) {
+  VectorXd &vec,
+  const VectorXd &ind) {
   VectorXd vec_ord(vec.size());
   for (int i=0; i < vec.size(); i++) {
     int index = int(ind(i));
@@ -1274,8 +1274,8 @@ void TrustRegionModel::sortVectorByIndex(
 }
 
 void TrustRegionModel::sortVectorByIndex(
-    RowVectorXd &vec,
-    const VectorXd &ind) {
+  RowVectorXd &vec,
+  const VectorXd &ind) {
   VectorXd vec_ord(vec.size());
   for (int i=0; i < vec.size(); i++) {
     int index = int(ind(i));
@@ -1289,8 +1289,8 @@ void TrustRegionModel::sortVectorByIndex(
 }
 
 void TrustRegionModel::sortMatrixByIndex(
-    Matrix<double,Dynamic,Dynamic> &points,
-    const VectorXd &ind) {
+  Matrix<double,Dynamic,Dynamic> &points,
+  const VectorXd &ind) {
 
   Matrix<double,Dynamic,Dynamic> points_ord(points.rows(), points.cols());
   for (int i=0; i<points.cols(); i++) {
@@ -1350,9 +1350,9 @@ void TrustRegionModel::nfpBasis(int dim) {
 }
 
 Polynomial TrustRegionModel::matricesToPolynomial(
-    double c0,
-    const VectorXd &g0,
-    const MatrixXd &H) {
+  double c0,
+  const VectorXd &g0,
+  const MatrixXd &H) {
 
   int dim = (int)g0.size();
   int n_terms = (dim+1)*(dim+2)/2;
@@ -1391,8 +1391,8 @@ Polynomial TrustRegionModel::matricesToPolynomial(
 }
 
 std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
-    int dimension,
-    VectorXd coefficients) {
+  int dimension,
+  VectorXd coefficients) {
 
   int n_terms = (dimension+1)*(dimension+2)/2;
   if (coefficients.size() == 0) {
@@ -1404,7 +1404,7 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
     Printer::ext_warn("Wrong dimension of coefficients.",
                       "Optimization", "TrustRegionModel");
     throw std::runtime_error(
-        "Failed to convert polynomial coefficients to matrices.");
+      "Failed to convert polynomial coefficients to matrices.");
   }
 
   //!< Constant term>
@@ -1431,9 +1431,9 @@ std::tuple<double, VectorXd, MatrixXd> TrustRegionModel::coefficientsToMatrices(
 
 
 Polynomial TrustRegionModel::normalizePolynomial(
-    int poly_i,
-    VectorXd point) {
-  DBG_printPivotPolynomials("normalizePolynomial-00");
+  int poly_i,
+  VectorXd point) {
+  DBG_printPivotPolynomials("normalizePoly-00");
   auto polynomial = pivot_polynomials_[poly_i];
   auto val = evaluatePolynomial(polynomial, point);
   for (int i = 0; i < 3; i++) {
@@ -1443,14 +1443,14 @@ Polynomial TrustRegionModel::normalizePolynomial(
       break;
     }
   }
-  DBG_printPivotPolynomials("normalizePolynomial-01");
+  DBG_printPivotPolynomials("normalizePoly-01");
   return polynomial;
 }
 
 Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
-    int poly_i,
-    int last_pt) {
-  DBG_printPivotPolynomials("orthogonalizeToOtherPolynomials-00");
+  int poly_i,
+  int last_pt) {
+  DBG_printPivotPolynomials("orthogzToOthrPolys-00");
   auto polynomial = pivot_polynomials_[poly_i];
   for (int n = 0; n <= last_pt; n++) {
     if (n != poly_i) {
@@ -1459,29 +1459,29 @@ Polynomial TrustRegionModel::orthogonalizeToOtherPolynomials(
                                points_shifted_.col(n));
     }
   }
-  DBG_printPivotPolynomials("orthogonalizeToOtherPolynomials-01");
+  DBG_printPivotPolynomials("orthogzToOthrPolys-01");
   return polynomial;
 }
 
 void TrustRegionModel::orthogonalizeBlock(
-    VectorXd point,
-    int np,
-    int block_beginning,
-    int block_end) {
-  DBG_printPivotPolynomials("orthogonalizeBlock-00");
+  VectorXd point,
+  int np,
+  int block_beginning,
+  int block_end) {
+  DBG_printPivotPolynomials("orthogzBlock-00");
   for (int p = block_beginning; p <= block_end; p++) {
     if (p != np) {
       pivot_polynomials_[p] = zeroAtPoint(pivot_polynomials_[p], pivot_polynomials_[np], point);
     }
   }
-  DBG_printPivotPolynomials("orthogonalizeBlock-01");
+  DBG_printPivotPolynomials("orthogzBlock-01");
 }
 
 
 Polynomial TrustRegionModel::zeroAtPoint(
-    Polynomial p1,
-    Polynomial p2,
-    VectorXd x) {
+  Polynomial p1,
+  Polynomial p2,
+  VectorXd x) {
   Polynomial p;
   p = p1;
 
@@ -1504,14 +1504,14 @@ Polynomial TrustRegionModel::zeroAtPoint(
 }
 
 double TrustRegionModel::evaluatePolynomial(
-    Polynomial p1,
-    VectorXd x) {
+  Polynomial p1,
+  VectorXd x) {
   double c;
   double terms[3];
   VectorXd g(p1.dimension);
   MatrixXd H(p1.dimension, p1.dimension);
 
-  DBG_printPolynomials("evaluatePolynomial", p1);
+  DBG_printPolynomials("evaluatePoly", p1);
   std::tie(c, g, H) = coefficientsToMatrices(p1.dimension, p1.coefficients);
 
   VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
@@ -1530,13 +1530,13 @@ double TrustRegionModel::evaluatePolynomial(
 }
 
 Polynomial TrustRegionModel::addPolynomial(
-    Polynomial p1,
-    Polynomial p2) {
+  Polynomial p1,
+  Polynomial p2) {
   if (p1.dimension != p2.dimension) {
     Printer::ext_warn(
-        "Summation of polynomials "
-        "with different dimensions.",
-        "Optimization", "TrustRegionModel");
+      "Summation of polynomials "
+      "with different dimensions.",
+      "Optimization", "TrustRegionModel");
     throw std::runtime_error("Failed to compute add polynomials. "
                              "They have different dimensions.");
   }
@@ -1560,8 +1560,8 @@ Polynomial TrustRegionModel::addPolynomial(
 }
 
 Polynomial TrustRegionModel::multiplyPolynomial(
-    Polynomial p1,
-    double factor) {
+  Polynomial p1,
+  double factor) {
   Polynomial p = p1;
   DBG_printVectorXd(p.coefficients, "multp0: ", "% 10.3e ", DBG_fn_pivp_);
 
@@ -1650,7 +1650,7 @@ RowVectorXd TrustRegionModel::nfpFiniteDifferences(int points_num) {
   DBG_printPivotPolynomials("nfpFiniteDifferences");
 
   std::vector<Polynomial> polynomials =
-      std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
+    std::vector<Polynomial>(pivot_polynomials_.begin(), pivot_polynomials_.begin() + points_num);
 
   //!<Remove constant polynomial>
   for (int m = 1; m < points_num; m++) {
@@ -1720,12 +1720,12 @@ string TrustRegionModel::DBG_printSettingsData(string msg) {
   ss << "tr\\_eps\\_c:      " << " & $" << DBG_printDouble(getParams().tr_eps_c) << " $ \\\\ \n";
   ss << "tr\\_eta\\_0:      " << " & $" << DBG_printDouble(getParams().tr_eta_0) << " $ \\\\ \n";
   ss << "tr\\_eta\\_1:      " << " & $" << DBG_printDouble(getParams().tr_eta_1) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_piv\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_pivot_thld) << " $ \\\\ \n";
+  ss << "tr\\_piv\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_piv_thld) << " $ \\\\ \n";
   ss << "tr\\_add\\_thresh: " << " & $" << DBG_printDouble(getParams().tr_add_thld) << " $ \\\\ \n";
-  ss << "tr\\_exch\\_thresh:" << " & $" << DBG_printDouble(getParams().tr_exch_thld) << " $ \\\\ \n";
-  ss << "tr\\_rad\\_max:    " << " & $" << DBG_printDouble(getParams().tr_radius_max) << " $ \\\\ \n";
-  ss << "tr\\_rad\\_factor: " << " & $" << DBG_printDouble(getParams().tr_radius_fac) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_tol\\_rad:    " << " & $" << DBG_printDouble(getParams().tr_tol_radius) << " $ \\\\ \n";
+  ss << "tr\\_exch\\_thresh:" << " & $" << DBG_printDouble(getParams().tr_xch_thld) << " $ \\\\ \n";
+  ss << "tr\\_rad\\_max:    " << " & $" << DBG_printDouble(getParams().tr_rad_max) << " $ \\\\ \n";
+  ss << "tr\\_rad\\_factor: " << " & $" << DBG_printDouble(getParams().tr_rad_fac) << " $ \\\\ \\midrule \n";
+  ss << "tr\\_tol\\_rad:    " << " & $" << DBG_printDouble(getParams().tr_rad_tol) << " $ \\\\ \n";
   ss << "tr\\_gamma\\_inc:  " << " & $" << DBG_printDouble(getParams().tr_gamma_inc) << " $ \\\\ \n";
   ss << "tr\\_gamma\\_dec:  " << " & $" << DBG_printDouble(getParams().tr_gamma_dec) << " $ \\\\ \n";
   ss << "tr\\_crit\\_mu:    " << " & $" << DBG_printDouble(getParams().tr_crit_mu) << " $ \\\\ \n";
@@ -1739,9 +1739,9 @@ string TrustRegionModel::DBG_printSettingsData(string msg) {
 }
 
 void TrustRegionModel::DBG_printFunctionData(
-    string fnm, string msg,
-    VectorXd v0, VectorXd v1, VectorXd v2,
-    double d0, double d1, double d2) {
+  string fnm, string msg,
+  VectorXd v0, VectorXd v1, VectorXd v2,
+  double d0, double d1, double d2) {
 
   stringstream ss;
   DBG_printHeader(ss, "FOEx");
@@ -1811,15 +1811,13 @@ void TrustRegionModel::DBG_printToFile(string fn, string sout) {
   fclose (pFile);
 }
 
-Polynomial TrustRegionModel::combinePolynomials(
-    int points_num,
-    RowVectorXd coefficients) {
-
-  // DBG_printPivotPolynomials("combinePolynomials");
+Polynomial TrustRegionModel::combinePolynomials(int points_num,
+                                                RowVectorXd coefficients) {
+  DBG_printPivotPolynomials("combinePolys");
 
   auto polynomials = std::vector<Polynomial>(
-      pivot_polynomials_.begin(),
-      pivot_polynomials_.begin() + points_num);
+    pivot_polynomials_.begin(),
+    pivot_polynomials_.begin() + points_num);
 
   int terms = (int)polynomials.size();
 
@@ -1827,8 +1825,8 @@ Polynomial TrustRegionModel::combinePolynomials(
     Printer::ext_warn("Polynomial and coefficients have different sizes.",
                       "Optimization", "TrustRegionModel");
     throw std::runtime_error(
-        "Failed to combine polynomials. Polynomial "
-        "and coefficients have different dimensions.");
+      "Failed to combine polynomials. Polynomial "
+      "and coefficients have different dimensions.");
   }
 
   auto p = multiplyPolynomial(polynomials[0], coefficients(0));
@@ -1875,14 +1873,14 @@ bool TrustRegionModel::isOld() {
   distance = points_abs_.col(0) - points_abs_.col(tr_center_);
 
   auto dist = distance.lpNorm<Infinity>();
-  auto tr_rad_fac = settings_->parameters().tr_radius_fac;
+  auto tr_rad_fac = settings_->parameters().tr_rad_fac;
   auto is_old = (dist > tr_rad_fac);
 
   return is_old;
 }
 
 bool TrustRegionModel::chooseAndReplacePoint() {
-  double pivot_threshold = settings_->parameters().tr_exch_thld;
+  double pivot_threshold = settings_->parameters().tr_xch_thld;
   double radius = radius_;
 
   int dim = (int)points_shifted_.rows();
@@ -1936,7 +1934,7 @@ bool TrustRegionModel::chooseAndReplacePoint() {
 
     if (!areReplacementPointsComputed()) {
       std::tie(repl_new_points_shifted_, repl_new_pivots_, repl_point_found_) =
-          pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
+        pointNew(pivot_polynomials_[pos], tr_center_x, radius_, bl_shifted, bu_shifted, pivot_threshold);
       DBG_printModelData("chooseAndReplacePoint-02");
     }
 
@@ -2078,12 +2076,12 @@ Eigen::VectorXd TrustRegionModel::unshiftPoint(Eigen::VectorXd &x) {
 
 
 tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
-    TrustRegionModel::pointNew(Polynomial polynomial,
-        Eigen::VectorXd tr_center_point,
-        double radius_used,
-        Eigen::VectorXd bl,
-        Eigen::VectorXd bu,
-        double pivot_threshold) {
+TrustRegionModel::pointNew(Polynomial polynomial,
+                           Eigen::VectorXd tr_center_point,
+                           double radius_used,
+                           Eigen::VectorXd bl,
+                           Eigen::VectorXd bu,
+                           double pivot_threshold) {
 
   Eigen::VectorXd new_point_min(getXDim(), 1);
   Eigen::VectorXd new_point_max(getXDim(), 1);
@@ -2108,17 +2106,17 @@ tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
                                                            bl, bu);
 
   if ((exitflag_min >= 0)
-      && (abs(pivot_min) >= pivot_threshold)) {
+    && (abs(pivot_min) >= pivot_threshold)) {
 
 
     if ((exitflag_max >= 0)
-        && (abs(pivot_max) >= abs(pivot_min))) {
+      && (abs(pivot_max) >= abs(pivot_min))) {
       new_points.col(0) = new_point_max;
       new_points.col(1) = new_point_min;
       new_pivot_values << pivot_max, pivot_min;
 
     } else if ((exitflag_max >= 0)
-        && (abs(pivot_max) >= pivot_threshold)) {
+      && (abs(pivot_max) >= pivot_threshold)) {
       new_points.col(0) = new_point_min;
       new_points.col(1) = new_point_max;
       new_pivot_values << pivot_min, pivot_max;
@@ -2133,7 +2131,7 @@ tuple<Eigen::MatrixXd, Eigen::RowVectorXd, bool>
     point_found = true;
 
   } else if ((exitflag_max >= 0)
-      && (abs(pivot_max) >= pivot_threshold)) {
+    && (abs(pivot_max) >= pivot_threshold)) {
     new_points.conservativeResize(dim_,1);
     new_points.col(0) = new_point_max;
 
@@ -2273,8 +2271,8 @@ bool TrustRegionModel::checkDataSize(string context){
   cached_points_size = cached_points_.cols();
 
   test_passed = (points_abs_size == points_shifted_size
-      && points_abs_size == fvalues_size
-      && cached_points_size == cached_fvalues_size);
+    && points_abs_size == fvalues_size
+    && cached_points_size == cached_fvalues_size);
 
   /*if (!test_passed){
     cerr << endl;

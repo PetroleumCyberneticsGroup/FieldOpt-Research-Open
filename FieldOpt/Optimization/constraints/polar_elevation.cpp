@@ -27,21 +27,19 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PolarElevation::PolarElevation(Settings::Optimizer::Constraint const settings,
-                               Model::Properties::VarPropContainer *variables,
-                               Settings::VerbParams vp)
-                               : Constraint(vp) {
+PolarElevation::PolarElevation(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 1) {
-    info("Adding PolarElevation constraint for " + settings.well.toStdString());
+    info("Adding PolarElevation constraint for " + seto.well.toStdString());
   }
 
-  min_elevation_ = settings.min;
-  max_elevation_ = settings.max;
-  for (auto var : *variables->GetContinuousVariables()){
+  min_elevation_ = seto.min;
+  max_elevation_ = seto.max;
+  for (auto var : *vars->GetContinuousVariables()){
     auto lvar = var.second;
     if (lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Elevation
-      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0){
+      && QString::compare(lvar->propertyInfo().parent_well_name, seto.well) == 0){
       affected_variable_ = lvar->id();
       break;
     }

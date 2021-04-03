@@ -50,7 +50,7 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
 
   wic_time_secs_ = c->GetWICTime();
   sim_time_secs_ = c->GetSimTime();
-  ensemble_realization_ = c->GetEnsembleRealization().toStdString();
+  ensemble_realization_ = c->GetEnsembleRlz().toStdString();
 
   status_eval_ = c->state.eval;
   status_cons_ = c->state.cons;

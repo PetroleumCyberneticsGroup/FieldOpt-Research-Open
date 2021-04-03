@@ -3,12 +3,11 @@ FieldOpt [Open Research Version] is a C++ programming framework
 for efficient prototyping and testing of optimization methodologies
 for problems involving large-scale numerical simulations.
 
-The FieldOpt framework serves as a multi-disciplinary knowledge
-repository of optimization and domain expertise.
-Technology development is based on efficient knowledge
-retention and integration of project work and synergy
-through mining of implemented iterative procedures and
-domain parametrizations.
+FieldOpt serves as a multi-disciplinary knowledge
+repository for coupling optimization with reservoir simulation.
+Technology development is based on integration of efficient
+iterative procedures with expert domain parametrizations.
+
 FieldOpt facilitates research and innovation through up-scaling of
 prototype methodology to realistic cases, coupling, integration and
 hybridization of optimization methodology and problem solutions,

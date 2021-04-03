@@ -33,23 +33,22 @@ namespace Constraints {
 
 using Printer::num2str;
 
-WSplineLength::WSplineLength(Settings::Optimizer::Constraint settings,
-                             Model::Properties::VarPropContainer *variables,
-                             Settings::VerbParams vp)
-                             : Constraint(vp) {
+WSplineLength::WSplineLength(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
+
   if (vp_.vOPT >= 3) {
-    im_ = "Adding WSplineLength constraint for " + settings.well.toStdString();
+    im_ = "Adding WSplineLength constraint for " + seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  min_length_ = settings.min;
-  max_length_ = settings.max;
-  penalty_weight_ = settings.penalty_weight;
+  min_length_ = seto.min;
+  max_length_ = seto.max;
+  penalty_weight_ = seto.penalty_weight;
 
-  affected_well_ = initWSplineConstraint(variables->GetWSplineVars(settings.well), vp_);
+  affected_well_ = initWSplineConstraint(vars->GetWSplineVars(seto.well), vp_);
 
   if (vp_.vOPT >= 3) {
-    im_ = " -> initialized length constraint for well: " + settings.well.toStdString();
+    im_ = " -> initialized length constraint for well: " + seto.well.toStdString();
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 }

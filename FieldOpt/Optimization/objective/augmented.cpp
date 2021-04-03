@@ -188,7 +188,7 @@ double Augmented::value(bool base_case) {
             }
 
             t_val *= objf_scal;
-            if (vp_.vOPT >= 3) {
+            if (vp_.vOPT >= 5) {
               ss << "scal.type: " << term->scaling << " -- ";
               ss << "objf_scal: " << num2str(objf_scal, 8, 1) << " -- ";
               ss << "t_val (scaled) = " << num2str(t_val, 8, 1) << "|";
@@ -213,12 +213,12 @@ double Augmented::value(bool base_case) {
         model_->setObjfScaler(objf_scal_);
       }
 
-      if (vp_.vOPT >= 3) {
+      if (vp_.vOPT >= 5) {
         ss << printTerm(term, t_val, 1);
       }
       value += t_val;
     }
-    if (vp_.vOPT >= 3) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
+    if (vp_.vOPT >= 5) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 
   } catch (std::exception const &ex) {
     em_ = "Failed to compute Augmented function ";
@@ -244,12 +244,12 @@ void Augmented::setUpWaterCutLimit() {
   if (npv_coeffs_[0] != 0.0 && npv_coeffs_[1] != 0.0) {
     auto po_cwp = npv_coeffs_[0] / npv_coeffs_[1];
     wcut_limit_ = abs(po_cwp) / (abs(po_cwp) + 1);
-    if (vp_.vOPT >= 3) {
+    if (vp_.vOPT >= 5) {
       im_ = "Water cut limit computed to " + num2str(wcut_limit_, 3);
       ext_info(im_, md_, cl_, vp_.lnw);
     }
 
-  } else if (vp_.vOPT >= 3) {
+  } else if (vp_.vOPT >= 5) {
     im_ = "Water cut limit not computed (def: 1.0)";
     ext_warn(im_, md_, cl_, vp_.lnw);
   }
@@ -311,7 +311,7 @@ void Augmented::setUpAugTerms() {
     ss << printTerm(term, 0, 0);
   }
 
-  if (vp_.vOPT >= 4) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
+  if (vp_.vOPT >= 5) { ext_info(ss.str(), md_, cl_, vp_.lnw); }
 }
 
 void Augmented::dbg(const int dm,
@@ -323,7 +323,7 @@ void Augmented::dbg(const int dm,
   stringstream ss;
 
   // dbg(0, w_slft);
-  if (dm==0 && vp_.vOPT >= 4) {
+  if (dm==0 && vp_.vOPT >= 5) {
     // weights liq seg flow total
     ss << "weights_slft    = " + DBG_prntVecXd(v0, ",", "% 5.3f");
     ss << " # sum = " + num2str(v0.sum(), 3, 0);
@@ -339,7 +339,7 @@ void Augmented::dbg(const int dm,
   }
 
   // dbg(2, timeXd, sd_vec, rsd_vec);
-  if (dm==2 && vp_.vOPT >= 4) {
+  if (dm==2 && vp_.vOPT >= 5) {
     if (vp_.vOPT >= 5) {
       ss << "time            = " + DBG_prntVecXd(v0, ",", "% 5.3f");
       DBG_prntToFile(fl_, ss.str()+ "\n");
@@ -356,14 +356,14 @@ void Augmented::dbg(const int dm,
   }
 
   // dbg(3, sd_vec_spline_l, sd_vec_spline_q);
-  if (dm==3 && vp_.vOPT >= 4) {
+  if (dm==3 && vp_.vOPT >= 5) {
     ss << "sd_vec_spline_l = " + DBG_prntVecXd(v0, ",", "% 5.3f");
     DBG_prntToFile(fl_, ss.str() + "\n"); info(ss.str(), vp_.lnw); ss.str("");
     ss << "sd_vec_spline_q = " + DBG_prntVecXd(v1, ",", "% 5.3f");
     DBG_prntToFile(fl_, ss.str() + "\n"); info(ss.str(), vp_.lnw); ss.str("");
   }
 
-  if (dm==4 && vp_.vOPT >= 3) {
+  if (dm==4 && vp_.vOPT >= 5) {
     ss << "sd_vec(lim_idx=" + num2str(v0(0), 0, 0);
     ss << ") = " + num2str(v0(1), 3, 0);
     ss << " -- t_val (nonscal) = " + num2str(v0(2),3,0);

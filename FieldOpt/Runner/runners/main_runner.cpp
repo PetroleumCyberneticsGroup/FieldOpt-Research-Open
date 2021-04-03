@@ -48,7 +48,7 @@ MainRunner::MainRunner(RuntimeSettings *rts) {
       runner_ = new MPI::SynchronousMPIRunner(runtime_settings_);
       break;
     }
-    default: { E("Runner type not recognized."); }
+    default: { E("Runner type not recognized.", md_, cl_); }
   }
 }
 

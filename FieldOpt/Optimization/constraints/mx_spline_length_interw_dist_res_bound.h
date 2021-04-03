@@ -50,11 +50,8 @@ namespace Constraints {
 class MxSplineLengthInterwDistResBound : public Constraint
 {
  public:
-  MxSplineLengthInterwDistResBound(
-    Settings::Optimizer::Constraint settings,
-    Model::Properties::VarPropContainer *variables,
-    Reservoir::Grid::Grid *grid,
-    Settings::VerbParams vp);
+  MxSplineLengthInterwDistResBound(SO& seto, VPC *vars,
+                                   Reservoir::Grid::Grid *grid, SV vp);
 
   bool IsBoundConstraint() const override;
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;

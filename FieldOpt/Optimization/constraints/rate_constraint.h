@@ -29,28 +29,30 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-class RateConstraint : public Constraint {
- public:
-  RateConstraint(Settings::Optimizer::Constraint settings,
-                 Model::Properties::VarPropContainer *variables,
-                 Settings::VerbParams vp);
 
-  bool IsBoundConstraint() const override;
+using Model::Properties::ContinuousProperty;
+
+class RateConstraint : public Constraint
+{
+ public:
+  RateConstraint(SO& seto, VPC *vars, SV vp);
+
+  string name() override { return cl_; }
+
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
+
+  bool IsBoundConstraint() const override { return true; };
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
-  string name() override { return "RateConstraint"; }
-
-  // Constraint interface
- public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
-
  private:
-  double min_;
-  double max_;
-  QStringList affected_well_names_;
-  QList<Model::Properties::ContinuousProperty *> affected_real_variables_;
+  QStringList rate_cnstrnd_well_nms_;
+  QList<ContinuousProperty *> rate_cnstrnd_real_vars_;
+  QList<QUuid> rate_cnstrnd_uuid_vars_;
+
+  string md_ = "Optimizer::constraints";
+  string cl_ = "RateConstraint";
 };
 }
 }
