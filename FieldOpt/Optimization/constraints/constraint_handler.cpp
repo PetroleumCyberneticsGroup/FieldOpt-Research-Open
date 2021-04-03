@@ -225,7 +225,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
     }
   }
 
-  if (opt_settings->Scaling() && !constraint_set_.empty()) {
+  if (opt_settings->ScaleVars() && !constraint_set_.empty()) {
     variables->ScaleVariables();
   }
 

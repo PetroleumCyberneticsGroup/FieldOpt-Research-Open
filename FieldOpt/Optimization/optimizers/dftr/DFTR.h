@@ -92,7 +92,6 @@ class DFTR : public Optimizer {
   void printIteration(double fval_current);
 
   // DFTR dbg
-  void dbgUpdateRad(int c, double step_sz, double rad_inc);
   bool F = false;
   bool T = true;
   double D = 0.0;

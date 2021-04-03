@@ -479,7 +479,8 @@ class Optimizer
   void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
   VerbParams verbParams() { return vp_; };
 
-  bool Scaling() { return scaling_; }
+  bool ScaleVars() { return scale_vars_; }
+  double ScaleObjf() { return scale_objf_; }
 
  private:
   QList<Constraint> constraints_;
@@ -487,7 +488,8 @@ class Optimizer
   Parameters parameters_;
   Objective objective_;
 
-  bool scaling_ = true;
+  bool scale_vars_ = true;
+  double scale_objf_ = 1.0;
 
   string im_, wm_, em_;
   string md_ = "Settings";

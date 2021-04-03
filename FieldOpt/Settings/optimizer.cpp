@@ -52,7 +52,8 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   QJsonArray json_constraints = json_optimizer["Constraints"].toArray();
   QString type = json_optimizer["Type"].toString();
 
-  scaling_ = json_optimizer["ScaleVars"].toBool();
+  scale_vars_ = json_optimizer["ScaleVars"].toBool();
+  scale_objf_ = json_optimizer["ScaleObjf"].toDouble();
 
   type_ = parseType(type);
 
@@ -86,7 +87,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
   Constraint optmzr_constraint = Constraint();
 
-  optmzr_constraint.scaling_ = scaling_;
+  optmzr_constraint.scaling_ = scale_vars_;
 
   if (json_constraint.contains("Well")) {
     optmzr_constraint.well = json_constraint["Well"].toString();
