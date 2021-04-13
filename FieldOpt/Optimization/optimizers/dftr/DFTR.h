@@ -77,6 +77,7 @@ class DFTR : public Optimizer {
 
   // DFTR management
   void updateRadius();
+  bool testCriticality();
 
   // FO-DFTR interface management
   bool submitTempCases();
@@ -110,6 +111,8 @@ class DFTR : public Optimizer {
   int tr_iter_max_, tr_num_init_x_, tr_rng_seed_; // Iter max + seed
   string tr_basis_, tr_init_smpln_, tr_prob_name_;
 
+  int tr_lim_inf_ = 0;
+
   // TR management
   double rho_;         // Agreement factor>
   double ared_;        // Actual reduction>
@@ -118,7 +121,7 @@ class DFTR : public Optimizer {
   double delay_reduc_; // Delay reduction>
   double fmult_;       // Maximize <-> minimize multiplier
 
-  int n_initial_points_;
+  // int n_initial_points_;
 
   // TR iteration
   VectorXd trial_point_;

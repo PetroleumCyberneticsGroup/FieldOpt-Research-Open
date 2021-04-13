@@ -62,9 +62,13 @@ DFTR::DFTR(Settings::Optimizer *settings,
 // ISFINISHED
 TC DFTR::IsFinished() {
   TC tc = NOT_FINISHED;
+
   if (trm_->isModInit() && !trm_->getModPolys().empty()) {
     if (trm_->measureCrit().norm() < tr_tol_f_) {
-      tc = OPT_CRITERIA_REACHED;
+      tc = DFTR_CRIT_NORM_1ST_ORD_LT_TOLF;
+
+    } else if (tr_lim_inf_ > std::ceil(tr_iter_max_*.05)) {
+      tc = DFTR_MAX_NUM_RHO_INF_MET;
     }
   }
   if (trm_->getRad() < tr_rad_tol_) {
@@ -122,6 +126,36 @@ void DFTR::updateRadius() {
 }
 
 // ---------------------------------------------------------
+// TESTCRITICALITY
+bool DFTR::testCriticality() {
+  //! -> Measure criticality
+  auto cr_mod = trm_->measureCrit();
+
+  trm_->dbg_->prntProgIter(10, F, cr_stat_, F, F,
+                           cr_mod, trm_->getCurrPt(), V, trm_->getCurrFval(), trm_->getRad());
+
+  //! -> Crit step (possibly close to x*)
+  if (cr_mod.norm() <= tr_eps_c_) {
+    trm_->dbg_->prntProgIter(5);
+
+    if (cr_stat_ != TRFrame::ONGOING) { cr_rad_ini_ = trm_->getRad(); }
+
+    cr_stat_ = trm_->critStep(cr_rad_ini_);
+    if (cr_stat_ == TRFrame::ONGOING) {
+      ensureImprPostProc();
+      return true;
+    }
+
+    trm_->dbg_->prntProgIter(21, F, F, F, F, cr_mod);
+    if (cr_mod.norm() < tr_tol_f_) { return true; } // check if not obsolete
+
+  } else {
+    cr_stat_ = TRFrame::FAILED;
+  }
+  return false;
+}
+
+// ---------------------------------------------------------
 // ITERATE
 void DFTR::iterate() {
   if (iteration_ == 0) {
@@ -130,8 +164,8 @@ void DFTR::iterate() {
   assert(trm_->isModInit());
 
   // dbg?
-  auto x_curr = trm_->getCurrPt(); // VectorXd
-  auto f_curr = trm_->getCurrFval(); // double
+  // auto x_curr = trm_->getCurrPt(); // VectorXd
+  // auto f_curr = trm_->getCurrFval(); // double
   double err_mod = 0.0;
 
   if (impr_modl_nx_) {
@@ -163,37 +197,11 @@ void DFTR::iterate() {
       trm_->dbg_->prntProgIter(4);
       trm_->moveToBestPt();
       trm_->computePolyMods();
-      f_curr = trm_->getCurrFval();
-      x_curr = trm_->getCurrPt();
       err_mod = trm_->checkInterp();
       // }
 
-      printIteration(f_curr);
-      // if (test_criticality()) { return; }; // implement later
-
-      //! -> Measure criticality
-      auto cr_mod = trm_->measureCrit();
-      trm_->dbg_->prntProgIter(10, F, cr_stat_, F, F,
-                               cr_mod, x_curr, V, f_curr, trm_->getRad());
-
-      //! -> Crit step (possibly close to x*)
-      if (cr_mod.norm() <= tr_eps_c_) {
-        trm_->dbg_->prntProgIter(5);
-
-        if (cr_stat_ != TRFrame::ONGOING) { cr_rad_ini_ = trm_->getRad(); }
-
-        cr_stat_ = trm_->critStep(cr_rad_ini_);
-        if (cr_stat_ == TRFrame::ONGOING) {
-          ensureImprPostProc();
-          return;
-        }
-
-        trm_->dbg_->prntProgIter(21, F, F, F, F, cr_mod);
-        if (cr_mod.norm() < tr_tol_f_) { return; } // check if not obsolete
-
-      } else {
-        cr_stat_ = TRFrame::FAILED;
-      }
+      printIteration(trm_->getCurrFval());
+      if (testCriticality()) { return; };
 
       //! -> Check LambdaPoised
       trm_->dbg_->prntProgIter(6, F, cr_stat_==TRFrame::ONGOING);
@@ -203,16 +211,19 @@ void DFTR::iterate() {
       trm_->dbg_->prntProgIter(7);
       tie(trial_point_, pred_red_) = trm_->solveTrSubprob();
 
-      trial_step_ = trial_point_ - x_curr;
+      trial_step_ = trial_point_ - trm_->getCurrPt();
+
+
 
       //! --
       if ((pred_red_ < tr_rad_tol_ * 1e-2)
-        || (pred_red_ < tr_rad_tol_ * abs(f_curr) && (trial_step_.norm()) < tr_rad_tol_)
-        || (pred_red_ < tr_tol_f_ * abs(f_curr) * 1e-3)) {
+        || (pred_red_ < tr_rad_tol_ * abs(trm_->getCurrFval()) && (trial_step_.norm()) < tr_rad_tol_)
+        || (pred_red_ < tr_tol_f_ * abs(trm_->getCurrFval()) * 1e-3)) {
 
         trm_->dbg_->prntProgIter(8);
 
         rho_ = trm_->infd_;
+        tr_lim_inf_++;
         mchange_ = trm_->ensureImpr();
         impr_modl_nx_ = ensureImprPostProc();
 
@@ -223,6 +234,9 @@ void DFTR::iterate() {
         case_handler_->AddNewCase(new_case);
         return;
       }
+
+
+
     } // <- CODE
 
   } else { // 2ND PART ITER LOGIC
