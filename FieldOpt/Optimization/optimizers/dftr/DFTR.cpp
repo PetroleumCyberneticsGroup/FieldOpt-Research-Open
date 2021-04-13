@@ -38,6 +38,7 @@ namespace Optimization {
 namespace Optimizers {
 
 using OptMode = Settings::Optimizer::OptimizerMode;
+// using CS = TRFrame::critExecStat; // remove later
 
 DFTR::DFTR(Settings::Optimizer *settings,
            Case *base_case,
@@ -86,14 +87,15 @@ void DFTR::updateRadius() {
 
   auto A = (rho_ == infd_);
   auto B = (mchange_ == 4);
+  trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
 
   // Radius update>
   if (rho_ > tr_eta_1_) {
     inc_fac = max(1.0, tr_gamma_inc_ * (step_sz / trm_->getRad()));
     trm_->setRad(min(inc_fac * trm_->getRad(), tr_rad_max_));
-    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
+    trm_->dbg_->prntUpdateRad(2, F, F, trm_->getRad(), step_sz, inc_fac);
 
-  } else if (iter_modl_fl_ && (A || B || crit_prfd_)) {
+  } else if (iter_modl_fl_ && (A || B || (cr_stat_ == TRFrame::SUCCESS))) {
     // A good model should have provided a better point.
     // Reduce radius, since error is related to it:
     //        | f(x) - m(x) | < K*(radius)^2
@@ -107,14 +109,14 @@ void DFTR::updateRadius() {
       delay_reduc_ = 0;
     }
 
-    if (delay_reduc_ >= 3 || delay_reduc_ == 0 || crit_prfd_) {
+    if (delay_reduc_ >= 3 || delay_reduc_ == 0 || (cr_stat_ == TRFrame::SUCCESS)) {
       trm_->setRad(tr_gamma_dec_ * trm_->getRad());
       delay_reduc_ = 0;
     }
 
-    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
+    trm_->dbg_->prntUpdateRad(3, iter_modl_fl_, F, trm_->getRad());
   } else {
-    trm_->dbg_->prntUpdateRad(1, A, B, rho_, tr_eta_1_, step_sz, inc_fac);
+    trm_->dbg_->prntUpdateRad(4, F, F, trm_->getRad());
   }
   iteration_++;
 }
@@ -147,11 +149,11 @@ void DFTR::iterate() {
   auto NRC = !trm_->areReplPtsCd() && !trm_->isReplNeeded();
   trm_->dbg_->prntProgIter(2, IC, RC, NIC, NRC);
 
-  if (NIC && NRC) {
+  if (NIC && NRC) { // 1ST PART ITER LOGIC
     if (enable_logging_) { logger_->AddEntry(this); }
 
     // CODE ->
-    if ((trm_->getRad() < tr_rad_tol_) || (iteration_ == tr_iter_max_)) {
+    if ((trm_->getRad() < tr_rad_tol_) || (iteration_ >= tr_iter_max_)) {
       trm_->dbg_->prntProgIter(3);
       return; // end of the algorithm
 
@@ -167,31 +169,34 @@ void DFTR::iterate() {
       // }
 
       printIteration(f_curr);
+      // if (test_criticality()) { return; }; // implement later
 
       //! -> Measure criticality
-      crit_prfd_ = false;
-      auto mod_crit = trm_->measureCrit();
-      trm_->dbg_->prntProgIter(10,crit_prfd_,crit_exec_,F,F, mod_crit, x_curr, V, f_curr);
+      auto cr_mod = trm_->measureCrit();
+      trm_->dbg_->prntProgIter(10, F, cr_stat_, F, F,
+                               cr_mod, x_curr, V, f_curr, trm_->getRad());
 
       //! -> Crit step (possibly close to x*)
-      if (mod_crit.norm() <= tr_eps_c_) {
+      if (cr_mod.norm() <= tr_eps_c_) {
         trm_->dbg_->prntProgIter(5);
-        if (!crit_exec_) { crit_init_rad_ = trm_->getRad(); }
-        crit_exec_ = trm_->critStep(crit_init_rad_);
-        if (crit_exec_) {
+
+        if (cr_stat_ != TRFrame::ONGOING) { cr_rad_ini_ = trm_->getRad(); }
+
+        cr_stat_ = trm_->critStep(cr_rad_ini_);
+        if (cr_stat_ == TRFrame::ONGOING) {
           ensureImprPostProc();
           return;
         }
-        crit_prfd_ = true;
-        if (mod_crit.norm() < tr_tol_f_) { return; }
-        trm_->dbg_->prntProgIter(21,F,F,F,F, mod_crit);
+
+        trm_->dbg_->prntProgIter(21, F, F, F, F, cr_mod);
+        if (cr_mod.norm() < tr_tol_f_) { return; } // check if not obsolete
 
       } else {
-        crit_exec_ = false;
+        cr_stat_ = TRFrame::FAILED;
       }
 
       //! -> Check LambdaPoised
-      trm_->dbg_->prntProgIter(6, crit_prfd_,crit_exec_);
+      trm_->dbg_->prntProgIter(6, F, cr_stat_==TRFrame::ONGOING);
       iter_modl_fl_ = trm_->isLambdaPoised();
 
       //! -> Compute step
@@ -202,8 +207,8 @@ void DFTR::iterate() {
 
       //! --
       if ((pred_red_ < tr_rad_tol_ * 1e-2)
-      || (pred_red_ < tr_rad_tol_ * abs(f_curr) && (trial_step_.norm()) < tr_rad_tol_)
-      || (pred_red_ < tr_tol_f_ * abs(f_curr) * 1e-3)) {
+        || (pred_red_ < tr_rad_tol_ * abs(f_curr) && (trial_step_.norm()) < tr_rad_tol_)
+        || (pred_red_ < tr_tol_f_ * abs(f_curr) * 1e-3)) {
 
         trm_->dbg_->prntProgIter(8);
 
@@ -220,9 +225,10 @@ void DFTR::iterate() {
       }
     } // <- CODE
 
-  } else {
+  } else { // 2ND PART ITER LOGIC
     auto impr_cs = trm_->getImprCases();
     auto repl_cs = trm_->getReplCases();
+    trm_->dbg_->prntProgIter(11);
 
     if (IC || RC) {
 
@@ -245,11 +251,13 @@ void DFTR::iterate() {
       if ((mchange_ == 1) || (mchange_ == 2)) {
         iteration_--;
       }
+      trm_->dbg_->prntProgIter(12);
       updateRadius();
       return;
       // <- CODE
 
     } else {
+      trm_->dbg_->prntProgIter(13);
       if (trm_->isImprNeeded() && impr_cs.empty() == 0) {
         case_handler_->AddNewCases(impr_cs);
         return;
@@ -262,6 +270,7 @@ void DFTR::iterate() {
     }
 
   } // if (!IC && !RC)
+  trm_->dbg_->prntProgIter(14);
 }
 
 // _________________________________________________________
@@ -413,23 +422,31 @@ bool DFTR::ensureImprPostProc(){
 
   if (trm_->isImprNeeded() && impr_cases.empty() == 0) {
     case_handler_->AddNewCases(impr_cases);
+    trm_->dbg_->prntEnsImprPostProc(1);
     return true;
   }
 
   if (trm_->isReplNeeded() && repl_cases.empty() == 0) {
     case_handler_->AddNewCases(repl_cases);
+    trm_->dbg_->prntEnsImprPostProc(2);
     return true;
   }
 
-  auto E = (impr_cases.empty() == 1 && repl_cases.empty() == 1);
-  if (crit_exec_ && E) {
+  auto E = (impr_cases.empty() && repl_cases.empty());
+  auto F = (cr_stat_ == TRFrame::ONGOING);
+  trm_->dbg_->prntEnsImprPostProc(3, 0, 0, 0, F,
+    impr_cases.empty(), repl_cases.empty());
+
+  if (F && E) {
     if (vp_.vOPT > 1) {
       wm_ = "[@ensureImprPostProc] Crit step did not generate a case.";
       ext_warn(wm_, md_, cl_, vp_.lnw);
     }
   }
 
-  if ((impr_cases.empty()) && (repl_cases.empty()) && !crit_exec_) {
+  //! Only update radius if not within criticality execution
+  if ((impr_cases.empty()) && (repl_cases.empty()) && !F) {
+    trm_->dbg_->prntEnsImprPostProc(4);
     updateRadius();
   }
   return false;
@@ -608,32 +625,6 @@ void DFTR::printIteration(double fval_current) {
   string str = ss.str();
   WriteLineToFile(QString::fromStdString(str), dftr_log_);
 }
-
-// _________________________________________________________
-// DBGUPDATERAD
-// void DFTR::dbgUpdateRad(int c, double step_sz, double inc_fac) {
-//
-//   im_ = "[updateRadius] ";
-//   if (c == 1) {
-//     im_ += "rho_ > eta_1_ |";
-//   } else if (c == 2) {
-//     im_ += "iter_modl_fl_ |";
-//   } else if (c == 3) {
-//     im_ += "no rad change |";
-//   }
-//   pad_text(im_, 15);
-//
-//   im_ += " step_sz: " + num2str(step_sz, 2, 1);
-//   im_ += " | inc_fac: " + num2str(inc_fac, 2, 1);
-//
-//   im_ += " | rad: " + num2str(trm_->getRad(), 2, 1);
-//   im_ += " | rad_max_: " + num2str(tr_rad_max_, 2, 1);
-//   im_ += " | dly_red_: " + num2str(delay_reduc_, 0, 0);
-//   im_ += " | ";
-//
-//   if (vp_.vOPT >= 3) { idbg(im_); }
-//
-// }
 
 }
 }

@@ -123,13 +123,13 @@ class DFTR : public Optimizer {
   // TR iteration
   VectorXd trial_point_;
   VectorXd trial_step_;
-  double fval_trial_, pred_red_, crit_init_rad_;
+  double fval_trial_, pred_red_, cr_rad_ini_;
 
   int mchange_ = 0;
   bool iter_modl_fl_ = false;
   bool impr_modl_nx_ = false;
-  bool crit_prfd_ = false;
-  bool crit_exec_ = false;
+
+  TRFrame::critExecStat cr_stat_ = TRFrame::FAILED;
 
   // FO constructs
   Settings::Optimizer *settings_;
