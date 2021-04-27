@@ -132,7 +132,12 @@ class DFTR : public Optimizer {
   bool iter_modl_fl_ = false;
   bool impr_modl_nx_ = false;
 
-  TRFrame::critExecStat cr_stat_ = TRFrame::FAILED;
+  critExecStat cr_stat_ = FAILED;
+  string getCrStat() {
+    if (cr_stat_ == ONGOING) { return "ONGOING";
+    } else if (cr_stat_ == SUCCESS) { return "SUCCESS";
+    } else if (cr_stat_ == FAILED) { return "FAILED"; }
+  }
 
   // FO constructs
   Settings::Optimizer *settings_;
