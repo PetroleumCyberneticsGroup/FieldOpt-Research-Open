@@ -80,10 +80,8 @@ class Case : public Loggable
    */
   struct CaseState {
     enum EvalStatus : int {
-      E_FAILED=-2, E_TIMEOUT=-1,
-      E_PENDING=0,
-      E_CURRENT=1, E_DONE=2,
-      E_BOOKKEEPED=3
+      E_FAILED=-2, E_TIMEOUT=-1, E_PENDING=0,
+      E_CURRENT=1, E_DONE=2, E_BOOKKEEPED=3
     };
 
     enum ConsStatus : int {
@@ -263,6 +261,8 @@ class Case : public Loggable
    * @return Values of the real variables in a vector
    */
   Eigen::VectorXd GetRealVarVector();
+
+  Eigen::VectorXd GetVarVector(QList<QUuid> vars);
 
   /*!
    * Sets real variable values in case from a given vector.

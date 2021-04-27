@@ -63,8 +63,8 @@ void CaseHandler::AddNewCases(QList<Case *> cases) {
 }
 
 Case *CaseHandler::GetNextCaseForEvaluation() {
-  if (evaluation_queue_.size() == 0) {
-    em_ = "The evaluation queue contains no cases.";
+  if (evaluation_queue_.empty()) {
+    em_ = "Evaluation queue contains no cases.";
     throw CaseHandlerException(em_);
   }
   evaluating_.append(evaluation_queue_.head());
@@ -75,7 +75,7 @@ Case *CaseHandler::GetNextCaseForEvaluation() {
 
 void CaseHandler::SetCaseEvaluated(const QUuid id) {
   if (!evaluating_.contains(id)) {
-    em_ = "The case id is not found in the list of cases being evaluated.";
+    em_ = "Case id not found in list of cases being evaluated.";
     throw CaseHandlerException(em_);
   }
   evaluating_.removeAll(id);

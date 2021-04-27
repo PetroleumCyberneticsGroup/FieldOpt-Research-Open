@@ -77,6 +77,7 @@ class DFTR : public Optimizer {
 
   // DFTR management
   void updateRadius();
+  bool testCriticality();
 
   // FO-DFTR interface management
   bool submitTempCases();
@@ -92,7 +93,6 @@ class DFTR : public Optimizer {
   void printIteration(double fval_current);
 
   // DFTR dbg
-  void dbgUpdateRad(int c, double step_sz, double rad_inc);
   bool F = false;
   bool T = true;
   double D = 0.0;
@@ -111,6 +111,8 @@ class DFTR : public Optimizer {
   int tr_iter_max_, tr_num_init_x_, tr_rng_seed_; // Iter max + seed
   string tr_basis_, tr_init_smpln_, tr_prob_name_;
 
+  int tr_lim_inf_ = 0;
+
   // TR management
   double rho_;         // Agreement factor>
   double ared_;        // Actual reduction>
@@ -119,18 +121,23 @@ class DFTR : public Optimizer {
   double delay_reduc_; // Delay reduction>
   double fmult_;       // Maximize <-> minimize multiplier
 
-  int n_initial_points_;
+  // int n_initial_points_;
 
   // TR iteration
   VectorXd trial_point_;
   VectorXd trial_step_;
-  double fval_trial_, pred_red_, crit_init_rad_;
+  double fval_trial_, pred_red_, cr_rad_ini_;
 
   int mchange_ = 0;
   bool iter_modl_fl_ = false;
   bool impr_modl_nx_ = false;
-  bool crit_prfd_ = false;
-  bool crit_exec_ = false;
+
+  critExecStat cr_stat_ = FAILED;
+  string getCrStat() {
+    if (cr_stat_ == ONGOING) { return "ONGOING";
+    } else if (cr_stat_ == SUCCESS) { return "SUCCESS";
+    } else if (cr_stat_ == FAILED) { return "FAILED"; }
+  }
 
   // FO constructs
   Settings::Optimizer *settings_;

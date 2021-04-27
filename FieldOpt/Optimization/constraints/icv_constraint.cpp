@@ -86,10 +86,11 @@ bool ICVConstraint::CaseSatisfiesConstraint(Case *c) {
 void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   string tm;
   if (vp_.vOPT >= 4) {
-    tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm = this->name() + " enabled: " + num2str(this->isEnabled(), 0);
+    tm += "-- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
     tm += "for case: " + c->id_stdstr();
     pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    tm += "x: " + DBG_prntVecXd(c->GetVarVector(icd_cnstrnd_uuid_vars_));
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 
@@ -104,9 +105,9 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     }
   }
 
-  if (vp_.vOPT >= 4 && tm.size() > 0) {
+  if (vp_.vOPT >= 4 && !tm.empty()) {
     pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    tm += "x: " + DBG_prntVecXd(c->GetVarVector(icd_cnstrnd_uuid_vars_));
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 }

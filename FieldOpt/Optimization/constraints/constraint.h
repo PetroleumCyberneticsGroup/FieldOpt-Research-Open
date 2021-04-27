@@ -73,6 +73,8 @@ class Constraint
    */
   virtual void SnapCaseToConstraints(Case *c) = 0;
 
+  void DBG_SnapCase(int cs, string s0, string s1);
+
   virtual void EnableLogging(QString output_directory_path);
 
   virtual void SetVerbParams(Settings::VerbParams vp) { vp_  = vp; };

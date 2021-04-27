@@ -35,8 +35,8 @@ Augmented::
 Augmented(Settings::Optimizer *settings,
           Simulation::Results::Results *results,
           Model::Model *model) : Objective(settings) {
-  settings_ = settings;
-  results_ = results;
+  seto_ = settings;
+  rslts_ = results;
   model_ = model;
   if (model_ == nullptr) {
     ext_error("Initialize model", md_, cl_, vp_.lnw);
@@ -48,8 +48,8 @@ Augmented(Settings::Optimizer *settings,
 
 double Augmented::value(bool base_case) {
   stringstream ss;
-  auto timeXd = results_->GetValueVectorXd(results_->Time);
-  auto stepXd = results_->GetValueVectorXd(results_->Step);
+  auto timeXd = rslts_->GetValueVectorXd(rslts_->Time);
+  auto stepXd = rslts_->GetValueVectorXd(rslts_->Step);
   auto ntstep = stepXd.size();
 
   auto vstep = VectorXd::LinSpaced(ntstep, 1, ntstep);
@@ -60,7 +60,7 @@ double Augmented::value(bool base_case) {
       double t_val = 0.0;
 
       if (term->prop_type == ECLProp::FieldTotal && term->active) {
-        auto rate_vec = results_->GetValueVectorXd(term->prop_spec);
+        auto rate_vec = rslts_->GetValueVectorXd(term->prop_spec);
         assert(stepXd.size() == rate_vec.size());
         t_val = term->coeff * (stepXd.cwiseProduct(rate_vec)).sum();
 
@@ -77,7 +77,7 @@ double Augmented::value(bool base_case) {
             // instead of using original wlft since wlft is computed using time-steps while slft's are computed
             // using report-steps (not read-in from UNRST), therefore the sum of slft does not match wlft
             // VectorXd wlft = results_->GetValueVectorXd(ECLProp::WellLiqProdTotal, wn); // not used, keep-for-ref
-            vector<VectorXd> slft = results_->GetValVectorSegXd(ECLProp::WellSegLiqFlowTotal, wn);
+            vector<VectorXd> slft = rslts_->GetValVectorSegXd(ECLProp::WellSegLiqFlowTotal, wn);
             if (slft.size() == 0) {
               em_ = "One of [sofr, swfr, sprp, sprd, swct, scsa] not printed in simulator summary.";
               ext_error(em_, md_, cl_, vp_.lnw);
@@ -98,8 +98,8 @@ double Augmented::value(bool base_case) {
             dbg(0, w_slft);
 
             // segment/well-water-cut
-            vector<VectorXd> swct = results_->GetValVectorSegXd(ECLProp::WellSegWaterCut, wn);
-            VectorXd wwct = results_->GetValueVectorXd(ECLProp::WellWaterCut, wn);
+            vector<VectorXd> swct = rslts_->GetValVectorSegXd(ECLProp::WellSegWaterCut, wn);
+            VectorXd wwct = rslts_->GetValueVectorXd(ECLProp::WellWaterCut, wn);
 
             // (relative) standard deviation at each report time
             VectorXd vec(nsegs), sd_vec(ntstep), rsd_vec(ntstep);
@@ -170,9 +170,9 @@ double Augmented::value(bool base_case) {
 
             } else if (term->scaling == "WellNPV" && model_->getObjfScalSz() == 3) {
               // npv measure for the production up to lim_idx
-              VectorXd wopr = results_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
-              VectorXd wwpr = results_->GetValueVectorXd(ECLProp::WellWatProdRate, wn);
-              VectorXd wwir = results_->GetValueVectorXd(ECLProp::WellWatInjRate, wn);
+              VectorXd wopr = rslts_->GetValueVectorXd(ECLProp::WellOilProdRate, wn);
+              VectorXd wwpr = rslts_->GetValueVectorXd(ECLProp::WellWatProdRate, wn);
+              VectorXd wwir = rslts_->GetValueVectorXd(ECLProp::WellWatInjRate, wn);
 
               auto step = stepXd.block(0,0, lim_idx,1);
               auto opr = wopr.block(0,0, lim_idx,1);
@@ -225,7 +225,8 @@ double Augmented::value(bool base_case) {
     em_ += string(ex.what()) + " Returning 0.0";
     ext_error(em_, md_, cl_, vp_.lnw);
   }
-  return value;
+
+  return value / seto_->ScaleObjf();
 }
 
 void Augmented::setUpWaterCutLimit() {
@@ -259,17 +260,17 @@ void Augmented::setUpAugTerms() {
   stringstream ss;
   ss << "Setting up terms in augmeted formulation|";
 
-  for (int ii = 0; ii < settings_->objective().terms.size(); ++ii) {
+  for (int ii = 0; ii < seto_->objective().terms.size(); ++ii) {
     auto *term = new Augmented::Term();
-    term->prop_name_str = settings_->objective().terms.at(ii).prop_name;
-    term->prop_name = results_->GetPropertyKey(term->prop_name_str);
+    term->prop_name_str = seto_->objective().terms.at(ii).prop_name;
+    term->prop_name = rslts_->GetPropertyKey(term->prop_name_str);
 
-    term->coeff = settings_->objective().terms.at(ii).coefficient;
-    term->scaling = settings_->objective().terms.at(ii).scaling;
-    term->active = settings_->objective().terms.at(ii).active;
+    term->coeff = seto_->objective().terms.at(ii).coefficient;
+    term->scaling = seto_->objective().terms.at(ii).scaling;
+    term->active = seto_->objective().terms.at(ii).active;
 
-    term->wells = settings_->objective().terms.at(ii).wells;
-    term->segments = settings_->objective().terms.at(ii).segments;
+    term->wells = seto_->objective().terms.at(ii).wells;
+    term->segments = seto_->objective().terms.at(ii).segments;
     terms_.push_back(term);
 
     if (term->prop_name == ECLProp::FieldOilProdTotal) {

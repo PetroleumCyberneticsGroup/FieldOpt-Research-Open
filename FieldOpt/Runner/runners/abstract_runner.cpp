@@ -405,16 +405,28 @@ void AbstractRunner::PrintCompletionMessage() {
 
   switch (optimizer_->IsFinished()) {
 
-    case Optimization::Optimizer::TerminationCondition::MAX_EVALS_REACHED:
+    case TC::MAX_ITERS_REACHED:
+      cout << "Max # iterations reached." << endl;
+      break;
+
+    case TC::MAX_EVALS_REACHED:
       cout << "Max # fevals reached (not converged)." << endl;
       break;
 
-      case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
+      case TC::MIN_STEP_LENGTH_REACHED:
       cout << "Min step length reached (converged)." << endl;
       break;
 
-    case Optimization::Optimizer::TerminationCondition::OPT_CRITERIA_REACHED:
-      cout << "Opt criteria reached (check DFTR criteria)" << endl;
+    case TC::OPT_CRITERIA_REACHED:
+      cout << "Opt criteria reached" << endl;
+      break;
+
+    case TC::DFTR_CRIT_NORM_1ST_ORD_LT_TOLF:
+      cout << "Crit.norm[1st-order] less than tolf." << endl;
+      break;
+
+    case TC::DFTR_MAX_NUM_RHO_INF_MET:
+      cout << "Max # of rho=-inf met." << endl;
       break;
 
     default: cout << "Unknown termination reason." << endl;
