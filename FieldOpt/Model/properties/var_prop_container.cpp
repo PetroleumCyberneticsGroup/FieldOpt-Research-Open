@@ -527,7 +527,9 @@ void VarPropContainer::ScaleVariables(){
     }
   }
 
-  ext_info(ss.str(), md_, cl_);
+  if (vp_.vOPT >= 1 || vp_.vSET >= 1 || vp_.vMOD >= 1) {
+    ext_info(ss.str(), md_, cl_);
+  }
 
   // ext_warn(wm_, md_, cl_);
   // em_ = "";

@@ -69,9 +69,16 @@ class TRDebug {
   void prntTempCases(int cs=0, bool c1=false, bool c2=false, bool c3=false,
                      bool c4=false, bool c5=false, bool c6=false);
 
-  void prntProgIter(int cs=0,
+  void prntTstCrit(int cs=0, string cr_str="",
+                   VectorXd v0 = VectorXd::Zero(0),
+                   VectorXd v1 = VectorXd::Zero(0),
+                   double d1=0.0, double d2=0.0);
+
+  void prntIterBool(int cs=0,
                     bool c1=false, bool c2=false,
-                    bool c3=false, bool c4=false,
+                    bool c3=false, bool c4=false);
+
+  void prntIterVctr(int cs=0,
                     VectorXd v0 = VectorXd::Zero(0),
                     VectorXd v1 = VectorXd::Zero(0),
                     VectorXd v2 = VectorXd::Zero(0),
@@ -115,7 +122,7 @@ class TRDebug {
   string fn_xchp_, fn_co2m_, fn_pcfs_;
 
   TRFrame* trm_;
-  bool prntDbg_ = true;
+  bool prntDbg_ = false;
 };
 
 }

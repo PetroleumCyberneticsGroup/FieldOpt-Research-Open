@@ -75,7 +75,9 @@ bool Paths::IsSet(Paths::Path path) {
 string Paths::GetPath(Paths::Path path) {
   if (!IsSet(path)) {
     string wm = "Getting unset variable (" + GetPathDesc(path) + ")";
-    ext_warn(wm, md_, cl_, vp_.lnw);
+    if (vp_.vSET >= 1) {
+      ext_warn(wm, md_, cl_, vp_.lnw);
+    }
     return "UNSET";
 
   } else {

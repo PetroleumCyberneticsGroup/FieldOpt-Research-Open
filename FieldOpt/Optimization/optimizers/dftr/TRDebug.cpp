@@ -410,6 +410,7 @@ void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
     ss << "|[@compInitPts] scnd_pt.lpNorm<Infinity>() = ";
     ss << v1.lpNorm<Infinity>();
     ss << " -- tr_piv_thld_ = " << trm_->tr_piv_thld_;
+    ss << "\n";
 
   } else if (cs == 4) {
     ss << "[@compInitPts] (init_pt-scnd_pt).norm() = ";
@@ -457,17 +458,44 @@ void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
   if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
-void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
-                           VectorXd v0, VectorXd v1, VectorXd v2,
-                           double d1, double d2) {
+void TRDebug::prntTstCrit(int cs, string crs,
+                          VectorXd v0, VectorXd v1, double d1, double d2) {
+
   stringstream ss;
-  ss << "[@iterate] ";
+  ss << "[@testCrit] ";
+  if (cs == 1) {
+    string crs_str = "crit stepping " + crs;
+
+    ss << prntVecXd(v0, "mod_crit ");
+    ss << " -- m_crit.n(): " + num2str(v0.norm(), 3, 1);
+    ss << "; epsC=" + num2str(trm_->tr_eps_c_, 3, 1);
+    ss << "|[@testCrit] " << prntVecXd(v1, "x_curr   ");
+    ss << " -- f_curr: " + num2str(d1, 3, 1);
+    ss << ", radius: " + num2str(d2, 3, 1);
+    ss << "|[@testCrit] [crit_stat_= " << crs_str << "]";
+
+  } else if (cs == 2) {
+    ss << FRED << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step" << AEND;
+
+  } else if (cs == 3) {
+    if (v0.norm() < trm_->tr_tol_f_) {
+      ss << "Model criticality < tol_f.";
+      ext_warn(ss.str(), trm_->md_, trm_->cl_);
+    }
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntIterBool(int cs, bool c1, bool c2, bool c3, bool c4) {
+  stringstream ss;
+  ss << "[@iterBool] ";
   if (cs == 1) {
     ss << "Starting ensureImpr @start of iterate";
 
   } else if (cs == 2) {
+    ss << "| ";
     ss << "Impr.pts Y cp; Impr.pts Y nd => " << c1 << " -- ";
-    ss << "Repl.pts Y cp; Repl.pts Y nd => " << c2 << " -- ";
+    ss << "Repl.pts Y cp; Repl.pts Y nd => " << c2 << "| ";
     ss << "Impr.pts N cp; Impr.pts N nd => " << c3 << " -- ";
     ss << "Repl.pts N cp; Repl.pts N nd => " << c4;
 
@@ -479,14 +507,13 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
     ss << "Then computePolyMods. (Interp is checked but not used.)";
 
   } else if (cs == 5) {
-    ss << FRED << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step" << AEND;
-
-  } else if (cs == 6) {
     ss << "Checking if model isLambdaPoised";
     ss << " [crit_prfd_=" << c1 << "] [crit_exec_=" << c2 << "]";
 
-  } else if (cs == 7) {
+  } else if (cs == 6) {
     ss << "Computing step";
+
+  } else if (cs == 7) {
 
   } else if (cs == 8) {
     ss << "Predicted reduction less than some tols";
@@ -496,14 +523,45 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
     ss << "Evaluating objective at trial point";
 
   } else if (cs == 10) {
-    ss << prntVecXd(v0, "mod_crit ");
-    ss << " -- m_crit.n(): " + num2str(v0.norm(), 3, 1);
-    ss << "; epsC=" + num2str(trm_->tr_eps_c_, 3, 1);
-    ss << "|[@iterate] " << prntVecXd(v1, "x_curr   ");
-    ss << " -- f_curr: " + num2str(d1, 3, 1);
-    ss << ", radius: " + num2str(d2, 3, 1);
-    ss << "|[@iterate] [crit_prfd_= " << c1;
-    ss << "] [crit_exec_=" << c2 << "]";
+    ss << "[Part 2A of iter logic]";
+
+  } else if (cs == 11) {
+    ss << "Continue with model improvement";
+
+  } else if (cs == 12) {
+    ss << "[Part 2B of iter logic]";
+
+  } else if (cs == 13) {
+    ss << "End of iterate()";
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntIterVctr(int cs,
+                           VectorXd v0, VectorXd v1, VectorXd v2,
+                           double d1, double d2) {
+  stringstream ss;
+  ss << "[@iterVctr] ";
+  if (cs == 1) {
+
+  } else if (cs == 2) {
+
+  } else if (cs == 3) {
+
+  } else if (cs == 4) {
+
+  } else if (cs == 5) {
+
+  } else if (cs == 6) {
+
+  } else if (cs == 7) {
+
+  } else if (cs == 8) {
+
+  } else if (cs == 9) {
+
+  } else if (cs == 10) {
 
   } else if (cs == 11) {
 
@@ -514,25 +572,7 @@ void TRDebug::prntProgIter(int cs, bool c1, bool c2, bool c3, bool c4,
   } else if (cs == 14) {
 
   }
-
-  if (trm_->vp_.vOPT == 3) {
-    if (cs <= 20) {
-      idbg(ss.str());
-      // } else if (cs > 20 && cs <= 40) {
-      //   ext_warn(ss.str(), trm_->md_, trm_->cl_);
-    }
-  }
-
-  if (trm_->vp_.vOPT >= 1) {
-    if (cs == 21) {
-      if (v0.norm() < trm_->tr_tol_f_) {
-        ss << "Model criticality < tol_f.";
-        ext_warn(ss.str(), trm_->md_, trm_->cl_);
-      }
-    }
-  }
-
-
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 
