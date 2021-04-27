@@ -62,7 +62,7 @@ void TRFrame::moveToBestPt() {
 
 // _________________________________________________________
 // CRITSTEP
-TRFrame::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
+Optimization::Optimizers::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
   // tr_crit_mu_:    factor b/e radius & criticality measure
   // tr_crit_omega_: factor used to reduce radius
   // tr_crit_beta_:  ensure final radius reduction is not drastic
@@ -75,7 +75,7 @@ TRFrame::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
     dbg_->prntCritStep(1, exit_flag, impr_cases_.size(), 0, areImprPtsCd());
     if (!areImprPtsCd() && exit_flag < 3) {
       setIsImprNeeded(true);
-      return ONGOING;
+      return Optimization::Optimizers::ONGOING;
     }
   }
 
@@ -100,7 +100,7 @@ TRFrame::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
         setIsImprNeeded(true);
         // revert to prev rad, reimpl once returning fval had been evaluated
         radius_ = rad_bf_crit_step;
-        return ONGOING;
+        return Optimization::Optimizers::ONGOING;
       }
     }
 
@@ -126,9 +126,9 @@ TRFrame::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
   radius_ = min(rad_bf_crit_step, fin_rad);
   dbg_->prntCritStep(4, 0, 0, 0, F, F, F, rad_bf_crit_step, fin_rad, radius_);
   if (abs(rad_bf_crit_step - radius_) < eps_) {
-    return FAILED;
+    return Optimization::Optimizers::FAILED;
   } else {
-    return SUCCESS;
+    return Optimization::Optimizers::SUCCESS;
   }
 }
 

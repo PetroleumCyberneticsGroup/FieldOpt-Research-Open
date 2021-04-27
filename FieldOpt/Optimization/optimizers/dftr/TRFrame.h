@@ -78,6 +78,7 @@ namespace Optimization {
 namespace Optimizers {
 
 class TRDebug;
+enum critExecStat { ONGOING=0, FAILED=1, SUCCESS=2 };
 
 // ---------------------------------------------------------
 class TRFrame {
@@ -140,7 +141,6 @@ class TRFrame {
   double checkInterp();
   VectorXd measureCrit();
 
-  enum critExecStat { ONGOING=0, FAILED=1, SUCCESS=2 };
   critExecStat critStep(double rad_bf_crit_step);
 
   // TR->[POLYS] ===========================================
