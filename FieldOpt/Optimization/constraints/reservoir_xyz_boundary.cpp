@@ -91,7 +91,7 @@ ReservoirXYZBoundary::ReservoirXYZBoundary(SO& seto, VPC *vars,
 
     box_xyz_cnstrnd_well_ = initWSplineConstraint(wspline_vars, vp);
 
-  } else {
+  } else if (vp_.vOPT >= 4) {
     wm_ = "GetWSplineVars for well ";
     wm_ += seto_.well.toStdString() + " is empty.";
     ext_warn(wm_, md_, cl_, vp_.lnw);
@@ -128,6 +128,9 @@ bool ReservoirXYZBoundary::CaseSatisfiesConstraint(Case *c) {
 }
 
 void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
+  // dbg
+  string s1 = DBG_prntVecXd(c->GetVarVector(wspline_cnstrnd_uuid_vars_));
+  DBG_SnapCase(1, c->id_stdstr(), s1);
 
   double heel_x_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.x);
   double heel_y_val = c->get_real_variable_value(box_xyz_cnstrnd_well_.heel.y);
@@ -154,6 +157,7 @@ void ReservoirXYZBoundary::SnapCaseToConstraints(Case *c) {
   c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.x, projected_toe(0));
   c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.y, projected_toe(1));
   c->set_real_variable_value(box_xyz_cnstrnd_well_.toe.z, projected_toe(2));
+
 }
 
 Eigen::VectorXd ReservoirXYZBoundary::GetLowerBounds(QList<QUuid> id_vector) const {

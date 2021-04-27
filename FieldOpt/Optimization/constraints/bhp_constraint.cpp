@@ -84,16 +84,21 @@ bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
 }
 
 void BhpConstraint::SnapCaseToConstraints(Case *c) {
-  string tm;
-  if (vp_.vOPT >= 4) {
-    tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
-    tm += "for case: " + c->id_stdstr();
-    pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
-    ext_info(tm, md_, cl_, vp_.lnw);
-  }
+  // dbg
+  string s1 = DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  DBG_SnapCase(1, c->id_stdstr(), s1);
 
-  tm = "";
+  // if (vp_.vOPT >= 4) {
+  //   tm = this->name() + " enabled: " + num2str(this->isEnabled(), 0);
+  //   tm += " -- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+  //   tm += "for case: " + c->id_stdstr();
+  //
+  //   pad_text(tm, vp_.lnw);
+  //   tm += "x: " + DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  //   ext_info(tm, md_, cl_, vp_.lnw);
+  // }
+
+  string tm = "";
   for (auto id : bhp_cnstrnd_uuid_vars_) {
     if (c->get_real_variable_value(id) > max_) {
       c->set_real_variable_value(id, max_);
@@ -104,11 +109,15 @@ void BhpConstraint::SnapCaseToConstraints(Case *c) {
     }
   }
 
-  if (vp_.vOPT >= 4 && tm.size() > 0) {
-    pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
-    ext_info(tm, md_, cl_, vp_.lnw);
-  }
+  // dbg
+  s1 = DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  DBG_SnapCase(2, tm, s1);
+
+  // if (vp_.vOPT >= 4 && !tm.empty()) {
+  //   pad_text(tm, vp_.lnw );
+  //   tm += "x: " + DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  //   ext_info(tm, md_, cl_, vp_.lnw);
+  // }
 }
 
 Eigen::VectorXd BhpConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
