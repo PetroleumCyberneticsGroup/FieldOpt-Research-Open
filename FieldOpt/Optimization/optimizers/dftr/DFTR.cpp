@@ -67,7 +67,7 @@ TC DFTR::IsFinished() {
     if (trm_->measureCrit().norm() < tr_tol_f_) {
       tc = DFTR_CRIT_NORM_1ST_ORD_LT_TOLF;
 
-    } else if (tr_lim_inf_ > std::ceil(tr_iter_max_*.05)) {
+    } else if (tr_lim_inf_ > std::ceil(tr_iter_max_*.20)) {
       tc = DFTR_MAX_NUM_RHO_INF_MET;
     }
   }
@@ -99,7 +99,7 @@ void DFTR::updateRadius() {
     trm_->setRad(min(inc_fac * trm_->getRad(), tr_rad_max_));
     trm_->dbg_->prntUpdateRad(2, F, F, trm_->getRad(), step_sz, inc_fac);
 
-  } else if (iter_modl_fl_ && (A || B || (cr_stat_ == TRFrame::SUCCESS))) {
+  } else if (iter_modl_fl_ && (A || B || (cr_stat_ == SUCCESS))) {
     // A good model should have provided a better point.
     // Reduce radius, since error is related to it:
     //        | f(x) - m(x) | < K*(radius)^2
@@ -113,7 +113,7 @@ void DFTR::updateRadius() {
       delay_reduc_ = 0;
     }
 
-    if (delay_reduc_ >= 3 || delay_reduc_ == 0 || (cr_stat_ == TRFrame::SUCCESS)) {
+    if (delay_reduc_ >= 3 || delay_reduc_ == 0 || (cr_stat_ == SUCCESS)) {
       trm_->setRad(tr_gamma_dec_ * trm_->getRad());
       delay_reduc_ = 0;
     }
@@ -130,27 +130,26 @@ void DFTR::updateRadius() {
 bool DFTR::testCriticality() {
   //! -> Measure criticality
   auto cr_mod = trm_->measureCrit();
-
-  trm_->dbg_->prntProgIter(10, F, cr_stat_, F, F,
-                           cr_mod, trm_->getCurrPt(), V, trm_->getCurrFval(), trm_->getRad());
+  trm_->dbg_->prntTstCrit(1, getCrStat(), cr_mod, trm_->getCurrPt(),
+                           trm_->getCurrFval(), trm_->getRad());
 
   //! -> Crit step (possibly close to x*)
   if (cr_mod.norm() <= tr_eps_c_) {
-    trm_->dbg_->prntProgIter(5);
+    trm_->dbg_->prntTstCrit(2);
 
-    if (cr_stat_ != TRFrame::ONGOING) { cr_rad_ini_ = trm_->getRad(); }
+    if (cr_stat_ != ONGOING) { cr_rad_ini_ = trm_->getRad(); }
 
     cr_stat_ = trm_->critStep(cr_rad_ini_);
-    if (cr_stat_ == TRFrame::ONGOING) {
+    if (cr_stat_ == ONGOING) {
       ensureImprPostProc();
       return true;
     }
 
-    trm_->dbg_->prntProgIter(21, F, F, F, F, cr_mod);
+    trm_->dbg_->prntTstCrit(3, getCrStat(), cr_mod);
     if (cr_mod.norm() < tr_tol_f_) { return true; } // check if not obsolete
 
   } else {
-    cr_stat_ = TRFrame::FAILED;
+    cr_stat_ = FAILED;
   }
   return false;
 }
@@ -169,7 +168,7 @@ void DFTR::iterate() {
   double err_mod = 0.0;
 
   if (impr_modl_nx_) {
-    trm_->dbg_->prntProgIter(1);
+    trm_->dbg_->prntIterBool(1);
     mchange_ = trm_->ensureImpr();
     impr_modl_nx_ = ensureImprPostProc();
   }
@@ -181,20 +180,20 @@ void DFTR::iterate() {
 
   auto NIC = !trm_->areImprPtsCd() && !trm_->isImprNeeded();
   auto NRC = !trm_->areReplPtsCd() && !trm_->isReplNeeded();
-  trm_->dbg_->prntProgIter(2, IC, RC, NIC, NRC);
+  trm_->dbg_->prntIterBool(2, IC, RC, NIC, NRC);
 
   if (NIC && NRC) { // 1ST PART ITER LOGIC
     if (enable_logging_) { logger_->AddEntry(this); }
 
     // CODE ->
     if ((trm_->getRad() < tr_rad_tol_) || (iteration_ >= tr_iter_max_)) {
-      trm_->dbg_->prntProgIter(3);
+      trm_->dbg_->prntIterBool(3);
       return; // end of the algorithm
 
     } else {
       // Move among points that are part of the model
       // if (trm_->isLambdaPoised()) {
-      trm_->dbg_->prntProgIter(4);
+      trm_->dbg_->prntIterBool(4);
       trm_->moveToBestPt();
       trm_->computePolyMods();
       err_mod = trm_->checkInterp();
@@ -204,23 +203,22 @@ void DFTR::iterate() {
       if (testCriticality()) { return; };
 
       //! -> Check LambdaPoised
-      trm_->dbg_->prntProgIter(6, F, cr_stat_==TRFrame::ONGOING);
+      trm_->dbg_->prntIterBool(5);
       iter_modl_fl_ = trm_->isLambdaPoised();
 
       //! -> Compute step
-      trm_->dbg_->prntProgIter(7);
+      trm_->dbg_->prntIterBool(6);
       tie(trial_point_, pred_red_) = trm_->solveTrSubprob();
-
       trial_step_ = trial_point_ - trm_->getCurrPt();
 
-
+      trm_->dbg_->prntIterBool(7); // to be filled
 
       //! --
       if ((pred_red_ < tr_rad_tol_ * 1e-2)
         || (pred_red_ < tr_rad_tol_ * abs(trm_->getCurrFval()) && (trial_step_.norm()) < tr_rad_tol_)
         || (pred_red_ < tr_tol_f_ * abs(trm_->getCurrFval()) * 1e-3)) {
 
-        trm_->dbg_->prntProgIter(8);
+        trm_->dbg_->prntIterBool(8);
 
         rho_ = trm_->infd_;
         tr_lim_inf_++;
@@ -228,23 +226,21 @@ void DFTR::iterate() {
         impr_modl_nx_ = ensureImprPostProc();
 
       } else {
-        trm_->dbg_->prntProgIter(9); //! -> Evaluate objective at trial point>
+        trm_->dbg_->prntIterBool(9); //! -> Evaluate objective at trial point>
         Case *new_case = new Case(base_case_);
         new_case->SetRealVarValues(trial_point_);
         case_handler_->AddNewCase(new_case);
         return;
       }
 
-
-
     } // <- CODE
 
   } else { // 2ND PART ITER LOGIC
     auto impr_cs = trm_->getImprCases();
     auto repl_cs = trm_->getReplCases();
-    trm_->dbg_->prntProgIter(11);
 
     if (IC || RC) {
+      trm_->dbg_->prntIterBool(10);
 
       if (impr_cs.empty() == 0){
         for (Case* c: impr_cs) {
@@ -265,13 +261,13 @@ void DFTR::iterate() {
       if ((mchange_ == 1) || (mchange_ == 2)) {
         iteration_--;
       }
-      trm_->dbg_->prntProgIter(12);
+      trm_->dbg_->prntIterBool(11);
       updateRadius();
       return;
       // <- CODE
 
     } else {
-      trm_->dbg_->prntProgIter(13);
+      trm_->dbg_->prntIterBool(12);
       if (trm_->isImprNeeded() && impr_cs.empty() == 0) {
         case_handler_->AddNewCases(impr_cs);
         return;
@@ -284,7 +280,7 @@ void DFTR::iterate() {
     }
 
   } // if (!IC && !RC)
-  trm_->dbg_->prntProgIter(14);
+  trm_->dbg_->prntIterBool(13);
 }
 
 // _________________________________________________________
@@ -447,7 +443,7 @@ bool DFTR::ensureImprPostProc(){
   }
 
   auto E = (impr_cases.empty() && repl_cases.empty());
-  auto F = (cr_stat_ == TRFrame::ONGOING);
+  auto F = (cr_stat_ == ONGOING);
   trm_->dbg_->prntEnsImprPostProc(3, 0, 0, 0, F,
     impr_cases.empty(), repl_cases.empty());
 
