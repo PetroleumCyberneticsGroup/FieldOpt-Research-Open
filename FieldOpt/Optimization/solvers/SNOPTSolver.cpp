@@ -219,7 +219,7 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setXSol(xsol);
   prob.setFSol(fsol);
 
-  // cout << "SNOPT Exit code: " + snoptHandler.getExitCode() << endl;
+  // cout << "sqp_snopt Exit code: " + snoptHandler.getExitCode() << endl;
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
 
 }
@@ -466,7 +466,7 @@ void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) 
   for (int ii = 0; ii < neF_; ii++) {
     Fmul_[ii] = 0;
   }
-  // TODO Extract value from SNOPT operation: Fmul, dual, ++
+  // TODO Extract value from sqp_snopt operation: Fmul, dual, ++
 
 }
 
@@ -526,7 +526,7 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setIntParameter("Hessian frequency",           ????);
   // H.setIntParameter("Hessian updates",                0);
 
-  // Does NOT work in the current version of SNOPT!!!
+  // Does NOT work in the current version of sqp_snopt!!!
   // H.setIntParameter("Hessian flush",    1);
 
 
@@ -652,8 +652,8 @@ bool SNOPTSolver::loadSNOPT(const string lib_name) {
 
   if (rc) {
     string errmsg;
-    errmsg = "Selected NLP solver SNOPT not available.\n"
-             "Tried to obtain SNOPT from shared library \"";
+    errmsg = "Selected NLP solver sqp_snopt not available.\n"
+             "Tried to obtain sqp_snopt from shared library \"";
     errmsg += LSL_SNOPTLibraryName();
     errmsg += "\", but the following error occured:\n";
     errmsg += buf;

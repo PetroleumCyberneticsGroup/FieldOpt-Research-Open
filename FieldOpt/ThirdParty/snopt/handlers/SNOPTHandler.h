@@ -1,5 +1,5 @@
 /***********************************************************
-Created by bellout on 2/10/18 from SNOPT template
+Created by bellout on 2/10/18 from sqp_snopt template
 
 Copyright (C) 2017-2019 Mathias Bellout
 <chakibbb.pcg@gmail.com>
@@ -79,7 +79,7 @@ class SNOPTHandler {
   My_fp usrfun;
 
 
-  // SNOPT Files needed
+  // sqp_snopt Files needed
   FILE *specsFile;
   FILE *printFile;
 

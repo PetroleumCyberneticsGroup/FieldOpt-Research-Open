@@ -65,7 +65,7 @@ class DFTR : public Optimizer {
        ConstraintHandler *constraint_handler = nullptr
   );
 
-  TerminationCondition IsFinished() override;
+  TC IsFinished() override;
   TRFrame *getTRMod() { return trm_; };
 
  protected:

@@ -1,5 +1,5 @@
 /***********************************************************
-Created by bellout on 2/10/18 from SNOPT template
+Created by bellout on 2/10/18 from sqp_snopt template
 
 Copyright (C) 2017-2019 Mathias Bellout
 <mathias.bellout@petroleumcyberneticsgroup.no>
@@ -65,8 +65,8 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
   this->has_snopt_option_file = true;
   if (!FileExists(QString(specname), vp_, md_, cl_)) {
     this->has_snopt_option_file = false;
-    // cout << "-- SNOPT: Couldn't open file: " << string(specname) << "\n";
-    // cout << "-- SNOPT: Using default options for SNOPT\n";
+    // cout << "-- sqp_snopt: Couldn't open file: " << string(specname) << "\n";
+    // cout << "-- sqp_snopt: Using default options for sqp_snopt\n";
   }
 
 
@@ -900,27 +900,27 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
 
   switch (inform) {
     case 101:
-    cout << "-- SNOPT: Specs file read successfully ! \n";
+    cout << "-- sqp_snopt: Specs file read successfully ! \n";
       break;
 
     case 131:
-    cout << "-- SNOPT: Specs file specified\n";
+    cout << "-- sqp_snopt: Specs file specified\n";
       break;
 
     case 132:
-    cout << "-- SNOPT: End-of-file encountered while looking for Specs file\n";
+    cout << "-- sqp_snopt: End-of-file encountered while looking for Specs file\n";
       break;
 
     case 133:
-    cout << "-- SNOPT: End-of-file encountered before finding End\n";
+    cout << "-- sqp_snopt: End-of-file encountered before finding End\n";
       break;
 
     case 134:
-    cout << "-- SNOPT: Endrun found before any valid sets of options\n";
+    cout << "-- sqp_snopt: Endrun found before any valid sets of options\n";
       break;
 
     default:
-    cout << "-- SNOPT: There were " << inform - 134
+    cout << "-- sqp_snopt: There were " << inform - 134
          << " errors while reading Specs\n";
       break;
   }
@@ -931,7 +931,7 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
   // doublereal *rw, integer *lenrw, ftnlen name_len, ftnlen cw_len)
 
   if (inform != 101)
-    cout << "-- SNOPT: Warning: unable to find specs file "
+    cout << "-- sqp_snopt: Warning: unable to find specs file "
          << specname << "\n" << "\n";
 }
 
