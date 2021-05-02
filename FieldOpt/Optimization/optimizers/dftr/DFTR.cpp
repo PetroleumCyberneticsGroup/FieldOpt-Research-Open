@@ -636,32 +636,6 @@ void DFTR::printIteration(double fval_current) {
   WriteLineToFile(QString::fromStdString(str), dftr_log_);
 }
 
-// _________________________________________________________
-// DBGUPDATERAD
-void DFTR::dbgUpdateRad(int c, double step_sz, double inc_fac) {
-
-  im_ = "[updateRadius] ";
-  if (c == 1) {
-    im_ += "rho_ > eta_1_ |";
-  } else if (c == 2) {
-    im_ += "iter_modl_fl_ |";
-  } else if (c == 3) {
-    im_ += "no rad change |";
-  }
-  pad_text(im_, 15);
-
-  im_ += " step_sz: " + num2str(step_sz, 2, 1);
-  im_ += " | inc_fac: " + num2str(inc_fac, 2, 1);
-
-  im_ += " | rad: " + num2str(trm_->getRad(), 2, 1);
-  im_ += " | rad_max_: " + num2str(tr_rad_max_, 2, 1);
-  im_ += " | dly_red_: " + num2str(delay_reduc_, 0, 0);
-  im_ += " | ";
-
-  if (vp_.vOPT >= 3) { idbg(im_); }
-
-}
-
 }
 }
 
