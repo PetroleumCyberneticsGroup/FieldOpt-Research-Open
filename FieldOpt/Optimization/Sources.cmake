@@ -70,7 +70,7 @@ SET(OPTIMIZATION_HEADERS
 		optimizers/dftr/TRFrame.h
 		optimizers/dftr/TRDebug.h
 		optimizers/ensemble_exp_value.h
-#		#
+ 		#
 		# algorithms: gradient-based
 		optimizers/sqp_snopt/SQP_SNOPT.h
 		#
