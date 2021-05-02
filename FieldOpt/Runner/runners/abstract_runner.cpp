@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <PSO.h>
 #include <trust_region/TrustRegionOptimization.h>
 #include <dftr/DFTR.h>
+#include <sqp_snopt/SQP_SNOPT.h>
 #include <GeneticAlgorithm.h>
 #include <RGARDD.h>
 #include <bayesian_optimization/EGO.h>
@@ -37,6 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <CMA_ES.h>
 #include <VFSA.h>
 #include <SPSA.h>
+
 #include <Optimization/hybrid_optimizer.h>
 #include "Simulation/simulator_interfaces/ix_simulator.h"
 #include "abstract_runner.h"
@@ -246,6 +248,9 @@ void AbstractRunner::InitializeBaseCase() {
   }
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔═╗  ╔╦╗  ╦  ╔╦╗  ╦  ╔═╗  ╔═╗  ╦═╗
+// │  │││  │   │     ║ ║  ╠═╝   ║   ║  ║║║  ║  ╔═╝  ║╣   ╠╦╝
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╩     ╩   ╩  ╩ ╩  ╩  ╚═╝  ╚═╝  ╩╚═
 void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
     E("Base Case and Model must be initialized before the Optimizer", md_, cl_);
@@ -253,6 +258,9 @@ void AbstractRunner::InitializeOptimizer() {
 
   switch (settings_->optimizer()->type()) {
 
+    // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
+    // │    │ │  │││  ├─┘  ├─┤  └─┐  └─┐
+    // └─┘  └─┘  ┴ ┴  ┴    ┴ ┴  └─┘  └─┘
     case OptzrTyp::Compass: {
       if (vp_.vRUN >= 1) { ext_info("Using CompassSearch.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
@@ -264,6 +272,9 @@ void AbstractRunner::InitializeOptimizer() {
                                             model_->constraintHandler());
       break;
     }
+      // ┌─┐  ┌─┐  ┌─┐  ┌─┐
+      // ├─┤  ├─┘  ├─┘  └─┐
+      // ┴ ┴  ┴    ┴    └─┘
     case OptzrTyp::APPS: {
       if (vp_.vRUN >= 1) { ext_info("Using APPS.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::APPS(settings_->optimizer(),
@@ -275,6 +286,9 @@ void AbstractRunner::InitializeOptimizer() {
                                    model_->constraintHandler());
       break;
     }
+      // ┌─┐  ┌─┐  ┌─┐
+      // ├─┘  └─┐  │ │
+      // ┴    └─┘  └─┘
     case OptzrTyp::PSO: {
       if (vp_.vRUN >= 1) { ext_info("Using PSO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::PSO(settings_->optimizer(),
@@ -286,6 +300,9 @@ void AbstractRunner::InitializeOptimizer() {
                                   model_->constraintHandler());
       break;
     }
+      // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌─┐
+      //  │   ├┬┘   ││  ├┤   │ │
+      //  ┴   ┴└─  ─┴┘  └    └─┘
     case OptzrTyp::TrustRegionOptimization: {
       if (vp_.vRUN >= 1) { ext_info("Using TR-DFO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
@@ -297,8 +314,11 @@ void AbstractRunner::InitializeOptimizer() {
                                                       model_->constraintHandler());
       break;
     }
+      // ┌┬┐  ┌─┐  ┌┬┐  ┬─┐
+      //  ││  ├┤    │   ├┬┘
+      // ─┴┘  └     ┴   ┴└─
     case OptzrTyp::DFTR: {
-      if (vp_.vRUN >= 1) { ext_info("Using TR-DFO [DFTR].", md_, cl_, vp_.lnw); }
+      if (vp_.vRUN >= 1) { ext_info("Using DFTR [TR-DFO].", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::DFTR(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
@@ -308,74 +328,102 @@ void AbstractRunner::InitializeOptimizer() {
                                    model_->constraintHandler());
       break;
     }
+      // ┌─┐  ┌─┐   ┌─┐
+      // └─┐  │─┼┐  ├─┘
+      // └─┘  └─┘└  ┴
+    case OptzrTyp::SQP: {
+      if (vp_.vRUN >= 1) { ext_info("Using SQP [SNOPT].", md_, cl_, vp_.lnw); }
+      optimizer_ = new Optzr::SQP_SNOPT(settings_->optimizer(),
+                                   base_case_,
+                                   model_,
+                                   simulator_,
+                                   logger_,
+                                   nullptr,
+                                   model_->constraintHandler());
+      break;
+    }
+      // ┌─┐  ┌─┐
+      // │ ┬  ├─┤
+      // └─┘  ┴ ┴
     case OptzrTyp::GeneticAlgorithm: {
       if (vp_.vRUN >= 1) { ext_info("Using GA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::RGARDD(settings_->optimizer(),
                                      base_case_,
                                      model_->variables(),
                                      model_->grid(),
-                                     logger_
-                                    );
+                                     logger_);
       break;
     }
+      // ┌─┐  ┌─┐  ┌─┐
+      // ├┤   │ ┬  │ │
+      // └─┘  └─┘  └─┘
     case OptzrTyp::EGO: {
       if (vp_.vRUN >= 1) { ext_info("Using EGO.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::BayesianOptimization::EGO(settings_->optimizer(),
                                                         base_case_,
                                                         model_->variables(),
                                                         model_->grid(),
-                                                        logger_
-                                                       );
+                                                        logger_);
       break;
     }
+      // ┌─┐  ─┐ ┬  ┬ ┬  ┌─┐  ┬─┐  ┌─┐  ┬ ┬  ┬┬  ┌┬┐
+      // ├┤   ┌┴┬┘  ├─┤  └─┐  ├┬┘  │    ├─┤  ││   ││
+      // └─┘  ┴ └─  ┴ ┴  └─┘  ┴└─  └─┘  ┴ ┴  ┴┴  ─┴┘
     case OptzrTyp::ExhaustiveSearch2DVert: {
       if (vp_.vRUN >= 1) { ext_info("Using ExhaustiveSearch2DVert.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::ExhaustiveSearch2DVert(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
                                                      model_->grid(),
-                                                     logger_
-                                                    );
+                                                     logger_);
       break;
     }
+      // ┬ ┬  ┬ ┬  ┌┐   ┬─┐  ┬  ┌┬┐
+      // ├─┤  └┬┘  ├┴┐  ├┬┘  │   ││
+      // ┴ ┴   ┴   └─┘  ┴└─  ┴  ─┴┘
     case OptzrTyp::Hybrid: {
       if (vp_.vRUN >= 1) { ext_info("Using Hybrid optimization.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
                                                      base_case_,
                                                      model_->variables(),
                                                      model_->grid(),
-                                                     logger_
-                                                    );
+                                                     logger_);
       break;
     }
+      // ┌─┐  ┌┬┐  ┌─┐       ┌─┐  ┌─┐
+      // │    │││  ├─┤  ───  ├┤   └─┐
+      // └─┘  ┴ ┴  ┴ ┴       └─┘  └─┘
     case OptzrTyp::CMA_ES: {
       if (vp_.vRUN >= 1) { ext_info("Using CMA_ES.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::CMA_ES(settings_->optimizer(),
                                      base_case_,
                                      model_->variables(),
                                      model_->grid(),
-                                     logger_
-                                    );
+                                     logger_);
       break;
     }
+      // ┬  ┬  ┌─┐  ┌─┐  ┌─┐
+      // └┐┌┘  ├┤   └─┐  ├─┤
+      //  └┘   └    └─┘  ┴ ┴
     case OptzrTyp::VFSA: {
       if (vp_.vRUN >= 1) { ext_info("Using VFSA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::VFSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
                                    model_->grid(),
-                                   logger_
-                                  );
+                                   logger_);
       break;
     }
+      // ┌─┐  ┌─┐  ┌─┐  ┌─┐
+      // └─┐  ├─┘  └─┐  ├─┤
+      // └─┘  ┴    └─┘  ┴ ┴
     case OptzrTyp::SPSA: {
       if (vp_.vRUN >= 1) { ext_info("Using SPSA.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::SPSA(settings_->optimizer(),
                                    base_case_,
                                    model_->variables(),
                                    model_->grid(),
-                                   logger_
-                                  );
+                                   logger_);
       break;
     }
     default: {
@@ -389,6 +437,9 @@ void AbstractRunner::InitializeOptimizer() {
     rts_->paths().GetPathQstr(Paths::OUTPUT_DIR));
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╦╔═  ╦╔═  ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╦═╗
+// │  │││  │   │   ╠╩╗  ║ ║  ║ ║  ╠╩╗  ╠╩╗  ║╣   ║╣   ╠═╝  ║╣   ╠╦╝
+// ┴  ┘└┘  ┴   ┴   ╚═╝  ╚═╝  ╚═╝  ╩ ╩  ╩ ╩  ╚═╝  ╚═╝  ╩    ╚═╝  ╩╚═
 void AbstractRunner::InitializeBookkeeper() {
   if (settings_ == nullptr || optimizer_ == nullptr) {
     E("Settings and Optimizer must be initialized before the Bookkeeper.", md_, cl_);
@@ -409,7 +460,7 @@ void AbstractRunner::PrintCompletionMessage() {
       cout << "Max # fevals reached (not converged)." << endl;
       break;
 
-      case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
+    case Optimization::Optimizer::TerminationCondition::MIN_STEP_LENGTH_REACHED:
       cout << "Min step length reached (converged)." << endl;
       break;
 
