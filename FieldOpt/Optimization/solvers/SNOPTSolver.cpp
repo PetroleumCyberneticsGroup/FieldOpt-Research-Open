@@ -29,6 +29,9 @@ namespace Optimizers {
 static Optimization::Optimizer::EmbeddedProblem *prob_ = nullptr;
 
 // Rosenbrock cost function def
+// ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╗╔  ╔╗   ╦═╗  ╔═╗  ╔═╗  ╦╔═
+// ╠╦╝  ║ ║  ╚═╗  ║╣   ║║║  ╠╩╗  ╠╦╝  ║ ║  ║    ╠╩╗
+// ╩╚═  ╚═╝  ╚═╝  ╚═╝  ╝╚╝  ╚═╝  ╩╚═  ╚═╝  ╚═╝  ╩ ╩
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -78,6 +81,9 @@ int Rosenbrock_(integer  *Status, integer *n,    double x[],
 }
 
 // Cost function def
+// ╔╦╗  ╦═╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗
+//  ║   ╠╦╝  ║║║  ║ ║   ║║  ╠═╣
+//  ╩   ╩╚═  ╩ ╩  ╚═╝  ═╩╝  ╩ ╩
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -163,6 +169,108 @@ int TRMod_A_(integer *Status, integer *n, doublereal x[],
   return 0;
 }
 
+// SQP cost function def
+// ╔═╗  ╔═╗   ╔═╗
+// ╚═╗  ║═╬╗  ╠═╝
+// ╚═╝  ╚═╝╚  ╩
+#ifdef __cplusplus
+extern "C" {
+#endif
+int SQP_(integer *Status, integer *n, double x[],
+         integer *needF,  integer *neF, double F[],
+         integer *needG,  integer *neG, double G[],
+         char *cu, integer *lencu,
+         integer iu[], integer *leniu,
+         double ru[], integer *lenru);
+#ifdef __cplusplus
+}
+#endif
+
+int SQP_(integer  *Status, integer *n,    double x[],
+         integer  *needF,  integer *neF,  double F[],
+         integer  *needG,  integer *neG,  double G[],
+         char     *cu,     integer *lencu,
+         integer  iu[],    integer *leniu,
+         double   ru[],    integer *lenru ) {
+
+  bool dbg = false;
+
+  // x -> eigen format
+  Eigen::VectorXd xv(*n);
+  for (int ii = 0; ii < *n; ii++) {
+    xv(ii) = x[ii];
+  }
+
+  // if (dbg) {
+  //   cout << "Debug c, g, gT, H:";
+  //   cout << "c = \n" << c << endl;
+  //   cout << "g = \n" << g << endl;
+  //   cout << "H = \n" << H << endl;
+  //   cout << "xv = \n" << xv << endl;
+  // }
+
+  int m = (int)*neF - 1;  // # of constraints
+
+  double c = 0.0;
+  double f = 0.0;
+  Eigen::VectorXd g = Eigen::VectorXd::Zero(*n);
+
+  prob_->tcase_->SetRealVarValues(xv);
+  prob_->model_->ApplyCase(prob_->tcase_);
+  prob_->simulator_->Evaluate();
+  f = prob_->tcase_->objf_value();
+  g = Eigen::VectorXd::Zero(*n);
+
+  if (*needF > 0) {
+
+    // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐    ╔═╗
+    // │    │ │  │││  ├─┘  │ │   │   ├┤     ╠╣
+    // └─┘  └─┘  ┴ ┴  ┴    └─┘   ┴   └─┘    ╚
+    // F[0] = c + g.transpose()*xv + 0.5*xv.transpose()*H*xv;
+    F[0] = f;
+
+    if (m) {
+      // Add nonlinear constraints to tr prob
+      // F[1] = ...
+      // F[2] = ...
+    }
+  }
+
+  if (*needG > 0) {
+
+    // ┌─┐  ┌─┐  ┌┬┐    ╔═╗
+    // │ ┬  ├┤    │     ║ ╦
+    // └─┘  └─┘   ┴     ╚═╝
+    // Eigen::VectorXd gv = g.transpose() + xv.transpose()*H;
+    Eigen::VectorXd gv = g;
+
+    if (dbg) { cout << "gv = \n" << gv << endl; }
+
+    for (int ii = 0; ii < *n; ii++) {
+      G[ii] = gv(ii);
+    }
+
+    if (m) {
+      // Standalone nonlinear constraint
+      int n_nlc = 1; // # of standalone nlc
+      // G[(*n) + n_nlc] = ...  // standalone constraint #1
+      n_nlc++;
+      // G[(*n) + n_nlc] = ...  // standalone constraint #2
+
+      // Matrix of nl constraints gradients (1 constraint / row)
+      // # of constraints = # of rows
+      Eigen::MatrixXd gcm;  // = ...
+      // Derivatives of constraints
+      for (int ii = 0; ii < gcm.rows(); ii++) { // # of c
+        for (int jj = 0; jj < gcm.cols(); jj++) { // # of vars
+          // G[(*n) + i + j] = ...
+        }
+      }
+    }
+  }
+  return 0;
+}
+
 SNOPTSolver::SNOPTSolver() {
     loadSNOPT();
 }
@@ -184,12 +292,18 @@ SNOPTSolver::~SNOPTSolver() {
   delete[] Fnames_;
 }
 
+// ╔═╗  ╔═╗  ╔╦╗  ╦ ╦  ╔═╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╦    ╦  ╦  ╔═╗  ╦═╗
+// ╚═╗  ║╣    ║   ║ ║  ╠═╝    ╚═╗  ║║║  ║ ║  ╠═╝   ║     ╚═╗  ║ ║  ║    ╚╗╔╝  ║╣   ╠╦╝
+// ╚═╝  ╚═╝   ╩   ╚═╝  ╩      ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╚═╝  ╩═╝   ╚╝   ╚═╝  ╩╚═
 void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &prob) {
 
   if (prob.getProbName() == "TRMod_A") {
     subprobTRModA(prob);
 
   } else  if (prob.getProbName() == "TRMod_B") {
+
+  } else  if (prob.getProbName() == "SQP") {
+    subprobSQP(prob);
 
   } else if (prob.getProbName() == "Rosenbrock") {
     subprobRosenbrock(prob);
@@ -221,9 +335,142 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
 
   // cout << "sqp_snopt Exit code: " + snoptHandler.getExitCode() << endl;
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
-
 }
 
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╔═╗  ╔═╗   ╔═╗
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗    ╚═╗  ║═╬╗  ╠═╝
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝    ╚═╝  ╚═╝╚  ╩
+void SNOPTSolver::subprobSQP(Optimization::Optimizer::EmbeddedProblem &prob) {
+
+//  cout << "Specs for TRMod subproblem A" << endl;
+
+  n_ = prob.getNunVars(); // # of variables
+  m_ = prob.getNunNnlConst(); // # of nonlinear c
+
+  // Total # of constraints + objective (length of F vector)
+  neF_ = m_ + 1; // l = 2
+  // # of linear constraints
+  lenA_ = prob.getNumLinConst();
+
+  // Length of grad vector (dim of iGfun jGvar arrays)
+  // --> n: (length of obj.grad = # of vars) +
+  // --> m * n: (# of constraints) * (# of vars)
+  lenG_ = n_ + m_ * n_;
+
+  // The objective could be any component of F; here the
+  // objective is specified as the first component of F
+  objRow_ = 0;
+
+  // Add nothing to objective for output purposes
+  objAdd_ = 0.0;
+
+  // Allocate memory
+
+  // Objective
+  F_ = new double[neF_];
+  Flow_ = new double[neF_];
+  Fupp_ = new double[neF_];
+  Fmul_ = new double[neF_];
+  Fstate_ = new integer[neF_];
+
+  // Variables
+  x_ = new double[n_];
+  xlow_ = new double[n_];
+  xupp_ = new double[n_];
+  xmul_ = new double[n_];  // Lagrange mulpliers
+  xstate_ = new integer[n_];  // state of variables
+
+  iGfun_ = new integer[lenG_];
+  jGvar_ = new integer[lenG_];
+
+  // Linear constraints
+
+  // iAfun_ = new integer[lenA_];
+  // jAvar_ = new integer[lenA_];
+  // A_ = new double[lenA_];
+
+  // No linear constraints
+  iAfun_ = nullptr;
+  jAvar_ = nullptr;
+  A_     = nullptr;
+
+  xnames_ = new char[nxnames_ * 8];
+  Fnames_ = new char[nxnames_ * 8];
+
+  // Bounds objective
+  Flow_[0] = prob.getFLb()(0);
+  Fupp_[0] = prob.getFUb()(0);
+  // Flow_[0] = -infinity_;
+  // Fupp_[0] = infinity_;
+
+  // Bounds nonlinear constraints
+  for (int ii = 1; ii < neF_; ii++) {
+    Flow_[ii] = prob.getFLb()(ii);
+    Fupp_[ii] = prob.getFUb()(ii);
+    // Flow_[ii] = -infinity_;
+    // Fupp_[ii] = infinity_;
+  }
+
+  // Bounds variables
+  for (int ii = 0; ii < n_; ii++) {
+    xlow_[ii] = prob.getXLb()(ii);
+    xupp_[ii] = prob.getXUb()(ii);
+    // xlow_[ii] = -infinity_;
+    // xupp_[ii] = infinity_;
+  }
+
+  // Initial point
+  for (int ii = 0; ii < n_; ii++) {
+    x_[ii] =  prob.getXInit()(ii);
+    // x_[ii] = 0.0;
+  }
+
+  // Gradient indices of objective
+  for (int ii = 0; ii < n_; ii++) {
+    iGfun_[ii] = 0;
+    jGvar_[ii] = ii;
+
+    // ilc: loop over # of (linear) constraints
+    for (int ilc = 0; ilc < lenA_; ilc++) {
+      iAfun_[ii + ilc * n_] = m_ + 1 + ilc; // <- sure about this m_?
+      jAvar_[ii + ilc * n_] = ii;
+      A_[ii + ilc * n_] = 0; // <- coeff. of linear constraints
+      //TODO If linear c: introduce coefficients here
+    }
+  }
+
+  if (m_ != 0) {  // if having nonlinear constraints
+    // Fill in constraint indices
+    for (int jj = 1; jj <= m_; jj++) {
+      for (int ii = 0; ii < n_; ii++) {
+        iGfun_[ii + jj * n_] = jj;
+        jGvar_[ii + jj * n_] = ii;
+      }
+    }
+  }
+
+  // Nonzero structure of the Jacobian
+  neG_ = lenG_;
+  neA_ = lenA_;
+
+  // If initial guess provided then states should be zero
+  for (int ii = 0; ii < n_; ii++) {
+    xstate_[ii] = 0;
+  }
+
+  // Fmul is the vector with the estimation of the Lagrange
+  // Multipliers; it will be always zero except in very rare
+  // cases of benchmarking performance with them set to some
+  // initial guess
+  for (int ii = 0; ii < neF_; ii++) {
+    Fmul_[ii] = 0;
+  }
+  // TODO Extract value from sqp_snopt operation: Fmul, dual, ++
+}
+
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╗╔  ╔╗   ╦═╗  ╔═╗  ╔═╗  ╦╔═
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗    ╠╦╝  ║ ║  ╚═╗  ║╣   ║║║  ╠╩╗  ╠╦╝  ║ ║  ║    ╠╩╗
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝    ╩╚═  ╚═╝  ╚═╝  ╚═╝  ╝╚╝  ╚═╝  ╩╚═  ╚═╝  ╚═╝  ╩ ╩
 void SNOPTSolver::subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &prob) {
 
   // cout << "Specs for Rosenbrock subproblem" << endl;
@@ -341,6 +588,9 @@ void SNOPTSolver::subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &pr
   }
 }
 
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╔╦╗  ╦═╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗     ║   ╠╦╝  ║║║  ║ ║   ║║  ╠═╣
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝     ╩   ╩╚═  ╩ ╩  ╚═╝  ═╩╝  ╩ ╩
 void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) {
 
 //  cout << "Specs for TRMod subproblem A" << endl;
@@ -467,9 +717,11 @@ void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) 
     Fmul_[ii] = 0;
   }
   // TODO Extract value from sqp_snopt operation: Fmul, dual, ++
-
 }
 
+// ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╔╦╗  ╦  ╔═╗  ╔╗╔  ╔═╗
+// ╚═╗  ║╣    ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║     ║ ║  ╠═╝   ║   ║  ║ ║  ║║║  ╚═╗
+// ╚═╝  ╚═╝   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╩     ╩   ╩  ╚═╝  ╝╚╝  ╚═╝
 void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::EmbeddedProblem &prob) {
 
   H.setProbName(prob.getProbName().c_str());
@@ -491,6 +743,9 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
     H.setUserFun(TRMod_A_);
 
   } else  if (prob.getProbName() == "TRMod_B") {
+
+  } else  if (prob.getProbName() == "SQP") {
+    H.setUserFun(SQP_);
 
   } else if (prob.getProbName() == "Rosenbrock") {
     H.setUserFun(Rosenbrock_);
@@ -598,6 +853,9 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 
 }
 
+// ╦  ╔╗╔  ╦  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗  ╦ ╦  ╔═╗  ╔╗╔  ╔╦╗  ╦    ╔═╗  ╦═╗
+// ║  ║║║  ║   ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║   ╠═╣  ╠═╣  ║║║   ║║  ║    ║╣   ╠╦╝
+// ╩  ╝╚╝  ╩   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩   ╩ ╩  ╩ ╩  ╝╚╝  ═╩╝  ╩═╝  ╚═╝  ╩╚═
 SNOPTHandler SNOPTSolver::initSNOPTHandler() {
 
   SNOPTHandler snoptHandler(prnt_file_.c_str(), smry_file_.c_str(), optn_file_.c_str());
@@ -614,6 +872,9 @@ SNOPTHandler SNOPTSolver::initSNOPTHandler() {
 }
 
 
+// ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╦    ╦  ╦  ╔═╗  ╦═╗
+// ╠╦╝  ║╣   ╚═╗  ║╣    ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║     ╚═╗  ║ ║  ║    ╚╗╔╝  ║╣   ╠╦╝
+// ╩╚═  ╚═╝  ╚═╝  ╚═╝   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╚═╝  ╩═╝   ╚╝   ╚═╝  ╩╚═
 void SNOPTSolver::resetSNOPTSolver() {
 
   for (int i = 0; i < n_; i++) {
@@ -629,7 +890,9 @@ void SNOPTSolver::resetSNOPTSolver() {
   }
 }
 
-
+// ╦    ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗
+// ║    ║ ║  ╠═╣   ║║    ╚═╗  ║║║  ║ ║  ╠═╝   ║
+// ╩═╝  ╚═╝  ╩ ╩  ═╩╝    ╚═╝  ╝╚╝  ╚═╝  ╩     ╩
 bool SNOPTSolver::loadSNOPT(const string lib_name) {
 
 // #ifdef NDEBUG

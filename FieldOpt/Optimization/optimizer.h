@@ -38,6 +38,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Optimization/objective/objective.h"
 
 #include "Model/model.h"
+#include "Simulation/simulator_interfaces/simulator.h"
 #include "Model/properties/var_prop_container.h"
 
 #include "Runner/loggable.hpp"
@@ -47,6 +48,10 @@ If not, see <http://www.gnu.org/licenses/>.
 
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
+
+namespace Model {
+class Model;
+}
 
 namespace Simulation {
 class Simulator;
@@ -220,6 +225,7 @@ class Optimizer : public Loggable
   map<string, vector<double>> GetValues() override;
 
  public:
+
   class EmbeddedProblem {
    public:
 
@@ -281,6 +287,20 @@ class Optimizer : public Loggable
     VectorXd getTrG() { return tr_g_; }
     MatrixXd getTrH() { return tr_H_; }
 
+
+
+    // TEST
+    double getSqpC() { return sqp_c_; }
+    VectorXd getSqpG() { return sqp_g_; }
+    MatrixXd getSqpH() { return sqp_H_; }
+
+    Case *tcase_ = nullptr;
+    Model::Model *model_ = nullptr;
+    Simulation::Simulator *simulator_ = nullptr;
+    // Runner::EmbeddedRunner *runner_ = nullptr;
+
+
+
     VectorXd getXSol() {
       return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
     }
@@ -309,6 +329,10 @@ class Optimizer : public Loggable
     VectorXd tr_g_;
     MatrixXd tr_H_;
 
+    double sqp_c_;
+    VectorXd sqp_g_;
+    MatrixXd sqp_H_;
+
     vector<double> xsol_;
     vector<double> fsol_;
     int tr_exit_flag_;
@@ -316,6 +340,13 @@ class Optimizer : public Loggable
     int SNOPT_exit_code_;
     string SNOPT_error_msg_;
   };
+
+
+
+
+
+
+
 
  protected:
   void updateTentativeBestCase(Case *c);

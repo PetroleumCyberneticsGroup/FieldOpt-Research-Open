@@ -105,6 +105,7 @@ class SNOPTSolver {
   // Setup for subproblems
   void subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob);
   void subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &prob);
+  void subprobSQP(Optimization::Optimizer::EmbeddedProblem &prob);
 
   // sqp_snopt functions / set sqp_snopt params
   bool loadSNOPT(string lib_name = "libsnopt-7.2.12.2.so");

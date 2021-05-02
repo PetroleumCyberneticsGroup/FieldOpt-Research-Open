@@ -676,8 +676,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // Trust Region parameters :: Lower bound
     if (json_params.contains("TR-LowerBnd")) {
       if (json_params.contains("TR-UpperBnd")) {
-        if (json_params["TR-LowerBnd"].toDouble() <
-            json_params["TR-UpperBnd"].toDouble()) {
+        if (json_params["TR-LowerBnd"].toDouble() < json_params["TR-UpperBnd"].toDouble()) {
           params.tr_lower_bnd = json_params["TR-LowerBnd"].toDouble();
         } else { E(ind_val + "TR-LowerBnd", md_, cl_); }
       } else {
@@ -688,8 +687,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // Trust Region parameters :: Upper bound
     if (json_params.contains("TR-UpperBnd")) {
       if (json_params.contains("TR-LowerBnd")) {
-        if (json_params["TR-LowerBnd"].toDouble() <
-            json_params["TR-UpperBnd"].toDouble()) {
+        if (json_params["TR-LowerBnd"].toDouble() < json_params["TR-UpperBnd"].toDouble()) {
           params.tr_upper_bnd = json_params["TR-UpperBnd"].toDouble();
         } else { E(ind_val + "TR-UpperBnd", md_, cl_); }
       } else {
@@ -710,6 +708,18 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     } else {
       params.rng_seed = std::time(0);
     }
+
+    // -----------------------------------------------------
+    //  SQP [SNOPT] PARAMS
+    set_opt_prop_double(params.sqp_ftol, json_params, "SQP-ftol", vp_);
+
+
+
+
+
+
+
+
 
 
   } catch (std::exception const &ex) {
@@ -917,6 +927,9 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
 
   } else if (QString::compare(type, "DFTR") == 0) {
     opt_type = OptimizerType::DFTR;
+
+  } else if (QString::compare(type, "SQP") == 0) {
+    opt_type = OptimizerType::SQP;
 
   } else {
     em_ = "Optimizer type " + type.toStdString() + " not recognized.";

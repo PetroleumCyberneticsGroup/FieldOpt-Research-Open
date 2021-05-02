@@ -24,6 +24,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #define FIELDOPT_OPTIMIZATION_OPTIMIZERS_SQP_SNOPT_SQP_SNOPT_H_
 
 #include "Optimization/optimizer.h"
+#include <Optimization/solvers/SNOPTSolver.h>
 
 using namespace Eigen;
 using namespace std;
@@ -40,23 +41,36 @@ using TC = Optimization::Optimizer::TerminationCondition;
 class SQP_SNOPT : public Optimizer {
 
  public:
-  SQP_SNOPT(Settings::Optimizer *seto, Case *bscs,
-            VarPropContainer *vars, Reservoir::Grid::Grid *grid,
+  SQP_SNOPT(Settings::Optimizer *seto,
+            Case *bscs,
+            Model::Model *model,
+            Simulation::Simulator *simulator,
             Logger *logger, CaseHandler *case_handler = nullptr,
-            Constraints::ConstraintHandler *constraint_handler = nullptr
-           );
+            Constraints::ConstraintHandler *constraint_handler = nullptr);
 
-  TC IsFinished() override;
+  TC IsFinished() override {};
 
  protected:
-  void iterate() override;
-  void handleEvaluatedCase(Case *c) override;
+  void iterate() override {};
+  void handleEvaluatedCase(Case *c) override {};
 
  private:
   // FO constructs
   Settings::Optimizer *seto_;
   Model::Properties::VarPropContainer *vars_;
+
   Case *bscs_;
+  // Runner::EmbeddedRunner *runner_;
+  Model::Model *model_;
+  Simulation::Simulator *simulator_;
+
+  // SNOPT solver
+  SNOPTSolver *SNOPTSolver_;
+
+  tuple<VectorXd, double, int> solver(VectorXd x, VectorXd bl, VectorXd bu);
+
+  VectorXd x_;
+  int getXDim() { return (int)x_.rows(); }
 
   // Dbg constructs
   string md_ = "Optimization/optimizers/sqp_snopt";

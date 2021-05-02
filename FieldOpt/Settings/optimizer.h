@@ -57,7 +57,7 @@ class Optimizer
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
     EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
-    DFTR
+    DFTR, SQP
   };
 
   enum OptimizerMode { Maximize, Minimize };
@@ -209,6 +209,9 @@ class Optimizer
     std::string tr_basis = "diagonalHessian";
 
     std::string tr_prob_name = "prob0"; // dbg
+
+    // SQP [SNOPT] parameters ------------------------------
+    double sqp_ftol = 1e-6;
 
     // VFSA Parameters -------------------------------------
     //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
