@@ -345,11 +345,12 @@ inline void info(const std::string &text, int lw=163) {
 // ├───────┴──────────────────────┴──────────────────────────────────────┤
 inline void idbg(const std::string &text, int lw=163) {
   std::stringstream ss;
-  ss << "\n"; // << FLGREEN
+  // ss << "\n"; // << FLGREEN
   auto lines = split_line(text, lw - 4);
   for (auto line : lines) {
     pad_text(line, lw - 4);
-    ss << "│ ■ " << line << " │" << "\n";
+    // ss << "│ ■ " << line << " │" << "\n";
+    ss << "\n" << "| = " << line << " |";
   }
   // ss << AEND;
   std::cout << ss.str();

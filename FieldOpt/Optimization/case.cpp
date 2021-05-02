@@ -258,6 +258,14 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
   return new_cases;
 }
 
+Eigen::VectorXd Case::GetVarVector(QList<QUuid> vars) {
+  Eigen::VectorXd vec(vars.length());
+  for (int i = 0; i < vars.length(); ++i) {
+    vec[i] = get_real_variable_value(vars.at(i));
+  }
+  return vec;
+}
+
 Eigen::VectorXd Case::GetRealVarVector() {
   Eigen::VectorXd vec(real_id_index_map_.length());
   for (int i = 0; i < real_id_index_map_.length(); ++i) {

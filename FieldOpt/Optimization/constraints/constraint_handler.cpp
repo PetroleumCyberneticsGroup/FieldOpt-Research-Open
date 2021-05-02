@@ -225,7 +225,7 @@ ConstraintHandler::ConstraintHandler(Settings::Optimizer *opt_settings,
     }
   }
 
-  if (opt_settings->Scaling() && !constraint_set_.empty()) {
+  if (opt_settings->ScaleVars() && !constraint_set_.empty()) {
     variables->ScaleVariables();
   }
 
@@ -246,8 +246,10 @@ void ConstraintHandler::SnapCaseToConstraints(Case *c) {
   // \todo Case c may contain other vars besides real vars
   auto vec_before = c->GetRealVarVector();
 
-  for (Constraint *constraint : constraints_) {
-    constraint->SnapCaseToConstraints(c);
+  for (Constraint *con : constraints_) {
+    if(con->isEnabled()) {
+      con->SnapCaseToConstraints(c);
+    }
   }
 
   if (vec_before != c->GetRealVarVector()) {

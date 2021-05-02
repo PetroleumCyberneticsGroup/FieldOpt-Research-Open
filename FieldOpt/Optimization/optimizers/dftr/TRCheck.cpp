@@ -62,21 +62,21 @@ void TRFrame::moveToBestPt() {
 
 // _________________________________________________________
 // CRITSTEP
-bool TRFrame::critStep(double rad_bf_crit_step) {
-
+Optimization::Optimizers::critExecStat TRFrame::critStep(double rad_bf_crit_step) {
   // tr_crit_mu_:    factor b/e radius & criticality measure
   // tr_crit_omega_: factor used to reduce radius
   // tr_crit_beta_:  ensure final radius reduction is not drastic
   // tr_tol_rad_:    tolerance of TR algorithm
-  // tr_tol_f:
-
   int exit_flag = 0; // use?
 
   //! Run ensureImpr
   if (!isLambdaPoised() || isModOld()) {
     exit_flag = ensureImpr();
     dbg_->prntCritStep(1, exit_flag, impr_cases_.size(), 0, areImprPtsCd());
-    if (!areImprPtsCd() && exit_flag < 3) { setIsImprNeeded(true); return true; }
+    if (!areImprPtsCd() && exit_flag < 3) {
+      setIsImprNeeded(true);
+      return Optimization::Optimizers::ONGOING;
+    }
   }
 
   //! Get gradient (g) at TR center
@@ -96,32 +96,40 @@ bool TRFrame::critStep(double rad_bf_crit_step) {
     if (!isLambdaPoised() || isModOld()) {
       exit_flag = ensureImpr();
       dbg_->prntCritStep(2, exit_flag, impr_cases_.size(), 0, areImprPtsCd());
-      if (!areImprPtsCd() && exit_flag < 3) { setIsImprNeeded(true); return true; }
+      if (!areImprPtsCd() && exit_flag < 3) {
+        setIsImprNeeded(true);
+        // revert to prev rad, reimpl once returning fval had been evaluated
+        radius_ = rad_bf_crit_step;
+        return Optimization::Optimizers::ONGOING;
+      }
     }
 
     //! Check radius against tols
     auto C = (radius_ < tr_tol_rad_);
     auto E = (tr_crit_beta_ * crit_measure.norm() < tr_tol_f_);
     auto F = (radius_ < 100 * tr_tol_rad_);
+    dbg_->prntCritStep(3, 0, 0, 0, C, E, F);
     if (C || (E && F)) {
-
       // Note: condition structured as: (C || (E && F))
       // whereas in CG it is: (C || E && F) (CLion complains)
 
       // CG comment: Better break. Not the end of algorithm,
       // but satisfies stopping condition for outer algorithm
       // anyway...
-
       wm_ = "[@critStep] Stopping condition for outer algorithm.";
       ext_warn(wm_, md_, cl_);
-
     }
   }
 
   // Final radius is increased to avoid a drastic reduction
-  auto fin_rad = max(radius_, tr_crit_beta_ * crit_measure.norm());
+  double fin_rad = max(radius_, tr_crit_beta_ * crit_measure.norm());
   radius_ = min(rad_bf_crit_step, fin_rad);
-  return false;
+  dbg_->prntCritStep(4, 0, 0, 0, F, F, F, rad_bf_crit_step, fin_rad, radius_);
+  if (abs(rad_bf_crit_step - radius_) < eps_) {
+    return Optimization::Optimizers::FAILED;
+  } else {
+    return Optimization::Optimizers::SUCCESS;
+  }
 }
 
 // _________________________________________________________

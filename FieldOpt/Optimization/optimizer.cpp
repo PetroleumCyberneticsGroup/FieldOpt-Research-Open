@@ -152,7 +152,6 @@ Case *Optimizer::GetCaseForEvaluation() {
 }
 
 void Optimizer::SubmitEvaluatedCase(Case *c) {
-  evaluated_cases_++;
   if (penalize_ && iteration_ > 0) {
     double penalized_ofv = PenalizedOFV(c);
     c->set_objf_value(penalized_ofv);
@@ -161,6 +160,11 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
   case_handler_->SetCaseState(c->id(), c->state, c->GetWICTime(), c->GetSimTime());
   case_handler_->SetCaseEvaluated(c->id());
   handleEvaluatedCase(case_handler_->GetCase(c->id()));
+
+  if(c->state.eval == Case::CaseState::E_DONE) {
+    evaluated_cases_++;
+  }
+
   if (enable_logging_) {
     logger_->AddEntry(case_handler_->GetCase(c->id()));
   }

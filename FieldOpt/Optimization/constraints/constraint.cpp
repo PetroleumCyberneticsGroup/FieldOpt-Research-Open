@@ -37,6 +37,23 @@ Constraint::Constraint(SO& seto, VPC *vars, SV vp) {
   vp_ = vp;
 }
 
+void Constraint::DBG_SnapCase(int cs, string s0, string s1) {
+  string tm;
+  if (vp_.vOPT >= 4 && cs == 1) {
+    tm = "=> " + name() + " enabled: " + num2str(isEnabled(), 0);
+    tm += " -- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm += "for case: " + s0;
+    pad_text(tm, vp_.lnw);
+    tm += "x: " + s1;
+    ext_info(tm, md_, cl_, vp_.lnw);
+
+  } else if (vp_.vOPT >= 4 && cs == 2) {
+    pad_text(s0, vp_.lnw );
+    tm += "x: " + s1;
+    ext_info(tm, md_, cl_, vp_.lnw);
+  }
+}
+
 void Constraint::EnableLogging(QString output_directory_path) {
   logging_enabled_ = true;
   constraint_log_path_ = output_directory_path + "/log_constraints.txt";

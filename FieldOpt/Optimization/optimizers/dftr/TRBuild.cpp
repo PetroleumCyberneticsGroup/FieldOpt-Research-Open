@@ -948,7 +948,7 @@ bool TRFrame::improveModelNfp() {
 // _________________________________________________________
 // ENSUREIMPROVEMENT
 int TRFrame::ensureImpr() {
-  bool model_old = isModOld(); // old behavior [for tests only]
+  // bool model_old = isModOld(); // old behavior [for tests only]
   int exit_flag = 0;
   bool success = false;
   dbg_->prntModelData("EnsureImpr-00");
@@ -958,13 +958,13 @@ int TRFrame::ensureImpr() {
     //! improve model
     success = improveModelNfp();
     if (success || (!success && impr_cases_.size() > 0)) { exit_flag = 1; }
-    dbg_->prntEnsureImpr(1, exit_flag);
+    dbg_->prntEnsureImpr(1, exit_flag, 0, 0, success);
 
   } else if (isModComplete() && !isModOld()) {
     //! replace point
     success = chooseNReplacePt();
     if (success || (!success && repl_cases_.size() > 0))  { exit_flag = 2; }
-    dbg_->prntEnsureImpr(2, exit_flag);
+    dbg_->prntEnsureImpr(2, exit_flag, 0, 0, success);
   }
   dbg_->prntModelData("EnsureImpr-01");
 
@@ -992,8 +992,12 @@ int TRFrame::ensureImpr() {
     } else { success = true; }
 
     //! if model is old
-    if (model_old) { exit_flag = 3;
-    } else { exit_flag = 4; }
+    // if (model_old) { // old behavior [for tests only]
+    if (isModOld()) {
+      exit_flag = 3;
+    } else {
+      exit_flag = 4;
+    }
   }
 
   dbg_->prntModelData("EnsureImpr-02");

@@ -78,6 +78,7 @@ namespace Optimization {
 namespace Optimizers {
 
 class TRDebug;
+enum critExecStat { ONGOING=0, FAILED=1, SUCCESS=2 };
 
 // ---------------------------------------------------------
 class TRFrame {
@@ -133,7 +134,6 @@ class TRFrame {
   //  ╩   ╩╚═    ╚═╝  ╩ ╩  ╚═╝  ╚═╝  ╩ ╩
   int findBestPt();
   void moveToBestPt();
-  bool critStep(double rad_bf_crit_step);
   bool isLambdaPoised();
   bool isModComplete();
   bool isModOld();
@@ -141,8 +141,7 @@ class TRFrame {
   double checkInterp();
   VectorXd measureCrit();
 
-
-
+  critExecStat critStep(double rad_bf_crit_step);
 
   // TR->[POLYS] ===========================================
   // ╔╦╗  ╦═╗    ╔═╗  ╔═╗  ╦    ╦ ╦  ╔═╗
