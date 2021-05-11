@@ -41,6 +41,7 @@ namespace Optimization {
 using Printer::ext_warn;
 using Printer::ext_info;
 using Printer::info;
+using Model::Properties::VarPropContainer;
 
 class CaseHandler;
 class CaseTransferObject;
@@ -138,7 +139,7 @@ class Case : public Loggable
    * Needed to get variable names.
    * @return An std string describing the case.
    */
-  string StringRepresentation(Model::Properties::VarPropContainer *varcont);
+  string StringRepresentation(VarPropContainer *varcont);
 
   // QHash<QUuid, bool> binary_variables() const { return binary_variables_; }
   // QHash<QUuid, int> integer_variables() const { return integer_variables_; }
@@ -154,8 +155,13 @@ class Case : public Loggable
   QList<QPair<QUuid, int>> integer_variables() const {
     return integer_variables_;
   }
+
   QList<QPair<QUuid, double>> real_variables() const {
     return real_variables_;
+  }
+
+  QList<QPair<QUuid, double>> real_var_grads() const {
+    return real_var_grads_;
   }
 
   // void set_binary_vars(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
@@ -191,6 +197,7 @@ class Case : public Loggable
 
   //!< Set the value of a real variable in the case.
   void set_real_variable_value(QUuid id, double val);
+  void set_real_variable_value(QUuid id, double val, double grad);
 
   int get_integer_variable_value(QUuid id) {
     for (const auto & integer_variable : integer_variables_) {
@@ -261,6 +268,7 @@ class Case : public Loggable
    * @return Values of the real variables in a vector
    */
   Eigen::VectorXd GetRealVarVector();
+  Eigen::VectorXd GetRealVarGrads(VarPropContainer *vars);
 
   Eigen::VectorXd GetVarVector(QList<QUuid> vars);
 
@@ -278,6 +286,7 @@ class Case : public Loggable
    * @param vec
    */
   void SetRealVarValues(Eigen::VectorXd vec);
+  void SetRealVarValues(Eigen::VectorXd vec, Eigen::VectorXd grad);
 
   /*!
    * @brief Get a vector containing the variable UUIDs in the
@@ -430,6 +439,7 @@ class Case : public Loggable
   QList<QPair<QUuid, bool>> binary_variables_;
   QList<QPair<QUuid, int>> integer_variables_;
   QList<QPair<QUuid, double>> real_variables_;
+  QList<QPair<QUuid, double>> real_var_grads_;
 
   QList<QUuid> real_id_index_map_;
   QList<QUuid> integer_id_index_map_;

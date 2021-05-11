@@ -47,6 +47,7 @@ Case::Case() {
   binary_variables_ = QList<QPair<QUuid, bool>>();
   integer_variables_ = QList<QPair<QUuid, int>>();
   real_variables_ = QList<QPair<QUuid, double>>();
+  real_var_grads_ = QList<QPair<QUuid, double>>();
 
   objective_function_value_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
@@ -63,6 +64,7 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
   binary_variables_ = binary_variables;
   integer_variables_ = integer_variables;
   real_variables_ = real_variables;
+  // real_var_grads_ = real_variables;
 
   for(int ii=0; ii < binary_variables_.size(); ii++) {
     binary_id_index_map_.append(binary_variables_.at(ii).first);
@@ -74,6 +76,7 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
 
   for(int ii=0; ii < real_variables_.size(); ii++) {
     real_id_index_map_.append(real_variables_.at(ii).first);
+    real_var_grads_.append(qMakePair(real_variables_.at(ii).first, 0.0));
   }
 
   objective_function_value_ = std::numeric_limits<double>::max();
@@ -89,6 +92,7 @@ Case::Case(const Case *c) {
   binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
   integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
+  real_var_grads_ = QList<QPair<QUuid, double>> (c->real_var_grads());
 
   binary_id_index_map_ = c->binary_id_index_map_;
   integer_id_index_map_ = c->integer_id_index_map_;
@@ -192,8 +196,24 @@ void Case::set_binary_variable_value(const QUuid id, const bool val) {
 void Case::set_real_variable_value(const QUuid id, const double val) {
   for(int ii=0; ii < real_variables_.size(); ii++) {
     if (real_variables_.at(ii).first==id) {
-      auto pair_int = qMakePair(real_variables_.at(ii).first, val);
-      real_variables_.replace(ii, pair_int);
+      auto pair_real = qMakePair(real_variables_.at(ii).first, val);
+      real_variables_.replace(ii, pair_real);
+      return;
+    }
+  }
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
+}
+
+void Case::set_real_variable_value(const QUuid id, const double val, const double grad) {
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    if (real_variables_.at(ii).first==id) {
+      // add real value
+      auto pair_real = qMakePair(real_variables_.at(ii).first, val);
+      real_variables_.replace(ii, pair_real);
+      // add corresponding gradient
+      auto pair_grad = qMakePair(real_variables_.at(ii).first, grad);
+      real_var_grads_.replace(ii, pair_grad);
       return;
     }
   }
@@ -275,9 +295,25 @@ Eigen::VectorXd Case::GetRealVarVector() {
   return vec;
 }
 
+Eigen::VectorXd Case::GetRealVarGrads(VarPropContainer *vars) {
+  Eigen::VectorXd grads(real_id_index_map_.length());
+  for (int i = 0; i < real_id_index_map_.length(); ++i) {
+    grads[i] = real_var_grads_.at(i).second;
+    auto cp = vars->GetContinuousVariable(real_id_index_map_[i]);
+    cp->scaleGrad(grads[i]);
+  }
+  return grads;
+}
+
 void Case::SetRealVarValues(Eigen::VectorXd vec) {
   for (int i = 0; i < vec.size(); ++i) {
     set_real_variable_value(real_id_index_map_[i], vec[i]);
+  }
+}
+
+void Case::SetRealVarValues(Eigen::VectorXd vec, Eigen::VectorXd grad) {
+  for (int i = 0; i < vec.size(); ++i) {
+    set_real_variable_value(real_id_index_map_[i], vec[i], grad[i]);
   }
 }
 

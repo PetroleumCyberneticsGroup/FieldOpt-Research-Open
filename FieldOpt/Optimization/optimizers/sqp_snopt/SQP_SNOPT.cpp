@@ -29,6 +29,7 @@ SQP_SNOPT::SQP_SNOPT(Settings::Optimizer *seto,
   Case *bscs,
   Model::Model *model,
   Simulation::Simulator *simulator,
+  Optimization::Objective::Objective *objf,
   Logger *logger, CaseHandler *case_handler,
   ConstraintHandler *constraint_handler)
   : Optimizer(seto, bscs, model->variables(), model->grid(), logger,
@@ -36,27 +37,48 @@ SQP_SNOPT::SQP_SNOPT(Settings::Optimizer *seto,
 
   model_ = model;
   simulator_ = simulator;
+  seto_ = seto;
+  objf_ = objf;
   vars_ = model->variables();
   bscs_ = bscs;
 
-  SNOPTSolver_ = new SNOPTSolver(); // subproblem solver
-
-  // runner_ = new Runner::EmbeddedRunner(model, simulator);
+  if (vp_.vOPT >= 1) { info("new SNOPTSolver()", vp_.lnw); }
+  SNOPTSolver_ = new SNOPTSolver();
 
   if (enable_logging_) {
     logger_->AddEntry(this);
   }
+
+  ub_.conservativeResize(bscs_->GetRealVarIdVector().size());
+  lb_.conservativeResize(bscs_->GetRealVarIdVector().size());
+  ub_.fill(seto->parameters().sqp_upper_bnd);
+  lb_.fill(seto->parameters().sqp_lower_bnd);
+
+  solver();
+}
+
+TC SQP_SNOPT::IsFinished() {
+  // TC tc = NOT_FINISHED;
+  // return tc;
+}
+
+void SQP_SNOPT::iterate() {
+  if (enable_logging_) {
+    logger_->AddEntry(this);
+  }
+  solver();
+  iteration_++;
 }
 
 // _________________________________________________________
 // SQP SNOPT SOLVER
-tuple<VectorXd, double, int>
-SQP_SNOPT::solver(VectorXd x, VectorXd bl, VectorXd bu) {
+tuple<VectorXd, double, int> SQP_SNOPT::solver() {
 
-  auto xdim = x.rows();
+  auto xdim = bscs_->GetRealVarIdVector().size();
 
-  Eigen::VectorXd x0(getXDim(), 1);
+  Eigen::VectorXd x0(xdim, 1);
   double fval;
+  VectorXd xstar;
   int exitflag = -1;
 
   double c;
@@ -68,6 +90,8 @@ SQP_SNOPT::solver(VectorXd x, VectorXd bl, VectorXd bu) {
   prob.tcase_ = new Case(bscs_);
   prob.model_ = model_;
   prob.simulator_ = simulator_;
+  prob.objf_ = objf_;
+  prob.seto_ = seto_;
 
   // prob.setProbName("TRMod_A");
   // prob.setProbName("Rosenbrock"); // dbg
@@ -79,9 +103,10 @@ SQP_SNOPT::solver(VectorXd x, VectorXd bl, VectorXd bu) {
   prob.setNunNnlConst(0);
 
   // Set init point, bounds on vars
-  prob.setXInit(x0);
-  prob.setXUb(bu);
-  prob.setXLb(bl);
+  cout << "bscs_->GetRealVarVector():\n" << bscs_->GetRealVarVector() << endl;
+  prob.setXInit(bscs_->GetRealVarVector());
+  prob.setXUb(ub_);
+  prob.setXLb(lb_);
 
   VectorXd FUb(1 + prob.getNunNnlConst());
   VectorXd FLb(1 + prob.getNunNnlConst());
@@ -102,12 +127,12 @@ SQP_SNOPT::solver(VectorXd x, VectorXd bl, VectorXd bu) {
 
   SNOPTSolver_->setUpSNOPTSolver(prob);
 
-  x = prob.getXSol();
+  xstar = prob.getXSol();
   fval = prob.getFSol()(0);
 
   // Should be zero -- double check
   if (prob.getSNOPTExitCode() == 1) { exitflag = 0; }
-  return make_tuple(x, fval, exitflag);
+  return make_tuple(xstar, fval, exitflag);
 }
 
 }

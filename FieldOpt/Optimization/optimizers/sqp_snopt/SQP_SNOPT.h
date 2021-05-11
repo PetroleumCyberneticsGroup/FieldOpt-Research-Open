@@ -45,13 +45,14 @@ class SQP_SNOPT : public Optimizer {
             Case *bscs,
             Model::Model *model,
             Simulation::Simulator *simulator,
+            Optimization::Objective::Objective *objf,
             Logger *logger, CaseHandler *case_handler = nullptr,
             Constraints::ConstraintHandler *constraint_handler = nullptr);
 
-  TC IsFinished() override {};
+  TC IsFinished() override;
 
  protected:
-  void iterate() override {};
+  void iterate() override;
   void handleEvaluatedCase(Case *c) override {};
 
  private:
@@ -60,14 +61,16 @@ class SQP_SNOPT : public Optimizer {
   Model::Properties::VarPropContainer *vars_;
 
   Case *bscs_;
-  // Runner::EmbeddedRunner *runner_;
   Model::Model *model_;
   Simulation::Simulator *simulator_;
+  Optimization::Objective::Objective *objf_;
 
   // SNOPT solver
   SNOPTSolver *SNOPTSolver_;
 
-  tuple<VectorXd, double, int> solver(VectorXd x, VectorXd bl, VectorXd bu);
+  VectorXd lb_, ub_;
+
+  tuple<VectorXd, double, int> solver();
 
   VectorXd x_;
   int getXDim() { return (int)x_.rows(); }

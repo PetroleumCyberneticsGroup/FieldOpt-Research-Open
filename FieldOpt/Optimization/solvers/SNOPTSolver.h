@@ -95,7 +95,7 @@ class SNOPTSolver {
   // be read from JSON and stored in settings_
   Settings::Optimizer *settings_;
 
-  string SNOPTRun_ = "TRMod";
+  string SNOPTRun_ = "DEF";
   string prnt_file_ = SNOPTRun_ + ".opt.prnt";
   string smry_file_ = SNOPTRun_ + ".opt.smry";
   string optn_file_ = SNOPTRun_ + ".opt.optn";

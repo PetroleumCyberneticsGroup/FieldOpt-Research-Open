@@ -212,6 +212,25 @@ class Optimizer
 
     // SQP [SNOPT] parameters ------------------------------
     double sqp_ftol = 1e-6;
+    double sqp_upper_bnd = 1.0;
+    double sqp_lower_bnd = -1.0;
+
+    double sqp_linesearch_tol = 0.9;
+    double sqp_major_feasi_tol = 1e-12;
+    double sqp_major_iter_lim = 100;
+    double sqp_optimality_tol = 1e-12;
+
+
+
+
+
+
+
+
+
+
+
+
 
     // VFSA Parameters -------------------------------------
     //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.

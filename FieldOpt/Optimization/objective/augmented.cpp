@@ -46,6 +46,14 @@ Augmented(Settings::Optimizer *settings,
   setUpWaterCutLimit();
 }
 
+VectorXd Augmented::grad() {
+  return rslts_->GetJsonResults().GetGradsXd();
+}
+
+double Augmented::fval() {
+  return rslts_->GetJsonResults().GetFval();
+}
+
 double Augmented::value(bool base_case) {
   stringstream ss;
   auto timeXd = rslts_->GetValueVectorXd(rslts_->Time);

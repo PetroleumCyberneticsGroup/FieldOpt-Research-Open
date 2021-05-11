@@ -63,6 +63,10 @@ namespace Optimization {
 
 class HybridOptimizer;
 
+namespace Objective {
+class Objective;
+}
+
 // =========================================================
 // The Optimizer class is the abstract parent class for all
 // optimizers. It is primarily designed to support direct
@@ -293,14 +297,15 @@ class Optimizer : public Loggable
 
 
     // TEST
-    double getSqpC() { return sqp_c_; }
-    VectorXd getSqpG() { return sqp_g_; }
-    MatrixXd getSqpH() { return sqp_H_; }
+    // double getSqpC() { return sqp_c_; }
+    // VectorXd getSqpG() { return sqp_g_; }
+    // MatrixXd getSqpH() { return sqp_H_; }
 
     Case *tcase_ = nullptr;
     Model::Model *model_ = nullptr;
     Simulation::Simulator *simulator_ = nullptr;
-    // Runner::EmbeddedRunner *runner_ = nullptr;
+    Optimization::Objective::Objective *objf_ = nullptr;
+    Settings::Optimizer *seto_ = nullptr;
 
 
 

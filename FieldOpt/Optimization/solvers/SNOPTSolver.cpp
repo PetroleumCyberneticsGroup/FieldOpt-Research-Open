@@ -58,7 +58,7 @@ int Rosenbrock_(integer  *Status, integer *n,    double x[],
   if (*needF > 0) {
     // Rosenbrock testproblem
     F[0] = (1.0 - x[0]) * (1.0 - x[0])
-        + 100.0 * (x[1] - x[0] * x[0]) * (x[1] - x[0] * x[0]);
+      + 100.0 * (x[1] - x[0] * x[0]) * (x[1] - x[0] * x[0]);
 
     if (m) {
       // Nonlinear constraint: unit disk
@@ -193,7 +193,7 @@ int SQP_(integer  *Status, integer *n,    double x[],
          integer  iu[],    integer *leniu,
          double   ru[],    integer *lenru ) {
 
-  bool dbg = false;
+  bool dbg = true;
 
   // x -> eigen format
   Eigen::VectorXd xv(*n);
@@ -211,17 +211,78 @@ int SQP_(integer  *Status, integer *n,    double x[],
 
   int m = (int)*neF - 1;  // # of constraints
 
-  double c = 0.0;
+  // double c = 0.0;
   double f = 0.0;
-  Eigen::VectorXd g = Eigen::VectorXd::Zero(*n);
+  Eigen::VectorXd g0 = Eigen::VectorXd::Zero(*n);
+  Eigen::VectorXd gs = Eigen::VectorXd::Zero(*n);
 
-  prob_->tcase_->SetRealVarValues(xv);
+  cout << "xv: " << xv.transpose() <<  endl;
+
+  prob_->tcase_->SetRealVarValues(xv, g0);
   prob_->model_->ApplyCase(prob_->tcase_);
   prob_->simulator_->Evaluate();
+
+  // Rerun to update var container with gradients (after eval)
+  g0 = prob_->objf_->grad(); // save unscaled g for dbg
+  prob_->tcase_->SetRealVarValues(xv, g0);
+
+  // Switch b/e FO.computed obj or read-in value from ECL GRD file
+  prob_->tcase_->set_objf_value(prob_->objf_->value()); // FO.obj
+  // prob_->tcase_->set_objf_value(prob_->objf_->fval()); // DBG: ECL GRD file
+
   f = prob_->tcase_->objf_value();
-  g = Eigen::VectorXd::Zero(*n);
+  gs = prob_->tcase_->GetRealVarGrads(prob_->model_->variables());
+
+  // dbg: f
+  stringstream ss; char buffer [100];
+  sprintf(buffer, "f: [ % 9.4e ] ", f);
+  ss << buffer;
+
+  // dbg: x
+  ss <<"x:  [ ";
+  for (int ii = 0; ii < xv.rows(); ii++) {
+    if (ii == xv.rows() - 1) {
+      sprintf(buffer, "% 10.3e ]\n", xv(ii));
+    } else {
+      sprintf(buffer, "% 10.3e ", xv(ii));
+    }
+    ss << buffer;
+  }
+
+  // dbg: g
+  ss <<"                   g0: [ ";
+  for (int ii = 0; ii < g0.rows(); ii++) {
+    if (ii == g0.rows() - 1) {
+      sprintf(buffer, "% 10.3e ]\n", g0(ii));
+    } else {
+      sprintf(buffer, "% 10.3e ", g0(ii));
+    }
+    ss << buffer;
+  }
+
+  // dbg: gs
+  ss <<"                   gs: [ ";
+  for (int ii = 0; ii < gs.rows(); ii++) {
+    if (ii == gs.rows() - 1) {
+      sprintf(buffer, "% 10.3e ]\n", gs(ii));
+    } else {
+      sprintf(buffer, "% 10.3e ", gs(ii));
+    }
+    ss << buffer;
+  }
+
+  // print to file
+  FILE * pFile;
+  pFile = std::fopen("sqp-snopt.out", "a");
+  std::fprintf(pFile, "%s", ss.str().c_str());
+  fclose (pFile);
+
 
   if (*needF > 0) {
+    if (dbg) {
+      cout << "f = " << f << endl;
+      cout << "xv = [ " << xv.transpose() << " ] " << endl;
+    }
 
     // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐    ╔═╗
     // │    │ │  │││  ├─┘  │ │   │   ├┤     ╠╣
@@ -237,17 +298,19 @@ int SQP_(integer  *Status, integer *n,    double x[],
   }
 
   if (*needG > 0) {
+    if (dbg) {
+      cout << "g0 = [ " << g0.transpose() << " ] " << endl;
+      cout << "gs = [ " << gs.transpose() << " ] " << endl;
+    }
 
     // ┌─┐  ┌─┐  ┌┬┐    ╔═╗
     // │ ┬  ├┤    │     ║ ╦
     // └─┘  └─┘   ┴     ╚═╝
     // Eigen::VectorXd gv = g.transpose() + xv.transpose()*H;
-    Eigen::VectorXd gv = g;
-
-    if (dbg) { cout << "gv = \n" << gv << endl; }
+    // Eigen::VectorXd gv = g;
 
     for (int ii = 0; ii < *n; ii++) {
-      G[ii] = gv(ii);
+      G[ii] = gs(ii);
     }
 
     if (m) {
@@ -272,7 +335,7 @@ int SQP_(integer  *Status, integer *n,    double x[],
 }
 
 SNOPTSolver::SNOPTSolver() {
-    loadSNOPT();
+  loadSNOPT();
 }
 
 SNOPTSolver::~SNOPTSolver() {
@@ -299,14 +362,18 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
 
   if (prob.getProbName() == "TRMod_A") {
     subprobTRModA(prob);
+    SNOPTRun_ = "TRMod_A";
 
   } else  if (prob.getProbName() == "TRMod_B") {
+    SNOPTRun_ = "TRMod_B";
 
   } else  if (prob.getProbName() == "SQP") {
     subprobSQP(prob);
+    SNOPTRun_ = "SQP";
 
   } else if (prob.getProbName() == "Rosenbrock") {
     subprobRosenbrock(prob);
+    SNOPTRun_ = "Rosenbrock";
   }
 
   // For Reference: Initialization of SNOPTHandler pointer
@@ -317,6 +384,10 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   // passing SNOPTHandler object as reference]
   // SNOPTHandler_->~SNOPTHandler();
   // SNOPTHandler_ = nullptr;
+
+  prnt_file_ = SNOPTRun_ + ".opt.prnt";
+  smry_file_ = SNOPTRun_ + ".opt.smry";
+  optn_file_ = SNOPTRun_ + ".opt.optn";
   SNOPTHandler snoptHandler = initSNOPTHandler();
   setSNOPTOptions(snoptHandler, prob);
 
@@ -333,7 +404,7 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setXSol(xsol);
   prob.setFSol(fsol);
 
-  // cout << "sqp_snopt Exit code: " + snoptHandler.getExitCode() << endl;
+  cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
 }
 
@@ -738,19 +809,85 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   H.setNeA        ( neA_ );
   H.setNeG        ( neG_ );
 
-  // Set cost function formulation for prob
+  auto p = prob.seto_->parameters();
+  p.sqp_ftol;
+
+  // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌┬┐    ┌─┐
+  //  │   ├┬┘  │││  │ │   ││    ├─┤
+  //  ┴   ┴└─  ┴ ┴  └─┘  ─┴┘    ┴ ┴
   if (prob.getProbName() == "TRMod_A") {
     H.setUserFun(TRMod_A_);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
+    H.setIntParameter("Minor print level", 10);
+    H.setIntParameter("Scale option", 1);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
 
+    // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌┬┐    ┌┐
+    //  │   ├┬┘  │││  │ │   ││    ├┴┐
+    //  ┴   ┴└─  ┴ ┴  └─┘  ─┴┘    └─┘
   } else  if (prob.getProbName() == "TRMod_B") {
 
+    // ┌─┐  ┌─┐   ┌─┐
+    // └─┐  │─┼┐  ├─┘
+    // └─┘  └─┘└  ┴
   } else  if (prob.getProbName() == "SQP") {
     H.setUserFun(SQP_);
 
+    // 5spot BC01/BC02
+    H.setParameter((char*) "Maximize");
+    H.setProbName((char*) "SQP");
+    H.setParameter((char*) "System information Yes");
+    H.setParameter((char *) "Solution  Yes");
+
+    // H.setRealParameter("Linesearch tolerance",        0.9);
+    // H.setRealParameter("Major feasibility tolerance", 1e-12);
+    // H.setIntParameter("Major Iterations Limit", 100);
+
+    H.setIntParameter("Verify level", -1);
+
+    // H.setIntParameter("Scale option", 1); // not working
+    // H.setParameter((char*) "Scale option 1"); // tested, not working
+    H.setRealParameter("Scale option", 1);
+
+    H.setParameter((char *) "Scale Print");
+
+
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution Yes");
+
+    H.setRealParameter("Major step limit", 0.01);
+    H.setRealParameter("Major optimality tolerance", 1e-12);
+
+    double f_prec = 1e-16;
+    H.setRealParameter("Function precision", f_prec);
+    H.setRealParameter("Difference interval",std::pow(f_prec, 1.0/2.0));
+    H.setRealParameter("Central difference interval",std::pow(f_prec, 1.0/3.0));
+
+    H.setIntParameter("Major print level", 1);
+    H.setIntParameter("Minor print level", 1);
+
+    H.setParameter((char*) "Print frequency 1");
+    H.setParameter((char*) "Summary frequency 1");
+
+    // ┬─┐  ┌─┐  ┌─┐  ┌─┐  ┌┐┌  ┌┐   ┬─┐  ┌─┐  ┌─┐  ┬┌─
+    // ├┬┘  │ │  └─┐  ├┤   │││  ├┴┐  ├┬┘  │ │  │    ├┴┐
+    // ┴└─  └─┘  └─┘  └─┘  ┘└┘  └─┘  ┴└─  └─┘  └─┘  ┴ ┴
   } else if (prob.getProbName() == "Rosenbrock") {
     H.setUserFun(Rosenbrock_);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
+    H.setIntParameter("Minor print level", 10);
+
+    H.setIntParameter("Scale option", 1);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
   }
 
+  // ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┬ ┬  ┬    ┌┬┐
+  //  ││  ├┤   ├┤   ├─┤  │ │  │     │
+  // ─┴┘  └─┘  └    ┴ ┴  └─┘  ┴─┘   ┴
   // H.setParameter(                 "Backup basis file 0");
   // H.setRealParameter(      "Central difference interval",
   //                    2 * derivativeRelativePerturbation);
@@ -784,10 +921,8 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // Does NOT work in the current version of sqp_snopt!!!
   // H.setIntParameter("Hessian flush",    1);
 
-
   // H.setParameter("Insert file                        0");
   // H.setRealParameter("Infinite bound",            ?????);
-
 
   // H.setParameter("Iterations limit");
   // H.setRealParameter("Linesearch tolerance",        0.9);
@@ -801,11 +936,9 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setParameter("LU density tolerance             0.6");
   // H.setParameter("LU singularity tolerance     3.2e-11");
 
-
   // Target nonlinear constraint violation
   // H.setRealParameter("Major feasibility tolerance", 0.000001);
   // H.setIntParameter("Major Iterations Limit", 1000);
-
 
   // Target complementarity gap
   // H.setRealParameter("Major optimality tolerance", 0.0001);
@@ -817,7 +950,7 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 
   // For satisfying the QP bounds
   // H.setRealParameter("Minor feasibility tolerance", ???);
-   H.setIntParameter("Minor print level", 10);
+  // H.setIntParameter("Minor print level", 10);
 
   // H.setParameter("New basis file                 0");
   // H.setParameter("New superbasics limit          99");
@@ -831,10 +964,10 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setParameter("Reduced Hessian dimension");
   // H.setParameter("Save frequency                 100");
 
-  H.setIntParameter("Scale option", 1);
+  // H.setIntParameter("Scale option", 1);
   // H.setParameter("Scale tolerance                0.9");
-  H.setParameter((char *) "Scale Print");
-  H.setParameter((char *) "Solution  Yes");
+  // H.setParameter((char *) "Scale Print");
+  // H.setParameter((char *) "Solution  Yes");
 
   // H.setParameter(   "Start Objective Check at Column 1");
   // H.setParameter(  "Start Constraint Check at Column 1");
@@ -858,10 +991,12 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 // ╩  ╝╚╝  ╩   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩   ╩ ╩  ╩ ╩  ╝╚╝  ═╩╝  ╩═╝  ╚═╝  ╩╚═
 SNOPTHandler SNOPTSolver::initSNOPTHandler() {
 
-  SNOPTHandler snoptHandler(prnt_file_.c_str(), smry_file_.c_str(), optn_file_.c_str());
+  SNOPTHandler snoptHandler(prnt_file_.c_str(),
+                            smry_file_.c_str(),
+                            optn_file_.c_str());
 
 
-  if (false) {
+  if (true) {
     cout << "Initiate SNOPTHandler" << endl;
     cout << "prnt_file: " << prnt_file_ << endl;
     cout << "smry_file: " << smry_file_ << endl;
@@ -910,7 +1045,7 @@ bool SNOPTSolver::loadSNOPT(const string lib_name) {
   } else {
     rc = LSL_loadSNOPTLib(lib_name.c_str(), buf, 255);
   }
-//  printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
+  // printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
 
 
   if (rc) {

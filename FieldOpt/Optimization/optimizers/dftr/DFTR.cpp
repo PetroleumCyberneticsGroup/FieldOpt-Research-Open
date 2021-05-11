@@ -56,6 +56,7 @@ DFTR::DFTR(Settings::Optimizer *settings,
   trm_ = new TRFrame(lb_, ub_, base_case_, settings_);
   computeInitPts();
   createLogFile();
+  printIteration(base_case_->objf_value());
 }
 
 // __________________________________________________________

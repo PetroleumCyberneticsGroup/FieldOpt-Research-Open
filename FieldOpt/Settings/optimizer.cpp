@@ -712,7 +712,16 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
 
     // -----------------------------------------------------
     //  SQP [SNOPT] PARAMS
-    set_opt_prop_double(params.sqp_ftol, json_params, "SQP-ftol", vp_);
+    set_opt_prop_double(params.sqp_ftol, json_params, "SQP-FTol", vp_);
+    set_opt_prop_double(params.sqp_upper_bnd, json_params, "SQP-UpperBnd", vp_);
+    set_opt_prop_double(params.sqp_lower_bnd, json_params, "SQP-LowerBnd", vp_);
+
+    set_opt_prop_double(params.sqp_linesearch_tol, json_params, "SQP-LinesearchTol", vp_);
+
+
+
+
+
 
 
 

@@ -337,6 +337,7 @@ void AbstractRunner::InitializeOptimizer() {
                                    base_case_,
                                    model_,
                                    simulator_,
+                                   objf_,
                                    logger_,
                                    nullptr,
                                    model_->constraintHandler());

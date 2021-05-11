@@ -66,7 +66,7 @@ JsonResults::JsonResults(std::string file_path, Settings::Simulator sim_settings
       throw std::runtime_error("JSON results file must contain an array named Components.");
     }
 
-    if (VERB_SIM >= 2) Printer::info("Parsing JSON results file contents.");
+    if (vp_.vSIM >= 2) Printer::info("Parsing JSON results file contents.");
     for (auto comp : json_results["Components"].toArray()) {
       QJsonObject component = comp.toObject();
       if (component["Type"] == "Single") {
@@ -96,7 +96,9 @@ JsonResults::JsonResults(std::string file_path, Settings::Simulator sim_settings
       grads_map_[gdata["DOMAIN"].toString().toStdString()] = gdata["GRAD"].toDouble();
       grads_vec_.push_back(gdata["GRAD"].toDouble());
       norms_vec_.push_back(gdata["NORM"].toDouble());
+      fval_vec_.push_back(gdata["FVAL"].toDouble());
     }
+    gradsXd_ = Eigen::Map<VectorXd>(grads_vec_.data(), grads_vec_.size());
 
     stringstream ss;
     if (vp_.vSIM >= 2 && !grads_vec_.empty()) {
@@ -117,7 +119,9 @@ JsonResults::JsonResults(std::string file_path, Settings::Simulator sim_settings
   }
 
   file->close();
-  if (VERB_SIM >= 2) Printer::ext_info("Done reading additional JSON results.", "Simulation", "JsonResults");
+  if (vp_.vSIM > 1) {
+    ext_info("Done reading additional JSON results.", md_, cl_);
+  }
 }
 
 double JsonResults::GetSingleValue(std::string name) {
