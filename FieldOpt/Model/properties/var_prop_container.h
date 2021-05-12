@@ -68,6 +68,14 @@ class VarPropContainer
  public:
   // VarPropContainer();
 
+  struct vType {
+    double norm = 0.0;
+    VectorXd vals;
+    Property::PropertyType prop;
+  };
+
+  vector<vType> VarPropContainer::GetVarTypes();
+
   VarPropContainer(Settings::VerbParams vp);
 
   //!< Add a property to the container and mark it as variable

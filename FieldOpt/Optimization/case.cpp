@@ -300,7 +300,7 @@ Eigen::VectorXd Case::GetRealVarGrads(VarPropContainer *vars) {
   for (int i = 0; i < real_id_index_map_.length(); ++i) {
     grads[i] = real_var_grads_.at(i).second;
     auto cp = vars->GetContinuousVariable(real_id_index_map_[i]);
-    cp->scaleGrad(grads[i]);
+    cp->scaleGrad(grads[i]); // var has bound info to do scaling
   }
   return grads;
 }

@@ -406,6 +406,39 @@ VarPropContainer::GetWellRateVars(QString well_name) const {
   return well_rate_variables;
 }
 
+// GETVARTYPES----------------------------------------------
+vector<vType> VarPropContainer::GetVarTypes() {
+
+  vector<vType> vTypes_vec;
+
+  // Get variable types
+  vector<QList<ContinuousProperty *>> varTypes;
+  if (!GetWellBHPVariables().is_empty()) {
+    varTypes.push_back(GetWellBHPVariables());
+  }
+  if (!GetWellICDVariables().is_empty()) {
+    varTypes.push_back(GetWellICDVariables());
+  }
+  if (!GetWellRateVariables().is_empty()) {
+    varTypes.push_back(GetWellRateVariables());
+  }
+
+  // Get values for each variable type
+  vType vt;
+  for (int ii = 0; ii < varTypes.size(); ii++) { // vector<Qlist<ContProps>>
+    for (int jj = 0; jj < varTypes[ii].size(); jj++) { // Qlist<ContProps>
+      if (jj == 1) {
+        vt.prop = varTypes[ii][jj]->propertyInfo().prop_type;
+      }
+      vt.vals(jj) = varTypes[ii][jj].valueSc();
+    }
+    vt.norm = vt.vals.norm();
+    vTypes_vec.push_back(vt);
+  }
+
+  return vTypes_vec;
+}
+
 // WELL BLOCKS ---------------------------------------------
 QList<DiscreteProperty *>
 VarPropContainer::GetWellBlockVariables() const {

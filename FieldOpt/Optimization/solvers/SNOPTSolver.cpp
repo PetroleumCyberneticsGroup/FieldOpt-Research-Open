@@ -222,7 +222,7 @@ int SQP_(integer  *Status, integer *n,    double x[],
   prob_->model_->ApplyCase(prob_->tcase_);
   prob_->simulator_->Evaluate();
 
-  // Rerun to update var container with gradients (after eval)
+  // Rerun to populate var container with gradients (after eval)
   g0 = prob_->objf_->grad(); // save unscaled g for dbg
   prob_->tcase_->SetRealVarValues(xv, g0);
 
@@ -231,6 +231,7 @@ int SQP_(integer  *Status, integer *n,    double x[],
   // prob_->tcase_->set_objf_value(prob_->objf_->fval()); // DBG: ECL GRD file
 
   f = prob_->tcase_->objf_value();
+  // Get scaled gradient
   gs = prob_->tcase_->GetRealVarGrads(prob_->model_->variables());
 
   // dbg: f
