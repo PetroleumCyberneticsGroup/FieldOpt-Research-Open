@@ -52,7 +52,7 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   QJsonArray json_constraints = json_optimizer["Constraints"].toArray();
   QString type = json_optimizer["Type"].toString();
 
-  scale_vars_ = json_optimizer["ScaleVars"].toBool();
+  scale_vars_ = json_optimizer["ScaleVars"].toInt();
   scale_objf_ = json_optimizer["ScaleObjf"].toDouble();
 
   type_ = parseType(type);

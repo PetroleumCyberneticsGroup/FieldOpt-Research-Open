@@ -44,7 +44,6 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
   fortranStyleObj = 0;
   fortranStyleAG = 0;
 
-
   // Create temporary memory for the call to sninit_.
   // Lengths must all be >= 500.
   lencw = 500;
@@ -54,21 +53,18 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
 
   // sninit_ "undefines" the optional parameters
 
-
   iPrint = 12;
   setPrintFile(prntname);
   iSumm = 29;  // Console/terminal: iSumm = 6;
   // setSummaryFile( summname );
   this->init_();
 
-
   this->has_snopt_option_file = true;
   if (!FileExists(QString(specname), vp_, md_, cl_)) {
     this->has_snopt_option_file = false;
-    // cout << "-- sqp_snopt: Couldn't open file: " << string(specname) << "\n";
-    // cout << "-- sqp_snopt: Using default options for sqp_snopt\n";
+    cout << "-- sqp_snopt: Couldn't open file: " << string(specname) << "\n";
+    cout << "-- sqp_snopt: Using default options for sqp_snopt\n";
   }
-
 
   if (this->has_snopt_option_file) {
     iSpecs = 15;

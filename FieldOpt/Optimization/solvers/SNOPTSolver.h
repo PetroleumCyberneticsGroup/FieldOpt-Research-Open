@@ -116,15 +116,12 @@ class SNOPTSolver {
 
  public:
   void resetSNOPTSolver(); // Needed?
-
 };
 
 }  // namespace Optimizers
 }  // namespace Optimization
 
 #endif //FOEX_DC_5SNOPTSOLVER_H
-
-
 
 // This class will find _one_ maximum of a quadratic
 // function (specified by c_, g_ and H_) subject to

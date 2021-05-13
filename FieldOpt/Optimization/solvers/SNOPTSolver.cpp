@@ -169,6 +169,25 @@ int TRMod_A_(integer *Status, integer *n, doublereal x[],
   return 0;
 }
 
+string prntVecXd(VectorXd v, string lbl) {
+  stringstream ss; char buffer [100];
+  ss <<"                  " << lbl <<  ": [ ";
+  for (int ii = 0; ii < v.rows(); ii++) {
+    if (ii == v.rows() - 1) {
+      sprintf(buffer, "% 10.3e ]\n", v(ii));
+    } else {
+      sprintf(buffer, "% 10.3e ", v(ii));
+    }
+    ss << buffer;
+  }
+  return ss.str();
+}
+
+// Dbg constructs
+string md_ = "Optimization/solvers";
+string cl_ = "SNOPTSolver";
+string im_ = "", wm_ = "", em_ = "";
+
 // SQP cost function def
 // ╔═╗  ╔═╗   ╔═╗
 // ╚═╗  ║═╬╗  ╠═╝
@@ -213,18 +232,22 @@ int SQP_(integer  *Status, integer *n,    double x[],
 
   // double c = 0.0;
   double f = 0.0;
-  Eigen::VectorXd g0 = Eigen::VectorXd::Zero(*n);
-  Eigen::VectorXd gs = Eigen::VectorXd::Zero(*n);
-
+  Eigen::VectorXd g00 = Eigen::VectorXd::Zero(*n);
   cout << "xv: " << xv.transpose() <<  endl;
 
-  prob_->tcase_->SetRealVarValues(xv, g0);
+  prob_->tcase_->SetRealVarValues(xv, g00);
   prob_->model_->ApplyCase(prob_->tcase_);
   prob_->simulator_->Evaluate();
 
   // Rerun to populate var container with gradients (after eval)
-  g0 = prob_->objf_->grad(); // save unscaled g for dbg
-  prob_->tcase_->SetRealVarValues(xv, g0);
+  g00 = prob_->objf_->grad(); // save unscaled g for dbg
+  if (g00.size() == 0) {
+    em_ = "No grad read from sim. Probably grad assembly failed";
+    em_ += "due to well shut down during simulation.";
+    ext_warn(em_, md_, cl_);
+  }
+  cout << "g00: " << g00.transpose() <<  endl;
+  prob_->tcase_->SetRealVarValues(xv, g00);
 
   // Switch b/e FO.computed obj or read-in value from ECL GRD file
   prob_->tcase_->set_objf_value(prob_->objf_->value()); // FO.obj
@@ -232,45 +255,18 @@ int SQP_(integer  *Status, integer *n,    double x[],
 
   f = prob_->tcase_->objf_value();
   // Get scaled gradient
-  gs = prob_->tcase_->GetRealVarGrads(prob_->model_->variables());
+  auto grads = prob_->tcase_->GetRealVarGradx(prob_->model_->variables());
+  // grads[0]: scaled g (if scaling=true)
+  // grads[1]: scaled + type.normalized g
 
   // dbg: f
   stringstream ss; char buffer [100];
-  sprintf(buffer, "f: [ % 9.4e ] ", f);
+  sprintf(buffer, "f: [ % 9.4e ] \n", f);
   ss << buffer;
-
-  // dbg: x
-  ss <<"x:  [ ";
-  for (int ii = 0; ii < xv.rows(); ii++) {
-    if (ii == xv.rows() - 1) {
-      sprintf(buffer, "% 10.3e ]\n", xv(ii));
-    } else {
-      sprintf(buffer, "% 10.3e ", xv(ii));
-    }
-    ss << buffer;
-  }
-
-  // dbg: g
-  ss <<"                   g0: [ ";
-  for (int ii = 0; ii < g0.rows(); ii++) {
-    if (ii == g0.rows() - 1) {
-      sprintf(buffer, "% 10.3e ]\n", g0(ii));
-    } else {
-      sprintf(buffer, "% 10.3e ", g0(ii));
-    }
-    ss << buffer;
-  }
-
-  // dbg: gs
-  ss <<"                   gs: [ ";
-  for (int ii = 0; ii < gs.rows(); ii++) {
-    if (ii == gs.rows() - 1) {
-      sprintf(buffer, "% 10.3e ]\n", gs(ii));
-    } else {
-      sprintf(buffer, "% 10.3e ", gs(ii));
-    }
-    ss << buffer;
-  }
+  ss << prntVecXd(xv, "x  ");
+  ss << prntVecXd(g00, "g00");
+  ss << prntVecXd(grads[0], "g0s");
+  ss << prntVecXd(grads[1], "gsn");
 
   // print to file
   FILE * pFile;
@@ -300,8 +296,9 @@ int SQP_(integer  *Status, integer *n,    double x[],
 
   if (*needG > 0) {
     if (dbg) {
-      cout << "g0 = [ " << g0.transpose() << " ] " << endl;
-      cout << "gs = [ " << gs.transpose() << " ] " << endl;
+      cout << "g00 = [ " << g00.transpose() << " ] " << endl;
+      cout << "g0s = [ " << grads[0].transpose() << " ] " << endl;
+      cout << "gsn = [ " << grads[1].transpose() << " ] " << endl;
     }
 
     // ┌─┐  ┌─┐  ┌┬┐    ╔═╗
@@ -310,8 +307,17 @@ int SQP_(integer  *Status, integer *n,    double x[],
     // Eigen::VectorXd gv = g.transpose() + xv.transpose()*H;
     // Eigen::VectorXd gv = g;
 
+    VectorXd g;
+    if (prob_->seto_->scaleVars() == 0) {
+      g = g00;
+    } else if (prob_->seto_->scaleVars() == 1) {
+      g = grads[0];
+    } else if (prob_->seto_->scaleVars() == 2) {
+      g = grads[1];
+    }
+
     for (int ii = 0; ii < *n; ii++) {
-      G[ii] = gs(ii);
+      G[ii] = g(ii);
     }
 
     if (m) {
@@ -389,6 +395,10 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prnt_file_ = SNOPTRun_ + ".opt.prnt";
   smry_file_ = SNOPTRun_ + ".opt.smry";
   optn_file_ = SNOPTRun_ + ".opt.optn";
+
+  auto d = prob.seto_->paths()->GetPath(Paths::SIM_EXEC_DIR);
+  optn_file_ = d + "/" + optn_file_;
+
   SNOPTHandler snoptHandler = initSNOPTHandler();
   setSNOPTOptions(snoptHandler, prob);
 
@@ -849,16 +859,10 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
     H.setIntParameter("Verify level", -1);
 
     // H.setIntParameter("Scale option", 1); // not working
-    // H.setParameter((char*) "Scale option 1"); // tested, not working
-    H.setRealParameter("Scale option", 1);
-
-    H.setParameter((char *) "Scale Print");
-
-
     H.setParameter((char *) "Scale Print");
     H.setParameter((char *) "Solution Yes");
 
-    H.setRealParameter("Major step limit", 0.01);
+    // H.setRealParameter("Major step limit", 100);
     H.setRealParameter("Major optimality tolerance", 1e-12);
 
     double f_prec = 1e-16;
@@ -992,17 +996,16 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 // ╩  ╝╚╝  ╩   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩   ╩ ╩  ╩ ╩  ╝╚╝  ═╩╝  ╩═╝  ╚═╝  ╩╚═
 SNOPTHandler SNOPTSolver::initSNOPTHandler() {
 
-  SNOPTHandler snoptHandler(prnt_file_.c_str(),
-                            smry_file_.c_str(),
-                            optn_file_.c_str());
-
-
   if (true) {
     cout << "Initiate SNOPTHandler" << endl;
     cout << "prnt_file: " << prnt_file_ << endl;
     cout << "smry_file: " << smry_file_ << endl;
     cout << "optn_file: " << optn_file_ << endl;
   }
+
+  SNOPTHandler snoptHandler(prnt_file_.c_str(),
+                            smry_file_.c_str(),
+                            optn_file_.c_str());
 
   return snoptHandler;
 }

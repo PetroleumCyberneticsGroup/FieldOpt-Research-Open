@@ -356,7 +356,7 @@ class TestResourceOptimizer :
   QJsonObject get_json_settings_tr_opt_maximize_{
     {"Type", "TrustRegionOptimization"},
     {"Mode", "Minimize"},
-    {"ScaleVars", false},
+    {"ScaleVars", 0},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},
       {"TR-InitRad", 1},
@@ -376,7 +376,7 @@ class TestResourceOptimizer :
   QJsonObject get_json_settings_dftr_max_{
     {"Type", "DFTR"},
     {"Mode", "Minimize"},
-    {"ScaleVars", false},
+    {"ScaleVars", 0},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},
       {"TR-InitRad", 1},

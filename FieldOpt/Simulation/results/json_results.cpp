@@ -115,7 +115,9 @@ JsonResults::JsonResults(std::string file_path, Settings::Simulator sim_settings
       }
       ss << "}";
     }
-    ext_info(ss.str(), md_, cl_, vp_.lnw);
+    if (vp_.vSIM >= 2 && !grads_vec_.empty()) {
+      ext_info(ss.str(), md_, cl_, vp_.lnw);
+    }
   }
 
   file->close();
