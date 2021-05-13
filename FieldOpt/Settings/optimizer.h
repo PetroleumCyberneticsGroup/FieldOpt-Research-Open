@@ -54,6 +54,9 @@ class Optimizer
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer, VerbParams vp);
 
+  Paths* paths() { return paths_; };
+  void setPaths(Paths *p) { paths_ = p; };
+
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
     EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
@@ -501,7 +504,7 @@ class Optimizer
   void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
   VerbParams verbParams() { return vp_; };
 
-  bool ScaleVars() { return scale_vars_; }
+  int scaleVars() { return scale_vars_; }
   double ScaleObjf() { return scale_objf_; }
 
  private:
@@ -509,8 +512,9 @@ class Optimizer
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
+  Paths *paths_;
 
-  bool scale_vars_ = true;
+  int scale_vars_ = 1;
   double scale_objf_ = 1.0;
 
   string im_, wm_, em_;
