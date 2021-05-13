@@ -291,7 +291,6 @@ class Case : public Loggable
    * @return Values of the real variables in a vector
    */
   VectorXd GetRealVarVector();
-  vector<VectorXd> GetRealVarGrads(VarPropContainer *vars);
   vector<VectorXd> GetRealVarGradx(VarPropContainer *vars);
 
   void GetGradsOrderedByType(

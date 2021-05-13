@@ -255,7 +255,8 @@ void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
     E("Base Case and Model must be initialized before the Optimizer", md_, cl_);
   }
-
+  settings_->optimizer()->setPaths(&settings_->paths());
+  
   switch (settings_->optimizer()->type()) {
 
     // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
