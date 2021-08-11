@@ -75,7 +75,7 @@ TC DFTR::IsFinished() {
   if (trm_->getRad() < tr_rad_tol_) {
     tc = MIN_STEP_LENGTH_REACHED;
   }
-  if (iteration_ == tr_iter_max_) {
+  if (evaluated_cases_ == tr_iter_max_) {
     tc = MAX_ITERS_REACHED;
   }
   if (tc != NOT_FINISHED) {
