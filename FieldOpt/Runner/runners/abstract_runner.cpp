@@ -463,7 +463,7 @@ void AbstractRunner::PrintCompletionMessage() {
       break;
 
     case TC::MAX_EVALS_REACHED:
-      cout << "Max # fevals reached (not converged)." << endl;
+      cout << "Max # fevals reached." << endl;
       break;
 
       case TC::MIN_STEP_LENGTH_REACHED:

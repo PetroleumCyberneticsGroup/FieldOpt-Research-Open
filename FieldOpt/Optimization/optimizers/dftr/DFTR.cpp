@@ -76,7 +76,8 @@ TC DFTR::IsFinished() {
     tc = MIN_STEP_LENGTH_REACHED;
   }
   if (evaluated_cases_ == tr_iter_max_) {
-    tc = MAX_ITERS_REACHED;
+    tc = MAX_EVALS_REACHED;
+    // tc = MAX_ITERS_REACHED;
   }
   if (tc != NOT_FINISHED) {
   }
