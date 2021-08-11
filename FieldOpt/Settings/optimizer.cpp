@@ -651,8 +651,8 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
 
     set_opt_prop_double(params.tr_tol_f, json_params, "TR-TolF", vp_);
     set_opt_prop_double(params.tr_eps_c, json_params, "TR-EpsC", vp_);
-    set_opt_prop_double(params.tr_eta_0, json_params, "TR-Eps0", vp_);
-    set_opt_prop_double(params.tr_eta_1, json_params, "TR-Eps1", vp_);
+    set_opt_prop_double(params.tr_eta_0, json_params, "TR-Eta0", vp_);
+    set_opt_prop_double(params.tr_eta_1, json_params, "TR-Eta1", vp_);
 
     // Thesholds
     set_opt_prop_double(params.tr_piv_thld, json_params, "TR-PivThld", vp_);
