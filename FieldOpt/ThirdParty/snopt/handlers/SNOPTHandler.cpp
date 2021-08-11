@@ -59,14 +59,16 @@ SNOPTHandler::SNOPTHandler(const char *prntname,
   // setSummaryFile( summname );
   this->init_();
 
-  this->has_snopt_option_file = true;
+  // set in header file
+  // this->has_optn_file = true;
+  // this->use_optn_file = false;
   if (!FileExists(QString(specname), vp_, md_, cl_)) {
-    this->has_snopt_option_file = false;
+    this->has_optn_file = false;
     cout << "-- sqp_snopt: Couldn't open file: " << string(specname) << "\n";
     cout << "-- sqp_snopt: Using default options for sqp_snopt\n";
   }
 
-  if (this->has_snopt_option_file) {
+  if (this->has_optn_file && this->use_optn_file) {
     iSpecs = 15;
     setSpecFile(specname);
   } else {
@@ -99,9 +101,9 @@ SNOPTHandler::~SNOPTHandler() {
   }
 
   // Delete work arrays.
-    delete[] rw;
-    delete[] iw;
-    delete[] cw;
+  delete[] rw;
+  delete[] iw;
+  delete[] cw;
 }
 
 
@@ -179,7 +181,7 @@ void SNOPTHandler::areAllUserDataSet_() {
 
 void SNOPTHandler::errorMessageOnExit_(const char *var) {
   throw(string(var) + " must be set prior to call to \n" +
-      "SNOPTOptimizer::solve() or SNOPTOptimizer::computeJac()");
+    "SNOPTOptimizer::solve() or SNOPTOptimizer::computeJac()");
 }
 
 
@@ -388,19 +390,19 @@ void SNOPTHandler::computeJac() {
 
 
   for (int i = 0; i < lencw; i++){
-      c_cw[i]  = cw[i];
+    c_cw[i]  = cw[i];
   }
 
   for (int i = 0; i < lenrw; i++){
-      c_rw[i]  = rw[i];
+    c_rw[i]  = rw[i];
   }
 
   for (int i = 0; i < leniw; i++){
-      c_iw[i]  = iw[i];
+    c_iw[i]  = iw[i];
   }
 
   for(int i = 0; i < n; i++){
-      cout << x[i] << "\t";
+    cout << x[i] << "\t";
   }
 
 
@@ -456,12 +458,12 @@ void SNOPTHandler::computeJac() {
 
 
   snjac_(&inform, &neF, &n, usrfun,
-       iAfun, jAvar, &lenA, &neA, A,
-       iGfun, jGvar, &lenG, &neG,
-       x, xlow, xupp, &mincw, &miniw, &minrw,
-       cw, &lencw, iw, &leniw, rw, &lenrw,
-       cw, &lencw, iw, &leniw, rw, &lenrw,
-       8 * 500, 8 * 500);
+         iAfun, jAvar, &lenA, &neA, A,
+         iGfun, jGvar, &lenG, &neG,
+         x, xlow, xupp, &mincw, &miniw, &minrw,
+         cw, &lencw, iw, &leniw, rw, &lenrw,
+         cw, &lencw, iw, &leniw, rw, &lenrw,
+         8 * 500, 8 * 500);
 
   //cout << iGfun  << "\t" << jGvar << "\t" << lenG << "\t" << neG  << "\t" << endl;
   //cout << leniw << "\t" << lencw << "\t" << lenrw << endl;
@@ -470,141 +472,141 @@ void SNOPTHandler::computeJac() {
 
 
   for(int i = 0; i < n; i++){
-      if(c_x[i] != x[i]) {
-        cout << "x: " << i << "\t"
-             << c_x[i] << "  !=  " << x[i] << endl;
-      }
+    if(c_x[i] != x[i]) {
+      cout << "x: " << i << "\t"
+           << c_x[i] << "  !=  " << x[i] << endl;
+    }
 
-      if(c_xlow[i] != xlow[i]) {
-        cout << "xlow: " << i << "\t"
-             << c_xlow[i] << "  !=  " << xlow[i] << endl;
-      }
+    if(c_xlow[i] != xlow[i]) {
+      cout << "xlow: " << i << "\t"
+           << c_xlow[i] << "  !=  " << xlow[i] << endl;
+    }
 
-      if(c_xupp[i] != xupp[i]) {
-        cout << "xupp: " << i << "\t"
-             << c_xupp[i] << "  !=  " << xupp[i] << endl;
-      }
+    if(c_xupp[i] != xupp[i]) {
+      cout << "xupp: " << i << "\t"
+           << c_xupp[i] << "  !=  " << xupp[i] << endl;
+    }
   }
 
 
   for (int i = 0; i < lenA; i++){
-      if(c_A[i] != A[i]) {
-        cout << "A: " << i << "\t"
-             << c_A[i] << "  !=  " << A[i] << endl;
-      }
+    if(c_A[i] != A[i]) {
+      cout << "A: " << i << "\t"
+           << c_A[i] << "  !=  " << A[i] << endl;
+    }
 
-      if(c_iAfun[i] != iAfun[i]) {
-        cout << "iAfun: " << i << "\t"
-             << c_iAfun[i] << "  !=  " << iAfun[i] << endl;
-      }
+    if(c_iAfun[i] != iAfun[i]) {
+      cout << "iAfun: " << i << "\t"
+           << c_iAfun[i] << "  !=  " << iAfun[i] << endl;
+    }
 
-      if(c_jAvar[i] != jAvar[i]) {
-        cout << "jAvar: " << i << "\t"
-             << c_jAvar[i] << "  !=  " << jAvar[i] << endl;
-      }
+    if(c_jAvar[i] != jAvar[i]) {
+      cout << "jAvar: " << i << "\t"
+           << c_jAvar[i] << "  !=  " << jAvar[i] << endl;
+    }
   }
 
 
   for (int i = 0; i < lenG; i++){
 
-      cout << "iGfun: " << i << "\t"
-           << c_iGfun[i] << "\t\t\t   and  \t\t\t"
-           << iGfun[i] << endl;
+    cout << "iGfun: " << i << "\t"
+         << c_iGfun[i] << "\t\t\t   and  \t\t\t"
+         << iGfun[i] << endl;
 
-      cout << "jGvar: " << i << "\t"
-           << c_jGvar[i] << "\t\t\t   and  \t\t\t"
-          << jGvar[i] << endl;
+    cout << "jGvar: " << i << "\t"
+         << c_jGvar[i] << "\t\t\t   and  \t\t\t"
+         << jGvar[i] << endl;
 
-      // if(c_iGfun[i] != iGfun[i])
-      //     cout << "iGfun: " << i << "\t"
-      //          << c_iGfun[i] << "\t\t\t  !=  \t\t\t"
-      //          << iGfun[i] << endl;
+    // if(c_iGfun[i] != iGfun[i])
+    //     cout << "iGfun: " << i << "\t"
+    //          << c_iGfun[i] << "\t\t\t  !=  \t\t\t"
+    //          << iGfun[i] << endl;
 
-      // if(c_jGvar[i] != jGvar[i])
-      //     cout << "jGvar: " << i << "\t"
-      //          << c_jGvar[i] << "\t\t\t  !=  \t\t\t"
-      //          << jGvar[i] << endl;
+    // if(c_jGvar[i] != jGvar[i])
+    //     cout << "jGvar: " << i << "\t"
+    //          << c_jGvar[i] << "\t\t\t  !=  \t\t\t"
+    //          << jGvar[i] << endl;
 
   }
 
 
   for(int i = 0; i < lencw; i++){
-      if (c_cw[i]  != cw[i]){
-          cout << " ---  CW --- i = " << i << "\t "
-               << c_cw[i] << " != " << cw[i] << endl;
-      }
+    if (c_cw[i]  != cw[i]){
+      cout << " ---  CW --- i = " << i << "\t "
+           << c_cw[i] << " != " << cw[i] << endl;
+    }
   }
 
 
   for(int i = 0; i < lenrw; i++){
-      //rw[i] = c_rw[i];
-      if (c_rw[i]  != rw[i]){
-          cout << " ---  RW --- i = " << i << "\t "
-               << c_rw[i] << " != " << rw[i] << endl;
+    //rw[i] = c_rw[i];
+    if (c_rw[i]  != rw[i]){
+      cout << " ---  RW --- i = " << i << "\t "
+           << c_rw[i] << " != " << rw[i] << endl;
 
-      }
+    }
   }
 
 
   for(int i = 0; i < leniw; i++){
-      //iw[i] = c_iw[i];
-      if (c_iw[i]  != iw[i]){
-          cout << " ---  IW --- i = " << i << "\t "
-               << c_iw[i] << " != " << iw[i] << endl;
+    //iw[i] = c_iw[i];
+    if (c_iw[i]  != iw[i]){
+      cout << " ---  IW --- i = " << i << "\t "
+           << c_iw[i] << " != " << iw[i] << endl;
 
-      }
+    }
   }
 
 
   //  inform = c_inform;
   if (c_inform != inform){
-      cout << "inform: " << c_inform
-           << "  !=  " << inform << endl;
+    cout << "inform: " << c_inform
+         << "  !=  " << inform << endl;
   }
 
   if (c_neF != neF){
-      cout << "neF: " << c_neF
-           << "  !=  " << neF << endl;
+    cout << "neF: " << c_neF
+         << "  !=  " << neF << endl;
   }
 
   if (c_n != n){
-      cout << "n: " << c_n
-          << "  !=  " << n << endl;
+    cout << "n: " << c_n
+         << "  !=  " << n << endl;
   }
 
   if (c_lenA != lenA){
-      cout << "lenA: " << c_lenA
-           << "  !=  " << lenA << endl;
+    cout << "lenA: " << c_lenA
+         << "  !=  " << lenA << endl;
   }
 
   if (c_lenG != lenG){
-      cout << "lenG: " << c_lenG
-           << "  !=  " << lenG << endl;
+    cout << "lenG: " << c_lenG
+         << "  !=  " << lenG << endl;
   }
 
   if (c_neA != neA){
-      cout << "neA: " << c_neA
-           << "  !=  " << neA << endl;
+    cout << "neA: " << c_neA
+         << "  !=  " << neA << endl;
   }
 
   if (c_neG != neG){
-      cout << "neG: " << c_neG
-           << "  !=  " << neG << endl;
+    cout << "neG: " << c_neG
+         << "  !=  " << neG << endl;
   }
 
   if (c_lencw != lencw){
-      cout << "lencw: " << c_lencw
-           << "  !=  " << lencw << endl;
+    cout << "lencw: " << c_lencw
+         << "  !=  " << lencw << endl;
   }
 
   if (c_leniw != leniw){
-      cout << "leniw: " << c_leniw
-           << "  !=  " << leniw << endl;
+    cout << "leniw: " << c_leniw
+         << "  !=  " << leniw << endl;
   }
 
   if (c_lenrw != lenrw){
-      cout << "lenrw: " << c_lenrw
-           << "  !=  " << lenrw << endl;
+    cout << "lenrw: " << c_lenrw
+         << "  !=  " << lenrw << endl;
   }
 
 
@@ -613,18 +615,18 @@ void SNOPTHandler::computeJac() {
   // minrw = c_minrw;
 
   if (c_mincw != mincw){
-      cout << "mincw: " << c_mincw
-           << "  !=  " << mincw << endl;
+    cout << "mincw: " << c_mincw
+         << "  !=  " << mincw << endl;
   }
 
   if (c_miniw != miniw){
-      cout << "miniw: " << c_miniw
-           << "  !=  " << miniw << endl;
+    cout << "miniw: " << c_miniw
+         << "  !=  " << miniw << endl;
   }
 
   if (c_minrw != minrw){
-      cout << "minrw: " << c_minrw
-           << "  !=  " << minrw << endl;
+    cout << "minrw: " << c_minrw
+         << "  !=  " << minrw << endl;
   }
 
 
@@ -896,28 +898,28 @@ void SNOPTHandler::setSpecFile(const char *aspecname) {
 
   switch (inform) {
     case 101:
-    cout << "-- sqp_snopt: Specs file read successfully ! \n";
+      cout << "-- sqp_snopt: Specs file read successfully ! \n";
       break;
 
     case 131:
-    cout << "-- sqp_snopt: Specs file specified\n";
+      cout << "-- sqp_snopt: Specs file specified\n";
       break;
 
     case 132:
-    cout << "-- sqp_snopt: End-of-file encountered while looking for Specs file\n";
+      cout << "-- sqp_snopt: End-of-file encountered while looking for Specs file\n";
       break;
 
     case 133:
-    cout << "-- sqp_snopt: End-of-file encountered before finding End\n";
+      cout << "-- sqp_snopt: End-of-file encountered before finding End\n";
       break;
 
     case 134:
-    cout << "-- sqp_snopt: Endrun found before any valid sets of options\n";
+      cout << "-- sqp_snopt: Endrun found before any valid sets of options\n";
       break;
 
     default:
-    cout << "-- sqp_snopt: There were " << inform - 134
-         << " errors while reading Specs\n";
+      cout << "-- sqp_snopt: There were " << inform - 134
+           << " errors while reading Specs\n";
       break;
   }
 

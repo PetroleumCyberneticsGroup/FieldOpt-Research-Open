@@ -156,6 +156,7 @@ tuple<VectorXd, double, int>
   Optimizer::EmbeddedProblem prob;
   prob.setProbName("TRMod_A");
   // prob.setProbName("Rosenbrock"); // dbg
+  prob.seto_ = settings_;
 
   // Set prob dims
   prob.setNunVars(getXDim());

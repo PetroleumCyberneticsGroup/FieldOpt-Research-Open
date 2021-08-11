@@ -147,7 +147,8 @@ class SNOPTHandler {
   void setSummaryFile(const char *summname);
   void setSpecFile(const char *specname);
 
-  bool has_snopt_option_file;
+  bool has_optn_file = false;
+  bool use_optn_file = false;
 
   string md_ = "ThirdParty::snopt::handlers";
   string cl_ = "SNOPTHandler";

@@ -415,7 +415,9 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setXSol(xsol);
   prob.setFSol(fsol);
 
-  cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
+  if (prob.seto_->verbParams().vOPT >= 1) {
+    cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
+  }
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
 }
 
@@ -996,7 +998,7 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 // ╩  ╝╚╝  ╩   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩   ╩ ╩  ╩ ╩  ╝╚╝  ═╩╝  ╩═╝  ╚═╝  ╩╚═
 SNOPTHandler SNOPTSolver::initSNOPTHandler() {
 
-  if (true) {
+  if (false) {
     cout << "Initiate SNOPTHandler" << endl;
     cout << "prnt_file: " << prnt_file_ << endl;
     cout << "smry_file: " << smry_file_ << endl;
