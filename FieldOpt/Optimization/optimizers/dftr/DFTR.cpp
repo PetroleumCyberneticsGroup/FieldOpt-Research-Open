@@ -64,6 +64,7 @@ DFTR::DFTR(Settings::Optimizer *settings,
 TC DFTR::IsFinished() {
   TC tc = NOT_FINISHED;
 
+  //! -> termination criteria
   if (trm_->isModInit() && !trm_->getModPolys().empty()) {
     if (trm_->measureCrit().norm() < tr_tol_f_) {
       tc = DFTR_CRIT_NORM_1ST_ORD_LT_TOLF;
@@ -215,7 +216,7 @@ void DFTR::iterate() {
 
       trm_->dbg_->prntIterBool(7); // to be filled
 
-      //! --
+      //! -> rho = -inf situation
       if ((pred_red_ < tr_rad_tol_ * 1e-2)
         || (pred_red_ < tr_rad_tol_ * abs(trm_->getCurrFval()) && (trial_step_.norm()) < tr_rad_tol_)
         || (pred_red_ < tr_tol_f_ * abs(trm_->getCurrFval()) * 1e-3)) {
@@ -227,8 +228,8 @@ void DFTR::iterate() {
         mchange_ = trm_->ensureImpr();
         impr_modl_nx_ = ensureImprPostProc();
 
-      } else {
-        trm_->dbg_->prntIterBool(9); //! -> Evaluate objective at trial point>
+      } else { //! -> Evaluate objective at trial point>
+        trm_->dbg_->prntIterBool(9);
         Case *new_case = new Case(base_case_);
         new_case->SetRealVarValues(trial_point_);
         case_handler_->AddNewCase(new_case);
