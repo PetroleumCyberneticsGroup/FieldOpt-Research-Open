@@ -458,9 +458,28 @@ void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
   if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
+void TRDebug::prntIsFinished(int cs, bool c1, bool c2,
+                            double d1, double d2, double d3, double d4) {
+  stringstream ss;
+  ss << "[@isFinished] ";
+  if (cs == 1) {
+    ss << "[A=(isModInit() && !getModPolys().empty()): ";
+    ss << num2str(c1, 0, 1) << "]";
+    ss << "[B=(trm_->getRad() < tr_rad_tol_): ";
+    ss << num2str(c2, 0, 1) << "]";
+
+    ss << ", radius: " + num2str(d1, 3, 1);
+    ss << ", #lim_inf: " + num2str(d2, 0, 0);
+    ss << ", #evals: " + num2str(d3, 0, 0);
+
+  } else if (cs == 2) {
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
 void TRDebug::prntTstCrit(int cs, string crs,
                           VectorXd v0, VectorXd v1, double d1, double d2) {
-
   stringstream ss;
   ss << "[@testCrit] ";
   if (cs == 1) {
