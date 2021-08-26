@@ -42,7 +42,8 @@ TRFrame::choosePivPoly(int initial_i, int final_i, double tol) {
   bool success = false;
   double pivot_value = 0.0;
 
-  dbg_->prntPivotPolys("choosePivotPolynomial-01");
+  // dbg_->prntPivotPolys("choosePivotPolynomial-00");
+  // >> DFTR_PivotPolyns.txt (fn_pivp)
 
   for (int k = initial_i; k <= final_i; k++) {
     auto poly = orthogzToOthrPolys(k, last_point);
@@ -68,7 +69,9 @@ TRFrame::choosePivPoly(int initial_i, int final_i, double tol) {
 // _________________________________________________________
 // NORMALIZEPOLY
 poly TRFrame::normalizePoly(int poly_i, VectorXd point) {
-  dbg_->prntPivotPolys("normalizePoly-00");
+  // dbg_->prntPivotPolys("normalizePoly-00");
+  // >> DFTR_PivotPolyns.txt (fn_pivp)
+
   auto polynomial = pivot_polys_[poly_i];
   auto val = evaluatePoly(polynomial, point);
   for (int i = 0; i < 3; i++) {
@@ -78,14 +81,15 @@ poly TRFrame::normalizePoly(int poly_i, VectorXd point) {
       break;
     }
   }
-  dbg_->prntPivotPolys("normalizePoly-01");
+  // dbg_->prntPivotPolys("normalizePoly-01");
+  // >> DFTR_PivotPolyns.txt (fn_pivp)
   return polynomial;
 }
 
 // __________________________________________________________
 // ORTHOGZTOOTHRPOLYS
 poly TRFrame::orthogzToOthrPolys(int poly_i, int last_pt) {
-  dbg_->prntPivotPolys("orthogzToOthrPolys-00");
+  // dbg_->prntPivotPolys("orthogzToOthrPolys-00");
 
   auto p = pivot_polys_[poly_i];
   for (int n = 0; n <= last_pt; n++) {
@@ -93,7 +97,8 @@ poly TRFrame::orthogzToOthrPolys(int poly_i, int last_pt) {
       p = zeroAtPt(p, pivot_polys_[n], pts_shftd_.col(n));
     }
   }
-  dbg_->prntPivotPolys("orthogzToOthrPolys-01");
+  // dbg_->prntPivotPolys("orthogzToOthrPolys-01");
+  // >> fn_pivp_: DFTR_PivotPolyns.txt
   return p;
 }
 
@@ -101,14 +106,14 @@ poly TRFrame::orthogzToOthrPolys(int poly_i, int last_pt) {
 // ORTHOGZBLOCK
 void TRFrame::orthogzBlock(VectorXd point, int np,
                            int block_beg, int block_end) {
-  dbg_->prntPivotPolys("orthogzBlock-00");
+  dbg_->prntPivotPolys("orthogzBlock-00"); // >> DFTR_PivotPolyns.txt
   for (int p = block_beg; p <= block_end; p++) {
     if (p != np) {
       pivot_polys_[p] = zeroAtPt(pivot_polys_[p],
                                  pivot_polys_[np], point);
     }
   }
-  dbg_->prntPivotPolys("orthogzBlock-01");
+  // dbg_->prntPivotPolys("orthogzBlock-01"); // >> DFTR_PivotPolyns.txt
 }
 
 // _________________________________________________________
@@ -122,7 +127,8 @@ poly TRFrame::zeroAtPt(poly &p1, poly &p2, VectorXd x) {
   int iter = 1;
 
   VectorXd xd(3); xd << px, p2x, -px/p2x; // dbg
-  dbg_->prntVecXd(xd, "p-vals: ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(xd, "p-vals: ", "% 10.3e ", dbg_->fn_pivp_);
+  // >> DFTR_PivotPolyns.txt (fn_pivp)
 
   while (px != 0) {
     p = addPoly(p, multiplyPoly(p2, -px/p2x));
@@ -140,22 +146,24 @@ double TRFrame::evaluatePoly(poly p1, VectorXd x) {
   VectorXd g(p1.dim);
   MatrixXd H(p1.dim, p1.dim);
 
-  dbg_->prntPolys("evaluatePoly", p1);
+  // dbg_->prntPolys("evaluatePoly", p1);
+  // >> DFTR_PivotCoeffs.txt (fn_pcfs_)
   tie(c, g, H) = coeffsToMatrices(p1.dim, p1.coeffs);
 
   VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
-  dbg_->prntVecXd(xv, "c -- prod(gx) -- prod(xHx): ",
-                  "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(xv, "c -- prod(gx) -- prod(xHx): ",
+  //                 "% 10.3e ", dbg_->fn_pivp_);
+  // >> DFTR_PivotPolyns.txt (fn_pivp_)
 
   terms[0] = c;
   terms[1] = g.transpose()*x;
   terms[2] = (x.transpose()*H*x);
   terms[2] *= 0.5;
 
-  dbg_->prntVecXd(x, "point x ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(x, "point x ", "% 10.3e ", dbg_->fn_pivp_);
   VectorXd xt(3); xt << terms[0], terms[1], terms[2]; // dbg
-  dbg_->prntVecXd(xt, "c --    gx    --    xHx:    ",
-                  "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(xt, "c --    gx    --    xHx:    ",
+  //                 "% 10.3e ", dbg_->fn_pivp_);
 
   return terms[0] + terms[1] + terms[2];
 }
@@ -168,8 +176,8 @@ poly TRFrame::addPoly(poly p1, poly p2) {
     E("Failed to add polys ->diff dims.", md_, cl_);
   }
 
-  dbg_->prntVecXd(p1.coeffs, "add-p1: ", "% 10.3e ", dbg_->fn_pivp_);
-  dbg_->prntVecXd(p2.coeffs, "add-p2: ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(p1.coeffs, "add-p1: ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(p2.coeffs, "add-p2: ", "% 10.3e ", dbg_->fn_pivp_);
 
   poly p;
   p.dim = p1.dim;
@@ -187,16 +195,16 @@ poly TRFrame::addPoly(poly p1, poly p2) {
 // MULTIPLYPOLY
 poly TRFrame::multiplyPoly(poly p1, double factor) {
   poly p = p1;
-  dbg_->prntVecXd(p.coeffs, "multp0: ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(p.coeffs, "multp0: ", "% 10.3e ", dbg_->fn_pivp_);
   p.coeffs = p1.coeffs * factor;
-  dbg_->prntVecXd(p.coeffs, "multp1: ", "% 10.3e ", dbg_->fn_pivp_);
+  // dbg_->prntVecXd(p.coeffs, "multp1: ", "% 10.3e ", dbg_->fn_pivp_);
   return p;
 }
 
 // _________________________________________________________
 // COMBINEPOLYS
 poly TRFrame::combinePolys(int npts, RowVectorXd coeffs) {
-  dbg_->prntPivotPolys("combinePolys");
+  // dbg_->prntPivotPolys("combinePolys");
 
   auto polys = vector<poly>(pivot_polys_.begin(),
                             pivot_polys_.begin() + npts);
@@ -222,7 +230,7 @@ poly TRFrame::shiftPoly(poly p, VectorXd s) {
   double terms[3], c;
   VectorXd g(p.dim);
   MatrixXd H(p.dim, p.dim);
-  dbg_->prntPolys("shiftPoly", p);
+  // dbg_->prntPolys("shiftPoly", p);
 
   tie(c, g, H) = coeffsToMatrices(p.dim, p.coeffs);
   double c_mod = c + (double)(g.transpose()*s);
@@ -305,7 +313,7 @@ modMatrix TRFrame::getModMatrix(int m) {
   VectorXd g(p.dim);
   MatrixXd H(p.dim, p.dim);
 
-  dbg_->prntPolys("getModelMatrices", p);
+  // dbg_->prntPolys("getModelMatrices", p);
   tie(c, g, H) = coeffsToMatrices(p.dim, p.coeffs);
 
   modMatrix mMatrix;
@@ -472,7 +480,7 @@ vector<poly> TRFrame::computeQuadMNPolys() {
     polynomials[n] = matricesToPoly(c, g, H);
   }
 
-  dbg_->prntPivotPolys("computeQuadMNPolys");
+  // dbg_->prntPivotPolys("computeQuadMNPolys");
   return polynomials;
 }
 
@@ -489,7 +497,7 @@ void TRFrame::computePolyMods() {
   int full_q_terms = (dim+1)*(dim+2)/2;
 
   vector<poly> p(f_num);
-  dbg_->prntPivotPolys("computePolyMods-00");
+  // dbg_->prntPivotPolys("computePolyMods-00");
 
   if ((linear_terms < points_num) && (points_num < full_q_terms)) {
     // Compute quadratic model
@@ -506,8 +514,8 @@ void TRFrame::computePolyMods() {
     }
   }
   modeling_polys_ = p;
-  dbg_->prntPolys("computePolyMods", modeling_polys_[0]);
-  dbg_->prntPivotPolys("computePolyMods-01");
+  // dbg_->prntPolys("computePolyMods", modeling_polys_[0]);
+  // dbg_->prntPivotPolys("computePolyMods-01");
 }
 
 // __________________________________________________________
@@ -517,7 +525,7 @@ RowVectorXd TRFrame::nfpFiniteDiffs(int points_num) {
   //!<Change so we can interpolate more functions at the same time>
   int dim = (int)pts_shftd_.rows();
   RowVectorXd l_alpha = fvals_;
-  dbg_->prntPivotPolys("nfpFiniteDiffs");
+  // dbg_->prntPivotPolys("nfpFiniteDiffs");
 
   vector<poly> polynomials = vector<poly>(pivot_polys_.begin(),
                                           pivot_polys_.begin() + points_num);
