@@ -106,16 +106,26 @@ void TRDebug::prntToFl(string fn, string sout) {
 void TRDebug::prntPolys(string msg, poly p) {
   stringstream ss;
   if (msg != "") { prntHeader(ss, msg, 1); }
-  ss << prntVecXd(p.coeffs) << endl;
-  prntToFl(fn_pcfs_, ss.str());
+  // ss << prntVecXd(p.coeffs) << endl;
+  // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+  if(msg == ".") {
+    prntToFl(fn_pcfs_, ".");
+  } else {
+    prntToFl(fn_pcfs_, ss.str());
+  }
 }
 
 void TRDebug::prntPivotVals(string msg) {
   stringstream ss;
   if (msg != "") { prntHeader(ss, msg, 0); }
-  ss << prntVecXd(trm_->pivot_values_) << endl;
-  ss << prntVecXd(trm_->pivot_order_) << endl;
-  prntToFl(fn_pivp_, ss.str());
+  // ss << prntVecXd(trm_->pivot_values_) << endl;
+  // ss << prntVecXd(trm_->pivot_order_) << endl;
+  // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+  if(msg == ".") {
+    prntToFl(fn_pivp_, ".");
+  } else {
+    prntToFl(fn_pivp_, ss.str());
+  }
 }
 
 void TRDebug::prntPivotPolys(string msg) {
@@ -124,31 +134,51 @@ void TRDebug::prntPivotPolys(string msg) {
 
   for (int kk = 0; kk < trm_->pivot_polys_.size(); kk++) {
     auto vec = trm_->pivot_polys_[kk].coeffs;
-    stringstream si; si << "piv.p#" << kk << " ";
-    ss << prntVecXd(vec, si.str()) << endl;
+    // stringstream si; si << "piv.p#" << kk << " ";
+    // ss << prntVecXd(vec, si.str()) << endl;
+    // >> fn_pivp_: DFTR_PivotPolyns.txt
   }
 
   if (trm_->pivot_values_.size() > 0) {
-    ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
+    // ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
   } else {
     ss << "pivot_values_.size(): " << trm_->pivot_values_.size() << endl;
   }
-  prntToFl(fn_pivp_, ss.str());
+  if(msg == ".") {
+    prntToFl(fn_pivp_, ".");
+  } else {
+    prntToFl(fn_pivp_, ss.str());
+  }
 }
 
 void TRDebug::prntHeader(stringstream &ss, string msg, int htype) {
   string ENDSTRN = string(100, '=');
+  auto t1 = current_time();
+  auto tt = time_since_msecs(trm_->t0_);
+  string un = "ms";
+  if (tt > 1e3) { tt /= 1e3; un = "s "; }
+  auto dt = "DT: " + num2str(tt,1,0,6);
+  dt += un + " -- " + timestamp_string() + " ";
 
-  if (msg != "") {
+  if (msg != "" && trm_->dbgs_ != msg) {
+    if (trm_->dbgs_ == ".") {
+      ss << dt;
+    } else {
+      ss << endl << dt;
+    }
     if ( htype == 0 ) {
-      ss << ENDSTRN << endl;
-      ss << "[" << msg << "]" << endl;
-
+      // ss << ENDSTRN << endl;
+      ss << " [" << msg << "]" << endl;
     } else if ( htype == 1 ) {
       Printer::pad_text(msg, 28);
-      ss << "[" << msg << "]";
+      ss << " [" << msg << "]";
     }
+  } else {
+    ss.str("");
+    ss << ".";
   }
+  trm_->t0_ = t1;
+  trm_->dbgs_ = msg;
 }
 
 void TRDebug::prntModelData(string msg) {
@@ -161,7 +191,7 @@ void TRDebug::prntModelData(string msg) {
 
   ss << "all_points_: "     << prntMatXd(trm_->all_pts_, " ") << "\n";
   ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-  ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+  // ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
 
   ss << "repl_new_points_shifted_: " << prntMatXd(trm_->repl_new_pts_shftd_, " ") << "\n";
   ss << "repl_new_point_shifted_: " << prntMatXd(trm_->repl_new_pt_shftd_, " ") << "\n";
@@ -170,8 +200,8 @@ void TRDebug::prntModelData(string msg) {
   ss << "repl_new_point_abs_: " << prntMatXd(trm_->repl_new_pt_abs_, " ") << "\n";
   ss << "repl_new_fvalues_: "   << prntVecXd(trm_->repl_new_fvals_) << "\n";
 
-  ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
-  ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
+  // ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
+  // ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
 
   prntToFl(fn_mdat_, ss.str());
 }
@@ -231,7 +261,7 @@ void TRDebug::prntFunctionData(string fnm, string msg,
     ss << "cached_points_: "  << prntMatXd(trm_->cached_pts_, " ") << "\n";
     ss << "fvalues_: "        << prntVecXd(trm_->fvals_) << "\n";
     ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-    ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+    // ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
     fn = fn_xchp_;
 
   } else if (fnm == "none") {

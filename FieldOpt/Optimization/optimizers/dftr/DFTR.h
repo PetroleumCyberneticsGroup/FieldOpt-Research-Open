@@ -112,6 +112,7 @@ class DFTR : public Optimizer {
   string tr_basis_, tr_init_smpln_, tr_prob_name_;
 
   int tr_lim_inf_ = 0;
+  QDateTime ti_, t0_;
 
   // TR management
   double rho_;         // Agreement factor>

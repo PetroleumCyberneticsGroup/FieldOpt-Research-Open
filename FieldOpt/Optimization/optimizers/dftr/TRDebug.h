@@ -56,7 +56,6 @@ class TRDebug {
 
   void prntToFl(string fn, string sout);
 
-
   void prntPolys(string msg, poly p);
   void prntPivotVals(string msg="");
   void prntPivotPolys(string msg="");
@@ -127,7 +126,7 @@ class TRDebug {
   string fn_xchp_, fn_co2m_, fn_pcfs_;
 
   TRFrame* trm_;
-  bool prntDbg_ = false;
+  bool prntDbg_ = true;
 };
 
 }

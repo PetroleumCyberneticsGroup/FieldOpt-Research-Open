@@ -622,6 +622,8 @@ void DFTR::createLogFile() {
   if (out_dir.length() > 0) { CreateDir(out_dir, vp_); }
   QString fn = "/dftr_" + QString::fromStdString(tr_prob_name_) + ".csv";
   dftr_log_ = out_dir + fn;
+  ti_ = QDateTime::currentDateTime();
+  t0_ = ti_;
 
   // Delete existing logs if --force flag is on
   if (FileExists(dftr_log_, vp_)) {
@@ -629,7 +631,7 @@ void DFTR::createLogFile() {
   }
 
   WriteLineToFile(fn, dftr_log_);
-  const QString header = "iter        fval         rho      radius  pts";
+  const QString header = "iter        fval         rho      radius  pts     dt     dT   tstamp";
   WriteLineToFile(header, dftr_log_);
 }
 
@@ -637,11 +639,18 @@ void DFTR::createLogFile() {
 // PRINTITERATION
 void DFTR::printIteration(double fval_current) {
   stringstream ss;
+  QDateTime t1 = QDateTime::currentDateTime();
   ss << setw(4) << right << iteration_ << setprecision(3)
      << setw(12) << scientific << right << fval_current
      << setw(12) << scientific << right << rho_
      << setw(12) << scientific << right << trm_->getRad()
-     << setw(5) << right << trm_->getNPts();
+     << setw(5) << right << trm_->getNPts() << setprecision(3)
+     << setw(7) << right << time_span_seconds(t0_, t1)
+     << setw(7) << scientific << right
+     << num2str(time_span_seconds(ti_, t1),1,1)
+     << setw(22) << right << timestamp_string(t1);
+  t0_ = t1;
+
   string str = ss.str();
   WriteLineToFile(QString::fromStdString(str), dftr_log_);
 }
