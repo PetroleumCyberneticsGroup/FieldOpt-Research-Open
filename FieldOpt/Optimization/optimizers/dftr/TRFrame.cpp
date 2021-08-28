@@ -62,6 +62,9 @@ TRFrame::TRFrame(VectorXd &lb, VectorXd &ub,
   ub_ = ub;
   tr_center_ = 0; // index
   // cache_max_ = (int)3*pow(dim_,2); // not used
+
+  ti_ = current_time();
+  t0_ = ti_;
 }
 
 // ---------------------------------------------------------

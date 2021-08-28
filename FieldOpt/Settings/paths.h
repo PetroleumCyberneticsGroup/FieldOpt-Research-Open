@@ -81,13 +81,27 @@ class Paths {
     pair<Path, string> {BUILD_DIR, "Build directory"},
     pair<Path, string> {OUTPUT_DIR, "Output directory"},
     pair<Path, string> {OPTMZD_DIR, "Optimized result dir"},
-    pair<Path, string> {SIM_DRIVER_DIR, "Sim driver parent directory"},
+    pair<Path, string> {SIM_EXEC_DIR, "Sim exec dir"},
+    pair<Path, string> {SIM_DRIVER_DIR, "Sim driver parent dir"},
     pair<Path, string> {SIM_WORK_DIR, "Sim work directory"},
-    pair<Path, string> {SIM_AUX_DIR, "Auxiliary files for simulation directory"},
+    pair<Path, string> {SIM_AUX_DIR, "Auxiliary files for simulation dir"},
     pair<Path, string> {TRAJ_DIR, "Dir w/ trajectory files for import"},
     pair<Path, string> {CASE_ROOT_DIR, "Case root dir"},
     pair<Path, string> {CASE_DRVR_DIR, "Case driver dir (relative to ROOT)"}
   };
+
+  // Examples:
+  // Optimized result dir          : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/fo.5spot_c09_bc01.bc01.xrun-sqp.NPV-SQP-X00-A01_20210513-T121955/optcs
+  // Sim exec dir                  : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/drivers
+  // Case driver dir (relative to ROOT):
+  // Sim driver parent dir         : MAIN/runs/20210210_e300.5spot.icd-opt-cong.test-case-dev-04/x.e300.c09_bc01-5spot_sc
+  // Output directory              : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/fo.5spot_c09_bc01.bc01.xrun-sqp.NPV-SQP-X00-A01_20210513-T121955
+  // Build directory               : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/drivers/
+  // Driver file                   : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/drivers/fo-drv.bc01.xrun-sqp_NPV-SQP-X00-A01.json
+  // Sim driver file               : MAIN/runs/20210210_e300.5spot.icd-opt-cong.test-case-dev-04/x.e300.c09_bc01-5spot_sc/ECL_5SPOT_C09_BC01_OPT.DATA
+  // Grid file                     : MAIN/runs/20210210_e300.5spot.icd-opt-cong.test-case-dev-04/x.e300.c09_bc01-5spot_sc/ECL_5SPOT_C09_BC01_OPT.EGRID
+  // Sim exe script                : MAIN/xdir/20210513-5spot-icd-opt-sqp.bc01.xrun-sqp.t200/drivers/bash_e300_slbs.sh
+  // Sim schedule file             : MAIN/runs/20210210_e300.5spot.icd-opt-cong.test-case-dev-04/x.e300.c09_bc01-5spot_sc/fo_edits.INC
 
   map<Path, string> paths_;
 

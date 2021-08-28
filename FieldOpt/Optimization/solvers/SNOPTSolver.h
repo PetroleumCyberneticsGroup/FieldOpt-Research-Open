@@ -87,7 +87,7 @@ class SNOPTSolver {
   // is likely to be on the boundary or not)
   integer *xstate_ = nullptr;
 
-  // Value SNOPT considers as infinity
+  // Value sqp_snopt considers as infinity
   const double infinity_ = 1e20;
 
   // Setup for SNOPTHandler
@@ -95,7 +95,7 @@ class SNOPTSolver {
   // be read from JSON and stored in settings_
   Settings::Optimizer *settings_;
 
-  string SNOPTRun_ = "TRMod";
+  string SNOPTRun_ = "DEF";
   string prnt_file_ = SNOPTRun_ + ".opt.prnt";
   string smry_file_ = SNOPTRun_ + ".opt.smry";
   string optn_file_ = SNOPTRun_ + ".opt.optn";
@@ -105,8 +105,9 @@ class SNOPTSolver {
   // Setup for subproblems
   void subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob);
   void subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &prob);
+  void subprobSQP(Optimization::Optimizer::EmbeddedProblem &prob);
 
-  // SNOPT functions / set SNOPT params
+  // sqp_snopt functions / set sqp_snopt params
   bool loadSNOPT(string lib_name = "libsnopt-7.2.12.2.so");
 
   void setSNOPTOptions(
@@ -115,15 +116,12 @@ class SNOPTSolver {
 
  public:
   void resetSNOPTSolver(); // Needed?
-
 };
 
 }  // namespace Optimizers
 }  // namespace Optimization
 
 #endif //FOEX_DC_5SNOPTSOLVER_H
-
-
 
 // This class will find _one_ maximum of a quadratic
 // function (specified by c_, g_ and H_) subject to

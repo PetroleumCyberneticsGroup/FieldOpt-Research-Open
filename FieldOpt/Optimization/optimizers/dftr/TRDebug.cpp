@@ -105,140 +105,177 @@ void TRDebug::prntToFl(string fn, string sout) {
 
 void TRDebug::prntPolys(string msg, poly p) {
   stringstream ss;
-  if (msg != "") { prntHeader(ss, msg, 1); }
-  ss << prntVecXd(p.coeffs) << endl;
-  prntToFl(fn_pcfs_, ss.str());
+  if (calcDbg_) {
+    if (msg != "") { prntHeader(ss, msg, 1); }
+    ss << prntVecXd(p.coeffs) << endl;
+    // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+
+    if(msg == ".") { prntToFl(fn_pcfs_, ".");
+    } else { prntToFl(fn_pcfs_, ss.str()); }
+  }
 }
 
 void TRDebug::prntPivotVals(string msg) {
   stringstream ss;
-  if (msg != "") { prntHeader(ss, msg, 0); }
-  ss << prntVecXd(trm_->pivot_values_) << endl;
-  ss << prntVecXd(trm_->pivot_order_) << endl;
-  prntToFl(fn_pivp_, ss.str());
+  if (calcDbg_) {
+    if (msg != "") { prntHeader(ss, msg, 0); }
+    ss << prntVecXd(trm_->pivot_values_) << endl;
+    ss << prntVecXd(trm_->pivot_order_) << endl;
+    // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+    if (msg == ".") {
+      prntToFl(fn_pivp_, ".");
+    } else { prntToFl(fn_pivp_, ss.str()); }
+  }
 }
 
 void TRDebug::prntPivotPolys(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
 
-  for (int kk = 0; kk < trm_->pivot_polys_.size(); kk++) {
-    auto vec = trm_->pivot_polys_[kk].coeffs;
-    stringstream si; si << "piv.p#" << kk << " ";
-    ss << prntVecXd(vec, si.str()) << endl;
-  }
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  if (trm_->pivot_values_.size() > 0) {
-    ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
-  } else {
-    ss << "pivot_values_.size(): " << trm_->pivot_values_.size() << endl;
+    for (int kk = 0; kk < trm_->pivot_polys_.size(); kk++) {
+      auto vec = trm_->pivot_polys_[kk].coeffs;
+      stringstream si;
+      si << "piv.p#" << kk << " ";
+      ss << prntVecXd(vec, si.str()) << endl;
+      // >> fn_pivp_: DFTR_PivotPolyns.txt
+    }
+
+    if (trm_->pivot_values_.size() > 0) {
+      ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
+    } else {
+      ss << "pivot_values_.size(): " << trm_->pivot_values_.size() << endl;
+    }
+
+    if (msg == ".") { prntToFl(fn_pivp_, ".");
+    } else { prntToFl(fn_pivp_, ss.str()); }
   }
-  prntToFl(fn_pivp_, ss.str());
 }
 
 void TRDebug::prntHeader(stringstream &ss, string msg, int htype) {
   string ENDSTRN = string(100, '=');
+  auto t1 = current_time();
+  auto tt = time_since_msecs(trm_->t0_);
+  string un = "ms";
+  if (tt > 1e3) { tt /= 1e3; un = "s "; }
+  auto dt = "DT: " + num2str(tt,1,0,6);
+  dt += un + " -- " + timestamp_string() + " ";
 
-  if (msg != "") {
+  if (msg != "" && trm_->dbgs_ != msg) {
+    if (trm_->dbgs_ == ".") {
+      ss << dt;
+    } else {
+      ss << endl << dt;
+    }
     if ( htype == 0 ) {
-      ss << ENDSTRN << endl;
-      ss << "[" << msg << "]" << endl;
-
+      // ss << ENDSTRN << endl;
+      ss << " [" << msg << "]" << endl;
     } else if ( htype == 1 ) {
       Printer::pad_text(msg, 28);
-      ss << "[" << msg << "]";
+      ss << " [" << msg << "]";
     }
+  } else {
+    ss.str("");
+    ss << ".";
   }
+  trm_->t0_ = t1;
+  trm_->dbgs_ = msg;
 }
 
 void TRDebug::prntModelData(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
-  ss << "cached_points_: "  << prntMatXd(trm_->cached_pts_, " ") << "\n";
-  ss << "fvalues_: "        << prntVecXd(trm_->fvals_) << "\n";
+    ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
+    ss << "cached_points_: " << prntMatXd(trm_->cached_pts_, " ") << "\n";
+    ss << "fvalues_: " << prntVecXd(trm_->fvals_) << "\n";
 
-  ss << "all_points_: "     << prntMatXd(trm_->all_pts_, " ") << "\n";
-  ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-  ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+    ss << "all_points_: " << prntMatXd(trm_->all_pts_, " ") << "\n";
+    ss << "points_abs_: " << prntMatXd(trm_->pts_abs_, " ") << "\n";
+    // ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
 
-  ss << "repl_new_points_shifted_: " << prntMatXd(trm_->repl_new_pts_shftd_, " ") << "\n";
-  ss << "repl_new_point_shifted_: " << prntMatXd(trm_->repl_new_pt_shftd_, " ") << "\n";
-  ss << "repl_new_pivots_: " << prntMatXd(trm_->repl_new_pivots_, " ") << "\n";
+    ss << "repl_new_points_shifted_: " << prntMatXd(trm_->repl_new_pts_shftd_, " ") << "\n";
+    ss << "repl_new_point_shifted_: " << prntMatXd(trm_->repl_new_pt_shftd_, " ") << "\n";
+    ss << "repl_new_pivots_: " << prntMatXd(trm_->repl_new_pivots_, " ") << "\n";
 
-  ss << "repl_new_point_abs_: " << prntMatXd(trm_->repl_new_pt_abs_, " ") << "\n";
-  ss << "repl_new_fvalues_: "   << prntVecXd(trm_->repl_new_fvals_) << "\n";
+    ss << "repl_new_point_abs_: " << prntMatXd(trm_->repl_new_pt_abs_, " ") << "\n";
+    ss << "repl_new_fvalues_: " << prntVecXd(trm_->repl_new_fvals_) << "\n";
 
-  ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
-  ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
+    ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
+    ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
 
-  prntToFl(fn_mdat_, ss.str());
+    prntToFl(fn_mdat_, ss.str());
+  }
 }
 
 string TRDebug::prntSettingsData(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  ss << "tr parameters      " << " & "  << "value" << "\\\\ \\toprule \n";
-  // ss << "tr\\_prob\\_nm: " << " &  " << trm_->tr_prob_name_           << " \\\\ \n";
-  ss << "tr\\_init\\_rad:   " << " & $" << prntDbl(trm_->tr_init_rad_)   << " $ \\\\ \n";
-  ss << "tr\\_tol\\_f:      " << " & $" << prntDbl(trm_->tr_tol_f_)      << " $ \\\\ \n";
-  ss << "tr\\_eps\\_c:      " << " & $" << prntDbl(trm_->tr_eps_c_)      << " $ \\\\ \n";
-  ss << "tr\\_eta\\_0:      " << " & $" << prntDbl(trm_->tr_eta_0_)      << " $ \\\\ \n";
-  ss << "tr\\_eta\\_1:      " << " & $" << prntDbl(trm_->tr_eta_1_)      << " $ \\\\ \\midrule \n";
-  ss << "tr\\_piv\\_thld:   " << " & $" << prntDbl(trm_->tr_piv_thld_)   << " $ \\\\ \n";
-  ss << "tr\\_add\\_thld:   " << " & $" << prntDbl(trm_->tr_add_thld_)   << " $ \\\\ \n";
-  ss << "tr\\_exch\\_thld:  " << " & $" << prntDbl(trm_->tr_exch_thld_)  << " $ \\\\ \n";
-  ss << "tr\\_rad\\_max:    " << " & $" << prntDbl(trm_->tr_rad_max_)    << " $ \\\\ \n";
-  ss << "tr\\_rad\\_fac:    " << " & $" << prntDbl(trm_->tr_rad_fac_)    << " $ \\\\ \\midrule \n";
-  ss << "tr\\_tol\\_rad:    " << " & $" << prntDbl(trm_->tr_tol_rad_)    << " $ \\\\ \n";
-  ss << "tr\\_gamma\\_inc:  " << " & $" << prntDbl(trm_->tr_gamma_inc_)  << " $ \\\\ \n";
-  ss << "tr\\_gamma\\_dec:  " << " & $" << prntDbl(trm_->tr_gamma_dec_)  << " $ \\\\ \n";
-  ss << "tr\\_crit\\_mu:    " << " & $" << prntDbl(trm_->tr_crit_mu_)    << " $ \\\\ \n";
-  ss << "tr\\_crit\\_omega: " << " & $" << prntDbl(trm_->tr_crit_omega_) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_crit\\_beta:  " << " & $" << prntDbl(trm_->tr_crit_beta_)  << " $ \\\\ \n";
-  ss << "tr\\_lower\\_b:    " << " & $" << prntDbl(trm_->tr_lower_bnd_)  << " $ \\\\ \n";
-  ss << "tr\\_upper\\_b:    " << " & $" << prntDbl(trm_->tr_upper_bnd_)  << " $ \\\\ \n";
-  ss << "tr\\_iter\\_max:   " << " & $" << prntDbl(trm_->tr_iter_max_)   << " $ \\\\ \n";
-  ss << "tr\\_num\\_initx:  " << " & $" << prntDbl(trm_->tr_num_init_x_) << " $ \\\\ \n";
-  ss << "tr\\_basis\\_:     " << " & $" << trm_->tr_basis_               << " $ \\\\ \n";
-  ss << "tr\\_init\\_smpln: " << " & $" << trm_->tr_init_smpln_          << " $ \\\\ \n";
-  ss << "tr\\_rng\\_seed:   " << " & $" << prntDbl(trm_->tr_rng_seed_)   << " $ \\\\ \\bottomrule \n";
+    ss << "tr parameters      " << " & " << "value" << "\\\\ \\toprule \n";
+    // ss << "tr\\_prob\\_nm: " << " &  " << trm_->tr_prob_name_           << " \\\\ \n";
+    ss << "tr\\_init\\_rad:   " << " & $" << prntDbl(trm_->tr_init_rad_) << " $ \\\\ \n";
+    ss << "tr\\_tol\\_f:      " << " & $" << prntDbl(trm_->tr_tol_f_) << " $ \\\\ \n";
+    ss << "tr\\_eps\\_c:      " << " & $" << prntDbl(trm_->tr_eps_c_) << " $ \\\\ \n";
+    ss << "tr\\_eta\\_0:      " << " & $" << prntDbl(trm_->tr_eta_0_) << " $ \\\\ \n";
+    ss << "tr\\_eta\\_1:      " << " & $" << prntDbl(trm_->tr_eta_1_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_piv\\_thld:   " << " & $" << prntDbl(trm_->tr_piv_thld_) << " $ \\\\ \n";
+    ss << "tr\\_add\\_thld:   " << " & $" << prntDbl(trm_->tr_add_thld_) << " $ \\\\ \n";
+    ss << "tr\\_exch\\_thld:  " << " & $" << prntDbl(trm_->tr_exch_thld_) << " $ \\\\ \n";
+    ss << "tr\\_rad\\_max:    " << " & $" << prntDbl(trm_->tr_rad_max_) << " $ \\\\ \n";
+    ss << "tr\\_rad\\_fac:    " << " & $" << prntDbl(trm_->tr_rad_fac_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_tol\\_rad:    " << " & $" << prntDbl(trm_->tr_tol_rad_) << " $ \\\\ \n";
+    ss << "tr\\_gamma\\_inc:  " << " & $" << prntDbl(trm_->tr_gamma_inc_) << " $ \\\\ \n";
+    ss << "tr\\_gamma\\_dec:  " << " & $" << prntDbl(trm_->tr_gamma_dec_) << " $ \\\\ \n";
+    ss << "tr\\_crit\\_mu:    " << " & $" << prntDbl(trm_->tr_crit_mu_) << " $ \\\\ \n";
+    ss << "tr\\_crit\\_omega: " << " & $" << prntDbl(trm_->tr_crit_omega_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_crit\\_beta:  " << " & $" << prntDbl(trm_->tr_crit_beta_) << " $ \\\\ \n";
+    ss << "tr\\_lower\\_b:    " << " & $" << prntDbl(trm_->tr_lower_bnd_) << " $ \\\\ \n";
+    ss << "tr\\_upper\\_b:    " << " & $" << prntDbl(trm_->tr_upper_bnd_) << " $ \\\\ \n";
+    ss << "tr\\_iter\\_max:   " << " & $" << prntDbl(trm_->tr_iter_max_) << " $ \\\\ \n";
+    ss << "tr\\_num\\_initx:  " << " & $" << prntDbl(trm_->tr_num_init_x_) << " $ \\\\ \n";
+    ss << "tr\\_basis\\_:     " << " & $" << trm_->tr_basis_ << " $ \\\\ \n";
+    ss << "tr\\_init\\_smpln: " << " & $" << trm_->tr_init_smpln_ << " $ \\\\ \n";
+    ss << "tr\\_rng\\_seed:   " << " & $" << prntDbl(trm_->tr_rng_seed_) << " $ \\\\ \\bottomrule \n";
 
-  prntToFl(fn_sdat_, ss.str());
+    prntToFl(fn_sdat_, ss.str());
+  }
   return ss.str();
 }
 
 void TRDebug::prntFunctionData(string fnm, string msg,
                                VectorXd v0, VectorXd v1, VectorXd v2,
                                double d0, double d1, double d2) {
-
   stringstream ss;
-  prntHeader(ss, "FOEx");
-  string fn;
+  if (calcDbg_) {
+    prntHeader(ss, "FOEx");
+    string fn;
 
-  if (fnm == "exchangePoint") {
-    ss << "[ p_abs_.rows(): " << prntDbl(trm_->pts_abs_.rows(),   "% 2.0f") << " ]";
-    ss << "[ last_p: "        << prntDbl(trm_->pts_abs_.cols()-1, "% 2.0f") << " ]";
-    ss << "[ center_i: "      << prntDbl((double)trm_->tr_center_,         "% 2.0f") << " ]";
-    ss << "[ radius_: "       << prntDbl((double)trm_->radius_,"% 6.3e") << " ]\n";
-    ss << "new_point: "       << prntVecXd(v0);
-    ss << "shift_center: "    << prntVecXd(v1) << "\n";
-    ss << "pivot_values_: "   << prntVecXd(trm_->pivot_values_) << "\n";
+    if (fnm == "exchangePoint") {
+      ss << "[ p_abs_.rows(): " << prntDbl(trm_->pts_abs_.rows(), "% 2.0f") << " ]";
+      ss << "[ last_p: " << prntDbl(trm_->pts_abs_.cols() - 1, "% 2.0f") << " ]";
+      ss << "[ center_i: " << prntDbl((double) trm_->tr_center_, "% 2.0f") << " ]";
+      ss << "[ radius_: " << prntDbl((double) trm_->radius_, "% 6.3e") << " ]\n";
+      ss << "new_point: " << prntVecXd(v0);
+      ss << "shift_center: " << prntVecXd(v1) << "\n";
+      ss << "pivot_values_: " << prntVecXd(trm_->pivot_values_) << "\n";
 
-    ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
-    ss << "cached_points_: "  << prntMatXd(trm_->cached_pts_, " ") << "\n";
-    ss << "fvalues_: "        << prntVecXd(trm_->fvals_) << "\n";
-    ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-    ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
-    fn = fn_xchp_;
+      ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
+      ss << "cached_points_: " << prntMatXd(trm_->cached_pts_, " ") << "\n";
+      ss << "fvalues_: " << prntVecXd(trm_->fvals_) << "\n";
+      ss << "points_abs_: " << prntMatXd(trm_->pts_abs_, " ") << "\n";
+      ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+      fn = fn_xchp_;
 
-  } else if (fnm == "none") {
-    cout << "Specify function name" << "\n";
+    } else if (fnm == "none") {
+      cout << "Specify function name" << "\n";
+    }
+
+    prntToFl(fn, ss.str());
   }
-
-  prntToFl(fn, ss.str());
 }
 
 // DFTR PROGRESS
@@ -358,34 +395,36 @@ void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
                              VectorXd v0, VectorXd v1, VectorXd v2) {
   stringstream ss;
   ss << "[@rebuildMod] ";
-  if (cs == 1) {
-    ss << "from orderPtsPreBuild() -> dim: ";
-    ss << num2str(s1,0) << " n_points: " << num2str(s1,0);
-    ss << " pivot_thld: " << num2str(d1,3, 1);
-    ss << "|[@rebuildMod] " << prntVecXd(v1, "scnd_pt  ");
+  if (calcDbg_) {
+    if (cs == 1) {
+      ss << "from orderPtsPreBuild() -> dim: ";
+      ss << num2str(s1, 0) << " n_points: " << num2str(s1, 0);
+      ss << " pivot_thld: " << num2str(d1, 3, 1);
+      ss << "|[@rebuildMod] " << prntVecXd(v1, "scnd_pt  ");
 
-  } else if (cs == 2) {
-    ss << "max_layer: " << num2str(d1,0);
-    ss << " -- farthest_pt: " << num2str(d2,0);
-    ss << " -- dist_farthest_pt: " << num2str(d3,0);
+    } else if (cs == 2) {
+      ss << "max_layer: " << num2str(d1, 0);
+      ss << " -- farthest_pt: " << num2str(d2, 0);
+      ss << " -- dist_farthest_pt: " << num2str(d3, 0);
 
-  } else if (cs == 3) {
-    ss << "max_layer: " << num2str(d1,0);
-    ss << " -- block_beginning: " << num2str(s1,0);
-    ss << " -- block_end: " << num2str(s2,0);
+    } else if (cs == 3) {
+      ss << "max_layer: " << num2str(d1, 0);
+      ss << " -- block_beginning: " << num2str(s1, 0);
+      ss << " -- block_end: " << num2str(s2, 0);
 
-  } else if (cs == 4) {
+    } else if (cs == 4) {
 
-  } else if (cs == 5) {
+    } else if (cs == 5) {
 
-  } else if (cs == 6) {
+    } else if (cs == 6) {
 
-  } else if (cs == 7) {
+    } else if (cs == 7) {
 
-  } else if (cs == 8) {
+    } else if (cs == 8) {
 
-  } else if (cs == 9) {
+    } else if (cs == 9) {
 
+    }
   }
   if (trm_->vp_.vOPT >= 4) { idbg(ss.str()); }
 }
@@ -458,9 +497,28 @@ void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
   if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
+void TRDebug::prntIsFinished(int cs, bool c1, bool c2,
+                             double d1, double d2, double d3, double d4) {
+  stringstream ss;
+  ss << "[@isFinished] ";
+  if (cs == 1) {
+    ss << "[A=(isModInit() && !getModPolys().empty()): ";
+    ss << num2str(c1, 0, 1) << "]";
+    ss << "[B=(trm_->getRad() < tr_rad_tol_): ";
+    ss << num2str(c2, 0, 1) << "]";
+
+    ss << ", radius: " + num2str(d1, 3, 1);
+    ss << ", #lim_inf: " + num2str(d2, 0, 0);
+    ss << ", #evals: " + num2str(d3, 0, 0);
+
+  } else if (cs == 2) {
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
 void TRDebug::prntTstCrit(int cs, string crs,
                           VectorXd v0, VectorXd v1, double d1, double d2) {
-
   stringstream ss;
   ss << "[@testCrit] ";
   if (cs == 1) {

@@ -70,6 +70,12 @@ class Property
   //!< Check if the property is locked.
   bool IsLocked() const { return locked_; }
 
+  bool checkLock(bool locked) {
+    string m =  "Can not change locked real variable.";
+    if (locked) { throw PropertyLockedException(m); }
+    return true;
+  }
+
   //!< Set the property to locked. The value
   //!< of a locked property cannot be changed.
   void Lock() { locked_ = true; }

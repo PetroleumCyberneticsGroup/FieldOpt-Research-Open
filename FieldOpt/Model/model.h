@@ -41,6 +41,7 @@ If not, see <http://www.gnu.org/licenses/>.
 class Logger;
 
 namespace Model {
+
 class ModelSynchronizationObject;
 
 using Reservoir::WellIndexCalculation::wicalc_rixx;

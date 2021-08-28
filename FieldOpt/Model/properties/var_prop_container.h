@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QMap>
 #include <QPair>
 #include <QString>
+#include <settings.h>
 
 #include "property.h"
 #include "binary_property.h"
@@ -43,6 +44,8 @@ namespace Model {
 namespace Properties {
 
 using std::runtime_error;
+using std::map;
+using std::pair;
 
 using Printer::info;
 using Printer::idbg;
@@ -66,7 +69,8 @@ class VarPropContainer
 {
   friend class ::Model::ModelSynchronizationObject;
  public:
-  // VarPropContainer();
+
+  vector<QList<ContinuousProperty *>> GetVarTypes();
 
   VarPropContainer(Settings::VerbParams vp);
 

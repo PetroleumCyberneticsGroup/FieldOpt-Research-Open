@@ -193,6 +193,8 @@ class TRFrame {
   double D = 0.0;
   int I = 0;
   VectorXd V = VectorXd::Zero(0);
+  std::chrono::system_clock::time_point ti_, t0_;
+  string dbgs_ = "";
 
   string md_ = "Optimization/optimizers/dftr";
   string cl_ = "TRFrame";

@@ -406,6 +406,23 @@ VarPropContainer::GetWellRateVars(QString well_name) const {
   return well_rate_variables;
 }
 
+// GETVARTYPES----------------------------------------------
+vector<QList<ContinuousProperty *>> VarPropContainer::GetVarTypes() {
+  // Get variable types (currently BHP, ICD, Rates)
+  vector<QList<ContinuousProperty *>> varTypes;
+  if (!GetWellBHPVariables().empty()) {
+    varTypes.push_back(GetWellBHPVariables());
+  }
+  if (!GetWellICDVariables().empty()) {
+    varTypes.push_back(GetWellICDVariables());
+  }
+  if (!GetWellRateVariables().empty()) {
+    varTypes.push_back(GetWellRateVariables());
+  }
+
+  return varTypes;
+}
+
 // WELL BLOCKS ---------------------------------------------
 QList<DiscreteProperty *>
 VarPropContainer::GetWellBlockVariables() const {

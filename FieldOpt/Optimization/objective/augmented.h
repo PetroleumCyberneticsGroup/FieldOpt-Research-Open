@@ -64,6 +64,8 @@ class Augmented : public Objective {
 
   double value() const override { return -1.0; };
   double value(bool base_case) override;
+  VectorXd grad() override;
+  double fval() override;
 
   void setDbgFileName(string fl) { fl_ = fl; }
 

@@ -56,29 +56,39 @@ DFTR::DFTR(Settings::Optimizer *settings,
   trm_ = new TRFrame(lb_, ub_, base_case_, settings_);
   computeInitPts();
   createLogFile();
+  printIteration(base_case_->objf_value());
 }
 
 // __________________________________________________________
 // ISFINISHED
 TC DFTR::IsFinished() {
   TC tc = NOT_FINISHED;
+  bool A, B, C;
 
-  if (trm_->isModInit() && !trm_->getModPolys().empty()) {
+  //! -> termination criteria
+  A = trm_->isModInit() && !trm_->getModPolys().empty();
+  if (A) {
     if (trm_->measureCrit().norm() < tr_tol_f_) {
       tc = DFTR_CRIT_NORM_1ST_ORD_LT_TOLF;
-
     } else if (tr_lim_inf_ > std::ceil(tr_iter_max_*.20)) {
       tc = DFTR_MAX_NUM_RHO_INF_MET;
     }
   }
-  if (trm_->getRad() < tr_rad_tol_) {
-    tc = MIN_STEP_LENGTH_REACHED;
-  }
-  if (iteration_ == tr_iter_max_) {
-    tc = MAX_ITERS_REACHED;
-  }
-  if (tc != NOT_FINISHED) {
-  }
+
+  B = trm_->getRad() < tr_rad_tol_;
+  if (B) { tc = MIN_STEP_LENGTH_REACHED; }
+
+  C = evaluated_cases_ == tr_iter_max_;
+  if (C) { tc = MAX_EVALS_REACHED; } // tc = MAX_ITERS_REACHED;
+
+  if (tc != NOT_FINISHED) { }
+
+  trm_->dbg_->prntIsFinished(1, A, B,
+    trm_->getRad(),tr_lim_inf_, evaluated_cases_);
+
+  // trm_->dbg_->prntIsFinished(2, C, T,
+  //   tr_tol_f_, tr_rad_tol_, tr_iter_max_);
+
   return tc;
 }
 
@@ -213,7 +223,7 @@ void DFTR::iterate() {
 
       trm_->dbg_->prntIterBool(7); // to be filled
 
-      //! --
+      //! -> rho = -inf situation
       if ((pred_red_ < tr_rad_tol_ * 1e-2)
         || (pred_red_ < tr_rad_tol_ * abs(trm_->getCurrFval()) && (trial_step_.norm()) < tr_rad_tol_)
         || (pred_red_ < tr_tol_f_ * abs(trm_->getCurrFval()) * 1e-3)) {
@@ -225,8 +235,8 @@ void DFTR::iterate() {
         mchange_ = trm_->ensureImpr();
         impr_modl_nx_ = ensureImprPostProc();
 
-      } else {
-        trm_->dbg_->prntIterBool(9); //! -> Evaluate objective at trial point>
+      } else { //! -> Evaluate objective at trial point>
+        trm_->dbg_->prntIterBool(9);
         Case *new_case = new Case(base_case_);
         new_case->SetRealVarValues(trial_point_);
         case_handler_->AddNewCase(new_case);
@@ -612,6 +622,8 @@ void DFTR::createLogFile() {
   if (out_dir.length() > 0) { CreateDir(out_dir, vp_); }
   QString fn = "/dftr_" + QString::fromStdString(tr_prob_name_) + ".csv";
   dftr_log_ = out_dir + fn;
+  ti_ = QDateTime::currentDateTime();
+  t0_ = ti_;
 
   // Delete existing logs if --force flag is on
   if (FileExists(dftr_log_, vp_)) {
@@ -619,7 +631,7 @@ void DFTR::createLogFile() {
   }
 
   WriteLineToFile(fn, dftr_log_);
-  const QString header = "iter        fval         rho      radius  pts";
+  const QString header = "iter        fval         rho      radius  pts     dt     dT   tstamp";
   WriteLineToFile(header, dftr_log_);
 }
 
@@ -627,11 +639,18 @@ void DFTR::createLogFile() {
 // PRINTITERATION
 void DFTR::printIteration(double fval_current) {
   stringstream ss;
+  QDateTime t1 = QDateTime::currentDateTime();
   ss << setw(4) << right << iteration_ << setprecision(3)
      << setw(12) << scientific << right << fval_current
      << setw(12) << scientific << right << rho_
      << setw(12) << scientific << right << trm_->getRad()
-     << setw(5) << right << trm_->getNPts();
+     << setw(5) << right << trm_->getNPts() << setprecision(3)
+     << setw(7) << right << time_span_seconds(t0_, t1)
+     << setw(7) << scientific << right
+     << num2str(time_span_seconds(ti_, t1),1,1)
+     << setw(22) << right << timestamp_string(t1);
+  t0_ = t1;
+
   string str = ss.str();
   WriteLineToFile(QString::fromStdString(str), dftr_log_);
 }
