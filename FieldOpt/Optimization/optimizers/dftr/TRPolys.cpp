@@ -106,7 +106,7 @@ poly TRFrame::orthogzToOthrPolys(int poly_i, int last_pt) {
 // ORTHOGZBLOCK
 void TRFrame::orthogzBlock(VectorXd point, int np,
                            int block_beg, int block_end) {
-  dbg_->prntPivotPolys("orthogzBlock-00"); // >> DFTR_PivotPolyns.txt
+  // dbg_->prntPivotPolys("orthogzBlock-00"); // >> DFTR_PivotPolyns.txt
   for (int p = block_beg; p <= block_end; p++) {
     if (p != np) {
       pivot_polys_[p] = zeroAtPt(pivot_polys_[p],
@@ -150,7 +150,7 @@ double TRFrame::evaluatePoly(poly p1, VectorXd x) {
   // >> DFTR_PivotCoeffs.txt (fn_pcfs_)
   tie(c, g, H) = coeffsToMatrices(p1.dim, p1.coeffs);
 
-  VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
+  // VectorXd xv(3); xv << c, g.prod(), H.prod(); // dbg
   // dbg_->prntVecXd(xv, "c -- prod(gx) -- prod(xHx): ",
   //                 "% 10.3e ", dbg_->fn_pivp_);
   // >> DFTR_PivotPolyns.txt (fn_pivp_)
@@ -161,7 +161,7 @@ double TRFrame::evaluatePoly(poly p1, VectorXd x) {
   terms[2] *= 0.5;
 
   // dbg_->prntVecXd(x, "point x ", "% 10.3e ", dbg_->fn_pivp_);
-  VectorXd xt(3); xt << terms[0], terms[1], terms[2]; // dbg
+  // VectorXd xt(3); xt << terms[0], terms[1], terms[2]; // dbg
   // dbg_->prntVecXd(xt, "c --    gx    --    xHx:    ",
   //                 "% 10.3e ", dbg_->fn_pivp_);
 
