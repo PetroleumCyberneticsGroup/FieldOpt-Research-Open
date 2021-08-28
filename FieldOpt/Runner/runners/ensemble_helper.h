@@ -104,7 +104,7 @@ class EnsembleHelper {
    * Get the realization object refereincing the alias string.
    */
   Settings::Ensemble::Realization
-  GetRealization(const std::string &alias) const;
+  GetRlz(const std::string &alias) const;
 
   /*!
    * Get base realization to be used for evaluating the base

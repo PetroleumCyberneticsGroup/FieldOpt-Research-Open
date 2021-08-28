@@ -45,6 +45,8 @@ class NPV : public Objective {
 
   double value() const override;
   double value(bool base_case) override { return -1.0; };
+  VectorXd grad() override { return VectorXd::Zero(0); };
+  double fval() override { return -1.0; };
 
  private:
 /*!

@@ -55,7 +55,10 @@ class Optimizer;
  * since this functionality is now handled by int
  * verbosity_level_ in runtime_settings
  */
-class Settings {
+class Settings
+{
+  friend class Optimizer;
+
  public:
   Settings() {}
   Settings(Paths &paths);

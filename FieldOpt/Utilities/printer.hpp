@@ -293,11 +293,11 @@ inline vector<string> split_line(const string text,
     std::size_t end_idx = 1;
     int line_nr = 0;
     string remainder = text;
-    while (remainder.size() > width) {
+    while (remainder.size() > width
+    || remainder.find_first_of("|") != std::string::npos) {
       if (remainder.find_first_of("|") < width) {
         end_idx = remainder.find_first_of("|");
-      }
-      else {
+      } else {
         end_idx = remainder.find_last_of(".,;/ ", width);
       }
       string line = remainder.substr(start_idx, end_idx);
@@ -310,8 +310,7 @@ inline vector<string> split_line(const string text,
     }
     pad_text(remainder, width);
     strv.push_back(remainder);
-  }
-  else {
+  } else {
     string padded = text;
     pad_text(padded, width);
     strv.push_back(padded);
@@ -334,14 +333,28 @@ inline void info(const std::string &text, int lw=163) {
   pad_text(content, lw - 4);
 
   BoxSym bS = bSym(lw);
-  ss << bS.ulnl;
-  ss << "│ ■ " << content << " │" << "\n";
-  ss << bS.llnl;
+  // ss << "\n" << bS.ulnl;
   ss << "\n";
+  ss << "│ ■ " << content << " │" << "\n";
+  // ss << bS.llnl;
+  // ss << "\n";
   ss << AEND;
   std::cout << ss.str();
 }
 
+// ├───────┴──────────────────────┴──────────────────────────────────────┤
+inline void idbg(const std::string &text, int lw=163) {
+  std::stringstream ss;
+  // ss << "\n"; // << FLGREEN
+  auto lines = split_line(text, lw - 4);
+  for (auto line : lines) {
+    pad_text(line, lw - 4);
+    // ss << "│ ■ " << line << " │" << "\n";
+    ss << "\n" << "| = " << line << " |";
+  }
+  // ss << AEND;
+  std::cout << ss.str();
+}
 
 /* Extended info box.
 Example:
@@ -381,7 +394,7 @@ inline void ext_info(const std::string &text,
   // auto width = floor(lw * 25/60);
   auto width = floor((lw-31) * 1/2) + 1;
   BoxSym bS = bSym(lw);
-  ss << bS.ulnl;
+  ss << "\n" << bS.ulnl;
   pad_text(module_name, width);
   if (lw == 163) {
     pad_text(class_name, width);

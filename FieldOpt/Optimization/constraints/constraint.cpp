@@ -28,10 +28,30 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-Constraint::Constraint(Settings::VerbParams vp) {
+Constraint::Constraint(SO& seto, VPC *vars, SV vp) {
+  seto_ = seto;
+  vars_ = vars;
+
   logging_enabled_ = false;
   penalty_weight_ = 0.0;
   vp_ = vp;
+}
+
+void Constraint::DBG_SnapCase(int cs, string s0, string s1) {
+  string tm;
+  if (vp_.vOPT >= 4 && cs == 1) {
+    tm = "=> " + name() + " enabled: " + num2str(isEnabled(), 0);
+    tm += " -- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm += "for case: " + s0;
+    pad_text(tm, vp_.lnw);
+    tm += "x: " + s1;
+    ext_info(tm, md_, cl_, vp_.lnw);
+
+  } else if (vp_.vOPT >= 4 && cs == 2) {
+    pad_text(s0, vp_.lnw );
+    tm += "x: " + s1;
+    ext_info(tm, md_, cl_, vp_.lnw);
+  }
 }
 
 void Constraint::EnableLogging(QString output_directory_path) {
@@ -60,6 +80,26 @@ void Constraint::InitializeNormalizer(QList<Case *> cases) {
     normalizer_.set_max(1.0L);
     normalizer_.set_steepness(1.0L);
   }
+}
+
+void Constraint::PrntWellInfo(string wi, int cs) {
+
+  if (cs == 1) {
+    string ws;
+    if (seto_.well.isEmpty()) {
+      for (const auto& wn : seto_.wells) { ws += wn.toStdString() + "; "; }
+    } else { ws = seto_.well.toStdString(); }
+
+    if (vp_.vOPT >= 3) {
+      im_ = "Adding " + wi + " constraint for " + seto_.well.toStdString();
+      ext_info(im_, md_, cl_, vp_.lnw);
+
+      im_ = "Adding " + wi + " constraint with [min, max] = [";
+      im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
+      im_ += "] for well " + ws + " with variables: ";
+    }
+  }
+
 }
 
 }

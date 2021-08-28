@@ -39,9 +39,7 @@ namespace Constraints {
 class WSplineLength : public Constraint, WellSplineConstraint
 {
  public:
-  WSplineLength(::Settings::Optimizer::Constraint settings,
-                ::Model::Properties::VarPropContainer *variables,
-                Settings::VerbParams vp);
+  WSplineLength(SO& seto, VPC *vars, SV vp);
 
   string name() override { return "WSplineLength"; };
 

@@ -31,19 +31,21 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef FIELDOPT_OPTIMIZATION_OPTIMIZERS_DFTR_TRFRAME_H_
 #define FIELDOPT_OPTIMIZATION_OPTIMIZERS_DFTR_TRFRAME_H_
 
+#include <Eigen/Core>
+#include <Eigen/Dense>
+
 #include <Optimization/case.h>
 #include <Settings/optimizer.h>
 #include <Optimization/solvers/SNOPTSolver.h>
 #include "TRDebug.h"
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
-
 #include <vector>
 #include <tuple>
 
 using Printer::info;
+using Printer::idbg;
 using Printer::ext_info;
+using Printer::pad_text;
 using Printer::num2str;
 using Printer::E;
 
@@ -76,6 +78,7 @@ namespace Optimization {
 namespace Optimizers {
 
 class TRDebug;
+enum critExecStat { ONGOING=0, FAILED=1, SUCCESS=2 };
 
 // ---------------------------------------------------------
 class TRFrame {
@@ -131,8 +134,6 @@ class TRFrame {
   //  ╩   ╩╚═    ╚═╝  ╩ ╩  ╚═╝  ╚═╝  ╩ ╩
   int findBestPt();
   void moveToBestPt();
-  VectorXd getCritGrad(); // Mod grad (abs coords) at current pt
-  bool critStep(double rad_bf_crit_step);
   bool isLambdaPoised();
   bool isModComplete();
   bool isModOld();
@@ -140,8 +141,7 @@ class TRFrame {
   double checkInterp();
   VectorXd measureCrit();
 
-
-
+  critExecStat critStep(double rad_bf_crit_step);
 
   // TR->[POLYS] ===========================================
   // ╔╦╗  ╦═╗    ╔═╗  ╔═╗  ╦    ╦ ╦  ╔═╗
@@ -188,6 +188,14 @@ class TRFrame {
   friend class TRDebug;
   TRDebug* dbg_;
 
+  bool F = false;
+  bool T = true;
+  double D = 0.0;
+  int I = 0;
+  VectorXd V = VectorXd::Zero(0);
+  std::chrono::system_clock::time_point ti_, t0_;
+  string dbgs_ = "";
+
   string md_ = "Optimization/optimizers/dftr";
   string cl_ = "TRFrame";
   string im_ = "", wm_ = "", em_ = "";
@@ -204,7 +212,7 @@ class TRFrame {
   double tr_init_rad_ = infd_;
   double tr_tol_f_ = infd_, tr_eps_c_ = infd_; // tols
   double tr_eta_0_ = infd_, tr_eta_1_ = infd_;
-  double tr_pivot_thld_ = infd_; // Thesholds
+  double tr_piv_thld_ = infd_; // Thesholds
   double tr_add_thld_ = infd_, tr_exch_thld_ = infd_;
   double tr_rad_max_ = infd_; // Radii
   double tr_rad_fac_ = infd_, tr_tol_rad_ = infd_;
@@ -219,6 +227,8 @@ class TRFrame {
 
   string tr_basis_, tr_init_smpln_, tr_prob_name_;
   double fmult_ = infd_; // Maximize <-> minimize multiplier
+
+  void setInitRad(double r) { tr_init_rad_ = r; };
 
   // [TR MODEL MANAGEMENT] =================================
   double getRad() { return radius_; }

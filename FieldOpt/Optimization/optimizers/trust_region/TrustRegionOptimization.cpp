@@ -168,7 +168,7 @@ void TrustRegionOptimization::iterate() {
 
   if(tr_model_->isInitialized()) {
     int iter_max = settings_->parameters().tr_iter_max;
-    double tol_radius = settings_->parameters().tr_tol_radius;
+    double tol_radius = settings_->parameters().tr_rad_tol;
     double eps_c = settings_->parameters().tr_eps_c;
     double tol_f = settings_->parameters().tr_tol_f;
     double err_model = 0.0;
@@ -204,9 +204,11 @@ void TrustRegionOptimization::iterate() {
         //!<Print summary>
         printIteration(fval_current);
 
-        //!<Criticality step -- if we are possibly close to the optimum>
+        //! -> Measure criticality
         criticality_step_performed_ = false;
         auto model_criticality = tr_model_->measureCriticality();
+
+        //! -> Crit step (possibly close to x*)
         if (model_criticality.norm() <= eps_c) {
           if (!criticality_step_execution_ongoing_) {
             criticality_init_radius_ = tr_model_->getRadius();
@@ -448,11 +450,11 @@ void TrustRegionOptimization::handleEvaluatedCase(Case *c) {
 }
 
 void TrustRegionOptimization::updateRadius() {
-  double tol_radius = settings_->parameters().tr_tol_radius;
+  double tol_radius = settings_->parameters().tr_rad_tol;
   double eta_1 = settings_->parameters().tr_eta_1;
   double gamma_1 = gamma_dec_;
   double gamma_2 = settings_->parameters().tr_gamma_inc;
-  double radius_max = settings_->parameters().tr_radius_max;
+  double radius_max = settings_->parameters().tr_rad_max;
 
   //!<From time to time a step may end a bit outside the TR>
   auto step_size = min(tr_model_->getRadius(), trial_step_.lpNorm<Infinity>());
@@ -508,7 +510,7 @@ void TrustRegionOptimization::computeInitialPoints() {
 
       //!<Second point must not be too close>
       while (second_point.lpNorm<Infinity>()
-          < settings_->parameters().tr_pivot_thld) {
+          < settings_->parameters().tr_piv_thld) {
         second_point << 2*second_point.array();
       }
 
@@ -625,7 +627,7 @@ TrustRegionOptimization::IsFinished() {
     }
   }
 
-  if (tr_model_->getRadius() < settings_->parameters().tr_tol_radius) {
+  if (tr_model_->getRadius() < settings_->parameters().tr_rad_tol) {
     tc = MIN_STEP_LENGTH_REACHED;
   }
 

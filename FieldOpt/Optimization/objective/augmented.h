@@ -64,6 +64,8 @@ class Augmented : public Objective {
 
   double value() const override { return -1.0; };
   double value(bool base_case) override;
+  VectorXd grad() override;
+  double fval() override;
 
   void setDbgFileName(string fl) { fl_ = fl; }
 
@@ -90,8 +92,8 @@ class Augmented : public Objective {
     map<string, vector<int>> segments;
   };
 
-  Simulation::Results::Results *results_;
-  Settings::Optimizer *settings_;
+  Simulation::Results::Results *rslts_;
+  Settings::Optimizer *seto_;
   Model::Model *model_;
 
   vector<Augmented::Term*> terms_;
@@ -105,8 +107,8 @@ class Augmented : public Objective {
     int pad = 20;
 
     pn = term->prop_name_str;
-    pt = results_->GetPropertyKey(term->prop_type);
-    ps = results_->GetPropertyKey(term->prop_spec);
+    pt = rslts_->GetPropertyKey(term->prop_type);
+    ps = rslts_->GetPropertyKey(term->prop_spec);
     pc = num2str(term->coeff, 5, 1, 12);
 
     pad_text(pn, pad);

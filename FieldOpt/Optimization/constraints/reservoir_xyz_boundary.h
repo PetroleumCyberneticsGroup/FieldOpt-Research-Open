@@ -34,6 +34,8 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
+using Model::Properties::ContinuousProperty;
+
 /*!
  * @brief This class implements the box-constraint with the
  * WellSpline well definition. The purpose is to contain all
@@ -43,28 +45,36 @@ namespace Constraints {
  * found in ResInsight @ ResInsight.org
  */
 
-class ReservoirXYZBoundary : public Constraint, WellSplineConstraint {
+class ReservoirXYZBoundary : public Constraint, WellSplineConstraint
+{
  public:
-  ReservoirXYZBoundary(const Settings::Optimizer::Constraint &settings,
-                       Model::Properties::VarPropContainer *variables,
-                       Reservoir::Grid::Grid *grid,
-                       Settings::VerbParams vp);
+  ReservoirXYZBoundary(SO& seto, VPC *vars,
+                       Reservoir::Grid::Grid *grid, SV vp);
 
-  string name() override { return "ReservoirXYZBoundary"; }
-  // Constraint interface
- public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
+  string name() override { return cl_; }
+
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
 
   bool IsBoundConstraint() const override { return true; }
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
  protected:
-  double xmin_, xmax_, ymin_, ymax_, zmin_, zmax_; //!< Constraint limits for the box
-  QList<int> index_list_; //!< Index list for the cells in the reservoir that are within the box
-  Reservoir::Grid::Grid *grid_; //!< Grid, as defined in Reservoir/grid.h
-  Well box_xyz_cnstrnd_well_; //!< The affected well
+
+  //!< Constraint limits for the box
+  double xmin_, xmax_, ymin_, ymax_, zmin_, zmax_;
+
+  //!< Index list for the cells in the reservoir that are within the box
+  QList<int> index_list_;
+
+  //!< Grid, as defined in Reservoir/grid.h
+  Reservoir::Grid::Grid *grid_;
+
+  Well box_xyz_cnstrnd_well_;
+
+  QList<ContinuousProperty *> wspline_cnstrnd_real_vars_;
+  QList<QUuid> wspline_cnstrnd_uuid_vars_;
 
   string md_ = "Optimizer::constraints";
   string cl_ = "ReservoirXYZBoundary";

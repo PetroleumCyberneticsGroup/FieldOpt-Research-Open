@@ -71,10 +71,8 @@ namespace Constraints {
 class ResBoundary : public Constraint, WellSplineConstraint
 {
  public:
-  ResBoundary(const Settings::Optimizer::Constraint &settings,
-              Model::Properties::VarPropContainer *variables,
-              Reservoir::Grid::Grid *grid,
-              Settings::VerbParams vp);
+  ResBoundary(SO& seto, VPC *vars,
+              Reservoir::Grid::Grid *grid, SV vp);
 
   string name() override { return "ResBoundary"; }
     // Constraint interface

@@ -47,6 +47,7 @@ Case::Case() {
   binary_variables_ = QList<QPair<QUuid, bool>>();
   integer_variables_ = QList<QPair<QUuid, int>>();
   real_variables_ = QList<QPair<QUuid, double>>();
+  rvar_grads_ = QList<QPair<QUuid, double>>();
 
   objective_function_value_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
@@ -63,6 +64,7 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
   binary_variables_ = binary_variables;
   integer_variables_ = integer_variables;
   real_variables_ = real_variables;
+  // rvar_grads_ = real_variables;
 
   for(int ii=0; ii < binary_variables_.size(); ii++) {
     binary_id_index_map_.append(binary_variables_.at(ii).first);
@@ -74,6 +76,7 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
 
   for(int ii=0; ii < real_variables_.size(); ii++) {
     real_id_index_map_.append(real_variables_.at(ii).first);
+    rvar_grads_.append(qMakePair(real_variables_.at(ii).first, 0.0));
   }
 
   objective_function_value_ = std::numeric_limits<double>::max();
@@ -89,6 +92,7 @@ Case::Case(const Case *c) {
   binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
   integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
+  rvar_grads_ = QList<QPair<QUuid, double>>(c->real_var_grads());
 
   binary_id_index_map_ = c->binary_id_index_map_;
   integer_id_index_map_ = c->integer_id_index_map_;
@@ -104,6 +108,7 @@ Case::Case(const Case *c) {
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
   ensemble_ofvs_ = c->ensemble_ofvs_;
+  vp_ = c->vp_;
 }
 
 bool Case::Equals(const Case *other, double tolerance) const {
@@ -192,8 +197,24 @@ void Case::set_binary_variable_value(const QUuid id, const bool val) {
 void Case::set_real_variable_value(const QUuid id, const double val) {
   for(int ii=0; ii < real_variables_.size(); ii++) {
     if (real_variables_.at(ii).first==id) {
-      auto pair_int = qMakePair(real_variables_.at(ii).first, val);
-      real_variables_.replace(ii, pair_int);
+      auto pair_real = qMakePair(real_variables_.at(ii).first, val);
+      real_variables_.replace(ii, pair_real);
+      return;
+    }
+  }
+  em_ = "Unable to set value of variable " + id.toString().toStdString();
+  throw VariableException(em_);
+}
+
+void Case::set_real_variable_value(const QUuid id, const double val, const double grad) {
+  for(int ii=0; ii < real_variables_.size(); ii++) {
+    if (real_variables_.at(ii).first==id) {
+      // add real value
+      auto pair_real = qMakePair(real_variables_.at(ii).first, val);
+      real_variables_.replace(ii, pair_real);
+      // add corresponding gradient
+      auto pair_grad = qMakePair(real_variables_.at(ii).first, grad);
+      rvar_grads_.replace(ii, pair_grad);
       return;
     }
   }
@@ -258,6 +279,14 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
   return new_cases;
 }
 
+Eigen::VectorXd Case::GetVarVector(QList<QUuid> vars) {
+  Eigen::VectorXd vec(vars.length());
+  for (int i = 0; i < vars.length(); ++i) {
+    vec[i] = get_real_variable_value(vars.at(i));
+  }
+  return vec;
+}
+
 Eigen::VectorXd Case::GetRealVarVector() {
   Eigen::VectorXd vec(real_id_index_map_.length());
   for (int i = 0; i < real_id_index_map_.length(); ++i) {
@@ -267,9 +296,75 @@ Eigen::VectorXd Case::GetRealVarVector() {
   return vec;
 }
 
+void Case::GetGradsOrderedByType(
+  map<Property::PropertyType, VectorXd> &vt_map,
+  VarPropContainer *vars) {
+  // Pres for grad normalization by variable type
+  // Organized grad vals by var type into map object
+  auto varTypes = vars->GetVarTypes();
+  stringstream ss; // dbg
+
+  for (int ii = 0; ii < varTypes.size(); ii++) { // loop-by-var-type
+
+    VectorXd vals = VectorXd::Zero(varTypes[ii].size());
+    for (int jj = 0; jj < varTypes[ii].size(); jj++) {
+      vals(jj) = get_list_value(varTypes[ii][jj]->id(), rvar_grads_scal_);
+    }
+
+    auto pt = varTypes[ii][0]->propertyInfo().prop_type;
+    auto tv = pair<Property::PropertyType, VectorXd>(pt, vals);
+    vt_map.insert(tv);
+
+    // dbg
+    if(vp_.vOPT > 1) {
+      ss << varTypes[ii][0]->propertyInfo().getPropTypeName();
+      ss << " -> var.norm() = " << vals.norm() << " | ";
+      ext_info(ss.str(), md_, cl_);
+    }
+  }
+}
+
+vector<VectorXd> Case::GetRealVarGradx(VarPropContainer *vars) {
+  VectorXd g = VectorXd(real_id_index_map_.length());
+  vector<VectorXd> grads = vector<VectorXd>(2, g);
+  rvar_grads_scal_ = QList<QPair<QUuid, double>>();
+
+  // Scaling: Get grad value, then scale it w/i var container
+  for (int i = 0; i < real_id_index_map_.length(); ++i) {
+    auto vid = rvar_grads_.at(i).first;
+    auto val = rvar_grads_.at(i).second;
+    // cont var obj has bounds info to perform scaling
+    vars->GetContinuousVariable(vid)->scaleGrad(val);
+    // update grad construct/vector
+    rvar_grads_scal_.append(QPair<QUuid, double>(vid, val));
+    grads[0][i] = val;
+  }
+
+  // Normalization prep: Get grad vals (scaled) ordered by var type
+  map<Property::PropertyType, VectorXd> vTypes_map;
+  GetGradsOrderedByType(vTypes_map, vars);
+
+  // Normalization: Normalize grad components according to variable types
+  for (int i = 0; i < rvar_grads_scal_.length(); ++i) {
+    auto vid = rvar_grads_scal_.at(i).first;
+    auto val = rvar_grads_scal_.at(i).second;
+    val /= vTypes_map[vars->GetContinuousVariable(vid)->propertyInfo().prop_type].norm();
+    rvar_grads_norm_.append(QPair<QUuid, double>(vid, val));
+    grads[1][i] = val;
+  }
+
+  return grads;
+}
+
 void Case::SetRealVarValues(Eigen::VectorXd vec) {
   for (int i = 0; i < vec.size(); ++i) {
     set_real_variable_value(real_id_index_map_[i], vec[i]);
+  }
+}
+
+void Case::SetRealVarValues(Eigen::VectorXd vec, Eigen::VectorXd grad) {
+  for (int i = 0; i < vec.size(); ++i) {
+    set_real_variable_value(real_id_index_map_[i], vec[i], grad[i]);
   }
 }
 

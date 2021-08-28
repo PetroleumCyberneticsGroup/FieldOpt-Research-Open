@@ -356,18 +356,19 @@ class TestResourceOptimizer :
   QJsonObject get_json_settings_tr_opt_maximize_{
     {"Type", "TrustRegionOptimization"},
     {"Mode", "Minimize"},
+    {"ScaleVars", 0},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},
-      {"InitialTrustRegionRadius", 1},
-      // {"TrustRegionLowerBound", -1e3},
-      // {"TrustRegionUpperBound", 1e3},
-      {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
-      {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
-      {"RNGSeed", 25},
-      {"CriticalityMu", 100},
-      {"CriticalityOmega", 0.5},
-      {"CriticalityBeta", 10},
-      {"ProblemName", "prob0"}
+      {"TR-InitRad", 1},
+      // {"TR-LowerBnd", -1e3},
+      // {"TR-UpperBnd", 1e3},
+      {"TR-LowerBnd", -std::numeric_limits<double>::infinity()},
+      {"TR-UpperBnd", std::numeric_limits<double>::infinity()},
+      {"TR-CritMu", 100},
+      {"TR-CritOmega", 0.5},
+      {"TR-CritBeta", 10},
+      {"TR-ProbName", "prob0"},
+      {"RNGSeed", 25}
     }},
     {"Objective", obj_fun_},
   };
@@ -375,18 +376,19 @@ class TestResourceOptimizer :
   QJsonObject get_json_settings_dftr_max_{
     {"Type", "DFTR"},
     {"Mode", "Minimize"},
+    {"ScaleVars", 0},
     {"Parameters", QJsonObject{
       {"MaxEvaluations", 3},
-      {"InitialTrustRegionRadius", 1},
-      // {"TrustRegionLowerBound", -1e3},
+      {"TR-InitRad", 1},
+      // {"TR-LowerBnd", -1e3},
       // {"TrustRegionUpperBound", 1e3},
-      {"TrustRegionLowerBound", -std::numeric_limits<double>::infinity()},
-      {"TrustRegionUpperBound", std::numeric_limits<double>::infinity()},
-      {"RNGSeed", 25},
-      {"CriticalityMu", 100},
-      {"CriticalityOmega", 0.5},
-      {"CriticalityBeta", 10},
-      {"ProblemName", "prob0"}
+      {"TR-LowerBnd", -std::numeric_limits<double>::infinity()},
+      {"TR-UpperBnd", std::numeric_limits<double>::infinity()},
+      {"TR-CritMu", 100},
+      {"TR-CritOmega", 0.5},
+      {"TR-CritBeta", 10},
+      {"TR-ProbName", "prob0"},
+      {"RNGSeed", 25}
     }},
     {"Objective", obj_fun_},
   };

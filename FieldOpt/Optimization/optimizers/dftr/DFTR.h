@@ -46,7 +46,7 @@ using namespace Eigen;
 using Model::Properties::VarPropContainer;
 using Optimization::Constraints::ConstraintHandler;
 
-using TermCond = Optimization::Optimizer::TerminationCondition;
+using TC = Optimization::Optimizer::TerminationCondition;
 
 using Utilities::FileHandling::CreateDir;
 using Utilities::FileHandling::FileExists;
@@ -65,7 +65,7 @@ class DFTR : public Optimizer {
        ConstraintHandler *constraint_handler = nullptr
   );
 
-  TerminationCondition IsFinished() override;
+  TC IsFinished() override;
   TRFrame *getTRMod() { return trm_; };
 
  protected:
@@ -77,6 +77,7 @@ class DFTR : public Optimizer {
 
   // DFTR management
   void updateRadius();
+  bool testCriticality();
 
   // FO-DFTR interface management
   bool submitTempCases();
@@ -87,21 +88,31 @@ class DFTR : public Optimizer {
   void setSettings(Settings::Optimizer *settings);
   void setLowerUpperBounds();
   void computeInitPts();
-  void projectToBounds(VectorXd *point);
+  void projToBnds(VectorXd *point);
   void createLogFile();
   void printIteration(double fval_current);
 
+  // DFTR dbg
+  bool F = false;
+  bool T = true;
+  double D = 0.0;
+  VectorXd V = VectorXd::Zero(0);
+
   // TR core properties
+  double infd_ = -std::numeric_limits<double>::infinity();
   double tr_init_rad_;
-  double tr_tol_f_, tr_eps_c_, tr_eta_0_, tr_eta_1_; // tols
-  double tr_pivot_thld_, tr_add_thld_, tr_exch_thld_; // Thesholds
-  double tr_rad_max_, tr_rad_fac_, tr_tol_rad_; // Radii
+  double tr_tol_f_, tr_eps_c_, tr_eta_0_, tr_eta_1_; // Tols
+  double tr_piv_thld_, tr_add_thld_, tr_xch_thld_; // Thesholds
+  double tr_rad_max_, tr_rad_fac_, tr_rad_tol_; // Radii
   double tr_gamma_inc_, tr_gamma_dec_; // Gamma factors
   double tr_crit_mu_, tr_crit_omega_, tr_crit_beta_; // Criticality
   double tr_lower_bnd_, tr_upper_bnd_;
   VectorXd lb_, ub_; // Bounds [scalars from settings, lb/ub vectors]
   int tr_iter_max_, tr_num_init_x_, tr_rng_seed_; // Iter max + seed
   string tr_basis_, tr_init_smpln_, tr_prob_name_;
+
+  int tr_lim_inf_ = 0;
+  QDateTime ti_, t0_;
 
   // TR management
   double rho_;         // Agreement factor>
@@ -111,18 +122,23 @@ class DFTR : public Optimizer {
   double delay_reduc_; // Delay reduction>
   double fmult_;       // Maximize <-> minimize multiplier
 
-  int n_initial_points_;
+  // int n_initial_points_;
 
   // TR iteration
   VectorXd trial_point_;
   VectorXd trial_step_;
-  double fval_trial_, pred_red_, crit_init_rad_;
+  double fval_trial_, pred_red_, cr_rad_ini_;
 
-  int mchange_;
+  int mchange_ = 0;
   bool iter_modl_fl_ = false;
-  bool crit_step_pd_ = false;
   bool impr_modl_nx_ = false;
-  bool crit_step_exec_on_ = false;
+
+  critExecStat cr_stat_ = FAILED;
+  string getCrStat() {
+    if (cr_stat_ == ONGOING) { return "ONGOING";
+    } else if (cr_stat_ == SUCCESS) { return "SUCCESS";
+    } else if (cr_stat_ == FAILED) { return "FAILED"; }
+  }
 
   // FO constructs
   Settings::Optimizer *settings_;

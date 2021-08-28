@@ -54,10 +54,13 @@ class Optimizer
   Optimizer(){}
   Optimizer(QJsonObject json_optimizer, VerbParams vp);
 
+  Paths* paths() { return paths_; };
+  void setPaths(Paths *p) { paths_ = p; };
+
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
     EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
-    DFTR
+    DFTR, SQP
   };
 
   enum OptimizerMode { Maximize, Minimize };
@@ -175,22 +178,28 @@ class Optimizer
     std::string ego_af = "ExpectedImprovement";
 
     // Trust Region parameters -----------------------------
-    double tr_init_rad = 1; //!< Initial TR radius
+    double tr_init_rad = 1; // Initial TR radius
+    // Tols
     double tr_tol_f = 1e-6;
     double tr_eps_c = 1e-5;
     double tr_eta_0 = 0;
     double tr_eta_1 = 0.05;
-    double tr_pivot_thld = 0.0625;
+    // Thesholds
+    double tr_piv_thld = 0.0625;
     double tr_add_thld = 100;
-    double tr_exch_thld = 1000;
-    double tr_radius_max = 1e3;
-    double tr_radius_fac = 6;
-    double tr_tol_radius = 1e-5;
+    double tr_xch_thld = 1000;
+    // Radii
+    double tr_rad_max = 1e3;
+    double tr_rad_fac = 6;
+    double tr_rad_tol = 1e-5;
+    // Gamma factors
     double tr_gamma_inc = 2;
     double tr_gamma_dec = 0.5;
+    // Criticality
     double tr_crit_mu = 100;
     double tr_crit_omega = 0.5;
     double tr_crit_beta = 10;
+    // Bounds
     double tr_lower_bnd = -std::numeric_limits<double>::infinity();
     double tr_upper_bnd = std::numeric_limits<double>::infinity();
 
@@ -198,11 +207,33 @@ class Optimizer
     int tr_num_init_x = -1;
     int tr_iter_max = 10000;
 
-    std::string tr_basis = "diagonalHessian";
-    std::string tr_prob_name = "prob0"; // dbg
-
     //!< Sampling method for initial guesses (Random or Uniform)
     std::string tr_init_smpln = "Random";
+    std::string tr_basis = "diagonalHessian";
+
+    std::string tr_prob_name = "prob0"; // dbg
+
+    // SQP [SNOPT] parameters ------------------------------
+    double sqp_ftol = 1e-6;
+    double sqp_upper_bnd = 1.0;
+    double sqp_lower_bnd = -1.0;
+
+    double sqp_linesearch_tol = 0.9;
+    double sqp_major_feasi_tol = 1e-12;
+    double sqp_major_iter_lim = 100;
+    double sqp_optimality_tol = 1e-12;
+
+
+
+
+
+
+
+
+
+
+
+
 
     // VFSA Parameters -------------------------------------
     //!< Number of evaluations to be performed pr. iteration (temperature). Default: 1.
@@ -473,15 +504,18 @@ class Optimizer
   void setTRProbName(std::string pn) { parameters_.tr_prob_name = pn; }
   VerbParams verbParams() { return vp_; };
 
-  bool Scaling() { return scaling_; }
+  int scaleVars() { return scale_vars_; }
+  double ScaleObjf() { return scale_objf_; }
 
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
+  Paths *paths_;
 
-  bool scaling_ = true;
+  int scale_vars_ = 1;
+  double scale_objf_ = 1.0;
 
   string im_, wm_, em_;
   string md_ = "Settings";

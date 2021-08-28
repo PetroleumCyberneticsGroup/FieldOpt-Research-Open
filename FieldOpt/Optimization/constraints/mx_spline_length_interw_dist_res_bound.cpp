@@ -29,43 +29,41 @@ namespace Optimization {
 namespace Constraints {
 
 MxSplineLengthInterwDistResBound::
-MxSplineLengthInterwDistResBound(
-  Settings::Optimizer::Constraint settings,
-  Model::Properties::VarPropContainer *variables,
-  Reservoir::Grid::Grid *grid,
-  Settings::VerbParams vp) : Constraint(vp) {
+MxSplineLengthInterwDistResBound(SO& seto, VPC *vars,
+                                 Reservoir::Grid::Grid *grid, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 3) {
     im_ = "Adding MxWSplineLengthInterwDistResBound constraint.";
     ext_info(im_, md_, cl_, vp_.lnw);
   }
 
-  max_iterations_ = settings.max_iterations;
+  max_iterations_ = seto.max_iterations;
   Settings::Optimizer::Constraint dist_constr_settings;
-  dist_constr_settings.wells = settings.wells;
-  dist_constr_settings.min = settings.min_distance;
-  distance_constraint_ = new InterwDist(dist_constr_settings, variables, vp);
+  dist_constr_settings.wells = seto.wells;
+  dist_constr_settings.min = seto.min_distance;
+  distance_constraint_ = new InterwDist(dist_constr_settings, vars, vp);
   Settings::Settings global_settings_;
 
   length_constraints_ = QList<WSplineLength *>();
-  for (QString wname : settings.wells) {
+  for (QString wname : seto.wells) {
     Settings::Optimizer::Constraint len_constr_settings;
     len_constr_settings.well = wname;
-    len_constr_settings.min = settings.min_length;
-    len_constr_settings.max = settings.max_length;
+    len_constr_settings.min = seto.min_length;
+    len_constr_settings.max = seto.max_length;
     length_constraints_.append(
-      new WSplineLength(len_constr_settings, variables, vp));
+      new WSplineLength(len_constr_settings, vars, vp));
 
     Settings::Optimizer::Constraint boundary_constraint_settings;
-    boundary_constraint_settings.box_imin = settings.box_imin;
-    boundary_constraint_settings.box_imax = settings.box_imax;
-    boundary_constraint_settings.box_jmin = settings.box_jmin;
-    boundary_constraint_settings.box_jmax = settings.box_jmax;
-    boundary_constraint_settings.box_kmin = settings.box_kmin;
-    boundary_constraint_settings.box_kmax = settings.box_kmax;
+    boundary_constraint_settings.box_imin = seto.box_imin;
+    boundary_constraint_settings.box_imax = seto.box_imax;
+    boundary_constraint_settings.box_jmin = seto.box_jmin;
+    boundary_constraint_settings.box_jmax = seto.box_jmax;
+    boundary_constraint_settings.box_kmin = seto.box_kmin;
+    boundary_constraint_settings.box_kmax = seto.box_kmax;
     boundary_constraint_settings.well = wname;
     boundary_constraints_.append(
-      new ResBoundary(boundary_constraint_settings, variables, grid, vp));
+      new ResBoundary(boundary_constraint_settings, vars, grid, vp));
   }
 }
 

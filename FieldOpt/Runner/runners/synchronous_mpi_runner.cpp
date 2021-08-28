@@ -77,7 +77,7 @@ void SynchronousMPIRunner::Execute() {
       optimizer_->SubmitEvaluatedCase(new_case);
     } else {
       if (is_ensemble_run_) {
-        int worker_rank = ensemble_helper_.GetAssignedWorker(new_case->GetEnsembleRealization().toStdString(), overseer_->GetFreeWorkerRanks());
+        int worker_rank = ensemble_helper_.GetAssignedWorker(new_case->GetEnsembleRlz().toStdString(), overseer_->GetFreeWorkerRanks());
         overseer_->AssignCase(new_case, worker_rank);
       } else {
         overseer_->AssignCase(new_case);
@@ -99,7 +99,7 @@ void SynchronousMPIRunner::Execute() {
       printMessage("Setting timings for evaluated case.", 2);
       if (!is_ensemble_run_ && optimizer_->GetSimulationDuration(evaluated_case) > 0){
         printMessage("Setting timings for evaluated case.", 2);
-        simulation_times_.push_back(optimizer_->GetSimulationDuration(evaluated_case));
+        sim_times_.push_back(optimizer_->GetSimulationDuration(evaluated_case));
       }
     }
 
@@ -182,7 +182,7 @@ void SynchronousMPIRunner::Execute() {
 
         if (is_ensemble_run_) {
           printMessage("Updating grid path.", 2);
-          model_->set_grid_path(ensemble_helper_.GetRealization(worker_->GetCurrentCase()->GetEnsembleRealization().toStdString()).grid());
+          model_->set_grid_path(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()).grid());
         }
 
         printMessage("Applying case to model.", 2);
@@ -190,30 +190,30 @@ void SynchronousMPIRunner::Execute() {
         model_update_done_ = true; logger_->AddEntry(this);
         auto start = QDateTime::currentDateTime();
 
-        if (runtime_settings_->simulation_timeout() == 0 && settings_->simulator()->max_minutes() < 0) {
+        if (rts_->sim_timeout() == 0 && settings_->simulator()->max_minutes() < 0) {
           printMessage("Starting model evaluation.", 2);
           simulator_->Evaluate();
-        } else if (simulation_times_.empty() && settings_->simulator()->max_minutes() > 0) {
+        } else if (sim_times_.empty() && settings_->simulator()->max_minutes() > 0) {
           if (!is_ensemble_run_) {
             printMessage("Starting model evaluation with timeout.", 2);
             simulation_success = simulator_->Evaluate(settings_->simulator()->max_minutes() * 60,
-                                                      runtime_settings_->threads_per_sim());
+                                                      rts_->threads_per_sim());
           }
           else {
             printMessage("Starting ensemble model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRealization(worker_->GetCurrentCase()->GetEnsembleRealization().toStdString()),
+            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
                                                       settings_->simulator()->max_minutes() * 60,
-                                                      runtime_settings_->threads_per_sim());
+                                                      rts_->threads_per_sim());
           }
         } else {
           if (!is_ensemble_run_) {
             printMessage("Starting model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(timeoutValue(), runtime_settings_->threads_per_sim());
+            simulation_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
           } else {
             printMessage("Starting ensemble model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRealization(worker_->GetCurrentCase()->GetEnsembleRealization().toStdString()),
+            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
                                                       settings_->simulator()->max_minutes() * 60,
-                                                      runtime_settings_->threads_per_sim());
+                                                      rts_->threads_per_sim());
           }
         }
 
@@ -228,7 +228,7 @@ void SynchronousMPIRunner::Execute() {
           worker_->GetCurrentCase()->set_objf_value(objf_->value());
           worker_->GetCurrentCase()->SetSimTime(sim_time);
           worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
-          simulation_times_.push_back(sim_time);
+          sim_times_.push_back(sim_time);
         } else {
           tag = MPIRunner::MsgTag::CASE_EVAL_TIMEOUT;
           printMessage("Timed out. Setting objective function value to SENTINEL VALUE.", 2);

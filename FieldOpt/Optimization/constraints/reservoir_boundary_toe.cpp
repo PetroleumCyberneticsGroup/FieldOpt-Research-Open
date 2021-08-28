@@ -30,15 +30,13 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Utilities/math.hpp"
 namespace Optimization {
 namespace Constraints {
-ReservoirBoundaryToe::ReservoirBoundaryToe(
-    const Settings::Optimizer::Constraint &settings,
-    Model::Properties::VarPropContainer *variables,
-    Reservoir::Grid::Grid *grid,
-    Settings::VerbParams vp)
-  : ResBoundary(settings, variables, grid, vp) {
+
+ReservoirBoundaryToe::ReservoirBoundaryToe(SO& seto, VPC *vars,
+                                           Reservoir::Grid::Grid *grid, SV vp)
+  : ResBoundary(seto, vars, grid, vp) {
 
   if (vp.vOPT >= 1) {
-    info("Adding ReservoirBoundaryToe constraint for " + settings.well.toStdString());
+    info("Adding ReservoirBoundaryToe constraint for " + seto.well.toStdString());
   }
 
 }

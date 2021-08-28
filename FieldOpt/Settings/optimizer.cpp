@@ -52,7 +52,8 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   QJsonArray json_constraints = json_optimizer["Constraints"].toArray();
   QString type = json_optimizer["Type"].toString();
 
-  scaling_ = json_optimizer["ScaleVars"].toBool();
+  scale_vars_ = json_optimizer["ScaleVars"].toInt();
+  scale_objf_ = json_optimizer["ScaleObjf"].toDouble();
 
   type_ = parseType(type);
 
@@ -86,7 +87,7 @@ Optimizer::parseSingleConstraint(QJsonObject json_constraint) {
 
   Constraint optmzr_constraint = Constraint();
 
-  optmzr_constraint.scaling_ = scaling_;
+  optmzr_constraint.scaling_ = scale_vars_;
 
   if (json_constraint.contains("Well")) {
     optmzr_constraint.well = json_constraint["Well"].toString();
@@ -528,9 +529,9 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // EGO Parameters :: EGO-InitSamplingMethod
     if (json_params.contains("EGO-InitSamplingMethod")) {
       QString method = json_params["EGO-InitSamplingMethod"].toString();
-      if (QString::compare(method, "Random") == 0 || QString::compare(method, "Uniform") == 0)
+      if (QString::compare(method, "Random") == 0 || QString::compare(method, "Uniform") == 0) {
         params.ego_init_sampling_method = json_params["EGO-InitSamplingMethod"].toString().toStdString();
-      else {
+      } else {
         Printer::error("EGO-InitSamplingMethod " + method.toStdString() + " not recognized.");
         throw std::runtime_error("Failed reading EGO settings.");
       }
@@ -543,8 +544,7 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
                                         "CovSEiso", "CovPeriodicMatern3iso", "CovPeriodic"};
       if (available_kernels.contains(json_params["EGO-Kernel"].toString())) {
         params.ego_kernel = json_params["EGO-Kernel"].toString().toStdString();
-      }
-      else {
+      } else {
         Printer::error("EGO-Kernel " + json_params["EGO-Kernel"].toString().toStdString() + " not recognized.");
         Printer::info("Available kernels: " + available_kernels.join(", ").toStdString());
         throw std::runtime_error("Failed reading EGO settings.");
@@ -604,7 +604,9 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     }
     if (json_params.contains("SPSA-A")) {
       params.spsa_A = json_params["SPSA-A"].toDouble();
-    } else params.spsa_A = 0.1 * params.spsa_max_iterations;
+    } else {
+      params.spsa_A = 0.1 * params.spsa_max_iterations;
+    }
     if (json_params.contains("SPSA_a")) {
       params.spsa_a = json_params["SPSA_a"].toDouble();
     }
@@ -645,35 +647,61 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // -----------------------------------------------------
     //  TRUST REGION PARAMETERS
     // Trust Region parameters :: Initial radius
-    set_opt_prop_double(params.tr_init_rad, json_params, "InitTRRadius", vp_);
-    // Trust Region parameters:: Trust region radius tolerance
-    set_opt_prop_double(params.tr_tol_radius, json_params, "TRRadiusTol", vp_);
-    // Trust Region parameters :: Max trust region radius
-    set_opt_prop_double(params.tr_radius_max, json_params, "MaxTRRadius", vp_);
+    set_opt_prop_double(params.tr_init_rad, json_params, "TR-InitRad", vp_);
+
+    set_opt_prop_double(params.tr_tol_f, json_params, "TR-TolF", vp_);
+    set_opt_prop_double(params.tr_eps_c, json_params, "TR-EpsC", vp_);
+    set_opt_prop_double(params.tr_eta_0, json_params, "TR-Eta0", vp_);
+    set_opt_prop_double(params.tr_eta_1, json_params, "TR-Eta1", vp_);
+
+    // Thesholds
+    set_opt_prop_double(params.tr_piv_thld, json_params, "TR-PivThld", vp_);
+    set_opt_prop_double(params.tr_add_thld, json_params, "TR-AddThld", vp_);
+    set_opt_prop_double(params.tr_xch_thld, json_params, "TR-xchThld", vp_);
+
+    // Radii
+    set_opt_prop_double(params.tr_rad_max, json_params, "TR-RadMax", vp_);
+    set_opt_prop_double(params.tr_rad_fac, json_params, "TR-RadFac", vp_);
+    set_opt_prop_double(params.tr_rad_tol, json_params, "TR-RadTol", vp_);
+
+    // Gamma factors
+    set_opt_prop_double(params.tr_gamma_inc, json_params, "TR-GammaInc", vp_);
+    set_opt_prop_double(params.tr_gamma_dec, json_params, "TR-GammaDec", vp_);
+
+    // Criticality
+    set_opt_prop_double(params.tr_crit_mu,    json_params, "TR-CritMu", vp_);
+    set_opt_prop_double(params.tr_crit_omega, json_params, "TR-CritOmega", vp_);
+    set_opt_prop_double(params.tr_crit_beta,  json_params, "TR-CritBeta", vp_);
+
 
     // Trust Region parameters :: Lower bound
-    if (json_params.contains("TRLowerBound")) {
-      if (json_params.contains("TRUpperBound")) {
-        if (json_params["TRLowerBound"].toDouble() <
-            json_params["TRUpperBound"].toDouble()) {
-          params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
-        } else { E(ind_val + "TRLowerBound", md_, cl_); }
+    if (json_params.contains("TR-LowerBnd")) {
+      if (json_params.contains("TR-UpperBnd")) {
+        if (json_params["TR-LowerBnd"].toDouble() < json_params["TR-UpperBnd"].toDouble()) {
+          params.tr_lower_bnd = json_params["TR-LowerBnd"].toDouble();
+        } else { E(ind_val + "TR-LowerBnd", md_, cl_); }
       } else {
-        params.tr_lower_bnd = json_params["TRLowerBound"].toDouble();
+        params.tr_lower_bnd = json_params["TR-LowerBnd"].toDouble();
       }
     }
 
     // Trust Region parameters :: Upper bound
-    if (json_params.contains("TRUpperBound")) {
-      if (json_params.contains("TRLowerBound")) {
-        if (json_params["TRLowerBound"].toDouble() <
-            json_params["TRUpperBound"].toDouble()) {
-          params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
-        } else { E(ind_val + "TRUpperBound", md_, cl_); }
+    if (json_params.contains("TR-UpperBnd")) {
+      if (json_params.contains("TR-LowerBnd")) {
+        if (json_params["TR-LowerBnd"].toDouble() < json_params["TR-UpperBnd"].toDouble()) {
+          params.tr_upper_bnd = json_params["TR-UpperBnd"].toDouble();
+        } else { E(ind_val + "TR-UpperBnd", md_, cl_); }
       } else {
-        params.tr_upper_bnd = json_params["TRUpperBound"].toDouble();
+        params.tr_upper_bnd = json_params["TR-UpperBnd"].toDouble();
       }
     }
+
+    set_opt_prop_int(params.tr_num_init_x, json_params, "TR-NumInitX", vp_);
+    set_opt_prop_int(params.tr_iter_max,   json_params, "TR-IterMax", vp_);
+
+    set_opt_prop_string(params.tr_init_smpln, json_params, "TR-InitSmpln", vp_);
+    set_opt_prop_string(params.tr_basis, json_params, "TR-Basis", vp_);
+    set_opt_prop_string(params.tr_prob_name, json_params, "TR-ProbName", vp_);
 
     // Trust Region parameters :: RNG seed
     if (json_params.contains("RNGSeed")) {
@@ -682,48 +710,27 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
       params.rng_seed = std::time(0);
     }
 
-    // Trust Region parameters :: Max iter
-    if (json_params.contains("TRMaxIter")) {
-      params.tr_iter_max = json_params["TRMaxIter"].toInt();
-    } else {
-      params.tr_iter_max = 10000;
-    }
+    // -----------------------------------------------------
+    //  SQP [SNOPT] PARAMS
+    set_opt_prop_double(params.sqp_ftol, json_params, "SQP-FTol", vp_);
+    set_opt_prop_double(params.sqp_upper_bnd, json_params, "SQP-UpperBnd", vp_);
+    set_opt_prop_double(params.sqp_lower_bnd, json_params, "SQP-LowerBnd", vp_);
 
-    // Trust Region parameters :: Criticality Mu
-    if (json_params.contains("CriticalityMu")) {
-      if (json_params["CriticalityMu"].toDouble() >= 0.0) {
-        params.tr_crit_mu =
-            json_params["CriticalityMu"].toDouble();
-      } else { E(ind_val + "CriticalityMu", md_, cl_); }
-    }
+    set_opt_prop_double(params.sqp_linesearch_tol, json_params, "SQP-LinesearchTol", vp_);
 
-    // Trust Region parameters :: Criticality Omega
-    if (json_params.contains("CriticalityOmega")) {
-      if (json_params["CriticalityOmega"].toDouble() >= 0.0) {
-        params.tr_crit_omega =
-            json_params["CriticalityOmega"].toDouble();
-      } else { E(ind_val + "CriticalityOmega", md_, cl_); }
-    }
 
-    // Trust Region parameters :: Criticality Beta
-    if (json_params.contains("CriticalityBeta")) {
-      if (json_params["CriticalityBeta"].toDouble() >= 0.0) {
-        params.tr_crit_beta =
-            json_params["CriticalityBeta"].toDouble();
-      } else {
-        throw std::runtime_error(ind_val + "CriticalityBeta");
-      }
-    }
 
-    // Trust Region parameters :: Criticality problem name
-    if (json_params.contains("ProblemName")) {
-      if (json_params["ProblemName"].toDouble() >= 0.0) {
-        params.tr_prob_name =
-            json_params["ProblemName"].toString().toStdString();
-      } else {
-        throw std::runtime_error(ind_val + "ProblemName");
-      }
-    }
+
+
+
+
+
+
+
+
+
+
+
 
   } catch (std::exception const &ex) {
     throw UnableToParseOptimizerParametersSectionException(
@@ -930,6 +937,9 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
 
   } else if (QString::compare(type, "DFTR") == 0) {
     opt_type = OptimizerType::DFTR;
+
+  } else if (QString::compare(type, "SQP") == 0) {
+    opt_type = OptimizerType::SQP;
 
   } else {
     em_ = "Optimizer type " + type.toStdString() + " not recognized.";

@@ -71,6 +71,9 @@ class JsonResults {
   double GetSingleValue(std::string name);
   std::vector<double> GetMonthlyValues(std::string name);
   std::vector<double> GetYearlyValues(std::string name);
+  std::vector<double> GetGrads() { return grads_vec_; }
+  double GetFval() { return fval_vec_[0]; }
+  VectorXd GetGradsXd() { return gradsXd_; }
 
  private:
   std::map<std::string, double> singles_;
@@ -79,7 +82,9 @@ class JsonResults {
 
   std::map<std::string, double> grads_map_;
   std::vector<double> grads_vec_;
+  VectorXd gradsXd_;
   std::vector<double> norms_vec_;
+  std::vector<double> fval_vec_;
 
   string md_ = "Simulation::results";
   string cl_ = "JsonResults";

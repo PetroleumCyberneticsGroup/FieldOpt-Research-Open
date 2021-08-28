@@ -97,18 +97,18 @@ void OneOffRunner::applyWellPositionFromArguments() {
     }
   }
 
-  base_case_->set_real_variable_value(phx, runtime_settings_->prod_coords().first[0]);
-  base_case_->set_real_variable_value(phy, runtime_settings_->prod_coords().first[1]);
-  base_case_->set_real_variable_value(phz, runtime_settings_->prod_coords().first[2]);
-  base_case_->set_real_variable_value(ptx, runtime_settings_->prod_coords().second[0]);
-  base_case_->set_real_variable_value(pty, runtime_settings_->prod_coords().second[1]);
-  base_case_->set_real_variable_value(ptz, runtime_settings_->prod_coords().second[2]);
-  base_case_->set_real_variable_value(ihx, runtime_settings_->inje_coords().first[0]);
-  base_case_->set_real_variable_value(ihy, runtime_settings_->inje_coords().first[1]);
-  base_case_->set_real_variable_value(ihz, runtime_settings_->inje_coords().first[2]);
-  base_case_->set_real_variable_value(itx, runtime_settings_->inje_coords().second[0]);
-  base_case_->set_real_variable_value(ity, runtime_settings_->inje_coords().second[1]);
-  base_case_->set_real_variable_value(itz, runtime_settings_->inje_coords().second[2]);
+  base_case_->set_real_variable_value(phx, rts_->prod_coords().first[0]);
+  base_case_->set_real_variable_value(phy, rts_->prod_coords().first[1]);
+  base_case_->set_real_variable_value(phz, rts_->prod_coords().first[2]);
+  base_case_->set_real_variable_value(ptx, rts_->prod_coords().second[0]);
+  base_case_->set_real_variable_value(pty, rts_->prod_coords().second[1]);
+  base_case_->set_real_variable_value(ptz, rts_->prod_coords().second[2]);
+  base_case_->set_real_variable_value(ihx, rts_->inje_coords().first[0]);
+  base_case_->set_real_variable_value(ihy, rts_->inje_coords().first[1]);
+  base_case_->set_real_variable_value(ihz, rts_->inje_coords().first[2]);
+  base_case_->set_real_variable_value(itx, rts_->inje_coords().second[0]);
+  base_case_->set_real_variable_value(ity, rts_->inje_coords().second[1]);
+  base_case_->set_real_variable_value(itz, rts_->inje_coords().second[2]);
 
   auto constraint_handler_ =
     new Optimization::Constraints::ConstraintHandler(settings_->optimizer(),

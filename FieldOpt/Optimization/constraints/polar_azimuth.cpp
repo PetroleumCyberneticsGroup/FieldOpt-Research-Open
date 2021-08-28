@@ -27,22 +27,20 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint const settings,
-                           Model::Properties::VarPropContainer *variables,
-                           Settings::VerbParams vp)
-                           : Constraint(vp) {
+PolarAzimuth::PolarAzimuth(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 1) {
-    info("Adding PolarAzimuth constraint for " + settings.well.toStdString());
+    info("Adding PolarAzimuth constraint for " + seto.well.toStdString());
   }
 
-  min_azimuth_ = settings.min;
-  max_azimuth_ = settings.max;
+  min_azimuth_ = seto.min;
+  max_azimuth_ = seto.max;
 
-  for (auto var : *variables->GetContinuousVariables()){
+  for (auto var : *vars->GetContinuousVariables()){
     auto lvar = var.second;
     if (lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
-      && QString::compare(lvar->propertyInfo().parent_well_name, settings.well) == 0){
+      && QString::compare(lvar->propertyInfo().parent_well_name, seto.well) == 0){
       affected_variable_ = lvar->id();
       break;
     }

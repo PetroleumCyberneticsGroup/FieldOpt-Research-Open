@@ -144,7 +144,7 @@ QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetBinaryVariableMap() 
 }
 
 void ModelSynchronizationObject::UpdateVariablePropertyIds(Model *model) {
-  auto vpc = model->variable_container_;
+  auto vpc = model->var_container_;
 
   // Binary variables
   if (vpc->BinaryVariableSize() > 0) {

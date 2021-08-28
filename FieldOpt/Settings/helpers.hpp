@@ -73,7 +73,7 @@ inline bool set_opt_prop_double(double &prop,
     return true;
 
   } else {
-    if (vp.vSET >= 6) {
+    if (vp.vSET >= 3) {
       im = "Property " + prop_name.toStdString();
       im += " not found. Using default ("+ num2str(prop) + ").";
       ext_info(im, md, cl);
@@ -109,6 +109,11 @@ inline bool set_opt_prop_int(int &prop, const QJsonObject &container,
 
   if (container.contains(prop_name) && (container[prop_name].isDouble())) {
     prop = container[prop_name].toInt();
+    return true;
+
+  } else if (container.contains(prop_name) && (container[prop_name].isString())) {
+    if (vp.vSET >= 3) { ext_info(prop_name.toStdString() + "given as string.", md, cl); }
+    prop = std::stoi(container[prop_name].toString().toStdString());
     return true;
 
   } else {

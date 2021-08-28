@@ -28,21 +28,19 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization {
 namespace Constraints {
-PolarWellLength::PolarWellLength(Settings::Optimizer::Constraint const settings,
-                                 Model::Properties::VarPropContainer *variables,
-                                 Settings::VerbParams vp)
-                                 : Constraint(vp) {
+PolarWellLength::PolarWellLength(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
   if (vp_.vOPT >= 1) {
-    info("Adding PolarWellLength constraint for " + settings.well.toStdString());
+    info("Adding PolarWellLength constraint for " + seto.well.toStdString());
   }
 
-  minimum_length_ = settings.min_length;
-  maximum_length_ = settings.max_length;
+  minimum_length_ = seto.min_length;
+  maximum_length_ = seto.max_length;
 
-  for (auto var : *variables->GetContinuousVariables()) {
+  for (auto var : *vars->GetContinuousVariables()) {
     auto lvar = var.second;
-    if (lvar->propertyInfo().parent_well_name == settings.well
+    if (lvar->propertyInfo().parent_well_name == seto.well
       && lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Length) {
       affected_variable_ = lvar->id();
       break;
