@@ -45,7 +45,7 @@ WeightedSum::WeightedSum(Settings::Optimizer *settings,
     comp->coefficient = settings->objective().weighted_sum.at(i).coefficient;
     comp->time_step = settings->objective().weighted_sum.at(i).time_step;
 
-    if (vp_.vOPT >= 3) {
+    if (vp_.vOPT >= 5) {
       string im = "comp.prop: "+ results_->GetPropertyKey(comp->property);
       im += ", comp.time_step: " + num2str(comp->time_step);
       ext_info(im, md_, cl_, vp_.lnw);

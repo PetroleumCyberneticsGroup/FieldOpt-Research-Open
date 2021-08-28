@@ -33,9 +33,7 @@ namespace Constraints {
 
 class PolarAzimuth : public Constraint {
  public:
-  PolarAzimuth(Settings::Optimizer::Constraint settings,
-               Model::Properties::VarPropContainer *variables,
-               Settings::VerbParams vp);
+  PolarAzimuth(SO& seto, VPC *vars, SV vp);
 
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;

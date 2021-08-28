@@ -41,6 +41,7 @@ If not, see <http://www.gnu.org/licenses/>.
 class Logger;
 
 namespace Model {
+
 class ModelSynchronizationObject;
 
 using Reservoir::WellIndexCalculation::wicalc_rixx;
@@ -48,7 +49,14 @@ using Reservoir::Grid::ECLGrid;
 using Optimization::Constraints::ConstraintHandler;
 
 using WDefType = Settings::Model::WellDefinitionType;
-using EvalStat = Optimization::Case::CaseState::EvalStatus;
+using ES = Optimization::Case::CaseState::EvalStatus;
+
+using Printer::info;
+using Printer::idbg;
+using Printer::ext_info;
+using Printer::ext_warn;
+using Printer::ext_error;
+using Printer::num2str;
 
 /*!
  * \brief The Model class represents the reservoir model
@@ -77,7 +85,7 @@ class Model : public Loggable
    * \brief variables Get the set of variable properties of all types.
    */
   Properties::VarPropContainer *variables() const {
-    return variable_container_;
+    return var_container_;
   }
 
   /*!
@@ -115,7 +123,7 @@ class Model : public Loggable
  private:
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
-  Properties::VarPropContainer *variable_container_;
+  Properties::VarPropContainer *var_container_;
 
   QList<Wells::Well *> *wells_;
 

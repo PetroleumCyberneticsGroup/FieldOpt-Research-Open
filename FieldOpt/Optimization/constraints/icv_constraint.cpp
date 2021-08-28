@@ -30,38 +30,21 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-ICVConstraint::
-ICVConstraint(const Settings::Optimizer::Constraint& settings,
-              Model::Properties::VarPropContainer *variables,
-              Settings::VerbParams vp) : Constraint(vp) {
-  variables_ = variables;
-  assert(!settings.wells.empty());
-  assert(settings.min < settings.max);
+ICVConstraint::ICVConstraint(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
-  string ws;
-  if (settings.well.isEmpty()) {
-    for (const auto& wn : settings.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = settings.well.toStdString(); }
+  min_ = seto_.min;
+  max_ = seto_.max;
+  assert(min_ < max_);
+  assert(!seto_.wells.empty());
 
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding ICV constraint for " + ws;
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  icd_cnstrnd_well_nms_ = seto_.wells;
+  penalty_weight_ = seto_.penalty_weight;
 
-  min_ = settings.min;
-  max_ = settings.max;
-
-  icd_cnstrnd_well_nms_ = settings.wells;
-  penalty_weight_ = settings.penalty_weight;
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding ICV constraint with [min, max] = [";
-    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well " + ws + " with variables: ";
-  }
+  PrntWellInfo("ICV", 1);
 
   for (auto &wname : icd_cnstrnd_well_nms_) {
-    auto icd_vars = variables->GetWellICDVars(wname);
+    auto icd_vars = vars->GetWellICDVars(wname);
     icd_cnstrnd_real_vars_.append(icd_vars);
 
     for (auto var : icd_vars) {
@@ -71,7 +54,9 @@ ICVConstraint(const Settings::Optimizer::Constraint& settings,
     }
   }
 
-  if(settings.scaling_) {
+  if(!icd_cnstrnd_real_vars_.empty()) { isEnabled_ = true; }
+
+  if(seto_.scaling_) {
     min_ = -1.0;
     max_ = 1.0;
   }
@@ -101,10 +86,11 @@ bool ICVConstraint::CaseSatisfiesConstraint(Case *c) {
 void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
   string tm;
   if (vp_.vOPT >= 4) {
-    tm = "Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+    tm = this->name() + " enabled: " + num2str(this->isEnabled(), 0);
+    tm += "-- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
     tm += "for case: " + c->id_stdstr();
     pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    tm += "x: " + DBG_prntVecXd(c->GetVarVector(icd_cnstrnd_uuid_vars_));
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 
@@ -119,14 +105,12 @@ void ICVConstraint::SnapCaseToConstraints(Optimization::Case *c) {
     }
   }
 
-  if (vp_.vOPT >= 4 && tm.size() > 0) {
+  if (vp_.vOPT >= 4 && !tm.empty()) {
     pad_text(tm, vp_.lnw );
-    tm += "x: " + DBG_prntVecXd(c->GetRealVarVector());
+    tm += "x: " + DBG_prntVecXd(c->GetVarVector(icd_cnstrnd_uuid_vars_));
     ext_info(tm, md_, cl_, vp_.lnw);
   }
 }
-
-bool ICVConstraint::IsBoundConstraint() const { return true; }
 
 Eigen::VectorXd ICVConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());

@@ -43,17 +43,20 @@ class ContinuousProperty : public Property
 {
  public:
   explicit ContinuousProperty(double value);
+  explicit ContinuousProperty(double value, double grad);
 
-  double value() const;
-
-  double valueSc() const;
+  double value() const { return value_; }
+  double valueSc() const { return value_sc_; }
+  double grad() const { return grad_; }
+  double gradSc() const { return grad_sc_; }
 
   void setValue(double value);
-
   void setValueSc(double value);
+  void setValue(double value, double grad);
+  void setValueSc(double value, double grad);
 
   void scaleValue();
-
+  void scaleGrad(double &grad);
   void UpdateValue();
 
   void Add(double d); //!< Add d to the value of this property.
@@ -75,6 +78,10 @@ class ContinuousProperty : public Property
  private:
   double value_;
   double value_sc_;
+
+  double infd_ = std::numeric_limits<double>::infinity();
+  double grad_ = -infd_;
+  double grad_sc_ = -infd_;
 
   // double value_bf_scale_ = 0.0;
   // double value_bf_descale_ = 0.0;

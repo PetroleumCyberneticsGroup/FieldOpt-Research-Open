@@ -140,74 +140,78 @@ class DFTRTest : public ::testing::Test,
                   double (*tr_dfo_prob)(VectorXd xs)){
     stringstream ss; ss << "[          ] " << FMAGENTA;
     double tol = 1e-06;
-    int p_count = 0;
+    int p_count_dftr = 0, p_count_trdfo = 0;
 
-    // Start opt loop --------------------------------------
-    while (tr_dfo_->IsFinished() == TC_NOT_FIN_) {
+    std::vector<VectorXd> vX_dftr, vX_trdfo, vXA, vXB;
+    std::vector<double> vF_dftr, vF_trdfo, vFA, vFB;
+    bool DX = false, DR = false, DF = false;
+    std::vector<string> lbl = { "A", "B" };
+    VectorXd data;
 
-      auto nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation();
+    // Start DFTR loop ------------------------------------
+    while (dftr_->IsFinished() == TC_NOT_FIN_) {
       auto nxt_cs_dftr = dftr_->GetCaseForEvaluation();
 
-      while (nxt_cs_dfo == nullptr) {
-        if (tr_dfo_->IsFinished()) {
-          break;
-        } else {
-          nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation();
-        }
-      }
-
       while (nxt_cs_dftr == nullptr) {
-        if (dftr_->IsFinished()) {
-          break;
-        } else {
-          nxt_cs_dftr = dftr_->GetCaseForEvaluation();
-        }
+        if (dftr_->IsFinished()) { break; }
+        else { nxt_cs_dftr = dftr_->GetCaseForEvaluation(); }
       }
-
-      if (tr_dfo_->IsFinished()) {
-        break;
-      }
-
-      if (dftr_->IsFinished()) {
-        break;
-      }
-
-      // Compute obj.function value for case
-      nxt_cs_dfo->set_objf_value(
-        tr_dfo_prob(nxt_cs_dfo->GetRealVarVector()));
+      if (dftr_->IsFinished()) { break; }
 
       nxt_cs_dftr->set_objf_value(
         tr_dfo_prob(nxt_cs_dftr->GetRealVarVector()));
 
       // Override 2nd point
-      if (p_count == 1 && prob.xm.cols() > 1) {
-        TestResources::OverrideSecondPoint(prob, *nxt_cs_dfo);
+      if (p_count_dftr == 1 && prob.xm.cols() > 1) {
         TestResources::OverrideSecondPoint(prob, *nxt_cs_dftr);
       }
 
       // Finish Runner
-      tr_dfo_->SubmitEvaluatedCase(nxt_cs_dfo);
       dftr_->SubmitEvaluatedCase(nxt_cs_dftr);
+      p_count_dftr++;
 
-      // Tests
-      if (tr_dfo_->getTrustRegionModel()->isInitialized()
-        && dftr_->getTRMod()->isModInit()) {
-        auto XA = tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose();
-        auto XB = dftr_->getTRMod()->getCurrPt().transpose();
-
-        auto DX = ((XA.array() - XB.array()).abs() < eps).all();
-        EXPECT_TRUE(DX);
-
-        auto FA = tr_dfo_->getTrustRegionModel()->getCurrentFval();
-        auto FB = dftr_->getTRMod()->getCurrFval();
-        EXPECT_NEAR(FA, FB, eps);
+      if (dftr_->getTRMod()->isModInit()) {
+        data.conservativeResize(dftr_->getTRMod()->getCurrPt().rows()+1, 1);
+        data << dftr_->getTRMod()->getCurrPt(), dftr_->getTRMod()->getRad();
+        vX_dftr.push_back(data);
+        vF_dftr.push_back(dftr_->getTRMod()->getCurrFval());
       }
-
-      p_count++;
     }
 
+    // Start TRDFO loop ------------------------------------
+    while (tr_dfo_->IsFinished() == TC_NOT_FIN_) {
+      auto nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation();
+
+      while (nxt_cs_dfo == nullptr) {
+        if (tr_dfo_->IsFinished()) { break; }
+        else { nxt_cs_dfo = tr_dfo_->GetCaseForEvaluation(); }
+      }
+      if (tr_dfo_->IsFinished()) { break; }
+
+      // Compute obj.function value for case
+      nxt_cs_dfo->set_objf_value(
+        tr_dfo_prob(nxt_cs_dfo->GetRealVarVector()));
+
+      // Override 2nd point
+      if (p_count_trdfo == 1 && prob.xm.cols() > 1) {
+        TestResources::OverrideSecondPoint(prob, *nxt_cs_dfo);
+      }
+
+      // Finish Runner
+      tr_dfo_->SubmitEvaluatedCase(nxt_cs_dfo);
+      p_count_trdfo++;
+
+      if (tr_dfo_->getTrustRegionModel()->isInitialized()) {
+        data.conservativeResize(tr_dfo_->getTrustRegionModel()->getCurrentPoint().rows()+1, 1);
+        data << tr_dfo_->getTrustRegionModel()->getCurrentPoint(), tr_dfo_->getTrustRegionModel()->getRadius();
+        vX_trdfo.push_back(data);
+        vF_trdfo.push_back(tr_dfo_->getTrustRegionModel()->getCurrentFval());
+      }
+    }
+
+    // Start comparison ------------------------------------
     stringstream sx;
-    string cc_trdfo, cc_dftr;
+    string ccA, ccB, cc_trdfo, cc_dftr;
 
     if (tr_dfo_->IsFinished() == TC_OPT_CRIT) {
       cc_trdfo = "OPT_CRITERIA_REACHED";
@@ -229,14 +233,65 @@ class DFTRTest : public ::testing::Test,
       cc_dftr += "MAX_ITERS_REACHED";
     }
 
+    if (vX_dftr.size() >= vX_trdfo.size()) {
+      vXA = vX_dftr;
+      vXB = vX_trdfo;
+      vFA = vF_dftr;
+      vFB = vF_trdfo;
+      lbl = { "DFTR__", "TR-DFO" };
+      ccA = cc_dftr;
+      ccB = cc_trdfo;
+    } else {
+      vXB = vX_dftr;
+      vXA = vX_trdfo;
+      vFB = vF_dftr;
+      vFA = vF_trdfo;
+      lbl = { "TR-DFO", "DFTR__" };
+      ccB = cc_dftr;
+      ccA = cc_trdfo;
+    }
+
+    bool prntDbg = false;
+    stringstream so;
+    if (prntDbg) {
+      so << FYELLOW << setw(12) << scientific << right << setprecision(6);
+      so << "" << endl;
+    }
+
+    for (int ii=0; ii < vXA.size(); ii++) {
+      if (prntDbg) {
+        so << lbl[0] << " x = " << vXA[ii].transpose() << " | f = " << vFA[ii] << endl;
+      }
+      if(ii < vXB.size()) {
+        DX = ((vXA[ii].head(vXA[ii].rows()-1) - vXB[ii].head(vXB[ii].rows()-1)).array().abs() < 2*eps).all();
+        DR = ((vXA[ii].tail(1) - vXB[ii].tail(1)).array().abs() < 2*eps).all();
+        DF = (abs(vFA[ii] - vFB[ii]) < 2*eps);
+
+        if (DX && DR && DF && prntDbg) {
+          so << lbl[1] << " x = " << vXB[ii].transpose() << " | f = " << vFB[ii];
+          so << " -> DX=" << DX << " -- DF=" << DF << " -- DR=" << DR << endl;
+        } else if (prntDbg) {
+          so << FRED << lbl[1] << " x = " << vXB[ii].transpose() << " | f = " << vFB[ii] << AEND;
+          if (!DX) { so << FRED << " -> DX=" << DX << AEND; } else { so << " -> DX=" << DX; }
+          if (!DF) { so << FRED << " -- DF=" << DF << AEND; } else { so << " -> DF=" << DF; }
+          if (!DR) { so << FRED << " -- DR=" << DR << AEND; } else { so << " -> DR=" << DR; }
+          so << endl;
+        }
+      }
+      so << AEND;
+    }
+    cout << so.str();
+
+    EXPECT_TRUE(DX);
+    EXPECT_TRUE(DF);
+
     sx << setw(12) << scientific << right << setprecision(6)
-       << "---------------------------------------------" << endl
-       << "TR_DFO: x* = " << tr_dfo_->getTrustRegionModel()->getCurrentPoint().transpose() << endl
-       << "TR_DFO: f* = " << tr_dfo_->getTrustRegionModel()->getCurrentFval() << endl
-       << "TR_DFO: tc: " << cc_trdfo.c_str() << endl
-       << "DFTR:   x* = " << dftr_->getTRMod()->getCurrPt().transpose() << endl
-       << "DFTR:   f* = " << dftr_->getTRMod()->getCurrFval() << endl
-       << "DFTR:   tc: " << cc_dftr.c_str() << endl;
+       << FYELLOW << "---------------------------------------------" << endl
+       << lbl[0] << ": x* = " << vXA.back().transpose() << "  |  f* = " << vFA.back() << endl
+       << "tc: " << ccA << endl
+       << lbl[1] << ": x* = " << vXB.back().transpose() << "  |  f* = " << vFB.back() << endl
+       << "tc: " << ccB << endl;
+    sx << AEND;
     cout << sx.str();
 
     return true;

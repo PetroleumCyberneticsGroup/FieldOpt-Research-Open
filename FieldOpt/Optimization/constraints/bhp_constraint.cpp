@@ -29,38 +29,21 @@ If not, see <http://www.gnu.org/licenses/>.
 namespace Optimization {
 namespace Constraints {
 
-BhpConstraint::
-BhpConstraint(const Settings::Optimizer::Constraint settings,
-              Model::Properties::VarPropContainer *variables,
-              Settings::VerbParams vp) : Constraint(vp) {
-  variables_ = variables;
-  assert(settings.wells.size() > 0);
-  assert(settings.min < settings.max);
+BhpConstraint::BhpConstraint(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
-  string ws;
-  if (settings.well.isEmpty()) {
-    for (auto wn : settings.wells) { ws += wn.toStdString() + "; "; }
-  } else { ws = settings.well.toStdString(); }
+  min_ = seto_.min;
+  max_ = seto_.max;
+  assert(min_ < max_);
+  assert(!seto_.wells.empty());
 
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding BHP constraint for " + ws;
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  bhp_cnstrnd_well_nms_ = seto_.wells;
+  penalty_weight_ = seto_.penalty_weight;
 
-  min_ = settings.min;
-  max_ = settings.max;
-
-  bhp_cnstrnd_well_nms_ = settings.wells;
-  penalty_weight_ = settings.penalty_weight;
-
-  if (vp_.vOPT >= 3) {
-    im_ = "Adding BHP constraint with [min, max] = [";
-    im_ += num2str(min_, 5) + ", " + num2str(max_, 5);
-    im_ += "] for well(s) " + ws + " with variables: ";
-  }
+  PrntWellInfo("BHP", 1);
 
   for (auto &wname : bhp_cnstrnd_well_nms_) {
-    auto bhp_vars = variables->GetWellBHPVars(wname);
+    auto bhp_vars = vars->GetWellBHPVars(wname);
     bhp_cnstrnd_real_vars_.append(bhp_vars);
 
     for (auto var : bhp_vars) {
@@ -70,7 +53,9 @@ BhpConstraint(const Settings::Optimizer::Constraint settings,
     }
   }
 
-  if(settings.scaling_) {
+  if(!bhp_cnstrnd_real_vars_.empty()) { isEnabled_ = true; }
+
+  if(seto.scaling_) {
     min_ = -1.0;
     max_ = 1.0;
   }
@@ -90,16 +75,49 @@ BhpConstraint(const Settings::Optimizer::Constraint settings,
 // }
 
 bool BhpConstraint::CaseSatisfiesConstraint(Case *c) {
-    for (int ii=0; ii < bhp_cnstrnd_real_vars_.size(); ii++ ) {
-      auto var_id = bhp_cnstrnd_uuid_vars_[ii];
-      double c_val = c->get_real_variable_value(var_id);
-      if (c_val > max_ || c_val < min_) { return false; }
-    }
+  for (int ii=0; ii < bhp_cnstrnd_real_vars_.size(); ii++ ) {
+    auto var_id = bhp_cnstrnd_uuid_vars_[ii];
+    double c_val = c->get_real_variable_value(var_id);
+    if (c_val > max_ || c_val < min_) { return false; }
+  }
   return true;
 }
 
-bool BhpConstraint::IsBoundConstraint() const {
-  return true;
+void BhpConstraint::SnapCaseToConstraints(Case *c) {
+  // dbg
+  string s1 = DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  DBG_SnapCase(1, c->id_stdstr(), s1);
+
+  // if (vp_.vOPT >= 4) {
+  //   tm = this->name() + " enabled: " + num2str(this->isEnabled(), 0);
+  //   tm += " -- Check bounds: [" + DBG_prntDbl(min_) + DBG_prntDbl(max_) + "] ";
+  //   tm += "for case: " + c->id_stdstr();
+  //
+  //   pad_text(tm, vp_.lnw);
+  //   tm += "x: " + DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  //   ext_info(tm, md_, cl_, vp_.lnw);
+  // }
+
+  string tm = "";
+  for (auto id : bhp_cnstrnd_uuid_vars_) {
+    if (c->get_real_variable_value(id) > max_) {
+      c->set_real_variable_value(id, max_);
+      tm = "Upper bound active";
+    } else if (c->get_real_variable_value(id) < min_) {
+      c->set_real_variable_value(id, min_);
+      tm = "Lower bound active";
+    }
+  }
+
+  // dbg
+  s1 = DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  DBG_SnapCase(2, tm, s1);
+
+  // if (vp_.vOPT >= 4 && !tm.empty()) {
+  //   pad_text(tm, vp_.lnw );
+  //   tm += "x: " + DBG_prntVecXd(c->GetVarVector(bhp_cnstrnd_uuid_vars_));
+  //   ext_info(tm, md_, cl_, vp_.lnw);
+  // }
 }
 
 Eigen::VectorXd BhpConstraint::GetLowerBounds(QList<QUuid> id_vector) const {
@@ -120,15 +138,7 @@ Eigen::VectorXd BhpConstraint::GetUpperBounds(QList<QUuid> id_vector) const {
   return ubounds;
 }
 
-void BhpConstraint::SnapCaseToConstraints(Case *c) {
-  for (auto var : bhp_cnstrnd_real_vars_) {
-    if (c->get_real_variable_value(var->id()) > max_) {
-      c->set_real_variable_value(var->id(), max_);
-    } else if (c->get_real_variable_value(var->id()) < min_) {
-      c->set_real_variable_value(var->id(), min_);
-    }
-  }
-}
+
 
 }
 }

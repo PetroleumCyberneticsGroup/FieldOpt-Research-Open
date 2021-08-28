@@ -49,10 +49,8 @@ class PseudoContBoundary2D : public Constraint {
   double Penalty(Case *c) override;
   long double PenaltyNormalized(Case *c) override;
 
-  PseudoContBoundary2D(const Settings::Optimizer::Constraint &settings,
-                       Model::Properties::VarPropContainer *variables,
-                       Reservoir::Grid::Grid *grid,
-                       Settings::VerbParams vp);
+  PseudoContBoundary2D(SO& seto, VPC *vars,
+                       Reservoir::Grid::Grid *grid, SV vp);
 
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;

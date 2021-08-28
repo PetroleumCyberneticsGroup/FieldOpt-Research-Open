@@ -41,6 +41,8 @@ namespace Optimization {
 using Printer::ext_warn;
 using Printer::ext_info;
 using Printer::info;
+using Model::Properties::VarPropContainer;
+using Model::Properties::Property;
 
 class CaseHandler;
 class CaseTransferObject;
@@ -80,10 +82,8 @@ class Case : public Loggable
    */
   struct CaseState {
     enum EvalStatus : int {
-      E_FAILED=-2, E_TIMEOUT=-1,
-      E_PENDING=0,
-      E_CURRENT=1, E_DONE=2,
-      E_BOOKKEEPED=3
+      E_FAILED=-2, E_TIMEOUT=-1, E_PENDING=0,
+      E_CURRENT=1, E_DONE=2, E_BOOKKEEPED=3
     };
 
     enum ConsStatus : int {
@@ -140,7 +140,7 @@ class Case : public Loggable
    * Needed to get variable names.
    * @return An std string describing the case.
    */
-  string StringRepresentation(Model::Properties::VarPropContainer *varcont);
+  string StringRepresentation(VarPropContainer *varcont);
 
   // QHash<QUuid, bool> binary_variables() const { return binary_variables_; }
   // QHash<QUuid, int> integer_variables() const { return integer_variables_; }
@@ -156,8 +156,13 @@ class Case : public Loggable
   QList<QPair<QUuid, int>> integer_variables() const {
     return integer_variables_;
   }
+
   QList<QPair<QUuid, double>> real_variables() const {
     return real_variables_;
+  }
+
+  QList<QPair<QUuid, double>> real_var_grads() const {
+    return rvar_grads_;
   }
 
   // void set_binary_vars(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
@@ -193,6 +198,7 @@ class Case : public Loggable
 
   //!< Set the value of a real variable in the case.
   void set_real_variable_value(QUuid id, double val);
+  void set_real_variable_value(QUuid id, double val, double grad);
 
   int get_integer_variable_value(QUuid id) {
     for (const auto & integer_variable : integer_variables_) {
@@ -227,7 +233,29 @@ class Case : public Loggable
     return STDMIN_D;
   };
 
-  enum SIGN { PLUS, MINUS, PLUSMINUS};
+  double get_grad_value(QUuid id) {
+    for (const auto & grad_var : rvar_grads_) {
+      if (grad_var.first==id) {
+        return grad_var.second;
+      }
+    }
+    wm_ = "QUuid id not found [DBL]! Returned default.";
+    ext_warn(wm_ , md_, cl_, vp_.lnw);
+    return STDMIN_D;
+  };
+
+  double get_list_value(QUuid id, QList<QPair<QUuid, double>> q_list) {
+    for (const auto & list_var : q_list) {
+      if (list_var.first==id) {
+        return list_var.second;
+      }
+    }
+    wm_ = "QUuid id not found [DBL]! Returned default.";
+    ext_warn(wm_ , md_, cl_, vp_.lnw);
+    return STDMIN_D;
+  };
+
+  enum SIGN { PLUS, MINUS, PLUSMINUS };
 
   /*!
    * \brief Perturb Creates variations of this Case,
@@ -262,7 +290,14 @@ class Case : public Loggable
    *
    * @return Values of the real variables in a vector
    */
-  Eigen::VectorXd GetRealVarVector();
+  VectorXd GetRealVarVector();
+  vector<VectorXd> GetRealVarGradx(VarPropContainer *vars);
+
+  void GetGradsOrderedByType(
+    map<Property::PropertyType, VectorXd> &vt_map,
+    VarPropContainer *vars);
+
+  VectorXd GetVarVector(QList<QUuid> vars);
 
   /*!
    * Sets real variable values in case from a given vector.
@@ -278,6 +313,7 @@ class Case : public Loggable
    * @param vec
    */
   void SetRealVarValues(Eigen::VectorXd vec);
+  void SetRealVarValues(Eigen::VectorXd vec, Eigen::VectorXd grad);
 
   /*!
    * @brief Get a vector containing the variable UUIDs in the
@@ -362,7 +398,7 @@ class Case : public Loggable
     ensemble_realization_ = alias;
   }
 
-  QString GetEnsembleRealization() const {
+  QString GetEnsembleRlz() const {
     return ensemble_realization_;
   }
 
@@ -429,7 +465,12 @@ class Case : public Loggable
 
   QList<QPair<QUuid, bool>> binary_variables_;
   QList<QPair<QUuid, int>> integer_variables_;
+
   QList<QPair<QUuid, double>> real_variables_;
+  QList<QPair<QUuid, double>> rvar_grads_;
+
+  QList<QPair<QUuid, double>> rvar_grads_scal_;
+  QList<QPair<QUuid, double>> rvar_grads_norm_;
 
   QList<QUuid> real_id_index_map_;
   QList<QUuid> integer_id_index_map_;

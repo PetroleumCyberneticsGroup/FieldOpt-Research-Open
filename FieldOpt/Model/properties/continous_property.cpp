@@ -33,30 +33,43 @@ namespace Properties {
 ContinuousProperty::
 ContinuousProperty(double value) : Property(Continuous) {
   value_ = value;
-  value_sc_ = 0.0; // scaled values updated after bounds are set
+  value_sc_ = value; // scaled values updated after bounds are set
 }
 
-double ContinuousProperty::value() const {
-  return value_;
-}
-
-double ContinuousProperty::valueSc() const {
-  return value_sc_;
+ContinuousProperty::
+ContinuousProperty(double value, double grad) : Property(Continuous) {
+  value_ = value;
+  value_sc_ = value; // scaled values updated after bounds are set
+  grad_ = grad;
+  grad_sc_ = grad;
 }
 
 void ContinuousProperty::setValue(double value) {
-  if (IsLocked()) {
-    throw PropertyLockedException("Can't change locked real variable.");
-  } else {
+  if (checkLock(IsLocked())) {
     value_ = value;
+    this->scaleValue();
   }
 }
 
 void ContinuousProperty::setValueSc(double value_sc) {
-  if (IsLocked()) {
-    throw PropertyLockedException("Can't change locked real variable.");
-  } else {
+  if (checkLock(IsLocked())) {
     value_sc_ = value_sc;
+    this->UpdateValue();
+  }
+}
+
+void ContinuousProperty::setValue(double value, double grad) {
+  if (checkLock(IsLocked())) {
+    value_ = value;
+    grad_ = grad;
+    this->scaleValue();
+  }
+}
+
+void ContinuousProperty::setValueSc(double value_sc, double grad_sc) {
+  if (checkLock(IsLocked())) {
+    value_sc_ = value_sc;
+    grad_sc_ = grad_sc;
     this->UpdateValue();
   }
 }
@@ -66,7 +79,12 @@ void ContinuousProperty::scaleValue() {
   // y = 2*x/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_
   // value_bf_scale_ = value_;
   value_sc_ = 2*value_/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_;
+  grad_sc_ = 2*grad_/bnds_b_mns_a_;
 
+}
+
+void ContinuousProperty::scaleGrad(double &grad) {
+  grad = 2*grad/bnds_b_mns_a_;
 }
 
 void ContinuousProperty::UpdateValue() {
@@ -74,14 +92,14 @@ void ContinuousProperty::UpdateValue() {
   // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2
   // value_bf_descale_ = value_;
   value_ = value_sc_ * bnds_b_mns_a_/2 + bnds_a_pls_b_/2;
+  grad_ = grad_sc_ * bnds_b_mns_a_/2;
 }
 
 void ContinuousProperty::Add(double d) {
-  if (IsLocked()) {
-    throw PropertyLockedException("Can't add to locked real variable");
-  } else {
-    value_ += d;
-    // value_sc_ += d;
+  if (checkLock(IsLocked())) {
+    // value_ += d; // obsolete, all d's are now scaled
+    value_sc_ += d;
+    this->UpdateValue();
   }
 }
 
@@ -90,8 +108,8 @@ bool ContinuousProperty::EqualsValue(double other_val, double epsilon) {
 }
 
 bool ContinuousProperty::Equals(ContinuousProperty *other, double epsilon) {
-  return std::abs(this->value() - other->value()) <= epsilon;
-  // return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
+  // return std::abs(this->value() - other->value()) <= epsilon;
+  return std::abs(this->valueSc() - other->valueSc()) <= epsilon;
 }
 
 string ContinuousProperty::ToString() {

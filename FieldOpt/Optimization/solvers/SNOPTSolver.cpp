@@ -29,6 +29,9 @@ namespace Optimizers {
 static Optimization::Optimizer::EmbeddedProblem *prob_ = nullptr;
 
 // Rosenbrock cost function def
+// ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╗╔  ╔╗   ╦═╗  ╔═╗  ╔═╗  ╦╔═
+// ╠╦╝  ║ ║  ╚═╗  ║╣   ║║║  ╠╩╗  ╠╦╝  ║ ║  ║    ╠╩╗
+// ╩╚═  ╚═╝  ╚═╝  ╚═╝  ╝╚╝  ╚═╝  ╩╚═  ╚═╝  ╚═╝  ╩ ╩
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,7 +58,7 @@ int Rosenbrock_(integer  *Status, integer *n,    double x[],
   if (*needF > 0) {
     // Rosenbrock testproblem
     F[0] = (1.0 - x[0]) * (1.0 - x[0])
-        + 100.0 * (x[1] - x[0] * x[0]) * (x[1] - x[0] * x[0]);
+      + 100.0 * (x[1] - x[0] * x[0]) * (x[1] - x[0] * x[0]);
 
     if (m) {
       // Nonlinear constraint: unit disk
@@ -78,6 +81,9 @@ int Rosenbrock_(integer  *Status, integer *n,    double x[],
 }
 
 // Cost function def
+// ╔╦╗  ╦═╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗
+//  ║   ╠╦╝  ║║║  ║ ║   ║║  ╠═╣
+//  ╩   ╩╚═  ╩ ╩  ╚═╝  ═╩╝  ╩ ╩
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -163,8 +169,180 @@ int TRMod_A_(integer *Status, integer *n, doublereal x[],
   return 0;
 }
 
+string prntVecXd(VectorXd v, string lbl) {
+  stringstream ss; char buffer [100];
+  ss <<"                  " << lbl <<  ": [ ";
+  for (int ii = 0; ii < v.rows(); ii++) {
+    if (ii == v.rows() - 1) {
+      sprintf(buffer, "% 10.3e ]\n", v(ii));
+    } else {
+      sprintf(buffer, "% 10.3e ", v(ii));
+    }
+    ss << buffer;
+  }
+  return ss.str();
+}
+
+// Dbg constructs
+string md_ = "Optimization/solvers";
+string cl_ = "SNOPTSolver";
+string im_ = "", wm_ = "", em_ = "";
+
+// SQP cost function def
+// ╔═╗  ╔═╗   ╔═╗
+// ╚═╗  ║═╬╗  ╠═╝
+// ╚═╝  ╚═╝╚  ╩
+#ifdef __cplusplus
+extern "C" {
+#endif
+int SQP_(integer *Status, integer *n, double x[],
+         integer *needF,  integer *neF, double F[],
+         integer *needG,  integer *neG, double G[],
+         char *cu, integer *lencu,
+         integer iu[], integer *leniu,
+         double ru[], integer *lenru);
+#ifdef __cplusplus
+}
+#endif
+
+int SQP_(integer  *Status, integer *n,    double x[],
+         integer  *needF,  integer *neF,  double F[],
+         integer  *needG,  integer *neG,  double G[],
+         char     *cu,     integer *lencu,
+         integer  iu[],    integer *leniu,
+         double   ru[],    integer *lenru ) {
+
+  bool dbg = true;
+
+  // x -> eigen format
+  Eigen::VectorXd xv(*n);
+  for (int ii = 0; ii < *n; ii++) {
+    xv(ii) = x[ii];
+  }
+
+  // if (dbg) {
+  //   cout << "Debug c, g, gT, H:";
+  //   cout << "c = \n" << c << endl;
+  //   cout << "g = \n" << g << endl;
+  //   cout << "H = \n" << H << endl;
+  //   cout << "xv = \n" << xv << endl;
+  // }
+
+  int m = (int)*neF - 1;  // # of constraints
+
+  // double c = 0.0;
+  double f = 0.0;
+  Eigen::VectorXd g00 = Eigen::VectorXd::Zero(*n);
+  cout << "xv: " << xv.transpose() <<  endl;
+
+  prob_->tcase_->SetRealVarValues(xv, g00);
+  prob_->model_->ApplyCase(prob_->tcase_);
+  prob_->simulator_->Evaluate();
+
+  // Rerun to populate var container with gradients (after eval)
+  g00 = prob_->objf_->grad(); // save unscaled g for dbg
+  if (g00.size() == 0) {
+    em_ = "No grad read from sim. Probably grad assembly failed";
+    em_ += "due to well shut down during simulation.";
+    ext_warn(em_, md_, cl_);
+  }
+  cout << "g00: " << g00.transpose() <<  endl;
+  prob_->tcase_->SetRealVarValues(xv, g00);
+
+  // Switch b/e FO.computed obj or read-in value from ECL GRD file
+  prob_->tcase_->set_objf_value(prob_->objf_->value()); // FO.obj
+  // prob_->tcase_->set_objf_value(prob_->objf_->fval()); // DBG: ECL GRD file
+
+  f = prob_->tcase_->objf_value();
+  // Get scaled gradient
+  auto grads = prob_->tcase_->GetRealVarGradx(prob_->model_->variables());
+  // grads[0]: scaled g (if scaling=true)
+  // grads[1]: scaled + type.normalized g
+
+  // dbg: f
+  stringstream ss; char buffer [100];
+  sprintf(buffer, "f: [ % 9.4e ] \n", f);
+  ss << buffer;
+  ss << prntVecXd(xv, "x  ");
+  ss << prntVecXd(g00, "g00");
+  ss << prntVecXd(grads[0], "g0s");
+  ss << prntVecXd(grads[1], "gsn");
+
+  // print to file
+  FILE * pFile;
+  pFile = std::fopen("sqp-snopt.out", "a");
+  std::fprintf(pFile, "%s", ss.str().c_str());
+  fclose (pFile);
+
+
+  if (*needF > 0) {
+    if (dbg) {
+      cout << "f = " << f << endl;
+      cout << "xv = [ " << xv.transpose() << " ] " << endl;
+    }
+
+    // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐    ╔═╗
+    // │    │ │  │││  ├─┘  │ │   │   ├┤     ╠╣
+    // └─┘  └─┘  ┴ ┴  ┴    └─┘   ┴   └─┘    ╚
+    // F[0] = c + g.transpose()*xv + 0.5*xv.transpose()*H*xv;
+    F[0] = f;
+
+    if (m) {
+      // Add nonlinear constraints to tr prob
+      // F[1] = ...
+      // F[2] = ...
+    }
+  }
+
+  if (*needG > 0) {
+    if (dbg) {
+      cout << "g00 = [ " << g00.transpose() << " ] " << endl;
+      cout << "g0s = [ " << grads[0].transpose() << " ] " << endl;
+      cout << "gsn = [ " << grads[1].transpose() << " ] " << endl;
+    }
+
+    // ┌─┐  ┌─┐  ┌┬┐    ╔═╗
+    // │ ┬  ├┤    │     ║ ╦
+    // └─┘  └─┘   ┴     ╚═╝
+    // Eigen::VectorXd gv = g.transpose() + xv.transpose()*H;
+    // Eigen::VectorXd gv = g;
+
+    VectorXd g;
+    if (prob_->seto_->scaleVars() == 0) {
+      g = g00;
+    } else if (prob_->seto_->scaleVars() == 1) {
+      g = grads[0];
+    } else if (prob_->seto_->scaleVars() == 2) {
+      g = grads[1];
+    }
+
+    for (int ii = 0; ii < *n; ii++) {
+      G[ii] = g(ii);
+    }
+
+    if (m) {
+      // Standalone nonlinear constraint
+      int n_nlc = 1; // # of standalone nlc
+      // G[(*n) + n_nlc] = ...  // standalone constraint #1
+      n_nlc++;
+      // G[(*n) + n_nlc] = ...  // standalone constraint #2
+
+      // Matrix of nl constraints gradients (1 constraint / row)
+      // # of constraints = # of rows
+      Eigen::MatrixXd gcm;  // = ...
+      // Derivatives of constraints
+      for (int ii = 0; ii < gcm.rows(); ii++) { // # of c
+        for (int jj = 0; jj < gcm.cols(); jj++) { // # of vars
+          // G[(*n) + i + j] = ...
+        }
+      }
+    }
+  }
+  return 0;
+}
+
 SNOPTSolver::SNOPTSolver() {
-    loadSNOPT();
+  loadSNOPT();
 }
 
 SNOPTSolver::~SNOPTSolver() {
@@ -184,15 +362,25 @@ SNOPTSolver::~SNOPTSolver() {
   delete[] Fnames_;
 }
 
+// ╔═╗  ╔═╗  ╔╦╗  ╦ ╦  ╔═╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╦    ╦  ╦  ╔═╗  ╦═╗
+// ╚═╗  ║╣    ║   ║ ║  ╠═╝    ╚═╗  ║║║  ║ ║  ╠═╝   ║     ╚═╗  ║ ║  ║    ╚╗╔╝  ║╣   ╠╦╝
+// ╚═╝  ╚═╝   ╩   ╚═╝  ╩      ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╚═╝  ╩═╝   ╚╝   ╚═╝  ╩╚═
 void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &prob) {
 
   if (prob.getProbName() == "TRMod_A") {
     subprobTRModA(prob);
+    SNOPTRun_ = "TRMod_A";
 
   } else  if (prob.getProbName() == "TRMod_B") {
+    SNOPTRun_ = "TRMod_B";
+
+  } else  if (prob.getProbName() == "SQP") {
+    subprobSQP(prob);
+    SNOPTRun_ = "SQP";
 
   } else if (prob.getProbName() == "Rosenbrock") {
     subprobRosenbrock(prob);
+    SNOPTRun_ = "Rosenbrock";
   }
 
   // For Reference: Initialization of SNOPTHandler pointer
@@ -203,6 +391,14 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   // passing SNOPTHandler object as reference]
   // SNOPTHandler_->~SNOPTHandler();
   // SNOPTHandler_ = nullptr;
+
+  prnt_file_ = SNOPTRun_ + ".opt.prnt";
+  smry_file_ = SNOPTRun_ + ".opt.smry";
+  optn_file_ = SNOPTRun_ + ".opt.optn";
+
+  auto d = prob.seto_->paths()->GetPath(Paths::SIM_EXEC_DIR);
+  optn_file_ = d + "/" + optn_file_;
+
   SNOPTHandler snoptHandler = initSNOPTHandler();
   setSNOPTOptions(snoptHandler, prob);
 
@@ -219,11 +415,146 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setXSol(xsol);
   prob.setFSol(fsol);
 
-  // cout << "SNOPT Exit code: " + snoptHandler.getExitCode() << endl;
+  if (prob.seto_->verbParams().vOPT >= 1) {
+    cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
+  }
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
-
 }
 
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╔═╗  ╔═╗   ╔═╗
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗    ╚═╗  ║═╬╗  ╠═╝
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝    ╚═╝  ╚═╝╚  ╩
+void SNOPTSolver::subprobSQP(Optimization::Optimizer::EmbeddedProblem &prob) {
+
+//  cout << "Specs for TRMod subproblem A" << endl;
+
+  n_ = prob.getNunVars(); // # of variables
+  m_ = prob.getNunNnlConst(); // # of nonlinear c
+
+  // Total # of constraints + objective (length of F vector)
+  neF_ = m_ + 1; // l = 2
+  // # of linear constraints
+  lenA_ = prob.getNumLinConst();
+
+  // Length of grad vector (dim of iGfun jGvar arrays)
+  // --> n: (length of obj.grad = # of vars) +
+  // --> m * n: (# of constraints) * (# of vars)
+  lenG_ = n_ + m_ * n_;
+
+  // The objective could be any component of F; here the
+  // objective is specified as the first component of F
+  objRow_ = 0;
+
+  // Add nothing to objective for output purposes
+  objAdd_ = 0.0;
+
+  // Allocate memory
+
+  // Objective
+  F_ = new double[neF_];
+  Flow_ = new double[neF_];
+  Fupp_ = new double[neF_];
+  Fmul_ = new double[neF_];
+  Fstate_ = new integer[neF_];
+
+  // Variables
+  x_ = new double[n_];
+  xlow_ = new double[n_];
+  xupp_ = new double[n_];
+  xmul_ = new double[n_];  // Lagrange mulpliers
+  xstate_ = new integer[n_];  // state of variables
+
+  iGfun_ = new integer[lenG_];
+  jGvar_ = new integer[lenG_];
+
+  // Linear constraints
+
+  // iAfun_ = new integer[lenA_];
+  // jAvar_ = new integer[lenA_];
+  // A_ = new double[lenA_];
+
+  // No linear constraints
+  iAfun_ = nullptr;
+  jAvar_ = nullptr;
+  A_     = nullptr;
+
+  xnames_ = new char[nxnames_ * 8];
+  Fnames_ = new char[nxnames_ * 8];
+
+  // Bounds objective
+  Flow_[0] = prob.getFLb()(0);
+  Fupp_[0] = prob.getFUb()(0);
+  // Flow_[0] = -infinity_;
+  // Fupp_[0] = infinity_;
+
+  // Bounds nonlinear constraints
+  for (int ii = 1; ii < neF_; ii++) {
+    Flow_[ii] = prob.getFLb()(ii);
+    Fupp_[ii] = prob.getFUb()(ii);
+    // Flow_[ii] = -infinity_;
+    // Fupp_[ii] = infinity_;
+  }
+
+  // Bounds variables
+  for (int ii = 0; ii < n_; ii++) {
+    xlow_[ii] = prob.getXLb()(ii);
+    xupp_[ii] = prob.getXUb()(ii);
+    // xlow_[ii] = -infinity_;
+    // xupp_[ii] = infinity_;
+  }
+
+  // Initial point
+  for (int ii = 0; ii < n_; ii++) {
+    x_[ii] =  prob.getXInit()(ii);
+    // x_[ii] = 0.0;
+  }
+
+  // Gradient indices of objective
+  for (int ii = 0; ii < n_; ii++) {
+    iGfun_[ii] = 0;
+    jGvar_[ii] = ii;
+
+    // ilc: loop over # of (linear) constraints
+    for (int ilc = 0; ilc < lenA_; ilc++) {
+      iAfun_[ii + ilc * n_] = m_ + 1 + ilc; // <- sure about this m_?
+      jAvar_[ii + ilc * n_] = ii;
+      A_[ii + ilc * n_] = 0; // <- coeff. of linear constraints
+      //TODO If linear c: introduce coefficients here
+    }
+  }
+
+  if (m_ != 0) {  // if having nonlinear constraints
+    // Fill in constraint indices
+    for (int jj = 1; jj <= m_; jj++) {
+      for (int ii = 0; ii < n_; ii++) {
+        iGfun_[ii + jj * n_] = jj;
+        jGvar_[ii + jj * n_] = ii;
+      }
+    }
+  }
+
+  // Nonzero structure of the Jacobian
+  neG_ = lenG_;
+  neA_ = lenA_;
+
+  // If initial guess provided then states should be zero
+  for (int ii = 0; ii < n_; ii++) {
+    xstate_[ii] = 0;
+  }
+
+  // Fmul is the vector with the estimation of the Lagrange
+  // Multipliers; it will be always zero except in very rare
+  // cases of benchmarking performance with them set to some
+  // initial guess
+  for (int ii = 0; ii < neF_; ii++) {
+    Fmul_[ii] = 0;
+  }
+  // TODO Extract value from sqp_snopt operation: Fmul, dual, ++
+}
+
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╗╔  ╔╗   ╦═╗  ╔═╗  ╔═╗  ╦╔═
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗    ╠╦╝  ║ ║  ╚═╗  ║╣   ║║║  ╠╩╗  ╠╦╝  ║ ║  ║    ╠╩╗
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝    ╩╚═  ╚═╝  ╚═╝  ╚═╝  ╝╚╝  ╚═╝  ╩╚═  ╚═╝  ╚═╝  ╩ ╩
 void SNOPTSolver::subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &prob) {
 
   // cout << "Specs for Rosenbrock subproblem" << endl;
@@ -341,6 +672,9 @@ void SNOPTSolver::subprobRosenbrock(Optimization::Optimizer::EmbeddedProblem &pr
   }
 }
 
+// ╔═╗  ╦ ╦  ╔╗   ╔═╗  ╦═╗  ╔═╗  ╔╗     ╔╦╗  ╦═╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗
+// ╚═╗  ║ ║  ╠╩╗  ╠═╝  ╠╦╝  ║ ║  ╠╩╗     ║   ╠╦╝  ║║║  ║ ║   ║║  ╠═╣
+// ╚═╝  ╚═╝  ╚═╝  ╩    ╩╚═  ╚═╝  ╚═╝     ╩   ╩╚═  ╩ ╩  ╚═╝  ═╩╝  ╩ ╩
 void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) {
 
 //  cout << "Specs for TRMod subproblem A" << endl;
@@ -466,10 +800,12 @@ void SNOPTSolver::subprobTRModA(Optimization::Optimizer::EmbeddedProblem &prob) 
   for (int ii = 0; ii < neF_; ii++) {
     Fmul_[ii] = 0;
   }
-  // TODO Extract value from SNOPT operation: Fmul, dual, ++
-
+  // TODO Extract value from sqp_snopt operation: Fmul, dual, ++
 }
 
+// ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╔╦╗  ╦  ╔═╗  ╔╗╔  ╔═╗
+// ╚═╗  ║╣    ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║     ║ ║  ╠═╝   ║   ║  ║ ║  ║║║  ╚═╗
+// ╚═╝  ╚═╝   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╩     ╩   ╩  ╚═╝  ╝╚╝  ╚═╝
 void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::EmbeddedProblem &prob) {
 
   H.setProbName(prob.getProbName().c_str());
@@ -486,16 +822,79 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   H.setNeA        ( neA_ );
   H.setNeG        ( neG_ );
 
-  // Set cost function formulation for prob
+  auto p = prob.seto_->parameters();
+  p.sqp_ftol;
+
+  // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌┬┐    ┌─┐
+  //  │   ├┬┘  │││  │ │   ││    ├─┤
+  //  ┴   ┴└─  ┴ ┴  └─┘  ─┴┘    ┴ ┴
   if (prob.getProbName() == "TRMod_A") {
     H.setUserFun(TRMod_A_);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
+    H.setIntParameter("Minor print level", 10);
+    H.setIntParameter("Scale option", 1);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
 
+    // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌┬┐    ┌┐
+    //  │   ├┬┘  │││  │ │   ││    ├┴┐
+    //  ┴   ┴└─  ┴ ┴  └─┘  ─┴┘    └─┘
   } else  if (prob.getProbName() == "TRMod_B") {
 
+    // ┌─┐  ┌─┐   ┌─┐
+    // └─┐  │─┼┐  ├─┘
+    // └─┘  └─┘└  ┴
+  } else  if (prob.getProbName() == "SQP") {
+    H.setUserFun(SQP_);
+
+    // 5spot BC01/BC02
+    H.setParameter((char*) "Maximize");
+    H.setProbName((char*) "SQP");
+    H.setParameter((char*) "System information Yes");
+    H.setParameter((char *) "Solution  Yes");
+
+    // H.setRealParameter("Linesearch tolerance",        0.9);
+    // H.setRealParameter("Major feasibility tolerance", 1e-12);
+    // H.setIntParameter("Major Iterations Limit", 100);
+
+    H.setIntParameter("Verify level", -1);
+
+    // H.setIntParameter("Scale option", 1); // not working
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution Yes");
+
+    // H.setRealParameter("Major step limit", 100);
+    H.setRealParameter("Major optimality tolerance", 1e-12);
+
+    double f_prec = 1e-16;
+    H.setRealParameter("Function precision", f_prec);
+    H.setRealParameter("Difference interval",std::pow(f_prec, 1.0/2.0));
+    H.setRealParameter("Central difference interval",std::pow(f_prec, 1.0/3.0));
+
+    H.setIntParameter("Major print level", 1);
+    H.setIntParameter("Minor print level", 1);
+
+    H.setParameter((char*) "Print frequency 1");
+    H.setParameter((char*) "Summary frequency 1");
+
+    // ┬─┐  ┌─┐  ┌─┐  ┌─┐  ┌┐┌  ┌┐   ┬─┐  ┌─┐  ┌─┐  ┬┌─
+    // ├┬┘  │ │  └─┐  ├┤   │││  ├┴┐  ├┬┘  │ │  │    ├┴┐
+    // ┴└─  └─┘  └─┘  └─┘  ┘└┘  └─┘  ┴└─  └─┘  └─┘  ┴ ┴
   } else if (prob.getProbName() == "Rosenbrock") {
     H.setUserFun(Rosenbrock_);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
+    H.setIntParameter("Minor print level", 10);
+
+    H.setIntParameter("Scale option", 1);
+    H.setParameter((char *) "Scale Print");
+    H.setParameter((char *) "Solution  Yes");
   }
 
+  // ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┬ ┬  ┬    ┌┬┐
+  //  ││  ├┤   ├┤   ├─┤  │ │  │     │
+  // ─┴┘  └─┘  └    ┴ ┴  └─┘  ┴─┘   ┴
   // H.setParameter(                 "Backup basis file 0");
   // H.setRealParameter(      "Central difference interval",
   //                    2 * derivativeRelativePerturbation);
@@ -526,13 +925,11 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setIntParameter("Hessian frequency",           ????);
   // H.setIntParameter("Hessian updates",                0);
 
-  // Does NOT work in the current version of SNOPT!!!
+  // Does NOT work in the current version of sqp_snopt!!!
   // H.setIntParameter("Hessian flush",    1);
-
 
   // H.setParameter("Insert file                        0");
   // H.setRealParameter("Infinite bound",            ?????);
-
 
   // H.setParameter("Iterations limit");
   // H.setRealParameter("Linesearch tolerance",        0.9);
@@ -546,11 +943,9 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setParameter("LU density tolerance             0.6");
   // H.setParameter("LU singularity tolerance     3.2e-11");
 
-
   // Target nonlinear constraint violation
   // H.setRealParameter("Major feasibility tolerance", 0.000001);
   // H.setIntParameter("Major Iterations Limit", 1000);
-
 
   // Target complementarity gap
   // H.setRealParameter("Major optimality tolerance", 0.0001);
@@ -562,7 +957,7 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 
   // For satisfying the QP bounds
   // H.setRealParameter("Minor feasibility tolerance", ???);
-   H.setIntParameter("Minor print level", 10);
+  // H.setIntParameter("Minor print level", 10);
 
   // H.setParameter("New basis file                 0");
   // H.setParameter("New superbasics limit          99");
@@ -576,10 +971,10 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   // H.setParameter("Reduced Hessian dimension");
   // H.setParameter("Save frequency                 100");
 
-  H.setIntParameter("Scale option", 1);
+  // H.setIntParameter("Scale option", 1);
   // H.setParameter("Scale tolerance                0.9");
-  H.setParameter((char *) "Scale Print");
-  H.setParameter((char *) "Solution  Yes");
+  // H.setParameter((char *) "Scale Print");
+  // H.setParameter((char *) "Solution  Yes");
 
   // H.setParameter(   "Start Objective Check at Column 1");
   // H.setParameter(  "Start Constraint Check at Column 1");
@@ -598,10 +993,10 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
 
 }
 
+// ╦  ╔╗╔  ╦  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗  ╦ ╦  ╔═╗  ╔╗╔  ╔╦╗  ╦    ╔═╗  ╦═╗
+// ║  ║║║  ║   ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║   ╠═╣  ╠═╣  ║║║   ║║  ║    ║╣   ╠╦╝
+// ╩  ╝╚╝  ╩   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩   ╩ ╩  ╩ ╩  ╝╚╝  ═╩╝  ╩═╝  ╚═╝  ╩╚═
 SNOPTHandler SNOPTSolver::initSNOPTHandler() {
-
-  SNOPTHandler snoptHandler(prnt_file_.c_str(), smry_file_.c_str(), optn_file_.c_str());
-
 
   if (false) {
     cout << "Initiate SNOPTHandler" << endl;
@@ -610,10 +1005,17 @@ SNOPTHandler SNOPTSolver::initSNOPTHandler() {
     cout << "optn_file: " << optn_file_ << endl;
   }
 
+  SNOPTHandler snoptHandler(prnt_file_.c_str(),
+                            smry_file_.c_str(),
+                            optn_file_.c_str());
+
   return snoptHandler;
 }
 
 
+// ╦═╗  ╔═╗  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔═╗  ╦    ╦  ╦  ╔═╗  ╦═╗
+// ╠╦╝  ║╣   ╚═╗  ║╣    ║     ╚═╗  ║║║  ║ ║  ╠═╝   ║     ╚═╗  ║ ║  ║    ╚╗╔╝  ║╣   ╠╦╝
+// ╩╚═  ╚═╝  ╚═╝  ╚═╝   ╩     ╚═╝  ╝╚╝  ╚═╝  ╩     ╩     ╚═╝  ╚═╝  ╩═╝   ╚╝   ╚═╝  ╩╚═
 void SNOPTSolver::resetSNOPTSolver() {
 
   for (int i = 0; i < n_; i++) {
@@ -629,7 +1031,9 @@ void SNOPTSolver::resetSNOPTSolver() {
   }
 }
 
-
+// ╦    ╔═╗  ╔═╗  ╔╦╗    ╔═╗  ╔╗╔  ╔═╗  ╔═╗  ╔╦╗
+// ║    ║ ║  ╠═╣   ║║    ╚═╗  ║║║  ║ ║  ╠═╝   ║
+// ╩═╝  ╚═╝  ╩ ╩  ═╩╝    ╚═╝  ╝╚╝  ╚═╝  ╩     ╩
 bool SNOPTSolver::loadSNOPT(const string lib_name) {
 
 // #ifdef NDEBUG
@@ -647,13 +1051,13 @@ bool SNOPTSolver::loadSNOPT(const string lib_name) {
   } else {
     rc = LSL_loadSNOPTLib(lib_name.c_str(), buf, 255);
   }
-//  printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
+  // printf("\x1b[33mSNOPT load exit # = %d.\n\x1b[0m", rc);
 
 
   if (rc) {
     string errmsg;
-    errmsg = "Selected NLP solver SNOPT not available.\n"
-             "Tried to obtain SNOPT from shared library \"";
+    errmsg = "Selected NLP solver sqp_snopt not available.\n"
+             "Tried to obtain sqp_snopt from shared library \"";
     errmsg += LSL_SNOPTLibraryName();
     errmsg += "\", but the following error occured:\n";
     errmsg += buf;

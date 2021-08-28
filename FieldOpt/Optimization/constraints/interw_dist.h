@@ -35,9 +35,7 @@ namespace Constraints {
 class InterwDist : public Constraint, WellSplineConstraint
 {
  public:
-  InterwDist(Settings::Optimizer::Constraint settings,
-             Model::Properties::VarPropContainer *variables,
-             Settings::VerbParams vp);
+  InterwDist(SO& seto, VPC *vars, SV vp);
 
   string name() override { return "InterwDist"; }
 

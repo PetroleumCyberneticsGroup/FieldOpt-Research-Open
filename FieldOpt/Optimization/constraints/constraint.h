@@ -36,6 +36,9 @@ namespace Optimization {
 namespace Constraints {
 
 using namespace Model::Properties;
+using VPC = Model::Properties::VarPropContainer;
+using SO = Settings::Optimizer::Constraint;
+using SV = Settings::VerbParams;
 
 using Printer::info;
 using Printer::ext_info;
@@ -52,7 +55,7 @@ using Printer::pad_text;
 class Constraint
 {
  public:
-  explicit Constraint(Settings::VerbParams vp);
+  explicit Constraint(SO& seto, VPC *vars, SV vp);
 
   /*!
    * \brief CaseSatisfiesConstraint checks whether a case
@@ -69,6 +72,8 @@ class Constraint
    * \param c The case that should have it's variable values snapped.
    */
   virtual void SnapCaseToConstraints(Case *c) = 0;
+
+  void DBG_SnapCase(int cs, string s0, string s1);
 
   virtual void EnableLogging(QString output_directory_path);
 
@@ -150,6 +155,9 @@ class Constraint
 
   long double GetPenaltyWeight() { return penalty_weight_; }
 
+  bool isEnabled() { return isEnabled_; }
+  void PrntWellInfo(string wi, int cs);
+
  protected:
   bool logging_enabled_;
   Settings::VerbParams vp_;
@@ -165,6 +173,12 @@ class Constraint
   //!< The weight to be used when considering the
   //!< constraint in a penalty function. (default: 0.0)
   long double penalty_weight_;
+
+  SO seto_;
+  VPC *vars_;
+
+  bool isEnabled_ = false;
+  double min_, max_;
 
  private:
   //!< Path to the constraint log path to be written.

@@ -46,6 +46,11 @@ inline double time_since_seconds(const std::chrono::system_clock::time_point t) 
     return time.count();
 }
 
+inline double time_since_msecs(const std::chrono::system_clock::time_point t) {
+  std::chrono::milliseconds time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time() - t);
+  return time.count();
+}
+
 /*!
  * @brief Get a time stamp string formatted as YYYY-MM-ddTHH:mm:ss
  * @return

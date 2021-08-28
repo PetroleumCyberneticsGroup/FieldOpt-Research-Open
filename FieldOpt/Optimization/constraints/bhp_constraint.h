@@ -41,28 +41,21 @@ using Model::Properties::ContinuousProperty;
 class BhpConstraint : public Constraint
 {
  public:
-  //!< This class' constructor should not be used directly.
-  //!< The constructors of subclasses should be used.
-  BhpConstraint(::Settings::Optimizer::Constraint settings,
-                ::Model::Properties::VarPropContainer *variables,
-                Settings::VerbParams vp);
+  BhpConstraint(SO& seto, VPC *vars, SV vp);
 
   string name() override { return cl_; }
 
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;
 
-  bool IsBoundConstraint() const override;
+  bool IsBoundConstraint() const override  { return true; };
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
  private:
-  double min_, max_;
   QStringList bhp_cnstrnd_well_nms_;
   QList<ContinuousProperty *> bhp_cnstrnd_real_vars_;
   QList<QUuid> bhp_cnstrnd_uuid_vars_;
-
-  Model::Properties::VarPropContainer *variables_;
 
   string md_ = "Optimizer::constraints";
   string cl_ = "BhpConstraint";

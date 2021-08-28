@@ -51,6 +51,10 @@ class Objective
 
   virtual double value(bool base_case = false) = 0;
 
+  virtual VectorXd grad() = 0;
+
+  virtual double fval() = 0;
+
  protected:
   Objective(Settings::Optimizer *settings);
 

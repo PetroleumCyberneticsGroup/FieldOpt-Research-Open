@@ -29,6 +29,11 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Runner {
 
+using TC = Optimization::Optimizer::TerminationCondition;
+using ES = Optimization::Case::CaseState::EvalStatus;
+using EM = Optimization::Case::CaseState::ErrorMessage;
+using OT = Settings::Optimizer::ObjectiveType;
+
 class MainRunner;
 
 /*!
@@ -40,14 +45,14 @@ class SerialRunner : public AbstractRunner
 {
   friend class MainRunner;
  private:
-  SerialRunner(RuntimeSettings *runtime_settings);
+  explicit SerialRunner(RuntimeSettings *runtime_settings);
 
   string md_ = "Runner";
   string cl_ = "SerialRunner";
 
   // AbstractRunner interface
  private:
-  void Execute();
+  void Execute() override;
 };
 
 }

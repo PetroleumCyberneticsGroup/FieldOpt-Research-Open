@@ -90,7 +90,7 @@ TEST_F(PropertiesTest, DiscretePropertyAddition) {
   EXPECT_TRUE(intvar->value() == 7);
 }
 
-TEST_F(PropertiesTest, ContinousPropertyAddition) {
+TEST_F(PropertiesTest, ContinuousPropertyAddition) {
   ContinuousProperty *realvar = new ContinuousProperty(7.0);
   realvar->Add(-2.5);
   EXPECT_TRUE(realvar->value() == 4.5);
@@ -104,7 +104,7 @@ TEST_F(PropertiesTest, DiscretePropertyEquals) {
   EXPECT_FALSE(intvar_1->Equals(intvar_3));
 }
 
-TEST_F(PropertiesTest, ContinousPropertyEquals) {
+TEST_F(PropertiesTest, ContinuousPropertyEquals) {
   ContinuousProperty *realvar_1 = new ContinuousProperty(2.0);
   ContinuousProperty *realvar_2 = new ContinuousProperty(2.0);
   ContinuousProperty *realvar_3 = new ContinuousProperty(3.0);

@@ -38,7 +38,7 @@ int TRFrame::changeTrCenter(VectorXd new_pt, double new_fval) {
   int exit_flag = 0;
 
   if (!isModComplete()) { // Add point
-    exit_flag = addPt(new_pt, new_fval, tr_pivot_thld_);
+    exit_flag = addPt(new_pt, new_fval, tr_piv_thld_);
     if(exit_flag > 0){ point_added = true; }
   }
 
@@ -50,7 +50,7 @@ int TRFrame::changeTrCenter(VectorXd new_pt, double new_fval) {
 
   } else {
     tie(point_exchanged, pt_i) =
-      exchangePt(new_pt, new_fval, tr_pivot_thld_);
+      exchangePt(new_pt, new_fval, tr_piv_thld_);
 
     if (point_exchanged) {
       tr_center_ = pt_i;
@@ -264,8 +264,9 @@ tuple<bool,int> TRFrame::exchangePt(VectorXd new_pt,
       pts_abs_.col(max_poly_i) = new_pt;
       fvals_(max_poly_i) = new_fval;
       pivot_values_(max_poly_i) = new_pivot_val;
-      modeling_polys_.clear();
+
       dbg_->prntPolys("exchangePoint-02", modeling_polys_[0]);
+      modeling_polys_.clear();
 
       succeeded = true;
       pt_i = max_poly_i;
@@ -352,11 +353,12 @@ bool TRFrame::rebuildModel() {
   nfpBasis(dim); // build nfp polynomial basis>
 
   // Starting rowPivotGaussianElimination
-  double pivot_thld = tr_pivot_thld_ * std::fmin(1, radius_);
-
+  double pivot_thld = tr_piv_thld_ * std::fmin(1, radius_);
   int polynomials_num = pivot_polys_.size();
   pivot_values_.conservativeResize(polynomials_num);
   pivot_values_.setZero(polynomials_num);
+
+  dbg_->prntRebuildMod(1, pivot_thld, D, D, dim, n_points, I, pivot_values_);
 
   // Constant term
   int last_pt_included = 0;
@@ -367,64 +369,63 @@ bool TRFrame::rebuildModel() {
   dbg_->prntModelData("rowPivotGaussianElim-00");
 
   for (int iter = 1; iter < polynomials_num; iter++) {
-
     pivot_polys_[poly_i] = orthogzToOthrPolys(poly_i, last_pt_included);
 
-    double max_layer;
-    auto farthest_point = (double)distances_(distances_.size()-1);
-    double distance_farthest_point = (farthest_point/radius_);
+    double max_layer = 0.0;
+    auto farthest_point = (double)distances_(distances_.size() - 1);
+    double distance_farthest_point = (farthest_point / radius_);
+    dbg_->prntRebuildMod(2, max_layer, farthest_point, distance_farthest_point);
 
     int block_beginning;
     int block_end;
 
-    if (poly_i <= dim) {
+    // Indices for linear / quadratic blocks
+    if (poly_i <= dim) { //! Linear block
+      max_layer = min(2 * tr_rad_fac_, distance_farthest_point);
       block_beginning = 1;
       block_end = dim;
 
-      max_layer = std::min(2 * tr_rad_fac_, distance_farthest_point);
       if (iter > dim) {
         //!< We already tested all linear terms.
         //!< We do not have points to build a FL model.
         //!< How did this happen??? see Comment [1]>
         break;
       }
-
-    } else { //!<Quadratic block -- being more carefull>
+    } else { //! Quadratic block (being more carefull)
       max_layer = min(tr_rad_fac_, distance_farthest_point);
       block_beginning = dim + 1;
       block_end = polynomials_num - 1;
     }
-
     max_layer = std::fmax(1.0, max_layer);
 
+    // Making layers
     VectorXd all_layers;
     all_layers.setLinSpaced(ceil(max_layer), 1.0, max_layer);
+    dbg_->prntRebuildMod(3, max_layer, D, D, block_beginning, block_end, I, all_layers);
 
-    double max_absval = 0.0;
-    double pt_max = 0.0;
+    // --
+    double max_absval = 0.0, pt_max = 0.0;
     for (int i = 0; i < all_layers.size(); i++) {
 
       auto layer = all_layers(i);
       double dist_max = layer * radius_;
       for (int n = last_pt_included + 1; n < n_points; n++) {
-        if (distances_(n) > dist_max) {
-          break; //!<for n>
-        }
 
+        if (distances_(n) > dist_max) { break; } //! for n
         auto val = evaluatePoly(pivot_polys_[poly_i], pts_shftd_.col(n));
-        val = val / dist_max; //!<minor adjustment>
+        val = val / dist_max; //! minor adjustment
+
         if (abs(max_absval) < abs(val)) {
           max_absval = val;
           pt_max = n;
         }
-        if (abs(max_absval) > pivot_thld) {
-          break; //!<for(layer)>
-        }
+        if (abs(max_absval) > pivot_thld) { break; } //! for(layer)
       }
     }
 
+    // --
     if (abs(max_absval) > pivot_thld) {
-      //!<Points accepted>
+      //! Points accepted
       int pt_next = last_pt_included + 1;
       if (pt_next != pt_max) {
         pts_shftd_.col(pt_next).swap(pts_shftd_.col(pt_max));
@@ -435,7 +436,7 @@ bool TRFrame::rebuildModel() {
 
       pivot_values_(pt_next) = max_absval;
 
-      //!<Normalize polynomial value>
+      //! Normalize polynomial value
       auto point = pts_shftd_.col(pt_next);
       auto poly_normalized = normalizePoly(poly_i, point);
 
@@ -450,6 +451,7 @@ bool TRFrame::rebuildModel() {
 
       last_pt_included = pt_next;
       poly_i++;
+
     } else {
       //!<These points don't render good pivot value for this>
       //!<specific polynomial. Exchange some polynomials>
@@ -461,7 +463,7 @@ bool TRFrame::rebuildModel() {
       //!<Comment [1]: If we are on the linear block,>
       //!<this means we won't be able to build a Fully Linear model>
     }
-  }
+  } // end Gaussian elimination
 
   dbg_->prntModelData("rowPivotGaussianElimination-01");
 
@@ -722,9 +724,9 @@ bool TRFrame::chooseNReplacePt() {
 // IMPROVEMODELNFP
 bool TRFrame::improveModelNfp() {
 
-  auto rel_pivot_threshold = settings_->parameters().tr_pivot_thld;
-  auto tol_radius = settings_->parameters().tr_tol_radius;
-  auto radius_factor = settings_->parameters().tr_radius_fac;
+  auto rel_pivot_threshold = settings_->parameters().tr_piv_thld;
+  auto tol_radius = settings_->parameters().tr_rad_tol;
+  auto radius_factor = settings_->parameters().tr_rad_fac;
 
   auto radius = radius_;
   auto pivot_threshold = rel_pivot_threshold*std::fmin(1, radius);
@@ -946,49 +948,109 @@ bool TRFrame::improveModelNfp() {
 // _________________________________________________________
 // ENSUREIMPROVEMENT
 int TRFrame::ensureImpr() {
-  bool model_complete = isModComplete();
-  bool model_fl = isLambdaPoised();
-  bool model_old = isModOld();
+  // bool model_old = isModOld(); // old behavior [for tests only]
   int exit_flag = 0;
   bool success = false;
-
   dbg_->prntModelData("EnsureImpr-00");
 
-  if (!model_complete && (!model_old || !model_fl)) {
-    //!<Calculate a new point to add>
-    success = improveModelNfp(); //!<improve model>
+  //! -> Find new point to add/replace
+  if (!isModComplete() && (!isModOld() || !isLambdaPoised())) {
+    //! improve model
+    success = improveModelNfp();
+    if (success || (!success && impr_cases_.size() > 0)) { exit_flag = 1; }
+    dbg_->prntEnsureImpr(1, exit_flag, 0, 0, success);
 
-    if ((success) || (!success && impr_cases_.size() > 0)) {
-      exit_flag = 1;
-    }
-  } else if ((model_complete) && (!model_old)){
-    success = chooseNReplacePt(); //!<replace point>
-    if ((success) || (!success && repl_cases_.size() > 0))  {
-      exit_flag = 2;
-    }
+  } else if (isModComplete() && !isModOld()) {
+    //! replace point
+    success = chooseNReplacePt();
+    if (success || (!success && repl_cases_.size() > 0))  { exit_flag = 2; }
+    dbg_->prntEnsureImpr(2, exit_flag, 0, 0, success);
   }
   dbg_->prntModelData("EnsureImpr-01");
 
-  if ((!success) && (impr_cases_.size() == 0) && (repl_cases_.size() == 0)) {
-    bool model_changed = rebuildModel();
 
+  //! -> No new point found/replaced -> rebuilding model
+  if (!success && (impr_cases_.size() == 0) && (repl_cases_.size() == 0)) {
+    bool model_changed = rebuildModel();
+    dbg_->prntEnsureImpr(3, 0, 0, 0, model_changed);
+
+    //! if model did not change
     if (!model_changed) {
-      if (!model_complete) {
+
+      //! -> adds to impr_cases_
+      if (!isModComplete()) {
         success = improveModelNfp();
+        dbg_->prntEnsureImpr(4, 0, 0, 0, success);
 
       } else {
-        //!<Replace point>
+        //! Replace point -> adds to repl_cases_
         success = chooseNReplacePt();
+        dbg_->prntEnsureImpr(5, 0, 0, 0, success);
       }
-    } else {
-      success = true;
-    }
-    if (model_old) {
+
+      //! model has changed
+    } else { success = true; }
+
+    //! if model is old
+    // if (model_old) { // old behavior [for tests only]
+    if (isModOld()) {
       exit_flag = 3;
     } else {
       exit_flag = 4;
     }
   }
+
   dbg_->prntModelData("EnsureImpr-02");
+  dbg_->prntEnsureImpr(6, exit_flag);
   return exit_flag;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

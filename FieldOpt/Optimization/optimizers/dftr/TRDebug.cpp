@@ -76,7 +76,7 @@ string TRDebug::prntVecXd(VectorXd vec, string mv,
     for (int ii = 0; ii < vec.size() - 1; ii++) {
       ss << prntDbl(vec(ii), fv);
     }
-    ss << prntDbl(vec(vec.size() - 1)) << "]";
+    ss << prntDbl(vec(vec.size() - 1), fv) << "]";
   } else {
     ss << "[ Empty ]";
   }
@@ -95,149 +95,545 @@ string TRDebug::prntMatXd(MatrixXd mat, string mm, string fm) {
 }
 
 void TRDebug::prntToFl(string fn, string sout) {
-  FILE * pFile;
-  pFile = std::fopen(fn.c_str(), "a");
-  std::fprintf(pFile, "%s", sout.c_str());
-  fclose (pFile);
+  if (prntDbg_) {
+    FILE * pFile;
+    pFile = std::fopen(fn.c_str(), "a");
+    std::fprintf(pFile, "%s", sout.c_str());
+    fclose (pFile);
+  }
 }
 
 void TRDebug::prntPolys(string msg, poly p) {
   stringstream ss;
-  if (msg != "") { prntHeader(ss, msg, 1); }
-  ss << prntVecXd(p.coeffs) << endl;
-  prntToFl(fn_pcfs_, ss.str());
+  if (calcDbg_) {
+    if (msg != "") { prntHeader(ss, msg, 1); }
+    ss << prntVecXd(p.coeffs) << endl;
+    // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+
+    if(msg == ".") { prntToFl(fn_pcfs_, ".");
+    } else { prntToFl(fn_pcfs_, ss.str()); }
+  }
 }
 
 void TRDebug::prntPivotVals(string msg) {
   stringstream ss;
-  if (msg != "") { prntHeader(ss, msg, 0); }
-  ss << prntVecXd(trm_->pivot_values_) << endl;
-  ss << prntVecXd(trm_->pivot_order_) << endl;
-  prntToFl(fn_pivp_, ss.str());
+  if (calcDbg_) {
+    if (msg != "") { prntHeader(ss, msg, 0); }
+    ss << prntVecXd(trm_->pivot_values_) << endl;
+    ss << prntVecXd(trm_->pivot_order_) << endl;
+    // >> fn_pcfs_: DFTR_PivotCoeffs.txt
+    if (msg == ".") {
+      prntToFl(fn_pivp_, ".");
+    } else { prntToFl(fn_pivp_, ss.str()); }
+  }
 }
 
 void TRDebug::prntPivotPolys(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
 
-  for (int kk = 0; kk < trm_->pivot_polys_.size(); kk++) {
-    auto vec = trm_->pivot_polys_[kk].coeffs;
-    stringstream si; si << "piv.p#" << kk << " ";
-    ss << prntVecXd(vec, si.str()) << endl;
-  }
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  if (trm_->pivot_values_.size() > 0) {
-    ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
-  } else {
-    ss << "pivot_values_.size(): " << trm_->pivot_values_.size() << endl;
+    for (int kk = 0; kk < trm_->pivot_polys_.size(); kk++) {
+      auto vec = trm_->pivot_polys_[kk].coeffs;
+      stringstream si;
+      si << "piv.p#" << kk << " ";
+      ss << prntVecXd(vec, si.str()) << endl;
+      // >> fn_pivp_: DFTR_PivotPolyns.txt
+    }
+
+    if (trm_->pivot_values_.size() > 0) {
+      ss << prntVecXd(trm_->pivot_values_, "piv_vls ") << endl;
+    } else {
+      ss << "pivot_values_.size(): " << trm_->pivot_values_.size() << endl;
+    }
+
+    if (msg == ".") { prntToFl(fn_pivp_, ".");
+    } else { prntToFl(fn_pivp_, ss.str()); }
   }
-  prntToFl(fn_pivp_, ss.str());
 }
 
 void TRDebug::prntHeader(stringstream &ss, string msg, int htype) {
   string ENDSTRN = string(100, '=');
+  auto t1 = current_time();
+  auto tt = time_since_msecs(trm_->t0_);
+  string un = "ms";
+  if (tt > 1e3) { tt /= 1e3; un = "s "; }
+  auto dt = "DT: " + num2str(tt,1,0,6);
+  dt += un + " -- " + timestamp_string() + " ";
 
-  if (msg != "") {
+  if (msg != "" && trm_->dbgs_ != msg) {
+    if (trm_->dbgs_ == ".") {
+      ss << dt;
+    } else {
+      ss << endl << dt;
+    }
     if ( htype == 0 ) {
-      ss << ENDSTRN << endl;
-      ss << "[" << msg << "]" << endl;
-
+      // ss << ENDSTRN << endl;
+      ss << " [" << msg << "]" << endl;
     } else if ( htype == 1 ) {
       Printer::pad_text(msg, 28);
-      ss << "[" << msg << "]";
+      ss << " [" << msg << "]";
     }
+  } else {
+    ss.str("");
+    ss << ".";
   }
+  trm_->t0_ = t1;
+  trm_->dbgs_ = msg;
 }
 
 void TRDebug::prntModelData(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
-  ss << "cached_points_: "  << prntMatXd(trm_->cached_pts_, " ") << "\n";
-  ss << "fvalues_: "        << prntVecXd(trm_->fvals_) << "\n";
+    ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
+    ss << "cached_points_: " << prntMatXd(trm_->cached_pts_, " ") << "\n";
+    ss << "fvalues_: " << prntVecXd(trm_->fvals_) << "\n";
 
-  ss << "all_points_: "     << prntMatXd(trm_->all_pts_, " ") << "\n";
-  ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-  ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+    ss << "all_points_: " << prntMatXd(trm_->all_pts_, " ") << "\n";
+    ss << "points_abs_: " << prntMatXd(trm_->pts_abs_, " ") << "\n";
+    // ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
 
-  ss << "repl_new_points_shifted_: " << prntMatXd(trm_->repl_new_pts_shftd_, " ") << "\n";
-  ss << "repl_new_point_shifted_: " << prntMatXd(trm_->repl_new_pt_shftd_, " ") << "\n";
-  ss << "repl_new_pivots_: " << prntMatXd(trm_->repl_new_pivots_, " ") << "\n";
+    ss << "repl_new_points_shifted_: " << prntMatXd(trm_->repl_new_pts_shftd_, " ") << "\n";
+    ss << "repl_new_point_shifted_: " << prntMatXd(trm_->repl_new_pt_shftd_, " ") << "\n";
+    ss << "repl_new_pivots_: " << prntMatXd(trm_->repl_new_pivots_, " ") << "\n";
 
-  ss << "repl_new_point_abs_: " << prntMatXd(trm_->repl_new_pt_abs_, " ") << "\n";
-  ss << "repl_new_fvalues_: "   << prntVecXd(trm_->repl_new_fvals_) << "\n";
+    ss << "repl_new_point_abs_: " << prntMatXd(trm_->repl_new_pt_abs_, " ") << "\n";
+    ss << "repl_new_fvalues_: " << prntVecXd(trm_->repl_new_fvals_) << "\n";
 
-  ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
-  ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
+    ss << "lb_: " << prntVecXd(trm_->lb_) << "\n";
+    ss << "ub_: " << prntVecXd(trm_->ub_) << "\n";
 
-  prntToFl(fn_mdat_, ss.str());
+    prntToFl(fn_mdat_, ss.str());
+  }
 }
 
 string TRDebug::prntSettingsData(string msg) {
   stringstream ss;
-  prntHeader(ss, msg);
+  if (calcDbg_) {
+    prntHeader(ss, msg);
 
-  ss << "tr parameters      " << " & "  << "value" << "\\\\ \\toprule \n";
-  // ss << "tr\\_prob\\_nm: " << " &  " << trm_->tr_prob_name_           << " \\\\ \n";
-  ss << "tr\\_init\\_rad:   " << " & $" << prntDbl(trm_->tr_init_rad_)   << " $ \\\\ \n";
-  ss << "tr\\_tol\\_f:      " << " & $" << prntDbl(trm_->tr_tol_f_)      << " $ \\\\ \n";
-  ss << "tr\\_eps\\_c:      " << " & $" << prntDbl(trm_->tr_eps_c_)      << " $ \\\\ \n";
-  ss << "tr\\_eta\\_0:      " << " & $" << prntDbl(trm_->tr_eta_0_)      << " $ \\\\ \n";
-  ss << "tr\\_eta\\_1:      " << " & $" << prntDbl(trm_->tr_eta_1_)      << " $ \\\\ \\midrule \n";
-  ss << "tr\\_piv\\_thld:   " << " & $" << prntDbl(trm_->tr_pivot_thld_) << " $ \\\\ \n";
-  ss << "tr\\_add\\_thld:   " << " & $" << prntDbl(trm_->tr_add_thld_)   << " $ \\\\ \n";
-  ss << "tr\\_exch\\_thld:  " << " & $" << prntDbl(trm_->tr_exch_thld_)  << " $ \\\\ \n";
-  ss << "tr\\_rad\\_max:    " << " & $" << prntDbl(trm_->tr_rad_max_)    << " $ \\\\ \n";
-  ss << "tr\\_rad\\_fac:    " << " & $" << prntDbl(trm_->tr_rad_fac_)    << " $ \\\\ \\midrule \n";
-  ss << "tr\\_tol\\_rad:    " << " & $" << prntDbl(trm_->tr_tol_rad_)    << " $ \\\\ \n";
-  ss << "tr\\_gamma\\_inc:  " << " & $" << prntDbl(trm_->tr_gamma_inc_)  << " $ \\\\ \n";
-  ss << "tr\\_gamma\\_dec:  " << " & $" << prntDbl(trm_->tr_gamma_dec_)  << " $ \\\\ \n";
-  ss << "tr\\_crit\\_mu:    " << " & $" << prntDbl(trm_->tr_crit_mu_)    << " $ \\\\ \n";
-  ss << "tr\\_crit\\_omega: " << " & $" << prntDbl(trm_->tr_crit_omega_) << " $ \\\\ \\midrule \n";
-  ss << "tr\\_crit\\_beta:  " << " & $" << prntDbl(trm_->tr_crit_beta_)  << " $ \\\\ \n";
-  ss << "tr\\_lower\\_b:    " << " & $" << prntDbl(trm_->tr_lower_bnd_)  << " $ \\\\ \n";
-  ss << "tr\\_upper\\_b:    " << " & $" << prntDbl(trm_->tr_upper_bnd_)  << " $ \\\\ \n";
-  ss << "tr\\_iter\\_max:   " << " & $" << prntDbl(trm_->tr_iter_max_)   << " $ \\\\ \n";
-  ss << "tr\\_num\\_initx:  " << " & $" << prntDbl(trm_->tr_num_init_x_) << " $ \\\\ \n";
-  ss << "tr\\_basis\\_:     " << " & $" << trm_->tr_basis_               << " $ \\\\ \n";
-  ss << "tr\\_init\\_smpln: " << " & $" << trm_->tr_init_smpln_          << " $ \\\\ \n";
-  ss << "tr\\_rng\\_seed:   " << " & $" << prntDbl(trm_->tr_rng_seed_)   << " $ \\\\ \\bottomrule \n";
+    ss << "tr parameters      " << " & " << "value" << "\\\\ \\toprule \n";
+    // ss << "tr\\_prob\\_nm: " << " &  " << trm_->tr_prob_name_           << " \\\\ \n";
+    ss << "tr\\_init\\_rad:   " << " & $" << prntDbl(trm_->tr_init_rad_) << " $ \\\\ \n";
+    ss << "tr\\_tol\\_f:      " << " & $" << prntDbl(trm_->tr_tol_f_) << " $ \\\\ \n";
+    ss << "tr\\_eps\\_c:      " << " & $" << prntDbl(trm_->tr_eps_c_) << " $ \\\\ \n";
+    ss << "tr\\_eta\\_0:      " << " & $" << prntDbl(trm_->tr_eta_0_) << " $ \\\\ \n";
+    ss << "tr\\_eta\\_1:      " << " & $" << prntDbl(trm_->tr_eta_1_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_piv\\_thld:   " << " & $" << prntDbl(trm_->tr_piv_thld_) << " $ \\\\ \n";
+    ss << "tr\\_add\\_thld:   " << " & $" << prntDbl(trm_->tr_add_thld_) << " $ \\\\ \n";
+    ss << "tr\\_exch\\_thld:  " << " & $" << prntDbl(trm_->tr_exch_thld_) << " $ \\\\ \n";
+    ss << "tr\\_rad\\_max:    " << " & $" << prntDbl(trm_->tr_rad_max_) << " $ \\\\ \n";
+    ss << "tr\\_rad\\_fac:    " << " & $" << prntDbl(trm_->tr_rad_fac_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_tol\\_rad:    " << " & $" << prntDbl(trm_->tr_tol_rad_) << " $ \\\\ \n";
+    ss << "tr\\_gamma\\_inc:  " << " & $" << prntDbl(trm_->tr_gamma_inc_) << " $ \\\\ \n";
+    ss << "tr\\_gamma\\_dec:  " << " & $" << prntDbl(trm_->tr_gamma_dec_) << " $ \\\\ \n";
+    ss << "tr\\_crit\\_mu:    " << " & $" << prntDbl(trm_->tr_crit_mu_) << " $ \\\\ \n";
+    ss << "tr\\_crit\\_omega: " << " & $" << prntDbl(trm_->tr_crit_omega_) << " $ \\\\ \\midrule \n";
+    ss << "tr\\_crit\\_beta:  " << " & $" << prntDbl(trm_->tr_crit_beta_) << " $ \\\\ \n";
+    ss << "tr\\_lower\\_b:    " << " & $" << prntDbl(trm_->tr_lower_bnd_) << " $ \\\\ \n";
+    ss << "tr\\_upper\\_b:    " << " & $" << prntDbl(trm_->tr_upper_bnd_) << " $ \\\\ \n";
+    ss << "tr\\_iter\\_max:   " << " & $" << prntDbl(trm_->tr_iter_max_) << " $ \\\\ \n";
+    ss << "tr\\_num\\_initx:  " << " & $" << prntDbl(trm_->tr_num_init_x_) << " $ \\\\ \n";
+    ss << "tr\\_basis\\_:     " << " & $" << trm_->tr_basis_ << " $ \\\\ \n";
+    ss << "tr\\_init\\_smpln: " << " & $" << trm_->tr_init_smpln_ << " $ \\\\ \n";
+    ss << "tr\\_rng\\_seed:   " << " & $" << prntDbl(trm_->tr_rng_seed_) << " $ \\\\ \\bottomrule \n";
 
-  prntToFl(fn_sdat_, ss.str());
+    prntToFl(fn_sdat_, ss.str());
+  }
   return ss.str();
 }
 
 void TRDebug::prntFunctionData(string fnm, string msg,
                                VectorXd v0, VectorXd v1, VectorXd v2,
                                double d0, double d1, double d2) {
-
   stringstream ss;
-  prntHeader(ss, "FOEx");
-  string fn;
+  if (calcDbg_) {
+    prntHeader(ss, "FOEx");
+    string fn;
 
-  if (fnm == "exchangePoint") {
-    ss << "[ p_abs_.rows(): " << prntDbl(trm_->pts_abs_.rows(),   "% 2.0f") << " ]";
-    ss << "[ last_p: "        << prntDbl(trm_->pts_abs_.cols()-1, "% 2.0f") << " ]";
-    ss << "[ center_i: "      << prntDbl((double)trm_->tr_center_,         "% 2.0f") << " ]";
-    ss << "[ radius_: "       << prntDbl((double)trm_->radius_,"% 6.3e") << " ]\n";
-    ss << "new_point: "       << prntVecXd(v0);
-    ss << "shift_center: "    << prntVecXd(v1) << "\n";
-    ss << "pivot_values_: "   << prntVecXd(trm_->pivot_values_) << "\n";
+    if (fnm == "exchangePoint") {
+      ss << "[ p_abs_.rows(): " << prntDbl(trm_->pts_abs_.rows(), "% 2.0f") << " ]";
+      ss << "[ last_p: " << prntDbl(trm_->pts_abs_.cols() - 1, "% 2.0f") << " ]";
+      ss << "[ center_i: " << prntDbl((double) trm_->tr_center_, "% 2.0f") << " ]";
+      ss << "[ radius_: " << prntDbl((double) trm_->radius_, "% 6.3e") << " ]\n";
+      ss << "new_point: " << prntVecXd(v0);
+      ss << "shift_center: " << prntVecXd(v1) << "\n";
+      ss << "pivot_values_: " << prntVecXd(trm_->pivot_values_) << "\n";
 
-    ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
-    ss << "cached_points_: "  << prntMatXd(trm_->cached_pts_, " ") << "\n";
-    ss << "fvalues_: "        << prntVecXd(trm_->fvals_) << "\n";
-    ss << "points_abs_: "     << prntMatXd(trm_->pts_abs_, " ") << "\n";
-    ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
-    fn = fn_xchp_;
+      ss << "cached_fvalues_: " << prntVecXd(trm_->cached_fvals_) << "\n";
+      ss << "cached_points_: " << prntMatXd(trm_->cached_pts_, " ") << "\n";
+      ss << "fvalues_: " << prntVecXd(trm_->fvals_) << "\n";
+      ss << "points_abs_: " << prntMatXd(trm_->pts_abs_, " ") << "\n";
+      ss << "points_shifted_: " << prntMatXd(trm_->pts_shftd_, " ") << "\n";
+      fn = fn_xchp_;
 
-  } else if (fnm == "none") {
-    cout << "Specify function name" << "\n";
+    } else if (fnm == "none") {
+      cout << "Specify function name" << "\n";
+    }
+
+    prntToFl(fn, ss.str());
+  }
+}
+
+// DFTR PROGRESS
+void TRDebug::prntTempCases(int cs, bool c1, bool c2, bool c3,
+                            bool c4, bool c5, bool c6) {
+  stringstream ss;
+  ss << "[@tempCases] ";
+  if (cs == 1) {
+    ss << "Init.pts N cp; tr.model N in => " << c1 << " -- ";
+    ss << "Init.pts Y cp; tr.model N in => " << c2 << "|[@tempCases] ";
+    ss << "Impr.pts Y cp; Impr.pts Y cp => " << c3 << " -- ";
+    ss << "Impr.pts Y cp; Impr.pts Y nd => " << c4 << " -- ";
+    ss << "Repl.pts Y cp; Repl.pts Y nd => " << c5;
+
+  } else if (cs == 2) {
+    ss << "Adding init cases";
+
+  } else if (cs == 3) {
+    ss << "Rebuilding model + setting model changed status + ";
+    ss << "moveToBestPt + computePolyMods";
+
+  } else if (cs == 4) {
+    ss << "Model has only one point...";
+    ext_warn(ss.str(), trm_->md_, trm_->cl_);
+
+  } else if (cs == 5) {
+    ss << "Model has been initialized + increasing iter #";
+
+  } else if (cs == 6) {
+    ss << "Ensure improvement + model has been initialized + increasing iter #";
+
+  } else if (cs == 7) {
+    ss << "submitTempCases returns false (temp init stage passed)";
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntEnsureImpr(int cs, int s1, int s2, int s3,
+                             bool c1, bool c2, bool c3) {
+  stringstream ss;
+  ss << "[@ensureImpr] ";
+  if (cs == 1) {
+    ss << "exit_flag from improveModelNfp(): " + num2str(s1,0);
+
+  } else if (cs == 2) {
+    ss << "exit_flag from chooseNReplacePt(): " + num2str(s1,0);
+
+  } else if (cs == 3) {
+    ss << "model_changed: " + num2str(c1,0);
+
+  } else if (cs == 4) {
+    ss << "success flag from improveModelNfp: " + num2str(c1,0);
+
+  } else if (cs == 5) {
+    ss << "success flag from chooseNReplacePt: " + num2str(c1,0);
+
+  } else if (cs == 6) {
+    ss << "final exit_flag: " + num2str(s1,0);
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntEnsImprPostProc(int cs, int s1, int s2, int s3,
+                                  bool c1, bool c2, bool c3) {
+  stringstream ss;
+  ss << "[@ensImprPostProc] ";
+  if (cs == 1) {
+    ss << "Impr pt found";
+
+  } else if (cs == 2) {
+    ss << "Repl pt found";
+
+  } else if (cs == 3) {
+    ss << "[crit_exec_=" + num2str(c1, 0);
+    ss << "] [impr_cases.empty()=" + num2str(c2, 0);
+    ss << "] [repl_cases.empty()=" + num2str(c3, 0) + "]";
+
+  } else if (cs == 4) {
+    ss << "Running updateRadius()";
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+
+}
+
+void TRDebug::prntCritStep(int cs, int s1, int s2, int s3,
+                           bool c1, bool c2, bool c3,
+                           double d1, double d2, double d3) {
+  stringstream ss;
+  ss << "[@critStep] ";
+  if (cs == 1) {
+    ss << "1st ensureImpr returned flag: " + num2str(s1,0);
+    ss << " -- impr_cases_.size() = " + num2str(s2,0);
+    ss << " -- areImprPtsCd()? => " << c1;
+
+  } else if (cs == 2) {
+    ss << "2nd ensureImpr returned flag: " + num2str(s1,0);
+    ss << " -- impr_cases_.size() = " + num2str(s2,0);
+    ss << " -- areImprPtsCd()? => " << c1;
+
+  } else if (cs == 3) {
+    ss << "Check rad vs tols -- ";
+    ss << "[ (radius_ < tol_rad_) => " << c1;
+    ss << " ] [ (crit_beta_ * crit_measure.norm() < tol_f_) => " << c2;
+    ss << " ] [ (radius_ < 100 * tol_rad_) => " << c3 << " ]";
+
+  } else if (cs == 4) {
+    ss << "rad_bf_crit_step: " + num2str(d1,3, 1);
+    ss << ", fin_rad: " + num2str(d2,3, 1);
+    ss << ", radius_: " + num2str(d3,3, 1);
+    ss << " => crit_step = false; ";
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
+                             int s1, int s2, int s3,
+                             VectorXd v0, VectorXd v1, VectorXd v2) {
+  stringstream ss;
+  ss << "[@rebuildMod] ";
+  if (calcDbg_) {
+    if (cs == 1) {
+      ss << "from orderPtsPreBuild() -> dim: ";
+      ss << num2str(s1, 0) << " n_points: " << num2str(s1, 0);
+      ss << " pivot_thld: " << num2str(d1, 3, 1);
+      ss << "|[@rebuildMod] " << prntVecXd(v1, "scnd_pt  ");
+
+    } else if (cs == 2) {
+      ss << "max_layer: " << num2str(d1, 0);
+      ss << " -- farthest_pt: " << num2str(d2, 0);
+      ss << " -- dist_farthest_pt: " << num2str(d3, 0);
+
+    } else if (cs == 3) {
+      ss << "max_layer: " << num2str(d1, 0);
+      ss << " -- block_beginning: " << num2str(s1, 0);
+      ss << " -- block_end: " << num2str(s2, 0);
+
+    } else if (cs == 4) {
+
+    } else if (cs == 5) {
+
+    } else if (cs == 6) {
+
+    } else if (cs == 7) {
+
+    } else if (cs == 8) {
+
+    } else if (cs == 9) {
+
+    }
+  }
+  if (trm_->vp_.vOPT >= 4) { idbg(ss.str()); }
+}
+
+void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
+  stringstream ss;
+  if (cs == 1) {
+    if (trm_->vp_.vOPT >= 4) { idbg(trm_->dbg_->prntSettingsData("")); }
+    ss << "[@setLowUprBnds] ";
+    ss << prntVecXd(v0, "bnd_lwr  ");
+    ss << "|[@setLowUprBnds] " << prntVecXd(v1, "bnd_upr  ");
+
+  } else if (cs == 2) {
+    ss << "[@compInitPts] Point too close";
+    ss << "|[@compInitPts] " << prntVecXd(v0, "scnd_pt  ");
+
+  } else if (cs == 3) {
+    ss << "[@compInitPts] ";
+    ss << prntVecXd(v0, "init_pt  ");
+    ss << "|[@compInitPts] " << prntVecXd(v1, "scnd_pt  ");
+
+    ss << "|[@compInitPts] scnd_pt.lpNorm<Infinity>() = ";
+    ss << v1.lpNorm<Infinity>();
+    ss << " -- tr_piv_thld_ = " << trm_->tr_piv_thld_;
+    ss << "\n";
+
+  } else if (cs == 4) {
+    ss << "[@compInitPts] (init_pt-scnd_pt).norm() = ";
+    ss << num2str((v0 - v1).norm(), 3, 1);
+    ss << " -- (init_pt-sncd_pt).norm<Inf> = ";
+    ss << num2str((v0 - v1).lpNorm<Infinity>(), 3, 1);
+    ss << " -- (ub_-lb_).norm() = ";
+    ss << num2str((trm_->ub_ - trm_->lb_).norm(),3, 1);
+    ss << " -- tr_init_rad_ = " << num2str(d1, 3, 1);
   }
 
-  prntToFl(fn, ss.str());
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
+
+void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
+                            double d1, double d2, double d3, double d4) {
+  stringstream ss;
+  ss << "[@updateRadius] ";
+
+  if (cs == 1) {
+    ss << "[A=(rho_==infd_): " << num2str(c1, 0, 1) << "]";
+    ss << " [B=(mchange_==4): " << num2str(c2, 0, 1) << "]";
+    ss << " [rho_=" << num2str(d1, 3, 1) << "]";
+    ss << " [eta_1_ = " << num2str(d2, 3, 1) << "]";
+
+    if(c1) { ss << "| [rho==-inf -> too short step.sz]"; }
+    if(c2) { ss << " [mchange_==4 -> Could not add point, had to rebuild mod]"; }
+
+  } else if (cs == 2) {
+    ss << " [radius_=" << num2str(d1, 3, 1) << "]";
+    ss << " [step.sz_=" << num2str(d2, 3, 1) << "]";
+    ss << " [inc_fac_=" << num2str(d3, 3, 1) << "]";
+
+  } else if (cs == 3) {
+    ss << "[iter_modl_fl_: " << num2str(c1, 0, 1) << "]";
+    ss << " [radius_=" << num2str(d1, 3, 1) << "]";
+
+  } else if (cs == 4) {
+    ss << " [radius_=" << num2str(d1, 3, 1) << "]";
+  }
+
+  ss << "|[@updateRadius] [step.sz = " << num2str(d3, 3, 1) << "] ";
+  ss << "[inc_fac = " << num2str(d4, 3, 1) << "]";
+
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntIsFinished(int cs, bool c1, bool c2,
+                             double d1, double d2, double d3, double d4) {
+  stringstream ss;
+  ss << "[@isFinished] ";
+  if (cs == 1) {
+    ss << "[A=(isModInit() && !getModPolys().empty()): ";
+    ss << num2str(c1, 0, 1) << "]";
+    ss << "[B=(trm_->getRad() < tr_rad_tol_): ";
+    ss << num2str(c2, 0, 1) << "]";
+
+    ss << ", radius: " + num2str(d1, 3, 1);
+    ss << ", #lim_inf: " + num2str(d2, 0, 0);
+    ss << ", #evals: " + num2str(d3, 0, 0);
+
+  } else if (cs == 2) {
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntTstCrit(int cs, string crs,
+                          VectorXd v0, VectorXd v1, double d1, double d2) {
+  stringstream ss;
+  ss << "[@testCrit] ";
+  if (cs == 1) {
+    string crs_str = "crit stepping " + crs;
+
+    ss << prntVecXd(v0, "mod_crit ");
+    ss << " -- m_crit.n(): " + num2str(v0.norm(), 3, 1);
+    ss << "; epsC=" + num2str(trm_->tr_eps_c_, 3, 1);
+    ss << "|[@testCrit] " << prntVecXd(v1, "x_curr   ");
+    ss << " -- f_curr: " + num2str(d1, 3, 1);
+    ss << ", radius: " + num2str(d2, 3, 1);
+    ss << "|[@testCrit] [crit_stat_= " << crs_str << "]";
+
+  } else if (cs == 2) {
+    ss << FRED << "(mod_crit.norm() <= tr_eps_c_) => starting crit.step" << AEND;
+
+  } else if (cs == 3) {
+    if (v0.norm() < trm_->tr_tol_f_) {
+      ss << "Model criticality < tol_f.";
+      ext_warn(ss.str(), trm_->md_, trm_->cl_);
+    }
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntIterBool(int cs, bool c1, bool c2, bool c3, bool c4) {
+  stringstream ss;
+  ss << "[@iterBool] ";
+  if (cs == 1) {
+    ss << "Starting ensureImpr @start of iterate";
+
+  } else if (cs == 2) {
+    ss << "| ";
+    ss << "Impr.pts Y cp; Impr.pts Y nd => " << c1 << " -- ";
+    ss << "Repl.pts Y cp; Repl.pts Y nd => " << c2 << "| ";
+    ss << "Impr.pts N cp; Impr.pts N nd => " << c3 << " -- ";
+    ss << "Repl.pts N cp; Repl.pts N nd => " << c4;
+
+  } else if (cs == 3) {
+    ss << "End b/c rad < tr_rad_tol_, or iter # > tr_iter_max_";
+
+  } else if (cs == 4) {
+    ss << "Move b/e model sample points: First moveToBestPt. ";
+    ss << "Then computePolyMods. (Interp is checked but not used.)";
+
+  } else if (cs == 5) {
+    ss << "Checking if model isLambdaPoised";
+    ss << " [crit_prfd_=" << c1 << "] [crit_exec_=" << c2 << "]";
+
+  } else if (cs == 6) {
+    ss << "Computing step";
+
+  } else if (cs == 7) {
+
+  } else if (cs == 8) {
+    ss << "Predicted reduction less than some tols";
+    ss <<"; setting rho=-inf; launching -> mchange_ = trm_->ensureImpr();";
+
+  } else if (cs == 9) {
+    ss << "Evaluating objective at trial point";
+
+  } else if (cs == 10) {
+    ss << "[Part 2A of iter logic]";
+
+  } else if (cs == 11) {
+    ss << "Continue with model improvement";
+
+  } else if (cs == 12) {
+    ss << "[Part 2B of iter logic]";
+
+  } else if (cs == 13) {
+    ss << "End of iterate()";
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+void TRDebug::prntIterVctr(int cs,
+                           VectorXd v0, VectorXd v1, VectorXd v2,
+                           double d1, double d2) {
+  stringstream ss;
+  ss << "[@iterVctr] ";
+  if (cs == 1) {
+
+  } else if (cs == 2) {
+
+  } else if (cs == 3) {
+
+  } else if (cs == 4) {
+
+  } else if (cs == 5) {
+
+  } else if (cs == 6) {
+
+  } else if (cs == 7) {
+
+  } else if (cs == 8) {
+
+  } else if (cs == 9) {
+
+  } else if (cs == 10) {
+
+  } else if (cs == 11) {
+
+  } else if (cs == 12) {
+
+  } else if (cs == 13) {
+
+  } else if (cs == 14) {
+
+  }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
+}
+
+
 
 }
 }

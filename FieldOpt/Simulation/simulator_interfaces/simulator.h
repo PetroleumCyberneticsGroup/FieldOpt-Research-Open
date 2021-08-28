@@ -34,6 +34,10 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Simulation/execution_scripts/execution_scripts.h"
 #include "Settings/ensemble.h"
 
+namespace Model {
+class Model;
+}
+
 namespace Simulation {
 
 /*!

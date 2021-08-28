@@ -38,8 +38,7 @@ namespace Optimizers {
 
 using Printer::DBG_prntVecXd;
 
-APPS::
-APPS(Settings::Optimizer *settings,
+APPS::APPS(Settings::Optimizer *settings,
      Case *base_case,
      Model::Properties::VarPropContainer *variables,
      Reservoir::Grid::Grid *grid,

@@ -33,9 +33,7 @@ namespace Constraints {
 
 class PolarWellLength : public Constraint {
  public:
-  PolarWellLength(Settings::Optimizer::Constraint settings,
-                  Model::Properties::VarPropContainer *variables,
-                  Settings::VerbParams vp);
+  PolarWellLength(SO& seto, VPC *vars, SV vp);
 
   bool CaseSatisfiesConstraint(Case *c) override;
   void SnapCaseToConstraints(Case *c) override;

@@ -132,8 +132,8 @@ void VarPropContainer::SetDiscreteVariableValue(QUuid id, int val) {
 void VarPropContainer::SetContinuousVariableValue(QUuid id, double val) {
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     if (continuous_variables_->at(ii).first==id) {
-      // continuous_variables_->at(ii).second->setValueSc(val);
-      continuous_variables_->at(ii).second->setValue(val);
+      continuous_variables_->at(ii).second->setValueSc(val);
+      // continuous_variables_->at(ii).second->setValue(val);
       return;
     }
   }
@@ -211,10 +211,10 @@ QList<QPair<QUuid, int>> VarPropContainer::GetDiscVarValues() const {
 QList<QPair<QUuid, double>> VarPropContainer::GetContVarValues() const {
   QList<QPair<QUuid, double>> cont_vals = QList<QPair<QUuid, double>>();
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
-    // cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-    //                            continuous_variables_->at(ii).second->valueSc()));
     cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
-                               continuous_variables_->at(ii).second->value()));
+                               continuous_variables_->at(ii).second->valueSc()));
+    // cont_vals.append(qMakePair(continuous_variables_->at(ii).first,
+    //                            continuous_variables_->at(ii).second->value()));
   }
   return cont_vals;
 }
@@ -406,6 +406,23 @@ VarPropContainer::GetWellRateVars(QString well_name) const {
   return well_rate_variables;
 }
 
+// GETVARTYPES----------------------------------------------
+vector<QList<ContinuousProperty *>> VarPropContainer::GetVarTypes() {
+  // Get variable types (currently BHP, ICD, Rates)
+  vector<QList<ContinuousProperty *>> varTypes;
+  if (!GetWellBHPVariables().empty()) {
+    varTypes.push_back(GetWellBHPVariables());
+  }
+  if (!GetWellICDVariables().empty()) {
+    varTypes.push_back(GetWellICDVariables());
+  }
+  if (!GetWellRateVariables().empty()) {
+    varTypes.push_back(GetWellRateVariables());
+  }
+
+  return varTypes;
+}
+
 // WELL BLOCKS ---------------------------------------------
 QList<DiscreteProperty *>
 VarPropContainer::GetWellBlockVariables() const {
@@ -476,7 +493,7 @@ VarPropContainer::GetDiscreteVariable(QString name) const {
 // GET CONTINUOUS VAR --------------------------------------
 ContinuousProperty*
 VarPropContainer::GetContinousVariable(QString name) const {
-  string tm = "Unable to find continous variable with name ";
+  string tm = "Unable to find continuous variable with name ";
   for(int ii=0; ii < continuous_variables_->size(); ii++) {
     auto var = continuous_variables_->at(ii).second;
     if (QString::compare(var->name(), name) == 0)
@@ -507,7 +524,7 @@ void VarPropContainer::ScaleVariables(){
   // constraint_handler constructor inserts the bounds
   // of each variable in the variable container
 
-  double D = 1.0, c = 1.0;
+  double D = 2.0, c = 0.0;
   // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2
   // y = 2*x/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_
 
@@ -527,7 +544,9 @@ void VarPropContainer::ScaleVariables(){
     }
   }
 
-  ext_info(ss.str(), md_, cl_);
+  if (vp_.vOPT >= 1 || vp_.vSET >= 1 || vp_.vMOD >= 1) {
+    ext_info(ss.str(), md_, cl_);
+  }
 
   // ext_warn(wm_, md_, cl_);
   // em_ = "";

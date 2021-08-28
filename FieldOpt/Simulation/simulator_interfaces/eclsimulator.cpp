@@ -58,7 +58,7 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
 void ECLSimulator::EvalXWrapper() {
 
   if (vp_.vSIM >= 2) {
-    im_ = "Starting EvalXWrapper [SNOPT].";
+    im_ = "Starting EvalXWrapper [sqp_snopt].";
     ext_info(im_,md_, cl_, vp_.lnw);
   }
   copyDriverFiles();

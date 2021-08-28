@@ -69,6 +69,12 @@ TEST_F(ModelTest, ApplyCase) {
                                                    model_->variables()->GetDiscVarValues(),
                                                    model_->variables()->GetContVarValues());
 
+  // Leave for dbg
+  // auto spline_vars = model_->variables()->GetWSplineVars("INJ");
+  // for (auto var : spline_vars) {
+  //   cout << "0: spline_var->value()=" << var->value() << " -- spline_var->valueSc()=" << var->valueSc() << endl;
+  // }
+
   // Set all continous variables for the PROD well to 1. Should affect BHP and transmissibilty.
   auto producer_vars = model_->variables()->GetWellBHPVars("PROD");
   producer_vars.append(model_->variables()->GetTransmissibilityVariables("PROD"));
@@ -94,8 +100,7 @@ TEST_F(ModelTest, ApplyCase) {
       EXPECT_EQ(2, wb->i());
       EXPECT_EQ(4, wb->j());
       EXPECT_EQ(1, wb->k());
-    }
-    else {
+    } else {
       EXPECT_EQ(1, wb->i());
       EXPECT_EQ(1, wb->j());
       EXPECT_EQ(1, wb->k());
@@ -122,6 +127,7 @@ TEST_F(ModelTest, Logging) {
   }
 
   model_->ApplyCase(c);
+
   model_->SetResult("FieldOilProdTotal", vector<double>{1.0, 2.0, 3.0});
   model_->SetCompdatString("This is the compdat string.");
   model_->ApplyCase(c);
