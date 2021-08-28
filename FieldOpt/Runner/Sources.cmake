@@ -9,6 +9,7 @@ SET(RUNNER_HEADERS
 	runners/oneoff_runner.h
 	runners/overseer.h
 	runners/serial_runner.h
+	runners/bilevel_runner.h
 	runners/synchronous_mpi_runner.h
 	runners/worker.h
 	runtime_settings.h
@@ -24,6 +25,7 @@ SET(RUNNER_SOURCES
 	runners/oneoff_runner.cpp
 	runners/overseer.cpp
 	runners/serial_runner.cpp
+	runners/bilevel_runner.cpp
 	runners/synchronous_mpi_runner.cpp
 	runners/worker.cpp
 	runtime_settings.cpp

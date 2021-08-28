@@ -52,6 +52,9 @@ using Printer::E;
 using std::runtime_error;
 
 using TC = Optimization::Optimizer::TerminationCondition;
+using ES = Optimization::Case::CaseState::EvalStatus;
+using EM = Optimization::Case::CaseState::ErrorMessage;
+using OT = Settings::Optimizer::ObjectiveType;
 
 class MainRunner;
 
@@ -98,6 +101,7 @@ class AbstractRunner
   Optimization::Case *optz_case_;
 
   Optimization::Optimizer *optimizer_;
+  Optimization::Optimizer *secndoptmzr_;
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;
@@ -148,6 +152,8 @@ class AbstractRunner
   void InitializeBaseCase();
   void InitializeOptimizer();
   void InitializeBookkeeper();
+
+  void InitSecndOptmzr();
 
   //!< Write the pre-run summary
   void FinalizeInitialization(bool write_logs);

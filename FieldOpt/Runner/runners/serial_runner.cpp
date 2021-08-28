@@ -87,7 +87,7 @@ void SerialRunner::Execute() {
         model_->ApplyCase(new_case);
         auto start = QDateTime::currentDateTime();
 
-        // SIMULATE CASE (SINGLE RUN, NOT TIMEOUT)
+        // SIMULATE CASE (SINGLE RUN, NO TIMEOUT)
         if (!is_ensemble_run_ && (sim_times_.empty() || rts_->sim_timeout() == 0)) {
           if (vp_.vRUN >= 3) { ext_info("Simulating case.", md_, cl_); }
           simulator_->Evaluate();

@@ -64,6 +64,8 @@ class ECLSimulator : public Simulator {
 
   void EvalXWrapper();
 
+  void EvalSecndOptmzr();
+
   bool Evaluate(const Settings::Ensemble::Realization &realization,
       int timeout, int threads) override;
   
