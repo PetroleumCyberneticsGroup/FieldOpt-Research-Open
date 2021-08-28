@@ -60,7 +60,7 @@ class Optimizer
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
     EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
-    DFTR, SQP
+    DFTR, SQP, APPS_DFTR
   };
 
   enum OptimizerMode { Maximize, Minimize };

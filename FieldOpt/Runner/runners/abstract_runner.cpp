@@ -248,6 +248,31 @@ void AbstractRunner::InitializeBaseCase() {
   }
 }
 
+void AbstractRunner::InitSecndOptmzr() {
+  if (base_case_ == nullptr || model_ == nullptr || optimizer_ == nullptr) {
+    E("Base Case, Model or Optimizer not initialized", md_, cl_);
+  }
+
+  switch (settings_->optimizer()->type()) {
+    // ┌─┐  ┌─┐  ┌─┐  ┌─┐       ┌┬┐  ┌─┐  ┌┬┐  ┬─┐
+    // ├─┤  ├─┘  ├─┘  └─┐  ───   ││  ├┤    │   ├┬┘
+    // ┴ ┴  ┴    ┴    └─┘       ─┴┘  └     ┴   ┴└─
+    case OptzrTyp::APPS_DFTR: {
+      if (vp_.vRUN >= 1) { ext_info("Using APPS_DFTR.", md_, cl_, vp_.lnw); }
+      secndoptmzr_ = new Optzr::DFTR(settings_->optimizer(),
+                                     base_case_,
+                                     model_->variables(),
+                                     model_->grid(),
+                                     logger_,
+                                     nullptr,
+                                     model_->constraintHandler());
+
+      break;
+    }
+  }
+
+}
+
 // ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔═╗  ╔╦╗  ╦  ╔╦╗  ╦  ╔═╗  ╔═╗  ╦═╗
 // │  │││  │   │     ║ ║  ╠═╝   ║   ║  ║║║  ║  ╔═╝  ║╣   ╠╦╝
 // ┴  ┘└┘  ┴   ┴     ╚═╝  ╩     ╩   ╩  ╩ ╩  ╩  ╚═╝  ╚═╝  ╩╚═
@@ -276,7 +301,7 @@ void AbstractRunner::InitializeOptimizer() {
       // ┌─┐  ┌─┐  ┌─┐  ┌─┐
       // ├─┤  ├─┘  ├─┘  └─┐
       // ┴ ┴  ┴    ┴    └─┘
-    case OptzrTyp::APPS: {
+    case OptzrTyp::APPS | OptzrTyp::APPS_DFTR: {
       if (vp_.vRUN >= 1) { ext_info("Using APPS.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::APPS(settings_->optimizer(),
                                    base_case_,
@@ -335,13 +360,13 @@ void AbstractRunner::InitializeOptimizer() {
     case OptzrTyp::SQP: {
       if (vp_.vRUN >= 1) { ext_info("Using SQP [SNOPT].", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::SQP_SNOPT(settings_->optimizer(),
-                                   base_case_,
-                                   model_,
-                                   simulator_,
-                                   objf_,
-                                   logger_,
-                                   nullptr,
-                                   model_->constraintHandler());
+                                        base_case_,
+                                        model_,
+                                        simulator_,
+                                        objf_,
+                                        logger_,
+                                        nullptr,
+                                        model_->constraintHandler());
       break;
     }
       // ┌─┐  ┌─┐
@@ -466,7 +491,7 @@ void AbstractRunner::PrintCompletionMessage() {
       cout << "Max # fevals reached." << endl;
       break;
 
-      case TC::MIN_STEP_LENGTH_REACHED:
+    case TC::MIN_STEP_LENGTH_REACHED:
       cout << "Min step length reached (converged)." << endl;
       break;
 

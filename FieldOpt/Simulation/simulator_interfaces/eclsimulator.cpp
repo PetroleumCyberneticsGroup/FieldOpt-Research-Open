@@ -46,7 +46,7 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
   settings_ = settings;
   vp_ = settings_->global()->verbParams();
 
-  if ( !paths_.IsSet(Paths::ENSEMBLE_FILE)) {
+  if (!paths_.IsSet(Paths::ENSEMBLE_FILE)) {
     deck_name_ = driver_file_name_.split(".DATA").first();
   } else {
     deck_name_ = "";
@@ -55,8 +55,14 @@ ECLSimulator::ECLSimulator(Settings::Settings *settings,
   results_ = new Results::ECLResults(settings);
 }
 
-void ECLSimulator::EvalXWrapper() {
+void ECLSimulator::EvalSecndOptmzr() {
+  if (vp_.vSIM >= 2) {
+    im_ = "Starting EvalSecndOptmzr [DFTR].";
+    ext_info(im_,md_, cl_, vp_.lnw);
+  }
+}
 
+void ECLSimulator::EvalXWrapper() {
   if (vp_.vSIM >= 2) {
     im_ = "Starting EvalXWrapper [sqp_snopt].";
     ext_info(im_,md_, cl_, vp_.lnw);

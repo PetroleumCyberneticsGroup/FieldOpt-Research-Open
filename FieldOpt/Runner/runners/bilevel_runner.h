@@ -1,9 +1,8 @@
 /***********************************************************
-Copyright (C) 2015-2017
-Einar J.M. Baumann <einar.baumann@gmail.com>
+Copyright (C) 2021
+Mathias Bellout <chakibbb-pcg@gmail.com>
 
-Modified 2017-2021 Mathias Bellout
-<chakibbb-pcg@gmail.com>
+bellout - Sat Aug 28 2021 14:16:50 week 34 CET+0200
 
 This file is part of the FieldOpt project.
 
@@ -22,8 +21,8 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-#ifndef SERIALRUNNER_H
-#define SERIALRUNNER_H
+#ifndef FIELDOPT_RUNNER_RUNNERS_BILEVEL_RUNNER_H_
+#define FIELDOPT_RUNNER_RUNNERS_BILEVEL_RUNNER_H_
 
 #include "abstract_runner.h"
 
@@ -31,25 +30,18 @@ namespace Runner {
 
 class MainRunner;
 
-/*!
- * \brief The SerialRunner class is a simple implementation
- * of a serial runner. It interacts with the optimizer and
- * starts simulations in series (i.e. it is _very_ slow).
- */
-class SerialRunner : public AbstractRunner
+class BilevelRunner : public AbstractRunner
 {
   friend class MainRunner;
  private:
-  explicit SerialRunner(RuntimeSettings *runtime_settings);
+  explicit BilevelRunner(RuntimeSettings *runtime_settings);
 
   string md_ = "Runner";
-  string cl_ = "SerialRunner";
+  string cl_ = "BilevelRunner";
 
-  // AbstractRunner interface
  private:
   void Execute() override;
 };
 
 }
-
-#endif // SERIALRUNNER_H
+#endif //FIELDOPT_RUNNER_RUNNERS_BILEVEL_RUNNER_H_
