@@ -95,7 +95,8 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 
   // Optmzd dir
   string optz_dir = output_dir.toStdString();
-  if(rts_->runner_type() == RuntimeSettings::SERIAL) {
+  if(rts_->runner_type() == RuntimeSettings::SERIAL
+    || rts_->runner_type() == RuntimeSettings::BILEVEL) {
     optz_dir += "/optcs";
   } else if(rts_->runner_type() == RuntimeSettings::MPISYNC) {
     optz_dir += "../optcs";
@@ -253,23 +254,23 @@ void AbstractRunner::InitSecndOptmzr() {
     E("Base Case, Model or Optimizer not initialized", md_, cl_);
   }
 
-  switch (settings_->optimizer()->type()) {
-    // ┌─┐  ┌─┐  ┌─┐  ┌─┐       ┌┬┐  ┌─┐  ┌┬┐  ┬─┐
-    // ├─┤  ├─┘  ├─┘  └─┐  ───   ││  ├┤    │   ├┬┘
-    // ┴ ┴  ┴    ┴    └─┘       ─┴┘  └     ┴   ┴└─
-    case OptzrTyp::APPS_DFTR: {
-      if (vp_.vRUN >= 1) { ext_info("Using APPS_DFTR.", md_, cl_, vp_.lnw); }
-      secndoptmzr_ = new Optzr::DFTR(settings_->optimizer(),
-                                     base_case_,
-                                     model_->variables(),
-                                     model_->grid(),
-                                     logger_,
-                                     nullptr,
-                                     model_->constraintHandler());
-
-      break;
-    }
-  }
+  // switch (settings_->optimizer()->type()) {
+  //   // ┌─┐  ┌─┐  ┌─┐  ┌─┐       ┌┬┐  ┌─┐  ┌┬┐  ┬─┐
+  //   // ├─┤  ├─┘  ├─┘  └─┐  ───   ││  ├┤    │   ├┬┘
+  //   // ┴ ┴  ┴    ┴    └─┘       ─┴┘  └     ┴   ┴└─
+  //   case OptzrTyp::APPS_DFTR: {
+  //     if (vp_.vRUN >= 1) { ext_info("Using APPS_DFTR.", md_, cl_, vp_.lnw); }
+  //     // secndoptmzr_ = new Optzr::DFTR(settings_->optimizer(),
+  //     //                                base_case_,
+  //     //                                model_->variables(),
+  //     //                                model_->grid(),
+  //     //                                logger_,
+  //     //                                nullptr,
+  //     //                                model_->constraintHandler());
+  //
+  //     break;
+  //   }
+  // }
 
 }
 

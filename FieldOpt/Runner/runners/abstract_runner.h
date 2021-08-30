@@ -102,6 +102,7 @@ class AbstractRunner
 
   Optimization::Optimizer *optimizer_;
   Optimization::Optimizer *secndoptmzr_;
+
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;
