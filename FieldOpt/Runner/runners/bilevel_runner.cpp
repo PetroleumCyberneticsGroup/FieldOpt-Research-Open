@@ -22,6 +22,7 @@ If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
 #include <Utilities/time.hpp>
+#include <dftr/DFTR.h>
 #include "bilevel_runner.h"
 #include "Utilities/printer.hpp"
 #include "Model/model.h"
@@ -36,8 +37,10 @@ BilevelRunner::BilevelRunner(Runner::RuntimeSettings *runtime_settings)
   EvaluateBaseModel();
   InitializeObjectiveFunction();
   InitializeBaseCase();
+
   InitializeOptimizer();
-  InitSecndOptmzr();
+  // InitSecndOptmzr(); // <-
+
   InitializeBookkeeper();
   FinalizeInitialization(true);
 }
@@ -46,37 +49,85 @@ void BilevelRunner::Execute() {
   while (optimizer_->IsFinished() == TC::NOT_FINISHED) {
 
     // get case from main optimizer
-    Optimization::Case *new_case;
-    new_case = optimizer_->GetCaseForEvaluation();
+    Optimization::Case *c_upper;
+    c_upper = optimizer_->GetCaseForEvaluation();
 
-    // evaluate case
-    if (bookkeeper_->IsEvaluated(new_case, true)) {
-      if (vp_.vRUN >= 3) { ext_info("Bookkeeped case.", md_, cl_); }
-      new_case->state.eval = ES::E_BOOKKEEPED;
+    {
+      std::unique_ptr<Optimization::Optimizers::DFTR>
+        secndoptmzr_(new Optimization::Optimizers::DFTR(
+        settings_->optimizer(), c_upper,
+        model_->variables(),model_->grid(),
+        logger_,nullptr,
+        model_->constraintHandler()));
 
-    } else {
-      try {
-        bool sim_success = true;
-        new_case->state.eval = ES::E_CURRENT;
+      // secndoptmzr_->updateTentativeBestCase(c_upper);
 
-        model_->ApplyCase(new_case);
-        auto start = QDateTime::currentDateTime();
-        simulator_->Evaluate();
-        auto end = QDateTime::currentDateTime();
-        int sim_time = time_span_seconds(start, end);
+      bool lower_sim_success;
+      QDateTime lower_sim_start, lower_sim_end;
+      Optimization::Case *c_lower = nullptr;
 
-        // compute objective
-        if (sim_success) {
-          new_case->set_objf_value(objf_->value(false));
+      while (secndoptmzr_->IsFinished() == TC::NOT_FINISHED) {
 
-          new_case->state.eval = ES::E_DONE;
-          new_case->SetSimTime(sim_time);
-          sim_times_.push_back((sim_time));
+        try {
+          c_lower = secndoptmzr_->GetCaseForEvaluation();
+          c_lower->state.eval = ES::E_CURRENT;
+          model_->ApplyCase(c_lower);
+
+          lower_sim_start = QDateTime::currentDateTime();
+          lower_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+          lower_sim_end = QDateTime::currentDateTime();
+          int lower_sim_time = time_span_seconds(lower_sim_start, lower_sim_end);
+
+          if(lower_sim_success) {
+            c_lower->set_objf_value(objf_->value(false));
+            c_lower->state.eval = ES::E_DONE;
+            c_lower->SetSimTime(lower_sim_time);
+            sim_times_.push_back((lower_sim_time));
+          }
+
+        } catch (runtime_error &e) {
+          wm_ = "Exception while simulating case: " + string(e.what());
+          ext_warn(wm_, md_, cl_);
         }
 
-      } catch (runtime_error &e) {}
+        secndoptmzr_->SubmitEvaluatedCase(c_lower);
+      }
+      c_upper->CopyCaseVals(secndoptmzr_->GetTentativeBestCase());
     }
-    optimizer_->SubmitEvaluatedCase(new_case);
+
+    optimizer_->SubmitEvaluatedCase(c_upper);
+    // secndoptmzr_->ResetOptimizer();
+
+
+
+    // if (bookkeeper_->IsEvaluated(c_upper, true)) {
+    //   if (vp_.vRUN >= 3) { ext_info("Bookkeeped case.", md_, cl_); }
+    //   c_upper->state.eval = ES::E_BOOKKEEPED;
+    //
+    // } else {
+    //   try {
+    //     bool sim_success = true;
+    //     c_upper->state.eval = ES::E_CURRENT;
+    //
+    //     model_->ApplyCase(c_upper);
+    //     auto start = QDateTime::currentDateTime();
+    //     simulator_->Evaluate();
+    //
+    //     auto end = QDateTime::currentDateTime();
+    //     int sim_time = time_span_seconds(start, end);
+    //
+    //     // compute objective
+    //     if (sim_success) {
+    //       c_upper->set_objf_value(objf_->value(false));
+    //
+    //       c_upper->state.eval = ES::E_DONE;
+    //       c_upper->SetSimTime(sim_time);
+    //       sim_times_.push_back((sim_time));
+    //     }
+    //
+    //   } catch (runtime_error &e) {}
+    // }
+    // optimizer_->SubmitEvaluatedCase(c_upper);
   }
   FinalizeRun(true);
 }

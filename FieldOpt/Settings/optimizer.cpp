@@ -941,6 +941,9 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
   } else if (QString::compare(type, "SQP") == 0) {
     opt_type = OptimizerType::SQP;
 
+  } else if (QString::compare(type, "APPS_DFTR") == 0) {
+    opt_type = OptimizerType::APPS_DFTR;
+
   } else {
     em_ = "Optimizer type " + type.toStdString() + " not recognized.";
     throw OptimizerTypeNotRecognizedException(em_);
