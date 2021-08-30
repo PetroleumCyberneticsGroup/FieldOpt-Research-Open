@@ -395,38 +395,39 @@ void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
                              VectorXd v0, VectorXd v1, VectorXd v2) {
   stringstream ss;
   ss << "[@rebuildMod] ";
-  if (calcDbg_) {
-    if (cs == 1) {
-      ss << "from orderPtsPreBuild() -> dim: ";
-      ss << num2str(s1, 0) << " n_points: " << num2str(s1, 0);
-      ss << " pivot_thld: " << num2str(d1, 3, 1);
+
+  if (cs == 1) {
+    ss << "from orderPtsPreBuild() -> dim: ";
+    ss << num2str(s1, 0) << " n_points: " << num2str(s1, 0);
+    ss << " pivot_thld: " << num2str(d1, 3, 1);
+    if (calcDbg_) {
       ss << "|[@rebuildMod] " << prntVecXd(v1, "scnd_pt  ");
-
-    } else if (cs == 2) {
-      ss << "max_layer: " << num2str(d1, 0);
-      ss << " -- farthest_pt: " << num2str(d2, 0);
-      ss << " -- dist_farthest_pt: " << num2str(d3, 0);
-
-    } else if (cs == 3) {
-      ss << "max_layer: " << num2str(d1, 0);
-      ss << " -- block_beginning: " << num2str(s1, 0);
-      ss << " -- block_end: " << num2str(s2, 0);
-
-    } else if (cs == 4) {
-
-    } else if (cs == 5) {
-
-    } else if (cs == 6) {
-
-    } else if (cs == 7) {
-
-    } else if (cs == 8) {
-
-    } else if (cs == 9) {
-
     }
+
+  } else if (cs == 2) {
+    ss << "max_layer: " << num2str(d1, 0);
+    ss << " -- farthest_pt: " << num2str(d2, 0);
+    ss << " -- dist_farthest_pt: " << num2str(d3, 0);
+
+  } else if (cs == 3) {
+    ss << "max_layer: " << num2str(d1, 0);
+    ss << " -- block_beginning: " << num2str(s1, 0);
+    ss << " -- block_end: " << num2str(s2, 0);
+
+  } else if (cs == 4) {
+
+  } else if (cs == 5) {
+
+  } else if (cs == 6) {
+
+  } else if (cs == 7) {
+
+  } else if (cs == 8) {
+
+  } else if (cs == 9) {
+
   }
-  if (trm_->vp_.vOPT >= 4) { idbg(ss.str()); }
+  if (trm_->vp_.vOPT == 3) { idbg(ss.str()); }
 }
 
 void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
@@ -498,18 +499,20 @@ void TRDebug::prntUpdateRad(int cs, bool c1, bool c2,
 }
 
 void TRDebug::prntIsFinished(int cs, bool c1, bool c2,
-                             double d1, double d2, double d3, double d4) {
+                             double d1, double d2, double d3,
+                             string s1) {
   stringstream ss;
   ss << "[@isFinished] ";
   if (cs == 1) {
     ss << "[A=(isModInit() && !getModPolys().empty()): ";
     ss << num2str(c1, 0, 1) << "]";
-    ss << "[B=(trm_->getRad() < tr_rad_tol_): ";
+    ss << "[B=(getRad() < tr_rad_tol_): ";
     ss << num2str(c2, 0, 1) << "]";
 
-    ss << ", radius: " + num2str(d1, 3, 1);
-    ss << ", #lim_inf: " + num2str(d2, 0, 0);
-    ss << ", #evals: " + num2str(d3, 0, 0);
+    ss << ", rad: " + num2str(d1, 3, 1);
+    ss << ", #infs: " + num2str(d2, 0, 0);
+    ss << ", #evald: " + num2str(d3, 0, 0);
+    ss << ", tc: " + s1;
 
   } else if (cs == 2) {
 
@@ -524,10 +527,14 @@ void TRDebug::prntTstCrit(int cs, string crs,
   if (cs == 1) {
     string crs_str = "crit stepping " + crs;
 
-    ss << prntVecXd(v0, "mod_crit ");
+    if (calcDbg_) {
+      ss << prntVecXd(v0, "mod_crit ");
+    }
     ss << " -- m_crit.n(): " + num2str(v0.norm(), 3, 1);
     ss << "; epsC=" + num2str(trm_->tr_eps_c_, 3, 1);
-    ss << "|[@testCrit] " << prntVecXd(v1, "x_curr   ");
+    if (calcDbg_) {
+      ss << "|[@testCrit] " << prntVecXd(v1, "x_curr   ");
+    }
     ss << " -- f_curr: " + num2str(d1, 3, 1);
     ss << ", radius: " + num2str(d2, 3, 1);
     ss << "|[@testCrit] [crit_stat_= " << crs_str << "]";

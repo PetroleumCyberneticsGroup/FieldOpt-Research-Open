@@ -60,7 +60,7 @@ void APPS::iterate() {
   if (enable_logging_) {
     logger_->AddEntry(this);
   }
-  if (inactive().size() > 0 && evaluated_cases_ < max_evaluations_) {
+  if (inactive().size() > 0 && c_evald_ < max_evaluations_) {
     case_handler_->AddNewCases(generate_trial_points(inactive()));
     set_active(inactive());
   }
@@ -68,7 +68,7 @@ void APPS::iterate() {
   if (is_hybrid_component_) {
     // Increment this here if this object is a hybrid optimization component,
     // as it will not be incremented elsewhere.
-    evaluated_cases_ = iteration_;
+    c_evald_ = iteration_;
   }
 }
 
@@ -128,7 +128,7 @@ void APPS::prune_queue() {
     return;
   } else {
     int queue_size = max_queue_length_ - directions_.size();
-    if (evaluated_cases_ >= max_evaluations_) queue_size = 1;
+    if (c_evald_ >= max_evaluations_) queue_size = 1;
     while (case_handler_->QueuedCases().size() > queue_size) {
       auto dequeued_case = dequeue_case_with_worst_origin();
       if (dequeued_case->origin_case()->id() == GetTentativeBestCase()->id())
@@ -142,7 +142,7 @@ void APPS::print_state(string header) {
   std::stringstream ss;
   ss << header << "|";
   ss << "Iteration:         " << iteration_ << "|";
-  ss << "Evaluated cases:   " << evaluated_cases_ << "|";
+  ss << "Evaluated cases:   " << c_evald_ << "|";
   ss << "Queued cases:      " << case_handler_->QueuedCases().size() << "|";
   ss << "Current best case: " << tentative_best_case_->id().toString().toStdString() << "|";
   ss << "OFV:               " << tentative_best_case_->objf_value() << "|";
