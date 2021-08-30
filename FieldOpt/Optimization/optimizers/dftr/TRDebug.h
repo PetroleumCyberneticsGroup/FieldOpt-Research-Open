@@ -91,7 +91,7 @@ class TRDebug {
   void prntIsFinished(int cs=0,
                       bool c1=false, bool c2=false,
                       double d1=0.0, double d2=0.0,
-                      double d3=0.0, double d4=0.0);
+                      double d3=0.0, string s1="");
 
   void prntProgInit(int cs=0, VectorXd v0 = VectorXd::Zero(0),
                     VectorXd v1 = VectorXd::Zero(0),
@@ -127,7 +127,7 @@ class TRDebug {
 
   TRFrame* trm_;
   bool prntDbg_ = false;
-  bool calcDbg_ = false;
+  bool calcDbg_ = true;
 };
 
 }
