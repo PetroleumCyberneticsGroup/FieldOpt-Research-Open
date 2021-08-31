@@ -10,6 +10,7 @@ SET(RUNNER_HEADERS
 	runners/overseer.h
 	runners/serial_runner.h
 	runners/bilevel_runner.h
+	runners/bilvl_synchr_mpi_rnr.h
 	runners/synchronous_mpi_runner.h
 	runners/worker.h
 	runtime_settings.h
@@ -26,6 +27,7 @@ SET(RUNNER_SOURCES
 	runners/overseer.cpp
 	runners/serial_runner.cpp
 	runners/bilevel_runner.cpp
+	runners/bilvl_synchr_mpi_rnr.cpp
 	runners/synchronous_mpi_runner.cpp
 	runners/worker.cpp
 	runtime_settings.cpp

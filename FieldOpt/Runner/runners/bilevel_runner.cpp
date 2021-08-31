@@ -71,9 +71,8 @@ void BilevelRunner::prntDbg(int lvl, Optimization::Optimizer *optmzr, Optimizati
 
 void BilevelRunner::Execute() {
   double fval_best = base_case_->objf_value();
-  // f diff in pattern threshold [fraction]
   double bl_ps_fdiff = settings_->optimizer()->parameters().bl_ps_fdiff;
-  im_ = "Set bl_ps_fdiff is: " + num2str(bl_ps_fdiff);
+  im_ = "f diff in pattern threshold [fraction]: " + num2str(bl_ps_fdiff);
   ext_info(im_, md_, cl_);
 
   // bl_ps_fdiff = -std::numeric_limits<double>::infinity(); // override
