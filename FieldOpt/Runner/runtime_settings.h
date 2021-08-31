@@ -55,7 +55,7 @@ class RuntimeSettings : public Loggable
   /*!
    * \brief The RunnerType enum lists the names of available runners.
    */
-  enum RunnerType { SERIAL, ONEOFF, MPISYNC, BILEVEL };
+  enum RunnerType { SERIAL, ONEOFF, MPISYNC, BILEVEL, BL_MPISYNC };
 
   Paths &paths() { return paths_; }
   int verbosity_level() const { return verbosity_level_; }

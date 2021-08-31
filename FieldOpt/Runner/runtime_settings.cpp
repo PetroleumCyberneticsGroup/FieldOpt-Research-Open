@@ -82,6 +82,8 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
       runner_type_ = RunnerType::MPISYNC;
     } else if (QString::compare(runner_str, "bilevel") == 0) {
       runner_type_ = RunnerType::BILEVEL;
+    } else if (QString::compare(runner_str, "bl-mpisync") == 0) {
+      runner_type_ = RunnerType::BL_MPISYNC;
     }
   } else { runner_type_ = RunnerType::SERIAL; }
 
