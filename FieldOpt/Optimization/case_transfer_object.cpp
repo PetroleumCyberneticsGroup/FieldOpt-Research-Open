@@ -34,7 +34,7 @@ using namespace std;
 
 CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   id_ = qUuidToBoostUuid(c->id_);
-  objective_function_value_ = c->objective_function_value_;
+  objective_function_value_ = c->objf_val_;
 
   // binary_variables_ = qHashToStdMap(c->binary_variables_);
   // integer_variables_ = qHashToStdMap(c->integer_variables_);
@@ -74,7 +74,7 @@ Case *CaseTransferObject::CreateCase() {
   c->real_variables_ = stdListToQlist(real_variables_);
 
   c->id_ = boostUuidToQuuid(id_);
-  c->objective_function_value_ = objective_function_value_;
+  c->objf_val_ = objective_function_value_;
   c->SetWICTime(wic_time_secs_);
   c->SetSimTime(sim_time_secs_);
   c->SetEnsembleRealization(QString::fromStdString(ensemble_realization_));

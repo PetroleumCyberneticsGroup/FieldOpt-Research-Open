@@ -110,7 +110,7 @@ Optimizer::TerminationCondition GSS::IsFinished() {
     return tc;
   }
 
-  if (evaluated_cases_ >= max_evaluations_) {
+  if (c_evald_ >= max_evaluations_) {
     tc = MAX_EVALS_REACHED;
   } else if (is_converged()) {
     tc = MIN_STEP_LENGTH_REACHED;

@@ -78,13 +78,13 @@ TC DFTR::IsFinished() {
   B = trm_->getRad() < tr_rad_tol_;
   if (B) { tc = MIN_STEP_LENGTH_REACHED; }
 
-  C = evaluated_cases_ == tr_iter_max_;
+  C = c_evald_ >= tr_iter_max_;
   if (C) { tc = MAX_EVALS_REACHED; } // tc = MAX_ITERS_REACHED;
 
   if (tc != NOT_FINISHED) { }
 
-  trm_->dbg_->prntIsFinished(1, A, B,
-    trm_->getRad(),tr_lim_inf_, evaluated_cases_);
+  trm_->dbg_->prntIsFinished(1, A, B,trm_->getRad(),
+    tr_lim_inf_, c_evald_, getTCString(tc));
 
   // trm_->dbg_->prntIsFinished(2, C, T,
   //   tr_tol_f_, tr_rad_tol_, tr_iter_max_);
@@ -196,7 +196,8 @@ void DFTR::iterate() {
     if (enable_logging_) { logger_->AddEntry(this); }
 
     // CODE ->
-    if ((trm_->getRad() < tr_rad_tol_) || (iteration_ >= tr_iter_max_)) {
+    // if ((trm_->getRad() < tr_rad_tol_) || (iteration_ >= tr_iter_max_)) {
+    if ((trm_->getRad() < tr_rad_tol_) || (c_evald_ >= tr_iter_max_)) {
       trm_->dbg_->prntIterBool(3);
       return; // end of the algorithm
 

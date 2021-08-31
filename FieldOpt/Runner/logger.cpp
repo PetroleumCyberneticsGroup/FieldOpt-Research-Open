@@ -29,7 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 
 Logger::Logger(Runner::RuntimeSettings *rts, QString output_subdir,
-               bool write_logs, Settings::VerbParams vp) {
+               bool write_logs, Settings::VerbParams vp, QString pfx) {
   vp_=vp;
   write_logs_ = write_logs;
   is_worker_ = output_subdir.length() > 0;
@@ -38,14 +38,15 @@ Logger::Logger(Runner::RuntimeSettings *rts, QString output_subdir,
     output_dir_ = output_dir_ + "/" + output_subdir + "/";
     Utilities::FileHandling::CreateDir(output_dir_, vp_);
   }
-  opt_log_path_ = output_dir_ + "/log_optimization.csv";
-  cas_log_path_ = output_dir_ + "/log_cases.csv";
-  ext_log_path_ = output_dir_ + "/log_extended.json";
-  run_state_path_ = output_dir_ + "/state_runner.txt";
-  summary_prerun_path_ = output_dir_ + output_subdir + "/summary_prerun.md";
-  summary_postrun_path_ = output_dir_ + output_subdir + "/summary_postrun.md";
-  QStringList log_paths = (QStringList() << cas_log_path_ << opt_log_path_ << ext_log_path_ << run_state_path_
-                                         << summary_prerun_path_ << summary_postrun_path_);
+  opt_log_path_ = output_dir_ + "/log_optimization" + pfx + ".csv";
+  cas_log_path_ = output_dir_ + "/log_cases" + pfx + ".csv";
+  ext_log_path_ = output_dir_ + "/log_extended" + pfx + ".json";
+  run_state_path_ = output_dir_ + "/state_runner" + pfx + ".txt";
+  summary_prerun_path_ = output_dir_ + output_subdir + "/summary_prerun" + pfx + ".md";
+  summary_postrun_path_ = output_dir_ + output_subdir + "/summary_postrun" + pfx + ".md";
+  QStringList log_paths = (QStringList() << cas_log_path_
+    << opt_log_path_ << ext_log_path_ << run_state_path_
+    << summary_prerun_path_ << summary_postrun_path_);
 
   // Delete existing logs if --force flag is on
   if (rts->overwrite_existing()) {

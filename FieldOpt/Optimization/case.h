@@ -188,7 +188,7 @@ class Case : public Loggable
   //!< Get the objective function value. Throws an
   //!< exception if the value has not been defined.
   double objf_value() const;
-  void set_objf_value(double objective_function_value);
+  void set_objf_value(double fval);
 
   //!< Set the value of an integer variable in the case.
   void set_integer_variable_value(QUuid id, int val);
@@ -441,6 +441,8 @@ class Case : public Loggable
 
   void SetVerbParams(Settings::VerbParams vp) { vp_ = vp; }
 
+  void CopyCaseVals(const Case *c);
+
  private:
   //!< Unique ID for the case.
   int sim_time_sec_;
@@ -454,7 +456,7 @@ class Case : public Loggable
   string cl_ = "Case";
   Settings::VerbParams vp_;
 
-  double objective_function_value_;
+  double objf_val_;
   // QHash<QUuid, bool> binary_variables_;
   // QHash<QUuid, int> integer_variables_;
   // QHash<QUuid, double> real_variables_;
@@ -472,6 +474,14 @@ class Case : public Loggable
   QList<QPair<QUuid, double>> rvar_grads_scal_;
   QList<QPair<QUuid, double>> rvar_grads_norm_;
 
+  // for bilevel opt setup
+  QList<QPair<QUuid, bool>> binary_variables_old_;
+  QList<QPair<QUuid, int>> integer_variables_old_;
+
+  QList<QPair<QUuid, double>> real_variables_old_;
+  QList<QPair<QUuid, double>> rvar_grads_old_;
+
+  //
   QList<QUuid> real_id_index_map_;
   QList<QUuid> integer_id_index_map_;
   QList<QUuid> binary_id_index_map_;

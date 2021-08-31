@@ -49,7 +49,7 @@ Case::Case() {
   real_variables_ = QList<QPair<QUuid, double>>();
   rvar_grads_ = QList<QPair<QUuid, double>>();
 
-  objective_function_value_ = std::numeric_limits<double>::max();
+  objf_val_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -79,7 +79,7 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
     rvar_grads_.append(qMakePair(real_variables_.at(ii).first, 0.0));
   }
 
-  objective_function_value_ = std::numeric_limits<double>::max();
+  objf_val_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
@@ -103,12 +103,32 @@ Case::Case(const Case *c) {
   //   integer_id_index_map_.append(integer_variables_.at(ii).first);
   // }
 
-  objective_function_value_ = c->objective_function_value_;
+  objf_val_ = c->objf_val_;
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
   ensemble_ofvs_ = c->ensemble_ofvs_;
   vp_ = c->vp_;
+}
+
+void Case::CopyCaseVals(const Case *c) {
+  binary_variables_old_ = binary_variables_;
+  integer_variables_old_ = integer_variables_;
+  real_variables_old_ = real_variables_;
+  rvar_grads_old_ = rvar_grads_;
+
+  binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
+  integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
+  real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
+  rvar_grads_ = QList<QPair<QUuid, double>>(c->real_var_grads());
+
+  binary_id_index_map_ = c->binary_id_index_map_;
+  integer_id_index_map_ = c->integer_id_index_map_;
+  real_id_index_map_ = c->real_id_index_map_;
+
+  objf_val_ = c->objf_val_;
+  sim_time_sec_ = c->sim_time_sec_;
+  wic_time_sec_ = c->wic_time_sec_;
 }
 
 bool Case::Equals(const Case *other, double tolerance) const {
@@ -162,11 +182,11 @@ bool Case::Equals(const Case *other, double tolerance) const {
 }
 
 double Case::objf_value() const {
-  if (objective_function_value_ == std::numeric_limits<double>::max()) {
+  if (objf_val_ == std::numeric_limits<double>::max()) {
     string em = "The objective function value has not been set in this Case.";
     throw ObjectiveFunctionException(em);
   } else {
-    return objective_function_value_;
+    return objf_val_;
   }
 }
 
@@ -236,7 +256,7 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
       auto pair = qMakePair(integer_variables_.at(var_indx).first, pval);
       new_case_p->integer_variables_.replace(var_indx, pair);
 
-      new_case_p->objective_function_value_ = std::numeric_limits<double>::max();
+      new_case_p->objf_val_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_p);
     }
     if (sign == MINUS || sign == PLUSMINUS) {
@@ -247,7 +267,7 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
       auto pair = qMakePair(integer_variables_.at(var_indx).first, pval);
       new_case_m->integer_variables_.replace(var_indx, pair);
 
-      new_case_m->objective_function_value_ = std::numeric_limits<double>::max();
+      new_case_m->objf_val_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_m);
     }
 
@@ -261,7 +281,7 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
       auto pair = qMakePair(real_variables_.at(var_indx).first, pval);
       new_case_p->real_variables_.replace(var_indx, pair);
 
-      new_case_p->objective_function_value_ = std::numeric_limits<double>::max();
+      new_case_p->objf_val_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_p);
     }
     if (sign == MINUS || sign == PLUSMINUS) {
@@ -272,7 +292,7 @@ QList<Case *> Case::Perturb(QUuid variabe_id, Case::SIGN sign, double magnitude)
       auto pair = qMakePair(real_variables_.at(var_indx).first, pval);
       new_case_m->real_variables_.replace(var_indx, pair);
 
-      new_case_m->objective_function_value_ = std::numeric_limits<double>::max();
+      new_case_m->objf_val_ = std::numeric_limits<double>::max();
       new_cases.append(new_case_m);
     }
   }
@@ -429,7 +449,7 @@ QUuid Case::GetId() {
 
 map <string, vector<double>> Case::GetValues() {
   map<string, vector<double>> valmap;
-  valmap["OFnVal"] = vector<double>{objective_function_value_};
+  valmap["OFnVal"] = vector<double>{objf_val_};
   valmap["SimDur"] = vector<double>{sim_time_sec_};
   valmap["WicDur"] = vector<double>{wic_time_sec_};
   if (ensemble_ofvs_.size() > 1) {
@@ -440,16 +460,18 @@ map <string, vector<double>> Case::GetValues() {
 
 string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) {
   stringstream str;
-  str << "|=========================================================|" << endl;
-  str << "| Case:            " << id_stdstr() << " |" << endl;
-  str << "|---------------------------------------------------------|" << endl;
+  str << "=========================================================|";
+  str << "> fobj: " << num2str(objf_val_, 3, 1);
+  str << " cs: " << id_stdstr() << " |";
+  str << "---------------------------------------------------------|";
 
   if (!real_variables_.empty()) {
-    str << "| Continuous variable values:                             |" << endl;
+    str << "Continuous variable values:                             |";
     for (int ii=0; ii < real_variables_.size(); ii++) {
       string vn = varcont->GetContinuousVariables()->at(ii).second->name().toStdString();
       double vv = real_variables_.at(ii).second;
-      str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
+      str << ">  " << vn << ": " << num2str(vv,3,0,20)  << " |";
+
     }
   }
 
@@ -470,7 +492,7 @@ string Case::StringRepresentation(Model::Properties::VarPropContainer *varcont) 
       str << "| > " << vn << ": " << std::setw (51 - vn.size()) << vv << " |" << endl;
     }
   }
-  str << "|=========================================================|" << endl;
+  str << "=========================================================|";
   return str.str();
 
 //    tringstream entry;
@@ -539,8 +561,8 @@ QPair<double, double> Case::GetEnsembleExpectedOfv() const {
   return pair;
 }
 
-void Case::set_objf_value(double objective_function_value) {
-  objective_function_value_ = objective_function_value;
+void Case::set_objf_value(double fval) {
+  objf_val_ = fval;
 }
 
 }

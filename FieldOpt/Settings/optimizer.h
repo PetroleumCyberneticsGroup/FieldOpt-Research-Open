@@ -60,7 +60,7 @@ class Optimizer
   enum OptimizerType {
     Compass, APPS, ExhaustiveSearch2DVert, GeneticAlgorithm,
     EGO, PSO, VFSA, SPSA, CMA_ES, Hybrid, TrustRegionOptimization,
-    DFTR, SQP, APPS_DFTR
+    DFTR, SQP, APPS_DFTR, CS_DFTR
   };
 
   enum OptimizerMode { Maximize, Minimize };
@@ -77,6 +77,8 @@ class Optimizer
 
   enum ConstraintWellSplinePointsType { MaxMin, Function};
   enum ObjectiveType { WeightedSum, NPV, Augmented};
+
+  constexpr static double infd = std::numeric_limits<double>::infinity();
 
   struct Parameters {
     // Common parameters
@@ -116,6 +118,9 @@ class Optimizer
 
     //!< Pattern to be used for GSS algorithms.
     QString pattern;
+
+    // Bilevel opt -----------------------------------------
+    double bl_ps_fdiff = -infd;
 
     // GA parameters ---------------------------------------
     //!< Max iterations. Default: 50

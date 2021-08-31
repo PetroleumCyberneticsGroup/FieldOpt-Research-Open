@@ -153,6 +153,9 @@ class CaseHandler
   int NumberInvalid() const { return nr_invl_; }
   int NumberFailed() const { return nr_fail_; }
 
+  string status();
+  void AddToNumberSimulated(int evald) { nr_eval_ = nr_eval_ + evald; }
+
  private:
 
   //!< Queue of the next keys to be evaluated.

@@ -83,6 +83,9 @@ double AbstractRunner::sentinelValue() const {
   return sentinel_value_;
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔═╗  ╔╦╗  ╔╦╗  ╦  ╔╗╔  ╔═╗  ╔═╗
+// │  │││  │   │     ╚═╗  ║╣    ║    ║   ║  ║║║  ║ ╦  ╚═╗
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╚═╝   ╩    ╩   ╩  ╝╚╝  ╚═╝  ╚═╝
 void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 
   // Output dir
@@ -120,6 +123,9 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   }
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╦
+// │  │││  │   │     ║║║  ║ ║   ║║  ║╣   ║
+// ┴  ┘└┘  ┴   ┴     ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩═╝
 void AbstractRunner::InitializeModel() {
   if (settings_ == nullptr) { E("Settings must be initialized b/f Model.", md_, cl_); }
 
@@ -131,6 +137,9 @@ void AbstractRunner::InitializeModel() {
   model_ = new Model::Model(*settings_, logger_);
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╦  ╔╦╗  ╦ ╦  ╦    ╔═╗  ╔╦╗  ╔═╗  ╦═╗
+// │  │││  │   │     ╚═╗  ║  ║║║  ║ ║  ║    ╠═╣   ║   ║ ║  ╠╦╝
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╩  ╩ ╩  ╚═╝  ╩═╝  ╩ ╩   ╩   ╚═╝  ╩╚═
 void AbstractRunner::InitializeSimulator() {
   if (model_ == nullptr) { E("Model must be initialized b/f Simulator.", md_, cl_); }
 
@@ -168,6 +177,9 @@ void AbstractRunner::InitializeSimulator() {
   }
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╗   ╔═╗  ╔╦╗  ╔═╗  ╔╦╗
+// │  │││  │   │     ║╣   ╚╗╔╝  ╠═╣  ║    ╠╩╗  ╚═╗  ║║║  ║ ║   ║║
+// ┴  ┘└┘  ┴   ┴     ╚═╝   ╚╝   ╩ ╩  ╩═╝  ╚═╝  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
 void AbstractRunner::EvaluateBaseModel() {
   if (simulator_ == nullptr) {
     E("Simulator must be initialized b/f evaluating base model.", md_, cl_);
@@ -187,6 +199,9 @@ void AbstractRunner::EvaluateBaseModel() {
   }
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔╗    ╦  ╔═╗  ╦ ╦  ╔╗╔  ╔═╗
+// │  │││  │   │     ║ ║  ╠╩╗   ║  ╠╣   ║ ║  ║║║  ║
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╚═╝  ╚╝  ╚    ╚═╝  ╝╚╝  ╚═╝
 void AbstractRunner::InitializeObjectiveFunction() {
   if (simulator_ == nullptr || settings_ == nullptr) {
     E("Simulator & Settings must be initialized b/f ObjectiveFunction.", md_, cl_);
@@ -219,6 +234,9 @@ void AbstractRunner::InitializeObjectiveFunction() {
   }
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔╗   ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╔═╗
+// │  │││  │   │     ╠╩╗  ╠═╣  ╚═╗  ║╣   ║    ╠═╣  ╚═╗  ║╣
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╩ ╩  ╚═╝  ╚═╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 void AbstractRunner::InitializeBaseCase() {
   if (objf_ == nullptr || model_ == nullptr) {
     E("ObjectiveFunction and Model must be initialized before BaseCase.", md_, cl_);
@@ -249,30 +267,7 @@ void AbstractRunner::InitializeBaseCase() {
   }
 }
 
-void AbstractRunner::InitSecndOptmzr() {
-  if (base_case_ == nullptr || model_ == nullptr || optimizer_ == nullptr) {
-    E("Base Case, Model or Optimizer not initialized", md_, cl_);
-  }
 
-  // switch (settings_->optimizer()->type()) {
-  //   // ┌─┐  ┌─┐  ┌─┐  ┌─┐       ┌┬┐  ┌─┐  ┌┬┐  ┬─┐
-  //   // ├─┤  ├─┘  ├─┘  └─┐  ───   ││  ├┤    │   ├┬┘
-  //   // ┴ ┴  ┴    ┴    └─┘       ─┴┘  └     ┴   ┴└─
-  //   case OptzrTyp::APPS_DFTR: {
-  //     if (vp_.vRUN >= 1) { ext_info("Using APPS_DFTR.", md_, cl_, vp_.lnw); }
-  //     // secndoptmzr_ = new Optzr::DFTR(settings_->optimizer(),
-  //     //                                base_case_,
-  //     //                                model_->variables(),
-  //     //                                model_->grid(),
-  //     //                                logger_,
-  //     //                                nullptr,
-  //     //                                model_->constraintHandler());
-  //
-  //     break;
-  //   }
-  // }
-
-}
 
 // ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔═╗  ╔╦╗  ╦  ╔╦╗  ╦  ╔═╗  ╔═╗  ╦═╗
 // │  │││  │   │     ║ ║  ╠═╝   ║   ║  ║║║  ║  ╔═╝  ║╣   ╠╦╝
@@ -288,7 +283,8 @@ void AbstractRunner::InitializeOptimizer() {
     // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
     // │    │ │  │││  ├─┘  ├─┤  └─┐  └─┐
     // └─┘  └─┘  ┴ ┴  ┴    ┴ ┴  └─┘  └─┘
-    case OptzrTyp::Compass: {
+    case OptzrTyp::Compass:
+    case OptzrTyp::CS_DFTR: {
       if (vp_.vRUN >= 1) { ext_info("Using CompassSearch.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
                                             base_case_,
@@ -302,7 +298,8 @@ void AbstractRunner::InitializeOptimizer() {
       // ┌─┐  ┌─┐  ┌─┐  ┌─┐
       // ├─┤  ├─┘  ├─┘  └─┐
       // ┴ ┴  ┴    ┴    └─┘
-    case OptzrTyp::APPS | OptzrTyp::APPS_DFTR: {
+    case OptzrTyp::APPS:
+    case OptzrTyp::APPS_DFTR: {
       if (vp_.vRUN >= 1) { ext_info("Using APPS.", md_, cl_, vp_.lnw); }
       optimizer_ = new Optzr::APPS(settings_->optimizer(),
                                    base_case_,
@@ -475,8 +472,14 @@ void AbstractRunner::InitializeBookkeeper() {
   bookkeeper_ = new Bookkeeper(settings_,optimizer_->case_handler());
 }
 
+// ┬  ┌┐┌  ┬  ┌┬┐    ╦    ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╦═╗
+// │  │││  │   │     ║    ║ ║  ║ ╦  ║ ╦  ║╣   ╠╦╝
+// ┴  ┘└┘  ┴   ┴     ╩═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╩╚═
 void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
   logger_ = new Logger(rts_, output_subdir, write_logs);
+  if(rts_->runner_type() == RuntimeSettings::RunnerType::BILEVEL) {
+    log_lwr_ = new Logger(rts_, output_subdir, write_logs, vp_, "_lwr");
+  }
 }
 
 void AbstractRunner::PrintCompletionMessage() {
