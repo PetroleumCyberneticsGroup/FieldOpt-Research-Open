@@ -101,14 +101,19 @@ class AbstractRunner
   Optimization::Case *optz_case_;
 
   Optimization::Optimizer *optimizer_;
-  Optimization::Optimizer *secndoptmzr_;
+  Logger *logger_;
 
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
-  Logger *logger_;
+
   std::vector<int> sim_times_;
+  std::vector<int> sim_times_lwr_{0};
+
   bool is_ensemble_run_;
   EnsembleHelper ensemble_helper_;
+
+  // Optimization::Optimizer *optmzr_lwr_ = nullptr;
+  Logger *log_lwr_= nullptr;
 
   // void E(string m) const {
   //   m = "[mod: " + md_ + "] [cls: " + cl_ + "] " + m;
@@ -153,8 +158,6 @@ class AbstractRunner
   void InitializeBaseCase();
   void InitializeOptimizer();
   void InitializeBookkeeper();
-
-  void InitSecndOptmzr();
 
   //!< Write the pre-run summary
   void FinalizeInitialization(bool write_logs);

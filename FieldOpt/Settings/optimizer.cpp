@@ -451,6 +451,17 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     else params.pattern = "Compass";
 
     // -----------------------------------------------------
+    // BILEVEL OPT
+    if (json_params.contains("BL-ps-fdiff")) {
+      if (json_params["BL-ps-fdiff"].isDouble()) {
+        params.bl_ps_fdiff = json_params["BL-ps-fdiff"].toDouble();
+      } else if (json_params["BL-ps-fdiff"].isString() &&
+        json_params["BL-ps-fdiff"].toString() == "-INF") {
+        params.bl_ps_fdiff = -infd;
+      }
+    } else { params.bl_ps_fdiff = -infd; }
+
+    // -----------------------------------------------------
     // GA PARAMETERS
     // GA parameters :: MaxGenerations
     if (json_params.contains("MaxGenerations"))
@@ -943,6 +954,9 @@ Optimizer::OptimizerType Optimizer::parseType(QString &type) {
 
   } else if (QString::compare(type, "APPS_DFTR") == 0) {
     opt_type = OptimizerType::APPS_DFTR;
+
+  } else if (QString::compare(type, "CS_DFTR") == 0) {
+    opt_type = OptimizerType::CS_DFTR;
 
   } else {
     em_ = "Optimizer type " + type.toStdString() + " not recognized.";

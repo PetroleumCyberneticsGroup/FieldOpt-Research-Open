@@ -154,4 +154,16 @@ void CaseHandler::DequeueCase(QUuid id) {
 Case *CaseHandler::GetCase(const QUuid id) const {
   return cases_[id];
 }
+
+string CaseHandler::status() {
+  stringstream ss;
+  ss << "#totl: " << nr_totl_ << ",  ";
+  ss << "#eval: " << nr_eval_ << ",  ";
+  ss << "#bkpd: " << nr_bkpd_ << ",  ";
+  ss << "#timo: " << nr_timo_ << ",  ";
+  ss << "#invl: " << nr_invl_ << ",  ";
+  ss << "#fail: " << nr_fail_;
+  return ss.str();
+}
+
 }

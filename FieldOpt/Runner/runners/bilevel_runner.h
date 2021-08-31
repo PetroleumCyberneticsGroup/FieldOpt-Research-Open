@@ -41,6 +41,8 @@ class BilevelRunner : public AbstractRunner
 
  private:
   void Execute() override;
+
+  void prntDbg(int lvl, Optimization::Optimizer *optmzr, Optimization::Case *cs);
 };
 
 }

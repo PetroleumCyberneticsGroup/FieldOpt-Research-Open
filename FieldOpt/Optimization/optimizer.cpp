@@ -36,6 +36,7 @@ using Printer::ext_info;
 using Printer::num2str;
 
 using Constraints::ConstraintHandler;
+using TC = Optimization::Optimizer::TerminationCondition;
 
 Optimizer::Optimizer(Settings::Optimizer *opt_settings,
                      Case *base_case,
@@ -87,7 +88,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
   // ITERATION ---------------------------------------------
   iteration_ = 0;
-  evaluated_cases_ = 0;
+  c_evald_ = 0;
   mode_ = opt_settings->mode();
   type_ = opt_settings->type();
 
@@ -121,6 +122,44 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   }
 }
 
+string Optimizer::getTCString(TC tc) {
+  stringstream cout;
+
+  switch (tc) {
+
+    case TC::NOT_FINISHED:
+      cout << "Not finished." << endl;
+      break;
+
+    case TC::MAX_ITERS_REACHED:
+      cout << "Max # iterations reached." << endl;
+      break;
+
+    case TC::MAX_EVALS_REACHED:
+      cout << "Max # fevals reached." << endl;
+      break;
+
+    case TC::MIN_STEP_LENGTH_REACHED:
+      cout << "Min step length reached (converged)." << endl;
+      break;
+
+    case TC::OPT_CRITERIA_REACHED:
+      cout << "Opt criteria reached" << endl;
+      break;
+
+    case TC::DFTR_CRIT_NORM_1ST_ORD_LT_TOLF:
+      cout << "Crit.norm[1st-order] less than tolf." << endl;
+      break;
+
+    case TC::DFTR_MAX_NUM_RHO_INF_MET:
+      cout << "Max # of rho=-inf met." << endl;
+      break;
+
+    default: cout << "Unknown termination reason." << endl;
+  }
+  return cout.str();
+}
+
 Settings::Optimizer::OptimizerType TR_DFO =
   Settings::Optimizer::OptimizerType::TrustRegionOptimization;
 
@@ -139,7 +178,7 @@ Case *Optimizer::GetCaseForEvaluation() {
   if (IsFinished() || (case_handler_->QueuedCases().empty())) {
     im_ = "(IsFinished() == NOT_FINISHED) => ";
     im_ += (IsFinished() == NOT_FINISHED) ? "true" : "false";
-    im_ += " (case_handler_->QueuedCases()..empty() == 0) => ";
+    im_ += " (QueuedCases()..empty()) => ";
     im_ += case_handler_->QueuedCases().empty() ? "true" : "false";
     im_ += " Returning nullptr";
 
@@ -162,7 +201,7 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
   handleEvaluatedCase(case_handler_->GetCase(c->id()));
 
   if(c->state.eval == Case::CaseState::E_DONE) {
-    evaluated_cases_++;
+    c_evald_++;
   }
 
   if (enable_logging_) {

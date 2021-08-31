@@ -70,7 +70,7 @@ class Logger
    * \param write_logs Whether or not the logs should be written. This setting is mainly here for tests.
    */
   Logger(Runner::RuntimeSettings *rts, QString output_subdir="",
-         bool write_logs=true, Settings::VerbParams vp={});
+         bool write_logs=true, Settings::VerbParams vp={}, QString pfx="");
 
   void AddEntry(Loggable *obj);
   void FinalizePrerunSummary();
