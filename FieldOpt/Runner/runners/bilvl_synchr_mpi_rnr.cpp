@@ -116,19 +116,23 @@ void BilevelSynchrMPIRunner::Execute() {
       //   printMessage(ensemble_helper_.GetStateString(), 2);
       // }
 
-      if (is_ensemble_run_ && ensemble_helper_.IsCaseAvailableForEval()) {
-        printMessage("Queued realization cases available.", 2);
-        if (overseer_->NumberOfFreeWorkers() > 0) { // Free workers available
-          printMessage("Free workers available. Handling next case.", 2);
-          handle_new_case();
-        } else { // No workers available
-          printMessage("No free workers available. Waiting for an evaluated case.", 2);
-          wait_for_evaluated_case();
-        }
-      } else if (is_ensemble_run_ && !ensemble_helper_.IsCaseDone()) {
-        printMessage("Not all ensemble realizations have been evaluated.", 2);
-        wait_for_evaluated_case();
-      } else if (optimizer_->nr_queued_cases() > 0) { // Queued cases in optimizer
+      // if (is_ensemble_run_ && ensemble_helper_.IsCaseAvailableForEval()) {
+      //   printMessage("Queued realization cases available.", 2);
+      //   if (overseer_->NumberOfFreeWorkers() > 0) { // Free workers available
+      //     printMessage("Free workers available. Handling next case.", 2);
+      //     handle_new_case();
+      //   } else { // No workers available
+      //     printMessage("No free workers available. Waiting for an evaluated case.", 2);
+      //     wait_for_evaluated_case();
+      //   }
+      //
+      // } else if (is_ensemble_run_ && !ensemble_helper_.IsCaseDone()) {
+      //   printMessage("Not all ensemble realizations have been evaluated.", 2);
+      //   wait_for_evaluated_case();
+      //
+      // } else
+      //
+      if (optimizer_->nr_queued_cases() > 0) { // Queued cases in optimizer
         printMessage("Queued cases available.", 2);
         if (overseer_->NumberOfFreeWorkers() > 0) { // Free workers available
           printMessage("Free workers available. Handling next case.", 2);
@@ -147,7 +151,9 @@ void BilevelSynchrMPIRunner::Execute() {
           wait_for_evaluated_case();
         }
       }
-    }
+
+    } // optimizer overseer finished
+
     FinalizeRun(true);
     overseer_->TerminateWorkers();
     printMessage("Terminating workers.", 2);
@@ -155,10 +161,11 @@ void BilevelSynchrMPIRunner::Execute() {
     env_.~environment();
     return;
 
+
   } else { // Worker
     printMessage("Waiting to receive initial unevaluated case...", 2);
     worker_->RecvUnevaluatedCase();
-    printMessage("Reveived initial unevaluated case.", 2);
+    printMessage("Received initial unevaluated case.", 2);
     while (worker_->GetCurrentCase() != nullptr) {
       MPIRunner::MsgTag tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS; // Tag to be sent along with the case.
       try {
@@ -167,10 +174,10 @@ void BilevelSynchrMPIRunner::Execute() {
         logger_->AddEntry(this);
         bool simulation_success = true;
 
-        if (is_ensemble_run_) {
-          printMessage("Updating grid path.", 2);
-          model_->set_grid_path(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()).grid());
-        }
+        // if (is_ensemble_run_) {
+        //   printMessage("Updating grid path.", 2);
+        //   model_->set_grid_path(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()).grid());
+        // }
 
         printMessage("Applying case to model.", 2);
         model_->ApplyCase(worker_->GetCurrentCase());
@@ -193,18 +200,19 @@ void BilevelSynchrMPIRunner::Execute() {
                                                       rts_->threads_per_sim());
           }
         } else {
-          if (!is_ensemble_run_) {
+          // if (!is_ensemble_run_) {
             printMessage("Starting model evaluation with timeout.", 2);
             simulation_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
-          } else {
-            printMessage("Starting ensemble model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
-                                                      settings_->simulator()->max_minutes() * 60,
-                                                      rts_->threads_per_sim());
-          }
+          // } else {
+          //   printMessage("Starting ensemble model evaluation with timeout.", 2);
+          //   simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
+          //                                             settings_->simulator()->max_minutes() * 60,
+          //                                             rts_->threads_per_sim());
+          // }
         }
 
-        simulation_done_ = true; logger_->AddEntry(this);
+        simulation_done_ = true;
+        logger_->AddEntry(this);
         auto end = QDateTime::currentDateTime();
         int sim_time = time_span_seconds(start, end);
 
@@ -234,13 +242,12 @@ void BilevelSynchrMPIRunner::Execute() {
       }
       printMessage("Sending back evaluated case.", 2);
       worker_->SendEvaluatedCase(tag);
-      printMessage("Waiting to reveive an unevaluated case...", 2);
+      printMessage("Waiting to receive an unevaluated case...", 2);
       worker_->RecvUnevaluatedCase();
       if (worker_->GetCurrentTag() == TERMINATE) {
         printMessage("Received termination message. Breaking.", 2);
         break;
-      }
-      else {
+      } else {
         printMessage("Received an unevaluated case.", 2);
       }
     }
@@ -262,7 +269,7 @@ void BilevelSynchrMPIRunner::Execute() {
 
 void BilevelSynchrMPIRunner::initialDistribution() {
   while (optimizer_->nr_queued_cases() > 0
-    && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
+      && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
     overseer_->AssignCase(optimizer_->GetCaseForEvaluation());
   }
 }
