@@ -60,7 +60,7 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   seconds_spent_in_iterate_ = 0;
 
   // CONSTRAINT HANDLER ------------------------------------
-  // Moved constraint handliner initialization to Model
+  // Moved constraint handler initialization to Model
   // if (constraint_handler == nullptr) {
   //   constraint_handler_ = new ConstraintHandler(opt_settings,
   //                                               variables, grid);
