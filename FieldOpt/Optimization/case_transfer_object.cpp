@@ -34,7 +34,9 @@ using namespace std;
 
 CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   id_ = qUuidToBoostUuid(c->id_);
-  objective_function_value_ = c->objf_val_;
+  objf_val_ = c->objf_val_;
+  fmax_ = c->fmax_;
+  fdiff_ = c->fdiff_;
 
   // binary_variables_ = qHashToStdMap(c->binary_variables_);
   // integer_variables_ = qHashToStdMap(c->integer_variables_);
@@ -47,6 +49,14 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   binary_variables_ = qListToStdList(c->binary_variables_);
   integer_variables_ = qListToStdList(c->integer_variables_);
   real_variables_ = qListToStdList(c->real_variables_);
+
+  rvar_grads_ = qListToStdList(c->rvar_grads_);
+  rvar_grads_scal_ = qListToStdList(c->rvar_grads_scal_);
+  rvar_grads_norm_ = qListToStdList(c->rvar_grads_norm_);
+
+  binary_id_index_map_  = qListToStdList(c->binary_id_index_map_);
+  integer_id_index_map_  = qListToStdList(c->integer_id_index_map_);
+  real_id_index_map_  = qListToStdList(c->real_id_index_map_);
 
   wic_time_secs_ = c->GetWICTime();
   sim_time_secs_ = c->GetSimTime();
@@ -61,6 +71,11 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
 Case *CaseTransferObject::CreateCase() {
   auto c = new Case();
 
+  c->id_ = boostUuidToQuuid(id_);
+  c->objf_val_ = objf_val_;
+  c->fmax_ = fmax_;
+  c->fdiff_ = fdiff_;
+
   // c->binary_variables_ = stdMapToQhash(binary_variables_);
   // c->integer_variables_ = stdMapToQhash(integer_variables_);
   // c->real_variables_ = stdMapToQhash(real_variables_);
@@ -73,15 +88,38 @@ Case *CaseTransferObject::CreateCase() {
   c->integer_variables_ = stdListToQlist(integer_variables_);
   c->real_variables_ = stdListToQlist(real_variables_);
 
-  c->id_ = boostUuidToQuuid(id_);
-  c->objf_val_ = objective_function_value_;
+  c->rvar_grads_ = stdListToQlist(rvar_grads_);
+  c->rvar_grads_scal_ = stdListToQlist(rvar_grads_scal_);
+  c->rvar_grads_norm_ = stdListToQlist(rvar_grads_norm_);
+
+  // // example iterating using next to get iterator for list:
+  // for(int ii=0; ii < binary_variables_.size(); ii++) {
+  //   auto it = std::next(binary_variables_.begin(), ii);
+  //   binary_id_index_map_.append(boostUuidToQuuid(it->first));
+  // }
+
+  // example using list iterator directly in loop
+  for(auto it = binary_variables_.begin(); it != binary_variables_.end(); it++) {
+    c->binary_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
+
+  for(auto it = integer_variables_.begin(); it != integer_variables_.end(); it++) {
+    c->integer_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
+
+  for(auto it = real_variables_.begin(); it != real_variables_.end(); it++) {
+    c->real_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
+
   c->SetWICTime(wic_time_secs_);
   c->SetSimTime(sim_time_secs_);
   c->SetEnsembleRealization(QString::fromStdString(ensemble_realization_));
+
   c->state.eval = static_cast<Case::CaseState::EvalStatus>(status_eval_);
   c->state.cons = static_cast<Case::CaseState::ConsStatus>(status_cons_);
   c->state.queue = static_cast<Case::CaseState::QueueStatus>(status_queue_);
   c->state.err_msg = static_cast<Case::CaseState::ErrorMessage >(status_err_msg_);
+
   return c;
 }
 
@@ -156,6 +194,15 @@ QList<QPair<QUuid, T>> CaseTransferObject::stdListToQlist(const std::list<pair<u
     qhash.append(qpair);
   }
   return qhash;
+}
+
+// --
+std::list<uuid> CaseTransferObject::qListToStdList(const QList<QUuid> &qhash) const {
+  std::list<uuid> stdlist = std::list<uuid>();
+  for (int ii=0; ii < qhash.size(); ii++) {
+    stdlist.push_back(qUuidToBoostUuid(qhash.at(ii)));
+  }
+  return stdlist;
 }
 
 }
