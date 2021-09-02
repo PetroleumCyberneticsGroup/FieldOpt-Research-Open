@@ -72,7 +72,7 @@ void MPIRunner::RecvMessage(Message &message) {
   Optimization::CaseTransferObject cto;
 
   im_ = "Waiting to receive a message with tag " + num2str(message.tag) + " (";
-  im_ = tag_to_string[message.tag] + ") " + " from source " + num2str(message.source);
+  im_ += tag_to_string[message.tag] + ") " + " from source " + num2str(message.source);
   printMessage(im_, 2);
 
   std::string s;

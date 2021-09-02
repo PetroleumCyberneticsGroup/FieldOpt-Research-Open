@@ -106,10 +106,10 @@ class MPIRunner : public AbstractRunner {
       this->destination = MPI_ANY_SOURCE;
     }
 
-    void set_status(mpi::status status) {
-      this->status = status;
-      this->source = status.source();
-      this->tag = status.tag();
+    void set_status(mpi::status stat) {
+      this->status = stat;
+      this->source = stat.source();
+      this->tag = stat.tag();
     }
 
     MsgTag get_tag() {
