@@ -27,6 +27,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "oneoff_runner.h"
 #include "synchronous_mpi_runner.h"
 #include "bilevel_runner.h"
+#include "bilvl_synchr_mpi_rnr.h"
 
 namespace Runner {
 
@@ -52,6 +53,11 @@ MainRunner::MainRunner(RuntimeSettings *rts) {
 
     case RuntimeSettings::RunnerType::BILEVEL: {
       runner_ = new BilevelRunner(runtime_settings_);
+      break;
+    }
+
+    case RuntimeSettings::RunnerType::BL_MPISYNC: {
+      runner_ = new MPI::BilevelSynchrMPIRunner(runtime_settings_);
       break;
     }
     default: { E("Runner type not recognized.", md_, cl_); }
