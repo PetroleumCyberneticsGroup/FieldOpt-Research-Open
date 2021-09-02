@@ -41,13 +41,14 @@ Overseer::Overseer(MPIRunner *runner) {
 }
 
 void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
-  if (NumberOfFreeWorkers() == 0) throw std::runtime_error("Cannot assign Case. No free workers found.");
+  if (NumberOfFreeWorkers() == 0) {
+    throw std::runtime_error("Cannot assign Case. No free workers found.");
+  }
   WorkerStatus *worker;
   if (preferred_worker > 0) {
     worker = workers_[preferred_worker];
     assert(worker->working == false);
-  }
-  else {
+  } else {
     worker = getFreeWorker();
   }
   if (time_since_seconds(last_sim_start_) < runner_->SimulatorDelay()) {
@@ -55,13 +56,17 @@ void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
     std::this_thread::sleep_until(last_sim_start_ + chrono::seconds(runner_->SimulatorDelay()));
   }
   auto msg = MPIRunner::Message();
-  msg.tag = MPIRunner::MsgTag ::CASE_UNEVAL;
+  msg.tag = MPIRunner::MsgTag::CASE_UNEVAL;
   msg.destination = worker->rank;
   msg.c = c;
   runner_->SendMessage(msg);
   worker->start();
+
   last_sim_start_ = current_time();
-  c->state.eval = Optimization::Case::CaseState::EvalStatus::E_CURRENT;
+  c->state.eval = ES::E_CURRENT;
+  // c->setFDiff(getBestF());
+  // c->setFDiff((c->objf_value() - getBestF())/getBestF());
+
   runner_->printMessage("Assigned case to worker " + boost::lexical_cast<std::string>(worker->rank), 2);
   runner_->printMessage("Current status for workers:\n" + workerStatusSummary(), 2);
 }
@@ -74,6 +79,7 @@ Optimization::Case *Overseer::RecvEvaluatedCase() {
                           + " from worker " + boost::lexical_cast<std::string>(message.source), 2);
   runner_->printMessage("Current status for workers:\n" + workerStatusSummary(), 2);
   last_case_tag = message.get_tag();
+  // addToBestF(message.c->objf_value());
   return message.c;
 }
 
