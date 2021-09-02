@@ -225,23 +225,27 @@ void SynchronousMPIRunner::Execute() {
           tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS;
           printMessage("Setting objective function value.", 2);
           model_->wellCost(settings_->optimizer());
-          worker_->GetCurrentCase()->set_objf_value(objf_->value());
+          if (settings_->optimizer()->objective().type == OT::Augmented) {
+            worker_->GetCurrentCase()->set_objf_value(objf_->value(false));
+          } else {
+            worker_->GetCurrentCase()->set_objf_value(objf_->value());
+          }
           worker_->GetCurrentCase()->SetSimTime(sim_time);
-          worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
+          worker_->GetCurrentCase()->state.eval = ES::E_DONE;
           sim_times_.push_back(sim_time);
         } else {
           tag = MPIRunner::MsgTag::CASE_EVAL_TIMEOUT;
           printMessage("Timed out. Setting objective function value to SENTINEL VALUE.", 2);
-          worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_TIMEOUT;
-          worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_SIM;
+          worker_->GetCurrentCase()->state.eval = ES::E_TIMEOUT;
+          worker_->GetCurrentCase()->state.err_msg = EM::ERR_SIM;
           worker_->GetCurrentCase()->set_objf_value(sentinelValue());
         }
 
       } catch (std::runtime_error e) {
         std::cout << e.what() << std::endl;
         tag = MPIRunner::MsgTag::CASE_EVAL_INVALID;
-        worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
-        worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_WIC;
+        worker_->GetCurrentCase()->state.eval = ES::E_FAILED;
+        worker_->GetCurrentCase()->state.err_msg = EM::ERR_WIC;
         printMessage("Invalid case. Setting objective function value to SENTINEL VALUE.", 2);
         worker_->GetCurrentCase()->set_objf_value(sentinelValue());
       }
