@@ -54,13 +54,26 @@ class CaseTransferObject {
   friend class boost::serialization::access;
   template<class Archive> void serialize(Archive & ar, const unsigned int version) {
     ar & id_;
-    ar & objective_function_value_;
+    ar & objf_val_;
+    ar & fmax_;
+    ar & fdiff_;
+    //
     ar & binary_variables_;
     ar & integer_variables_;
     ar & real_variables_;
-    ar & ensemble_realization_;
+    //
+    ar & rvar_grads_;
+    ar & rvar_grads_scal_;
+    ar & rvar_grads_norm_;
+    //
+    ar & binary_id_index_map_;
+    ar & integer_id_index_map_;
+    ar & real_id_index_map_;
+    //
     ar & wic_time_secs_;
     ar & sim_time_secs_;
+    ar & ensemble_realization_;
+    //
     ar & status_eval_;
     ar & status_cons_;
     ar & status_queue_;
@@ -87,7 +100,7 @@ class CaseTransferObject {
   boost::uuids::uuid id() const { return id_; }
   QString id_string() const { return boostUuidToQstring(id_); }
   string id_stdstr() const { return boostUuidToQstring(id_).toStdString(); }
-  double objective_function_value() const { return objective_function_value_; }
+  double objective_function_value() const { return objf_val_; }
 
   // map<uuid, bool> binary_variables() const { return binary_variables_; }
   // map<uuid, int> integer_variables() const { return integer_variables_; }
@@ -105,7 +118,10 @@ class CaseTransferObject {
 
  private:
   boost::uuids::uuid id_{};
-  double objective_function_value_;
+  double objf_val_;
+  double fmax_;
+  double fdiff_;
+
   int wic_time_secs_;
   int sim_time_secs_;
 
@@ -116,6 +132,15 @@ class CaseTransferObject {
   list<pair<uuid, bool>> binary_variables_;
   list<pair<uuid, int>> integer_variables_;
   list<pair<uuid, double>> real_variables_;
+  list<pair<uuid, double>> rvar_grads_;
+
+  list<pair<uuid, double>> rvar_grads_scal_;
+  list<pair<uuid, double>> rvar_grads_norm_;
+
+  //
+  list<uuid> binary_id_index_map_;
+  list<uuid> integer_id_index_map_;
+  list<uuid> real_id_index_map_;
 
   string ensemble_realization_;
 
@@ -137,6 +162,8 @@ class CaseTransferObject {
   // template<typename T> std::map<uuid, T> qHashToStdMap(const QHash<QUuid, T> &qhash) const;
   // template<typename T> std::map<uuid, T> qMapToStdMap(const QMap<QUuid, T> &qhash) const;
   template<typename T> std::list<pair<uuid, T>> qListToStdList(const QList<QPair<QUuid, T>> &qhash) const;
+
+  std::list<uuid> qListToStdList(const QList<QUuid> &qhash) const;
 
   //!< Create a QHash from a standard library hash map
   // template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
