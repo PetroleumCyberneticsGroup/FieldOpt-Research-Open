@@ -135,8 +135,16 @@ class Overseer {
   //!< The message tag for the last received case.
   MPIRunner::MsgTag last_case_tag;
 
+  void addToBestF(double f) { bestF_.push_back(f); }
+
+  double getBestF() {
+    return *std::max_element(bestF_.begin(), bestF_.end());
+  }
+
  private:
   MPIRunner *runner_;
+
+  std::vector<double> bestF_{0.0};
 
   //!< A map of the workers. The key is the rank of the process.
   QHash<int, WorkerStatus*> workers_;
