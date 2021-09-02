@@ -443,10 +443,23 @@ class Case : public Loggable
 
   void CopyCaseVals(const Case *c);
 
+  void setFMax(double fmax) { fmax_ = fmax; }
+
+  double getFMax() { return fmax_; }
+
+  void setFDiff(double fdiff) { fdiff_ = fdiff; }
+
+  double getFDiff() { return fdiff_; }
+
  private:
   //!< Unique ID for the case.
   int sim_time_sec_;
   QUuid id_;
+  double objf_val_;
+
+  // for use w/ mpirunner
+  double fmax_ = -std::numeric_limits<double>::infinity();
+  double fdiff_ = 0.0;
 
   //!< Number of seconds spent computing the well index.
   int wic_time_sec_;
@@ -456,7 +469,6 @@ class Case : public Loggable
   string cl_ = "Case";
   Settings::VerbParams vp_;
 
-  double objf_val_;
   // QHash<QUuid, bool> binary_variables_;
   // QHash<QUuid, int> integer_variables_;
   // QHash<QUuid, double> real_variables_;
@@ -467,24 +479,22 @@ class Case : public Loggable
 
   QList<QPair<QUuid, bool>> binary_variables_;
   QList<QPair<QUuid, int>> integer_variables_;
-
   QList<QPair<QUuid, double>> real_variables_;
-  QList<QPair<QUuid, double>> rvar_grads_;
 
+  QList<QPair<QUuid, double>> rvar_grads_;
   QList<QPair<QUuid, double>> rvar_grads_scal_;
   QList<QPair<QUuid, double>> rvar_grads_norm_;
 
-  // for bilevel opt setup
-  QList<QPair<QUuid, bool>> binary_variables_old_;
-  QList<QPair<QUuid, int>> integer_variables_old_;
-
-  QList<QPair<QUuid, double>> real_variables_old_;
-  QList<QPair<QUuid, double>> rvar_grads_old_;
+  // for bilevel opt setup -> delete later if not nec
+  // QList<QPair<QUuid, bool>> binary_variables_old_;
+  // QList<QPair<QUuid, int>> integer_variables_old_;
+  // QList<QPair<QUuid, double>> real_variables_old_;
+  // QList<QPair<QUuid, double>> rvar_grads_old_;
 
   //
-  QList<QUuid> real_id_index_map_;
-  QList<QUuid> integer_id_index_map_;
   QList<QUuid> binary_id_index_map_;
+  QList<QUuid> integer_id_index_map_;
+  QList<QUuid> real_id_index_map_;
 
   //!< The parent of this trial point. Needed by APPS.
   Case* parent_;
