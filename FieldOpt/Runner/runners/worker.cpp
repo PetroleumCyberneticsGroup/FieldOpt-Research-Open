@@ -39,9 +39,9 @@ void Worker::RecvUnevaluatedCase() {
   msg.tag = MPIRunner::MsgTag::CASE_UNEVAL;
   runner_->RecvMessage(msg);
   current_tag_ = msg.get_tag();
-  if (msg.get_tag() != MPIRunner::MsgTag::TERMINATE)
+  if (msg.get_tag() != MPIRunner::MsgTag::TERMINATE) {
     current_case_ = msg.c;
-  else {
+  } else {
     current_case_ = nullptr;
   }
 }
