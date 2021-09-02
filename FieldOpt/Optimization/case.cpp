@@ -47,24 +47,35 @@ Case::Case() {
   binary_variables_ = QList<QPair<QUuid, bool>>();
   integer_variables_ = QList<QPair<QUuid, int>>();
   real_variables_ = QList<QPair<QUuid, double>>();
+
   rvar_grads_ = QList<QPair<QUuid, double>>();
+  rvar_grads_scal_ = QList<QPair<QUuid, double>>();
+  rvar_grads_norm_ = QList<QPair<QUuid, double>>();
+
+  binary_id_index_map_ = QList<QUuid>();
+  integer_id_index_map_ = QList<QUuid>();
+  real_id_index_map_ = QList<QUuid>();
 
   objf_val_ = std::numeric_limits<double>::max();
   sim_time_sec_ = 0;
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
   ensemble_ofvs_ = QHash<QString, double>();
+  vp_ = {};
 }
 
 Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
            const QList<QPair<QUuid, int>> &integer_variables,
            const QList<QPair<QUuid, double>> &real_variables) {
-
   id_ = QUuid::createUuid();
+
   binary_variables_ = binary_variables;
   integer_variables_ = integer_variables;
   real_variables_ = real_variables;
-  // rvar_grads_ = real_variables;
+
+  rvar_grads_ = QList<QPair<QUuid, double>>();
+  rvar_grads_scal_ = QList<QPair<QUuid, double>>();
+  rvar_grads_norm_ = QList<QPair<QUuid, double>>();
 
   for(int ii=0; ii < binary_variables_.size(); ii++) {
     binary_id_index_map_.append(binary_variables_.at(ii).first);
@@ -84,15 +95,19 @@ Case::Case(const QList<QPair<QUuid, bool>> &binary_variables,
   wic_time_sec_ = 0;
   ensemble_realization_ = "";
   ensemble_ofvs_ = QHash<QString, double>();
+  vp_ = {};
 }
 
 Case::Case(const Case *c) {
-
   id_ = QUuid::createUuid();
+
   binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
   integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
+
   rvar_grads_ = QList<QPair<QUuid, double>>(c->real_var_grads());
+  rvar_grads_scal_ = QList<QPair<QUuid, double>>(c->real_var_grads_scal());
+  rvar_grads_norm_ = QList<QPair<QUuid, double>>(c->real_var_grads_norm());
 
   binary_id_index_map_ = c->binary_id_index_map_;
   integer_id_index_map_ = c->integer_id_index_map_;
@@ -112,15 +127,19 @@ Case::Case(const Case *c) {
 }
 
 void Case::CopyCaseVals(const Case *c) {
-  binary_variables_old_ = binary_variables_;
-  integer_variables_old_ = integer_variables_;
-  real_variables_old_ = real_variables_;
-  rvar_grads_old_ = rvar_grads_;
+  // for bilevel opt setup -> delete later if not nec
+  // binary_variables_old_ = binary_variables_;
+  // integer_variables_old_ = integer_variables_;
+  // real_variables_old_ = real_variables_;
+  // rvar_grads_old_ = rvar_grads_;
 
   binary_variables_ = QList<QPair<QUuid, bool>> (c->binary_variables());
   integer_variables_ = QList<QPair<QUuid, int>> (c->integer_variables());
   real_variables_ = QList<QPair<QUuid, double>> (c->real_variables());
+
   rvar_grads_ = QList<QPair<QUuid, double>>(c->real_var_grads());
+  rvar_grads_scal_ = QList<QPair<QUuid, double>>(c->real_var_grads_scal());
+  rvar_grads_norm_ = QList<QPair<QUuid, double>>(c->real_var_grads_norm());
 
   binary_id_index_map_ = c->binary_id_index_map_;
   integer_id_index_map_ = c->integer_id_index_map_;

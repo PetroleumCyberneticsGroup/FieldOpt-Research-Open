@@ -165,6 +165,14 @@ class Case : public Loggable
     return rvar_grads_;
   }
 
+  QList<QPair<QUuid, double>> real_var_grads_scal() const {
+    return rvar_grads_scal_;
+  }
+
+  QList<QPair<QUuid, double>> real_var_grads_norm() const {
+    return rvar_grads_norm_;
+  }
+
   // void set_binary_vars(const QHash<QUuid, bool> &binary_variables) { binary_variables_ = binary_variables; }
   // void set_integer_vars(const QHash<QUuid, int> &integer_variables) { integer_variables_ = integer_variables; }
   // void set_real_vars(const QHash<QUuid, double> &real_variables) { real_variables_ = real_variables; }
