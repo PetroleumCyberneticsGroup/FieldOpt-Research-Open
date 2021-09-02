@@ -283,7 +283,7 @@ void Model::verifyWellCompartments(Wells::Well *w) {
     throw std::runtime_error("The start-packer MD for the first compartment is negative.");
   }
 
-  double length;
+  double length = 0;
   for (int i = 0; i < w->trajectory()->GetWellSpline()->GetSplinePoints().size() - 1; ++i) {
     length += (w->trajectory()->GetWellSpline()->GetSplinePoints()[i+1]->ToEigenVector()
       - w->trajectory()->GetWellSpline()->GetSplinePoints()[i]->ToEigenVector()).norm();
