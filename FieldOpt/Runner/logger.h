@@ -78,7 +78,10 @@ class Logger
   QString getOutputDir() { return output_dir_;}
 
  private:
-  bool is_worker_; //!< Indicates whether or not this logger is on a worker process. This determines which logs are written.
+  //!< Indicates whether or not this logger is on a worker process.
+  //!< This determines which logs are written.
+  bool is_worker_ = true;
+
   bool write_logs_;
   Settings::VerbParams vp_;
 

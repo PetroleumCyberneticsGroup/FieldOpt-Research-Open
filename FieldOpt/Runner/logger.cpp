@@ -229,8 +229,7 @@ void Logger::collectExtendedLogs() {
     QString subpath = output_dir_ + "/rank" + QString::number(rank) + "/log_extended.json";
     if (!Utilities::FileHandling::FileExists(subpath, vp_)) {
       break;
-    }
-    else {
+    } else {
       QFile json_file(subpath);
       json_file.open(QFile::ReadWrite);
       QByteArray json_data = json_file.readAll();
