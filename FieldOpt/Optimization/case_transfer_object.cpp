@@ -50,6 +50,14 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   integer_variables_ = qListToStdList(c->integer_variables_);
   real_variables_ = qListToStdList(c->real_variables_);
 
+  rvar_grads_ = qListToStdList(c->rvar_grads_);
+  rvar_grads_scal_ = qListToStdList(c->rvar_grads_scal_);
+  rvar_grads_norm_ = qListToStdList(c->rvar_grads_norm_);
+
+  binary_id_index_map_  = qListToStdList(c->binary_id_index_map_);
+  integer_id_index_map_  = qListToStdList(c->integer_id_index_map_);
+  real_id_index_map_  = qListToStdList(c->real_id_index_map_);
+
   wic_time_secs_ = c->GetWICTime();
   sim_time_secs_ = c->GetSimTime();
   ensemble_realization_ = c->GetEnsembleRlz().toStdString();
@@ -79,6 +87,29 @@ Case *CaseTransferObject::CreateCase() {
   c->binary_variables_ = stdListToQlist(binary_variables_);
   c->integer_variables_ = stdListToQlist(integer_variables_);
   c->real_variables_ = stdListToQlist(real_variables_);
+
+  c->rvar_grads_ = stdListToQlist(rvar_grads_);
+  c->rvar_grads_scal_ = stdListToQlist(rvar_grads_scal_);
+  c->rvar_grads_norm_ = stdListToQlist(rvar_grads_norm_);
+
+  // // example iterating using next to get iterator for list:
+  // for(int ii=0; ii < binary_variables_.size(); ii++) {
+  //   auto it = std::next(binary_variables_.begin(), ii);
+  //   binary_id_index_map_.append(boostUuidToQuuid(it->first));
+  // }
+
+  // example using list iterator directly in loop
+  for(auto it = binary_variables_.begin(); it != binary_variables_.end(); it++) {
+    c->binary_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
+
+  for(auto it = integer_variables_.begin(); it != integer_variables_.end(); it++) {
+    c->integer_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
+
+  for(auto it = real_variables_.begin(); it != real_variables_.end(); it++) {
+    c->real_id_index_map_.append(boostUuidToQuuid(it->first));
+  }
 
   c->SetWICTime(wic_time_secs_);
   c->SetSimTime(sim_time_secs_);
@@ -163,6 +194,15 @@ QList<QPair<QUuid, T>> CaseTransferObject::stdListToQlist(const std::list<pair<u
     qhash.append(qpair);
   }
   return qhash;
+}
+
+// --
+std::list<uuid> CaseTransferObject::qListToStdList(const QList<QUuid> &qhash) const {
+  std::list<uuid> stdlist = std::list<uuid>();
+  for (int ii=0; ii < qhash.size(); ii++) {
+    stdlist.push_back(qUuidToBoostUuid(qhash.at(ii)));
+  }
+  return stdlist;
 }
 
 }

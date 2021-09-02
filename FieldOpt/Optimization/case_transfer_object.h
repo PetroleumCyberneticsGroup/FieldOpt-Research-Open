@@ -56,11 +56,21 @@ class CaseTransferObject {
   template<class Archive> void serialize(Archive & ar, const unsigned int version) {
     ar & id_;
     ar & objf_val_;
-    ar & fdiff_;
     ar & fmax_;
+    ar & fdiff_;
+    //
     ar & binary_variables_;
     ar & integer_variables_;
     ar & real_variables_;
+    //
+    ar & rvar_grads_;
+    ar & rvar_grads_scal_;
+    ar & rvar_grads_norm_;
+    //
+    ar & binary_id_index_map_;
+    ar & integer_id_index_map_;
+    ar & real_id_index_map_;
+    //
     ar & wic_time_secs_;
     ar & sim_time_secs_;
     ar & ensemble_realization_;
@@ -134,6 +144,15 @@ class CaseTransferObject {
   list<pair<uuid, bool>> binary_variables_;
   list<pair<uuid, int>> integer_variables_;
   list<pair<uuid, double>> real_variables_;
+  list<pair<uuid, double>> rvar_grads_;
+
+  list<pair<uuid, double>> rvar_grads_scal_;
+  list<pair<uuid, double>> rvar_grads_norm_;
+
+  //
+  list<uuid> binary_id_index_map_;
+  list<uuid> integer_id_index_map_;
+  list<uuid> real_id_index_map_;
 
   string ensemble_realization_;
 
@@ -155,6 +174,8 @@ class CaseTransferObject {
   // template<typename T> std::map<uuid, T> qHashToStdMap(const QHash<QUuid, T> &qhash) const;
   // template<typename T> std::map<uuid, T> qMapToStdMap(const QMap<QUuid, T> &qhash) const;
   template<typename T> std::list<pair<uuid, T>> qListToStdList(const QList<QPair<QUuid, T>> &qhash) const;
+
+  std::list<uuid> qListToStdList(const QList<QUuid> &qhash) const;
 
   //!< Create a QHash from a standard library hash map
   // template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
