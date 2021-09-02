@@ -52,6 +52,7 @@ namespace Runner {
 using OptzrMod = Settings::Optimizer::OptimizerMode;
 using OptzrTyp = Settings::Optimizer::OptimizerType;
 
+using RnrTyp = RuntimeSettings::RunnerType;
 using SimTyp = Settings::Simulator::SimulatorType;
 using ObjTyp = Settings::Optimizer::ObjectiveType;
 
@@ -127,13 +128,13 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
 // │  │││  │   │     ║║║  ║ ║   ║║  ║╣   ║
 // ┴  ┘└┘  ┴   ┴     ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩═╝
 void AbstractRunner::InitializeModel() {
-  if (settings_ == nullptr) { E("Settings must be initialized b/f Model.", md_, cl_); }
-
+  if (settings_ == nullptr) {
+    E("Settings must be initialized b/f Model.", md_, cl_);
+  }
   if (is_ensemble_run_) {
     settings_->paths().SetPath(Paths::GRID_FILE,
                                ensemble_helper_.GetBaseRealization().grid());
   }
-
   model_ = new Model::Model(*settings_, logger_);
 }
 
@@ -477,7 +478,7 @@ void AbstractRunner::InitializeBookkeeper() {
 // ┴  ┘└┘  ┴   ┴     ╩═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╩╚═
 void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
   logger_ = new Logger(rts_, output_subdir, write_logs);
-  if(rts_->runner_type() == RuntimeSettings::RunnerType::BILEVEL) {
+  if(rts_->runner_type() == RnrTyp::BILEVEL || rts_->runner_type() == RnrTyp::BL_MPISYNC) {
     log_lwr_ = new Logger(rts_, output_subdir, write_logs, vp_, "_lwr");
   }
 }
