@@ -21,6 +21,7 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
+#include <dftr/DFTR.h>
 #include "bilvl_synchr_mpi_rnr.h"
 
 namespace Runner {
@@ -40,6 +41,7 @@ BilevelSynchrMPIRunner::BilevelSynchrMPIRunner(RuntimeSettings *rts) : MPIRunner
     InitializeOptimizer();
     InitializeBookkeeper();
     overseer_ = new MPI::Overseer(this);
+    overseer_->addToBestF(base_case_->objf_value());
     FinalizeInitialization(true);
 
   } else {
@@ -51,16 +53,21 @@ BilevelSynchrMPIRunner::BilevelSynchrMPIRunner(RuntimeSettings *rts) : MPIRunner
     worker_ = new MPI::Worker(this);
     FinalizeInitialization(false);
   }
+
+  bl_ps_fdiff_ = settings_->optimizer()->parameters().bl_ps_fdiff;
+  im_ = "f diff in pattern threshold [fraction]: " + num2str(bl_ps_fdiff_);
+  ext_info(im_, md_, cl_);
 }
 
-
+// --
+void BilevelSynchrMPIRunner::initialDistribution() {
+  while (optimizer_->nr_queued_cases() > 0
+    && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
+    overseer_->AssignCase(optimizer_->GetCaseForEvaluation());
+  }
+}
 
 void BilevelSynchrMPIRunner::Execute() {
-  double fval_best = base_case_->objf_value();
-  double bl_ps_fdiff = settings_->optimizer()->parameters().bl_ps_fdiff;
-  im_ = "f diff in pattern threshold [fraction]: " + num2str(bl_ps_fdiff);
-  ext_info(im_, md_, cl_);
-
 
   // --
   auto handle_new_case = [&]() mutable {
@@ -88,7 +95,7 @@ void BilevelSynchrMPIRunner::Execute() {
     printMessage("Evaluated case received.", 2);
     if (overseer_->last_case_tag == MPIRunner::MsgTag::CASE_EVAL_SUCCESS) {
       printMessage("Setting state for evaluated case.", 2);
-      evaluated_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
+      evaluated_case->state.eval = ES::E_DONE;
       printMessage("Setting timings for evaluated case.", 2);
       if (!is_ensemble_run_ && optimizer_->GetSimulationDuration(evaluated_case) > 0) {
         printMessage("Setting timings for evaluated case.", 2);
@@ -99,10 +106,6 @@ void BilevelSynchrMPIRunner::Execute() {
     optimizer_->SubmitEvaluatedCase(evaluated_case);
     printMessage("Submitted evaluated case to optimizer.", 2);
   };
-
-
-
-
 
 
   if (rank() == 0) { // Overseer
@@ -166,43 +169,52 @@ void BilevelSynchrMPIRunner::Execute() {
     printMessage("Waiting to receive initial unevaluated case...", 2);
     worker_->RecvUnevaluatedCase();
     printMessage("Received initial unevaluated case.", 2);
+
+    cout << "[4] worker_->GetCurrentCase()->GetRealVarIdVector().size():"
+         << worker_->GetCurrentCase()->GetRealVarIdVector().size() << endl;
+
     while (worker_->GetCurrentCase() != nullptr) {
       MPIRunner::MsgTag tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS; // Tag to be sent along with the case.
       try {
         model_update_done_ = false;
         simulation_done_ = false;
         logger_->AddEntry(this);
-        bool simulation_success = true;
+
+        QDateTime upper_sim_start, upper_sim_end;
+        bool upper_sim_success = true;
 
         // if (is_ensemble_run_) {
         //   printMessage("Updating grid path.", 2);
         //   model_->set_grid_path(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()).grid());
         // }
 
+        // compute fval for testcase0
         printMessage("Applying case to model.", 2);
         model_->ApplyCase(worker_->GetCurrentCase());
-        model_update_done_ = true; logger_->AddEntry(this);
-        auto start = QDateTime::currentDateTime();
+        model_update_done_ = true;
+        logger_->AddEntry(this);
+
+
+        upper_sim_start = QDateTime::currentDateTime();
 
         if (rts_->sim_timeout() == 0 && settings_->simulator()->max_minutes() < 0) {
           printMessage("Starting model evaluation.", 2);
           simulator_->Evaluate();
         } else if (sim_times_.empty() && settings_->simulator()->max_minutes() > 0) {
-          if (!is_ensemble_run_) {
-            printMessage("Starting model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(settings_->simulator()->max_minutes() * 60,
-                                                      rts_->threads_per_sim());
-          }
-          else {
-            printMessage("Starting ensemble model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
-                                                      settings_->simulator()->max_minutes() * 60,
-                                                      rts_->threads_per_sim());
-          }
+          // if (!is_ensemble_run_) {
+          printMessage("Starting model evaluation with timeout.", 2);
+          upper_sim_success = simulator_->Evaluate(settings_->simulator()->max_minutes() * 60,
+                                                   rts_->threads_per_sim());
+          // } else {
+          //   printMessage("Starting ensemble model evaluation with timeout.", 2);
+          //   simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
+          //                                             settings_->simulator()->max_minutes() * 60,
+          //                                             rts_->threads_per_sim());
+          // }
         } else {
           // if (!is_ensemble_run_) {
-            printMessage("Starting model evaluation with timeout.", 2);
-            simulation_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+          printMessage("Starting model evaluation with timeout.", 2);
+          upper_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
           // } else {
           //   printMessage("Starting ensemble model evaluation with timeout.", 2);
           //   simulation_success = simulator_->Evaluate(ensemble_helper_.GetRlz(worker_->GetCurrentCase()->GetEnsembleRlz().toStdString()),
@@ -211,39 +223,112 @@ void BilevelSynchrMPIRunner::Execute() {
           // }
         }
 
+
+
         simulation_done_ = true;
         logger_->AddEntry(this);
-        auto end = QDateTime::currentDateTime();
-        int sim_time = time_span_seconds(start, end);
+        upper_sim_end = QDateTime::currentDateTime();
+        int upper_sim_time = time_span_seconds(upper_sim_start, upper_sim_end);
 
-        if (simulation_success) {
+        // prntDbg(1,optimizer_, worker_->GetCurrentCase());
+
+
+        if (upper_sim_success) {
           tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS;
           printMessage("Setting objective function value.", 2);
           model_->wellCost(settings_->optimizer());
-          worker_->GetCurrentCase()->set_objf_value(objf_->value());
-          worker_->GetCurrentCase()->SetSimTime(sim_time);
-          worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
-          sim_times_.push_back(sim_time);
+
+          if (settings_->optimizer()->objective().type == OT::Augmented) {
+            worker_->GetCurrentCase()->set_objf_value(objf_->value(false));
+          } else {
+            worker_->GetCurrentCase()->set_objf_value(objf_->value());
+          }
+
+          string tm = "Objective function value set to ";
+          tm += num2str(worker_->GetCurrentCase()->objf_value(), 8, 1);
+          if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+
+          worker_->GetCurrentCase()->state.eval = ES::E_DONE;
+          worker_->GetCurrentCase()->SetSimTime(upper_sim_time);
+          sim_times_.push_back(upper_sim_time);
+
+          // start of optmzr-lower-level scope ---------------
+          // if (worker_->GetCurrentCase()->fdiff > bl_ps_fdiff_) {
+          if (true) {
+            im_ = "worker_->GetCurrentCase()->state.fdiff =>";
+            im_ += num2str(worker_->GetCurrentCase()->getFDiff(), 8, 1);
+            im_ += " >? " + num2str(bl_ps_fdiff_, 3);
+            if (vp_.vRUN >= 1) { info(im_, vp_.lnw); }
+
+            cout << "[3] worker_->GetCurrentCase()->GetRealVarIdVector().size():"
+                 << worker_->GetCurrentCase()->GetRealVarIdVector().size() << endl;
+
+            std::unique_ptr<Optimization::Optimizers::DFTR>
+              optmzr_lwr_(new Optimization::Optimizers::DFTR(
+              settings_->optimizer(), worker_->GetCurrentCase(),
+              model_->variables(), model_->grid(),
+              log_lwr_, nullptr,
+              model_->constraintHandler()));
+
+            bool lower_sim_success;
+            QDateTime lower_sim_start, lower_sim_end;
+            Optimization::Case *c_lower = nullptr;
+
+            while (optmzr_lwr_->IsFinished() == TC::NOT_FINISHED) {
+
+              try {
+                c_lower = optmzr_lwr_->GetCaseForEvaluation();
+                c_lower->state.eval = ES::E_CURRENT;
+                model_->ApplyCase(c_lower);
+
+                // prntDbg(2, optmzr_lwr_.get(), c_lower);
+
+                lower_sim_start = QDateTime::currentDateTime();
+                lower_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+                lower_sim_end = QDateTime::currentDateTime();
+                int lower_sim_time = time_span_seconds(lower_sim_start, lower_sim_end);
+
+                if (lower_sim_success) {
+                  c_lower->set_objf_value(objf_->value(false));
+                  c_lower->state.eval = ES::E_DONE;
+                  c_lower->SetSimTime(lower_sim_time);
+                  sim_times_.push_back((lower_sim_time));
+                }
+
+              } catch (runtime_error &e) {
+                wm_ = "Exception while simulating case: " + string(e.what());
+                ext_warn(wm_, md_, cl_);
+              }
+
+              optmzr_lwr_->SubmitEvaluatedCase(c_lower);
+            }
+            worker_->GetCurrentCase()->CopyCaseVals(optmzr_lwr_->GetTentativeBestCase());
+            optimizer_->case_handler()->AddToNumberSimulated(optmzr_lwr_->get_c_evald());
+          } // -------------------------------------------------
+
+
         } else {
           tag = MPIRunner::MsgTag::CASE_EVAL_TIMEOUT;
           printMessage("Timed out. Setting objective function value to SENTINEL VALUE.", 2);
-          worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_TIMEOUT;
-          worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_SIM;
+          worker_->GetCurrentCase()->state.eval = ES::E_TIMEOUT;
+          worker_->GetCurrentCase()->state.err_msg = EM::ERR_SIM;
           worker_->GetCurrentCase()->set_objf_value(sentinelValue());
         }
 
       } catch (std::runtime_error e) {
         std::cout << e.what() << std::endl;
         tag = MPIRunner::MsgTag::CASE_EVAL_INVALID;
-        worker_->GetCurrentCase()->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
-        worker_->GetCurrentCase()->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_WIC;
+        worker_->GetCurrentCase()->state.eval = ES::E_FAILED;
+        worker_->GetCurrentCase()->state.err_msg = EM::ERR_WIC;
         printMessage("Invalid case. Setting objective function value to SENTINEL VALUE.", 2);
         worker_->GetCurrentCase()->set_objf_value(sentinelValue());
       }
       printMessage("Sending back evaluated case.", 2);
       worker_->SendEvaluatedCase(tag);
+
       printMessage("Waiting to receive an unevaluated case...", 2);
       worker_->RecvUnevaluatedCase();
+
       if (worker_->GetCurrentTag() == TERMINATE) {
         printMessage("Received termination message. Breaking.", 2);
         break;
@@ -267,12 +352,7 @@ void BilevelSynchrMPIRunner::Execute() {
 
 
 
-void BilevelSynchrMPIRunner::initialDistribution() {
-  while (optimizer_->nr_queued_cases() > 0
-      && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
-    overseer_->AssignCase(optimizer_->GetCaseForEvaluation());
-  }
-}
+
 
 Loggable::LogTarget BilevelSynchrMPIRunner::GetLogTarget() {
   return STATE_RUNNER;

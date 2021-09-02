@@ -44,8 +44,10 @@ class BilevelSynchrMPIRunner : public MPIRunner, public Loggable {
   MPI::Overseer *overseer_;
   MPI::Worker *worker_;
 
-  bool model_update_done_;
-  bool simulation_done_;
+  bool model_update_done_ = false;
+  bool simulation_done_ = false;
+
+  double bl_ps_fdiff_ = 0.0;
 
   void initialDistribution();
 };
