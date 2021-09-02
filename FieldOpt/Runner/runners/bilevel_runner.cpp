@@ -43,32 +43,6 @@ BilevelRunner::BilevelRunner(Runner::RuntimeSettings *runtime_settings)
   FinalizeInitialization(true);
 }
 
-void BilevelRunner::prntDbg(int lvl, Optimization::Optimizer *optmzr, Optimization::Case *cs) {
-
-  string str;
-  if (vp_.vOPT >= 3 && lvl == 1) {
-    str = "[@upr_optmzr] |";
-  } else if (vp_.vOPT >= 3 && lvl == 2) {
-    str = "[@lwr_optmzr] |";
-  }
-
-  im_ = str;
-  im_ += optmzr->GetStatusStringHeader().toStdString() + "|";
-  im_ += optmzr->GetStatusString().toStdString();
-  ext_info(im_, md_, cl_);
-
-  im_ = str;
-  im_ += cs->StringRepresentation(model_->variables());
-  ext_info(im_, md_, cl_);
-
-  im_ = str;
-  im_ = "CaseHandler status: " + optmzr->case_handler()->status();
-  im_ += " (QueuedCases()..empty()) => ";
-  im_ += optmzr->case_handler()->QueuedCases().empty() ? "true" : "false";
-  ext_info(im_, md_, cl_);
-
-}
-
 void BilevelRunner::Execute() {
   double fval_best = base_case_->objf_value();
   double bl_ps_fdiff = settings_->optimizer()->parameters().bl_ps_fdiff;
@@ -130,6 +104,11 @@ void BilevelRunner::Execute() {
         // start of optmzr-lower-level scope ---------------
         if ((c_upper->objf_value() - fval_best)/fval_best > bl_ps_fdiff) {
 
+          string tm = "worker_->GetCurrentCase()->objf_value() - fval_best)/fval_best =>";
+          tm += num2str((c_upper->objf_value() - fval_best)/fval_best, 8, 1);
+          tm += " >? " + num2str(bl_ps_fdiff, 3);
+          if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
+
           std::unique_ptr<Optimization::Optimizers::DFTR>
             optmzr_lwr_(new Optimization::Optimizers::DFTR(
             settings_->optimizer(), c_upper,
@@ -148,7 +127,7 @@ void BilevelRunner::Execute() {
               c_lower->state.eval = ES::E_CURRENT;
               model_->ApplyCase(c_lower);
 
-              prntDbg(2, optimizer_, c_upper);
+              // prntDbg(2, optmzr_lwr_.get(), c_lower);
 
               lower_sim_start = QDateTime::currentDateTime();
               lower_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
@@ -189,6 +168,32 @@ void BilevelRunner::Execute() {
     fval_best = optimizer_->GetTentativeBestCase()->objf_value();
   }
   FinalizeRun(true);
+}
+
+void BilevelRunner::prntDbg(int lvl,
+                             Optimization::Optimizer *optmzr,
+                             Optimization::Case *cs) {
+  string str;
+  if (vp_.vOPT >= 3 && lvl == 1) {
+    str = "[@upr_optmzr] |";
+  } else if (vp_.vOPT >= 3 && lvl == 2) {
+    str = "[@lwr_optmzr] |";
+  }
+
+  // im_ = str;
+  // im_ += optmzr->GetStatusStringHeader().toStdString() + "|";
+  // im_ += optmzr->GetStatusString().toStdString();
+  // ext_info(im_, md_, cl_);
+
+  im_ = str;
+  im_ += cs->StringRepresentation(model_->variables());
+  ext_info(im_, md_, cl_);
+
+  im_ = str;
+  im_ = "CaseHandler status: " + optmzr->case_handler()->status();
+  im_ += " (QueuedCases()..empty()) => ";
+  im_ += optmzr->case_handler()->QueuedCases().empty() ? "true" : "false";
+  ext_info(im_, md_, cl_);
 }
 
 }
