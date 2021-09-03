@@ -29,6 +29,10 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
 
+#include <boost/math/special_functions/nonfinite_num_facets.hpp>
+using boost::math::nonfinite_num_put;
+using boost::math::nonfinite_num_get;
+
 namespace mpi = boost::mpi;
 
 namespace Runner {
@@ -106,10 +110,10 @@ class MPIRunner : public AbstractRunner {
       this->destination = MPI_ANY_SOURCE;
     }
 
-    void set_status(mpi::status status) {
-      this->status = status;
-      this->source = status.source();
-      this->tag = status.tag();
+    void set_status(mpi::status stat) {
+      this->status = stat;
+      this->source = stat.source();
+      this->tag = stat.tag();
     }
 
     MsgTag get_tag() {
@@ -176,6 +180,13 @@ class MPIRunner : public AbstractRunner {
   void RecvModelSynchronizationObject();
 
   int SimulatorDelay() const;
+
+  std::locale get_nonfinite_loc() {
+    std::locale old_locale;
+    std::locale tmp_locale(old_locale, new nonfinite_num_put<char>);
+    std::locale new_locale(tmp_locale, new nonfinite_num_get<char>);
+    return new_locale;
+  }
 
  protected:
   explicit MPIRunner(RuntimeSettings *rts);

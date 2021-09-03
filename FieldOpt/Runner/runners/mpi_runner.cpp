@@ -28,15 +28,16 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/mpi/status.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <boost/serialization/list.hpp>
+// #include <boost/lexical_cast.hpp> // -- obsolete: to be removed
+// #include <boost/serialization/list.hpp> // -- obsolete: to be removed
+// #include "Utilities/verbosity.h" // -- obsolete: to be removed
 
 #include <iostream>
-#include "Utilities/verbosity.h"
 #include "Utilities/printer.hpp"
 
 BOOST_IS_MPI_DATATYPE(boost::uuids::uuid)
+// BOOST_IS_MPI_DATATYPE(std::numeric_limits<double>)
+// not working; see get_nonfinite_loc() in header
 
 namespace Runner {
 namespace MPI {
@@ -56,8 +57,9 @@ void MPIRunner::SendMessage(Message &message) {
   if (message.c != nullptr) {
     auto cto = Optimization::CaseTransferObject(message.c);
     std::ostringstream oss;
+    oss.imbue(get_nonfinite_loc());
     boost::archive::text_oarchive oa(oss);
-    oa << cto;
+    oa << cto; // write class instance to archive
     s = oss.str();
   } else {
     s = "";
@@ -72,7 +74,7 @@ void MPIRunner::RecvMessage(Message &message) {
   Optimization::CaseTransferObject cto;
 
   im_ = "Waiting to receive a message with tag " + num2str(message.tag) + " (";
-  im_ = tag_to_string[message.tag] + ") " + " from source " + num2str(message.source);
+  im_ += tag_to_string[message.tag] + ") " + " from source " + num2str(message.source);
   printMessage(im_, 2);
 
   std::string s;
@@ -82,6 +84,7 @@ void MPIRunner::RecvMessage(Message &message) {
 
   auto handle_received_case = [&]() mutable {
     std::istringstream iss(s);
+    iss.imbue(get_nonfinite_loc());
     boost::archive::text_iarchive ia(iss);
     ia >> cto;
     message.c = cto.CreateCase();

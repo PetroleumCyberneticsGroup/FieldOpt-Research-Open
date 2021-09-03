@@ -52,6 +52,7 @@ using namespace std;
 */
 class CaseTransferObject {
   friend class boost::serialization::access;
+
   template<class Archive> void serialize(Archive & ar, const unsigned int version) {
     ar & id_;
     ar & objf_val_;
@@ -81,7 +82,18 @@ class CaseTransferObject {
   }
 
  public:
-  CaseTransferObject() {}
+  CaseTransferObject() {
+    objf_val_ = std::numeric_limits<double>::max();
+    fmax_ = 0.0;
+    fdiff_ = 0.0;
+    sim_time_secs_ = 0;
+    wic_time_secs_ = 0;
+
+    status_eval_ = 0;
+    status_cons_ = 0;
+    status_queue_ = 0;
+    status_err_msg_ = 0;
+  }
 
   /*!
    * @brief Create a CaseTransferObject representing a Case object.
@@ -169,8 +181,6 @@ class CaseTransferObject {
   // template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
   // template<typename T> QMap<QUuid, T> stdMapToQmap(const std::map<uuid, T> &stmap) const;
   template<typename T> QList<QPair<QUuid, T>> stdListToQlist(const std::list<pair<uuid, T>> &stmap) const;
-
-
 
 };
 

@@ -64,7 +64,7 @@ void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
 
   last_sim_start_ = current_time();
   c->state.eval = ES::E_CURRENT;
-  // c->setFDiff(getBestF());
+  // c->setMaxF(getBestF());
   // c->setFDiff((c->objf_value() - getBestF())/getBestF());
 
   runner_->printMessage("Assigned case to worker " + boost::lexical_cast<std::string>(worker->rank), 2);
