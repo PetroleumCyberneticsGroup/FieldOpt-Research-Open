@@ -52,15 +52,19 @@ using namespace std;
 */
 class CaseTransferObject {
   friend class boost::serialization::access;
+
   template<class Archive> void serialize(Archive & ar, const unsigned int version) {
     ar & id_;
-    ar & objective_function_value_;
+    ar & objf_val_;
+    ar & fdiff_;
+    ar & fmax_;
     ar & binary_variables_;
     ar & integer_variables_;
     ar & real_variables_;
-    ar & ensemble_realization_;
     ar & wic_time_secs_;
     ar & sim_time_secs_;
+    ar & ensemble_realization_;
+    //
     ar & status_eval_;
     ar & status_cons_;
     ar & status_queue_;
@@ -68,7 +72,18 @@ class CaseTransferObject {
   }
 
  public:
-  CaseTransferObject() {}
+  CaseTransferObject() {
+    objf_val_ = std::numeric_limits<double>::max();
+    fmax_ = 0.0;
+    fdiff_ = 0.0;
+    sim_time_secs_ = 0;
+    wic_time_secs_ = 0;
+
+    status_eval_ = 0;
+    status_cons_ = 0;
+    status_queue_ = 0;
+    status_err_msg_ = 0;
+  }
 
   /*!
    * @brief Create a CaseTransferObject representing a Case object.
@@ -87,7 +102,7 @@ class CaseTransferObject {
   boost::uuids::uuid id() const { return id_; }
   QString id_string() const { return boostUuidToQstring(id_); }
   string id_stdstr() const { return boostUuidToQstring(id_).toStdString(); }
-  double objective_function_value() const { return objective_function_value_; }
+  double objective_function_value() const { return objf_val_; }
 
   // map<uuid, bool> binary_variables() const { return binary_variables_; }
   // map<uuid, int> integer_variables() const { return integer_variables_; }
@@ -105,7 +120,10 @@ class CaseTransferObject {
 
  private:
   boost::uuids::uuid id_{};
-  double objective_function_value_;
+  double objf_val_;
+  double fmax_;
+  double fdiff_;
+
   int wic_time_secs_;
   int sim_time_secs_;
 
@@ -142,8 +160,6 @@ class CaseTransferObject {
   // template<typename T> QHash<QUuid, T> stdMapToQhash(const std::map<uuid, T> &stmap) const;
   // template<typename T> QMap<QUuid, T> stdMapToQmap(const std::map<uuid, T> &stmap) const;
   template<typename T> QList<QPair<QUuid, T>> stdListToQlist(const std::list<pair<uuid, T>> &stmap) const;
-
-
 
 };
 

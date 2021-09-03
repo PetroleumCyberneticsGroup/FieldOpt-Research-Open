@@ -34,7 +34,9 @@ using namespace std;
 
 CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   id_ = qUuidToBoostUuid(c->id_);
-  objective_function_value_ = c->objf_val_;
+  objf_val_ = c->objf_val_;
+  fmax_ = c->fmax_;
+  fdiff_ = c->fdiff_;
 
   // binary_variables_ = qHashToStdMap(c->binary_variables_);
   // integer_variables_ = qHashToStdMap(c->integer_variables_);
@@ -61,6 +63,11 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
 Case *CaseTransferObject::CreateCase() {
   auto c = new Case();
 
+  c->id_ = boostUuidToQuuid(id_);
+  c->objf_val_ = objf_val_;
+  c->fmax_ = fmax_;
+  c->fdiff_ = fdiff_;
+
   // c->binary_variables_ = stdMapToQhash(binary_variables_);
   // c->integer_variables_ = stdMapToQhash(integer_variables_);
   // c->real_variables_ = stdMapToQhash(real_variables_);
@@ -73,15 +80,15 @@ Case *CaseTransferObject::CreateCase() {
   c->integer_variables_ = stdListToQlist(integer_variables_);
   c->real_variables_ = stdListToQlist(real_variables_);
 
-  c->id_ = boostUuidToQuuid(id_);
-  c->objf_val_ = objective_function_value_;
   c->SetWICTime(wic_time_secs_);
   c->SetSimTime(sim_time_secs_);
   c->SetEnsembleRealization(QString::fromStdString(ensemble_realization_));
+
   c->state.eval = static_cast<Case::CaseState::EvalStatus>(status_eval_);
   c->state.cons = static_cast<Case::CaseState::ConsStatus>(status_cons_);
   c->state.queue = static_cast<Case::CaseState::QueueStatus>(status_queue_);
   c->state.err_msg = static_cast<Case::CaseState::ErrorMessage >(status_err_msg_);
+
   return c;
 }
 
