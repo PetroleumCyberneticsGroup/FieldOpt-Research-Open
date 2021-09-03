@@ -56,7 +56,7 @@ BilevelSynchrMPIRunner::BilevelSynchrMPIRunner(RuntimeSettings *rts) : MPIRunner
 
 
 void BilevelSynchrMPIRunner::Execute() {
-  double fval_best = base_case_->objf_value();
+  // double fval_best = base_case_->objf_value();
   double bl_ps_fdiff = settings_->optimizer()->parameters().bl_ps_fdiff;
   im_ = "f diff in pattern threshold [fraction]: " + num2str(bl_ps_fdiff);
   ext_info(im_, md_, cl_);

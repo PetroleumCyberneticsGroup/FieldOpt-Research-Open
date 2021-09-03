@@ -467,6 +467,11 @@ class Case : public Loggable
 
   // for use w/ mpirunner
   double fmax_ = -std::numeric_limits<double>::infinity();
+  // double fmax_ = -std::numeric_limits<double>::max();
+  // Be very care about infinity string representation in
+  // Boost, in particular when passing MPI message strings
+  // during serialization/deserialization; source of "input
+  // stream error".
   double fdiff_ = 0.0;
 
   //!< Number of seconds spent computing the well index.
