@@ -308,11 +308,11 @@ int SQP_(integer  *Status, integer *n,    double x[],
     // Eigen::VectorXd gv = g;
 
     VectorXd g;
-    if (prob_->seto_->scaleVars() == 0) {
+    if (prob_->getSeto()->scaleVars() == 0) {
       g = g00;
-    } else if (prob_->seto_->scaleVars() == 1) {
+    } else if (prob_->getSeto()->scaleVars() == 1) {
       g = grads[0];
-    } else if (prob_->seto_->scaleVars() == 2) {
+    } else if (prob_->getSeto()->scaleVars() == 2) {
       g = grads[1];
     }
 
@@ -396,7 +396,7 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   smry_file_ = SNOPTRun_ + ".opt.smry";
   optn_file_ = SNOPTRun_ + ".opt.optn";
 
-  auto d = prob.seto_->paths()->GetPath(Paths::SIM_EXEC_DIR);
+  auto d = prob.getSeto()->paths()->GetPath(Paths::SIM_EXEC_DIR);
   optn_file_ = d + "/" + optn_file_;
 
   SNOPTHandler snoptHandler = initSNOPTHandler();
@@ -415,7 +415,7 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setXSol(xsol);
   prob.setFSol(fsol);
 
-  if (prob.seto_->verbParams().vOPT >= 1) {
+  if (prob.getSeto()->verbParams().vOPT >= 1) {
     cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
   }
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
@@ -822,7 +822,7 @@ void SNOPTSolver::setSNOPTOptions(SNOPTHandler &H, Optimization::Optimizer::Embe
   H.setNeA        ( neA_ );
   H.setNeG        ( neG_ );
 
-  auto p = prob.seto_->parameters();
+  auto p = prob.getSeto()->parameters();
   p.sqp_ftol;
 
   // ┌┬┐  ┬─┐  ┌┬┐  ┌─┐  ┌┬┐    ┌─┐

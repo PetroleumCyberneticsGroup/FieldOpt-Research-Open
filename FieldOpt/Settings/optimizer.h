@@ -517,7 +517,7 @@ class Optimizer
   OptimizerType type_;
   Parameters parameters_;
   Objective objective_;
-  Paths *paths_;
+  Paths *paths_ = nullptr;
 
   int scale_vars_ = 1;
   double scale_objf_ = 1.0;

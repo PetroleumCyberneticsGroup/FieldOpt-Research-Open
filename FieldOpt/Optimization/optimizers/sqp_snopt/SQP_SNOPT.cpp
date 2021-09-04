@@ -91,7 +91,8 @@ tuple<VectorXd, double, int> SQP_SNOPT::solver() {
   prob.model_ = model_;
   prob.simulator_ = simulator_;
   prob.objf_ = objf_;
-  prob.seto_ = seto_;
+
+  prob.setSeto(seto_);
 
   // prob.setProbName("TRMod_A");
   // prob.setProbName("Rosenbrock"); // dbg

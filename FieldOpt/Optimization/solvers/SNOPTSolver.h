@@ -91,9 +91,9 @@ class SNOPTSolver {
   const double infinity_ = 1e20;
 
   // Setup for SNOPTHandler
-  // optn_file, smry_file and prnt_file file names should
-  // be read from JSON and stored in settings_
-  Settings::Optimizer *settings_;
+  // optn_file, smry_file and prnt_file file names
+  // should be read from JSON and stored in settings_
+  Settings::Optimizer *settings_ = nullptr;
 
   string SNOPTRun_ = "DEF";
   string prnt_file_ = SNOPTRun_ + ".opt.prnt";

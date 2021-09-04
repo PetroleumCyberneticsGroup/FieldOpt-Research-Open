@@ -115,6 +115,8 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   vp_ = settings_->global()->verbParams();
   // settings_->global()->showVerbParams();
 
+  settings_->optimizer()->setPaths(&settings_->paths());
+  
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
     ensemble_helper_ = EnsembleHelper(
@@ -278,7 +280,7 @@ void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
     E("Base Case and Model must be initialized before the Optimizer", md_, cl_);
   }
-  settings_->optimizer()->setPaths(&settings_->paths());
+  // settings_->optimizer()->setPaths(&settings_->paths());
 
   switch (settings_->optimizer()->type()) {
 

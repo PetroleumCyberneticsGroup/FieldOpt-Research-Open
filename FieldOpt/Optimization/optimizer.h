@@ -296,8 +296,6 @@ class Optimizer : public Loggable
     VectorXd getTrG() { return tr_g_; }
     MatrixXd getTrH() { return tr_H_; }
 
-
-
     // TEST
     // double getSqpC() { return sqp_c_; }
     // VectorXd getSqpG() { return sqp_g_; }
@@ -309,7 +307,8 @@ class Optimizer : public Loggable
     Optimization::Objective::Objective *objf_ = nullptr;
     Settings::Optimizer *seto_ = nullptr;
 
-
+    void setSeto(Settings::Optimizer *seto) { seto_ = seto; }
+    Settings::Optimizer* getSeto() { return seto_; }
 
     VectorXd getXSol() {
       return Eigen::Map<VectorXd>(xsol_.data(), xsol_.size());
