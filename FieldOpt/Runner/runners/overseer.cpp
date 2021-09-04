@@ -38,6 +38,7 @@ Overseer::Overseer(MPIRunner *runner) {
   }
   runner_->printMessage("Initialized overseer.");
   last_sim_start_ = current_time();
+  last_case_tag = MPIRunner::MsgTag::ANY_TAG;
 }
 
 void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
@@ -47,7 +48,7 @@ void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
   WorkerStatus *worker;
   if (preferred_worker > 0) {
     worker = workers_[preferred_worker];
-    assert(worker->working == false);
+    assert(!worker->working);
   } else {
     worker = getFreeWorker();
   }
@@ -64,10 +65,10 @@ void Overseer::AssignCase(Optimization::Case *c, int preferred_worker) {
 
   last_sim_start_ = current_time();
   c->state.eval = ES::E_CURRENT;
-  // c->setMaxF(getBestF());
-  // c->setFDiff((c->objf_value() - getBestF())/getBestF());
+  c->setFMax(getBestF());
+  c->setFDiff((c->objf_value() - getBestF())/getBestF());
 
-  runner_->printMessage("Assigned case to worker " + boost::lexical_cast<std::string>(worker->rank), 2);
+  runner_->printMessage("Assigned case to worker " + std::to_string(worker->rank), 2);
   runner_->printMessage("Current status for workers:\n" + workerStatusSummary(), 2);
 }
 
@@ -75,11 +76,11 @@ Optimization::Case *Overseer::RecvEvaluatedCase() {
   auto message = MPIRunner::Message();
   runner_->RecvMessage(message);
   workers_[message.source]->stop();
-  runner_->printMessage("Received case with tag " + boost::lexical_cast<std::string>(message.tag)
-                          + " from worker " + boost::lexical_cast<std::string>(message.source), 2);
+  runner_->printMessage("Received case with tag " + std::to_string(message.tag)
+                          + " from worker " + std::to_string(message.source), 2);
   runner_->printMessage("Current status for workers:\n" + workerStatusSummary(), 2);
   last_case_tag = message.get_tag();
-  // addToBestF(message.c->objf_value());
+  addToBestF(message.c->objf_value());
   return message.c;
 }
 
@@ -103,9 +104,11 @@ int Overseer::NumberOfFreeWorkers() {
 }
 
 Overseer::WorkerStatus * Overseer::GetLongestRunningWorker() {
-  if (NumberOfFreeWorkers() == runner_->world_.size()-1) return nullptr;
+  if (NumberOfFreeWorkers() == runner_->world_.size()-1) {
+    return nullptr;
+  }
   int longest_running_time = -1;
-  int longest_running_worker;
+  int longest_running_worker = 0;
   for (int i = 1; i < runner_->world_.size(); ++i) {
     if (workers_[i]->working_seconds() > longest_running_time) {
       longest_running_time = workers_[i]->working_seconds();
