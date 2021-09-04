@@ -40,20 +40,21 @@ Model::Model(Settings::Settings settings, Logger *logger) {
     wic_ = nullptr;
   }
   current_case_ = nullptr;
+  settings_ = settings;
 
   vp_ = settings.model()->verbParams();
   var_container_ = new Properties::VarPropContainer(vp_);
 
   wells_ = new QList<Wells::Well *>();
-  for (int well_nr = 0; well_nr < settings.model()->wells().size(); ++well_nr) {
-    wells_->append(new Wells::Well(*settings.model(), well_nr,
+  for (int well_nr = 0; well_nr < settings_.model()->wells().size(); ++well_nr) {
+    wells_->append(new Wells::Well(*settings_.model(), well_nr,
                                    var_container_,
                                    grid_, wic_));
   }
 
   var_container_->CheckVariableNameUniqueness();
 
-  constraint_handler_ = new ConstraintHandler(settings.optimizer(),
+  constraint_handler_ = new ConstraintHandler(settings_.optimizer(),
                                               var_container_, grid_);
 
   logger_ = logger;

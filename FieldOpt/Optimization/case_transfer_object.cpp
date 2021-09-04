@@ -99,16 +99,16 @@ Case *CaseTransferObject::CreateCase() {
   // }
 
   // example using list iterator directly in loop
-  for(auto it = binary_variables_.begin(); it != binary_variables_.end(); it++) {
-    c->binary_id_index_map_.append(boostUuidToQuuid(it->first));
+  for(auto & binary_variable : binary_variables_) {
+    c->binary_id_index_map_.append(boostUuidToQuuid(binary_variable.first));
   }
 
-  for(auto it = integer_variables_.begin(); it != integer_variables_.end(); it++) {
-    c->integer_id_index_map_.append(boostUuidToQuuid(it->first));
+  for(auto & integer_variable : integer_variables_) {
+    c->integer_id_index_map_.append(boostUuidToQuuid(integer_variable.first));
   }
 
-  for(auto it = real_variables_.begin(); it != real_variables_.end(); it++) {
-    c->real_id_index_map_.append(boostUuidToQuuid(it->first));
+  for(auto & real_variable : real_variables_) {
+    c->real_id_index_map_.append(boostUuidToQuuid(real_variable.first));
   }
 
   c->SetWICTime(wic_time_secs_);
@@ -199,8 +199,8 @@ QList<QPair<QUuid, T>> CaseTransferObject::stdListToQlist(const std::list<pair<u
 // --
 std::list<uuid> CaseTransferObject::qListToStdList(const QList<QUuid> &qhash) const {
   std::list<uuid> stdlist = std::list<uuid>();
-  for (int ii=0; ii < qhash.size(); ii++) {
-    stdlist.push_back(qUuidToBoostUuid(qhash.at(ii)));
+  for (auto ii : qhash) {
+    stdlist.push_back(qUuidToBoostUuid(ii));
   }
   return stdlist;
 }

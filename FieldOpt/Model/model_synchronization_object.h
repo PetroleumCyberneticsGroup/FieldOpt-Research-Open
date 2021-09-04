@@ -54,18 +54,19 @@ class ModelSynchronizationObject {
   template<class Archive> void serialize(Archive & ar, const unsigned int version) {
     ar & binary_variable_ids_;
     ar & discrete_variable_ids_;
-    ar & continous_variable_ids_;
+    ar & continuous_variable_ids_;
   }
 
  public:
-  ModelSynchronizationObject() {}
-  ModelSynchronizationObject(Model *model);
+  // ModelSynchronizationObject() {}
+  ModelSynchronizationObject() = default;
+  explicit ModelSynchronizationObject(Model *model);
 
   // QMap<QString, QUuid> GetDiscreteVariableMap();
-  // QMap<QString, QUuid> GetContinousVariableMap();
+  // QMap<QString, QUuid> GetContinuousVariableMap();
   // QMap<QString, QUuid> GetBinaryVariableMap();
   QList<QPair<QString, QUuid>> GetDiscreteVariableMap();
-  QList<QPair<QString, QUuid>> GetContinousVariableMap();
+  QList<QPair<QString, QUuid>> GetContinuousVariableMap();
   QList<QPair<QString, QUuid>> GetBinaryVariableMap();
 
   void UpdateVariablePropertyIds(Model *model);
@@ -75,7 +76,7 @@ class ModelSynchronizationObject {
   std::list<std::pair<string, uuid>> discrete_variable_ids_;
 
   //!< Mapping from variable name to variable UUID, for continuous variables.
-  std::list<std::pair<string, uuid>> continous_variable_ids_;
+  std::list<std::pair<string, uuid>> continuous_variable_ids_;
 
   //!< Mapping from variable name to variable UUID, for binary variables.
   // std::map<string, uuid> binary_variable_ids_;
@@ -98,16 +99,16 @@ class ModelSynchronizationObject {
 
   //!< Convert a std/boost based mapping to a Qt based mapping to be used by the rest of the model.
   // QMap<QString, QUuid> convertToQtMapping(const std::map<string, uuid> map);
-  QList<QPair<QString, QUuid>> convertToQtMapping(const std::list<std::pair<string, uuid>> map);
+  QList<QPair<QString, QUuid>> convertToQtMapping(std::list<std::pair<string, uuid>> map);
 
   //!< Create a QUuid from a boost uuid
-  QUuid boostUuidToQuuid(const uuid buuid) const;
+  QUuid boostUuidToQuuid(uuid buuid) const;
 
   //!< Create a boost uuid from a QUuid
-  uuid qUuidToBoostUuid(const QUuid quuid) const;
+  uuid qUuidToBoostUuid(QUuid quuid) const;
 
   //!< Get the string representation of a boost uuid
-  QString boostUuidToQstring(const uuid buuid) const;
+  QString boostUuidToQstring(uuid buuid) const;
 };
 
 }

@@ -120,10 +120,18 @@ class Model : public Loggable
     return constraint_handler_;
   }
 
+  void UpdateConstraintHandler() {
+    constraint_handler_ = nullptr;
+    constraint_handler_ = new ConstraintHandler(settings_.optimizer(),
+                                                var_container_, grid_);
+  }
+
  private:
   Reservoir::Grid::Grid *grid_;
   Reservoir::WellIndexCalculation::wicalc_rixx *wic_;
   Properties::VarPropContainer *var_container_;
+
+  Settings::Settings settings_;
 
   QList<Wells::Well *> *wells_;
 

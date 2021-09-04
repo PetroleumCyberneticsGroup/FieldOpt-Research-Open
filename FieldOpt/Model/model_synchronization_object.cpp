@@ -33,7 +33,7 @@ using namespace boost::uuids;
 
 ModelSynchronizationObject::ModelSynchronizationObject(Model *model) {
   discrete_variable_ids_ = createNameToIdMapping(model->variables()->GetDiscreteVariables());
-  continous_variable_ids_ = createNameToIdMapping(model->variables()->GetContinuousVariables());
+  continuous_variable_ids_ = createNameToIdMapping(model->variables()->GetContinuousVariables());
   binary_variable_ids_ = createNameToIdMapping(model->variables()->GetBinaryVariables());
 }
 
@@ -127,12 +127,12 @@ QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetDiscreteVariableMap(
   return convertToQtMapping(discrete_variable_ids_);
 }
 
-// QMap<QString, QUuid> ModelSynchronizationObject::GetContinousVariableMap() {
-//   return convertToQtMapping(continous_variable_ids_);
+// QMap<QString, QUuid> ModelSynchronizationObject::GetContinuousVariableMap() {
+//   return convertToQtMapping(continuous_variable_ids_);
 // }
 
-QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetContinousVariableMap() {
-  return convertToQtMapping(continous_variable_ids_);
+QList<QPair<QString, QUuid>> ModelSynchronizationObject::GetContinuousVariableMap() {
+  return convertToQtMapping(continuous_variable_ids_);
 }
 
 // QMap<QString, QUuid> ModelSynchronizationObject::GetBinaryVariableMap() {
@@ -166,11 +166,11 @@ void ModelSynchronizationObject::UpdateVariablePropertyIds(Model *model) {
 
   // Continuous variables
   if (vpc->ContinuousVariableSize() > 0) {
-    for (int ii=0; ii < GetContinousVariableMap().size(); ii++) {
-      auto var = GetContinousVariableMap().at(ii);
+    for (int ii=0; ii < GetContinuousVariableMap().size(); ii++) {
+      auto var = GetContinuousVariableMap().at(ii);
       auto name = var.first;
       auto prop = vpc->GetContinousVariable(name);
-      // QUuid new_uuid = GetContinousVariableMap()[name];
+      // QUuid new_uuid = GetContinuousVariableMap()[name];
       QUuid new_uuid = var.second;
       QUuid old_uuid = prop->id();
       prop->UpdateId(new_uuid);
@@ -197,6 +197,7 @@ void ModelSynchronizationObject::UpdateVariablePropertyIds(Model *model) {
       vpc->discrete_variables_->removeOne(qMakePair(old_uuid, prop));
     }
   }
+  model->UpdateConstraintHandler();
 }
 
 QUuid ModelSynchronizationObject::boostUuidToQuuid(const uuid buuid) const {
