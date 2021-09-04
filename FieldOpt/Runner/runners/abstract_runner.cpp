@@ -116,7 +116,7 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   // settings_->global()->showVerbParams();
 
   settings_->optimizer()->setPaths(&settings_->paths());
-  
+
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
     ensemble_helper_ = EnsembleHelper(
