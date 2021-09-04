@@ -170,9 +170,6 @@ void BilevelSynchrMPIRunner::Execute() {
     worker_->RecvUnevaluatedCase();
     printMessage("Received initial unevaluated case.", 2);
 
-    cout << "[4] worker_->GetCurrentCase()->GetRealVarIdVector().size():"
-         << worker_->GetCurrentCase()->GetRealVarIdVector().size() << endl;
-
     while (worker_->GetCurrentCase() != nullptr) {
       MPIRunner::MsgTag tag = MPIRunner::MsgTag::CASE_EVAL_SUCCESS; // Tag to be sent along with the case.
       try {
@@ -258,9 +255,6 @@ void BilevelSynchrMPIRunner::Execute() {
             im_ += " >? " + num2str(bl_ps_fdiff_, 3);
             if (vp_.vRUN >= 1) { info(im_, vp_.lnw); }
 
-            cout << "[3] worker_->GetCurrentCase()->GetRealVarIdVector().size():"
-                 << worker_->GetCurrentCase()->GetRealVarIdVector().size() << endl;
-
             std::unique_ptr<Optimization::Optimizers::DFTR>
               optmzr_lwr_(new Optimization::Optimizers::DFTR(
               settings_->optimizer(), worker_->GetCurrentCase(),
@@ -282,7 +276,12 @@ void BilevelSynchrMPIRunner::Execute() {
                 // prntDbg(2, optmzr_lwr_.get(), c_lower);
 
                 lower_sim_start = QDateTime::currentDateTime();
-                lower_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+                if (rts_->sim_timeout() == 0 && settings_->simulator()->max_minutes() < 0) {
+                  lower_sim_success = true;
+                  simulator_->Evaluate();
+                } else {
+                  lower_sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+                }
                 lower_sim_end = QDateTime::currentDateTime();
                 int lower_sim_time = time_span_seconds(lower_sim_start, lower_sim_end);
 

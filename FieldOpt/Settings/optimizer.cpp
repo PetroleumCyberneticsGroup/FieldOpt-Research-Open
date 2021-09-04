@@ -71,8 +71,8 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   try {
     constraints_ = QList<Constraint>();
     // Iterate over all constraints
-    for (int i = 0; i < json_constraints.size(); ++i) {
-      QJsonObject json_constraint = json_constraints[i].toObject();
+    for (auto && i : json_constraints) {
+      QJsonObject json_constraint = i.toObject();
       constraints_.append(parseSingleConstraint(json_constraint));
     }
   } catch (std::exception const &ex) {
