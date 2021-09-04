@@ -223,8 +223,6 @@ void BilevelSynchrMPIRunner::Execute() {
           // }
         }
 
-
-
         simulation_done_ = true;
         logger_->AddEntry(this);
         upper_sim_end = QDateTime::currentDateTime();

@@ -452,11 +452,9 @@ class Case : public Loggable
   void CopyCaseVals(const Case *c);
 
   void setFMax(double fmax) { fmax_ = fmax; }
-
-  double getFMax() { return fmax_; }
-
   void setFDiff(double fdiff) { fdiff_ = fdiff; }
 
+  double getFMax() { return fmax_; }
   double getFDiff() { return fdiff_; }
 
  private:
