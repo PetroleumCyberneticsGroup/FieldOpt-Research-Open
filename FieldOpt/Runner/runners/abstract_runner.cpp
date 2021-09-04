@@ -102,7 +102,8 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   if(rts_->runner_type() == RuntimeSettings::SERIAL
     || rts_->runner_type() == RuntimeSettings::BILEVEL) {
     optz_dir += "/optcs";
-  } else if(rts_->runner_type() == RuntimeSettings::MPISYNC) {
+  } else if(rts_->runner_type() == RuntimeSettings::MPISYNC
+    || rts_->runner_type() == RuntimeSettings::BL_MPISYNC) {
     optz_dir += "../optcs";
   }
 
