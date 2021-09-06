@@ -416,7 +416,7 @@ void SNOPTSolver::setUpSNOPTSolver(Optimization::Optimizer::EmbeddedProblem &pro
   prob.setFSol(fsol);
 
   if (prob.getSeto()->verbParams().vOPT >= 1) {
-    cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
+    // cout << "sqp_snopt Exit code: " + std::to_string(snoptHandler.getExitCode()) << endl;
   }
   prob.setSNOPTExitCode(snoptHandler.getExitCode());
 }

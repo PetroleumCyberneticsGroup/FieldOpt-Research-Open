@@ -433,7 +433,7 @@ void TRDebug::prntRebuildMod(int cs, double d1, double d2, double d3,
 void TRDebug::prntProgInit(int cs, VectorXd v0, VectorXd v1, double d1) {
   stringstream ss;
   if (cs == 1) {
-    if (trm_->vp_.vOPT >= 4) { idbg(trm_->dbg_->prntSettingsData("")); }
+    if (trm_->vp_.vOPT == 3) { idbg(trm_->dbg_->prntSettingsData("")); }
     ss << "[@setLowUprBnds] ";
     ss << prntVecXd(v0, "bnd_lwr  ");
     ss << "|[@setLowUprBnds] " << prntVecXd(v1, "bnd_upr  ");
