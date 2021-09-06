@@ -195,13 +195,14 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
     double penalized_ofv = PenalizedOFV(c);
     c->set_objf_value(penalized_ofv);
   }
-  case_handler_->UpdateCaseObjectiveFunctionValue(c->id(), c->objf_value());
-  case_handler_->SetCaseState(c->id(), c->state, c->GetWICTime(), c->GetSimTime());
+  case_handler_->UpdateCaseObjFVal(c->id(), c->objf_value());
+  // adds nr evaluated to logger counter:
+  case_handler_->SetCaseState(c->id(), c->state, c->GetWICTime(), c->GetSimTime(), c->getNrSims());
   case_handler_->SetCaseEvaluated(c->id());
   handleEvaluatedCase(case_handler_->GetCase(c->id()));
 
   if(c->state.eval == Case::CaseState::E_DONE) {
-    c_evald_++;
+    c_evald_++; // internal counter for algorithm
   }
 
   if (enable_logging_) {

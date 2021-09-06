@@ -148,6 +148,7 @@ void Case::CopyCaseVals(const Case *c) {
   objf_val_ = c->objf_val_;
   sim_time_sec_ = c->sim_time_sec_;
   wic_time_sec_ = c->wic_time_sec_;
+  nr_sims_ = c->nr_sims_;
 }
 
 bool Case::Equals(const Case *other, double tolerance) const {

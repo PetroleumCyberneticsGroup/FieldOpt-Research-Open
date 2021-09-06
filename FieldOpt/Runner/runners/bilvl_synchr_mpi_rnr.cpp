@@ -267,7 +267,6 @@ void BilevelSynchrMPIRunner::Execute() {
             Optimization::Case *c_lower = nullptr;
 
             while (optmzr_lwr_->IsFinished() == TC::NOT_FINISHED) {
-
               try {
                 c_lower = optmzr_lwr_->GetCaseForEvaluation();
                 c_lower->state.eval = ES::E_CURRENT;
@@ -296,15 +295,16 @@ void BilevelSynchrMPIRunner::Execute() {
                 wm_ = "Exception while simulating case: " + string(e.what());
                 ext_warn(wm_, md_, cl_);
               }
-
               optmzr_lwr_->SubmitEvaluatedCase(c_lower);
             }
+
+            optmzr_lwr_->GetTentativeBestCase()->setNrSims(optmzr_lwr_->get_c_evald());
             worker_->GetCurrentCase()->CopyCaseVals(optmzr_lwr_->GetTentativeBestCase());
-            optimizer_->case_handler()->AddToNumberSimulated(optmzr_lwr_->get_c_evald());
           } // -------------------------------------------------
 
 
         } else {
+          cout << "WARNING: CASE_EVAL_TIMEOUT!" << endl;
           tag = MPIRunner::MsgTag::CASE_EVAL_TIMEOUT;
           printMessage("Timed out. Setting objective function value to SENTINEL VALUE.", 2);
           worker_->GetCurrentCase()->state.eval = ES::E_TIMEOUT;

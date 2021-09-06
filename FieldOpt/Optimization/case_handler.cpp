@@ -83,7 +83,14 @@ void CaseHandler::SetCaseEvaluated(const QUuid id) {
   evaluated_recently_.append(id);
 
   switch (cases_[id]->state.eval) {
-    case Case::CaseState::EvalStatus::E_DONE: nr_eval_++; break;
+    case Case::CaseState::EvalStatus::E_DONE:
+      nr_eval_++;
+      // (getNrSims() > 1)==true only if running lwr case,
+      // i.e., updating external counter with internal one
+      if(cases_[id]->getNrSims() > 1) {
+        nr_eval_ += cases_[id]->getNrSims();
+      }
+      break;
     case Case::CaseState::EvalStatus::E_BOOKKEEPED: nr_bkpd_++; break;
     case Case::CaseState::EvalStatus::E_TIMEOUT: nr_timo_++; break;
     case Case::CaseState::EvalStatus::E_FAILED: nr_fail_++; break;
@@ -93,16 +100,16 @@ void CaseHandler::SetCaseEvaluated(const QUuid id) {
   }
 }
 
-void CaseHandler::UpdateCaseObjectiveFunctionValue(const QUuid id,
-                                                   const double ofv) {
+void CaseHandler::UpdateCaseObjFVal(const QUuid id, const double ofv) {
   cases_[id]->set_objf_value(ofv);
 }
 
 void CaseHandler::SetCaseState(QUuid id, Case::CaseState state,
-                               int wic_time, int sim_time) {
+                               int wic_time, int sim_time, int nsims) {
   cases_[id]->state = state;
   cases_[id]->SetWICTime(wic_time);
   cases_[id]->SetSimTime(sim_time);
+  cases_[id]->setNrSims(nsims);
 }
 
 QList<Case *> CaseHandler::RecentlyEvaluatedCases() const {

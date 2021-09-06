@@ -79,7 +79,7 @@ class CaseHandler
   Case *GetCase(const QUuid id) const;
 
   /*!
-   * \brief UpdateCaseObjectiveFunctionValue updates the
+   * \brief UpdateCaseObjFVal updates the
    * objective function value of a case. This is needed
    * when using, for instance, MPI based runners, where
    * the case object before and after evaluation is not
@@ -88,7 +88,7 @@ class CaseHandler
    * \param ofv
    * The objective function value to be set for the case.
    */
-  void UpdateCaseObjectiveFunctionValue(QUuid id, double ofv);
+  void UpdateCaseObjFVal(QUuid id, double ofv);
 
   /*!
    * @brief Update the evaluation status, error message,
@@ -99,7 +99,7 @@ class CaseHandler
    * @param sim_time The simulator execution time.
    */
   void SetCaseState(QUuid id, Case::CaseState state,
-                    int wic_time, int sim_time);
+                    int wic_time, int sim_time, int nsims);
 
   /*!
    * \brief RecentlyEvaluatedCases Get the list of cases

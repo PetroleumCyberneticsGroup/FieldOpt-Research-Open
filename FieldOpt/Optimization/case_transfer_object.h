@@ -58,6 +58,7 @@ class CaseTransferObject {
     ar & objf_val_;
     ar & fmax_;
     ar & fdiff_;
+    ar & nr_sims_;
     //
     ar & binary_variables_;
     ar & integer_variables_;
@@ -88,6 +89,7 @@ class CaseTransferObject {
     fdiff_ = 0.0;
     sim_time_secs_ = 0;
     wic_time_secs_ = 0;
+    nr_sims_ = 1;
 
     status_eval_ = 0;
     status_cons_ = 0;
@@ -133,6 +135,7 @@ class CaseTransferObject {
   double objf_val_;
   double fmax_;
   double fdiff_;
+  int nr_sims_;
 
   int wic_time_secs_;
   int sim_time_secs_;

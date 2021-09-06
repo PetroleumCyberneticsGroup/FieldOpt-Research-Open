@@ -37,6 +37,7 @@ CaseTransferObject::CaseTransferObject(Optimization::Case *c) {
   objf_val_ = c->objf_val_;
   fmax_ = c->fmax_;
   fdiff_ = c->fdiff_;
+  nr_sims_ = c->nr_sims_;
 
   // binary_variables_ = qHashToStdMap(c->binary_variables_);
   // integer_variables_ = qHashToStdMap(c->integer_variables_);
@@ -75,6 +76,7 @@ Case *CaseTransferObject::CreateCase() {
   c->objf_val_ = objf_val_;
   c->fmax_ = fmax_;
   c->fdiff_ = fdiff_;
+  c->nr_sims_ = nr_sims_;
 
   // c->binary_variables_ = stdMapToQhash(binary_variables_);
   // c->integer_variables_ = stdMapToQhash(integer_variables_);

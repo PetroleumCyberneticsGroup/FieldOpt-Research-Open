@@ -457,6 +457,9 @@ class Case : public Loggable
   double getFMax() { return fmax_; }
   double getFDiff() { return fdiff_; }
 
+  void setNrSims(int n) { nr_sims_ = n; }
+  int getNrSims() { return nr_sims_; }
+
  private:
   //!< Unique ID for the case.
   int sim_time_sec_;
@@ -471,6 +474,7 @@ class Case : public Loggable
   // during serialization/deserialization; source of "input
   // stream error".
   double fdiff_ = 0.0;
+  int nr_sims_ = 1;
 
   //!< Number of seconds spent computing the well index.
   int wic_time_sec_;
