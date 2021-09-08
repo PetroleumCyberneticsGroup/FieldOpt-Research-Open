@@ -72,7 +72,7 @@ class Case : public Loggable
        const QList<QPair<QUuid, double>> &real_variables);
 
   Case(const Case &c) = delete;
-  Case(const Case *c);
+  explicit Case(const Case *c);
 
   /*!
    * @brief The CaseState struct holds information about
@@ -98,8 +98,8 @@ class Case : public Loggable
     };
 
     enum ErrorMessage : int {
-      ERR_SIM=-4, ERR_WIC=-3, ERR_CONS=-2, ERR_UNKNOWN=-1,
-      ERR_OK=0
+      ERR_SIM=-4, ERR_WIC=-3, ERR_CONS=-2,
+      ERR_UNKNOWN=-1, ERR_OK=0
     };
 
     CaseState() {
@@ -122,11 +122,11 @@ class Case : public Loggable
    * \brief Equals Checks whether this case is equal
    * to another case within some tolerance.
    * \param other Case to compare with.
-   * \param tolerance Allowed deviation between two cases.
+   * \param tol Allowed deviation between two cases.
    * \return True if cases are equal within tolerance,
    * otherwise false.
    */
-  bool Equals(const Case *other, double tolerance=0.0) const;
+  bool Equals(const Case *other, double tol=0.0) const;
 
   QUuid id() const { return id_; }
 

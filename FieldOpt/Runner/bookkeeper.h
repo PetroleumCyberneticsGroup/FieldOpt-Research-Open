@@ -63,7 +63,7 @@ class Bookkeeper
   bool IsEvaluated(Optimization::Case *c, bool set_obj=false);
 
  private:
-  double tolerance_;
+  double tol_;
   Optimization::CaseHandler *case_handler_;
 };
 

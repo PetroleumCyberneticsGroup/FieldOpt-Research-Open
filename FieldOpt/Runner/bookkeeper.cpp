@@ -28,13 +28,13 @@ namespace Runner {
 
 Bookkeeper::Bookkeeper(Settings::Settings *settings,
                        Optimization::CaseHandler *case_handler) {
-  tolerance_ = settings->global()->bookkeeper_tol();
+  tol_ = settings->global()->bookkeeper_tol();
   case_handler_ = case_handler;
 }
 
 bool Bookkeeper::IsEvaluated(Optimization::Case *c, bool set_obj) {
   for (auto evaluated_c : case_handler_->EvaluatedCases()) {
-    if (evaluated_c->Equals(c)) { // Case has been evaluated
+    if (evaluated_c->Equals(c, tol_)) { // Case has been evaluated
       if (set_obj) c->set_objf_value(evaluated_c->objf_value());
       return true;
     }

@@ -151,7 +151,7 @@ void Case::CopyCaseVals(const Case *c) {
   nr_sims_ = c->nr_sims_;
 }
 
-bool Case::Equals(const Case *other, double tolerance) const {
+bool Case::Equals(const Case *other, double tol) const {
 
   // Check if number of variables are equal
   if (this->binary_variables().size() != other->binary_variables().size()
@@ -167,7 +167,7 @@ bool Case::Equals(const Case *other, double tolerance) const {
   for(int ii=0; ii < binary_variables_.size(); ii++) {
     auto lhs = this->binary_variables_.at(ii).second;
     auto rhs = other->binary_variables_.at(ii).second;
-    if (std::abs(lhs - rhs) > tolerance) {
+    if (std::abs(lhs - rhs) > tol) {
       return false;
     }
   }
@@ -180,7 +180,7 @@ bool Case::Equals(const Case *other, double tolerance) const {
   for(int ii=0; ii < integer_variables_.size(); ii++) {
     auto lhs = this->integer_variables_.at(ii).second;
     auto rhs = other->integer_variables_.at(ii).second;
-    if (std::abs(lhs - rhs) > tolerance) {
+    if (std::abs(lhs - rhs) > tol) {
       return false;
     }
   }
@@ -193,7 +193,7 @@ bool Case::Equals(const Case *other, double tolerance) const {
   for(int ii=0; ii < real_variables_.size(); ii++) {
     auto lhs = this->real_variables_.at(ii).second;
     auto rhs = other->real_variables_.at(ii).second;
-    if (std::abs(lhs - rhs) > tolerance) {
+    if (std::abs(lhs - rhs) > tol) {
       return false;
     }
   }
