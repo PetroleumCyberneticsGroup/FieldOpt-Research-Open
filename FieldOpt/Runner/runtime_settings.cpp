@@ -292,6 +292,8 @@ map<string, string> RuntimeSettings::GetState() {
     case SERIAL: statemap["runner"] = "Serial"; break;
     case ONEOFF: statemap["runner"] = "One-off"; break;
     case MPISYNC: statemap["runner"] = "MPI Parallel"; break;
+    case BILEVEL: statemap["runner"] = "Bilevel"; break;
+    case BL_MPISYNC: statemap["runner"] = "Bilevel-MPI-sync"; break;
   }
 
   statemap["path FieldOpt driver"] = paths_.GetPath(Paths::DRIVER_FILE);

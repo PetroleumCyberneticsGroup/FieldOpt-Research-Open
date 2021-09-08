@@ -33,17 +33,20 @@ Logger::Logger(Runner::RuntimeSettings *rts, QString output_subdir,
   vp_=vp;
   write_logs_ = write_logs;
   is_worker_ = output_subdir.length() > 0;
+  runner_ = rts->GetState()["runner"];
   output_dir_ = rts->paths().GetPathQstr(Paths::OUTPUT_DIR);
   if (output_subdir.length() > 0) {
     output_dir_ = output_dir_ + "/" + output_subdir + "/";
     Utilities::FileHandling::CreateDir(output_dir_, vp_);
   }
+
   opt_log_path_ = output_dir_ + "/log_optimization" + pfx + ".csv";
   cas_log_path_ = output_dir_ + "/log_cases" + pfx + ".csv";
   ext_log_path_ = output_dir_ + "/log_extended" + pfx + ".json";
   run_state_path_ = output_dir_ + "/state_runner" + pfx + ".txt";
   summary_prerun_path_ = output_dir_ + output_subdir + "/summary_prerun" + pfx + ".md";
   summary_postrun_path_ = output_dir_ + output_subdir + "/summary_postrun" + pfx + ".md";
+
   QStringList log_paths = (QStringList() << cas_log_path_
     << opt_log_path_ << ext_log_path_ << run_state_path_
     << summary_prerun_path_ << summary_postrun_path_);
@@ -90,8 +93,8 @@ void Logger::AddEntry(Loggable *obj) {
 }
 
 void Logger::logRunnerState(Loggable *obj) {
-  if (!write_logs_ || !is_worker_) // Only workers should do this
-    return;
+  // Only workers should do this
+  if (!write_logs_ || !is_worker_) { return; }
   stringstream st;
   st << obj->GetState()["case-desc"] << "\n\n";
   st << "Model update done?  " << obj->GetState()["mod-update-done"] << "\n";
@@ -101,8 +104,8 @@ void Logger::logRunnerState(Loggable *obj) {
 }
 
 void Logger::logCase(Loggable *obj) {
-  if (!write_logs_ || is_worker_)
-    return;
+  if (!write_logs_ || is_worker_) { return; }
+
   stringstream entry;
   entry << setw(cas_log_col_widths_["TimeSt"]) << timestamp_string() << " ,";
   entry << setw(cas_log_col_widths_["EvalSt"]) << obj->GetState()["EvalSt"] << " ,";
@@ -121,7 +124,9 @@ void Logger::logCase(Loggable *obj) {
 }
 
 void Logger::logOptimizer(Loggable *obj) {
-  if (!write_logs_ || is_worker_) return;
+  if ((!write_logs_ || is_worker_)
+  && !(runner_ == "Bilevel-MPI-sync")) { return; }
+
   stringstream entry;
   entry << setw(opt_log_col_widths_["TimeSt"]) << timestamp_string() << " ,";
   entry << setw(opt_log_col_widths_["TimeEl"]) << timespan_string(obj->GetState()["TimeEl"][0]) << " , ";
@@ -143,14 +148,14 @@ void Logger::logOptimizer(Loggable *obj) {
 }
 
 void Logger::logExtended(Loggable *obj) {
-  if (!write_logs_) return;
+  if (!write_logs_) { return; }
   QJsonObject new_entry;
 
   // UUID
   new_entry.insert("UUID", obj->GetId().toString());
 
   QJsonArray realizations;
-  for (auto const a : obj->GetValues()) {
+  for (auto const& a : obj->GetValues()) {
     if (a.first.compare(0, 4, "Rea#") == 0) {
       QJsonObject rea;
       rea.insert(QString::fromStdString(a.first), a.second[0]);
@@ -163,7 +168,7 @@ void Logger::logExtended(Loggable *obj) {
 
   // Variable values
   QJsonArray vars;
-  for (auto const a : obj->GetValues()) {
+  for (auto const& a : obj->GetValues()) {
     if(a.first.compare(0, 4, "Var#") == 0) {
       QJsonObject var;
       var.insert(QString::fromStdString(a.first), a.second[0]);
@@ -174,12 +179,12 @@ void Logger::logExtended(Loggable *obj) {
 
   // Production data
   QJsonArray prod;
-  for (auto const a : obj->GetValues()) {
+  for (auto const& a : obj->GetValues()) {
     if(a.first.compare(0, 4, "Res#") == 0) {
       QJsonObject data;
       QJsonArray prod_vector;
-      for (int i = 0; i < a.second.size(); ++i) {
-        prod_vector.append(a.second[i]);
+      for (double i : a.second) {
+        prod_vector.append(i);
       }
       data.insert(QString::fromStdString(a.first), prod_vector);
       prod.append(data);
@@ -219,7 +224,7 @@ void Logger::logExtended(Loggable *obj) {
 }
 
 void Logger::collectExtendedLogs() {
-  if (!write_logs_ || is_worker_) return;
+  if (!write_logs_ || is_worker_) { return; }
 
   QList<QJsonObject> worker_parts_;
   int rank = 1;
@@ -238,8 +243,8 @@ void Logger::collectExtendedLogs() {
       rank++;
     }
   }
-  if (worker_parts_.size() == 0) // Return if there were no workers (we're running in serial)
-    return;
+  // Return if there were no workers (we're running in serial)
+  if (worker_parts_.empty()) { return; }
 
   // Gather all cases in one array
   QJsonArray all_cases;
@@ -262,7 +267,7 @@ void Logger::collectExtendedLogs() {
 }
 
 void Logger::logSummary(Loggable *obj) {
-  if (obj->GetWellDescriptions().size() > 0) {
+  if (!obj->GetWellDescriptions().empty()) {
     sum_wellmap_ = obj->GetWellDescriptions();
     sum_mod_statemap_ = obj->GetState();
     sum_mod_valmap_ = obj->GetValues();
@@ -278,7 +283,7 @@ void Logger::logSummary(Loggable *obj) {
 }
 
 void Logger::FinalizePrerunSummary() {
-  if (!write_logs_ || is_worker_) return;
+  if (!write_logs_ || is_worker_) { return; }
 
   stringstream sum;
 
@@ -293,7 +298,7 @@ void Logger::FinalizePrerunSummary() {
   sum << "## Run-time settings" << "\n\n";
   sum << "| Setting                        | Value                |\n";
   sum << "| ------------------------------ | -------------------- |\n";
-  for (auto entry : sum_rts_statemap_) {
+  for (const auto& entry : sum_rts_statemap_) {
     if (entry.first.compare(0, 4, "path") != 0)
       sum << "| " << entry.first << setw(33-entry.first.size()) << right
           << " | " << entry.second << setw(23-entry.second.size()) << right << " |\n";
@@ -304,7 +309,7 @@ void Logger::FinalizePrerunSummary() {
   sum << "### Paths" << "\n\n";
   sum << "| Path                       | Value                          |\n";
   sum << "| -------------------------- | ---------------------------------------- |\n";
-  for (auto entry : sum_rts_statemap_) {
+  for (const auto& entry : sum_rts_statemap_) {
     if (entry.first.compare(0, 4, "path") == 0) {
       // Remove "path " from the key.
       string pathn = entry.first;
@@ -326,7 +331,7 @@ void Logger::FinalizePrerunSummary() {
   sum << "## Optimizer" << "\n\n";
   sum << "| Setting                   | Value                          |\n";
   sum << "| ------------------------- | ------------------------------ |\n";
-  for (auto entry : sum_opt_statemap_) {
+  for (const auto& entry : sum_opt_statemap_) {
     sum << "| " << entry.first << setw(28-entry.first.size()) << right
         << " | " << entry.second << setfill(' ') << setw(33-entry.second.size()) << right << " |\n";
   }
@@ -355,7 +360,7 @@ void Logger::FinalizePrerunSummary() {
 }
 
 void Logger::FinalizePostrunSummary() {
-  if (!write_logs_ || is_worker_) return;
+  if (!write_logs_ || is_worker_) { return; }
 
   collectExtendedLogs(); // Collect all the extended json logs into one
 
@@ -372,7 +377,7 @@ void Logger::FinalizePostrunSummary() {
   // ==> Breif summary table <==
   sum << "| Key                  | Value                          |\n";
   sum << "| -------------------- | ------------------------------ |\n";
-  for (auto item : sum_opt_statemap_) {
+  for (const auto& item : sum_opt_statemap_) {
     if (item.first.compare(0, 2, "bc") != 0) { // Filtering out the best case entries
       sum << "| " << item.first << setw(23-item.first.size()) << right
           << " | " << item.second << setw(33-item.second.size()) << right << " |\n";

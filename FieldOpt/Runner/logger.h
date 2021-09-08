@@ -81,6 +81,7 @@ class Logger
   //!< Indicates whether or not this logger is on a worker process.
   //!< This determines which logs are written.
   bool is_worker_ = true;
+  string runner_ = "";
 
   bool write_logs_;
   Settings::VerbParams vp_;

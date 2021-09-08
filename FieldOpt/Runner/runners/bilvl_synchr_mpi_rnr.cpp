@@ -107,7 +107,6 @@ void BilevelSynchrMPIRunner::Execute() {
     printMessage("Submitted evaluated case to optimizer.", 2);
   };
 
-
   if (rank() == 0) { // Overseer
     printMessage("Performing initial distribution...", 2);
     initialDistribution();

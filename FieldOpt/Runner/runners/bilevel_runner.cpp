@@ -121,7 +121,6 @@ void BilevelRunner::Execute() {
           Optimization::Case *c_lower = nullptr;
 
           while (optmzr_lwr_->IsFinished() == TC::NOT_FINISHED) {
-
             try {
               c_lower = optmzr_lwr_->GetCaseForEvaluation();
               c_lower->state.eval = ES::E_CURRENT;
@@ -149,7 +148,6 @@ void BilevelRunner::Execute() {
             optmzr_lwr_->SubmitEvaluatedCase(c_lower);
           }
           c_upper->CopyCaseVals(optmzr_lwr_->GetTentativeBestCase());
-          // optimizer_->set_c_evald(optmzr_lwr_->get_c_evald());
           optimizer_->case_handler()->AddToNumberSimulated(optmzr_lwr_->get_c_evald());
         } // -------------------------------------------------
 
