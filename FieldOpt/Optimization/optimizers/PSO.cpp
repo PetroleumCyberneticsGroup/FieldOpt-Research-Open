@@ -31,6 +31,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Optimization{
 namespace Optimizers{
+
 PSO::PSO(Settings::Optimizer *settings,
          Case *base_case,
          Model::Properties::VarPropContainer *variables,
@@ -38,11 +39,13 @@ PSO::PSO(Settings::Optimizer *settings,
          Logger *logger,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, variables, grid,
+              logger, case_handler, constraint_handler) {
 
   n_vars_ = variables->ContinuousVariableSize();
   gen_ = get_random_generator(settings->parameters().rng_seed);
   max_iterations_ = settings->parameters().max_generations;
+
   stagnation_limit_ = settings->parameters().stagnation_limit;
   learning_factor_1_ = settings->parameters().pso_learning_factor_1;
   learning_factor_2_ = settings->parameters().pso_learning_factor_2;
@@ -51,9 +54,9 @@ PSO::PSO(Settings::Optimizer *settings,
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
       lower_bound_ = constraint_handler_->GetLowerBounds(
-        base_case->GetRealVarIdVector());
+          base_case->GetRealVarIdVector());
       upper_bound_ = constraint_handler_->GetUpperBounds(
-        base_case->GetRealVarIdVector());
+          base_case->GetRealVarIdVector());
     } else {
       lower_bound_.resize(n_vars_);
       upper_bound_.resize(n_vars_);
@@ -72,16 +75,16 @@ PSO::PSO(Settings::Optimizer *settings,
 
   if (vp_.vOPT > 2) {
     stringstream ss;
-    ss << "Using bounds from constraints: " << endl;
-    ss << vec_to_str(vector<double>(lower_bound_.data(), lower_bound_.data() + lower_bound_.size()));
-    ss << endl;
-    ss << vec_to_str(vector<double>(upper_bound_.data(), upper_bound_.data() + upper_bound_.size()));
-    ext_info(ss.str(), "Optimization","PSO");
+    ss << "vmax: " << Printer::num2str(v_max_, 3, 0);
+    ss << "; bounds: " << endl;
+    ss<< Printer::DBG_prntVecXd(lower_bound_, "lb: ");
+    ss<< Printer::DBG_prntVecXd(upper_bound_, "ub: ");
+    ext_info(ss.str(), md_, cl_);
   }
 
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
-    swarm_.push_back(Particle(new_case ,gen_, v_max_, n_vars_));
+    swarm_.emplace_back(Particle(new_case, gen_, v_max_, n_vars_));
     case_handler_->AddNewCase(new_case);
   }
 
@@ -91,17 +94,18 @@ PSO::PSO(Settings::Optimizer *settings,
 }
 
 void PSO::iterate(){
-  if(enable_logging_){
-    logger_->AddEntry(this);
-  }
+  if(enable_logging_){ logger_->AddEntry(this); }
+
   swarm_memory_.push_back(swarm_);
-  current_best_particle_global_=get_global_best();
+  current_best_particle_global_ = get_global_best();
+
   swarm_ = update_velocity();
   swarm_ = update_position();
+
   vector<Particle> next_generation_swarm;
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
-    next_generation_swarm.push_back(Particle(new_case, gen_, v_max_, n_vars_));
+    next_generation_swarm.emplace_back(Particle(new_case, gen_, v_max_, n_vars_));
     next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity, swarm_[i].rea_vars);
   }
   for(int i = 0; i < number_of_particles_; i++){
@@ -116,19 +120,25 @@ void PSO::handleEvaluatedCase(Case *c) {
     updateTentativeBestCase(c);
     if (vp_.vOPT > 1) {
       stringstream ss;
-      ss.precision(6);
-      ss << scientific;
-      ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
-      Printer::ext_info(ss.str(), "Optimization", "PSO");
+      ss << "New best in swarm, iteration " << Printer::num2str(iteration_, 0);
+      ss << ": OFV " << Printer::num2str(c->objf_value(), 3, 1);
+      Printer::ext_info(ss.str(), md_, cl_);
     }
   }
 }
 
 Optimizer::TerminationCondition PSO::IsFinished() {
-  if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
-  if (is_stagnant()) return MIN_STEP_LENGTH_REACHED;
-  if (iteration_ < max_iterations_) return NOT_FINISHED;
-  else return MAX_EVALS_REACHED;
+  if (case_handler_->CasesBeingEvaluated().size() > 0) {
+    return NOT_FINISHED;
+  }
+
+  if (is_stagnant()) { return MIN_STEP_LENGTH_REACHED; }
+
+  if (iteration_ < max_iterations_) {
+    return NOT_FINISHED;
+  } else {
+    return MAX_EVALS_REACHED;
+  }
 }
 
 Case *PSO::generateRandomCase() {
@@ -140,21 +150,24 @@ Case *PSO::generateRandomCase() {
     erands(i) = random_doubles(gen_, lower_bound_(i), upper_bound_(i), 1)[0];
   }
   new_case->SetRealVarValues(erands);
-  return  new_case;
+  return new_case;
 }
 
-PSO::Particle::Particle(Optimization::Case *c, boost::random::mt19937 &gen, VectorXd v_max, int n_vars) {
+PSO::Particle::Particle(Optimization::Case *c,
+                        boost::random::mt19937 &gen,
+                        VectorXd v_max, int n_vars) {
   case_pointer = c;
-  rea_vars=c->GetRealVarVector();
+  rea_vars = c->GetRealVarVector();
   Eigen::VectorXd temp(n_vars);
   for(int i = 0; i < rea_vars.size(); i++){
     temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
   }
-  rea_vars_velocity=temp;
+  rea_vars_velocity = temp;
 }
 
-void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars_swap){
-  rea_vars=rea_vars_swap;
+void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
+                                  Eigen::VectorXd rea_vars_swap){
+  rea_vars = rea_vars_swap;
   case_pointer->SetRealVarValues(rea_vars);
   rea_vars_velocity = rea_vars_velocity_swap;
 }
@@ -170,7 +183,7 @@ void PSO::printSwarm(vector<Particle> swarm) const {
     ss << "OFV: " << partic.ofv() << " Position: ";
     ss << eigenvec_to_str(partic.rea_vars) << "|";
   }
-  ext_info(ss.str(), "Optimization", "PSO");
+  ext_info(ss.str(), md_, cl_);
 }
 
 bool PSO::is_stagnant() {
@@ -191,10 +204,12 @@ PSO::Particle PSO::get_global_best(){
   } else {
     best_particle = current_best_particle_global_;
   }
+
   for(int i = 0; i < swarm_memory_.size(); i++){
-    for(int j = 0; j < swarm_memory_[i].size();j++){
-      if (isBetter(swarm_memory_[i][j].case_pointer, best_particle.case_pointer)) {
-        best_particle=swarm_memory_[i][j];
+    for(int j = 0; j < swarm_memory_[i].size(); j++){
+      if (isBetter(swarm_memory_[i][j].case_pointer,
+                   best_particle.case_pointer)) {
+        best_particle = swarm_memory_[i][j];
       }
     }
   }
@@ -204,7 +219,8 @@ PSO::Particle PSO::get_global_best(){
 PSO::Particle PSO::find_best_in_particle_memory(int particle_num){
   Particle best_in_particle_memory = swarm_memory_[0][particle_num];
   for(int i = 1; i < swarm_memory_.size(); i++) {
-    if (isBetter(swarm_memory_[i][particle_num].case_pointer, best_in_particle_memory.case_pointer)) {
+    if (isBetter(swarm_memory_[i][particle_num].case_pointer,
+                 best_in_particle_memory.case_pointer)) {
       best_in_particle_memory = swarm_memory_[i][particle_num];
     }
   }
@@ -214,34 +230,42 @@ PSO::Particle PSO::find_best_in_particle_memory(int particle_num){
 vector<PSO::Particle> PSO::update_velocity() {
   vector<Particle> new_swarm;
   for(int i = 0; i < swarm_.size(); i++){
+
     Particle best_in_particle_memory = find_best_in_particle_memory(i);
     new_swarm.push_back(swarm_[i]);
+
     for(int j = 0; j < n_vars_; j++){
       double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1) * (best_in_particle_memory.rea_vars(j)-swarm_[i].rea_vars(j));
       double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1) * (current_best_particle_global_.rea_vars(j)-swarm_[i].rea_vars(j));
       new_swarm[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
+
       if (new_swarm[i].rea_vars_velocity(j) < -v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = -v_max_(j);
-      }else if(new_swarm[i].rea_vars_velocity(j) > v_max_(j)){
+      } else if(new_swarm[i].rea_vars_velocity(j) > v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = v_max_(j);
       }
     }
+
   }
   return new_swarm;
 }
 
 vector<PSO::Particle> PSO::update_position() {
   for(int i = 0; i < swarm_.size(); i++){
+
     for(int j = 0; j < n_vars_; j++){
-      swarm_[i].rea_vars(j)=swarm_[i].rea_vars_velocity(j)+swarm_[i].rea_vars(j);
+      swarm_[i].rea_vars(j) = swarm_[i].rea_vars_velocity(j) + swarm_[i].rea_vars(j);
+
       if (swarm_[i].rea_vars(j) > upper_bound_[j]){
-        swarm_[i].rea_vars(j) = upper_bound_[j]-abs(swarm_[i].rea_vars(j)-upper_bound_[j])*0.5;
-        swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j)*-0.5;
+        swarm_[i].rea_vars(j) = upper_bound_[j] - abs(swarm_[i].rea_vars(j) - upper_bound_[j])*0.5;
+        swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j) * -0.5;
+
       } else if (swarm_[i].rea_vars(j) < lower_bound_[j]){
-        swarm_[i].rea_vars(j) = lower_bound_[j]+abs(swarm_[i].rea_vars(j)-lower_bound_[j])*0.5;
-        swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j)*-0.5;
+        swarm_[i].rea_vars(j) = lower_bound_[j] + abs(swarm_[i].rea_vars(j) - lower_bound_[j])*0.5;
+        swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j) * -0.5;
       }
     }
+
   }
   return swarm_;
 }

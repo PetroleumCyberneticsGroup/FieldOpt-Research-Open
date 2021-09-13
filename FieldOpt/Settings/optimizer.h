@@ -162,7 +162,7 @@ class Optimizer
     double pso_learning_factor_2;
 
     //!< # of particles in the swarm. Default: 50
-    double pso_swarm_size;
+    int pso_swarm_size;
 
     //!< Scaling factor for particle velocities. Default: 1.0
     double pso_velocity_scale;
