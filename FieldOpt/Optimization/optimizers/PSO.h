@@ -177,7 +177,7 @@ class PSO : public Optimizer {
   string cl_ = "PSO";
   string md_ = "Optimization::Optimizers";
 
-}
+};
 }
 }
 
