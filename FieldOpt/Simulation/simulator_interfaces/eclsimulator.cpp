@@ -205,6 +205,8 @@ void ECLSimulator::WriteDriverFilesOnly() {
   driver_file_writer.WriteDriverFile(paths_.GetPathQstr(Paths::SIM_OUT_SCH_FILE));
 }
 
+using FT = Settings::Simulator::FileStructType;
+
 void ECLSimulator::copyDriverFiles() {
   std::string workdir = paths_.GetPath(Paths::OUTPUT_DIR);
   std::string casedir = workdir;
@@ -213,7 +215,7 @@ void ECLSimulator::copyDriverFiles() {
 
   // Flat file structure
   if (!DirExists(workdir, vp_, md_, cl_)
-    && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Flat) {
+    && settings_->simulator()->file_structure().type_ == FT::Flat) {
     if (vp_.vSIM >= 1) {
       im_ = "Output deck directory not found. Copying input deck:";
       im_ += paths_.GetPath(Paths::SIM_DRIVER_DIR) + " -> " + workdir;
@@ -226,7 +228,7 @@ void ECLSimulator::copyDriverFiles() {
 
   // Branched file structure
   if (!DirExists(casedir, vp_, md_, cl_)
-    && settings_->simulator()->file_structure().type_ == Settings::Simulator::FileStructType::Branched) {
+    && settings_->simulator()->file_structure().type_ == FT::Branched) {
     if (vp_.vSIM >= 1) {
       im_ = "Output dir not found. Copying input deck:";
       im_ += paths_.GetPath(Paths::CASE_ROOT_DIR) + " -> " + casedir;

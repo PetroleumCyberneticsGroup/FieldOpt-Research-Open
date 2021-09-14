@@ -47,7 +47,7 @@ Simulator::Simulator(const QJsonObject& json_simulator,
 }
 
 void Simulator::setStructure(QJsonObject json_simulator) {
-  if(vp_.vSET >= 5) { info("Parsing FileStructure.", vp_.lnw); }
+  if(vp_.vSET == 5) { info("Parsing FileStructure.", vp_.lnw); }
 
   if (json_simulator.contains("FileStructure")) {
     QString type = json_simulator["FileStructure"].toString();
@@ -67,14 +67,14 @@ void Simulator::setStructure(QJsonObject json_simulator) {
 }
 
 void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
-  if(vp_.vSET >= 5) { info("Setting paths.", vp_.lnw); }
+  if(vp_.vSET == 5) { info("Setting paths.", vp_.lnw); }
 
   sched_file_name_ = json_simulator["ScheduleFile"].toString();
 
   if (!paths.IsSet(Paths::ENSEMBLE_FILE)) {
     is_ensemble_ = false;
 
-    if(vp_.vSET >= 4) { info("Setting SIM_DRIVER_FILE, SIM_DRIVER_DIR", vp_.lnw); }
+    if(vp_.vSET == 5) { info("Setting SIM_DRIVER_FILE, SIM_DRIVER_DIR", vp_.lnw); }
     if (!paths.IsSet(Paths::SIM_DRIVER_FILE)
         && json_simulator.contains("DriverPath")) {
       paths.SetPath(Paths::SIM_DRIVER_FILE,
@@ -84,7 +84,7 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
     QString sim_drvr_dir = GetParentDirPath(paths.GetPathQstr(Paths::SIM_DRIVER_FILE));
     paths.SetPath(Paths::SIM_DRIVER_DIR, sim_drvr_dir.toStdString());
 
-    if(vp_.vSET >= 4) { info("Setting CASE_DRVR_DIR, CASE_ROOT_DIR, SIM_SCH_FILE", vp_.lnw); }
+    if(vp_.vSET == 5) { info("Setting CASE_DRVR_DIR, CASE_ROOT_DIR, SIM_SCH_FILE", vp_.lnw); }
     QStringList parts = sim_drvr_dir.split("/");
     string root_drvr_path;
     for (int ii=parts.length() - file_structure_.levels_num_ ; ii < parts.length(); ii++) {
@@ -107,6 +107,8 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
                       GetParentDirPath(GetAbsFilePath(schedule_path)));
       }
 
+      if(vp_.vSET == 5) { paths.ShowPaths(); }
+
       paths.SetPath(Paths::SIM_SCH_FILE, schedule_path, true);
     }
 
@@ -123,7 +125,7 @@ void Simulator::setPaths(QJsonObject json_simulator, Paths &paths) {
 }
 
 void Simulator::setType(QJsonObject json_simulator) {
-  if(vp_.vSET >= 5) { info("Setting Simulator type.", vp_.lnw); }
+  if(vp_.vSET == 5) { info("Setting Simulator type.", vp_.lnw); }
 
   QString type = json_simulator["Type"].toString();
   if (QString::compare(type, "ECLIPSE") == 0) {
@@ -141,7 +143,7 @@ void Simulator::setType(QJsonObject json_simulator) {
 }
 
 void Simulator::setParams(QJsonObject json_simulator) {
-  if(vp_.vSET >= 5) { info("Setting Simulator parameters.", vp_.lnw); }
+  if(vp_.vSET == 5) { info("Setting Simulator parameters.", vp_.lnw); }
   set_opt_prop_int(max_minutes_, json_simulator, "MaxMinutes", vp_);
   set_opt_prop_bool(ecl_use_actionx_, json_simulator, "UseACTIONX", vp_);
   set_opt_prop_bool(use_post_sim_script_, json_simulator, "UsePostSimScript", vp_);
@@ -152,7 +154,7 @@ void Simulator::setParams(QJsonObject json_simulator) {
 }
 
 void Simulator::setCommands(QJsonObject json_simulator) {
-  if(vp_.vSET >= 5) { info("Setting Simulator commands.", vp_.lnw); }
+  if(vp_.vSET == 5) { info("Setting Simulator commands.", vp_.lnw); }
   script_name_ = "";
   QJsonArray sim_exec_cmds = json_simulator["SimExecCmds"].toArray();
   QJsonArray pre_sim_args = json_simulator["PreSimArgs"].toArray();

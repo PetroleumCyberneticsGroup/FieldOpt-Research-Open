@@ -56,6 +56,13 @@ Simulator::Simulator(Settings::Settings *settings) {
 
     if (paths_.IsSet(Paths::CASE_ROOT_DIR)) {
       case_parent_dir_name_ = ParentDirectoryNameQstr(paths_.GetPath(Paths::CASE_ROOT_DIR));
+    } else {
+      cout << "Paths::CASE_ROOT_DIR not set" << endl;
+    }
+    if (vp_.vSIM == 5) {
+      stringstream ss;
+      ss << "case_parent_dir_name_: " << case_parent_dir_name_.toStdString();
+      ext_info(ss.str(), md_, cl_, vp_.lnw);
     }
 
   } else { // multiple realizations
