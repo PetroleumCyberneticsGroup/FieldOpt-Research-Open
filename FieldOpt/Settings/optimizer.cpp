@@ -502,12 +502,32 @@ Optimizer::Parameters Optimizer::parseParameters(QJsonObject &json_params) {
     // PSO parameters :: PSO-LearningFactor1
     if(json_params.contains("PSO-LearningFactor1")){
       params.pso_learning_factor_1 = json_params["PSO-LearningFactor1"].toDouble();
-    } else { params.pso_learning_factor_1 = 2; }
+    } else { params.pso_learning_factor_1 = 1.5; }
 
     // PSO parameters :: PSO-LearningFactor2
     if(json_params.contains("PSO-LearningFactor2")){
       params.pso_learning_factor_2 = json_params["PSO-LearningFactor2"].toDouble();
-    } else { params.pso_learning_factor_2 = 2; }
+    } else { params.pso_learning_factor_2 = 1.5; }
+
+    // PSO parameters :: PSO-InertiaWeight
+    if(json_params.contains("PSO-InertiaWeight")){
+      params.pso_inertia_weight = json_params["PSO-InertiaWeight"].toDouble();
+    } else { params.pso_inertia_weight = 0.73; }
+
+    // PSO parameters :: PSO-InertiaWeightMax
+    if(json_params.contains("PSO-InertiaWeightMax")){
+      params.pso_inertia_weight_max = json_params["PSO-InertiaWeightMax"].toDouble();
+    } else { params.pso_inertia_weight_max = 0.9; }
+
+    // PSO parameters :: PSO-InertiaWeightMin
+    if(json_params.contains("PSO-InertiaWeightMin")){
+      params.pso_inertia_weight_min = json_params["PSO-InertiaWeightMin"].toDouble();
+    } else { params.pso_inertia_weight_min = 0.5; }
+
+    // PSO parameters :: PSO-InertiaDecay
+    if(json_params.contains("PSO-InertiaDecay")){
+      params.pso_inertia_decay = json_params["PSO-InertiaDecay"].toBool();
+    }
 
     // PSO parameters :: PSO-SwarmSize
     if(json_params.contains("PSO-SwarmSize")){
