@@ -44,7 +44,8 @@ class Paths {
     DRIVER_FILE = 0, SIM_DRIVER_FILE = 1, GRID_FILE = 2,
     SIM_EXEC_SCRIPT_FILE = 3, SIM_SCH_FILE = 4,
     SIM_OUT_DRIVER_FILE = 5, SIM_OUT_SCH_FILE = 6,
-    SIM_HDF5_FILE=7, ENSEMBLE_FILE=8, SIM_SCH_INSET_FILE=9,
+    SIM_HDF5_FILE = 7, ENSEMBLE_FILE = 8,
+    SIM_SCH_INSET_FILE = 9, RESTART_FILE = 10,
     BUILD_DIR = -1, OUTPUT_DIR = -2, SIM_DRIVER_DIR = -3,
     SIM_WORK_DIR = -4, SIM_AUX_DIR = -5, TRAJ_DIR = -6,
     CASE_ROOT_DIR = -7, CASE_DRVR_DIR = -8,
@@ -70,6 +71,7 @@ class Paths {
   map<Path, string> path_descriptions = {
     pair<Path, string> {DRIVER_FILE, "Driver file"},
     pair<Path, string> {SIM_DRIVER_FILE, "Sim driver file"},
+    pair<Path, string> {RESTART_FILE, "restart file"},
     pair<Path, string> {GRID_FILE, "Grid file"},
     pair<Path, string> {SIM_EXEC_SCRIPT_FILE, "Sim exe script"},
     pair<Path, string> {SIM_SCH_FILE, "Sim schedule file"},
