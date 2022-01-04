@@ -70,13 +70,17 @@ class PSO : public Optimizer {
 
   /*!
    * @brief
-   * Generates a random set of cases within their given upper and lower bounds. The function also generates an initial
-   * velocity based on the vMax parameter given through the .json file.
+   * Generates a random set of cases within their given upper
+   * and lower bounds. The function also generates an initial
+   * velocity based on the vMax parameter given through the
+   * .json file.
    * @return
    */
   Case *generateRandomCase();
+
   /*!
-   * @brief Looks through the memory of the swarm in order to find the best evaluated perturbation.
+   * @brief Looks through the memory of the swarm in
+   * order to find the best evaluated perturbation.
    * @param swarm
    * @param current_best_particle_global
    * @return
@@ -84,19 +88,23 @@ class PSO : public Optimizer {
   Particle get_global_best();
 
   /*!
-   * @brief Updates the velocity based on learning_factor_1_ (c1), learning_factor_2_ (c2), the best evaluated
-   * perturbation of the swarm and the best evaluated perturbation of that particle.
+   * @brief Updates the velocity based on learning_factor_1_ (c1),
+   * learning_factor_2_ (c2), the best evaluated perturbation of
+   * the swarm and the best evaluated perturbation of that particle.
    * @param swarm_memory
    * @return
    */
   vector<PSO::Particle> update_velocity();
+
   /*!
-   * @brief Updates the position based on the updated velocities of the particles in the swarm.
+   * @brief Updates the position based on the updated
+   * velocities of the particles in the swarm.
    * @return
    */
   vector<PSO::Particle> update_position();
   /*!
-   * @brief Prints the swarm and its current values in a readable format, calls print particle
+   * @brief Prints the swarm and its current values
+   * in a readable format, calls print particle
    * @param swarm
    */
   void printSwarm(vector<Particle> swarm = vector<Particle>()) const;

@@ -388,6 +388,9 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_hybridopt.json
       DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
+  file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/restart.json
+      DESTINATION ${CMAKE_BINARY_DIR}/examples)
+
   # Create FO output dirs
   set(FO_OUTPUT_DIR ${CMAKE_BINARY_DIR}/fieldopt-output)
   set(DIRS

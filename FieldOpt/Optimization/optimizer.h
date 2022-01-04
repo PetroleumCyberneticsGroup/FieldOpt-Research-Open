@@ -99,6 +99,8 @@ class Optimizer : public Loggable
    */
   void SubmitEvaluatedCase(Case *c);
 
+  void applyRestart(Case* c, int nc);
+
   // -------------------------------------------------------
   /*!
    * \brief GetTentativeBestCase Get best case found so far.
@@ -193,7 +195,7 @@ class Optimizer : public Loggable
    */
   Optimizer(::Settings::Optimizer *opt_settings,
             Case *base_case,
-            Model::Properties::VarPropContainer *variables,
+            Model::Properties::VarPropContainer *vars,
             Reservoir::Grid::Grid *grid,
             Logger *logger,
             CaseHandler *case_handler = nullptr,
@@ -366,6 +368,8 @@ class Optimizer : public Loggable
   // All constraints defined for the optimization.
   Constraints::ConstraintHandler *constraint_handler_ = nullptr;
 
+  Model::Properties::VarPropContainer* vars_ = nullptr;
+
   int evaluated_cases_;  // Number of evaluated cases.
 
   // Maximum number of objective function evaluations
@@ -448,6 +452,9 @@ class Optimizer : public Loggable
 
  private:
   QDateTime start_time_;
+  Settings::Optimizer *seto_;
+
+  double infd_ = -std::numeric_limits<double>::infinity();
 
   // The number of seconds spent in the iterate() method.
   int seconds_spent_in_iterate_;

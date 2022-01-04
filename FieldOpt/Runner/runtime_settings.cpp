@@ -230,9 +230,9 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
       ("grid-path,g", po::value<std::string>(),
        "path to model grid file (e.g. *.GRID)")
       ("sim-exec-path,e", po::value<std::string>(),
-       "path to script that executes the reservoir simulation")
+       "path to script that executes the reservoir sim")
       ("sim-aux", po::value<std::string>(),
-       "path to directory with additional auxilary simulation files")
+       "path to directory with additional auxilary sim files")
       ("sim-inset", po::value<std::string>(),
        "path to simulator schedule inset file")
       ("fieldopt-build-dir,b", po::value<std::string>(),
@@ -251,8 +251,9 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
        "Injection well position coordinates")
       ("input-file", po::value<std::string>(), "path to FO driver file")
       ("output-dir", po::value<std::string>(), "path to result folder .")
-      ("restart-file", po::value<std::string>(), "restart file (JSON).")
+      ("restart-file,w", po::value<std::string>(), "restart file (JSON).")
       ;
+
   // Positional arguments
   po::positional_options_description p;
   p.add("input-file", 1);

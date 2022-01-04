@@ -28,6 +28,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include <QJsonDocument>
 #include <iostream>
+#include <qdebug.h>
 
 namespace Settings {
 
@@ -58,10 +59,8 @@ QString Settings::GetLogCsvString() const {
 
 void Settings::readDriverFile() {
 
-  if(vp_.vSET >= 5) {
-    im_ = "Reading driver file.";
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  if(vp_.vSET >= 5)
+    ext_info("Reading driver file.", md_, cl_, vp_.lnw);
   QFile *file = new QFile(paths_.GetPathQstr(Paths::DRIVER_FILE));
 
   if (!file->open(QIODevice::ReadOnly)) {
@@ -87,18 +86,37 @@ void Settings::readDriverFile() {
   readModelSection();
   readOptimizerSection();
 
+  if(paths_.IsSet(Paths::RESTART_FILE))
+    readRestartFile();
+
   file->close();
-  if(vp_.vSET >= 5) {
-    im_ = "Finished reading JSON.";
-    ext_info(im_, md_, cl_, vp_.lnw, 2, 2);
-  }
+  if(vp_.vSET >= 5)
+    ext_info("Finished reading JSON.", md_, cl_, vp_.lnw, 2, 2);
+}
+
+void Settings::readRestartFile() {
+  if(vp_.vSET >= 5)
+    ext_info("Reading Restart file.", md_, cl_, vp_.lnw);
+
+  QFile *file = new QFile(paths_.GetPathQstr(Paths::RESTART_FILE));
+  if (!file->open(QIODevice::ReadOnly))
+    ext_info("Restart file no found.", md_, cl_, vp_.lnw);
+
+  QJsonDocument json = QJsonDocument::fromJson(file->readAll());
+  optimizer_->restart_json_ = new QJsonObject(json.object());
+  optimizer_->restart_ = true;
+
+  // dbg
+  // qDebug() << json.toJson();
+  // QTextStream ts(stdout);
+  // ts << "json.toJson(): " << endl;
+  // ts << json.toJson();
 }
 
 void Settings::readGlobalSection() {
-  if(vp_.vSET >= 5) {
-    im_ = "Reading Global section.";
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  if(vp_.vSET >= 5)
+    ext_info("Reading Global section.", md_, cl_, vp_.lnw);
+
   try {
     QJsonObject json_global = json_driver_->value("Global").toObject();
     global_ = new Global(json_global);
@@ -109,10 +127,9 @@ void Settings::readGlobalSection() {
 }
 
 void Settings::readSimulatorSection() {
-  if(vp_.vSET >= 5) {
-    im_ = "Reading Simulator section.";
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  if(vp_.vSET >= 5)
+    ext_info("Reading Simulator section.", md_, cl_, vp_.lnw);
+
   try {
     QJsonObject json_simulator = json_driver_->value("Simulator").toObject();
     simulator_ = new Simulator(json_simulator, paths_,global()->verbParams());
@@ -123,10 +140,9 @@ void Settings::readSimulatorSection() {
 }
 
 void Settings::readOptimizerSection() {
-  if(vp_.vSET >= 5) {
-    im_ = "Reading Optimizer section.";
-    ext_info(im_, md_, cl_, vp_.lnw);
-  }
+  if(vp_.vSET >= 5)
+    ext_info("Reading Optimizer section.", md_, cl_, vp_.lnw);
+
   try {
     QJsonObject optimizer = json_driver_->value("Optimizer").toObject();
     optimizer_ = new Optimizer(optimizer,global()->verbParams());

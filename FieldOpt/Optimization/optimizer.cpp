@@ -39,7 +39,7 @@ using Constraints::ConstraintHandler;
 
 Optimizer::Optimizer(Settings::Optimizer *opt_settings,
                      Case *base_case,
-                     Model::Properties::VarPropContainer *variables,
+                     Model::Properties::VarPropContainer *vars,
                      Reservoir::Grid::Grid *grid,
                      Logger *logger,
                      CaseHandler *case_handler,
@@ -54,9 +54,11 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
       "must be set before initializing an Optimizer.");
   }
 
+  vars_ = vars;
   max_evaluations_ = opt_settings->parameters().max_evaluations;
   tentative_best_case_iteration_ = 0;
   seconds_spent_in_iterate_ = 0;
+  seto_ = opt_settings;
 
   // CONSTRAINT HANDLER ------------------------------------
   // Moved constraint handliner initialization to Model
@@ -76,6 +78,8 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
   // BASE CASE -> NEW CASE ---------------------------------
   tentative_best_case_ = base_case;
+  if (seto_->restart())
+    applyRestart(tentative_best_case_, -1);
 
   if (case_handler == nullptr) {
     case_handler_ = new CaseHandler(tentative_best_case_);
@@ -88,18 +92,18 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   // ITERATION ---------------------------------------------
   iteration_ = 0;
   evaluated_cases_ = 0;
-  mode_ = opt_settings->mode();
-  type_ = opt_settings->type();
+  mode_ = seto_->mode();
+  type_ = seto_->type();
 
   is_async_ = false;
   start_time_ = QDateTime::currentDateTime();
   logger_ = logger;
   enable_logging_ = true;
 
-  vp_ = opt_settings->verbParams();
+  vp_ = seto_->verbParams();
 
   // PENALIZATION ------------------------------------------
-  penalize_ = opt_settings->objective().use_penalty_function;
+  penalize_ = seto_->objective().use_penalty_function;
 
   if (penalize_) {
     if (!normalizer_ofv_.is_ready()) {
@@ -126,6 +130,35 @@ Settings::Optimizer::OptimizerType TR_DFO =
 
 Settings::Optimizer::OptimizerType DFTR =
   Settings::Optimizer::OptimizerType::DFTR;
+
+void Optimizer::applyRestart(Case* c, int nc) {
+  QJsonObject rjson0, rjson1;
+
+  if (nc < 0) { // "BestPoint"
+    rjson0 = seto_->restartJson()->value("BestPoint").toObject();
+    rjson1 = rjson0.value("Variables").toObject();
+    c->set_objf_value(rjson0["Fval"].toString().toDouble());
+
+  } else { // "LastPoints"
+    rjson0 = seto_->restartJson()->value("LastPoints").toObject();
+    rjson1 = rjson0.value(QString::number(nc)).toObject();
+    c->set_objf_value(-infd_);
+  }
+
+  for (auto var : *vars_->GetContinuousVariables()) {
+    vars_->SetContinuousVariableValue(var.first, infd_);
+    if(rjson1.contains(var.second->name())) {
+      auto val = rjson1.value(var.second->name()).toDouble();
+      vars_->SetContinuousVariableValue(var.first, val);
+    } else {
+      ext_warn("var.rstrt not found in current var.container", md_, cl_);
+    }
+  }
+
+  // double check all vars in var.container have been updated
+  for (auto var : vars_->GetContVarValues())
+    if (var.second == infd_) ext_warn("var.container not updated", md_, cl_);
+}
 
 Case *Optimizer::GetCaseForEvaluation() {
   if (case_handler_->QueuedCases().empty()) {

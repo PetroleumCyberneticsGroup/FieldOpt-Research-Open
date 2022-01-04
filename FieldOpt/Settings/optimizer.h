@@ -507,6 +507,9 @@ class Optimizer
   int scaleVars() { return scale_vars_; }
   double ScaleObjf() { return scale_objf_; }
 
+  QJsonObject* restartJson() { return restart_json_; }
+  bool restart() { return restart_; }
+
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
@@ -516,6 +519,8 @@ class Optimizer
 
   int scale_vars_ = 1;
   double scale_objf_ = 1.0;
+  QJsonObject *restart_json_ = nullptr;
+  bool restart_ = false;
 
   string im_, wm_, em_;
   string md_ = "Settings";
