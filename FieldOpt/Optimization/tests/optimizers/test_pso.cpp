@@ -52,7 +52,7 @@ class PSOTest : public ::testing::Test,
   virtual void SetUp() {}
 
   Optimization::Case *base_;
-  Optimization::Case* test_case_rstrt_;
+  Optimization::Case* base_case_rstrt_;
 };
 
 TEST_F(PSOTest, Constructor) {
@@ -66,8 +66,7 @@ TEST_F(PSOTest, TestFunctionSpherical) {
                                                test_case_ga_spherical_6r_,
                                                varcont_6r_,
                                                grid_5spot_,
-                                               logger_
-  );
+                                               logger_);
 
   while (!minimizer->IsFinished()) {
     auto next_case = minimizer->GetCaseForEvaluation();
@@ -103,24 +102,78 @@ TEST_F(PSOTest, TestFunctionRosenbrock) {
 
 TEST_F(PSOTest, TestRestart) {
 
-  test_case_rstrt_ = new Optimization::Case(model_rstrt_->variables()->GetBinVarValues(),
-                                            model_rstrt_->variables()->GetDiscVarValues(),
-                                            model_rstrt_->variables()->GetContVarValues());
-  test_case_rstrt_->set_objf_value(0.0);
+  auto vars = model_rstrt_->variables();
+  base_case_rstrt_ = new Optimization::Case(vars->GetBinVarValues(),
+                                            vars->GetDiscVarValues(),
+                                            vars->GetContVarValues());
+  base_case_rstrt_->set_objf_value(0.0);
 
-  test_case_rstrt_->StringRepresentation(model_rstrt_->variables());
-
-
+  base_case_rstrt_->StringRepresentation(vars);
 
   Optimization::Optimizer *optmzr = new PSO(settings_rstrt_opt_,
-                                            test_case_rstrt_,
-                                            model_rstrt_->variables(),
+                                            base_case_rstrt_,
+                                            vars,
                                             grid_olympr37_,
                                             logger_);
 
-  for ( auto *c : optmzr->case_handler()->AllCases()) {
+  map<string, map<string, double>> vmap;
+  vmap.insert(
+      {"bc", {
+          { "Var#BHP#INJD-15#0", 199.96961185494197 },
+          { "Var#BHP#INJD-15#1094", 209.54137953870247 },
+          { "Var#BHP#INJD-15#1641", 250.0531920881195 },
+          { "Var#BHP#INJD-15#2188", 197.0584663055752 },
+          { "Var#BHP#INJD-15#2735", 200.6145349062493 },
+          { "Var#BHP#INJD-15#3282", 195.43382947558968 },
+          { "Var#BHP#INJD-15#3829", 253.89998863950598 },
+          { "Var#BHP#INJD-15#4376", 218.0791077686635 },
+          { "Var#BHP#INJD-15#4923", 250.38103437442064 },
+          { "Var#BHP#INJD-15#547", 244.80148597015165 },
+          { "Var#BHP#INJD-16#0", 236.31054225077148 },
+          { "Var#BHP#INJD-16#1094", 238.83416476794562 },
+          { "Var#BHP#INJD-16#1641", 201.13418297135198 },
+          { "Var#BHP#INJD-16#2188", 239.78391825977764 },
+          { "Var#BHP#INJD-16#2735", 254.14934644255555 },
+          { "Var#BHP#INJD-16#3282", 228.72663503476676 },
+          { "Var#BHP#INJD-16#3829", 195.01219735780882 },
+          { "Var#BHP#INJD-16#4376", 247.82345714823884 },
+          { "Var#BHP#INJD-16#4923", 202.85386597435658 },
+          { "Var#BHP#INJD-16#547", 253.05227067702344 },
+          { "Var#BHP#PRODX2#0", 167.36580743563388 },
+          { "Var#BHP#PRODX2#1094", 105.43188190973554 },
+          { "Var#BHP#PRODX2#1641", 117.34227644118684 },
+          { "Var#BHP#PRODX2#2188", 157.77387174276436 },
+          { "Var#BHP#PRODX2#2735", 173.02961678205642 },
+          { "Var#BHP#PRODX2#3282", 106.125474949253 },
+          { "Var#BHP#PRODX2#3829", 109.99697898592774 },
+          { "Var#BHP#PRODX2#4376", 105.4197999414107 },
+          { "Var#BHP#PRODX2#4923", 106.73833844615724 },
+          { "Var#BHP#PRODX2#547", 105.00074442714711 },
+          { "Var#ICD#PRODX2#0", 0.00653218586329762 },
+          { "Var#ICD#PRODX2#1", 0.0001577555527071811 },
+          { "Var#ICD#PRODX2#2", 0.00012941330135794304 },
+          { "Var#ICD#PRODX2#3", 3.9575624016865985e-06 },
+          { "Var#ICD#PRODX2#4", 1.2178067233547564e-05 },
+          { "Var#ICD#PRODX2#5", 6.558205015438912e-07 },
+          { "Var#ICD#PRODX2#6", 5.045821649893485e-06 },
+          { "Var#ICD#PRODX2#7", 1.127772782414261e-05 }, }
+      });
 
+  EXPECT_NEAR(0.7571595999999999, optmzr->GetTentativeBestCase()->objf_value(), 1e-12);
+
+  // check base case
+  for ( auto v : vmap.at("bc")) {
+    auto uuid = vars->GetContVarQUuid(QString::fromStdString(v.first).replace("Var#",""));
+    auto val = optmzr->GetTentativeBestCase()->get_real_variable_value(uuid);
+    EXPECT_NEAR(val, v.second, 1e-12);
   }
+
+
+  // for ( auto *c : optmzr->case_handler()->AllCases()) {
+  //   for ( auto v : bc_vmap) {
+  //     c->GetValues().at("")
+  //   }
+  // }
 }
 
 }
