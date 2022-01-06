@@ -111,6 +111,15 @@ void Settings::readRestartFile() {
   // QTextStream ts(stdout);
   // ts << "json.toJson(): " << endl;
   // ts << json.toJson();
+
+  // keep for ref.:
+  // cout << "rjson0:" << endl; // QJsonDocument::Indented
+  // QString strJson0(QJsonDocument(rjson0).toJson(QJsonDocument::Compact));
+  // cout << strJson0.toStdString() << endl;
+
+  // QJsonArray array = seto_->restartJson()->value("BestPoint").toArray();
+  // foreach (const QJsonValue & v, array)
+  //     cout << v.toObject().keys()[0].toStdString() << endl;
 }
 
 void Settings::readGlobalSection() {

@@ -30,6 +30,11 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Reservoir/tests/test_resource_grids.h"
 #include "Optimization/tests/test_resource_test_functions.h"
 
+// #include "Optimization/tests/test_resource_cases.h"
+#include "Model/tests/test_resource_model.h"
+
+// #include <QtCore/QJsonDocument>
+
 using namespace TestResources::TestFunctions;
 using namespace Optimization::Optimizers;
 
@@ -47,7 +52,7 @@ class PSOTest : public ::testing::Test,
   virtual void SetUp() {}
 
   Optimization::Case *base_;
-
+  Optimization::Case* test_case_rstrt_;
 };
 
 TEST_F(PSOTest, Constructor) {
@@ -78,7 +83,11 @@ TEST_F(PSOTest, TestFunctionSpherical) {
 TEST_F(PSOTest, TestFunctionRosenbrock) {
   test_case_ga_spherical_6r_->set_objf_value(abs(Rosenbrock(test_case_ga_spherical_6r_->GetRealVarVector())));
   settings_pso_min_->SetRngSeed(5);
-  Optimization::Optimizer *minimizer = new PSO(settings_pso_min_, test_case_ga_spherical_6r_, varcont_6r_, grid_5spot_, logger_ );
+  Optimization::Optimizer *minimizer = new PSO(settings_pso_min_,
+                                               test_case_ga_spherical_6r_,
+                                               varcont_6r_,
+                                               grid_5spot_,
+                                               logger_);
 
   while (!minimizer->IsFinished()) {
     auto next_case = minimizer->GetCaseForEvaluation();
@@ -90,6 +99,28 @@ TEST_F(PSOTest, TestFunctionRosenbrock) {
   EXPECT_NEAR(0.0, best_case->objf_value(), 1);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 0.5);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[1], 0.5);
+}
+
+TEST_F(PSOTest, TestRestart) {
+
+  test_case_rstrt_ = new Optimization::Case(model_rstrt_->variables()->GetBinVarValues(),
+                                            model_rstrt_->variables()->GetDiscVarValues(),
+                                            model_rstrt_->variables()->GetContVarValues());
+  test_case_rstrt_->set_objf_value(0.0);
+
+  test_case_rstrt_->StringRepresentation(model_rstrt_->variables());
+
+
+
+  Optimization::Optimizer *optmzr = new PSO(settings_rstrt_opt_,
+                                            test_case_rstrt_,
+                                            model_rstrt_->variables(),
+                                            grid_olympr37_,
+                                            logger_);
+
+  for ( auto *c : optmzr->case_handler()->AllCases()) {
+
+  }
 }
 
 }

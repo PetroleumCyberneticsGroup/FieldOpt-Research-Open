@@ -44,13 +44,16 @@ class TestResourceGrids {
         "../examples/ADGPRS/5spot/ECL_5SPOT.EGRID");
 
     grid_norne_ = new Reservoir::Grid::ECLGrid(
-        "../examples/Flow/norne/NORNE_ATW2013.EGRID"
-    );
+        "../examples/Flow/norne/NORNE_ATW2013.EGRID");
+
+    grid_olympr37_ = new Reservoir::Grid::ECLGrid(
+        "../examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T01/OLPZ_BCXX_R37_F37_W01.EGRID");
   }
 
   Reservoir::Grid::Grid *grid_5spot_;
   Reservoir::Grid::Grid *grid_horzwel_;
   Reservoir::Grid::Grid *grid_norne_;
+  Reservoir::Grid::Grid *grid_olympr37_;
 };
 }
 

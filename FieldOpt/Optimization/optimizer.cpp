@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "optimizer.h"
 #include <time.h>
 #include <cmath>
+#include <QtCore/QJsonDocument>
 
 namespace Optimization {
 
@@ -132,27 +133,45 @@ Settings::Optimizer::OptimizerType DFTR =
   Settings::Optimizer::OptimizerType::DFTR;
 
 void Optimizer::applyRestart(Case* c, int nc) {
-  QJsonObject rjson0, rjson1;
+  QJsonArray rjson0, rjson1;
 
   if (nc < 0) { // "BestPoint"
-    rjson0 = seto_->restartJson()->value("BestPoint").toObject();
-    rjson1 = rjson0.value("Variables").toObject();
-    c->set_objf_value(rjson0["Fval"].toString().toDouble());
+    cout << "BestPoint" << endl;
+    rjson0 = seto_->restartJson()->value("BestPoint").toArray();
+    for (const auto v : rjson0)
+      if(v.toObject().contains("Fval")) {
+        c->set_objf_value(v.toObject().value("Fval").toDouble());
+      } else if(v.toObject().contains("Variables")) {
+        rjson1 = v.toObject().value("Variables").toArray();
+      }
 
-  } else { // "LastPoints"
-    rjson0 = seto_->restartJson()->value("LastPoints").toObject();
-    rjson1 = rjson0.value(QString::number(nc)).toObject();
+  } else { // "LastPoints"QJsonObject
+    cout << "LastPoint: " << nc << endl;
+    rjson0 = seto_->restartJson()->value("LastPoints").toArray();
     c->set_objf_value(-infd_);
+    for (const auto v : rjson0)
+      if(v.toObject().contains(QString::number(nc))) {
+        rjson1 = v.toObject().value(QString::number(nc)).toArray();
+      }
   }
 
   for (auto var : *vars_->GetContinuousVariables()) {
     vars_->SetContinuousVariableValue(var.first, infd_);
-    if(rjson1.contains(var.second->name())) {
-      auto val = rjson1.value(var.second->name()).toDouble();
-      vars_->SetContinuousVariableValue(var.first, val);
-    } else {
-      ext_warn("var.rstrt not found in current var.container", md_, cl_);
+    // cout << "var.second->name(): " << var.second->name().toStdString() << endl;
+
+    bool found_var = false;
+    for (const auto v : rjson1) {
+      if(v.toObject().keys()[0].contains(var.second->name())) {
+        // cout << "v.rstrt:" << v.toObject().keys()[0].toStdString() << endl;
+        vars_->SetContinuousVariableValue(var.first, v.toObject().value(var.second->name()).toDouble());
+        found_var = true; // one of the rstrt vars should match the current var
+        break;
+      }
     }
+
+    if(!found_var)
+      ext_warn("input var.rstrt not found in current var.container", md_, cl_);
+
   }
 
   // double check all vars in var.container have been updated

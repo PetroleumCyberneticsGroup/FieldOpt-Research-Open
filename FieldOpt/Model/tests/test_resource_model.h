@@ -43,10 +43,12 @@ class TestResourceModel : public TestResourceSettings,
     model_ = new Model::Model(*settings_full_, logger_);
     model_en_5spot_ = new Model::Model(*settings_en_5spot_full_,
                                        logger_);
+    model_rstrt_ = new Model::Model(*settings_rstrt_, logger_);
   }
 
   Model::Model *model_;
   Model::Model *model_en_5spot_;
+  Model::Model *model_rstrt_;
 };
 }
 

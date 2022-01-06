@@ -117,6 +117,33 @@ class RunnerResources {
   };
 
   // -----------------------------------------------------
+  string olympr37_rstrt_nm = "fo-drv.bc03.xrun-010_NPV-PSO-X00-A00"; // same as T01!
+  string olympr37_rstrt_dir = "../examples/ECLIPSE/olympr37-dwf-rlz-flat/BC01/T02/";
+  string olympr37_rstrt_driver = olympr37_rstrt_dir + "../../drivers/" + olympr37_rstrt_nm + ".json";
+  string olympr37_rstrt_file = olympr37_rstrt_dir + "../../drivers/restart-pso.json";
+
+  string olympr37_rstrt_simexe = olympr37_rstrt_dir + "../../drivers/bash_e300_slbs.sh";
+  string olympr37_rstrt_xdir = "../fieldopt-output/olympr37/" + olympr37_rstrt_nm;
+
+  string olympr37_rstrt_egrid = olympr37_rstrt_dir + "/OLPZ_BCXX_R37_F37_W01.EGRID";
+  string olympr37_rstrt_data = olympr37_rstrt_dir + "/OLPZ_BCXX_R37_F37_W01.DATA";
+
+  int argc_olympr37_rstrt = 20;
+  const char *argv_olympr37_rstrt[20] = {
+      "FieldOpt", olympr37_rstrt_driver.c_str(),
+      olympr37_T02_xdir.c_str(), // <- T02_dir ok
+      "-r", "serial",
+      "-g", olympr37_rstrt_egrid.c_str(),
+      "-s", olympr37_rstrt_data.c_str(),
+      "-f",
+      "-e", olympr37_rstrt_simexe.c_str(),
+      "-v", "0",
+      "-n", "1", // threads-per-sim
+      "-t", "1000", // sim-timeout
+      "-w", olympr37_rstrt_file.c_str(),
+  };
+
+  // -----------------------------------------------------
   // string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.apps-t01.npv";
   string driver_nm = "fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv";
   string en_5spot_dir = "../examples/ECLIPSE/5spot_c04_flow_en10_perm";
@@ -181,6 +208,9 @@ class RunnerResources {
 
   Runner::RuntimeSettings *rts_olympr37_T02_ =
     new Runner::RuntimeSettings(argc_olympr37_T02, argv_olympr37_T02);
+
+  Runner::RuntimeSettings *rts_olympr37_rstrt_ =
+      new Runner::RuntimeSettings(argc_olympr37_rstrt, argv_olympr37_rstrt);
 
  protected:
   Logger *logger_ = new Logger(rts_,
