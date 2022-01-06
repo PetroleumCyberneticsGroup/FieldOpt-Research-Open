@@ -98,7 +98,7 @@ class VarPropContainer
   //!< Get the discrete variable with index id.
   DiscreteProperty *GetDiscreteVariable(QUuid id) const;
 
-  //!< Get the continous variable with index id.
+  //!< Get the continuous variable with index id.
   ContinuousProperty *GetContinuousVariable(QUuid id) const;
 
   //!< Get the binary variable with the specified name.
@@ -107,8 +107,10 @@ class VarPropContainer
   //!< Get the discrete variable with the specified name.
   DiscreteProperty *GetDiscreteVariable(QString name) const;
 
-  //!< Get the continous variable with the specified name.
+  //!< Get the continuous variable with the specified name.
   ContinuousProperty *GetContinousVariable(QString name) const;
+
+  QUuid GetContVarQUuid(QString name) const;
 
   //!< Set the value of a binary variable.
   void SetBinaryVariableValue(QUuid id, bool val);

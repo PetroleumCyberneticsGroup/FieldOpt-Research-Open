@@ -490,7 +490,7 @@ VarPropContainer::GetDiscreteVariable(QString name) const {
   throw std::runtime_error(tm + name.toStdString());
 }
 
-// GET CONTINUOUS VAR --------------------------------------
+// GET CONTINUOUS VAR (return: ContinuousProperty*) --------
 ContinuousProperty*
 VarPropContainer::GetContinousVariable(QString name) const {
   string tm = "Unable to find continuous variable with name ";
@@ -498,6 +498,16 @@ VarPropContainer::GetContinousVariable(QString name) const {
     auto var = continuous_variables_->at(ii).second;
     if (QString::compare(var->name(), name) == 0)
       return var;
+  }
+  throw std::runtime_error(tm + name.toStdString());
+}
+
+// GET CONTINUOUS VAR (return: UUID*) ----------------------
+QUuid VarPropContainer::GetContVarQUuid(QString name) const {
+  string tm = "Unable to find continuous variable with name ";
+  for(int ii=0; ii < continuous_variables_->size(); ii++) {
+    if (QString::compare(continuous_variables_->at(ii).second->name(), name) == 0)
+      return continuous_variables_->at(ii).first;
   }
   throw std::runtime_error(tm + name.toStdString());
 }
