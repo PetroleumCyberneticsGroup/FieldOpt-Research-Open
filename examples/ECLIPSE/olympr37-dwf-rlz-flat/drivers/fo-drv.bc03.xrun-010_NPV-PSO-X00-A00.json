@@ -1,0 +1,639 @@
+{
+  "Global": {
+    "Cmt": "fo.r003.c09-olympr37.icd-opt-apps.aug.msw.scl.json",
+    "Name": "olympr37-msw-opt-aug",
+    "BookkeeperTol": 1e-07,
+    "VerbConf": {
+      "iBoxLineWidth": 163,
+      "Model": 0,
+      "Optim": 0,
+      "WICal": 0,
+      "Simul": 0,
+      "Runnr": 0,
+      "Resvr": 0,
+      "Setng": 0,
+      "Utils": 0
+    }
+  },
+  "Optimizer": {
+    "Type": "PSO",
+    "Mode": "Maximize",
+    "ScaleVars": 2,
+    "ScaleObjf": 1000000000,
+    "Parameters": {
+      "MaxGenerations": 250,
+      "PSO-LearningFactor1": 2,
+      "PSO-LearningFactor2": 2,
+      "PSO-SwarmSize": 38,
+      "PSO-VelocityScale": 1
+    },
+    "--Parameters": {
+      "MaxEvaluations": 1,
+      "ContractionFactor": 0.618033988749895,
+      "ExpansionFactor": 1.618033988749895,
+      "AutoStepLengths": false,
+      "InitialStepLength": 0.00196325,
+      "MinimumStepLength": 0.00039265
+    },
+    "Objective": {
+      "Type": "Augmented",
+      "Terms": [
+        {
+          "Oil price": "60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
+          "PropName": "FieldOilProdTotal",
+          "Coefficient": 377.3887,
+          "Active": true
+        },
+        {
+          "Water production cost": "6 $/bbl * 6.289811 bbl/m^3 ",
+          "PropName": "FieldWatProdTotal",
+          "Coefficient": -37.7388,
+          "Active": true
+        },
+        {
+          "Water injection cost": "2 $/bbl * 6.289811 bbl/m^3",
+          "PropName": "FieldWatInjTotal",
+          "Coefficient": -12.5796,
+          "Active": true
+        },
+        {
+          "SD Segment WCT:END S:NPV0": "SegWCT @ Prod.End",
+          "PropName": "SegWCTStdEnd",
+          "Coefficient": -377.3887,
+          "Active": false,
+          "Scaling": "NPV0",
+          "Wells": [
+            "PRODX2"
+          ],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+          ]
+        },
+        {
+          "SD Segment WCT:WCL S:NPV0": "SegWCT @ Water cut limit",
+          "PropName": "SegWCTStdWcl",
+          "Coefficient": -377.3887,
+          "Active": false,
+          "Scaling": "NPV0",
+          "Wells": [
+            "PRODX2"
+          ],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+          ]
+        },
+        {
+          "SD Segment WCT:WCL S:WNPV": "SegWCT @ Water cut limit",
+          "PropName": "SegWCTStdWcl",
+          "Coefficient": -377.3887,
+          "Active": false,
+          "Scaling": "WellNPV",
+          "Wells": [
+            "PRODX2"
+          ],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+          ]
+        },
+        {
+          "Well water breakthrough time": "",
+          "PropName": "WellWBTTotal",
+          "Coefficient": -377.3887,
+          "Active": false,
+          "Wells": [
+            "PRODX2"
+          ],
+          "Segments": [
+            [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+          ]
+        }
+      ]
+    },
+    "Constraints": [
+      {
+        "Wells": [
+          "PRODX2"
+        ],
+        "Type": "ICVConstraint",
+        "Min": 0,
+        "Max": "7.853E-3"
+      },
+      {
+        "Wells": [
+          "PRODX2"
+        ],
+        "Type": "WellXYZBox",
+        "xMin": 520471.85,
+        "xMax": 524471.85,
+        "yMin": 6177467.67,
+        "yMax": 6181467.67,
+        "zMin": 2024.432,
+        "zMax": 2044.432
+      },
+      {
+        "Wells": [
+          "PRODX2"
+        ],
+        "Type": "BHP",
+        "Min": 105,
+        "Max": 175
+      },
+      {
+        "Wells": [
+          "INJD-15"
+        ],
+        "Type": "BHP",
+        "Min": 195,
+        "Max": 255
+      },
+      {
+        "Wells": [
+          "INJD-16"
+        ],
+        "Type": "BHP",
+        "Min": 195,
+        "Max": 255
+      }
+    ]
+  },
+  "Simulator": {
+    "Type": "ECLIPSE",
+    "FluidModel": "BlackOil",
+    "------------------------------- 1": "",
+    "FileStructure": "Branched",
+    "--FileStructure": "Flat",
+    "BranchLevels": 3,
+    "UsePreSimScript": true,
+    "UsePostSimScript": true,
+    "AddSimScripts": true,
+    "------------------------------- 2": "",
+    "PreSimArgs": [
+      "0 0 \\/",
+      "NoG",
+      "MSW",
+      "olympr37",
+      ""
+    ],
+    "--PreSimArgs0": [
+      "0 1 \\/",
+      "AdjG",
+      "",
+      "olympr37",
+      ""
+    ],
+    "--PreSimArgs1": [
+      "10 10 \\/",
+      "Optz",
+      "",
+      "olympr37",
+      ""
+    ],
+    "------------------------------- 3": "",
+    "PostSimArgs": [ "NoG" ],
+    "--PostSimArgs0": [
+      "AdjG",
+      8,
+      "PRODX2:SCSA"
+    ],
+    "--PostSimArgs1": [
+      "AdjG",
+      38,
+      "PRODX2:WBHP|INJD-15:WBHP|INJD-16:WBHP|PRODX2:SCSA"
+    ],
+    "--PostSimArgs2": [ "Optz" ],
+    "ReadAdjGrads": false,
+    "------------------------------- 4": "",
+    "ReadExternalJsonResults": false,
+    "ScheduleFile": "fo_edits.INC",
+    "ExecutionScript": "bash_ecl",
+    "UseACTIONX": false,
+    "SelectRealizations": 1,
+    "MaxMinutes": -1
+  },
+  "Model": {
+    "StartDate": [ 1, 10, 2019 ],
+    "--ControlTimes": [
+      0,
+      438,
+      876,
+      1314,
+      1752,
+      2190,
+      2628,
+      3066,
+      3504,
+      3942,
+      4380
+    ],
+    "ControlTimes": [
+      0,
+      547,
+      1094,
+      1641,
+      2188,
+      2735,
+      3282,
+      3829,
+      4376,
+      4923,
+      5470
+    ],
+    "--TStepRefinement": 20,
+    "TStepRefinement": 1,
+    "Reservoir": { "Type": "ECLIPSE" },
+    "Wells": [
+      {
+        "Group": "P",
+        "Name": "PRODX2",
+        "Type": "Producer",
+        "PreferredPhase": "Oil",
+        "WellboreRadius": 0.108,
+        "DefinitionType": "WellSpline",
+        "WellSegStruct": "ICDBranches",
+        "SplinePoints": {
+          "Heel": {
+            "x": 522471.85,
+            "y": 6179467.67,
+            "z": 2034,
+            "IsVariable": false
+          },
+          "Toe": {
+            "x": 525013.03,
+            "y": 6179558.16,
+            "z": 2058,
+            "IsVariable": false
+          }
+        },
+        "Segmentation": {
+          "Tubing": {
+            "Diameter": 0.152,
+            "Roughness": 1e-05
+          },
+          "Annulus": {
+            "Diameter": 0.152,
+            "Roughness": 1e-05,
+            "CrossSectionArea": 0.00810732
+          },
+          "Compartments": {
+            "IsVariable": true,
+            "Count": 8,
+            "VariablePackers": false,
+            "VariableICDs": true,
+            "ICDType": "Valve",
+            "--ICDValveSize": 3.9265e-05,
+            "ICDValveSize": 3.9265e-05,
+            "ICDValveFlowCoeff": 0.7,
+            "Diameter": 0.008,
+            "Roughness": 1.52e-05,
+            "CrossSectionArea": 5.02655e-05,
+            "SegVolume": 3.19186e-06
+          }
+        },
+        "--ICVs": [
+          {
+            "IsVariable": true,
+            "TimeStep": 0,
+            "ICDNames": [ "ICV2", "ICV3", "ICV4", "ICV5", "ICV6", "ICV7", "ICV8", "ICV9" ],
+            "ICDSegments": [ 2, 3, 4, 5, 6, 7, 8, 9 ],
+            "ValveSize": "3.9265E-5",
+            "FlowCoefficient": 0.7,
+            "MinValveSize": 0,
+            "MaxValveSize": "7.853E-3",
+            "FrictionDrop": "-1",
+            "PipeDiameter": "0.1016",
+            "AbsRoughness": "-1",
+            "PipeXsecArea": "8.10732E-3",
+            "DeviceStatus": "OPEN",
+            "MaxXsectArea": "7.853E-3"
+          }
+        ],
+        "--Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 2,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 4,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 6,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 8,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": false
+          }
+        ],
+        "Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 547,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1094,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1641,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2188,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2735,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3282,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3829,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4376,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4923,
+            "Mode": "BHP",
+            "BHP": 155,
+            "IsVariable": true
+          }
+        ]
+      },
+      {
+        "Group": "I",
+        "Name": "INJD-15",
+        "Type": "Injector",
+        "PreferredPhase": "Water",
+        "WellboreRadius": 0.09525,
+        "DefinitionType": "WellSpline",
+        "SplinePoints": {
+          "Heel": {
+            "x": 524523.309,
+            "y": 6180251.851,
+            "z": 2057.161,
+            "IsVariable": false
+          },
+          "Toe": {
+            "x": 524910.076,
+            "y": 6180073.999,
+            "z": 2076.141,
+            "IsVariable": false
+          }
+        },
+        "--Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 2,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 4,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 6,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 8,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          }
+        ],
+        "Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 547,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1094,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1641,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2188,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2735,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3282,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3829,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4376,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4923,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          }
+        ]
+      },
+      {
+        "Group": "I",
+        "Name": "INJD-16",
+        "Type": "Injector",
+        "PreferredPhase": "Water",
+        "WellboreRadius": 0.09525,
+        "DefinitionType": "WellSpline",
+        "SplinePoints": {
+          "Heel": {
+            "x": 523767.52,
+            "y": 6180444.372,
+            "z": 2047.812,
+            "IsVariable": false
+          },
+          "Toe": {
+            "x": 524218.024,
+            "y": 6180414.87,
+            "z": 2058.11,
+            "IsVariable": false
+          }
+        },
+        "--Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 2,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 4,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 6,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          },
+          {
+            "TimeStep": 8,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": false
+          }
+        ],
+        "Controls": [
+          {
+            "TimeStep": 0,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 547,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1094,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 1641,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2188,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 2735,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3282,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 3829,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4376,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          },
+          {
+            "TimeStep": 4923,
+            "Mode": "BHP",
+            "BHP": 205,
+            "IsVariable": true
+          }
+        ]
+      }
+    ]
+  }
+}
