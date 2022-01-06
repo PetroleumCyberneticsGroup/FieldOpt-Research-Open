@@ -30,10 +30,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "Reservoir/tests/test_resource_grids.h"
 #include "Optimization/tests/test_resource_test_functions.h"
 
-// #include "Optimization/tests/test_resource_cases.h"
 #include "Model/tests/test_resource_model.h"
-
-// #include <QtCore/QJsonDocument>
 
 using namespace TestResources::TestFunctions;
 using namespace Optimization::Optimizers;
@@ -101,11 +98,14 @@ TEST_F(PSOTest, TestFunctionRosenbrock) {
 }
 
 TEST_F(PSOTest, TestRestart) {
+  auto start = std::chrono::steady_clock::now();
 
   auto vars = model_rstrt_->variables();
   base_case_rstrt_ = new Optimization::Case(vars->GetBinVarValues(),
                                             vars->GetDiscVarValues(),
                                             vars->GetContVarValues());
+  std::cout << "[PSOTest]-t1 (ms)=" << Printer::since(start).count() << std::endl;
+
   base_case_rstrt_->set_objf_value(0.0);
 
   base_case_rstrt_->StringRepresentation(vars);
@@ -115,6 +115,7 @@ TEST_F(PSOTest, TestRestart) {
                                             vars,
                                             grid_olympr37_,
                                             logger_);
+  std::cout << "[PSOTest]-t2 (ms)=" << Printer::since(start).count() << std::endl;
 
   map<string, map<string, double>> vmap;
   vmap.insert(
@@ -167,6 +168,7 @@ TEST_F(PSOTest, TestRestart) {
     auto val = optmzr->GetTentativeBestCase()->get_real_variable_value(uuid);
     EXPECT_NEAR(val, v.second, 1e-12);
   }
+  std::cout << "[PSOTest]-t3 (ms)=" << Printer::since(start).count() << std::endl;
 
 
   // for ( auto *c : optmzr->case_handler()->AllCases()) {

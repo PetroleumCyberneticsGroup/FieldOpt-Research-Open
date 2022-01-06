@@ -41,6 +41,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <chrono>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -68,6 +69,14 @@ using Eigen::VectorXd;
 using Eigen::Map;
 
 namespace Printer {
+
+template <
+    class result_t   = std::chrono::milliseconds,
+    class clock_t    = std::chrono::steady_clock,
+    class duration_t = std::chrono::milliseconds >
+inline result_t since(std::chrono::time_point<clock_t, duration_t> const& start) {
+  return std::chrono::duration_cast<result_t>(clock_t::now() - start);
+}
 
 inline void E(string m, string md, string cl) {
   m = "[mod: " + md + "] [cls: " + cl + "] " + m;
