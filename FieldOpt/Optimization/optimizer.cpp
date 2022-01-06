@@ -136,17 +136,17 @@ void Optimizer::applyRestart(Case* c, int nc) {
   QJsonArray rjson0, rjson1;
 
   if (nc < 0) { // "BestPoint"
-    cout << "BestPoint" << endl;
+    // cout << "BestPoint" << endl;
     rjson0 = seto_->restartJson()->value("BestPoint").toArray();
     for (const auto v : rjson0)
-      if(v.toObject().contains("Fval")) {
-        c->set_objf_value(v.toObject().value("Fval").toDouble());
+      if(v.toObject().contains("Fmax")) {
+        c->set_objf_value(v.toObject().value("Fmax").toDouble());
       } else if(v.toObject().contains("Variables")) {
         rjson1 = v.toObject().value("Variables").toArray();
       }
 
-  } else { // "LastPoints"QJsonObject
-    cout << "LastPoint: " << nc << endl;
+  } else { // "LastPoints"
+    // cout << "LastPoint: " << nc << endl;
     rjson0 = seto_->restartJson()->value("LastPoints").toArray();
     c->set_objf_value(-infd_);
     for (const auto v : rjson0)
@@ -156,14 +156,12 @@ void Optimizer::applyRestart(Case* c, int nc) {
   }
 
   for (auto var : *vars_->GetContinuousVariables()) {
-    vars_->SetContinuousVariableValue(var.first, infd_);
-    // cout << "var.second->name(): " << var.second->name().toStdString() << endl;
+    c->set_real_variable_value(var.first, infd_);
 
     bool found_var = false;
     for (const auto v : rjson1) {
       if(v.toObject().keys()[0].contains(var.second->name())) {
-        // cout << "v.rstrt:" << v.toObject().keys()[0].toStdString() << endl;
-        vars_->SetContinuousVariableValue(var.first, v.toObject().value(var.second->name()).toDouble());
+        c->set_real_variable_value(var.first, v.toObject().value("Var#" + var.second->name()).toDouble());
         found_var = true; // one of the rstrt vars should match the current var
         break;
       }
