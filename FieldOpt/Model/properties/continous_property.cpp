@@ -87,6 +87,10 @@ void ContinuousProperty::scaleGrad(double &grad) {
   grad = 2*grad/bnds_b_mns_a_;
 }
 
+void ContinuousProperty::scaleOtherValue(double &oval) {
+  oval = 2*oval/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_;
+}
+
 void ContinuousProperty::UpdateValue() {
   // y - > x
   // x = y * bnds_b_mns_a_/2 + bnds_a_pls_b_/2

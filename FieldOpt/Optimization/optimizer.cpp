@@ -148,7 +148,8 @@ void Optimizer::applyRestart(Case* c, int nc) {
     for (const auto v : rjson1) {
       if(v.toObject().keys()[0].contains(var.second->name())) {
         auto oval = v.toObject().value("Var#" + var.second->name()).toDouble();
-        c->set_real_variable_value(var.first, var.second->scaleOtherValue(oval));
+        var.second->scaleOtherValue(oval);
+        c->set_real_variable_value(var.first, oval);
         found_var = true; // one of the rstrt vars should match the current var
         break;
       }
