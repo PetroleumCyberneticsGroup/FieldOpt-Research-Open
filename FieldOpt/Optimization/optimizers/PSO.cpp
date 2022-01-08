@@ -86,7 +86,7 @@ PSO::PSO(Settings::Optimizer *settings,
     if (settings->restart())
       applyRestart(new_case, i);
 
-    swarm_.push_back(Particle(new_case, gen_, v_max_, n_vars_));
+    swarm_.emplace_back(new_case, gen_, v_max_, n_vars_);
     case_handler_->AddNewCase(new_case);
   }
 
@@ -109,7 +109,7 @@ void PSO::iterate(){
   vector<Particle> next_generation_swarm;
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
-    next_generation_swarm.push_back(Particle(new_case, gen_, v_max_, n_vars_));
+    next_generation_swarm.emplace_back(new_case, gen_, v_max_, n_vars_);
     next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity, swarm_[i].rea_vars);
   }
   for(int i = 0; i < number_of_particles_; i++){
@@ -181,7 +181,7 @@ PSO::Particle::Particle(Optimization::Case *c,
 // ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
 void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
                                   Eigen::VectorXd rea_vars_swap){
-  rea_vars=rea_vars_swap;
+  rea_vars = rea_vars_swap;
   case_pointer->SetRealVarValues(rea_vars);
   rea_vars_velocity = rea_vars_velocity_swap;
 }
