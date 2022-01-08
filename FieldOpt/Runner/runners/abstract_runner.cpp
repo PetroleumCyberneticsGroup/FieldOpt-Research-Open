@@ -61,6 +61,9 @@ using Optimization::Objective::Augmented;
 
 namespace Optzr = Optimization::Optimizers;
 
+// ┌─┐  ┌┐   ┌─┐  ┌┬┐  ┬─┐  ┌─┐  ┌─┐  ┌┬┐    ╦═╗  ╦ ╦  ╔╗╔  ╔╗╔  ╔═╗  ╦═╗
+// ├─┤  ├┴┐  └─┐   │   ├┬┘  ├─┤  │     │     ╠╦╝  ║ ║  ║║║  ║║║  ║╣   ╠╦╝
+// ┴ ┴  └─┘  └─┘   ┴   ┴└─  ┴ ┴  └─┘   ┴     ╩╚═  ╚═╝  ╝╚╝  ╝╚╝  ╚═╝  ╩╚═
 AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
   rts_ = runtime_settings;
 
@@ -76,6 +79,9 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
   is_ensemble_run_ = false;
 }
 
+// ┌─┐  ┌─┐  ┌┐┌  ┌┬┐  ┬  ┌┐┌  ┌─┐  ┬    ╦  ╦  ╔═╗  ╦
+// └─┐  ├┤   │││   │   │  │││  ├┤   │    ╚╗╔╝  ╠═╣  ║
+// └─┘  └─┘  ┘└┘   ┴   ┴  ┘└┘  └─┘  ┴─┘   ╚╝   ╩ ╩  ╩═╝
 double AbstractRunner::sentinelValue() const {
   if (seto_->mode() == OptzrMod::Minimize) {
     return -1*sentinel_value_;
@@ -83,7 +89,10 @@ double AbstractRunner::sentinelValue() const {
   return sentinel_value_;
 }
 
-void AbstractRunner::InitializeSettings(const QString& output_subdir) {
+// ┬  ┌┐┌  ┬  ┌┬┐  ╔═╗  ╔═╗  ╔╦╗  ╔╦╗  ╦  ╔╗╔  ╔═╗  ╔═╗
+// │  │││  │   │   ╚═╗  ║╣    ║    ║   ║  ║║║  ║ ╦  ╚═╗
+// ┴  ┘└┘  ┴   ┴   ╚═╝  ╚═╝   ╩    ╩   ╩  ╝╚╝  ╚═╝  ╚═╝
+void AbstractRunner::InitSettings(const QString& output_subdir) {
 
   // Output dir
   QString output_dir = rts_->paths().GetPathQstr(Paths::OUTPUT_DIR);
@@ -120,7 +129,10 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   }
 }
 
-void AbstractRunner::InitializeModel() {
+// ┬  ┌┐┌  ┬  ┌┬┐  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╦
+// │  │││  │   │   ║║║  ║ ║   ║║  ║╣   ║
+// ┴  ┘└┘  ┴   ┴   ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩═╝
+void AbstractRunner::InitModel() {
   if (settings_ == nullptr) { E("Settings must be initialized b/f Model.", md_, cl_); }
 
   if (is_ensemble_run_) {
@@ -132,7 +144,10 @@ void AbstractRunner::InitializeModel() {
   vars_ = model_->variables();
 }
 
-void AbstractRunner::InitializeSimulator() {
+// ┬  ┌┐┌  ┬  ┌┬┐  ╔═╗  ╦  ╔╦╗  ╦ ╦  ╦    ╔═╗  ╔╦╗  ╔═╗  ╦═╗
+// │  │││  │   │   ╚═╗  ║  ║║║  ║ ║  ║    ╠═╣   ║   ║ ║  ╠╦╝
+// ┴  ┘└┘  ┴   ┴   ╚═╝  ╩  ╩ ╩  ╚═╝  ╩═╝  ╩ ╩   ╩   ╚═╝  ╩╚═
+void AbstractRunner::InitSimulator() {
   if (model_ == nullptr) { E("Model must be initialized b/f Simulator.", md_, cl_); }
 
   switch (settings_->simulator()->type()) {
@@ -169,7 +184,10 @@ void AbstractRunner::InitializeSimulator() {
   }
 }
 
-void AbstractRunner::EvaluateBaseModel() {
+// ┌─┐  ┬  ┬  ┌─┐  ┬    ╔╗   ╔═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╦
+// ├┤   └┐┌┘  ├─┤  │    ╠╩╗  ╠═╣  ╚═╗  ║╣   ║║║  ║ ║   ║║  ║╣   ║
+// └─┘   └┘   ┴ ┴  ┴─┘  ╚═╝  ╩ ╩  ╚═╝  ╚═╝  ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩═╝
+void AbstractRunner::EvalBaseModel() {
   if (simulator_ == nullptr) {
     E("Simulator must be initialized b/f evaluating base model.", md_, cl_);
   }
@@ -492,17 +510,23 @@ void AbstractRunner::InitializeOptimizer() {
 // ┬  ┌┐┌  ┬  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╦╔═  ╦╔═  ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╦═╗
 // │  │││  │   │   ╠╩╗  ║ ║  ║ ║  ╠╩╗  ╠╩╗  ║╣   ║╣   ╠═╝  ║╣   ╠╦╝
 // ┴  ┘└┘  ┴   ┴   ╚═╝  ╚═╝  ╚═╝  ╩ ╩  ╩ ╩  ╚═╝  ╚═╝  ╩    ╚═╝  ╩╚═
-void AbstractRunner::InitializeBookkeeper() {
+void AbstractRunner::InitBookkeeper() {
   if (settings_ == nullptr || optimizer_ == nullptr) {
     E("Settings and Optimizer must be initialized before the Bookkeeper.", md_, cl_);
   }
   bookkeeper_ = new Bookkeeper(settings_,optimizer_->case_handler());
 }
 
-void AbstractRunner::InitializeLogger(QString output_subdir, bool write_logs) {
+// ┬  ┌┐┌  ┬  ┌┬┐  ╦    ╔═╗  ╔═╗  ╔═╗  ╔═╗  ╦═╗
+// │  │││  │   │   ║    ║ ║  ║ ╦  ║ ╦  ║╣   ╠╦╝
+// ┴  ┘└┘  ┴   ┴   ╩═╝  ╚═╝  ╚═╝  ╚═╝  ╚═╝  ╩╚═
+void AbstractRunner::InitLogger(QString output_subdir, bool write_logs) {
   logger_ = new Logger(rts_, output_subdir, write_logs);
 }
 
+// ┌─┐  ┬─┐  ┌┐┌  ┌┬┐  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦    ╔═╗  ╔╦╗  ╦  ╔═╗  ╔╗╔  ╔╦╗  ╔═╗  ╔═╗
+// ├─┘  ├┬┘  │││   │   ║    ║ ║  ║║║  ╠═╝  ║    ║╣    ║   ║  ║ ║  ║║║  ║║║  ╚═╗  ║ ╦
+// ┴    ┴└─  ┘└┘   ┴   ╚═╝  ╚═╝  ╩ ╩  ╩    ╩═╝  ╚═╝   ╩   ╩  ╚═╝  ╝╚╝  ╩ ╩  ╚═╝  ╚═╝
 void AbstractRunner::PrintCompletionMessage() {
   cout << "Optimization complete: ";
 
@@ -565,6 +589,9 @@ void AbstractRunner::PrintCompletionMessage() {
   ComputeOptmzdCase();
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐  ╔═╗  ╔═╗  ╔╦╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔═╗  ╔═╗
+// │    │ │  │││  ├─┘  │ │   │   ├┤   ║ ║  ╠═╝   ║   ║║║  ╔═╝   ║║  ║    ╠═╣  ╚═╗  ║╣
+// └─┘  └─┘  ┴ ┴  ┴    └─┘   ┴   └─┘  ╚═╝  ╩     ╩   ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 void AbstractRunner::ComputeOptmzdCase() {
   cout << "Running simulation using optzd values" << endl;
   auto opt_vars_int = optimizer_->GetTentativeBestCase()->integer_variables();
@@ -587,6 +614,9 @@ void AbstractRunner::ComputeOptmzdCase() {
   cout << "objf_value: " << optz_case_->objf_value() << endl;
 }
 
+// ┌┬┐  ┬  ┌┬┐  ┌─┐  ┌─┐  ┬ ┬  ┌┬┐  ╦  ╦  ╔═╗  ╦
+//  │   │  │││  ├┤   │ │  │ │   │   ╚╗╔╝  ╠═╣  ║
+//  ┴   ┴  ┴ ┴  └─┘  └─┘  └─┘   ┴    ╚╝   ╩ ╩  ╩═╝
 int AbstractRunner::timeoutVal() const {
   if (sim_times_.empty() || rts_->sim_timeout() == 0) {
     return 10000;
@@ -595,13 +625,19 @@ int AbstractRunner::timeoutVal() const {
   }
 }
 
-void AbstractRunner::FinalizeInitialization(bool write_logs) {
+// ┌─┐  ┬  ┌┐┌  ┌─┐  ┬    ┬  ┌─┐  ┌─┐  ╦  ╔╗╔  ╦  ╔╦╗
+// ├┤   │  │││  ├─┤  │    │  ┌─┘  ├┤   ║  ║║║  ║   ║
+// └    ┴  ┘└┘  ┴ ┴  ┴─┘  ┴  └─┘  └─┘  ╩  ╝╚╝  ╩   ╩
+void AbstractRunner::FinalizeInit(bool write_logs) {
   if (write_logs) {
     logger_->AddEntry(rts_);
     logger_->FinalizePrerunSummary();
   }
 }
 
+// ┌─┐  ┬  ┌┐┌  ┌─┐  ┬    ┬  ┌─┐  ┌─┐  ╦═╗  ╦ ╦  ╔╗╔
+// ├┤   │  │││  ├─┤  │    │  ┌─┘  ├┤   ╠╦╝  ║ ║  ║║║
+// └    ┴  ┘└┘  ┴ ┴  ┴─┘  ┴  └─┘  └─┘  ╩╚═  ╚═╝  ╝╚╝
 void AbstractRunner::FinalizeRun(bool write_logs) {
   if (optimizer_ != nullptr) { // This indicates whether or not we're on a worker process
     model_->ApplyCase(optimizer_->GetTentativeBestCase());

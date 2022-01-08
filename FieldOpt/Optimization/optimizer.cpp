@@ -130,6 +130,9 @@ Settings::Optimizer::OptimizerType TR_DFO =
 Settings::Optimizer::OptimizerType DFTR =
   Settings::Optimizer::OptimizerType::DFTR;
 
+// ┌─┐  ┌─┐  ┌─┐  ┬    ┬ ┬    ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
+// ├─┤  ├─┘  ├─┘  │    └┬┘    ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
+// ┴ ┴  ┴    ┴    ┴─┘   ┴     ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
 void Optimizer::applyRestart(Case* c, int nc) {
   QJsonArray rjson0, rjson1;
 
@@ -164,6 +167,9 @@ void Optimizer::applyRestart(Case* c, int nc) {
     if (var.second == infd_) ext_warn("var.container not updated", md_, cl_);
 }
 
+// ┌─┐  ┌─┐  ┌┬┐    ╔═╗  ╔═╗  ╔═╗  ╔═╗    ┌─┐  ┌─┐  ┬─┐    ╔═╗  ╦  ╦  ╔═╗  ╦
+// │ ┬  ├┤    │     ║    ╠═╣  ╚═╗  ║╣     ├┤   │ │  ├┬┘    ║╣   ╚╗╔╝  ╠═╣  ║
+// └─┘  └─┘   ┴     ╚═╝  ╩ ╩  ╚═╝  ╚═╝    └    └─┘  ┴└─    ╚═╝   ╚╝   ╩ ╩  ╩═╝
 Case *Optimizer::GetCaseForEvaluation() {
   if (case_handler_->QueuedCases().empty()) {
     time_t start, end;
@@ -188,6 +194,9 @@ Case *Optimizer::GetCaseForEvaluation() {
   return case_handler_->GetNextCaseForEvaluation();
 }
 
+// ┌─┐  ┬ ┬  ┌┐   ┌┬┐  ┬  ┌┬┐    ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗    ╔═╗  ╔═╗  ╔═╗  ╔═╗
+// └─┐  │ │  ├┴┐  │││  │   │     ║╣   ╚╗╔╝  ╠═╣  ║     ║║    ║    ╠═╣  ╚═╗  ║╣
+// └─┘  └─┘  └─┘  ┴ ┴  ┴   ┴     ╚═╝   ╚╝   ╩ ╩  ╩═╝  ═╩╝    ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 void Optimizer::SubmitEvaluatedCase(Case *c) {
   if (penalize_ && iteration_ > 0) {
     double penalized_ofv = PenalizedOFV(c);

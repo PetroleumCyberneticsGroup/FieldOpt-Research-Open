@@ -29,20 +29,20 @@ namespace Runner {
 OneOffRunner::OneOffRunner(RuntimeSettings *runtime_settings)
   : AbstractRunner(runtime_settings) {
   std::cout << "Initializing one-off runner." << std::endl;
-  InitializeSettings();
-  InitializeModel();
-  InitializeSimulator();
-  //EvaluateBaseModel();
+  InitSettings();
+  InitModel();
+  InitSimulator();
+  //EvalBaseModel();
   InitObjF();
   InitBaseCase();
   //InitializeOptimizer();
-  //InitializeBookkeeper();
-  InitializeLogger();
+  //InitBookkeeper();
+  InitLogger();
 }
 
 void OneOffRunner::Execute() {
   applyWellPositionFromArguments();
-  EvaluateBaseModel();
+  EvalBaseModel();
   // Write objective function value to file
   model_->wellCost(settings_->optimizer());
   //Utilities::FileHandling::WriteLineToFile(QString("%1").arg(objf_->value()),

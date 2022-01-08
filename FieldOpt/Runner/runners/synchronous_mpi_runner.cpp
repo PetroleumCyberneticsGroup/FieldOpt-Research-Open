@@ -31,27 +31,27 @@ SynchronousMPIRunner::SynchronousMPIRunner(RuntimeSettings *rts) : MPIRunner(rts
   assert(world_.size() >= 2 && "SynchronousMPIRunner requires at least two MPI processes.");
 
   if (world_.rank() == 0) {
-    InitializeSettings("rank" + QString::number(rank()));
+    InitSettings("rank" + QString::number(rank()));
 
-    InitializeLogger();
-    InitializeModel();
-    InitializeSimulator();
-    EvaluateBaseModel();
+    InitLogger();
+    InitModel();
+    InitSimulator();
+    EvalBaseModel();
     InitObjF();
     InitBaseCase();
     InitializeOptimizer();
-    InitializeBookkeeper();
+    InitBookkeeper();
     overseer_ = new MPI::Overseer(this);
-    FinalizeInitialization(true);
+    FinalizeInit(true);
 
   } else {
-    InitializeLogger("rank" + QString::number(rank()));
-    InitializeSettings("rank" + QString::number(rank()));
-    InitializeModel();
-    InitializeSimulator();
+    InitLogger("rank" + QString::number(rank()));
+    InitSettings("rank" + QString::number(rank()));
+    InitModel();
+    InitSimulator();
     InitObjF();
     worker_ = new MPI::Worker(this);
-    FinalizeInitialization(false);
+    FinalizeInit(false);
   }
 }
 
