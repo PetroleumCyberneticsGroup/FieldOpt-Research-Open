@@ -92,10 +92,14 @@ class AbstractRunner
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
-  Settings::Settings *settings_;
+  Model::Properties::VarPropContainer *vars_;
+
   RuntimeSettings *rts_;
   Optimization::Case *base_case_;
   Optimization::Case *optz_case_;
+
+  Settings::Settings *settings_;
+  Settings::Optimizer *seto_;
 
   Optimization::Optimizer *optimizer_;
   Optimization::Objective::Objective *objf_;
@@ -144,10 +148,12 @@ class AbstractRunner
   void InitializeModel();
   void InitializeSimulator();
   void EvaluateBaseModel();
-  void InitializeObjectiveFunction();
-  void InitializeBaseCase();
+  void InitObjF();
+  void InitBaseCase();
   void InitializeOptimizer();
   void InitializeBookkeeper();
+
+  void ApplyRestartBaseCase();
 
   //!< Write the pre-run summary
   void FinalizeInitialization(bool write_logs);

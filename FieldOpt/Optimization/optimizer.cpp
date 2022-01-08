@@ -79,8 +79,6 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
 
   // BASE CASE -> NEW CASE ---------------------------------
   tentative_best_case_ = base_case;
-  if (seto_->restart())
-    applyRestart(tentative_best_case_, -1);
 
   if (case_handler == nullptr) {
     case_handler_ = new CaseHandler(tentative_best_case_);
@@ -135,25 +133,13 @@ Settings::Optimizer::OptimizerType DFTR =
 void Optimizer::applyRestart(Case* c, int nc) {
   QJsonArray rjson0, rjson1;
 
-  if (nc < 0) { // "BestPoint"
-    // cout << "BestPoint" << endl;
-    rjson0 = seto_->restartJson()->value("BestPoint").toArray();
-    for (const auto v : rjson0)
-      if(v.toObject().contains("Fmax")) {
-        c->set_objf_value(v.toObject().value("Fmax").toDouble());
-      } else if(v.toObject().contains("Variables")) {
-        rjson1 = v.toObject().value("Variables").toArray();
-      }
-
-  } else { // "LastPoints"
-    // cout << "LastPoint: " << nc << endl;
-    rjson0 = seto_->restartJson()->value("LastPoints").toArray();
-    c->set_objf_value(-infd_);
-    for (const auto v : rjson0)
-      if(v.toObject().contains(QString::number(nc))) {
-        rjson1 = v.toObject().value(QString::number(nc)).toArray();
-      }
-  }
+  cout << "LastPoint: " << nc << endl;
+  rjson0 = seto_->restartJson()->value("LastPoints").toArray();
+  c->set_objf_value(-infd_);
+  for (const auto v : rjson0)
+    if(v.toObject().contains(QString::number(nc))) {
+      rjson1 = v.toObject().value(QString::number(nc)).toArray();
+    }
 
   for (auto var : *vars_->GetContinuousVariables()) {
     c->set_real_variable_value(var.first, infd_);
@@ -161,7 +147,8 @@ void Optimizer::applyRestart(Case* c, int nc) {
     bool found_var = false;
     for (const auto v : rjson1) {
       if(v.toObject().keys()[0].contains(var.second->name())) {
-        c->set_real_variable_value(var.first, v.toObject().value("Var#" + var.second->name()).toDouble());
+        auto oval = v.toObject().value("Var#" + var.second->name()).toDouble();
+        c->set_real_variable_value(var.first, var.second->scaleOtherValue(oval));
         found_var = true; // one of the rstrt vars should match the current var
         break;
       }
@@ -169,7 +156,6 @@ void Optimizer::applyRestart(Case* c, int nc) {
 
     if(!found_var)
       ext_warn("input var.rstrt not found in current var.container", md_, cl_);
-
   }
 
   // double check all vars in var.container have been updated

@@ -33,8 +33,8 @@ OneOffRunner::OneOffRunner(RuntimeSettings *runtime_settings)
   InitializeModel();
   InitializeSimulator();
   //EvaluateBaseModel();
-  InitializeObjectiveFunction();
-  InitializeBaseCase();
+  InitObjF();
+  InitBaseCase();
   //InitializeOptimizer();
   //InitializeBookkeeper();
   InitializeLogger();

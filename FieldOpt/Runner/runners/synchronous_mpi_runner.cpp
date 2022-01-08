@@ -37,8 +37,8 @@ SynchronousMPIRunner::SynchronousMPIRunner(RuntimeSettings *rts) : MPIRunner(rts
     InitializeModel();
     InitializeSimulator();
     EvaluateBaseModel();
-    InitializeObjectiveFunction();
-    InitializeBaseCase();
+    InitObjF();
+    InitBaseCase();
     InitializeOptimizer();
     InitializeBookkeeper();
     overseer_ = new MPI::Overseer(this);
@@ -49,7 +49,7 @@ SynchronousMPIRunner::SynchronousMPIRunner(RuntimeSettings *rts) : MPIRunner(rts
     InitializeSettings("rank" + QString::number(rank()));
     InitializeModel();
     InitializeSimulator();
-    InitializeObjectiveFunction();
+    InitObjF();
     worker_ = new MPI::Worker(this);
     FinalizeInitialization(false);
   }

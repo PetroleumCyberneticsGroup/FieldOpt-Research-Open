@@ -77,7 +77,7 @@ AbstractRunner::AbstractRunner(RuntimeSettings *runtime_settings) {
 }
 
 double AbstractRunner::sentinelValue() const {
-  if (settings_->optimizer()->mode() == OptzrMod::Minimize) {
+  if (seto_->mode() == OptzrMod::Minimize) {
     return -1*sentinel_value_;
   }
   return sentinel_value_;
@@ -108,12 +108,13 @@ void AbstractRunner::InitializeSettings(const QString& output_subdir) {
   settings_ = new Settings::Settings(rts_->paths());
   vp_ = settings_->global()->verbParams();
   // settings_->global()->showVerbParams();
+  seto_ = settings_->optimizer();
 
   if (settings_->simulator()->is_ensemble()) {
     is_ensemble_run_ = true;
     ensemble_helper_ = EnsembleHelper(
       settings_->simulator()->get_ensemble(),
-      settings_->optimizer()->parameters().rng_seed);
+      seto_->parameters().rng_seed);
   } else {
     is_ensemble_run_ = false;
   }
@@ -128,6 +129,7 @@ void AbstractRunner::InitializeModel() {
   }
 
   model_ = new Model::Model(*settings_, logger_);
+  vars_ = model_->variables();
 }
 
 void AbstractRunner::InitializeSimulator() {
@@ -186,31 +188,34 @@ void AbstractRunner::EvaluateBaseModel() {
   }
 }
 
-void AbstractRunner::InitializeObjectiveFunction() {
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔═╗  ╔╗    ╦  ╔═╗
+// │  │││  │   │     ║ ║  ╠╩╗   ║  ╠╣
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╚═╝  ╚╝  ╚
+void AbstractRunner::InitObjF() {
   if (simulator_ == nullptr || settings_ == nullptr) {
     E("Simulator & Settings must be initialized b/f ObjectiveFunction.", md_, cl_);
   }
 
-  switch (settings_->optimizer()->objective().type) {
+  switch (seto_->objective().type) {
 
     case ObjTyp::WeightedSum: {
       auto tm = "Using WeightedSum-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ = new WeightedSum(settings_->optimizer(), simulator_->results(), model_);
+      objf_ = new WeightedSum(seto_, simulator_->results(), model_);
       break;
     }
 
     case ObjTyp::NPV: {
       auto tm = "Using NPV-type objective function.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ = new NPV(settings_->optimizer(), simulator_->results(), model_);
+      objf_ = new NPV(seto_, simulator_->results(), model_);
       break;
     }
 
     case ObjTyp::Augmented: {
       auto tm = "Using Augmented objective.";
       if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
-      objf_ = new Augmented(settings_->optimizer(), simulator_->results(), model_);
+      objf_ = new Augmented(seto_, simulator_->results(), model_);
       break;
     }
 
@@ -218,25 +223,69 @@ void AbstractRunner::InitializeObjectiveFunction() {
   }
 }
 
-void AbstractRunner::InitializeBaseCase() {
+// ┌─┐  ┌─┐  ┌─┐  ┬    ┬ ┬    ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
+// ├─┤  ├─┘  ├─┘  │    └┬┘    ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
+// ┴ ┴  ┴    ┴    ┴─┘   ┴     ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
+void AbstractRunner::ApplyRestartBaseCase() {
+  if (base_case_ == nullptr || settings_ == nullptr)
+    E("base_case_ and settings_ not initialized", md_, cl_);
+
+  QJsonArray rjson0, rjson1;
+
+  cout << "BestPoint" << endl;
+  rjson0 = seto_->restartJson()->value("BestPoint").toArray();
+  for (const auto v: rjson0)
+    if (v.toObject().contains("Fmax")) {
+      base_case_->set_objf_value(v.toObject().value("Fmax").toDouble());
+    } else if (v.toObject().contains("Variables")) {
+      rjson1 = v.toObject().value("Variables").toArray();
+    }
+
+  for (auto var: *vars_->GetContinuousVariables()) {
+    base_case_->set_real_variable_value(var.first, seto_->infd_n());
+
+    bool found_var = false;
+    for (const auto v: rjson1)
+      if (v.toObject().keys()[0].contains(var.second->name())) {
+        auto oval = v.toObject().value("Var#" + var.second->name()).toDouble();
+        base_case_->set_real_variable_value(var.first, var.second->scaleOtherValue(oval));
+        found_var = true; // one of the rstrt vars should match the current var
+        break;
+      }
+
+    if (!found_var)
+      ext_warn("input var.rstrt not found in current var.container", md_, cl_);
+  }
+
+  // double check all vars in var.container have been updated
+  for (auto var : vars_->GetContVarValues())
+    if (var.second == seto_->infd_n()) ext_warn("var.container not updated", md_, cl_);
+}
+
+// ┬  ┌┐┌  ┬  ┌┬┐    ╔╗   ╔═╗  ╔═╗  ╔═╗    ╔═╗  ╔═╗  ╔═╗  ╔═╗
+// │  │││  │   │     ╠╩╗  ╠═╣  ╚═╗  ║╣     ║    ╠═╣  ╚═╗  ║╣
+// ┴  ┘└┘  ┴   ┴     ╚═╝  ╩ ╩  ╚═╝  ╚═╝    ╚═╝  ╩ ╩  ╚═╝  ╚═╝
+void AbstractRunner::InitBaseCase() {
   if (objf_ == nullptr || model_ == nullptr) {
     E("ObjectiveFunction and Model must be initialized before BaseCase.", md_, cl_);
   }
-  base_case_ = new Optimization::Case(model_->variables()->GetBinVarValues(),
-                                      model_->variables()->GetDiscVarValues(),
-                                      model_->variables()->GetContVarValues());
+  base_case_ = new Optimization::Case(vars_->GetBinVarValues(),
+                                      vars_->GetDiscVarValues(),
+                                      vars_->GetContVarValues());
   base_case_->SetVerbParams(vp_);
+  if (seto_->restart())
+    ApplyRestartBaseCase();
 
   if (!simulator_->results()->isAvailable()) {
-    base_case_->set_objf_value(sentinelValue());
+    base_case_->set_objf_value(seto_->infd_n());
 
     string tm = "Simulation results are unavailable.";
     tm += "Base case objective set to sentinel value.";
     if (vp_.vRUN >= 1) { info(tm, vp_.lnw); }
 
   } else {
-    model_->wellCost(settings_->optimizer());
-    if (settings_->optimizer()->objective().type == ObjTyp::Augmented) {
+    model_->wellCost(seto_);
+    if (seto_->objective().type == ObjTyp::Augmented) {
       base_case_->set_objf_value(objf_->value(true));
     } else {
       base_case_->set_objf_value(objf_->value());
@@ -255,18 +304,18 @@ void AbstractRunner::InitializeOptimizer() {
   if (base_case_ == nullptr || model_ == nullptr) {
     E("Base Case and Model must be initialized before the Optimizer", md_, cl_);
   }
-  settings_->optimizer()->setPaths(&settings_->paths());
+  seto_->setPaths(&settings_->paths());
 
-  switch (settings_->optimizer()->type()) {
+  switch (seto_->type()) {
 
     // ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
     // │    │ │  │││  ├─┘  ├─┤  └─┐  └─┐
     // └─┘  └─┘  ┴ ┴  ┴    ┴ ┴  └─┘  └─┘
     case OptzrTyp::Compass: {
       if (vp_.vRUN >= 1) { ext_info("Using CompassSearch.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::CompassSearch(settings_->optimizer(),
+      optimizer_ = new Optzr::CompassSearch(seto_,
                                             base_case_,
-                                            model_->variables(),
+                                            vars_,
                                             model_->grid(),
                                             logger_,
                                             nullptr,
@@ -278,9 +327,9 @@ void AbstractRunner::InitializeOptimizer() {
       // ┴ ┴  ┴    ┴    └─┘
     case OptzrTyp::APPS: {
       if (vp_.vRUN >= 1) { ext_info("Using APPS.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::APPS(settings_->optimizer(),
+      optimizer_ = new Optzr::APPS(seto_,
                                    base_case_,
-                                   model_->variables(),
+                                   vars_,
                                    model_->grid(),
                                    logger_,
                                    nullptr,
@@ -292,9 +341,9 @@ void AbstractRunner::InitializeOptimizer() {
       // ┴    └─┘  └─┘
     case OptzrTyp::PSO: {
       if (vp_.vRUN >= 1) { ext_info("Using PSO.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::PSO(settings_->optimizer(),
+      optimizer_ = new Optzr::PSO(seto_,
                                   base_case_,
-                                  model_->variables(),
+                                  vars_,
                                   model_->grid(),
                                   logger_,
                                   nullptr,
@@ -306,9 +355,9 @@ void AbstractRunner::InitializeOptimizer() {
       //  ┴   ┴└─  ─┴┘  └    └─┘
     case OptzrTyp::TrustRegionOptimization: {
       if (vp_.vRUN >= 1) { ext_info("Using TR-DFO.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::TrustRegionOptimization(settings_->optimizer(),
+      optimizer_ = new Optzr::TrustRegionOptimization(seto_,
                                                       base_case_,
-                                                      model_->variables(),
+                                                      vars_,
                                                       model_->grid(),
                                                       logger_,
                                                       nullptr,
@@ -320,9 +369,9 @@ void AbstractRunner::InitializeOptimizer() {
       // ─┴┘  └     ┴   ┴└─
     case OptzrTyp::DFTR: {
       if (vp_.vRUN >= 1) { ext_info("Using DFTR [TR-DFO].", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::DFTR(settings_->optimizer(),
+      optimizer_ = new Optzr::DFTR(seto_,
                                    base_case_,
-                                   model_->variables(),
+                                   vars_,
                                    model_->grid(),
                                    logger_,
                                    nullptr,
@@ -334,14 +383,14 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  └─┘└  ┴
     case OptzrTyp::SQP: {
       if (vp_.vRUN >= 1) { ext_info("Using SQP [SNOPT].", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::SQP_SNOPT(settings_->optimizer(),
-                                   base_case_,
-                                   model_,
-                                   simulator_,
-                                   objf_,
-                                   logger_,
-                                   nullptr,
-                                   model_->constraintHandler());
+      optimizer_ = new Optzr::SQP_SNOPT(seto_,
+                                        base_case_,
+                                        model_,
+                                        simulator_,
+                                        objf_,
+                                        logger_,
+                                        nullptr,
+                                        model_->constraintHandler());
       break;
     }
       // ┌─┐  ┌─┐
@@ -349,9 +398,9 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  ┴ ┴
     case OptzrTyp::GeneticAlgorithm: {
       if (vp_.vRUN >= 1) { ext_info("Using GA.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::RGARDD(settings_->optimizer(),
+      optimizer_ = new Optzr::RGARDD(seto_,
                                      base_case_,
-                                     model_->variables(),
+                                     vars_,
                                      model_->grid(),
                                      logger_);
       break;
@@ -361,9 +410,9 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  └─┘  └─┘
     case OptzrTyp::EGO: {
       if (vp_.vRUN >= 1) { ext_info("Using EGO.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::BayesianOptimization::EGO(settings_->optimizer(),
+      optimizer_ = new Optzr::BayesianOptimization::EGO(seto_,
                                                         base_case_,
-                                                        model_->variables(),
+                                                        vars_,
                                                         model_->grid(),
                                                         logger_);
       break;
@@ -373,9 +422,9 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  ┴ └─  ┴ ┴  └─┘  ┴└─  └─┘  ┴ ┴  ┴┴  ─┴┘
     case OptzrTyp::ExhaustiveSearch2DVert: {
       if (vp_.vRUN >= 1) { ext_info("Using ExhaustiveSearch2DVert.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::ExhaustiveSearch2DVert(settings_->optimizer(),
+      optimizer_ = new Optzr::ExhaustiveSearch2DVert(seto_,
                                                      base_case_,
-                                                     model_->variables(),
+                                                     vars_,
                                                      model_->grid(),
                                                      logger_);
       break;
@@ -385,9 +434,9 @@ void AbstractRunner::InitializeOptimizer() {
       // ┴ ┴   ┴   └─┘  ┴└─  ┴  ─┴┘
     case OptzrTyp::Hybrid: {
       if (vp_.vRUN >= 1) { ext_info("Using Hybrid optimization.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optimization::HybridOptimizer(settings_->optimizer(),
+      optimizer_ = new Optimization::HybridOptimizer(seto_,
                                                      base_case_,
-                                                     model_->variables(),
+                                                     vars_,
                                                      model_->grid(),
                                                      logger_);
       break;
@@ -397,9 +446,9 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  ┴ ┴  ┴ ┴       └─┘  └─┘
     case OptzrTyp::CMA_ES: {
       if (vp_.vRUN >= 1) { ext_info("Using CMA_ES.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::CMA_ES(settings_->optimizer(),
+      optimizer_ = new Optzr::CMA_ES(seto_,
                                      base_case_,
-                                     model_->variables(),
+                                     vars_,
                                      model_->grid(),
                                      logger_);
       break;
@@ -409,9 +458,9 @@ void AbstractRunner::InitializeOptimizer() {
       //  └┘   └    └─┘  ┴ ┴
     case OptzrTyp::VFSA: {
       if (vp_.vRUN >= 1) { ext_info("Using VFSA.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::VFSA(settings_->optimizer(),
+      optimizer_ = new Optzr::VFSA(seto_,
                                    base_case_,
-                                   model_->variables(),
+                                   vars_,
                                    model_->grid(),
                                    logger_);
       break;
@@ -421,9 +470,9 @@ void AbstractRunner::InitializeOptimizer() {
       // └─┘  ┴    └─┘  ┴ ┴
     case OptzrTyp::SPSA: {
       if (vp_.vRUN >= 1) { ext_info("Using SPSA.", md_, cl_, vp_.lnw); }
-      optimizer_ = new Optzr::SPSA(settings_->optimizer(),
+      optimizer_ = new Optzr::SPSA(seto_,
                                    base_case_,
-                                   model_->variables(),
+                                   vars_,
                                    model_->grid(),
                                    logger_);
       break;
@@ -466,7 +515,7 @@ void AbstractRunner::PrintCompletionMessage() {
       cout << "Max # fevals reached." << endl;
       break;
 
-      case TC::MIN_STEP_LENGTH_REACHED:
+    case TC::MIN_STEP_LENGTH_REACHED:
       cout << "Min step length reached (converged)." << endl;
       break;
 
@@ -494,21 +543,21 @@ void AbstractRunner::PrintCompletionMessage() {
   auto opt_vars_bin = optimizer_->GetTentativeBestCase()->binary_variables();
 
   for (auto var : opt_vars_int) {
-    auto prop_name = model_->variables()->GetDiscreteVariable(var.first)->name();
+    auto prop_name = vars_->GetDiscreteVariable(var.first)->name();
     cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
 
   for (auto var : opt_vars_real) {
-    auto prop_name = model_->variables()->GetContinuousVariable(var.first)->name();
-    auto vre = model_->variables()->GetContinuousVariable(var.first)->value();
-    auto vsc = model_->variables()->GetContinuousVariable(var.first)->valueSc();
+    auto prop_name = vars_->GetContinuousVariable(var.first)->name();
+    auto vre = vars_->GetContinuousVariable(var.first)->value();
+    auto vsc = vars_->GetContinuousVariable(var.first)->valueSc();
     cout << "\t" << prop_name.toStdString();
     cout << "\t" << num2str(vsc, 3, 1);
     cout << "\t" << num2str(vre, 3, 1) << endl;
   }
 
   for (auto var : opt_vars_bin) {
-    auto prop_name = model_->variables()->GetBinaryVariable(var.first)->name();
+    auto prop_name = vars_->GetBinaryVariable(var.first)->name();
     cout << "\t" << prop_name.toStdString() << "\t" << var.second << endl;
   }
 
@@ -529,7 +578,7 @@ void AbstractRunner::ComputeOptmzdCase() {
   simulator_->UpdatePaths(settings_->paths());
   simulator_->Evaluate();
 
-  if (settings_->optimizer()->objective().type == ObjTyp::Augmented) {
+  if (seto_->objective().type == ObjTyp::Augmented) {
     optz_case_->set_objf_value(objf_->value(true));
   } else {
     optz_case_->set_objf_value(objf_->value());

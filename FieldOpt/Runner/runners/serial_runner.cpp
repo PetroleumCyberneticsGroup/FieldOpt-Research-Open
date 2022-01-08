@@ -36,8 +36,8 @@ SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings)
   InitializeModel();
   InitializeSimulator();
   EvaluateBaseModel();
-  InitializeObjectiveFunction();
-  InitializeBaseCase();
+  InitObjF();
+  InitBaseCase();
   InitializeOptimizer();
   InitializeBookkeeper();
   FinalizeInitialization(true);
