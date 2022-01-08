@@ -95,14 +95,17 @@ PSO::PSO(Settings::Optimizer *settings,
   }
 }
 
+// ╦  ╔╦╗  ╔═╗  ╦═╗  ╔═╗  ╔╦╗  ╔═╗
+// ║   ║   ║╣   ╠╦╝  ╠═╣   ║   ║╣
+// ╩   ╩   ╚═╝  ╩╚═  ╩ ╩   ╩   ╚═╝
 void PSO::iterate(){
   if(enable_logging_){
     logger_->AddEntry(this);
   }
   swarm_memory_.push_back(swarm_);
-  current_best_particle_global_ = get_global_best();
-  swarm_ = update_velocity();
-  swarm_ = update_position();
+  current_best_particle_global_ = getGlobalBest();
+  swarm_ = updateVelocity();
+  swarm_ = updatePosition();
   vector<Particle> next_generation_swarm;
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
@@ -116,6 +119,10 @@ void PSO::iterate(){
   iteration_++;
 }
 
+
+// ┬ ┬  ┌─┐  ┌┐┌  ┌┬┐  ┬    ┌─┐  ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗  ╔═╗  ╔═╗
+// ├─┤  ├─┤  │││   ││  │    ├┤   ║╣   ╚╗╔╝  ╠═╣  ║     ║║  ║    ╚═╗
+// ┴ ┴  ┴ ┴  ┘└┘  ─┴┘  ┴─┘  └─┘  ╚═╝   ╚╝   ╩ ╩  ╩═╝  ═╩╝  ╚═╝  ╚═╝
 void PSO::handleEvaluatedCase(Case *c) {
   if(isImprovement(c)){
     updateTentativeBestCase(c);
@@ -129,13 +136,19 @@ void PSO::handleEvaluatedCase(Case *c) {
   }
 }
 
+// ╦  ┌─┐  ╔═╗  ╦  ╔╗╔  ╦  ╔═╗  ╦ ╦  ╔═╗  ╔╦╗
+// ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
+// ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
 Optimizer::TerminationCondition PSO::IsFinished() {
   if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
-  if (is_stagnant()) return MIN_STEP_LENGTH_REACHED;
+  if (isStagnant()) return MIN_STEP_LENGTH_REACHED;
   if (iteration_ < max_iterations_) return NOT_FINISHED;
   else return MAX_EVALS_REACHED;
 }
 
+// ┌─┐  ┌─┐  ┌┐┌  ╦═╗  ╔═╗  ╔╗╔  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗
+// │ ┬  ├┤   │││  ╠╦╝  ╠═╣  ║║║   ║║  ║ ║  ║║║  ║    ╚═╗
+// └─┘  └─┘  ┘└┘  ╩╚═  ╩ ╩  ╝╚╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 Case *PSO::generateRandomCase() {
   Case *new_case;
   new_case = new Case(GetTentativeBestCase());
@@ -148,6 +161,9 @@ Case *PSO::generateRandomCase() {
   return new_case;
 }
 
+// ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
+// ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
+// ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
 PSO::Particle::Particle(Optimization::Case *c,
                         boost::random::mt19937 &gen,
                         VectorXd v_max, int n_vars) {
@@ -160,6 +176,9 @@ PSO::Particle::Particle(Optimization::Case *c,
   rea_vars_velocity=temp;
 }
 
+// ┌─┐  ┌─┐  ┬─┐  ┌┬┐  ┬  ┌─┐  ┬    ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╦╗
+// ├─┘  ├─┤  ├┬┘   │   │  │    │    ├┤   ╠═╣   ║║  ╠═╣  ╠═╝   ║
+// ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
 void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
                                   Eigen::VectorXd rea_vars_swap){
   rea_vars=rea_vars_swap;
@@ -167,6 +186,9 @@ void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
   rea_vars_velocity = rea_vars_velocity_swap;
 }
 
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗
+// ├─┘  ├┬┘  │  │││   │   ╚═╗  ║║║  ╠═╣  ╠╦╝  ║║║
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╚═╝  ╚╩╝  ╩ ╩  ╩╚═  ╩ ╩
 void PSO::printSwarm(vector<Particle> swarm) const {
   if (swarm.size() == 0)
     swarm = swarm_;
@@ -181,7 +203,10 @@ void PSO::printSwarm(vector<Particle> swarm) const {
   ext_info(ss.str(), "Optimization", "PSO");
 }
 
-bool PSO::is_stagnant() {
+// ┬  ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╗╔  ╔═╗  ╔╗╔  ╔╦╗
+// │  └─┐  ╚═╗   ║   ╠═╣  ║ ╦  ║║║  ╠═╣  ║║║   ║
+// ┴  └─┘  ╚═╝   ╩   ╩ ╩  ╚═╝  ╝╚╝  ╩ ╩  ╝╚╝   ╩
+bool PSO::isStagnant() {
   vector<double> list_of_sums;
   for (auto chrom : swarm_) {
     list_of_sums.push_back(chrom.rea_vars.sum());
@@ -190,9 +215,15 @@ bool PSO::is_stagnant() {
   return stdev <= stagnation_limit_;
 }
 
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
+// ├─┘  ├┬┘  │  │││   │   ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
 void PSO::printParticle(Particle &partic) const { }
 
-PSO::Particle PSO::get_global_best(){
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╦    ╔═╗  ╔╗   ╔═╗  ╦    ┌┐   ┌─┐  ┌─┐┌┬┐
+// │ ┬  ├┤    │   ║ ╦  ║    ║ ║  ╠╩╗  ╠═╣  ║    ├┴┐  ├┤   └─┐ │
+// └─┘  └─┘   ┴   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩ ╩  ╩═╝  └─┘  └─┘  └─┘ ┴
+PSO::Particle PSO::getGlobalBest(){
   Particle best_particle;
   if(swarm_memory_.size() == 1){
     best_particle = swarm_memory_[0][0];
@@ -209,7 +240,10 @@ PSO::Particle PSO::get_global_best(){
   return best_particle;
 }
 
-PSO::Particle PSO::find_best_in_particle_memory(int particle_num){
+// ┌─┐  ┬  ┌┐┌  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╔╦╗  ┬  ┌┐┌  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗
+// ├┤   │  │││   ││  ╠╩╗  ║╣   ╚═╗   ║   │  │││  ╠═╝  ║║║  ║╣   ║║║
+// └    ┴  ┘└┘  ─┴┘  ╚═╝  ╚═╝  ╚═╝   ╩   ┴  ┘└┘  ╩    ╩ ╩  ╚═╝  ╩ ╩
+PSO::Particle PSO::findBestInParticleMemory(int particle_num){
   Particle best_in_particle_memory = swarm_memory_[0][particle_num];
   for(int i = 1; i < swarm_memory_.size(); i++) {
     if (isBetter(swarm_memory_[i][particle_num].case_pointer, best_in_particle_memory.case_pointer)) {
@@ -219,10 +253,13 @@ PSO::Particle PSO::find_best_in_particle_memory(int particle_num){
   return best_in_particle_memory;
 }
 
-vector<PSO::Particle> PSO::update_velocity() {
+// ┬ ┬  ┌─┐  ┌┬┐  ┌─┐  ┌┬┐  ┌─┐  ╦  ╦  ╔═╗  ╦    ╔═╗  ╔═╗  ╦  ╔╦╗  ╦ ╦
+// │ │  ├─┘   ││  ├─┤   │   ├┤   ╚╗╔╝  ║╣   ║    ║ ║  ║    ║   ║   ╚╦╝
+// └─┘  ┴    ─┴┘  ┴ ┴   ┴   └─┘   ╚╝   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩   ╩    ╩
+vector<PSO::Particle> PSO::updateVelocity() {
   vector<Particle> new_swarm;
   for(int i = 0; i < swarm_.size(); i++){
-    Particle best_in_particle_memory = find_best_in_particle_memory(i);
+    Particle best_in_particle_memory = findBestInParticleMemory(i);
     new_swarm.push_back(swarm_[i]);
     for(int j = 0; j < n_vars_; j++){
       double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1) * (best_in_particle_memory.rea_vars(j)-swarm_[i].rea_vars(j));
@@ -238,7 +275,10 @@ vector<PSO::Particle> PSO::update_velocity() {
   return new_swarm;
 }
 
-vector<PSO::Particle> PSO::update_position() {
+// ┬ ┬  ┌─┐  ┌┬┐  ┌─┐  ┌┬┐  ┌─┐  ╔═╗  ╔═╗  ╔═╗  ╦  ╔╦╗  ╦  ╔═╗  ╔╗╔
+// │ │  ├─┘   ││  ├─┤   │   ├┤   ╠═╝  ║ ║  ╚═╗  ║   ║   ║  ║ ║  ║║║
+// └─┘  ┴    ─┴┘  ┴ ┴   ┴   └─┘  ╩    ╚═╝  ╚═╝  ╩   ╩   ╩  ╚═╝  ╝╚╝
+vector<PSO::Particle> PSO::updatePosition() {
   for(int i = 0; i < swarm_.size(); i++){
     for(int j = 0; j < n_vars_; j++){
       swarm_[i].rea_vars(j)=swarm_[i].rea_vars_velocity(j)+swarm_[i].rea_vars(j);

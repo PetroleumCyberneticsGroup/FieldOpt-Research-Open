@@ -85,7 +85,7 @@ class PSO : public Optimizer {
    * @param current_best_particle_global
    * @return
    */
-  Particle get_global_best();
+  Particle getGlobalBest();
 
   /*!
    * @brief Updates the velocity based on learning_factor_1_ (c1),
@@ -94,14 +94,14 @@ class PSO : public Optimizer {
    * @param swarm_memory
    * @return
    */
-  vector<PSO::Particle> update_velocity();
+  vector<PSO::Particle> updateVelocity();
 
   /*!
    * @brief Updates the position based on the updated
    * velocities of the particles in the swarm.
    * @return
    */
-  vector<PSO::Particle> update_position();
+  vector<PSO::Particle> updatePosition();
   /*!
    * @brief Prints the swarm and its current values
    * in a readable format, calls print particle
@@ -119,13 +119,13 @@ class PSO : public Optimizer {
    * @param particle_num
    * @return
    */
-  Particle find_best_in_particle_memory(int particle_num);
+  Particle findBestInParticleMemory(int particle_num);
   /*!
    * @brief Performs a check on the swarm, to figure out whether it is stuck with particles that are too close to one
    * another.
    * @return
    */
-  bool is_stagnant();
+  bool isStagnant();
 
   double stagnation_limit_; //!< The stagnation criterion, standard deviation of all particle positions.
   vector<vector<Particle>> swarm_memory_; //!< The memory of the swarm at previous timesteps.
