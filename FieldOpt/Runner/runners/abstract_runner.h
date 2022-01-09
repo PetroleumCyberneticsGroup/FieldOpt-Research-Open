@@ -101,7 +101,7 @@ class AbstractRunner
   Settings::Settings *settings_;
   Settings::Optimizer *seto_;
 
-  Optimization::Optimizer *optimizer_;
+  Optimization::Optimizer *optmzr_;
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;

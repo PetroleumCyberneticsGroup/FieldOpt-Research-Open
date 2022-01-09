@@ -64,7 +64,7 @@ void SynchronousMPIRunner::Execute() {
       new_case = ensemble_helper_.GetCaseForEval();
     } else {
       printMessage("Getting new case from optimizer.", 2);
-      new_case = optimizer_->GetCaseForEvaluation();
+      new_case = optmzr_->GetCaseForEvaluation();
       if (is_ensemble_run_) {
         ensemble_helper_.SetActiveCase(new_case);
         new_case = ensemble_helper_.GetCaseForEval();
@@ -74,7 +74,7 @@ void SynchronousMPIRunner::Execute() {
     if (!is_ensemble_run_ && bookkeeper_->IsEvaluated(new_case, true)) {
       printMessage("Case found in bookkeeper");
       new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_BOOKKEEPED;
-      optimizer_->SubmitEvaluatedCase(new_case);
+      optmzr_->SubmitEvaluatedCase(new_case);
     } else {
       if (is_ensemble_run_) {
         int worker_rank = ensemble_helper_.GetAssignedWorker(new_case->GetEnsembleRlz().toStdString(), overseer_->GetFreeWorkerRanks());
@@ -97,9 +97,9 @@ void SynchronousMPIRunner::Execute() {
       printMessage("Setting state for evaluated case.", 2);
       evaluated_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
       printMessage("Setting timings for evaluated case.", 2);
-      if (!is_ensemble_run_ && optimizer_->GetSimulationDuration(evaluated_case) > 0){
+      if (!is_ensemble_run_ && optmzr_->GetSimulationDuration(evaluated_case) > 0){
         printMessage("Setting timings for evaluated case.", 2);
-        sim_times_.push_back(optimizer_->GetSimulationDuration(evaluated_case));
+        sim_times_.push_back(optmzr_->GetSimulationDuration(evaluated_case));
       }
     }
 
@@ -110,12 +110,12 @@ void SynchronousMPIRunner::Execute() {
         printMessage("All selected realizations evaluated. Getting composite case.", 2);
         auto evaluated_case = ensemble_helper_.GetEvaluatedCase();
         evaluated_case->set_objf_value(evaluated_case->GetEnsembleAverageOfv());
-        optimizer_->SubmitEvaluatedCase(evaluated_case);
+        optmzr_->SubmitEvaluatedCase(evaluated_case);
         model_->ApplyCase(evaluated_case);
         printMessage("Submitted evaluated case to optimizer and model.", 2);
       }
     } else {
-      optimizer_->SubmitEvaluatedCase(evaluated_case);
+      optmzr_->SubmitEvaluatedCase(evaluated_case);
       printMessage("Submitted evaluated case to optimizer.", 2);
     }
   };
@@ -125,7 +125,7 @@ void SynchronousMPIRunner::Execute() {
     initialDistribution();
     printMessage("Initial distribution done.", 2);
 
-    while (optimizer_->IsFinished() == false) {
+    while (optmzr_->IsFinished() == false) {
       if (is_ensemble_run_) {
         printMessage(ensemble_helper_.GetStateString(), 2);
       }
@@ -141,7 +141,7 @@ void SynchronousMPIRunner::Execute() {
       } else if (is_ensemble_run_ && !ensemble_helper_.IsCaseDone()) {
         printMessage("Not all ensemble realizations have been evaluated.", 2);
         wait_for_evaluated_case();
-      } else if (optimizer_->nr_queued_cases() > 0) { // Queued cases in optimizer
+      } else if (optmzr_->nr_queued_cases() > 0) { // Queued cases in optimizer
         printMessage("Queued cases available.", 2);
         if (overseer_->NumberOfFreeWorkers() > 0) { // Free workers available
           printMessage("Free workers available. Handling next case.", 2);
@@ -268,11 +268,11 @@ void SynchronousMPIRunner::Execute() {
 void SynchronousMPIRunner::initialDistribution() {
 
   if (!is_ensemble_run_) { // Single-realization run
-    while (optimizer_->nr_queued_cases() > 0 && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
-      overseer_->AssignCase(optimizer_->GetCaseForEvaluation());
+    while (optmzr_->nr_queued_cases() > 0 && overseer_->NumberOfFreeWorkers() > 1) { // Leave one free worker
+      overseer_->AssignCase(optmzr_->GetCaseForEvaluation());
     }
   } else { // Ensemble run
-    auto next_case = optimizer_->GetCaseForEvaluation();
+    auto next_case = optmzr_->GetCaseForEvaluation();
     ensemble_helper_.SetActiveCase(next_case);
     while (ensemble_helper_.IsCaseAvailableForEval() && overseer_->NumberOfFreeWorkers() > 1) {
       overseer_->AssignCase(ensemble_helper_.GetCaseForEval());

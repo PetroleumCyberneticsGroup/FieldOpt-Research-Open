@@ -44,14 +44,14 @@ SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings)
 }
 
 void SerialRunner::Execute() {
-  while (optimizer_->IsFinished() == TC::NOT_FINISHED) {
+  while (optmzr_->IsFinished() == TC::NOT_FINISHED) {
 
     Optimization::Case *new_case;
 
     // MAKE NEW CASE
     if (is_ensemble_run_) { // ENSEMBLE RUN
       if (ensemble_helper_.IsCaseDone()) {
-        ensemble_helper_.SetActiveCase(optimizer_->GetCaseForEvaluation());
+        ensemble_helper_.SetActiveCase(optmzr_->GetCaseForEvaluation());
       }
       if (vp_.vRUN >= 3) { ext_info("Getting ensemble case.", md_, cl_); }
 
@@ -61,16 +61,16 @@ void SerialRunner::Execute() {
 
     } else { // SINGLE RUN
       if (vp_.vRUN >= 3) { ext_info("Getting case from Optimizer.", md_, cl_); }
-      new_case = optimizer_->GetCaseForEvaluation();
+      new_case = optmzr_->GetCaseForEvaluation();
       if (vp_.vRUN >= 3) { ext_info("Got case from Optimizer.", md_, cl_); }
 
       while (new_case == nullptr) {
-        if (optimizer_->IsFinished()) { break;
+        if (optmzr_->IsFinished()) { break;
         } else {
-          new_case = optimizer_->GetCaseForEvaluation();
+          new_case = optmzr_->GetCaseForEvaluation();
         }
       }
-      if (optimizer_->IsFinished()) { break; }
+      if (optmzr_->IsFinished()) { break; }
     }
 
     // RUN NEW CASE -> CHECK IF BOOKKEEPED
@@ -144,12 +144,12 @@ void SerialRunner::Execute() {
     if (is_ensemble_run_) {
       ensemble_helper_.SubmitEvaluatedRealization(new_case);
       if  (ensemble_helper_.IsCaseDone()) {
-        optimizer_->SubmitEvaluatedCase(ensemble_helper_.GetEvaluatedCase());
+        optmzr_->SubmitEvaluatedCase(ensemble_helper_.GetEvaluatedCase());
       }
     }
     else {
       if (vp_.vRUN >= 3) { ext_info("Submitting evaluated case to Optimizer.", md_, cl_); }
-      optimizer_->SubmitEvaluatedCase(new_case);
+      optmzr_->SubmitEvaluatedCase(new_case);
     }
   }
   FinalizeRun(true);
