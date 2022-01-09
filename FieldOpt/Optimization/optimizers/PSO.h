@@ -25,6 +25,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/random.hpp>
 #include "optimizer.h"
+#include <QJsonDocument>
 
 #ifndef FIELDOPT_PSO_H
 #define FIELDOPT_PSO_H
@@ -64,6 +65,7 @@ class PSO : public Optimizer {
     Particle(Optimization::Case *c, boost::random::mt19937 &gen,
              Eigen::VectorXd v_max, int n_vars);
     Particle(){}
+
     void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars);
     double ofv() { return case_pointer->objf_value(); }
   };
@@ -129,6 +131,8 @@ class PSO : public Optimizer {
 
   void printRestart();
 
+  vector<vector<Particle>> getSwarmMem() { return swarm_memory_; }
+
   //!< Current swarm of particles
   vector<Particle> swarm_;
 
@@ -145,8 +149,6 @@ class PSO : public Optimizer {
   double learning_factor_2_; //!< Learning factor 2 (c2)
   Eigen::VectorXd v_max_; //!< Max velocity of the particle
   int max_iterations_; //!< Max iterations
-
-
 
   Particle current_best_particle_global_; //!< global best particle position
   Eigen::VectorXd lower_bound_; //!< Lower bounds for the variables (used for randomly generating populations and mutation)
