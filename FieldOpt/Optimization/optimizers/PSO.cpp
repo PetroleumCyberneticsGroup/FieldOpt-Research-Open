@@ -113,7 +113,8 @@ void PSO::iterate(){
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
     next_generation_swarm.emplace_back(new_case, gen_, v_max_, n_vars_);
-    next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity, swarm_[i].rea_vars);
+    next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity,
+                                           swarm_[i].rea_vars);
   }
   for(int i = 0; i < number_of_particles_; i++){
     case_handler_->AddNewCase(next_generation_swarm[i].case_pointer);
@@ -122,23 +123,35 @@ void PSO::iterate(){
   iteration_++;
 }
 
+// ┌─┐  ┌─┐  ┬─┐  ┌┬┐  ┬  ┌─┐  ┬    ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╦╗
+// ├─┘  ├─┤  ├┬┘   │   │  │    │    ├┤   ╠═╣   ║║  ╠═╣  ╠═╝   ║
+// ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
+void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
+                                  Eigen::VectorXd rea_vars_swap) {
+  rea_vars = rea_vars_swap;
+  case_pointer->SetRealVarValues(rea_vars);
+  rea_vars_velocity = rea_vars_velocity_swap;
+}
+
 // ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╦    ╔═╗  ╔╗   ╔═╗  ╦    ┌┐   ┌─┐  ┌─┐┌┬┐
 // │ ┬  ├┤    │   ║ ╦  ║    ║ ║  ╠╩╗  ╠═╣  ║    ├┴┐  ├┤   └─┐ │
 // └─┘  └─┘   ┴   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩ ╩  ╩═╝  └─┘  └─┘  └─┘ ┴
-PSO::Particle PSO::getGlobalBest(){
+PSO::Particle PSO::getGlobalBest() {
   Particle best_particle;
 
   if(swarm_memory_.size() == 1){
     cout << "!!!!! swarm_memory_.size() == 1 !!!!!" << endl;
     best_particle = swarm_memory_[0][0];
+    // possibly use base_case as initial global best
   } else {
     best_particle = current_best_particle_global_;
   }
 
   for(int i = 0; i < swarm_memory_.size(); i++){
     for(int j = 0; j < swarm_memory_[i].size();j++){
-      if (isBetter(swarm_memory_[i][j].case_pointer, best_particle.case_pointer)) {
-        best_particle=swarm_memory_[i][j];
+      if (isBetter(swarm_memory_[i][j].case_pointer,
+                   best_particle.case_pointer)) {
+        best_particle = swarm_memory_[i][j];
       }
     }
   }
@@ -148,10 +161,13 @@ PSO::Particle PSO::getGlobalBest(){
 // ┌─┐  ┬  ┌┐┌  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╔╦╗  ┬  ┌┐┌  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗
 // ├┤   │  │││   ││  ╠╩╗  ║╣   ╚═╗   ║   │  │││  ╠═╝  ║║║  ║╣   ║║║
 // └    ┴  ┘└┘  ─┴┘  ╚═╝  ╚═╝  ╚═╝   ╩   ┴  ┘└┘  ╩    ╩ ╩  ╚═╝  ╩ ╩
-PSO::Particle PSO::findBestInParticleMemory(int particle_num){
+PSO::Particle PSO::findBestInParticleMemory(int particle_num) {
+
   Particle best_in_particle_memory = swarm_memory_[0][particle_num];
+
   for(int i = 1; i < swarm_memory_.size(); i++) {
-    if (isBetter(swarm_memory_[i][particle_num].case_pointer, best_in_particle_memory.case_pointer)) {
+    if (isBetter(swarm_memory_[i][particle_num].case_pointer,
+                 best_in_particle_memory.case_pointer)) {
       best_in_particle_memory = swarm_memory_[i][particle_num];
     }
   }
@@ -163,18 +179,27 @@ PSO::Particle PSO::findBestInParticleMemory(int particle_num){
 // └─┘  ┴    ─┴┘  ┴ ┴   ┴   └─┘   ╚╝   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩   ╩    ╩
 vector<PSO::Particle> PSO::updateVelocity() {
   vector<Particle> new_swarm;
+
   for(int i = 0; i < swarm_.size(); i++){
     Particle best_in_particle_memory = findBestInParticleMemory(i);
     new_swarm.push_back(swarm_[i]);
+
     for(int j = 0; j < n_vars_; j++){
-      double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1) * (best_in_particle_memory.rea_vars(j)-swarm_[i].rea_vars(j));
-      double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1) * (current_best_particle_global_.rea_vars(j)-swarm_[i].rea_vars(j));
-      new_swarm[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
+      double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1)
+      * (best_in_particle_memory.rea_vars(j) - swarm_[i].rea_vars(j));
+
+      double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1)
+      * (current_best_particle_global_.rea_vars(j) - swarm_[i].rea_vars(j));
+
+      new_swarm[i].rea_vars_velocity(j) =
+      swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
+
       if (new_swarm[i].rea_vars_velocity(j) < -v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = -v_max_(j);
       } else if(new_swarm[i].rea_vars_velocity(j) > v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = v_max_(j);
       }
+
     }
   }
   return new_swarm;
@@ -186,10 +211,12 @@ vector<PSO::Particle> PSO::updateVelocity() {
 vector<PSO::Particle> PSO::updatePosition() {
   for(int i = 0; i < swarm_.size(); i++){
     for(int j = 0; j < n_vars_; j++){
-      swarm_[i].rea_vars(j)=swarm_[i].rea_vars_velocity(j)+swarm_[i].rea_vars(j);
+      swarm_[i].rea_vars(j) = swarm_[i].rea_vars_velocity(j)+swarm_[i].rea_vars(j);
+
       if (swarm_[i].rea_vars(j) > upper_bound_[j]){
         swarm_[i].rea_vars(j) = upper_bound_[j]-abs(swarm_[i].rea_vars(j)-upper_bound_[j])*0.5;
         swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j)*-0.5;
+
       } else if (swarm_[i].rea_vars(j) < lower_bound_[j]){
         swarm_[i].rea_vars(j) = lower_bound_[j]+abs(swarm_[i].rea_vars(j)-lower_bound_[j])*0.5;
         swarm_[i].rea_vars_velocity(j) = swarm_[i].rea_vars_velocity(j)*-0.5;
@@ -197,16 +224,6 @@ vector<PSO::Particle> PSO::updatePosition() {
     }
   }
   return swarm_;
-}
-
-// ┌─┐  ┌─┐  ┬─┐  ┌┬┐  ┬  ┌─┐  ┬    ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╦╗
-// ├─┘  ├─┤  ├┬┘   │   │  │    │    ├┤   ╠═╣   ║║  ╠═╣  ╠═╝   ║
-// ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
-void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
-                                  Eigen::VectorXd rea_vars_swap){
-  rea_vars = rea_vars_swap;
-  case_pointer->SetRealVarValues(rea_vars);
-  rea_vars_velocity = rea_vars_velocity_swap;
 }
 
 // ┬ ┬  ┌─┐  ┌┐┌  ┌┬┐  ┬    ┌─┐  ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗  ╔═╗  ╔═╗
@@ -238,7 +255,7 @@ PSO::Particle::Particle(Optimization::Case *c,
   for(int i = 0; i < rea_vars.size(); i++){
     temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
   }
-  rea_vars_velocity=temp;
+  rea_vars_velocity = temp;
 }
 
 // ┌─┐  ┌─┐  ┌┐┌  ╦═╗  ╔═╗  ╔╗╔  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗
