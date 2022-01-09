@@ -60,6 +60,7 @@ class ContinuousProperty : public Property
   void UpdateValue();
 
   void scaleOtherValue(double &oval);
+  void scaleBackOtherValue(double &oval);
 
   void Add(double d); //!< Add d to the value of this property.
 
