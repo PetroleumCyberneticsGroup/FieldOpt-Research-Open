@@ -136,7 +136,7 @@ Settings::Optimizer::OptimizerType DFTR =
 void Optimizer::applyRestart(Case* c, int nc) {
   QJsonArray rjson0, rjson1;
 
-  cout << "LastPoint: " << nc << endl;
+  // cout << "LastPoint: " << nc << endl;
   rjson0 = seto_->restartJson()->value("LastPoints").toArray();
   c->set_objf_value(-infd_);
   for (const auto v : rjson0)
@@ -216,14 +216,23 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
   }
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ╔╦╗  ╔═╗  ╔╗╔  ╔╦╗  ┌┐   ┌─┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
+// │ ┬  ├┤    │    ║   ║╣   ║║║   ║   ├┴┐  ├─┤  └─┐  ├┤   │    └─┐
+// └─┘  └─┘   ┴    ╩   ╚═╝  ╝╚╝   ╩   └─┘  ┴ ┴  └─┘  └─┘  └─┘  └─┘
 Case *Optimizer::GetTentativeBestCase() const {
   return tentative_best_case_;
 }
 
+// ┬  ┌─┐  ╦  ╔╦╗  ╔═╗  ╦═╗  ╔═╗  ╦  ╦  ╔═╗  ╔╦╗  ╔═╗  ╔╗╔  ╔╦╗
+// │  └─┐  ║  ║║║  ╠═╝  ╠╦╝  ║ ║  ╚╗╔╝  ║╣   ║║║  ║╣   ║║║   ║
+// ┴  └─┘  ╩  ╩ ╩  ╩    ╩╚═  ╚═╝   ╚╝   ╚═╝  ╩ ╩  ╚═╝  ╝╚╝   ╩
 bool Optimizer::isImprovement(const Case *c) {
   return isBetter(c, tentative_best_case_);
 }
 
+// ┬  ┌─┐  ╔╗   ╔═╗  ╔╦╗  ╔╦╗  ╔═╗  ╦═╗
+// │  └─┐  ╠╩╗  ║╣    ║    ║   ║╣   ╠╦╝
+// ┴  └─┘  ╚═╝  ╚═╝   ╩    ╩   ╚═╝  ╩╚═
 bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   if (mode_ == Settings::Optimizer::OptimizerMode::Maximize) {
     if (c1->objf_value() > c2->objf_value())
@@ -236,6 +245,9 @@ bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   return false;
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗  ┌─┐  ┌┬┐  ┬─┐  ╦ ╦  ╔╦╗  ╦═╗
+// │ ┬  ├┤    │   ╚═╗   ║   ╠═╣   ║   └─┐   │   ├┬┘  ╠═╣   ║║  ╠╦╝
+// └─┘  └─┘   ┴   ╚═╝   ╩   ╩ ╩   ╩   └─┘   ┴   ┴└─  ╩ ╩  ═╩╝  ╩╚═
 QString Optimizer::GetStatusStringHeader() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
     .arg("Iteration")
@@ -246,6 +258,9 @@ QString Optimizer::GetStatusStringHeader() const {
     .arg("TentativeBestCaseOFValue");
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗  ┌─┐  ┌┬┐  ┬─┐
+// │ ┬  ├┤    │   ╚═╗   ║   ╠═╣   ║   └─┐   │   ├┬┘
+// └─┘  └─┘   ┴   ╚═╝   ╩   ╩ ╩   ╩   └─┘   ┴   ┴└─
 QString Optimizer::GetStatusString() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
     .arg(iteration_)
