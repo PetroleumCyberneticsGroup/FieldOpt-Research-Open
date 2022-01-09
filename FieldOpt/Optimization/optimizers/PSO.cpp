@@ -87,14 +87,15 @@ PSO::PSO(Settings::Optimizer *settings,
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
     // apply restart if any
-    if (settings->restart())
+    if (settings->restart()) {
+      cout << "Applying restart..." << endl;
       applyRestart(new_case, i);
+    }
 
     // generate particle + add to swarm:
     swarm_.emplace_back(new_case, gen_, v_max_, n_vars_);
     case_handler_->AddNewCase(new_case);
   }
-  swarm_memory_.push_back(swarm_);
 
   // [start] uncomment only for testing
   // for (int ii = 0; ii < 249; ii++) // add swarms for testing
@@ -275,7 +276,7 @@ PSO::Particle::Particle(Optimization::Case *c,
 // └─┘  └─┘  ┘└┘  ╩╚═  ╩ ╩  ╝╚╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 Case *PSO::generateRandomCase() {
   Case *new_case;
-  new_case = new Case(GetTentativeBestCase());
+  new_case = new Case(GetTentBestCase());
 
   Eigen::VectorXd erands(n_vars_);
   for (int i = 0; i < n_vars_; ++i) {
@@ -289,7 +290,6 @@ Case *PSO::generateRandomCase() {
 // ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
 // ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
 Optimizer::TerminationCondition PSO::IsFinished() {
-
   if (!case_handler_->CasesBeingEvaluated().empty())
     return NOT_FINISHED;
 
@@ -328,7 +328,7 @@ void PSO::printRestart() {
         double val = cs->get_real_variable_value(var.first);
         prtclObj->insert(var.second->name(), val);
       }
-      // prtclObj->insert("f", cs->objf_value());
+      prtclObj->insert("f", cs->objf_value());
       // insert particle into swarm
       swarmObj->insert("PARTICLE#" + QString::number(jj), QJsonValue(*prtclObj));
     }
