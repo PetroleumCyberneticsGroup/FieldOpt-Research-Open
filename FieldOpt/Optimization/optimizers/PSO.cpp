@@ -72,20 +72,25 @@ PSO::PSO(Settings::Optimizer *settings,
   auto difference = upper_bound_ - lower_bound_;
   v_max_ = difference * settings->parameters().pso_velocity_scale;
 
+  // dbg
   if (vp_.vOPT > 2) {
     stringstream ss;
     ss << "Using bounds from constraints: " << endl;
-    ss << vec_to_str(vector<double>(lower_bound_.data(), lower_bound_.data() + lower_bound_.size()));
+    ss << vec_to_str(vector<double>(lower_bound_.data(),
+                                    lower_bound_.data() + lower_bound_.size()));
     ss << endl;
-    ss << vec_to_str(vector<double>(upper_bound_.data(), upper_bound_.data() + upper_bound_.size()));
+    ss << vec_to_str(vector<double>(upper_bound_.data(),
+                                    upper_bound_.data() + upper_bound_.size()));
     ext_info(ss.str(), "Optimization", "PSO");
   }
 
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
+    // apply restart if any
     if (settings->restart())
       applyRestart(new_case, i);
-   // generate particle + add to swarm:
+
+    // generate particle + add to swarm:
     swarm_.emplace_back(new_case, gen_, v_max_, n_vars_);
     case_handler_->AddNewCase(new_case);
   }
@@ -156,6 +161,38 @@ PSO::Particle PSO::getGlobalBest() {
     }
   }
   return best_particle;
+}
+
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
+// ├─┘  ├┬┘  │  │││   │   ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
+void PSO::printRestart() {
+  QJsonObject *jsonObj = new QJsonObject();
+
+  QJsonObject *swarmObj = new QJsonObject();
+
+  QJsonObject *prtclObj = new QJsonObject();
+
+  string swarm_nr, prtcl_nr;
+
+  for(int ii = 0; ii < swarm_memory_.size(); ii++){
+    for(int jj = 0; jj < swarm_memory_[ii].size(); jj++){
+
+      swarm_nr = to_string(ii);
+      prtcl_nr = to_string(jj);
+      prtcl_cs = swarm_memory_[ii][jj].case_pointer;
+
+      prtclObj->insert(prtcl_nr, )
+
+
+
+
+
+
+
+
+    }
+  }
 }
 
 // ┌─┐  ┬  ┌┐┌  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╔╦╗  ┬  ┌┐┌  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗
@@ -277,10 +314,21 @@ Case *PSO::generateRandomCase() {
 // ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
 // ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
 Optimizer::TerminationCondition PSO::IsFinished() {
-  if (!case_handler_->CasesBeingEvaluated().empty()) return NOT_FINISHED;
-  if (isStagnant()) return MIN_STEP_LENGTH_REACHED;
-  if (iteration_ < max_iterations_) return NOT_FINISHED;
-  else return MAX_EVALS_REACHED;
+
+  if (!case_handler_->CasesBeingEvaluated().empty())
+    return NOT_FINISHED;
+
+  if (isStagnant()) {
+    printRestart();
+    return MIN_STEP_LENGTH_REACHED;
+  }
+
+  if (iteration_ < max_iterations_) {
+    return NOT_FINISHED;
+  } else {
+    printRestart();
+    return MAX_EVALS_REACHED;
+  }
 }
 
 // ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗

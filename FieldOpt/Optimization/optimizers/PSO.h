@@ -127,6 +127,8 @@ class PSO : public Optimizer {
    */
   bool isStagnant();
 
+  void printRestart();
+
   //!< Current swarm of particles
   vector<Particle> swarm_;
 
