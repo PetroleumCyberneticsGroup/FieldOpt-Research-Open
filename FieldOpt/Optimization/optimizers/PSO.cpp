@@ -38,13 +38,14 @@ PSO::PSO(Settings::Optimizer *settings,
          Logger *logger,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables,
-              grid, logger, case_handler, constraint_handler) {
+        ) : Optimizer(settings, base_case, variables,
+                      grid, logger, case_handler, constraint_handler) {
 
   n_vars_ = variables->ContinuousVariableSize();
   gen_ = get_random_generator(settings->parameters().rng_seed);
   max_iterations_ = settings->parameters().max_generations;
   number_of_particles_ = settings->parameters().pso_swarm_size;
+  restart_ = settings->restart();
 
   stagnation_limit_ = settings->parameters().stagnation_limit;
   learning_factor_1_ = settings->parameters().pso_learning_factor_1;
@@ -53,9 +54,9 @@ PSO::PSO(Settings::Optimizer *settings,
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
       lower_bound_ = constraint_handler_->GetLowerBounds(
-          base_case->GetRealVarIdVector());
+        base_case->GetRealVarIdVector());
       upper_bound_ = constraint_handler_->GetUpperBounds(
-          base_case->GetRealVarIdVector());
+        base_case->GetRealVarIdVector());
     } else {
       lower_bound_.resize(n_vars_);
       upper_bound_.resize(n_vars_);
@@ -87,7 +88,7 @@ PSO::PSO(Settings::Optimizer *settings,
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
     // apply restart if any
-    if (settings->restart()) {
+    if (restart_) {
       cout << "Applying restart..." << endl;
       applyRestart(new_case, i);
     }
@@ -199,13 +200,13 @@ vector<PSO::Particle> PSO::updateVelocity() {
 
     for(int j = 0; j < n_vars_; j++){
       double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1)
-      * (best_in_particle_memory.rea_vars(j) - swarm_[i].rea_vars(j));
+        * (best_in_particle_memory.rea_vars(j) - swarm_[i].rea_vars(j));
 
       double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1)
-      * (current_best_particle_global_.rea_vars(j) - swarm_[i].rea_vars(j));
+        * (current_best_particle_global_.rea_vars(j) - swarm_[i].rea_vars(j));
 
       new_swarm[i].rea_vars_velocity(j) =
-      swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
+        swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
 
       if (new_swarm[i].rea_vars_velocity(j) < -v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = -v_max_(j);
@@ -294,14 +295,15 @@ Optimizer::TerminationCondition PSO::IsFinished() {
     return NOT_FINISHED;
 
   if (isStagnant()) {
-    printRestart();
+    if (restart_) { printRestart(); }
     return MIN_STEP_LENGTH_REACHED;
   }
 
   if (iteration_ < max_iterations_) {
     return NOT_FINISHED;
   } else {
-    printRestart();
+    if (restart_) { printRestart(); }
+
     return MAX_EVALS_REACHED;
   }
 }
@@ -310,33 +312,44 @@ Optimizer::TerminationCondition PSO::IsFinished() {
 // ├─┘  ├┬┘  │  │││   │   ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
 // ┴    ┴└─  ┴  ┘└┘   ┴   ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
 void PSO::printRestart() {
+  auto *memObj_sc = new QJsonObject();
   auto *memObj = new QJsonObject();
-
-  QString swarm_nr, prtcl_nr;
   Case* cs;
 
   // loop through all swarms
   for(int ii = 0; ii < swarm_memory_.size(); ii++) {
+    auto *swarmObj_sc = new QJsonObject(); // new swarm object
     auto *swarmObj = new QJsonObject(); // new swarm object
 
     for(int jj = 0; jj < swarm_memory_[ii].size(); jj++) {
-      auto *prtclObj = new QJsonObject(); // new particle object
+      auto *prtclObj_sc = new QJsonObject(); // new particle obj_sc
+      auto *prtclObj = new QJsonObject(); //
+      cs = swarm_memory_[ii][jj].case_pointer;
 
       // insert variable names & values into particle object
-      cs = swarm_memory_[ii][jj].case_pointer;
       for (auto var : *vars_->GetContinuousVariables()) {
         double val = cs->get_real_variable_value(var.first);
+        prtclObj_sc->insert(var.second->name(), val);
+        var.second->scaleBackOtherValue(val);
         prtclObj->insert(var.second->name(), val);
       }
+
+      // print objective
+      prtclObj_sc->insert("f", cs->objf_value());
       prtclObj->insert("f", cs->objf_value());
+
       // insert particle into swarm
-      swarmObj->insert("PARTICLE#" + QString::number(jj), QJsonValue(*prtclObj));
+      QString pn = "PARTICLE#" + QString::number(jj);
+      swarmObj_sc->insert(pn, QJsonValue(*prtclObj_sc));
+      swarmObj->insert(pn, QJsonValue(*prtclObj));
     }
     // insert swarm into memory
-    memObj->insert("SWARM#" + QString::number(ii), QJsonValue(*swarmObj));
+    QString sn = "SWARM#" + QString::number(ii);
+    memObj_sc->insert(sn, QJsonValue(*swarmObj_sc));
+    memObj->insert(sn, QJsonValue(*swarmObj));
   }
 
-  QByteArray byteArray;
+  QByteArray byteArray, byteArray_sc;
   QJsonDocument::JsonFormat jformat;
   QString td = QDateTime::currentDateTime().toString("-yyyyMMdd-THHmmss");
 
@@ -348,16 +361,28 @@ void PSO::printRestart() {
   // sz:swarms=10/prtcls=38/vars=38 -> 531K
   // sz:swarms=250/prtcls=38/vars=38 -> 13M
 
+  byteArray_sc = QJsonDocument(*memObj_sc).toJson(jformat);
   byteArray = QJsonDocument(*memObj).toJson(jformat);
+
+  QFile file_sc;
+  file_sc.setFileName("retart-pso-swarm-mem" + td + "_sc.json");
+  if(!file_sc.open(QIODevice::WriteOnly)){
+    cout << "No write access (sc)";
+    return;
+  }
+  file_sc.write(byteArray_sc);
+  file_sc.close();
 
   QFile file;
   file.setFileName("retart-pso-swarm-mem" + td + ".json");
   if(!file.open(QIODevice::WriteOnly)){
-    cout << "No write access for json file";
+    cout << "No write access";
     return;
   }
   file.write(byteArray);
   file.close();
+
+  restart_ = false;
 }
 
 // ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗

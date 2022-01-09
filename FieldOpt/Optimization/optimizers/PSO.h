@@ -57,16 +57,23 @@ class PSO : public Optimizer {
     boost::random::mt19937 gen_; //!< Random number generator with the random functions in math.hpp
 
  public:
+  bool restart_ = false;
+
   struct Particle{
     Eigen::VectorXd rea_vars; //!< Real variables
     Case *case_pointer; //!< Pointer to the case
-    Eigen::VectorXd rea_vars_velocity; //!< The velocity of the real variables
 
-    Particle(Optimization::Case *c, boost::random::mt19937 &gen,
-             Eigen::VectorXd v_max, int n_vars);
+    //!< Velocity of the real variables
+    Eigen::VectorXd rea_vars_velocity;
+
+    Particle(Optimization::Case *c,
+             boost::random::mt19937 &gen,
+             Eigen::VectorXd v_max,
+             int n_vars);
     Particle(){}
 
-    void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars);
+    void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
+                       Eigen::VectorXd rea_vars);
     double ofv() { return case_pointer->objf_value(); }
   };
 
@@ -131,7 +138,7 @@ class PSO : public Optimizer {
 
   void printRestart();
 
-  vector<vector<Particle>> getSwarmMem() { return swarm_memory_; }
+  vector<vector<Particle>> getSwarmMem() const { return swarm_memory_; }
 
   //!< Current swarm of particles
   vector<Particle> swarm_;
@@ -150,9 +157,16 @@ class PSO : public Optimizer {
   Eigen::VectorXd v_max_; //!< Max velocity of the particle
   int max_iterations_; //!< Max iterations
 
-  Particle current_best_particle_global_; //!< global best particle position
-  Eigen::VectorXd lower_bound_; //!< Lower bounds for the variables (used for randomly generating populations and mutation)
-  Eigen::VectorXd upper_bound_; //!< Upper bounds for the variables (used for randomly generating populations and mutation)
+  //!< global best particle position
+  Particle current_best_particle_global_;
+
+  //!< Lower bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd lower_bound_;
+
+  //!< Upper bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd upper_bound_;
   int n_vars_; //!< Number of variables in the problem.
 
 };
