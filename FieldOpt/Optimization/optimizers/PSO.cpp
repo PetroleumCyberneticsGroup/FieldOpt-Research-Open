@@ -85,7 +85,7 @@ PSO::PSO(Settings::Optimizer *settings,
     auto new_case = generateRandomCase();
     if (settings->restart())
       applyRestart(new_case, i);
-
+   // generate particle + add to swarm:
     swarm_.emplace_back(new_case, gen_, v_max_, n_vars_);
     case_handler_->AddNewCase(new_case);
   }
@@ -99,14 +99,17 @@ PSO::PSO(Settings::Optimizer *settings,
 // ║   ║   ║╣   ╠╦╝  ╠═╣   ║   ║╣
 // ╩   ╩   ╚═╝  ╩╚═  ╩ ╩   ╩   ╚═╝
 void PSO::iterate(){
-  if(enable_logging_){
+  if(enable_logging_)
     logger_->AddEntry(this);
-  }
+
+  // push swarm to memory
   swarm_memory_.push_back(swarm_);
   current_best_particle_global_ = getGlobalBest();
+
   swarm_ = updateVelocity();
   swarm_ = updatePosition();
   vector<Particle> next_generation_swarm;
+
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
     next_generation_swarm.emplace_back(new_case, gen_, v_max_, n_vars_);
@@ -119,117 +122,19 @@ void PSO::iterate(){
   iteration_++;
 }
 
-
-// ┬ ┬  ┌─┐  ┌┐┌  ┌┬┐  ┬    ┌─┐  ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗  ╔═╗  ╔═╗
-// ├─┤  ├─┤  │││   ││  │    ├┤   ║╣   ╚╗╔╝  ╠═╣  ║     ║║  ║    ╚═╗
-// ┴ ┴  ┴ ┴  ┘└┘  ─┴┘  ┴─┘  └─┘  ╚═╝   ╚╝   ╩ ╩  ╩═╝  ═╩╝  ╚═╝  ╚═╝
-void PSO::handleEvaluatedCase(Case *c) {
-  if(isImprovement(c)){
-    updateTentativeBestCase(c);
-    if (vp_.vOPT > 1) {
-      stringstream ss;
-      ss.precision(6);
-      ss << scientific;
-      ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
-      Printer::ext_info(ss.str(), "Optimization", "PSO");
-    }
-  }
-}
-
-// ╦  ┌─┐  ╔═╗  ╦  ╔╗╔  ╦  ╔═╗  ╦ ╦  ╔═╗  ╔╦╗
-// ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
-// ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
-Optimizer::TerminationCondition PSO::IsFinished() {
-  if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
-  if (isStagnant()) return MIN_STEP_LENGTH_REACHED;
-  if (iteration_ < max_iterations_) return NOT_FINISHED;
-  else return MAX_EVALS_REACHED;
-}
-
-// ┌─┐  ┌─┐  ┌┐┌  ╦═╗  ╔═╗  ╔╗╔  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗
-// │ ┬  ├┤   │││  ╠╦╝  ╠═╣  ║║║   ║║  ║ ║  ║║║  ║    ╚═╗
-// └─┘  └─┘  ┘└┘  ╩╚═  ╩ ╩  ╝╚╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
-Case *PSO::generateRandomCase() {
-  Case *new_case;
-  new_case = new Case(GetTentativeBestCase());
-
-  Eigen::VectorXd erands(n_vars_);
-  for (int i = 0; i < n_vars_; ++i) {
-    erands(i) = random_doubles(gen_, lower_bound_(i), upper_bound_(i), 1)[0];
-  }
-  new_case->SetRealVarValues(erands);
-  return new_case;
-}
-
-// ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
-// ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
-// ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
-PSO::Particle::Particle(Optimization::Case *c,
-                        boost::random::mt19937 &gen,
-                        VectorXd v_max, int n_vars) {
-  case_pointer = c;
-  rea_vars=c->GetRealVarVector();
-  Eigen::VectorXd temp(n_vars);
-  for(int i = 0; i < rea_vars.size(); i++){
-    temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
-  }
-  rea_vars_velocity=temp;
-}
-
-// ┌─┐  ┌─┐  ┬─┐  ┌┬┐  ┬  ┌─┐  ┬    ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╦╗
-// ├─┘  ├─┤  ├┬┘   │   │  │    │    ├┤   ╠═╣   ║║  ╠═╣  ╠═╝   ║
-// ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
-void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
-                                  Eigen::VectorXd rea_vars_swap){
-  rea_vars = rea_vars_swap;
-  case_pointer->SetRealVarValues(rea_vars);
-  rea_vars_velocity = rea_vars_velocity_swap;
-}
-
-// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗
-// ├─┘  ├┬┘  │  │││   │   ╚═╗  ║║║  ╠═╣  ╠╦╝  ║║║
-// ┴    ┴└─  ┴  ┘└┘   ┴   ╚═╝  ╚╩╝  ╩ ╩  ╩╚═  ╩ ╩
-void PSO::printSwarm(vector<Particle> swarm) const {
-  if (swarm.size() == 0)
-    swarm = swarm_;
-  stringstream ss;
-  ss.precision(6);
-  ss << scientific;
-  ss << "Population:|" << endl;
-  for(auto partic : swarm){
-    ss << "OFV: " << partic.ofv() << " Position: ";
-    ss << eigenvec_to_str(partic.rea_vars) << "|";
-  }
-  ext_info(ss.str(), "Optimization", "PSO");
-}
-
-// ┬  ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╗╔  ╔═╗  ╔╗╔  ╔╦╗
-// │  └─┐  ╚═╗   ║   ╠═╣  ║ ╦  ║║║  ╠═╣  ║║║   ║
-// ┴  └─┘  ╚═╝   ╩   ╩ ╩  ╚═╝  ╝╚╝  ╩ ╩  ╝╚╝   ╩
-bool PSO::isStagnant() {
-  vector<double> list_of_sums;
-  for (auto chrom : swarm_) {
-    list_of_sums.push_back(chrom.rea_vars.sum());
-  }
-  double stdev = calc_standard_deviation(list_of_sums);
-  return stdev <= stagnation_limit_;
-}
-
-// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
-// ├─┘  ├┬┘  │  │││   │   ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
-// ┴    ┴└─  ┴  ┘└┘   ┴   ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
-void PSO::printParticle(Particle &partic) const { }
-
 // ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╦    ╔═╗  ╔╗   ╔═╗  ╦    ┌┐   ┌─┐  ┌─┐┌┬┐
 // │ ┬  ├┤    │   ║ ╦  ║    ║ ║  ╠╩╗  ╠═╣  ║    ├┴┐  ├┤   └─┐ │
 // └─┘  └─┘   ┴   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩ ╩  ╩═╝  └─┘  └─┘  └─┘ ┴
 PSO::Particle PSO::getGlobalBest(){
   Particle best_particle;
+
   if(swarm_memory_.size() == 1){
+    cout << "!!!!! swarm_memory_.size() == 1 !!!!!" << endl;
     best_particle = swarm_memory_[0][0];
   } else {
     best_particle = current_best_particle_global_;
   }
+
   for(int i = 0; i < swarm_memory_.size(); i++){
     for(int j = 0; j < swarm_memory_[i].size();j++){
       if (isBetter(swarm_memory_[i][j].case_pointer, best_particle.case_pointer)) {
@@ -293,6 +198,107 @@ vector<PSO::Particle> PSO::updatePosition() {
   }
   return swarm_;
 }
+
+// ┌─┐  ┌─┐  ┬─┐  ┌┬┐  ┬  ┌─┐  ┬    ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╦╗
+// ├─┘  ├─┤  ├┬┘   │   │  │    │    ├┤   ╠═╣   ║║  ╠═╣  ╠═╝   ║
+// ┴    ┴ ┴  ┴└─   ┴   ┴  └─┘  ┴─┘  └─┘  ╩ ╩  ═╩╝  ╩ ╩  ╩     ╩
+void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
+                                  Eigen::VectorXd rea_vars_swap){
+  rea_vars = rea_vars_swap;
+  case_pointer->SetRealVarValues(rea_vars);
+  rea_vars_velocity = rea_vars_velocity_swap;
+}
+
+// ┬ ┬  ┌─┐  ┌┐┌  ┌┬┐  ┬    ┌─┐  ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗  ╔═╗  ╔═╗
+// ├─┤  ├─┤  │││   ││  │    ├┤   ║╣   ╚╗╔╝  ╠═╣  ║     ║║  ║    ╚═╗
+// ┴ ┴  ┴ ┴  ┘└┘  ─┴┘  ┴─┘  └─┘  ╚═╝   ╚╝   ╩ ╩  ╩═╝  ═╩╝  ╚═╝  ╚═╝
+void PSO::handleEvaluatedCase(Case *c) {
+  if(isImprovement(c)){
+    updateTentativeBestCase(c);
+
+    if (vp_.vOPT > 1) {
+      stringstream ss;
+      ss.precision(6);
+      ss << scientific << "New best in swarm, iteration ";
+      ss << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
+      Printer::ext_info(ss.str(), "Optimization", "PSO");
+    }
+  }
+}
+
+// ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
+// ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
+// ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
+PSO::Particle::Particle(Optimization::Case *c,
+                        boost::random::mt19937 &gen,
+                        VectorXd v_max, int n_vars) {
+  case_pointer = c;
+  rea_vars=c->GetRealVarVector();
+  Eigen::VectorXd temp(n_vars);
+  for(int i = 0; i < rea_vars.size(); i++){
+    temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
+  }
+  rea_vars_velocity=temp;
+}
+
+// ┌─┐  ┌─┐  ┌┐┌  ╦═╗  ╔═╗  ╔╗╔  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗
+// │ ┬  ├┤   │││  ╠╦╝  ╠═╣  ║║║   ║║  ║ ║  ║║║  ║    ╚═╗
+// └─┘  └─┘  ┘└┘  ╩╚═  ╩ ╩  ╝╚╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
+Case *PSO::generateRandomCase() {
+  Case *new_case;
+  new_case = new Case(GetTentativeBestCase());
+
+  Eigen::VectorXd erands(n_vars_);
+  for (int i = 0; i < n_vars_; ++i) {
+    erands(i) = random_doubles(gen_, lower_bound_(i), upper_bound_(i), 1)[0];
+  }
+  new_case->SetRealVarValues(erands);
+  return new_case;
+}
+
+// ╦  ┌─┐  ╔═╗  ╦  ╔╗╔  ╦  ╔═╗  ╦ ╦  ╔═╗  ╔╦╗
+// ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
+// ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
+Optimizer::TerminationCondition PSO::IsFinished() {
+  if (!case_handler_->CasesBeingEvaluated().empty()) return NOT_FINISHED;
+  if (isStagnant()) return MIN_STEP_LENGTH_REACHED;
+  if (iteration_ < max_iterations_) return NOT_FINISHED;
+  else return MAX_EVALS_REACHED;
+}
+
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗
+// ├─┘  ├┬┘  │  │││   │   ╚═╗  ║║║  ╠═╣  ╠╦╝  ║║║
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╚═╝  ╚╩╝  ╩ ╩  ╩╚═  ╩ ╩
+void PSO::printSwarm(vector<Particle> swarm) const {
+  if (swarm.empty())
+    swarm = swarm_;
+  stringstream ss;
+  ss.precision(6);
+  ss << scientific;
+  ss << "Population:|" << endl;
+  for(auto partic : swarm){
+    ss << "OFV: " << partic.ofv() << " Position: ";
+    ss << eigenvec_to_str(partic.rea_vars) << "|";
+  }
+  ext_info(ss.str(), "Optimization", "PSO");
+}
+
+// ┬  ┌─┐  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔╗╔  ╔═╗  ╔╗╔  ╔╦╗
+// │  └─┐  ╚═╗   ║   ╠═╣  ║ ╦  ║║║  ╠═╣  ║║║   ║
+// ┴  └─┘  ╚═╝   ╩   ╩ ╩  ╚═╝  ╝╚╝  ╩ ╩  ╝╚╝   ╩
+bool PSO::isStagnant() {
+  vector<double> list_of_sums;
+  for (auto chrom : swarm_) {
+    list_of_sums.push_back(chrom.rea_vars.sum());
+  }
+  double stdev = calc_standard_deviation(list_of_sums);
+  return stdev <= stagnation_limit_;
+}
+
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╔═╗  ╦═╗  ╔╦╗  ╦  ╔═╗  ╦    ╔═╗
+// ├─┘  ├┬┘  │  │││   │   ╠═╝  ╠═╣  ╠╦╝   ║   ║  ║    ║    ║╣
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╩    ╩ ╩  ╩╚═   ╩   ╩  ╚═╝  ╩═╝  ╚═╝
+void PSO::printParticle(Particle &partic) const { }
 
 
 }

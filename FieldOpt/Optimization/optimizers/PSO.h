@@ -127,14 +127,25 @@ class PSO : public Optimizer {
    */
   bool isStagnant();
 
-  double stagnation_limit_; //!< The stagnation criterion, standard deviation of all particle positions.
-  vector<vector<Particle>> swarm_memory_; //!< The memory of the swarm at previous timesteps.
-  int number_of_particles_; //!< The number of particles in the swarm
+  //!< Current swarm of particles
+  vector<Particle> swarm_;
+
+  //!< Memory of swarm at previous timesteps.
+  vector<vector<Particle>> swarm_memory_;
+
+  //!< Mumber of particles in the swarm
+  int number_of_particles_;
+
+  //!< Stagnation criterion, std.dev of all particle positions.
+  double stagnation_limit_;
+
   double learning_factor_1_; //!< Learning factor 1 (c1)
   double learning_factor_2_; //!< Learning factor 2 (c2)
   Eigen::VectorXd v_max_; //!< Max velocity of the particle
   int max_iterations_; //!< Max iterations
-  vector<Particle> swarm_; //!< Current swarm of particles
+
+
+
   Particle current_best_particle_global_; //!< global best particle position
   Eigen::VectorXd lower_bound_; //!< Lower bounds for the variables (used for randomly generating populations and mutation)
   Eigen::VectorXd upper_bound_; //!< Upper bounds for the variables (used for randomly generating populations and mutation)
