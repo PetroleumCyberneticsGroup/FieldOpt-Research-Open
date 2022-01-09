@@ -69,7 +69,7 @@ TEST_F(GeneticAlgorithmTest, TestFunctionSpherical) {
     next_case->set_objf_value(abs(Sphere(next_case->GetRealVarVector())));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.1);
@@ -89,7 +89,7 @@ TEST_F(GeneticAlgorithmTest, TestFunctionRosenbrock) {
     next_case->set_objf_value(Rosenbrock(next_case->GetRealVarVector()));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 
 //    EXPECT_NEAR(3.72484, best_case->objective_function_value(), 1);
 //    EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 2.5);

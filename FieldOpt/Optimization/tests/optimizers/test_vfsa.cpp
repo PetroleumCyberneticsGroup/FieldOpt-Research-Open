@@ -71,7 +71,7 @@ TEST_F(VFSATest, TestFunctionSpherical) {
     minimizer->SubmitEvaluatedCase(next_case);
     iter++;
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.1);
@@ -93,7 +93,7 @@ TEST_F(VFSATest, TestFunctionRosenbrock) {
     maximizer->SubmitEvaluatedCase(next_case);
     iter++;
   }
-  auto best_case = maximizer->GetTentativeBestCase();
+  auto best_case = maximizer->GetTentBestCase();
 
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.1);
 //    EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 1);

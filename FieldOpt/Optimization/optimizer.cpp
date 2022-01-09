@@ -219,7 +219,7 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
 // ┌─┐  ┌─┐  ┌┬┐  ╔╦╗  ╔═╗  ╔╗╔  ╔╦╗  ┌┐   ┌─┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
 // │ ┬  ├┤    │    ║   ║╣   ║║║   ║   ├┴┐  ├─┤  └─┐  ├┤   │    └─┐
 // └─┘  └─┘   ┴    ╩   ╚═╝  ╝╚╝   ╩   └─┘  ┴ ┴  └─┘  └─┘  └─┘  └─┘
-Case *Optimizer::GetTentativeBestCase() const {
+Case *Optimizer::GetTentBestCase() const {
   return tentative_best_case_;
 }
 

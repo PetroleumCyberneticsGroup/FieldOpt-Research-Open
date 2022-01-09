@@ -89,7 +89,7 @@ void APPS::successful_iteration(Case *c) {
 
 void APPS::unsuccessful_iteration(Case *c) {
   vector<int> unsuccessful_direction;
-  if (c->origin_case()->id() == GetTentativeBestCase()->id()) {
+  if (c->origin_case()->id() == GetTentBestCase()->id()) {
     unsuccessful_direction.push_back(c->origin_direction_index());
     set_inactive(unsuccessful_direction);
     contract(unsuccessful_direction);
@@ -131,7 +131,7 @@ void APPS::prune_queue() {
     if (evaluated_cases_ >= max_evaluations_) queue_size = 1;
     while (case_handler_->QueuedCases().size() > queue_size) {
       auto dequeued_case = dequeue_case_with_worst_origin();
-      if (dequeued_case->origin_case()->id() == GetTentativeBestCase()->id())
+      if (dequeued_case->origin_case()->id() == GetTentBestCase()->id())
         set_inactive(vector<int>{dequeued_case->origin_direction_index()});
     }
     return;

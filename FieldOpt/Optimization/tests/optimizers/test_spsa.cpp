@@ -68,7 +68,7 @@ TEST_F(SPSATest, TestFunctionSphericalMinimize) {
     next_case->state.eval = Optimization::Case::CaseState::E_DONE;
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.1);
@@ -89,7 +89,7 @@ TEST_F(SPSATest, TestFunctionSphericalMaximize) {
     next_case->state.eval = Optimization::Case::CaseState::E_DONE;
     maximizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = maximizer->GetTentativeBestCase();
+  auto best_case = maximizer->GetTentBestCase();
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 1.0);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 1.0);
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 1.0);

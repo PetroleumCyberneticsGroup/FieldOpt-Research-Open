@@ -85,8 +85,8 @@ QString CompassSearch::GetStatusString() const {
     .arg(nr_evaluated_cases())
     .arg(nr_queued_cases())
     .arg(nr_recently_evaluated_cases())
-    .arg(GetTentativeBestCase()->id().toString())
-    .arg(GetTentativeBestCase()->objf_value())
+    .arg(GetTentBestCase()->id().toString())
+    .arg(GetTentBestCase()->objf_value())
     .arg(step_lengths_[0]);
 }
 
@@ -96,7 +96,7 @@ void CompassSearch::handleEvaluatedCase(Case *c) {
 }
 
 bool CompassSearch::is_successful_iteration() {
-  return case_handler_->RecentlyEvaluatedCases().contains(GetTentativeBestCase());
+  return case_handler_->RecentlyEvaluatedCases().contains(GetTentBestCase());
 }
 
 }}

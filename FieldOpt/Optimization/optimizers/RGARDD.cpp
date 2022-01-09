@@ -136,7 +136,7 @@ void RGARDD::handleEvaluatedCase(Case *c) {
       }
       if (vp_.vOPT >= 3) {
         im_ = "New best in generation " + num2str(iteration_);
-        im_ += ": " + num2str(GetTentativeBestCase()->objf_value());
+        im_ += ": " + num2str(GetTentBestCase()->objf_value());
         ext_info(im_, "RGARDD", "Optimization", vp_.lnw);
       }
     }

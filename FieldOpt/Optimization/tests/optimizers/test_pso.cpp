@@ -85,7 +85,7 @@ TEST_F(PSOTest, TestFunctionSpherical) {
     next_case->set_objf_value(abs(Sphere(next_case->GetRealVarVector())));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
   EXPECT_NEAR(0.0, best_case->objf_value(), 0.12);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.12);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.12);
@@ -105,7 +105,7 @@ TEST_F(PSOTest, TestFunctionRosenbrock) {
     next_case->set_objf_value(Rosenbrock(next_case->GetRealVarVector()));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 
   EXPECT_NEAR(0.0, best_case->objf_value(), 1);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 0.5);
@@ -332,7 +332,7 @@ TEST_F(PSOTest, TestRestart) {
           { "Var#ICD#PRODX2#7", 3.7220256079980706e-05 }, }
       });
 
-  // EXPECT_NEAR(0.7571595999999999, optmzr_->GetTentativeBestCase()->objf_value(), 1e-12); // bc
+  // EXPECT_NEAR(0.7571595999999999, optmzr_->GetTentBestCase()->objf_value(), 1e-12); // bc
   // temp commented out until finding the fval of the particle:
   // EXPECT_NEAR(??????, optmzr_->getSwarmMem()[0][0].case_pointer->objf_value(), 1e-12); //
 
@@ -341,7 +341,7 @@ TEST_F(PSOTest, TestRestart) {
     auto uuid = vars_->GetContVarQUuid(QString::fromStdString(v.first).replace("Var#",""));
     auto val = optmzr_->getSwarmMem()[0][0].case_pointer->get_real_variable_value(uuid);
     vars_->GetContinuousVariable(uuid)->scaleBackOtherValue(val);
-    // auto val = optmzr_->GetTentativeBestCase()->get_real_variable_value(uuid);
+    // auto val = optmzr_->GetTentBestCase()->get_real_variable_value(uuid);
     EXPECT_NEAR(val, v.second, 1e-12);
   }
   // std::cout << "[PSOTest]-t3 (ms)=" << Printer::since(start).count() << std::endl;

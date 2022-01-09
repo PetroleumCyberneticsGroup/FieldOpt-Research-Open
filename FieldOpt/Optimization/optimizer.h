@@ -103,10 +103,10 @@ class Optimizer : public Loggable
 
   // -------------------------------------------------------
   /*!
-   * \brief GetTentativeBestCase Get best case found so far.
+   * \brief GetTentBestCase Get best case found so far.
    * \return
    */
-  Case *GetTentativeBestCase() const;
+  Case *GetTentBestCase() const;
 
   /*!
    * \brief case_handler Get the case handler.

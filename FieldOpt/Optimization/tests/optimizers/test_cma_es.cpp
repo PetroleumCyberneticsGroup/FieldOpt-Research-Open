@@ -70,7 +70,7 @@ TEST_F(CMA_ESTest, TestFunctionSpherical) {
     next_case->set_objf_value(abs(Sphere(next_case->GetRealVarVector())));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
   EXPECT_NEAR(0.0, best_case->objf_value(), 0.12);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.12);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.12);
@@ -87,7 +87,7 @@ TEST_F(CMA_ESTest, TestFunctionRosenbrock) {
     next_case->set_objf_value(Rosenbrock(next_case->GetRealVarVector()));
     minimizer->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 
   EXPECT_NEAR(0.0, best_case->objf_value(), 5);
   EXPECT_NEAR(1.0, best_case->GetRealVarVector()[0], 3);

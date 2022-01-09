@@ -560,12 +560,12 @@ void AbstractRunner::PrintCompletionMessage() {
   }
 
   cout << "Best case at termination:" << endl;
-  cout << optimizer_->GetTentativeBestCase()->id().toString().toStdString() << endl;
+  cout << optimizer_->GetTentBestCase()->id().toString().toStdString() << endl;
   cout << "Variable values: " << endl;
 
-  auto opt_vars_int = optimizer_->GetTentativeBestCase()->integer_variables();
-  auto opt_vars_real = optimizer_->GetTentativeBestCase()->real_variables();
-  auto opt_vars_bin = optimizer_->GetTentativeBestCase()->binary_variables();
+  auto opt_vars_int = optimizer_->GetTentBestCase()->integer_variables();
+  auto opt_vars_real = optimizer_->GetTentBestCase()->real_variables();
+  auto opt_vars_bin = optimizer_->GetTentBestCase()->binary_variables();
 
   for (auto var : opt_vars_int) {
     auto prop_name = vars_->GetDiscreteVariable(var.first)->name();
@@ -589,14 +589,14 @@ void AbstractRunner::PrintCompletionMessage() {
   ComputeOptmzdCase();
 }
 
-// ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐  ╔═╗  ╔═╗  ╔╦╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗  ╔═╗  ╔═╗
-// │    │ │  │││  ├─┘  │ │   │   ├┤   ║ ║  ╠═╝   ║   ║║║  ╔═╝   ║║  ║    ╠═╣  ╚═╗  ║╣
-// └─┘  └─┘  ┴ ┴  ┴    └─┘   ┴   └─┘  ╚═╝  ╩     ╩   ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╩ ╩  ╚═╝  ╚═╝
+// ┌─┐  ┌─┐  ┌┬┐  ┌─┐  ┬ ┬  ┌┬┐  ┌─┐  ╔═╗  ╔═╗  ╔╦╗  ╔╦╗  ╔═╗  ╔╦╗  ╔═╗  ╔═╗
+// │    │ │  │││  ├─┘  │ │   │   ├┤   ║ ║  ╠═╝   ║   ║║║  ╔═╝   ║║  ║    ╚═╗
+// └─┘  └─┘  ┴ ┴  ┴    └─┘   ┴   └─┘  ╚═╝  ╩     ╩   ╩ ╩  ╚═╝  ═╩╝  ╚═╝  ╚═╝
 void AbstractRunner::ComputeOptmzdCase() {
   cout << "Running simulation using optzd values" << endl;
-  auto opt_vars_int = optimizer_->GetTentativeBestCase()->integer_variables();
-  auto opt_vars_real = optimizer_->GetTentativeBestCase()->real_variables();
-  auto opt_vars_bin = optimizer_->GetTentativeBestCase()->binary_variables();
+  auto opt_vars_int = optimizer_->GetTentBestCase()->integer_variables();
+  auto opt_vars_real = optimizer_->GetTentBestCase()->real_variables();
+  auto opt_vars_bin = optimizer_->GetTentBestCase()->binary_variables();
   optz_case_ = new Optimization::Case(opt_vars_bin, opt_vars_int, opt_vars_real);
 
   settings_->paths().CopyPath(Paths::OUTPUT_DIR, Paths::OPTMZD_DIR);
@@ -640,7 +640,7 @@ void AbstractRunner::FinalizeInit(bool write_logs) {
 // └    ┴  ┘└┘  ┴ ┴  ┴─┘  ┴  └─┘  └─┘  ╩╚═  ╚═╝  ╝╚╝
 void AbstractRunner::FinalizeRun(bool write_logs) {
   if (optimizer_ != nullptr) { // This indicates whether or not we're on a worker process
-    model_->ApplyCase(optimizer_->GetTentativeBestCase());
+    model_->ApplyCase(optimizer_->GetTentBestCase());
     simulator_->WriteDriverFilesOnly();
     PrintCompletionMessage();
   }

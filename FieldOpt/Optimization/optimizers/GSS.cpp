@@ -149,11 +149,11 @@ QList<Case *> GSS::generate_trial_points(vector<int> dirs) {
     dirs = range(0, (int)directions_.size(), 1);
   }
 
-  VectorXi int_base = GetTentativeBestCase()->GetIntegerVarVector();
-  VectorXd rea_base = GetTentativeBestCase()->GetRealVarVector();
+  VectorXi int_base = GetTentBestCase()->GetIntegerVarVector();
+  VectorXd rea_base = GetTentBestCase()->GetRealVarVector();
 
   for (int dir : dirs) {
-    auto trial_point = new Case(GetTentativeBestCase());
+    auto trial_point = new Case(GetTentBestCase());
 
     if (int_base.size() > 0) {
       trial_point->SetIntegerVarValues(perturb(int_base, dir));
@@ -161,7 +161,7 @@ QList<Case *> GSS::generate_trial_points(vector<int> dirs) {
       trial_point->SetRealVarValues(perturb(rea_base, dir));
     }
 
-    trial_point->set_origin_data(GetTentativeBestCase(),
+    trial_point->set_origin_data(GetTentBestCase(),
                                  dir, step_lengths_(dir));
     trial_points.append(trial_point);
   }
