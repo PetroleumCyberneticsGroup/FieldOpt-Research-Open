@@ -94,6 +94,13 @@ PSO::PSO(Settings::Optimizer *settings,
     swarm_.emplace_back(new_case, gen_, v_max_, n_vars_);
     case_handler_->AddNewCase(new_case);
   }
+  swarm_memory_.push_back(swarm_);
+
+  // [start] uncomment only for testing
+  // for (int ii = 0; ii < 249; ii++) // add swarms for testing
+  //   swarm_memory_.push_back(swarm_);
+  // printRestart();
+  // [end] must be commented
 
   if (vp_.vOPT > 2) {
     printSwarm();
@@ -161,38 +168,6 @@ PSO::Particle PSO::getGlobalBest() {
     }
   }
   return best_particle;
-}
-
-// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
-// ├─┘  ├┬┘  │  │││   │   ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
-// ┴    ┴└─  ┴  ┘└┘   ┴   ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
-void PSO::printRestart() {
-  QJsonObject *jsonObj = new QJsonObject();
-
-  QJsonObject *swarmObj = new QJsonObject();
-
-  QJsonObject *prtclObj = new QJsonObject();
-
-  string swarm_nr, prtcl_nr;
-
-  for(int ii = 0; ii < swarm_memory_.size(); ii++){
-    for(int jj = 0; jj < swarm_memory_[ii].size(); jj++){
-
-      swarm_nr = to_string(ii);
-      prtcl_nr = to_string(jj);
-      prtcl_cs = swarm_memory_[ii][jj].case_pointer;
-
-      prtclObj->insert(prtcl_nr, )
-
-
-
-
-
-
-
-
-    }
-  }
 }
 
 // ┌─┐  ┬  ┌┐┌  ┌┬┐  ╔╗   ╔═╗  ╔═╗  ╔╦╗  ┬  ┌┐┌  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗
@@ -329,6 +304,60 @@ Optimizer::TerminationCondition PSO::IsFinished() {
     printRestart();
     return MAX_EVALS_REACHED;
   }
+}
+
+// ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
+// ├─┘  ├┬┘  │  │││   │   ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
+// ┴    ┴└─  ┴  ┘└┘   ┴   ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
+void PSO::printRestart() {
+  auto *memObj = new QJsonObject();
+
+  QString swarm_nr, prtcl_nr;
+  Case* cs;
+
+  // loop through all swarms
+  for(int ii = 0; ii < swarm_memory_.size(); ii++) {
+    auto *swarmObj = new QJsonObject(); // new swarm object
+
+    for(int jj = 0; jj < swarm_memory_[ii].size(); jj++) {
+      auto *prtclObj = new QJsonObject(); // new particle object
+
+      // insert variable names & values into particle object
+      cs = swarm_memory_[ii][jj].case_pointer;
+      for (auto var : *vars_->GetContinuousVariables()) {
+        double val = cs->get_real_variable_value(var.first);
+        prtclObj->insert(var.second->name(), val);
+      }
+      // prtclObj->insert("f", cs->objf_value());
+      // insert particle into swarm
+      swarmObj->insert("PARTICLE#" + QString::number(jj), QJsonValue(*prtclObj));
+    }
+    // insert swarm into memory
+    memObj->insert("SWARM#" + QString::number(ii), QJsonValue(*swarmObj));
+  }
+
+  QByteArray byteArray;
+  QJsonDocument::JsonFormat jformat;
+  QString td = QDateTime::currentDateTime().toString("-yyyyMMdd-THHmmss");
+
+  jformat = QJsonDocument::Indented;
+  // sz:swarms=10/prtcls=38/vars=38 -> 736K
+  // sz:swarms=250/prtcls=38/vars=38 -> 18M
+
+  // jformat = QJsonDocument::Compact;
+  // sz:swarms=10/prtcls=38/vars=38 -> 531K
+  // sz:swarms=250/prtcls=38/vars=38 -> 13M
+
+  byteArray = QJsonDocument(*memObj).toJson(jformat);
+
+  QFile file;
+  file.setFileName("retart-pso-swarm-mem" + td + ".json");
+  if(!file.open(QIODevice::WriteOnly)){
+    cout << "No write access for json file";
+    return;
+  }
+  file.write(byteArray);
+  file.close();
 }
 
 // ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗
