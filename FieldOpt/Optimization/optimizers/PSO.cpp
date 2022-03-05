@@ -38,11 +38,14 @@ PSO::PSO(Settings::Optimizer *settings,
          Logger *logger,
          CaseHandler *case_handler,
          Constraints::ConstraintHandler *constraint_handler
-) : Optimizer(settings, base_case, variables, grid, logger, case_handler, constraint_handler) {
+) : Optimizer(settings, base_case, variables,
+              grid, logger, case_handler, constraint_handler) {
 
   n_vars_ = variables->ContinuousVariableSize();
   gen_ = get_random_generator(settings->parameters().rng_seed);
   max_iterations_ = settings->parameters().max_generations;
+  number_of_particles_ = settings->parameters().pso_swarm_size;
+
   stagnation_limit_ = settings->parameters().stagnation_limit;
   learning_factor_1_ = settings->parameters().pso_learning_factor_1;
   learning_factor_2_ = settings->parameters().pso_learning_factor_2;
@@ -50,7 +53,6 @@ PSO::PSO(Settings::Optimizer *settings,
   inertia_weight_max_ = settings->parameters().pso_inertia_weight_max;
   inertia_weight_min_ = settings->parameters().pso_inertia_weight_min;
   inertia_decay_ = settings->parameters().pso_inertia_decay;
-  number_of_particles_ = settings->parameters().pso_swarm_size;
 
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
@@ -77,9 +79,11 @@ PSO::PSO(Settings::Optimizer *settings,
   if (vp_.vOPT > 2) {
     stringstream ss;
     ss << "Using bounds from constraints: " << endl;
-    ss << vec_to_str(vector<double>(lower_bound_.data(), lower_bound_.data() + lower_bound_.size()));
+    ss << vec_to_str(vector<double>(lower_bound_.data(),
+                                    lower_bound_.data() + lower_bound_.size()));
     ss << endl;
-    ss << vec_to_str(vector<double>(upper_bound_.data(), upper_bound_.data() + upper_bound_.size()));
+    ss << vec_to_str(vector<double>(upper_bound_.data(),
+                                    upper_bound_.data() + upper_bound_.size()));
     ext_info(ss.str(), "Optimization","PSO");
   }
 
@@ -95,18 +99,20 @@ PSO::PSO(Settings::Optimizer *settings,
 }
 
 void PSO::iterate(){
-  if(enable_logging_){
+  if(enable_logging_)
     logger_->AddEntry(this);
-  }
+
   swarm_memory_.push_back(swarm_);
   current_best_particle_global_=get_global_best();
+
   swarm_ = update_velocity();
   swarm_ = update_position();
   vector<Particle> next_generation_swarm;
   for (int i = 0; i < number_of_particles_; ++i) {
     auto new_case = generateRandomCase();
     next_generation_swarm.push_back(Particle(new_case, gen_, v_max_, n_vars_));
-    next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity, swarm_[i].rea_vars);
+    next_generation_swarm[i].ParticleAdapt(swarm_[i].rea_vars_velocity,
+                                           swarm_[i].rea_vars);
   }
   for(int i = 0; i < number_of_particles_; i++){
     case_handler_->AddNewCase(next_generation_swarm[i].case_pointer);
@@ -115,78 +121,11 @@ void PSO::iterate(){
   iteration_++;
 }
 
-void PSO::handleEvaluatedCase(Case *c) {
-  if(isImprovement(c)){
-    updateTentativeBestCase(c);
-    if (vp_.vOPT > 1) {
-      stringstream ss;
-      ss.precision(6);
-      ss << scientific;
-      ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
-      Printer::ext_info(ss.str(), "Optimization", "PSO");
-    }
-  }
-}
-
-Optimizer::TerminationCondition PSO::IsFinished() {
-  if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
-  if (is_stagnant()) return MIN_STEP_LENGTH_REACHED;
-  if (iteration_ < max_iterations_) return NOT_FINISHED;
-  else return MAX_EVALS_REACHED;
-}
-
-Case *PSO::generateRandomCase() {
-  Case *new_case;
-  new_case = new Case(GetTentativeBestCase());
-
-  Eigen::VectorXd erands(n_vars_);
-  for (int i = 0; i < n_vars_; ++i) {
-    erands(i) = random_doubles(gen_, lower_bound_(i), upper_bound_(i), 1)[0];
-  }
-  new_case->SetRealVarValues(erands);
-  return  new_case;
-}
-
-PSO::Particle::Particle(Optimization::Case *c, boost::random::mt19937 &gen, VectorXd v_max, int n_vars) {
-  case_pointer = c;
-  rea_vars=c->GetRealVarVector();
-  Eigen::VectorXd temp(n_vars);
-  for(int i = 0; i < rea_vars.size(); i++){
-    temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
-  }
-  rea_vars_velocity=temp;
-}
-
 void PSO::Particle::ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars_swap){
   rea_vars=rea_vars_swap;
   case_pointer->SetRealVarValues(rea_vars);
   rea_vars_velocity = rea_vars_velocity_swap;
 }
-
-void PSO::printSwarm(vector<Particle> swarm) const {
-  if (swarm.size() == 0)
-    swarm = swarm_;
-  stringstream ss;
-  ss.precision(6);
-  ss << scientific;
-  ss << "Population:|" << endl;
-  for(auto partic : swarm){
-    ss << "OFV: " << partic.ofv() << " Position: ";
-    ss << eigenvec_to_str(partic.rea_vars) << "|";
-  }
-  ext_info(ss.str(), "Optimization", "PSO");
-}
-
-bool PSO::is_stagnant() {
-  vector<double> list_of_sums;
-  for (auto chrom : swarm_) {
-    list_of_sums.push_back(chrom.rea_vars.sum());
-  }
-  double stdev = calc_standard_deviation(list_of_sums);
-  return stdev <= stagnation_limit_;
-}
-
-void PSO::printParticle(Particle &partic) const { }
 
 PSO::Particle PSO::get_global_best(){
   Particle best_particle;
@@ -251,6 +190,80 @@ vector<PSO::Particle> PSO::update_position() {
   }
   return swarm_;
 }
+
+void PSO::handleEvaluatedCase(Case *c) {
+  if(isImprovement(c)){
+    updateTentativeBestCase(c);
+    if (vp_.vOPT > 1) {
+      stringstream ss;
+      ss.precision(6);
+      ss << scientific;
+      ss << "New best in swarm, iteration " << Printer::num2str(iteration_) << ": OFV " << c->objf_value();
+      Printer::ext_info(ss.str(), "Optimization", "PSO");
+    }
+  }
+}
+
+PSO::Particle::Particle(Optimization::Case *c, boost::random::mt19937 &gen, VectorXd v_max, int n_vars) {
+  case_pointer = c;
+  rea_vars=c->GetRealVarVector();
+  Eigen::VectorXd temp(n_vars);
+  for(int i = 0; i < rea_vars.size(); i++){
+    temp(i) = random_doubles(gen, -v_max(i), v_max(i), 1)[0];
+  }
+  rea_vars_velocity=temp;
+}
+
+Case *PSO::generateRandomCase() {
+  Case *new_case;
+  new_case = new Case(GetTentativeBestCase());
+
+  Eigen::VectorXd erands(n_vars_);
+  for (int i = 0; i < n_vars_; ++i) {
+    erands(i) = random_doubles(gen_, lower_bound_(i), upper_bound_(i), 1)[0];
+  }
+  new_case->SetRealVarValues(erands);
+  return  new_case;
+}
+
+Optimizer::TerminationCondition PSO::IsFinished() {
+  if (case_handler_->CasesBeingEvaluated().size() > 0) return NOT_FINISHED;
+  if (is_stagnant()) return MIN_STEP_LENGTH_REACHED;
+  if (iteration_ < max_iterations_) return NOT_FINISHED;
+  else return MAX_EVALS_REACHED;
+}
+
+void PSO::printSwarm(vector<Particle> swarm) const {
+  if (swarm.size() == 0)
+    swarm = swarm_;
+  stringstream ss;
+  ss.precision(6);
+  ss << scientific;
+  ss << "Population:|" << endl;
+  for(auto partic : swarm){
+    ss << "OFV: " << partic.ofv() << " Position: ";
+    ss << eigenvec_to_str(partic.rea_vars) << "|";
+  }
+  ext_info(ss.str(), "Optimization", "PSO");
+}
+
+bool PSO::is_stagnant() {
+  vector<double> list_of_sums;
+  for (auto chrom : swarm_) {
+    list_of_sums.push_back(chrom.rea_vars.sum());
+  }
+  double stdev = calc_standard_deviation(list_of_sums);
+  return stdev <= stagnation_limit_;
+}
+
+void PSO::printParticle(Particle &partic) const { }
+
+
+
+
+
+
+
 
 
 }

@@ -59,12 +59,17 @@ class PSO : public Optimizer {
   struct Particle{
     Eigen::VectorXd rea_vars; //!< Real variables
     Case *case_pointer; //!< Pointer to the case
-    Eigen::VectorXd rea_vars_velocity; //!< The velocity of the real variables
 
-    Particle(Optimization::Case *c, boost::random::mt19937 &gen,
-             Eigen::VectorXd v_max, int n_vars);
+    //!< Velocity of the real variables
+    Eigen::VectorXd rea_vars_velocity;
+
+    Particle(Optimization::Case *c,
+             boost::random::mt19937 &gen,
+             Eigen::VectorXd v_max,
+             int n_vars);
     Particle(){}
-    void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap, Eigen::VectorXd rea_vars);
+    void ParticleAdapt(Eigen::VectorXd rea_vars_velocity_swap,
+                       Eigen::VectorXd rea_vars);
     double ofv() { return case_pointer->objf_value(); }
   };
 
@@ -75,6 +80,7 @@ class PSO : public Optimizer {
    * @return
    */
   Case *generateRandomCase();
+
   /*!
    * @brief Looks through the memory of the swarm in order to find the best evaluated perturbation.
    * @param swarm
@@ -112,6 +118,7 @@ class PSO : public Optimizer {
    * @return
    */
   Particle find_best_in_particle_memory(int particle_num);
+
   /*!
    * @brief Performs a check on the swarm, to figure out whether it is stuck with particles that are too close to one
    * another.
@@ -119,9 +126,19 @@ class PSO : public Optimizer {
    */
   bool is_stagnant();
 
-  double stagnation_limit_; //!< The stagnation criterion, standard deviation of all particle positions.
-  vector<vector<Particle>> swarm_memory_; //!< The memory of the swarm at previous timesteps.
-  int number_of_particles_; //!< The number of particles in the swarm
+//!< Current swarm of particles
+  vector<Particle> swarm_;
+
+  //!< Memory of the swarm at previous timesteps.
+  vector<vector<Particle>> swarm_memory_;
+
+  //!< Number of particles in the swarm
+  int number_of_particles_;
+
+  //!< The stagnation criterion, std.dev of all particle positions.
+  double stagnation_limit_;
+
+
   double learning_factor_1_; //!< Learning factor 1 (c1)
   double learning_factor_2_; //!< Learning factor 2 (c2)
   double inertia_weight_; //!< Inertia weight
@@ -130,10 +147,17 @@ class PSO : public Optimizer {
   bool inertia_decay_; //!< Use inertia weight decay if true
   Eigen::VectorXd v_max_; //!< Max velocity of the particle
   int max_iterations_; //!< Max iterations
-  vector<Particle> swarm_; //!< Current swarm of particles
-  Particle current_best_particle_global_; //!< global best particle position
-  Eigen::VectorXd lower_bound_; //!< Lower bounds for the variables (used for randomly generating populations and mutation)
-  Eigen::VectorXd upper_bound_; //!< Upper bounds for the variables (used for randomly generating populations and mutation)
+
+  //!< global best particle position
+  Particle current_best_particle_global_;
+
+  //!< Lower bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd lower_bound_;
+
+  //!< Upper bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd upper_bound_;
   int n_vars_; //!< Number of variables in the problem.
 
 };
