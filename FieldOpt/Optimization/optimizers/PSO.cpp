@@ -50,6 +50,10 @@ PSO::PSO(Settings::Optimizer *settings,
   stagnation_limit_ = settings->parameters().stagnation_limit;
   learning_factor_1_ = settings->parameters().pso_learning_factor_1;
   learning_factor_2_ = settings->parameters().pso_learning_factor_2;
+  inertia_weight_ = settings->parameters().pso_inertia_weight;
+  inertia_weight_max_ = settings->parameters().pso_inertia_weight_max;
+  inertia_weight_min_ = settings->parameters().pso_inertia_weight_min;
+  inertia_decay_ = settings->parameters().pso_inertia_decay;
 
   if (constraint_handler_ != nullptr) { // All actual cases
     if (constraint_handler_->HasBoundaryConstraints()) {
@@ -193,21 +197,16 @@ PSO::Particle PSO::findBestInParticleMemory(int particle_num) {
 // └─┘  ┴    ─┴┘  ┴ ┴   ┴   └─┘   ╚╝   ╚═╝  ╩═╝  ╚═╝  ╚═╝  ╩   ╩    ╩
 vector<PSO::Particle> PSO::updateVelocity() {
   vector<Particle> new_swarm;
-
+  double inertia_multiple = inertia_decay_ ?
+                      inertia_weight_max_ - ((iteration_*1.0/max_iterations_) * (inertia_weight_max_-inertia_weight_min_)) : inertia_weight_;
   for(int i = 0; i < swarm_.size(); i++){
     Particle best_in_particle_memory = findBestInParticleMemory(i);
     new_swarm.push_back(swarm_[i]);
 
     for(int j = 0; j < n_vars_; j++){
-      double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1)
-        * (best_in_particle_memory.rea_vars(j) - swarm_[i].rea_vars(j));
-
-      double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1)
-        * (current_best_particle_global_.rea_vars(j) - swarm_[i].rea_vars(j));
-
-      new_swarm[i].rea_vars_velocity(j) =
-        swarm_[i].rea_vars_velocity(j) + velocity_1 + velocity_2;
-
+      double velocity_1 = learning_factor_1_ * random_double(gen_, 0, 1) * (best_in_particle_memory.rea_vars(j)-swarm_[i].rea_vars(j));
+      double velocity_2 = learning_factor_2_ * random_double(gen_, 0, 1) * (current_best_particle_global_.rea_vars(j)-swarm_[i].rea_vars(j));
+      new_swarm[i].rea_vars_velocity(j) = (inertia_multiple * swarm_[i].rea_vars_velocity(j)) + velocity_1 + velocity_2;
       if (new_swarm[i].rea_vars_velocity(j) < -v_max_(j)){
         new_swarm[i].rea_vars_velocity(j) = -v_max_(j);
       } else if(new_swarm[i].rea_vars_velocity(j) > v_max_(j)){
