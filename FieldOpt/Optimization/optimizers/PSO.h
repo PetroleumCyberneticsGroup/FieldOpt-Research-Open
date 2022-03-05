@@ -58,6 +58,7 @@ class PSO : public Optimizer {
 
  public:
   bool restart_ = false;
+  bool print_rstrt_ = true;
 
   struct Particle{
     Eigen::VectorXd rea_vars; //!< Real variables

@@ -287,22 +287,22 @@ Case *PSO::generateRandomCase() {
   return new_case;
 }
 
-// ╦  ┌─┐  ╔═╗  ╦  ╔╗╔  ╦  ╔═╗  ╦ ╦  ╔═╗  ╔╦╗
-// ║  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
-// ╩  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
+//  ┬  ┌─┐  ╔═╗  ╦  ╔╗╔  ╦  ╔═╗  ╦ ╦  ╔═╗  ╔╦╗
+//  │  └─┐  ╠╣   ║  ║║║  ║  ╚═╗  ╠═╣  ║╣    ║║
+//  ┴  └─┘  ╚    ╩  ╝╚╝  ╩  ╚═╝  ╩ ╩  ╚═╝  ═╩╝
 Optimizer::TerminationCondition PSO::IsFinished() {
   if (!case_handler_->CasesBeingEvaluated().empty())
     return NOT_FINISHED;
 
   if (isStagnant()) {
-    if (restart_) { printRestart(); }
+    if (print_rstrt_) { printRestart(); }
     return MIN_STEP_LENGTH_REACHED;
   }
 
   if (iteration_ < max_iterations_) {
     return NOT_FINISHED;
   } else {
-    if (restart_) { printRestart(); }
+    if (print_rstrt_) { printRestart(); }
 
     return MAX_EVALS_REACHED;
   }
@@ -382,7 +382,7 @@ void PSO::printRestart() {
   file.write(byteArray);
   file.close();
 
-  restart_ = false;
+  print_rstrt_ = false;
 }
 
 // ┌─┐  ┬─┐  ┬  ┌┐┌  ┌┬┐  ╔═╗  ╦ ╦  ╔═╗  ╦═╗  ╔╦╗
