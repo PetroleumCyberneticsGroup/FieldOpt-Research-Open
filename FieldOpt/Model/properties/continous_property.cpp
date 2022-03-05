@@ -80,11 +80,20 @@ void ContinuousProperty::scaleValue() {
   // value_bf_scale_ = value_;
   value_sc_ = 2*value_/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_;
   grad_sc_ = 2*grad_/bnds_b_mns_a_;
-
 }
 
 void ContinuousProperty::scaleGrad(double &grad) {
   grad = 2*grad/bnds_b_mns_a_;
+}
+
+// used in test_pso:
+void ContinuousProperty::scaleOtherValue(double &oval) {
+  oval = 2*oval/bnds_b_mns_a_ - bnds_a_pls_b_/bnds_b_mns_a_;
+}
+
+// used in test_pso:
+void ContinuousProperty::scaleBackOtherValue(double &oval) {
+  oval = (oval + bnds_a_pls_b_/bnds_b_mns_a_) * bnds_b_mns_a_ / 2;
 }
 
 void ContinuousProperty::UpdateValue() {

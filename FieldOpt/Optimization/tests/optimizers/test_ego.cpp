@@ -142,7 +142,7 @@ TEST_F(EGOTest, TestFunctionSpherical) {
     next_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
     ego->SubmitEvaluatedCase(next_case);
   }
-  auto best_case = ego->GetTentativeBestCase();
+  auto best_case = ego->GetTentBestCase();
 //    EXPECT_NEAR(0.0, best_case->objective_function_value(), 0.1);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.2);
 //    EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.2);

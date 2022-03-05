@@ -313,7 +313,7 @@ void CMA_ES::decompositionOfC() {
 
 Case *CMA_ES::generateCase(Eigen::VectorXd xmean, int index, bool first_iteration) {
   Case *new_case;
-  new_case = new Case(GetTentativeBestCase());
+  new_case = new Case(GetTentBestCase());
 
   Eigen::VectorXd xmeanNormal(n_vars_);
   Eigen::VectorXd erands_norm(n_vars_);

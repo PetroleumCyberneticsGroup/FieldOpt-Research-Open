@@ -29,6 +29,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include "optimizer.h"
 #include <time.h>
 #include <cmath>
+#include <QtCore/QJsonDocument>
 
 namespace Optimization {
 
@@ -39,7 +40,7 @@ using Constraints::ConstraintHandler;
 
 Optimizer::Optimizer(Settings::Optimizer *opt_settings,
                      Case *base_case,
-                     Model::Properties::VarPropContainer *variables,
+                     Model::Properties::VarPropContainer *vars,
                      Reservoir::Grid::Grid *grid,
                      Logger *logger,
                      CaseHandler *case_handler,
@@ -54,9 +55,11 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
       "must be set before initializing an Optimizer.");
   }
 
+  vars_ = vars;
   max_evaluations_ = opt_settings->parameters().max_evaluations;
   tentative_best_case_iteration_ = 0;
   seconds_spent_in_iterate_ = 0;
+  seto_ = opt_settings;
 
   // CONSTRAINT HANDLER ------------------------------------
   // Moved constraint handliner initialization to Model
@@ -88,18 +91,18 @@ Optimizer::Optimizer(Settings::Optimizer *opt_settings,
   // ITERATION ---------------------------------------------
   iteration_ = 0;
   evaluated_cases_ = 0;
-  mode_ = opt_settings->mode();
-  type_ = opt_settings->type();
+  mode_ = seto_->mode();
+  type_ = seto_->type();
 
   is_async_ = false;
   start_time_ = QDateTime::currentDateTime();
   logger_ = logger;
   enable_logging_ = true;
 
-  vp_ = opt_settings->verbParams();
+  vp_ = seto_->verbParams();
 
   // PENALIZATION ------------------------------------------
-  penalize_ = opt_settings->objective().use_penalty_function;
+  penalize_ = seto_->objective().use_penalty_function;
 
   if (penalize_) {
     if (!normalizer_ofv_.is_ready()) {
@@ -127,6 +130,46 @@ Settings::Optimizer::OptimizerType TR_DFO =
 Settings::Optimizer::OptimizerType DFTR =
   Settings::Optimizer::OptimizerType::DFTR;
 
+// ┌─┐  ┌─┐  ┌─┐  ┬    ┬ ┬  ╦═╗  ╔═╗  ╔═╗  ╔╦╗  ╔═╗  ╦═╗  ╔╦╗
+// ├─┤  ├─┘  ├─┘  │    └┬┘  ╠╦╝  ║╣   ╚═╗   ║   ╠═╣  ╠╦╝   ║
+// ┴ ┴  ┴    ┴    ┴─┘   ┴   ╩╚═  ╚═╝  ╚═╝   ╩   ╩ ╩  ╩╚═   ╩
+void Optimizer::applyRestart(Case* c, int nc) {
+  QJsonArray rjson0, rjson1;
+
+  // cout << "LastPoint: " << nc << endl;
+  rjson0 = seto_->restartJson()->value("LastPoints").toArray();
+  c->set_objf_value(-infd_);
+  for (const auto v : rjson0)
+    if(v.toObject().contains(QString::number(nc))) {
+      rjson1 = v.toObject().value(QString::number(nc)).toArray();
+    }
+
+  for (auto var : *vars_->GetContinuousVariables()) {
+    c->set_real_variable_value(var.first, infd_);
+
+    bool found_var = false;
+    for (const auto v : rjson1) {
+      if(v.toObject().keys()[0].contains(var.second->name())) {
+        auto oval = v.toObject().value("Var#" + var.second->name()).toDouble();
+        var.second->scaleOtherValue(oval);
+        c->set_real_variable_value(var.first, oval);
+        found_var = true; // one of the rstrt vars should match the current var
+        break;
+      }
+    }
+
+    if(!found_var)
+      ext_warn("input var.rstrt not found in current var.container", md_, cl_);
+  }
+
+  // double check all vars in var.container have been updated
+  for (auto var : vars_->GetContVarValues())
+    if (var.second == infd_) ext_warn("var.container not updated", md_, cl_);
+}
+
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╔═╗  ╔═╗  ╔═╗  ┌─┐  ┌─┐  ┬─┐  ╔═╗  ╦  ╦  ╔═╗  ╦
+// │ ┬  ├┤    │   ║    ╠═╣  ╚═╗  ║╣   ├┤   │ │  ├┬┘  ║╣   ╚╗╔╝  ╠═╣  ║
+// └─┘  └─┘   ┴   ╚═╝  ╩ ╩  ╚═╝  ╚═╝  └    └─┘  ┴└─  ╚═╝   ╚╝   ╩ ╩  ╩═╝
 Case *Optimizer::GetCaseForEvaluation() {
   if (case_handler_->QueuedCases().empty()) {
     time_t start, end;
@@ -151,6 +194,9 @@ Case *Optimizer::GetCaseForEvaluation() {
   return case_handler_->GetNextCaseForEvaluation();
 }
 
+// ┌─┐  ┬ ┬  ┌┐   ┌┬┐  ┬  ┌┬┐    ╔═╗  ╦  ╦  ╔═╗  ╦    ╔╦╗    ╔═╗  ╔═╗  ╔═╗  ╔═╗
+// └─┐  │ │  ├┴┐  │││  │   │     ║╣   ╚╗╔╝  ╠═╣  ║     ║║    ║    ╠═╣  ╚═╗  ║╣
+// └─┘  └─┘  └─┘  ┴ ┴  ┴   ┴     ╚═╝   ╚╝   ╩ ╩  ╩═╝  ═╩╝    ╚═╝  ╩ ╩  ╚═╝  ╚═╝
 void Optimizer::SubmitEvaluatedCase(Case *c) {
   if (penalize_ && iteration_ > 0) {
     double penalized_ofv = PenalizedOFV(c);
@@ -170,14 +216,23 @@ void Optimizer::SubmitEvaluatedCase(Case *c) {
   }
 }
 
-Case *Optimizer::GetTentativeBestCase() const {
+// ┌─┐  ┌─┐  ┌┬┐  ╔╦╗  ╔═╗  ╔╗╔  ╔╦╗  ┌┐   ┌─┐  ┌─┐  ┌─┐  ┌─┐  ┌─┐
+// │ ┬  ├┤    │    ║   ║╣   ║║║   ║   ├┴┐  ├─┤  └─┐  ├┤   │    └─┐
+// └─┘  └─┘   ┴    ╩   ╚═╝  ╝╚╝   ╩   └─┘  ┴ ┴  └─┘  └─┘  └─┘  └─┘
+Case *Optimizer::GetTentBestCase() const {
   return tentative_best_case_;
 }
 
+// ┬  ┌─┐  ╦  ╔╦╗  ╔═╗  ╦═╗  ╔═╗  ╦  ╦  ╔═╗  ╔╦╗  ╔═╗  ╔╗╔  ╔╦╗
+// │  └─┐  ║  ║║║  ╠═╝  ╠╦╝  ║ ║  ╚╗╔╝  ║╣   ║║║  ║╣   ║║║   ║
+// ┴  └─┘  ╩  ╩ ╩  ╩    ╩╚═  ╚═╝   ╚╝   ╚═╝  ╩ ╩  ╚═╝  ╝╚╝   ╩
 bool Optimizer::isImprovement(const Case *c) {
   return isBetter(c, tentative_best_case_);
 }
 
+// ┬  ┌─┐  ╔╗   ╔═╗  ╔╦╗  ╔╦╗  ╔═╗  ╦═╗
+// │  └─┐  ╠╩╗  ║╣    ║    ║   ║╣   ╠╦╝
+// ┴  └─┘  ╚═╝  ╚═╝   ╩    ╩   ╚═╝  ╩╚═
 bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   if (mode_ == Settings::Optimizer::OptimizerMode::Maximize) {
     if (c1->objf_value() > c2->objf_value())
@@ -190,6 +245,9 @@ bool Optimizer::isBetter(const Case *c1, const Case *c2) const {
   return false;
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗  ┌─┐  ┌┬┐  ┬─┐  ╦ ╦  ╔╦╗  ╦═╗
+// │ ┬  ├┤    │   ╚═╗   ║   ╠═╣   ║   └─┐   │   ├┬┘  ╠═╣   ║║  ╠╦╝
+// └─┘  └─┘   ┴   ╚═╝   ╩   ╩ ╩   ╩   └─┘   ┴   ┴└─  ╩ ╩  ═╩╝  ╩╚═
 QString Optimizer::GetStatusStringHeader() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
     .arg("Iteration")
@@ -200,6 +258,9 @@ QString Optimizer::GetStatusStringHeader() const {
     .arg("TentativeBestCaseOFValue");
 }
 
+// ┌─┐  ┌─┐  ┌┬┐  ╔═╗  ╔╦╗  ╔═╗  ╔╦╗  ┌─┐  ┌┬┐  ┬─┐
+// │ ┬  ├┤    │   ╚═╗   ║   ╠═╣   ║   └─┐   │   ├┬┘
+// └─┘  └─┘   ┴   ╚═╝   ╩   ╩ ╩   ╩   └─┘   ┴   ┴└─
 QString Optimizer::GetStatusString() const {
   return QString("%1,%2,%3,%4,%5,%6\n")
     .arg(iteration_)

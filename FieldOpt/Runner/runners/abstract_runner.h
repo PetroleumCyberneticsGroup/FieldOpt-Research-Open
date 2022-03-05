@@ -92,12 +92,16 @@ class AbstractRunner
 
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
-  Settings::Settings *settings_;
+  Model::Properties::VarPropContainer *vars_;
+
   RuntimeSettings *rts_;
   Optimization::Case *base_case_;
   Optimization::Case *optz_case_;
 
-  Optimization::Optimizer *optimizer_;
+  Settings::Settings *settings_;
+  Settings::Optimizer *seto_;
+
+  Optimization::Optimizer *optmzr_;
   Optimization::Objective::Objective *objf_;
   Simulation::Simulator *simulator_;
   Logger *logger_;
@@ -140,17 +144,19 @@ class AbstractRunner
    */
   int timeoutVal() const;
 
-  void InitializeSettings(const QString& output_subdirectory="");
-  void InitializeModel();
-  void InitializeSimulator();
-  void EvaluateBaseModel();
-  void InitializeObjectiveFunction();
-  void InitializeBaseCase();
+  void InitSettings(const QString& output_subdir="");
+  void InitModel();
+  void InitSimulator();
+  void EvalBaseModel();
+  void InitObjF();
+  void InitBaseCase();
   void InitializeOptimizer();
-  void InitializeBookkeeper();
+  void InitBookkeeper();
+
+  void ApplyRestartBaseCase();
 
   //!< Write the pre-run summary
-  void FinalizeInitialization(bool write_logs);
+  void FinalizeInit(bool write_logs);
 
   //!< Finalize the run, writing data to the summary log.
   void FinalizeRun(bool write_logs);
@@ -160,7 +166,7 @@ class AbstractRunner
    * @param output_subdir Optional subdir in
    * the output dir to write the logs in.
    */
-  void InitializeLogger(QString output_subdir="", bool write_logs=true);
+  void InitLogger(QString output_subdir="", bool write_logs=true);
 };
 
 }

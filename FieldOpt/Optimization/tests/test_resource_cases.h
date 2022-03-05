@@ -34,14 +34,20 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <QUuid>
 #include <QList>
 
+
+
 namespace TestResources {
 
 // =========================================================
 class TestResourceCases :
     public TestResources::TestResourceVariablePropertyContainer {
+    // public TestResources::TestResourceVariablePropertyContainer,
+    // public TestResources::TestResourceModel {
 
  public:
   TestResourceCases() {
+
+
 
     test_case_1_3i_ = new Optimization::Case(
         QList<QPair<QUuid, bool>>(),
@@ -74,15 +80,15 @@ class TestResourceCases :
 
     test_case_two_well_splines_ =
         new Optimization::Case(
-          varcont_two_spline_wells_->GetBinVarValues(),
-          varcont_two_spline_wells_->GetDiscVarValues(),
-          varcont_two_spline_wells_->GetContVarValues());
+            varcont_two_spline_wells_->GetBinVarValues(),
+            varcont_two_spline_wells_->GetDiscVarValues(),
+            varcont_two_spline_wells_->GetContVarValues());
 
     test_case_spline_ =
         new Optimization::Case(
-          varcont_prod_spline_->GetBinVarValues(),
-          varcont_prod_spline_->GetDiscVarValues(),
-          varcont_prod_spline_->GetContVarValues());
+            varcont_prod_spline_->GetBinVarValues(),
+            varcont_prod_spline_->GetDiscVarValues(),
+            varcont_prod_spline_->GetContVarValues());
 
     test_case_2r_ = new Optimization::Case(
         QList<QPair<QUuid, bool>>(),

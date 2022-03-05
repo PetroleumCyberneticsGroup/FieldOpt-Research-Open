@@ -2,7 +2,7 @@
 Copyright (C) 2015-2018
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2020 Mathias Bellout
+Modified 2017-2022 Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
@@ -43,6 +43,7 @@ class SettingsTest : public ::testing::Test {
 TEST_F(SettingsTest, ConstructorAndTestFileValidity) {
   Paths paths;
   paths.SetPath(Paths::DRIVER_FILE, driver_example_);
+  paths.SetPath(Paths::RESTART_FILE, olympr37_rstrt_file_);
   paths.SetPath(Paths::OUTPUT_DIR, directory_output_);
   paths.SetPath(Paths::SIM_DRIVER_FILE, deck_horzwel_);
   EXPECT_NO_THROW(auto settings = ::Settings::Settings(paths));

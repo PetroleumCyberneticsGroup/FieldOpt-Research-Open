@@ -59,6 +59,9 @@ class ContinuousProperty : public Property
   void scaleGrad(double &grad);
   void UpdateValue();
 
+  void scaleOtherValue(double &oval);
+  void scaleBackOtherValue(double &oval);
+
   void Add(double d); //!< Add d to the value of this property.
 
   /*!

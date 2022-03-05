@@ -299,8 +299,6 @@ class Case : public Loggable
 
   VectorXd GetVarVector(QList<QUuid> vars);
 
-  Eigen::VectorXd GetVarVector(QList<QUuid> vars);
-
   /*!
    * Sets real variable values in case from a given vector.
    *

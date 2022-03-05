@@ -107,6 +107,18 @@ class TestResourceSettings {
     settings_olympr37_opt_ = settings_olympr37_->optimizer();
     settings_olympr37_sim_ = settings_olympr37_->simulator();
     settings_olympr37_mod_ = settings_olympr37_->model();
+
+    // -----------------------------------------------------
+    paths_rstrt_ = runner_resources_->rts_olympr37_rstrt_->paths();
+    if(vp_.vSET >= 5) {
+      string im = "test: paths_olympr37_full_(";
+      im += paths_rstrt_.GetPath(Paths::DRIVER_FILE) + ")";
+      ext_warn(im, "", "TestResourceSettings", vp_.lnw, 1);
+    }
+    settings_rstrt_ = new Settings::Settings(paths_rstrt_);
+    settings_rstrt_opt_ = settings_rstrt_->optimizer();
+    settings_rstrt_sim_ = settings_rstrt_->simulator();
+    settings_rstrt_mod_ = settings_rstrt_->model();
   }
 
   TestResources::RunnerResources *runner_resources_;
@@ -131,6 +143,11 @@ class TestResourceSettings {
   Settings::Model *settings_olympr37_mod_;
   Paths paths_olympr37_;
 
+  Settings::Settings *settings_rstrt_;
+  Settings::Optimizer *settings_rstrt_opt_;
+  Settings::Simulator *settings_rstrt_sim_;
+  Settings::Model *settings_rstrt_mod_;
+  Paths paths_rstrt_;
 };
 
 }

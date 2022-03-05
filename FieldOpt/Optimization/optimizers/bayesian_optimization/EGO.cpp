@@ -218,7 +218,7 @@ void EGO::iterate() {
 
   start = QDateTime::currentDateTime();
   VectorXd new_position = af_opt_.Optimize(gp_, af_,
-    normalizer_ofv_.normalize(GetTentativeBestCase()->objf_value())
+    normalizer_ofv_.normalize(GetTentBestCase()->objf_value())
   );
   end = QDateTime::currentDateTime();
   time_af_opt_ += time_span_seconds(start, end);

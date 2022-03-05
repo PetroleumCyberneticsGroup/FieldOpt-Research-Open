@@ -162,7 +162,7 @@ vector<GeneticAlgorithm::Chromosome>
 }
 
 Case *GeneticAlgorithm::generateRandomCase() {
-  auto new_case = new Case(GetTentativeBestCase());
+  auto new_case = new Case(GetTentBestCase());
 
   Eigen::VectorXd erands(n_vars_);
   for (int i = 0; i < n_vars_; ++i) {

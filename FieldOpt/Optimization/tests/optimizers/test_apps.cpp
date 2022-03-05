@@ -132,7 +132,7 @@ TEST_F(APPSTest, TestFunctionSpherical) {
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
 
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
   EXPECT_NEAR(0.0, best_case->objf_value(), 0.01);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[0], 0.01);
   EXPECT_NEAR(0.0, best_case->GetRealVarVector()[1], 0.01);
@@ -173,7 +173,7 @@ TEST_F(APPSTest, TestFunctionRosenbrock) {
 
     minimizer->SubmitEvaluatedCase(random_evaluated_case);
   }
-  auto best_case = minimizer->GetTentativeBestCase();
+  auto best_case = minimizer->GetTentBestCase();
 
   // The Rosenbrock function is hard. We don't expect Compass search to find the optimum exactly.
   EXPECT_NEAR(0.0, best_case->objf_value(), 2);

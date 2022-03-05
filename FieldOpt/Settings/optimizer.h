@@ -519,6 +519,12 @@ class Optimizer
   int scaleVars() { return scale_vars_; }
   double ScaleObjf() { return scale_objf_; }
 
+  QJsonObject* restartJson() { return restart_json_; }
+  bool restart() { return restart_; }
+
+  double infd_n() { return -infd_; };
+  double infd_p() { return infd_; };
+
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
@@ -528,6 +534,9 @@ class Optimizer
 
   int scale_vars_ = 1;
   double scale_objf_ = 1.0;
+  QJsonObject *restart_json_ = nullptr;
+  bool restart_ = false;
+  double infd_ = std::numeric_limits<double>::infinity();
 
   string im_, wm_, em_;
   string md_ = "Settings";

@@ -2,7 +2,7 @@
 Copyright (C) 2015-2017
 Einar J.M. Baumann <einar.baumann@gmail.com>
 
-Modified 2017-2020 Mathias Bellout
+Modified 2017-2022 Mathias Bellout
 <chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
@@ -46,6 +46,11 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
     paths_.SetPath(Paths::OUTPUT_DIR,
                    vm["output-dir"].as<std::string>());
   } else { E("An output directory must be specified."); };
+
+  if (vm.count("restart-file")) {
+    paths_.SetPath(Paths::RESTART_FILE,
+                   vm["restart-file"].as<std::string>());
+  }
 
   if (vm.count("verbose")) verbosity_level_ = vm["verbose"].as<int>();
   else { verbosity_level_ = 0; }
@@ -187,8 +192,8 @@ RuntimeSettings::RuntimeSettings(int argc, const char *argv[]) {
 QString RuntimeSettings::
 wellSplineCoordinateString(const QPair<QVector<double>, QVector<double>> spline) const {
   return QString("(%1, %2, %3) - (%4, %5, %6)")
-    .arg(spline.first[0]).arg(spline.first[1]).arg(spline.first[2])
-    .arg(spline.second[0]).arg(spline.second[1]).arg(spline.second[2]);
+      .arg(spline.first[0]).arg(spline.first[1]).arg(spline.first[2])
+      .arg(spline.second[0]).arg(spline.second[1]).arg(spline.second[2]);
 }
 
 QString RuntimeSettings::runnerTypeString() const {
@@ -209,46 +214,46 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
   int verbosity_level;
   po::options_description desc("FieldOpt options");
   desc.add_options()
-        ("help,h", "print help message")
-        ("verbose,v", po::value<int>(&verbosity_level)->default_value(0),
-         "verbosity level for runtime console logging")
-        ("sim-delay", po::value<int>(&simulation_delay_)->default_value(0),
-         "Minimum delay between each simulation during initialization.")
-        ("force,f", po::value<int>()->implicit_value(0),
-         "overwrite existing output files")
-        ("max-parallel-simulations,m", po::value<int>(&max_par_sims)->default_value(0),
-         "start max <arg> parallel simulations")
-        ("threads-per-simulation,n", po::value<int>(&thr_per_sim)->default_value(1),
-         "number of threads allocated to each simulation")
-        ("runner-type,r", po::value<std::string>(),
-         "type of runner (serial/oneoff/mpisync)")
-        ("grid-path,g", po::value<std::string>(),
-         "path to model grid file (e.g. *.GRID)")
-        ("sim-exec-path,e", po::value<std::string>(),
-         "path to script that executes the reservoir simulation")
-        ("sim-aux", po::value<std::string>(),
-         "path to directory with additional auxilary simulation files")
-        ("sim-inset", po::value<std::string>(),
-         "path to simulator schedule inset file")
-        ("fieldopt-build-dir,b", po::value<std::string>(),
-         "path to FieldOpt build directory")
-        ("ensemble-path", po::value<std::string>(),
-         "Path to ensemble description file")
-        ("traj-dir", po::value<std::string>(),
-         "Path directory containing trajectory files for import")
-        ("sim-drv-path,s", po::value<std::string>(),
-         "path to simulator driver file (e.g. *.DATA)")
-        ("simulation-timeout,t", po::value<int>(&simulation_timeout)->default_value(0),
-         "Simulations will be terminated after running for t*(lowest_recorded_time)")
-        ("well-prod-points,p", po::value<std::vector<double>>()->multitoken(),
-         "Production well position coordinates")
-        ("well-inj-points,i", po::value<std::vector<double>>()->multitoken(),
-         "Injection well position coordinates")
-        ("input-file", po::value<std::string>(),
-         "path to FieldOpt driver file")
-        ("output-dir", po::value<std::string>(),
-         "path to folder in which to store the results.")
-    ;
+      ("help,h", "print help message")
+      ("verbose,v", po::value<int>(&verbosity_level)->default_value(0),
+       "verbosity level for runtime console logging")
+      ("sim-delay", po::value<int>(&simulation_delay_)->default_value(0),
+       "Minimum delay between each simulation during initialization.")
+      ("force,f", po::value<int>()->implicit_value(0),
+       "overwrite existing output files")
+      ("max-parallel-simulations,m", po::value<int>(&max_par_sims)->default_value(0),
+       "start max <arg> parallel simulations")
+      ("threads-per-simulation,n", po::value<int>(&thr_per_sim)->default_value(1),
+       "number of threads allocated to each simulation")
+      ("runner-type,r", po::value<std::string>(),
+       "type of runner (serial/oneoff/mpisync)")
+      ("grid-path,g", po::value<std::string>(),
+       "path to model grid file (e.g. *.GRID)")
+      ("sim-exec-path,e", po::value<std::string>(),
+       "path to script that executes the reservoir sim")
+      ("sim-aux", po::value<std::string>(),
+       "path to directory with additional auxilary sim files")
+      ("sim-inset", po::value<std::string>(),
+       "path to simulator schedule inset file")
+      ("fieldopt-build-dir,b", po::value<std::string>(),
+       "path to FieldOpt build directory")
+      ("ensemble-path", po::value<std::string>(),
+       "Path to ensemble description file")
+      ("traj-dir", po::value<std::string>(),
+       "Path directory containing trajectory files for import")
+      ("sim-drv-path,s", po::value<std::string>(),
+       "path to simulator driver file (e.g. *.DATA)")
+      ("simulation-timeout,t", po::value<int>(&simulation_timeout)->default_value(0),
+       "Simulations will be terminated after running for t*(lowest_recorded_time)")
+      ("well-prod-points,p", po::value<std::vector<double>>()->multitoken(),
+       "Production well position coordinates")
+      ("well-inj-points,i", po::value<std::vector<double>>()->multitoken(),
+       "Injection well position coordinates")
+      ("input-file", po::value<std::string>(), "path to FO driver file")
+      ("output-dir", po::value<std::string>(), "path to result folder .")
+      ("restart-file,w", po::value<std::string>(), "restart file (JSON).")
+      ;
+
   // Positional arguments
   po::positional_options_description p;
   p.add("input-file", 1);
@@ -261,8 +266,8 @@ po::variables_map RuntimeSettings::createVariablesMap(int argc, const char **arg
 
   // If called with --help or -h flag:
   if (vm.count("help")
-    || !vm.count("input-file")
-    || !vm.count("output-dir")) { // Print help if --help present or input file/output dir not present
+      || !vm.count("input-file")
+      || !vm.count("output-dir")) { // Print help if --help present or input file/output dir not present
     cout << "Usage: ./FieldOpt input-file output-dir [options]" << endl;
     cout << desc << endl;
     exit(EXIT_SUCCESS);
