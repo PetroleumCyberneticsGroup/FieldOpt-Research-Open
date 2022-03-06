@@ -1,21 +1,26 @@
-/******************************************************************************
-Copyright (C) 2015-2017 Brage S. Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Brage S. Kristoffersen <brage_sk@hotmail.com>
+
+Modified 2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
 This file is part of the FieldOpt project.
 
-FieldOpt is free software: you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
 FieldOpt is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_NPV_H
 #define FIELDOPT_NPV_H
@@ -31,19 +36,22 @@ class NPV : public Objective {
  public:
 /*!
  * \brief NPV
- * \param settings The Settings object from which to create the objective.
- * \param results The Results object from which to get property values.
+ * \param settings Settings object from which to create the objective.
+ * \param results Results object from which to get property values.
  */
   NPV(Settings::Optimizer *settings,
       Simulation::Results::Results *results,
       Model::Model *model);
 
-  double value() const;
+  double value() const override;
+  double value(bool base_case) override { return -1.0; };
+  VectorXd grad() override { return VectorXd::Zero(0); };
+  double fval() override { return -1.0; };
 
  private:
 /*!
- * \brief The Component class is used for internal representation of the components of
- * NPV.
+ * \brief The Component class is used for internal
+ * representation of the components of NPV.
  */
   struct Component {
    public:
@@ -54,18 +62,25 @@ class NPV : public Objective {
     std::string well;
     double resolveValue(Simulation::Results::Results *results);
     double resolveValueDiscount(Simulation::Results::Results *results, double time_step);
-    double yearlyToMonthly(double discount_factor);
+    static double yearlyToMonthly(double discount_factor);
     std::string interval;
     double discount;
     bool usediscountfactor;
     bool is_json_component;
   };
 
-  QList<Component *> *components_; //!< List of gamma, k pairs.
-  Simulation::Results::Results *results_;  //!< Object providing access to simulator results.
+  //!< List of gamma, k pairs.
+  QList<Component *> *components_;
+
+  //!< Object providing access to simulator results.
+  Simulation::Results::Results *results_;
   Settings::Optimizer *settings_;
   Model::Model::Economy *well_economy_;
+
+  string cl_ = "NPV";
 };
+
+
 
 }
 }

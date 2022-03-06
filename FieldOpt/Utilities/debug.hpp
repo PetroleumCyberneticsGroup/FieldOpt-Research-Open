@@ -1,12 +1,30 @@
-//
-// Created by bellout on 2/21/18.
-//
+/***********************************************************
+Created by bellout on 2/21/18.
+Copyright (C) 2017-2019 Mathias Bellout
+<chakibbb-pcg@gmail.com>
 
-// ---------------------------------------------------------------
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
+// ---------------------------------------------------------
 #ifndef FIELDOPT_DEBUG_HPP
 #define FIELDOPT_DEBUG_HPP
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 // STD
 #include <iostream>
 #include <iomanip>
@@ -16,25 +34,25 @@
 #include <string>
 #include <algorithm>
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 // FIELDOPT
 #include <Settings/model.h>
 #include <Utilities/colors.hpp>
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 // WIC
 #include "WellIndexCalculation/intersected_cell.h"
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 // QT
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 // RIXX
 #include "WellIndexCalculation/resinxx/rixx_core_geom/cvfVector3.h"
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 using std::vector;
 using std::map;
 using std::cout;
@@ -119,7 +137,7 @@ inline static string fstr(string ostr,
 /*!
  * \brief
  */
-inline string verbstr(const vector<int> vvec,
+inline void verbstr(const vector<int> vvec,
                       int idx = -1,
                       int wdth = 29) {
 
@@ -130,24 +148,24 @@ inline string verbstr(const vector<int> vvec,
   cout << endl;
 }
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 /*!
  * \brief Get time stamp
  */
 inline string get_time_stamp() {
 
-  // -------------------------------------------------------------
+  // -------------------------------------------------------
   time_t ltime;
   struct tm *Tm;
   char ts_char [50];
   string ts_str;
 
-  // -------------------------------------------------------------
+  // -------------------------------------------------------
   ltime = time(nullptr); /* get current cal time */
   sprintf(ts_char, "%s", asctime( localtime(&ltime) ) );
   ts_str = string(ts_char);
 
-  // -------------------------------------------------------------
+  // -------------------------------------------------------
   // Remove newline character
   ts_str.erase(remove(ts_str.begin(), ts_str.end(), '\n'),
                ts_str.end());
@@ -155,7 +173,7 @@ inline string get_time_stamp() {
   return ts_str;
 }
 
-// -----------------------------------------------------------------
+// ---------------------------------------------------------
 void inline print_dbg_msg_wellspline_wic_coords(
     string fstr, string fn, Settings::Model::Well well_settings,
     vector<IntersectedCell> block_data, int l, int lt) {
@@ -431,7 +449,7 @@ void inline print_dbg_msg_wellspline_wic_coords(
 
 }
 
-// -----------------------------------------------------------------
+// -----------------------------------------------------------
 void inline print_dbg_msg_snoptsolver(string fstr, // function str
                                       string cstr, // comment str
                                       double t, int l, int lt,
@@ -463,7 +481,7 @@ void inline print_dbg_msg_snoptsolver(string fstr, // function str
 
 }
 
-// -----------------------------------------------------------------
+// -----------------------------------------------------------
 void inline print_dbg_msg_wellspline(string fstr, // function str
                                      string cstr, // comment str
                                      double t, int l, int lt) {
@@ -491,7 +509,7 @@ void inline print_dbg_msg_wellspline(string fstr, // function str
 
 }
 
-// -----------------------------------------------------------------
+// -----------------------------------------------------------
 void inline print_dbg_msg_wic_ri(string fstr, // function str
                                  string cstr, // comment str
                                  double t, // time var
@@ -527,7 +545,7 @@ void inline print_dbg_msg_wic_ri(string fstr, // function str
 
 }
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 /*!
  * \brief Prints debug messages template
  * @param debug_msg
@@ -596,7 +614,7 @@ inline void print_dbg_template(bool dbg_mode, bool append,
   }
 };
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 /*!
  * \brief Prints debug messages for optimizer system
  * @param debug_msg
@@ -613,7 +631,7 @@ inline void print_ri_hck(
                      dbg_func, dbg_file, dbg_msgs);
 };
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 inline string show_Ved3d(string msg_in = "",
                          cvf::Vec3d dbg_vec = cvf::Vec3d::ZERO,
                          bool format = true) {
@@ -640,7 +658,7 @@ inline string show_Ved3d(string msg_in = "",
 
 }
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 inline void print_ri_hck_vec3d(
     string dbg_func, string dbg_file, string dbg_msgs = "",
     cvf::Vec3d dbg_vec = cvf::Vec3d::ZERO,
@@ -655,7 +673,7 @@ inline void print_ri_hck_vec3d(
                      dbg_func, dbg_file, dbg_msgs);
 };
 
-// ---------------------------------------------------------------
+// ---------------------------------------------------------
 inline void print_ri_hck_vec3f(
     string dbg_func, string dbg_file, string dbg_msgs = "",
     cvf::Vec3f dbg_vec = cvf::Vec3f::ZERO,

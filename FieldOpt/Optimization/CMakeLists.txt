@@ -3,52 +3,87 @@ project(optimization)
 
 include(Sources.cmake)
 
-add_library(optimization STATIC ${OPTIMIZATION_HEADERS} ${OPTIMIZATION_SOURCES})
+# Target lib ===============================================
+add_library(optimization STATIC
+  ${OPTIMIZATION_HEADERS}
+  ${OPTIMIZATION_SOURCES})
+
 add_library(fieldopt::optimization ALIAS ${PROJECT_NAME})
 
-target_link_libraries(optimization
-        PUBLIC fieldopt::model
-        PUBLIC fieldopt::simulation
-        PUBLIC fieldopt::constraintmath
-		PUBLIC fieldopt::reservoir
-        PUBLIC fieldopt::runner
-		PUBLIC ${gp}
-        Qt5::Core
-		PUBLIC ${Boost_LIBRARIES})
+if(snopt MATCHES NOTFOUND)
+  target_link_libraries(optimization
+    PUBLIC fieldopt::model
+    PUBLIC fieldopt::simulation
+    PUBLIC fieldopt::constraintmath
+    PUBLIC fieldopt::reservoir
+    PUBLIC fieldopt::runner
+    PUBLIC ${gp}
+    Qt5::Core
+    PUBLIC ${Boost_LIBRARIES})
+else()
+  target_link_libraries(optimization
+    PUBLIC fieldopt::model
+    PUBLIC fieldopt::simulation
+    PUBLIC fieldopt::constraintmath
+    PUBLIC fieldopt::reservoir
+    PUBLIC fieldopt::runner
+    PUBLIC ${gp}
+    PUBLIC ${snopt}
+    Qt5::Core
+    PUBLIC ${Boost_LIBRARIES})
+endif()
 
 target_include_directories(optimization PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
 add_compile_options(-std=c++11)
 
+# Test exec ================================================
 if (BUILD_TESTING)
-	# Unit tests
-	add_executable(test_optimization ${OPTIMIZATION_TESTS})
+  # Unit tests
+  add_executable(test_optimization ${OPTIMIZATION_TESTS})
 
-	target_link_libraries(test_optimization
-			PUBLIC fieldopt::model
-			PUBLIC fieldopt::simulation
-			PUBLIC fieldopt::constraintmath
-			PUBLIC fieldopt::reservoir
-			PUBLIC fieldopt::runner
-			fieldopt::optimization
-			${gtest}
-			${gtest_main}
-			${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(test_optimization
+    PUBLIC fieldopt::optimization
+    PUBLIC fieldopt::settings
+    PUBLIC fieldopt::runner
+    ${gtest}
+    ${gtest_main}
+    ${CMAKE_THREAD_LIBS_INIT})
 
-	target_include_directories(test_optimization PUBLIC
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>)
+  target_include_directories(test_optimization PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/constraints>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/optimizers>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/solvers>)
 
-	add_test(NAME test_optimization COMMAND $<TARGET_FILE:test_optimization>)
+  add_test(NAME test_optimization
+    COMMAND $<TARGET_FILE:test_optimization>)
+
+  #  -------------------------------------------------------
+  add_executable(test_objective ${OBJECTIVE_TESTS})
+
+  target_link_libraries(test_objective
+    PUBLIC fieldopt::optimization
+    PUBLIC fieldopt::runner
+    ${gtest}
+    ${gtest_main}
+    ${CMAKE_THREAD_LIBS_INIT})
+
+  target_include_directories(test_objective PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tests>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/objective>)
+
+  add_test(NAME test_objective
+    COMMAND $<TARGET_FILE:test_objective>)
 endif()
 
-install( TARGETS optimization
-		RUNTIME DESTINATION bin
-		LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib/static
-		)
+# Install ==================================================
+install(TARGETS optimization
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib/static)

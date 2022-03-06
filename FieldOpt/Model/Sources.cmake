@@ -11,7 +11,7 @@ SET(MODEL_HEADERS
 	properties/discrete_property.h
 	properties/property.h
 	properties/property_exceptions.h
-	properties/variable_property_container.h
+	properties/var_prop_container.h
 	wells/compartment.h
 	wells/control.h
 	wells/segment.h
@@ -26,10 +26,10 @@ SET(MODEL_HEADERS
 	wells/wellbore/trajectory.h
 	wells/wellbore/wellblock.h
 	wells/wellbore/wellspline.h
-    wells/wellbore/polar_spline.h
+	wells/wellbore/polar_spline.h
 	drilling/drilling.h
-	drilling/drilling_schedule.h
-)
+	drilling/drilling_schedule.h	
+	)
 
 SET(MODEL_SOURCES
 	cpp-spline/src/BSpline.cpp
@@ -43,7 +43,7 @@ SET(MODEL_SOURCES
 	properties/continous_property.cpp
 	properties/discrete_property.cpp
 	properties/property.cpp
-	properties/variable_property_container.cpp
+	properties/var_prop_container.cpp
 	wells/compartment.cpp
 	wells/control.cpp
 	wells/segment.cpp
@@ -60,7 +60,7 @@ SET(MODEL_SOURCES
 	wells/wellbore/polar_spline.cpp
 	drilling/drilling.cpp
 	drilling/drilling_schedule.cpp
-)
+	)
 
 SET(MODEL_TESTS
 	tests/test_resource_model.h

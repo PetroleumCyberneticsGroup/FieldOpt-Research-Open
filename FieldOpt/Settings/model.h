@@ -1,27 +1,27 @@
-/******************************************************************************
- *
- * model.h
- *
- * Created: 28.09.2015 2015 by einar
- *
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2015 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Created: 28.09.2015 2015 by einar
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 
 #ifndef SETTINGS_MODEL_H
@@ -34,10 +34,8 @@
 #include "trajectory_importer.h"
 
 #include <QString>
-#include <QJsonArray>
 #include <QList>
-#include <QMap>
-
+#include <QJsonArray>
 #include <assert.h>
 
 namespace Settings {
@@ -45,28 +43,45 @@ namespace Settings {
 class DeckParser;
 
 /*!
- * \brief The Model class contains model-specific settings. Model settings objects may _only_ be
- * created by the Settings class. They are created when reading a JSON-formatted "driver file".
+ * \brief The Model class contains model-specific settings. Model
+ * settings objects may _only_ be created by the Settings class.
+ * They are created when reading a JSON-formatted "driver file".
  *
- * \todo Add more control types, e.g. multiple rate types (liquid rate, oil rate, gas rate, etc.) for producers.
+ * \todo Add more control types, e.g. multiple rate types
+ * (liquid rate, oil rate, gas rate, etc.) for producers.
  */
 class Model
 {
   friend class Settings;
 
  public:
-  Model(QJsonObject json_model, Paths &paths); // This should only be accessed externally for testing purposes.
+  // This should only be accessed externally for testing purposes.
+  Model(QJsonObject json_model, Paths &paths, VerbParams vp);
+
   enum WellType : int { Injector=11, Producer=12, UNKNOWN_TYPE=19 };
-  enum ControlMode : int { BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24, RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
+  enum ControlMode : int {
+    BHPControl=21, LRATControl=22, ORATControl=23, WRATControl=24,
+    RESVControl=25, GRATControl=26, UNKNOWN_CONTROL=29 };
+
   enum InjectionType : int { WaterInjection=31, GasInjection=32 };
-  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42, PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
-  enum WellCompletionType : int { Perforation=61, ICV=62, Packer=63, Tubing=64, Annulus=65 };
+
+  enum WellDefinitionType : int { WellBlocks=41, WellSpline=42,
+    PseudoContVertical2D=43, PolarSpline=45, UNDEFINED=44 };
+
+  enum WellCompletionType : int { Perforation=61, ICV=62,
+    Packer=63, Tubing=64, Annulus=65 };
+
   enum WellState : int { WellOpen=71, WellShut=72 };
-  enum PreferredPhase : int { Oil=81, Water=82, Gas=83, Liquid=84, UNKNOWN_PHASE=89 };
+
+  enum PreferredPhase : int { Oil=81, Water=82, Gas=83,
+    Liquid=84, UNKNOWN_PHASE=89 };
+
   enum Direction : int { X=91, Y=92, Z=93 };
 
   struct Well {
     Well(){}
+
     struct Completion {
       Completion(){}
       WellCompletionType type;               //!< Which type of completion this is (Perforation/ICD)
@@ -79,26 +94,36 @@ class Model
       double placement               = -1.0; //!< Placement as a fraction of the well length.
       double true_vertical_depth     = -1.0; //!< True vertical depth for the location of the completion.
       int time_step                  = -1;   //!< Time step for completion to activate/be modified.
-      int segment_index              = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
-      std::string device_name        = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
-      std::vector<std::string> device_names; //< List of device names that have common settings.
-      std::vector<int> segment_indexes; //!< List of segment indexes matching the device_names list.
-      std::vector<double> valve_sizes; //!< List of valve size for nozzle ICDs.
-      double min_valve_size         = 0.0;    //!< Minimum valve size (needed for simulator input)
-      double max_valve_size         = 7.854E-3; //!< Maximum valve size (needed for simulator input)
+      int icd_segment                = -1;    //!< Segment index for the ICD in the deck (used when we don't specify the trajectory)
+      std::string icd_name           = "UNSET"; //!< Device name. Must be defined when doing ICV optimization with IX.
+      std::vector<std::string> icd_names; //< List of device names that have common settings.
+      std::vector<int> icd_segments; //!< List of segment indexes matching the icd_names list.
+      double icd_segment_length      = -1.0; // Set length of ICD equal to trajectory through 1st block
+      double min_valve_size          = 0.0;    //!< Minimum valve size (needed for simulator input)
+      double max_valve_size          = 7.854E-3; //!< Maximum valve size (needed for simulator input)
       bool is_variable               = false; //!< True if all viable properties are variable. Otherwise false.
       bool variable_placement        = false; //!< Whether the placement of a comp. along the trajectory should be variable.
       bool variable_strength         = false; //!< Whether the strength of a comp. (e.g. ICD/perforation) should be variable.
       QString name;
+
+      double friction_drop  = 0.0;
+      double pipe_diameter  = 0.0;
+      double abs_roughness  = 0.0;
+      double pipe_xsec_area = 0.0;
+      std::string device_stat = "open";
+      double max_xsec_area = 0.0;
+
+      VerbParams verb_params_;
     };
 
     /*!
      * @brief A grouping of ICVs that make up a compartment
      */
     struct ICVGroup : Completion {
-        std::string icv_group_name;
-        std::vector<std::string> icvs;
+      std::string icv_group_name;
+      std::vector<std::string> icvs;
     };
+
     struct WellBlock {
       WellBlock(){}
       bool is_variable;
@@ -107,24 +132,28 @@ class Model
       QString name;
       int i, j, k;
     };
+
     struct SplinePoint {
       SplinePoint(){}
       QString name;
       double x, y, z;
       bool is_variable = false;
     };
+
     struct PolarSpline{
-        SplinePoint midpoint;
-        double azimuth=0;
-        double length=0;
-        double elevation=90;
-        QString name="";
-        bool is_variable=false;
+      SplinePoint midpoint;
+      double azimuth=0;
+      double length=0;
+      double elevation=90;
+      QString name="";
+      bool is_variable=false;
     };
+
     struct PseudoContPosition {
       int i, j;
       bool is_variable = false;
     };
+
     struct ControlEntry {
       int time_step;                                 //!< The time step this control is to be applied at.
       WellState state;                               //!< Whether the well is open or shut.
@@ -140,7 +169,11 @@ class Model
       QString name;
       bool isDifferent(ControlEntry other);
       std::string toString();
+
+      double tstep_ref_;
+
     };
+
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
     QString name;                               //!< The name to be used for the well.
     WellType type;                              //!< The well type, i.e. producer or injector.
@@ -159,15 +192,23 @@ class Model
     bool is_variable_spline;                    //!< Whether the whole spline should be variable.
     PseudoContPosition pseudo_cont_position;    //!< Initial position when using pseudo-continous positioning variables.
     QList<ControlEntry> controls;               //!< List of well controls
+
     bool use_segmented_model = false;           //!< Whether the segmented well model should be used.
     Completion seg_tubing;                      //!< Tubing settings when the segmented well model is used.
     Completion seg_annulus;                     //!< Annulus settings when the segmented well model is used.
     Completion seg_compartment_params;          //!< Parameters to be used for automatically generated ICDs.
     std::vector<Completion> completions;        //!< List of completions. Used when using neither segmentation or trajectories.
     int seg_n_compartments = 0;                 //!< Number of packer-delimited compartments with ICDs to use.
+
+    string wseg_structure;
+
     std::vector<TrajectoryImporter::ImportedWellBlock> imported_wellblocks_; //!< List of imported well blocks.
-    std::string toString();
-    std::vector<ICVGroup> icv_compartments; //!< Grouping of ICVs into named comparments.
+    std::string toString(std::string sp="\n");
+    std::vector<ICVGroup> icv_compartments;     //!< Grouping of ICVs into named comparments.
+
+    VerbParams verb_params_;
+    void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
+    VerbParams verbParams() const { return verb_params_; };
   };
 
   struct Drilling {
@@ -218,19 +259,34 @@ class Model
   QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
   Drilling drilling() const { return drilling_;} //!< Get the drilling settings in the model
   void readDrilling(QJsonObject json_drilling_workflow);
+  
+  //!< Get struct containing settings for the well(s) in the model.
+  QList<Well> wells() const { return wells_; }
+
+  //!< Get control times for schedule
+  QList<double> control_times() const { return control_times_; }
+  QList<int> start_date() const { return start_date_; }
+
+  VerbParams vp_;
+  VerbParams verbParams() const { return vp_; };
 
  private:
   QList<Well> wells_;
-  QList<int> control_times_;
+  QList<double> control_times_;
   Drilling drilling_;
+  QList<int> start_date_;
+  int tstep_refinement_;
+
+  string md_ = "Settings";
+  string cl_ = "Model";
+  string im_, em_, wm_;
 
   void readReservoir(QJsonObject json_reservoir, Paths &paths);
   Well readSingleWell(QJsonObject json_well);
+  // void setImportedWellDefaults(QJsonObject json_model);
+  // void parseImportedWellOverrides(QJsonArray json_wells);
 
-  void setImportedWellDefaults(QJsonObject json_model);
-  void parseImportedWellOverrides(QJsonArray json_wells);
-
-  void parseSegmentation(QJsonObject json_seg, Well &well);
+  void parseSegmentation(const QJsonObject& json_seg, Well &well);
   void parseSegmentTubing(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentAnnulus(const QJsonObject &json_seg, Well &well) const;
   void parseSegmentCompartments(const QJsonObject &json_seg, Well &well) const;
@@ -239,6 +295,10 @@ class Model
   void parseICVCompartmentalization(QJsonArray &icv_compartmentalization, Well &well);
 
   bool controlTimeIsDeclared(int time) const;
+
+  void printModelParams() {
+
+  }
 
 };
 

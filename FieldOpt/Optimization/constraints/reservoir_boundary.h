@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_RESERVOIRBOUNDARY_H
 #define FIELDOPT_RESERVOIRBOUNDARY_H
@@ -28,7 +33,7 @@ namespace Optimization {
 namespace Constraints {
 
 /*!
- * \brief The ReservoirBoundary class deals with
+ * \brief The ResBoundary class deals with
  * imposing and checking reservoir boundary constraints
  *
  *  The class takes a boundary as input in the form of
@@ -41,16 +46,17 @@ namespace Constraints {
  *  the box constraints (TASK A), then figure out way
  *  boundary constraints for non-box (parallelogram)
  *  shapes (TASK B); finally, define this constraint
- *  (out of ReservoirBoundary) as a standalone
+ *  (out of ResBoundary) as a standalone
  *  constraint (call it Box) (TASK C)
  *
  *  Steps for (A):
  *  1. find the edge cells of the box [x] + unit test [],
  *
- *  2. get the corner points for each of the cells [] + unit test [],
+ *  2. get corner points for each of the cells [] + unit test [],
  *
- *  3. find the corner points of the entire box (assuming the box is a
- *  parallelogram, which may not be true for the top and bottom planes
+ *  3. find the corner points of the entire box (assuming
+ *  the box is a parallelogram, which may not be true for
+ *  the top and bottom planes
  *  -> figure out how to deal with this later) [] + unit test [],
  *
  *  4. print the box data to log for external visualization
@@ -62,13 +68,13 @@ namespace Constraints {
  *
  *  Steps for (B):
  */
-class ReservoirBoundary : public Constraint, WellSplineConstraint
+class ResBoundary : public Constraint, WellSplineConstraint
 {
  public:
-  ReservoirBoundary(const Settings::Optimizer::Constraint &settings,
-                    Model::Properties::VariablePropertyContainer *variables,
-                    Reservoir::Grid::Grid *grid);
-  string name() override { return "ReservoirBoundary"; }
+  ResBoundary(SO& seto, VPC *vars,
+              Reservoir::Grid::Grid *grid, SV vp);
+
+  string name() override { return "ResBoundary"; }
     // Constraint interface
  public:
   bool CaseSatisfiesConstraint(Case *c);

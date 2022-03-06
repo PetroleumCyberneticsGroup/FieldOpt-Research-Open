@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 1/10/19.
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
+Created by einar on 1/10/19.
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_VFSA_H
 #define FIELDOPT_VFSA_H
 
@@ -29,21 +35,27 @@ namespace Optimization {
 namespace Optimizers {
 
 /*!
- * @brief This class implements the Very Fast Simulated Annealing (VFSA) optimization algorithm.
- *
- * The implementation is based on the descriptions in
- *      "Very fast simulated re-annealing", L. Ingber, Mathematical and Computer Modelling (1989)
- * and
- *      "FVSARES---a very fast simulated annealing FORTRAN program for interpretation of 1-D DC resistivity
- *      sounding data from various electrode arrays", Shashi Prakash Sharma, Computers & Geosciences (2012).
- *
- * Note that this algorithm requires boundary constraints to be specified.
- */
+* @brief This class implements the Very Fast Simulated
+* Annealing (VFSA) optimization algorithm.
+*
+* The implementation is based on the descriptions in "Very
+* fast simulated re-annealing", L. Ingber, Mathematical and
+* Computer Modelling (1989)
+*
+* and
+* "FVSARES---a very fast simulated annealing FORTRAN program
+* for interpretation of 1-D DC resistivity sounding data from
+* various electrode arrays", Shashi Prakash Sharma, Computers
+* & Geosciences (2012).
+*
+* Note that this algorithm requires boundary constraints to
+* be specified.
+*/
 class VFSA : public Optimizer {
  public:
   VFSA(Settings::Optimizer *settings,
        Case *base_case,
-       Model::Properties::VariablePropertyContainer *variables,
+       Model::Properties::VarPropContainer *variables,
        Reservoir::Grid::Grid *grid,
        Logger *logger,
        CaseHandler *case_handler=0,

@@ -187,7 +187,7 @@ namespace {
         auto reader = Hdf5SummaryReader(file_path);
         double expected_values[8] = {0.0, 2740, 11103, 58555, 93933, 120550, 170314, 178150};
         for (int t = 0; t < reader.number_of_tsteps(); ++t) {
-            EXPECT_NEAR(expected_values[t], reader.field_cumulative_oil_production_sc()[t], 1.0);
+            EXPECT_NEAR(expected_values[t], reader.field_oil_prod_total_sc()[t], 1.0);
         }
     }
 

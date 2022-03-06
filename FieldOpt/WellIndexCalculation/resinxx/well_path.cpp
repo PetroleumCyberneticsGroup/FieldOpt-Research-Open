@@ -312,7 +312,7 @@ double WellPath::peacemanRadius(double permeabilityNormalDirection1,
 
 // -----------------------------------------------------------------
 CellDir
-WellPath::calculateDirectionInCell(WellPathCellIntersectionInfo cell,
+WellPath::calculateDirectionInCell(WellPathCellIntersectionInfo &cell,
                                    IntersectedCell &icell) {
 
   // -------------------------------------------------------------
@@ -548,7 +548,10 @@ void RICompData::copy(RICompData& target, const RICompData& from) {
 
   target.m_metadata = from.m_metadata;
   target.m_wellName = from.m_wellName;
+
   target.m_cellIndex = from.m_cellIndex;
+  // TODO: remove bc class already has user-declared copy operator
+
   target.m_connectionState = from.m_connectionState;
   target.m_saturation = from.m_saturation;
   target.m_transmissibility = from.m_transmissibility;

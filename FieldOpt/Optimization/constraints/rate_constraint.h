@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_RATE_CONSTRAINT_H
 #define FIELDOPT_RATE_CONSTRAINT_H
@@ -24,26 +29,30 @@
 
 namespace Optimization {
 namespace Constraints {
-class RateConstraint : public Constraint {
+
+using Model::Properties::ContinuousProperty;
+
+class RateConstraint : public Constraint
+{
  public:
-  RateConstraint(Settings::Optimizer::Constraint settings,
-                 Model::Properties::VariablePropertyContainer *variables);
-  bool IsBoundConstraint() const override;
+  RateConstraint(SO& seto, VPC *vars, SV vp);
+
+  string name() override { return cl_; }
+
+  bool CaseSatisfiesConstraint(Case *c) override;
+  void SnapCaseToConstraints(Case *c) override;
+
+  bool IsBoundConstraint() const override { return true; };
   Eigen::VectorXd GetLowerBounds(QList<QUuid> id_vector) const override;
   Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const override;
 
-  string name() override { return "RateConstraint"; }
-
-  // Constraint interface
- public:
-  bool CaseSatisfiesConstraint(Case *c);
-  void SnapCaseToConstraints(Case *c);
-
  private:
-  double min_;
-  double max_;
-  QStringList affected_well_names_;
-  QList<Model::Properties::ContinousProperty *> affected_real_variables_;
+  QStringList rate_cnstrnd_well_nms_;
+  QList<ContinuousProperty *> rate_cnstrnd_real_vars_;
+  QList<QUuid> rate_cnstrnd_uuid_vars_;
+
+  string md_ = "Optimizer::constraints";
+  string cl_ = "RateConstraint";
 };
 }
 }

@@ -1,22 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
-   Additions by M.Bellout (2017) <mathias.bellout@ntnu.no>
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "constraints/reservoir_boundary.h"
@@ -34,21 +38,23 @@ class ReservoirBoundaryTest : public ::testing::Test,
 
  public:
   ReservoirBoundaryTest() {
-      bound_settings_.type = Settings::Optimizer::ConstraintType::ReservoirBoundary;
-      bound_settings_.well = settings_optimizer_->constraints()[5].wells[1]; // TESTW
-      bound_settings_.box_imin = settings_optimizer_->constraints()[5].box_imin;
-      bound_settings_.box_imax = settings_optimizer_->constraints()[5].box_imax;
-      bound_settings_.box_jmin = settings_optimizer_->constraints()[5].box_jmin;
-      bound_settings_.box_jmax = settings_optimizer_->constraints()[5].box_jmax;
-      bound_settings_.box_kmin = settings_optimizer_->constraints()[5].box_kmin;
-      bound_settings_.box_kmax = settings_optimizer_->constraints()[5].box_kmax;
+    bound_settings_.type = Settings::Optimizer::ConstraintType::ReservoirBoundary;
+    bound_settings_.well = settings_optimizer_->constraints()[5].wells[1]; // TESTW
+    bound_settings_.box_imin = settings_optimizer_->constraints()[5].box_imin;
+    bound_settings_.box_imax = settings_optimizer_->constraints()[5].box_imax;
+    bound_settings_.box_jmin = settings_optimizer_->constraints()[5].box_jmin;
+    bound_settings_.box_jmax = settings_optimizer_->constraints()[5].box_jmax;
+    bound_settings_.box_kmin = settings_optimizer_->constraints()[5].box_kmin;
+    bound_settings_.box_kmax = settings_optimizer_->constraints()[5].box_kmax;
 
-      boundary_constraint_ = new Optimization::Constraints::ReservoirBoundary(
-          bound_settings_, varcont_prod_spline_, grid_5spot_);
+    boundary_constraint_ = new Optimization::Constraints::ResBoundary(bound_settings_,
+                                                                      varcont_prod_spline_,
+                                                                      grid_5spot_,
+                                                                      settings_full_->global()->verbParams());
   }
 
   Settings::Optimizer::Constraint bound_settings_;
-  Optimization::Constraints::ReservoirBoundary *boundary_constraint_;
+  Optimization::Constraints::ResBoundary *boundary_constraint_;
 
   virtual ~ReservoirBoundaryTest() { }
   virtual void TearDown() { }
@@ -67,23 +73,23 @@ class ReservoirBoundaryTest : public ::testing::Test,
 //}
 
 TEST_F(ReservoirBoundaryTest, CheckListBoxEdgeCells) {
-    auto box_edge_cells_ = boundary_constraint_->returnListOfBoxEdgeCellIndices();
+  auto box_edge_cells_ = boundary_constraint_->returnListOfBoxEdgeCellIndices();
 
-    std::cout << "length box_edge_cells_: "
-              << box_edge_cells_.length() << std::endl;
+  std::cout << "length box_edge_cells_: "
+            << box_edge_cells_.length() << std::endl;
 
-    // Keep this for now (will be part of further unit test)
-    //for( int i=0; i < box_edge_cells_.length(); ++i )
-    //{
-    //   std::cout << box_edge_cells_[i] << std::endl;
-    //}
-    EXPECT_TRUE(box_edge_cells_.length()>0);
+  // Keep this for now (will be part of further unit test)
+  //for( int i=0; i < box_edge_cells_.length(); ++i )
+  //{
+  //   std::cout << box_edge_cells_[i] << std::endl;
+  //}
+  EXPECT_TRUE(box_edge_cells_.length()>0);
 }
 
 TEST_F(ReservoirBoundaryTest, CheckBoundConstraintSettings) {
-    // std::cout << "i=" << i << " j=" << j << " k=" << k << std::endl;
-    // std::cout << grid_->GetCell(i, j, k).global_index() << std::endl;
+  // std::cout << "i=" << i << " j=" << j << " k=" << k << std::endl;
+  // std::cout << grid_->GetCell(i, j, k).global_index() << std::endl;
 
-    boundary_constraint_->findCornerCells();
+  boundary_constraint_->findCornerCells();
 }
 }

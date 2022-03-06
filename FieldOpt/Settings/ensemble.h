@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_ENSEMBLE_H
 #define FIELDOPT_ENSEMBLE_H
@@ -23,7 +28,12 @@
 #include <map>
 #include <vector>
 #include "string"
-#include <vector>
+
+#include <Utilities/verbosity.h>
+
+using std::string;
+using std::vector;
+using std::map;
 
 namespace Settings {
 
@@ -42,7 +52,8 @@ class Ensemble {
    * be a CSV file in the format
    *
    * \verbatim
-   * Alias , RelativeDataPath , RelativeSchedulePath, RelativeGridPath
+   * Alias , RelativeDataPath , RelativeSchedulePath,
+   * RelativeGridPath
    * \endverbatim
    *
    * Lines starting with '#' will be interpreted as comment
@@ -66,41 +77,47 @@ class Ensemble {
    * The fourth entry should be the path to the .EGRID file
    * for the specific realization.
    *
-   *
-   *
    * @param ens_path
    */
-  Ensemble(const std::string &ens_path);
+  Ensemble(const string &ens_path, VerbParams vp);
 
   Ensemble();
 
 
   struct Realization {
     Realization() = delete;
-    Realization(std::string alias, std::string data_rel_path,
-                std::string schedule_rel_path, std::string grid_rel_path);
+    Realization(string alias,
+                string data_rel_path,
+                string schedule_rel_path,
+                string grid_rel_path);
 
-    std::string alias() const;
-    std::string data() const;
-    std::string schedule() const;
-    std::string grid() const;
+    string alias() const;
+    string data() const;
+    string schedule() const;
+    string grid() const;
 
    private:
-    const std::string alias_;
-    const std::string data_rel_path_;
-    const std::string schedule_rel_path_;
-    const std::string grid_rel_path_;
+    const string alias_;
+    const string data_rel_path_;
+    const string schedule_rel_path_;
+    const string grid_rel_path_;
   };
 
   int NSelect() const;
   void SetNSelect(const int n);
-  const Realization &GetRealization(const std::string &alias) const;
-  std::vector<std::string> GetAliases() const;
+  const Realization &GetRealization(const string &alias) const;
+  vector<std::string> GetAliases() const;
 
  private:
-  int n_select_; //!< Number of realizations to be selected for each evaluation. Will be set to all if not specified in driver.
-  std::string ensemble_parent_dir_;
-  std::map<std::string, Realization> realizations_;
+  // Number of rlzs to be selected for each evaluation.
+  // Will be set to all if not specified in driver.
+  int n_select_;
+  string ensemble_parent_dir_;
+  map<string, Realization> realizations_;
+
+  string md_ = "Settings";
+  string cl_ = "ensemble";
+  VerbParams vp_;
 
 
 };

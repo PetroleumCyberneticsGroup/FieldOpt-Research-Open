@@ -50,6 +50,10 @@ RICaseData::RICaseData(string file_path) {
   m_fractureActiveCellInfo = new RIActiveCellInfo;
 
   // -------------------------------------------------------
+  PorosityModelTypeMATRIX_ = PorosityModelType::MATRIX_MODEL;
+  PorosityModelTypeFRAC_ = PorosityModelType::FRACTURE_MODEL;
+
+  // -------------------------------------------------------
   setActiveCellInfo(PorosityModelTypeFRAC_,
                     m_activeCellInfo);
 
@@ -62,12 +66,7 @@ RICaseData::RICaseData(string file_path) {
   //     setActiveCellInfo(m_fractureActiveCellInfo.p());
 
   // -------------------------------------------------------
-//  m_unitsType = RiaEclipseUnitTools::UNITS_METRIC;
-
-  // -------------------------------------------------------
-  PorosityModelTypeMATRIX_ = PorosityModelType::MATRIX_MODEL;
-  PorosityModelTypeFRAC_ = PorosityModelType::FRACTURE_MODEL;
-
+  // m_unitsType = RiaEclipseUnitTools::UNITS_METRIC;
 }
 
 // =========================================================

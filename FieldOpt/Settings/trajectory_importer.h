@@ -1,21 +1,26 @@
-/******************************************************************************
-   Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_TRAJECTORY_IMPORTER_H
 #define FIELDOPT_TRAJECTORY_IMPORTER_H
@@ -25,27 +30,31 @@
 #include <vector>
 #include <Eigen/Core>
 
+#include "Utilities/verbosity.h"
+
 namespace Settings {
 
 /*!
- * The TrajectoryImporter class implements importing of pre-computed
- * well trajectories.
+ * The TrajectoryImporter class implements importing of
+ * pre-computed well trajectories.
  *
- * The trajectory files are expected to be found in a directory named
- * 'trajectories' on the same level as the simulator driver file;
- * the 'trajectories' directory is expected to contain one file per
- * trajectory we want to import, and the file should have the same
- * name as the well it represents. The file is also expected to have
- * one header line (which will be ignored).
+ * Trajectory files are expected to be found in a directory
+ * named 'trajectories' on the same level as the simulator
+ * driver file; the 'trajectories' directory is expected to
+ * contain one file per trajectory we want to import, and the
+ * file should have the same name as the well it represents.
+ * The file is also expected to have one header line (which
+ * will be ignored).
  *
- * The file should be in the CSV format, and should have one row
- * per intersected grid block. Each line should have (in this order)
- * the I, J and K indices for the block; the X, Y, Z coordinates
- * for the intersection point _into_ the grid block; and the X, Y, Z
- * coordinates for the intersection _out of_ the grid block.
+ * The file should be in the CSV format, and should have one
+ * row per intersected grid block. Each line should have (in
+ * this order) the I, J and K indices for the block; the X,
+ * Y, Z coordinates for the intersection point _into_ the
+ * grid block; and the X, Y, Z coordinates for the intersection
+ * _out of_ the grid block.
  *
- * Example: Importing the trajectory for the D-2H well for the
- * NORNE_SIMPLIFIED deck.
+ * Example: Importing the trajectory for the D-2H well for
+ * the NORNE_SIMPLIFIED deck.
  * Directory structure:
  *
  * norne-simplified/
@@ -68,7 +77,9 @@ class TrajectoryImporter {
    * @param traj_dir_path Path to the 'trajectories' directory.
    * @param wells List of wells to be imported.
    */
-  TrajectoryImporter(const std::string &traj_dir_path, const std::vector<std::string> &wells);
+  TrajectoryImporter(const std::string &traj_dir_path,
+                     const std::vector<std::string> &wells,
+                     VerbParams vp);
 
   TrajectoryImporter();
 
@@ -100,6 +111,10 @@ class TrajectoryImporter {
   std::string traj_dir_path_; //!< Absolute path to the trajectories directory.
   std::map<std::string, std::string> traj_file_paths_; //!< Map from well name to absolute path of trajectory file.
   std::map<std::string, std::vector<ImportedWellBlock> > imported_trajectories_; //!< Map from well name to imported trajectory.
+
+  std::string md_ = "Settings";
+  std::string cl_ = "trajectory_importer";
+  VerbParams vp_;
 
   /*!
    * Build the traj_file_paths_ map by searching the directory at traj_dir_path_

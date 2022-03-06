@@ -1,36 +1,47 @@
-/******************************************************************************
-   Copyright (C) 2019 Einar J.M. Baumann <einar.baumann@gmail.com>,
-   Brage Strand Kristoffersen <brage_sk@hotmail.com>
+/***********************************************************
+Copyright (C) 2019
+Einar J.M. Baumann <einar.baumann@gmail.com>
+Brage Strand Kristoffersen <brage_sk@hotmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2020-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "polar_azimuth.h"
 namespace Optimization {
 namespace Constraints {
 
-PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
-                           Model::Properties::VariablePropertyContainer *variables) {
-  min_azimuth_ = settings.min;
-  max_azimuth_ = settings.max;
+PolarAzimuth::PolarAzimuth(SO& seto, VPC *vars, SV vp)
+  : Constraint(seto, vars, vp) {
 
-  for (auto var : variables->GetContinousVariables()->values()){
-    if (var->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
-    && QString::compare(var->propertyInfo().parent_well_name, settings.well) == 0){
-      affected_variable_ = var->id();
+  if (vp_.vOPT >= 1) {
+    info("Adding PolarAzimuth constraint for " + seto.well.toStdString());
+  }
+
+  min_azimuth_ = seto.min;
+  max_azimuth_ = seto.max;
+
+  for (auto var : *vars->GetContinuousVariables()){
+    auto lvar = var.second;
+    if (lvar->propertyInfo().polar_prop == Model::Properties::Property::PolarProp::Azimuth
+      && QString::compare(lvar->propertyInfo().parent_well_name, seto.well) == 0){
+      affected_variable_ = lvar->id();
       break;
     }
   }
@@ -38,8 +49,8 @@ PolarAzimuth::PolarAzimuth(Settings::Optimizer::Constraint settings,
 }
 
 bool PolarAzimuth::CaseSatisfiesConstraint(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] <= max_azimuth_
-    && c->real_variables()[affected_variable_] >= min_azimuth_){
+  if (c->get_real_variable_value(affected_variable_) <= max_azimuth_
+    && c->get_real_variable_value(affected_variable_) >= min_azimuth_){
     return true;
   } else {
     return false;
@@ -47,9 +58,9 @@ bool PolarAzimuth::CaseSatisfiesConstraint(Optimization::Case *c) {
 }
 
 void PolarAzimuth::SnapCaseToConstraints(Optimization::Case *c) {
-  if (c->real_variables()[affected_variable_] >= max_azimuth_){
+  if (c->get_real_variable_value(affected_variable_) >= max_azimuth_){
     c->set_real_variable_value(affected_variable_, max_azimuth_);
-  } else if (c->real_variables()[affected_variable_] <= min_azimuth_) {
+  } else if (c->get_real_variable_value(affected_variable_) <= min_azimuth_) {
     c->set_real_variable_value(affected_variable_, min_azimuth_);
   }
 }
@@ -57,18 +68,21 @@ void PolarAzimuth::SnapCaseToConstraints(Optimization::Case *c) {
 bool PolarAzimuth::IsBoundConstraint() const {
   return true;
 }
+
 Eigen::VectorXd PolarAzimuth::GetLowerBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd lbounds(id_vector.size());
   lbounds.fill(0);
   lbounds[id_vector.indexOf(affected_variable_)] = min_azimuth_;
   return lbounds;
 }
+
 Eigen::VectorXd PolarAzimuth::GetUpperBounds(QList<QUuid> id_vector) const {
   Eigen::VectorXd ubounds(id_vector.size());
   ubounds.fill(0);
   ubounds[id_vector.indexOf(affected_variable_)] = max_azimuth_;
   return ubounds;
 }
+
 string PolarAzimuth::name() {
   return "PolarAzimuth";
 }

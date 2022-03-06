@@ -1,37 +1,41 @@
-/******************************************************************************
- * Created: 16.12.2015 2015 by einar
- *
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2015 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 
 #ifndef FIELDOPT_ENSEMBLE_HELPER_H
 #define FIELDOPT_ENSEMBLE_HELPER_H
 
-#include <boost/random.hpp>
-#include "Settings/ensemble.h"
 #include "Optimization/case.h"
+#include "Settings/ensemble.h"
+
+#include <boost/random.hpp>
 #include <chrono>
 
 namespace Runner {
 
 /*!
- * The EnsembleHelper class contains facilities that helps the
+ * The EnsembleHelper class contains facilities to help
  * Runner classes deal with ensembles (multiple realizations).
  */
 class EnsembleHelper {
@@ -43,19 +47,19 @@ class EnsembleHelper {
   /*!
    * Set a new active case and populate the realization queue
    * for it. You will not be able to set a new active case
-   * until all the realizations selected for this one have been
-   * evaluated.
+   * until all the realizations selected for this one have
+   * been evaluated.
    */
   void SetActiveCase(Optimization::Case *c);
 
   /*!
-   * Check whether all the realizations selected for the currently
-   * active case have been evaluated.
+   * Check whether all the realizations selected for the
+   * currently active case have been evaluated.
    */
   bool IsCaseDone() const;
 
   /*!
-   * Chech whether there are any cases available for evaluation.
+   * Chech if there are any cases available for evaluation.
    */
   bool IsCaseAvailableForEval() const;
 
@@ -75,10 +79,12 @@ class EnsembleHelper {
   std::string GetStateString() const;
 
   /*!
-   * Get a copy of the currently active case, with the realization
-   * tag properly set.
+   * Get a copy of the currently active case, with the
+   * realization tag properly set.
    */
   Optimization::Case *GetCaseForEval();
+
+  void GetCaseForEval(Optimization::Case &c);
 
   /*!
    * Return a case for a specific realization to the handler.
@@ -97,29 +103,36 @@ class EnsembleHelper {
   /*!
    * Get the realization object refereincing the alias string.
    */
-  Settings::Ensemble::Realization GetRealization(const std::string &alias) const;
+  Settings::Ensemble::Realization
+  GetRlz(const std::string &alias) const;
 
   /*!
-   * Get the base realization, to be used for evaluating the base model for initialization.
+   * Get base realization to be used for evaluating the base
+   * model for initialization.
    * @param alias
    * @return
    */
   Settings::Ensemble::Realization GetBaseRealization() const;
 
   /*!
-   * @brief Check if a realization has been assigned any workers.
+   * @brief Check if realization has been assigned any workers.
    * @param alias The alias of the realization to check.
-   * @return True if one or more worker has been assigned to the realization; otherwise false.
+   * @return True if one or more worker has been assigned
+   * to the realization; otherwise false.
    */
   bool HasAssignedWorkers(const std::string &alias) const;
 
   /*!
-   * @brief Get a worker that has been assigned to the realization and that is also currently free, if poosible.
+   * @brief Get a worker that has been assigned to the
+   * realization and that is also currently free, if poosible.
    * @param alias The alias of the realization to check.
-   * @param free_workers Vector of ranks for the workers that are currently not working.
-   * @return A vector containing the ranks of the workers that have been assigned to the case.
+   * @param free_workers Vector of ranks for the workers
+   * that are currently not working.
+   * @return A vector containing the ranks of the workers
+   * that have been assigned to the case.
    */
-  int GetAssignedWorker(const std::string &alias, std::vector<int> free_workers);
+  int GetAssignedWorker(const std::string &alias,
+      std::vector<int> free_workers);
 
   /*!
    * @brief Assign a worker (or an additional worker) to a relization.
@@ -130,7 +143,8 @@ class EnsembleHelper {
    * @param free_workers Vector of ranks for the workers that are currently not working.
    * @return The rank of the new worker assigned to the realization.
    */
-  int AssignNewWorker(const std::string &alias, std::vector<int> free_workers);
+  int AssignNewWorker(const std::string &alias,
+      std::vector<int> free_workers);
 
  private:
 
@@ -153,13 +167,15 @@ class EnsembleHelper {
    * @param rank Rank of the worker to check.
    * @return True if the rank is in the vector for the alias in assigned_workers_.
    */
-  bool isAssignedToWorker(const std::string &alias, const int rank) const;
+  bool isAssignedToWorker(
+      const std::string &alias, const int rank) const;
 
   /*!
    * @brief Get a sorted vector of pairs <rank, assigned realizations>.
    * @param free_workers Vector of ranks for the workers that are currently not working.
    */
-  std::vector< pair<int, int> > workerLoads(std::vector<int> free_workers) const;
+  std::vector< pair<int, int> >
+  workerLoads(std::vector<int> free_workers) const;
 
   /*!
    * Ensemble object containing paths for all realizations.
@@ -183,24 +199,24 @@ class EnsembleHelper {
   std::vector<std::string> rzn_busy_;
 
   /*!
-   * The number of realizations that will be selected for evaluation.
+   * # of realizations that will be selected for evaluation.
    */
   int n_select_;
 
   /*!
-   * RNG that will be used when selecting which realizations to evaluate.
+   * RNG used when selecting which realizations to evaluate.
    */
   boost::random::mt19937 rng_;
 
   /*!
-   * Time at which the currently active case was first added to the handler.
+   * Time at which currently active case was first added to handler.
    */
   std::chrono::high_resolution_clock::time_point eval_start_time_;
 
   /*!
    * Mapping of realizations to one or more worker ranks.
    */
-  std::map<std::string, std::vector<int> > assigend_workers_;
+  std::map<std::string, std::vector<int> > assigned_workers_;
 
 };
 

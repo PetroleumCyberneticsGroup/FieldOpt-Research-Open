@@ -1,0 +1,155 @@
+WELSPECS
+    INJ1 I 8 56 1* WATER 1* 1* 1* 1* /
+    INJ2 I 51 44 1* WATER 1* 1* 1* 1* /
+    PROD1 P 4 7 1* OIL 1* 1* 1* 1* /
+    PROD2 P 11 7 1* OIL 1* 1* 1* 1* /
+    PROD3 P 18 7 1* OIL 1* 1* 1* 1* /
+    PROD4 P 25 7 1* OIL 1* 1* 1* 1* /
+    PROD5 P 32 7 1* OIL 1* 1* 1* 1* /
+    PROD6 P 39 7 1* OIL 1* 1* 1* 1* /
+    PROD7 P 46 7 1* OIL 1* 1* 1* 1* /
+    PROD8 P 53 7 1* OIL 1* 1* 1* 1* /
+
+/
+
+COMPDAT
+    INJ1 8 56 1 1 OPEN 1* 1* 0.216 1* 1* 1* Z /
+    INJ2 51 44 1 1 OPEN 1* 1* 0.216 1* 1* 1* Z /
+    PROD1 4 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 5 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 6 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 7 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 8 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 9 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD1 10 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 11 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 12 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 13 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 14 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 15 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 16 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD2 17 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 18 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 19 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 20 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 21 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 22 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 23 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD3 24 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 25 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 26 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 27 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 28 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 29 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 30 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD4 31 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 32 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 33 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 34 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 35 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 36 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 37 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD5 38 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 39 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 40 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 41 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 42 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 43 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 44 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD6 45 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 46 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 47 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 48 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 49 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 50 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 51 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD7 52 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD8 53 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD8 54 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+    PROD8 55 7 1 1 OPEN 1* 1* 0.216 1* 1* 1* X /
+
+/
+
+WCONINJE
+   INJ1 WATER OPEN BHP 1* 1* 230/
+/
+
+WCONINJE
+   INJ2 WATER OPEN BHP 1* 1* 230/
+/
+
+WCONPROD
+   PROD1 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD2 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD3 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD4 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD5 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD6 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD7 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+WCONPROD
+   PROD8 OPEN BHP 1* 1* 1* 1* 1* 90/
+/
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+TSTEP
+182.5 /
+
+

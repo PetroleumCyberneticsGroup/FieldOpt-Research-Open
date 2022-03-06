@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 2/27/17.
-   Copyright (C) 2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
+Created by einar on 2/27/17.
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_GENETICALGORITHM_H
 #define FIELDOPT_GENETICALGORITHM_H
 
@@ -41,18 +47,20 @@ class GeneticAlgorithm : public Optimizer {
    */
   GeneticAlgorithm(Settings::Optimizer *settings,
                    Case *base_case,
-                   Model::Properties::VariablePropertyContainer *variables,
+                   Model::Properties::VarPropContainer *variables,
                    Reservoir::Grid::Grid *grid,
                    Logger *logger,
-                   CaseHandler *case_handler=0,
-                   Constraints::ConstraintHandler *constraint_handler=0
+                   CaseHandler *case_handler=nullptr,
+                   Constraints::ConstraintHandler *constraint_handler=nullptr
   );
   TerminationCondition IsFinished() override;
  protected:
   virtual void handleEvaluatedCase(Case *c) = 0;
   virtual void iterate() = 0;
+
  protected:
-  boost::random::mt19937 gen_; //!< Random number generator with the random functions in math.hpp
+  //!< Random number generator with the random functions in math.hpp
+  boost::random::mt19937 gen_;
 
   /*!
    * @brief The Chromosome struct is used to hold variable values
@@ -63,19 +71,27 @@ class GeneticAlgorithm : public Optimizer {
     Case *case_pointer;
     Chromosome(Case *c);
     Chromosome() {}
-    double ofv() { return case_pointer->objective_function_value(); }
+    double ofv() { return case_pointer->objf_value(); }
     void createNewCase();
   };
 
   vector<Chromosome> population_; //!< Holds the current population.
   int max_generations_; //!< Maximum number of generations.
   int population_size_; //!< Size of population. This is automatically set to min(n_vars, 100);
+
   double p_crossover_; //!< Crossover probability.
   double p_mutation_; //!< Mutation probability.
   double decay_rate_;
   double mutation_strength_;
-  Eigen::VectorXd lower_bound_; //!< Lower bounds for the variables (used for randomly generating populations and mutation)
-  Eigen::VectorXd upper_bound_; //!< Upper bounds for the variables (used for randomly generating populations and mutation)
+
+  //!< Lower bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd lower_bound_;
+
+  //!< Upper bounds for the variables (used for
+  //!< randomly generating populations and mutation)
+  Eigen::VectorXd upper_bound_;
+
   int n_vars_; //!< Number of variables in the problem.
 
   /*!

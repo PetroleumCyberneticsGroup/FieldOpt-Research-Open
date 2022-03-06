@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef FIELDOPT_OVERSEER_H
 #define FIELDOPT_OVERSEER_H
 
@@ -26,17 +32,20 @@
 namespace Runner {
 namespace MPI {
 /*!
- * @brief The Overseer class takes care of distributing cases between workers. The runner taken as an
- * is primarily used for the common MPI helpers.
+ * @brief The Overseer class takes care of distributing cases
+ * between workers. The runner taken as an is primarily used
+ * for the common MPI helpers.
  */
 class Overseer {
  public:
-  Overseer(MPIRunner *runner);
+  explicit Overseer(MPIRunner *runner);
 
   /*!
-   * @brief Assign a Case to a Worker. If no workers are free, the scheduler will wait untill one is.
+   * @brief Assign a Case to a Worker. If no workers
+   * are free, the scheduler will wait untill one is.
    * @param c The case to be assigned to a Worker for evaluation.
-   * @param preferred_worker Prefer to assign the case to the worker with this rank (default: no preference)
+   * @param preferred_worker Prefer to assign the case to
+   * the worker with this rank (default: no preference)
    */
   void AssignCase(Optimization::Case *c, int preferred_worker=-1);
 
@@ -47,23 +56,27 @@ class Overseer {
   Optimization::Case *RecvEvaluatedCase();
 
   /*!
-   * @brief Wait for a message with the TERMINATE tag from each of the workers to confirm termination
-   * before moving on to finalization.
+   * @brief Wait for a message with the TERMINATE tag from
+   * each of the workers to confirm termination before moving
+   * on to finalization.
    */
   void EnsureWorkerTermination();
 
   /*!
-   * @brief Terminate all workers by sending a message with the TERMINATE tag.
+   * @brief Terminate all workers by sending a message with
+   * the TERMINATE tag.
    */
   void TerminateWorkers();
 
   /*!
-   * @brief Get the number of workers that are currently not performing any work.
+   * @brief Get the number of workers that are currently not
+   * performing any work.
    */
   int NumberOfFreeWorkers();
 
   /*!
-   * @brief Get the number of workers that are currently executing simulations.
+   * @brief Get the number of workers that are currently
+   * executing simulations.
    */
   int NumberOfBusyWorkers();
 
@@ -73,31 +86,43 @@ class Overseer {
   std::vector<int> GetFreeWorkerRanks() const;
 
   /*!
-   * @brief The WorkerStatus struct holds information about the current status of all workers in the network.
+   * @brief The WorkerStatus struct holds information about
+   * the current status of all workers in the network.
    */
   struct WorkerStatus {
     WorkerStatus() { rank = -1; }
-    WorkerStatus(int r) { rank = r;}
-    int rank; //!< The rank of the process the worker is running on.
-    bool working = false; //!< Indicates if the worker is currently performing simulations.
-    QDateTime working_since; //!< The last time a job was sent to the worker.
-    int working_seconds() { //!< Number of seconds since last work was sent to the process.
-        return time_since_seconds(working_since);
+
+    explicit WorkerStatus(int r) { rank = r;}
+
+    //!< Rank of the process the worker is running on.
+    int rank;
+
+    //!< Indicates if the worker is currently performing simulations.
+    bool working = false;
+
+    //!< The last time a job was sent to the worker.
+    QDateTime working_since;
+
+    //!< Number of seconds since last work was sent to the process.
+    int working_seconds() const {
+      return time_since_seconds(working_since);
     }
+
     /*!
-     * @brief Start the worker. Should be called whenever work is sent to the worker. This marks is as
-     * working.
+     * @brief Start the worker. Should be called whenever
+     * work is sent to the worker. This marks is as working.
      */
     void start() {
-        working = true;
-        working_since = QDateTime::currentDateTime();
+      working = true;
+      working_since = QDateTime::currentDateTime();
     }
     /*!
-     * @brief Stop the worker. This should be called whenever results are received from the worker. This
-     * marks the worker as not working.
+     * @brief Stop the worker. This should be called whenever
+     * results are received from the worker. This marks the
+     * worker as not working.
      */
     void stop() {
-        working = false;
+      working = false;
     }
   };
 
@@ -107,20 +132,25 @@ class Overseer {
        */
   WorkerStatus * GetLongestRunningWorker();
 
-  MPIRunner::MsgTag last_case_tag; //!< The message tag for the last received case.
+  //!< The message tag for the last received case.
+  MPIRunner::MsgTag last_case_tag;
 
  private:
   MPIRunner *runner_;
-  QHash<int, WorkerStatus*> workers_; //!< A map of the workers. The key is the rank of the process.
 
-  WorkerStatus * getFreeWorker(); //!< Get a worker not marked as working.
+  //!< A map of the workers. The key is the rank of the process.
+  QHash<int, WorkerStatus*> workers_;
+
+  //!< Get a worker not marked as working.
+  WorkerStatus * getFreeWorker();
 
   /*!
    * @brief Get a string summarizing the status for all workers.
    */
   std::string workerStatusSummary();
 
-  std::chrono::system_clock::time_point last_sim_start_; //!< Time stamp for the start of the previous simulation.
+  //!< Time stamp for the start of the previous simulation.
+  std::chrono::system_clock::time_point last_sim_start_;
 };
 }
 }

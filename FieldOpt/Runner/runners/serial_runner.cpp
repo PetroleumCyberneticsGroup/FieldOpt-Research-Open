@@ -1,21 +1,27 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015+2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #include <Utilities/time.hpp>
 #include "serial_runner.h"
 #include "Utilities/printer.hpp"
@@ -24,25 +30,22 @@
 namespace Runner {
 
 SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings)
-    : AbstractRunner(runtime_settings)
-{
-  InitializeModules();
-}
-
-void SerialRunner::InitializeModules() {
-  InitializeLogger();
-  InitializeSettings();
-  InitializeModel();
-  InitializeSimulator();
-  EvaluateBaseModel();
-  InitializeObjectiveFunction();
-  InitializeBaseCase();
+  : AbstractRunner(runtime_settings) {
+  InitLogger();
+  InitSettings();
+  InitModel();
+  InitSimulator();
+  EvalBaseModel();
+  InitObjF();
+  InitBaseCase();
   InitializeOptimizer();
-  InitializeBookkeeper();
-  FinalizeInitialization(true);
+  InitBookkeeper();
+  FinalizeInit(true);
 }
 
-SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings, Optimization::Case* base_case, Model::ModelSynchronizationObject* mso)
+SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings,
+                           Optimization::Case* base_case,
+                           Model::ModelSynchronizationObject* mso)
     : AbstractRunner(runtime_settings) {
   if (base_case != 0 && mso != 0) {
     base_case_ = base_case;
@@ -52,94 +55,116 @@ SerialRunner::SerialRunner(Runner::RuntimeSettings *runtime_settings, Optimizati
   InitializeModules();
 }
 
+void SerialRunner::Execute() {
+  while (optmzr_->IsFinished() == TC::NOT_FINISHED) {
 
+    Optimization::Case *new_case;
 
-void SerialRunner::Execute()
-{
-    while (optimizer_->IsFinished() == Optimization::Optimizer::TerminationCondition::NOT_FINISHED) {
-        Optimization::Case *new_case;
-        if (is_ensemble_run_) {
-            if (ensemble_helper_.IsCaseDone()) {
-                ensemble_helper_.SetActiveCase(optimizer_->GetCaseForEvaluation());
-            }
-            if (VERB_RUN >= 3) Printer::ext_info("Getting ensemble case.", "Runner", "Serial Runner");
-            new_case = ensemble_helper_.GetCaseForEval();
-            model_->set_grid_path(ensemble_helper_.GetRealization(new_case->GetEnsembleRealization().toStdString()).grid());
-        }
-        else {
-            if (VERB_RUN >= 3) Printer::ext_info("Getting case from Optimizer.", "Runner", "Serial Runner");
-            new_case = optimizer_->GetCaseForEvaluation();
-            if (VERB_RUN >= 3) Printer::ext_info("Got case from Optimizer.", "Runner", "Serial Runner");
-        }
+    // MAKE NEW CASE
+    if (is_ensemble_run_) { // ENSEMBLE RUN
+      if (ensemble_helper_.IsCaseDone()) {
+        ensemble_helper_.SetActiveCase(optmzr_->GetCaseForEvaluation());
+      }
+      if (vp_.vRUN >= 3) { ext_info("Getting ensemble case.", md_, cl_); }
 
-        if (!is_ensemble_run_ && bookkeeper_->IsEvaluated(new_case, true)) {
-            if (VERB_RUN >= 3) Printer::ext_info("Bookkeeped case.", "Runner", "Serial Runner");
-            new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_BOOKKEEPED;
+      new_case = ensemble_helper_.GetCaseForEval();
+      auto en_rlz = new_case->GetEnsembleRlz().toStdString();
+      model_->set_grid_path(ensemble_helper_.GetRlz(en_rlz).grid());
+
+    } else { // SINGLE RUN
+      if (vp_.vRUN >= 3) { ext_info("Getting case from Optimizer.", md_, cl_); }
+      new_case = optmzr_->GetCaseForEvaluation();
+      if (vp_.vRUN >= 3) { ext_info("Got case from Optimizer.", md_, cl_); }
+
+      while (new_case == nullptr) {
+        if (optmzr_->IsFinished()) { break;
+        } else {
+          new_case = optmzr_->GetCaseForEvaluation();
         }
-        else {
-            try {
-                bool simulation_success = true;
-                new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_CURRENT;
-                if (VERB_RUN >= 3) Printer::ext_info("Applying case to model.", "Runner", "Serial Runner");
-                model_->ApplyCase(new_case);
-                auto start = QDateTime::currentDateTime();
-                if (!is_ensemble_run_ && (simulation_times_.size() == 0 || runtime_settings_->simulation_timeout() == 0)) {
-                    if (VERB_RUN >= 3) Printer::ext_info("Simulating case.", "Runner", "Serial Runner");
-                    simulator_->Evaluate();
-                }
-                else {
-                    if (is_ensemble_run_) {
-                        if (VERB_RUN >= 3) Printer::ext_info("Simulating ensemble case.", "Runner", "Serial Runner");
-                        simulation_success = simulator_->Evaluate(
-                            ensemble_helper_.GetRealization(new_case->GetEnsembleRealization().toStdString()),
-                            timeoutValue(),
-                            runtime_settings_->threads_per_sim()
-                        );
-                    }
-                    else {
-                        if (VERB_RUN >= 3) Printer::ext_info("Simulating case.", "Runner", "Serial Runner");
-                        simulation_success = simulator_->Evaluate(
-                            timeoutValue(),
-                            runtime_settings_->threads_per_sim()
-                        );
-                    }
-                }
-                if (VERB_RUN >= 3) Printer::ext_info("Done simulating case.", "Runner", "Serial Runner");
-                auto end = QDateTime::currentDateTime();
-                int sim_time = time_span_seconds(start, end);
-                if (simulation_success) {
-                    model_->wellCost(settings_->optimizer());
-                    new_case->set_objective_function_value(objective_function_->value());
-                    new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_DONE;
-                    new_case->SetSimTime(sim_time);
-                    simulation_times_.push_back((sim_time));
-                }
-                else {
-                    new_case->set_objective_function_value(sentinelValue());
-                    new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
-                    new_case->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_SIM;
-                    if (sim_time >= timeoutValue())
-                        new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_TIMEOUT;
-                }
-            } catch (std::runtime_error e) {
-                Printer::ext_warn("Exception thrown while applying/simulating case: " + std::string(e.what()) + ". Setting obj. fun. value to sentinel value.", "Runner", "SerialRunner");
-                new_case->set_objective_function_value(sentinelValue());
-                new_case->state.eval = Optimization::Case::CaseState::EvalStatus::E_FAILED;
-                new_case->state.err_msg = Optimization::Case::CaseState::ErrorMessage::ERR_WIC;
-            }
-        }
-        if (is_ensemble_run_) {
-            ensemble_helper_.SubmitEvaluatedRealization(new_case);
-            if  (ensemble_helper_.IsCaseDone()) {
-                optimizer_->SubmitEvaluatedCase(ensemble_helper_.GetEvaluatedCase());
-            }
-        }
-        else {
-            if (VERB_RUN >= 3) Printer::ext_info("Submitting evaluated case to Optimizer.", "Runner", "Serial Runner");
-            optimizer_->SubmitEvaluatedCase(new_case);
-        }
+      }
+      if (optmzr_->IsFinished()) { break; }
     }
-    FinalizeRun(true);
+
+    // RUN NEW CASE -> CHECK IF BOOKKEEPED
+    if (!is_ensemble_run_ && bookkeeper_->IsEvaluated(new_case, true)) {
+      if (vp_.vRUN >= 3) { ext_info("Bookkeeped case.", md_, cl_); }
+      new_case->state.eval = ES::E_BOOKKEEPED;
+
+    } else { // RUN NEW CASE
+      try {
+        bool sim_success = true;
+        new_case->state.eval = ES::E_CURRENT;
+
+        if (vp_.vRUN >= 3) { ext_info("Applying case to model.", md_, cl_); }
+        model_->ApplyCase(new_case);
+        auto start = QDateTime::currentDateTime();
+
+        // SIMULATE CASE (SINGLE RUN, NOT TIMEOUT)
+        if (!is_ensemble_run_ && (sim_times_.empty() || rts_->sim_timeout() == 0)) {
+          if (vp_.vRUN >= 3) { ext_info("Simulating case.", md_, cl_); }
+          simulator_->Evaluate();
+
+        } else { // SIMULATE CASE (ENSEMBLE RUN, WITH TIMEOUT)
+          if (is_ensemble_run_) {
+            if (vp_.vRUN >= 3) { ext_info("Simulating ensemble case.", md_, cl_); }
+            auto en_rlz = ensemble_helper_.GetRlz(new_case->GetEnsembleRlz().toStdString());
+            sim_success = simulator_->Evaluate(en_rlz, timeoutVal(), rts_->threads_per_sim()
+            );
+
+          } else { // SIMULATE CASE (SINGLE RUN, WITH TIMEOUT)
+            if (vp_.vRUN >= 3) { ext_info("Simulating case.", md_, cl_); }
+            sim_success = simulator_->Evaluate(timeoutVal(), rts_->threads_per_sim());
+          }
+        }
+        if (vp_.vRUN >= 3) { ext_info("Done simulating case.", md_, cl_); }
+        auto end = QDateTime::currentDateTime();
+        int sim_time = time_span_seconds(start, end);
+        if (sim_success) {
+
+          model_->wellCost(settings_->optimizer());
+          if (settings_->optimizer()->objective().type == OT::Augmented) {
+            new_case->set_objf_value(objf_->value(false));
+          } else {
+            new_case->set_objf_value(objf_->value());
+          }
+
+          string tm = "Objective function value set to ";
+          tm += num2str(new_case->objf_value(), 8, 1);
+          if (vp_.vRUN >= 1) { info(tm,  vp_.lnw); }
+
+          new_case->state.eval = ES::E_DONE;
+          new_case->SetSimTime(sim_time);
+          sim_times_.push_back((sim_time));
+
+        } else {
+          new_case->set_objf_value(sentinelValue());
+          new_case->state.eval = ES::E_FAILED;
+          new_case->state.err_msg = EM::ERR_SIM;
+          if (sim_time >= timeoutVal()) {
+            new_case->state.eval = ES::E_TIMEOUT;
+          }
+        }
+      } catch (runtime_error &e) {
+        wm_ = "Exception thrown while applying/simulating case: " + string(e.what());
+        wm_ += ". Setting obj. fun. value to sentinel value.";
+        ext_warn(wm_, md_, cl_);
+        new_case->set_objf_value(sentinelValue());
+        new_case->state.eval = ES::E_FAILED;
+        new_case->state.err_msg = EM::ERR_WIC;
+      }
+    }
+    if (is_ensemble_run_) {
+      ensemble_helper_.SubmitEvaluatedRealization(new_case);
+      if  (ensemble_helper_.IsCaseDone()) {
+        optmzr_->SubmitEvaluatedCase(ensemble_helper_.GetEvaluatedCase());
+      }
+    }
+    else {
+      if (vp_.vRUN >= 3) { ext_info("Submitting evaluated case to Optimizer.", md_, cl_); }
+      optmzr_->SubmitEvaluatedCase(new_case);
+    }
+  }
+  FinalizeRun(true);
 }
 
 }

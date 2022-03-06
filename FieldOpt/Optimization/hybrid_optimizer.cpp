@@ -29,7 +29,7 @@ namespace Optimization {
 
 HybridOptimizer::HybridOptimizer(Settings::Optimizer *settings,
          Case *base_case,
-         Model::Properties::VariablePropertyContainer *variables,
+         Model::Properties::VarPropContainer *variables,
          Reservoir::Grid::Grid *grid,
          Logger *logger
 )
@@ -73,7 +73,7 @@ Optimizer::TerminationCondition HybridOptimizer::IsFinished() {
         if (enable_logging_) {
             logger_->AddEntry(this);
         }
-        return TerminationCondition::MINIMUM_STEP_LENGTH_REACHED;
+        return TerminationCondition::MIN_STEP_LENGTH_REACHED;
     }
     else if (iteration_ < max_hybrid_iterations_) {
         return TerminationCondition::NOT_FINISHED;
@@ -99,7 +99,7 @@ void HybridOptimizer::handleEvaluatedCase(Case *c) {
                 std::stringstream ss;
                 ss << "Found better case. Passing to primary." << "|";
                 ss << " ID: " << c->id().toString().toStdString() << "|";
-                ss << "OFV: " << c->objective_function_value();
+                ss << "OFV: " << c->objf_value();
                 Printer::ext_info(ss.str(), "Optimization", "HybridOptimizer");
             }
             updateTentativeBestCase(c);
@@ -112,7 +112,7 @@ void HybridOptimizer::handleEvaluatedCase(Case *c) {
                 std::stringstream ss;
                 ss << "Found better case. Passing to secondary." << "|";
                 ss << " ID: " << c->id().toString().toStdString() << "|";
-                ss << "OFV: " << c->objective_function_value();
+                ss << "OFV: " << c->objf_value();
                 Printer::ext_info(ss.str(), "Optimization", "HybridOptimizer");
             }
             updateTentativeBestCase(c);

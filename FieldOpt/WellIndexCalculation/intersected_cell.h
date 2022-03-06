@@ -1,27 +1,32 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Hilmar M. Magnusson <hilmarmag@gmail.com>
-   Modified by Einar J.M. Baumann (2016) <einar.baumann@gmail.com>
-   Modified by Alin G. Chitu (2016-2017) <alin.chitu@tno.nl, chitu_alin@yahoo.com>
+/***********************************************************
+Copyright (C) 2015-2016
+Hilmar M. Magnusson <hilmarmag@gmail.com>
 
-   This file and the WellIndexCalculator as a whole is part of the
-   FieldOpt project. However, unlike the rest of FieldOpt, the
-   WellIndexCalculator is provided under the GNU Lesser General Public
-   License.
+Modified 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   WellIndexCalculator is free software: you can redistribute it and/or
-   modify it under the terms of the GNU Lesser General Public License
-   as published by the Free Software Foundation, either version 3 of
-   the License, or (at your option) any later version.
+Modified 2016-2017
+Alin G. Chitu <alin.chitu@tno.nl, chitu_alin@yahoo.com>
 
-   WellIndexCalculator is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
+Modified 2017-2021
+Mathias Bellout <mathias.bellout@gmail.no>
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with WellIndexCalculator.  If not, see
-   <http://www.gnu.org/licenses/>.
-******************************************************************************/
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_INTERSECTEDCELL_H
 #define FIELDOPT_INTERSECTEDCELL_H
@@ -58,16 +63,19 @@ class IntersectedCell : public Grid::Cell {
   Vector3d zvec() const;
 
   void add_new_segment(Vector3d entry_point, Vector3d exit_point,
-                       double entry_md, double exit_md,
+                       double entry_md, double exit_md, double length,
                        double segment_radius, double segment_skin);
   int num_segments() const;
 
   Vector3d get_segment_entry_point(int segment_index) const;
   Vector3d get_segment_exit_point(int segment_index) const;
+
   double get_segment_entry_md(int segment_index) const;
   double get_segment_exit_md(int segment_index) const;
   double get_segment_radius(int segment_index) const;
   double get_segment_skin(int segment_index) const;
+
+  double get_segment_length(int segment_index) const;
 
   void update_last_segment_exit_point(Vector3d exit_point);
 
@@ -82,7 +90,7 @@ class IntersectedCell : public Grid::Cell {
                                     double value);
 
   void set_segment_calculation_data_3d(int segment_index,
-                                    string name,
+                                       string name,
                                        Vector3d value3d);
 
   map<string, vector<double>>& get_calculation_data();
@@ -107,6 +115,7 @@ class IntersectedCell : public Grid::Cell {
   vector<double> exit_mds_;
   vector<double> segment_radius_;
   vector<double> segment_skin_;
+  vector<double> segment_length_;
 
   int i_, j_, k_;
 

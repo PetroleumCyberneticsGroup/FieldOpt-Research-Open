@@ -1,30 +1,35 @@
-/******************************************************************************
-   Copyright (C) 2015-2016 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2016
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef CONSTRAINTHANDLER_H
 #define CONSTRAINTHANDLER_H
 #include "constraint.h"
 #include "bhp_constraint.h"
 #include "well_spline_length.h"
-#include "interwell_distance.h"
-#include "combined_spline_length_interwell_distance.h"
-#include "combined_spline_length_interwell_distance_reservoir_boundary.h"
+#include "interw_dist.h"
+#include "mx_spline_length_interw_dist.h"
+#include "mx_spline_length_interw_dist_res_bound.h"
 #include "polar_azimuth.h"
 #include "polar_elevation.h"
 #include "polar_well_length.h"
@@ -38,7 +43,8 @@
 #include "rate_constraint.h"
 #include "Optimization/case.h"
 #include "reservoir_xyz_boundary.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
+
 #include "Settings/optimizer.h"
 #include "Reservoir/grid/grid.h"
 
@@ -54,16 +60,23 @@ namespace Constraints {
 class ConstraintHandler
 {
  public:
-  ConstraintHandler(QList<Settings::Optimizer::Constraint> constraints,
-                    Model::Properties::VariablePropertyContainer *variables,
+  ConstraintHandler(Settings::Optimizer *opt_settings,
+                    Model::Properties::VarPropContainer *variables,
                     Reservoir::Grid::Grid *grid);
-  bool CaseSatisfiesConstraints(Case *c); //!< Check if a Case satisfies _all_ constraints.
-  void SnapCaseToConstraints(Case *c); //!< Snap all variables to _all_ constraints.
 
-  QList<Constraint *> constraints() const { return constraints_; }
+  //!< Check if a Case satisfies _all_ constraints.
+  bool CaseSatisfiesConstraints(Case *c);
+
+  //!< Snap all variables to _all_ constraints.
+  void SnapCaseToConstraints(Case *c);
+
+  QList<Constraint *> constraints() const {
+    return constraints_;
+  }
 
   /*!
-   * @brief Check whether any of the constraints within are boundary constraints.
+   * @brief Check whether any of the constraints
+   * within are boundary constraints.
    */
   bool HasBoundaryConstraints() const;
 
@@ -74,7 +87,8 @@ class ConstraintHandler
   void InitializeNormalizers(QList<Case *> cases);
 
   /*!
-   * @brief Get the sum of all normalized penalties multiplied by their respective weights.
+   * @brief Get the sum of all normalized penalties
+   * multiplied by their respective weights.
    * @param c The case to get the penalties for.
    * @return Weighted sum of all normalized penalties
    */
@@ -85,6 +99,15 @@ class ConstraintHandler
 
  private:
   QList<Constraint *> constraints_;
+  QList<Settings::Optimizer::Constraint> constraint_set_;
+  Model::Properties::VarPropContainer *vars_;
+
+  Settings::VerbParams vp_;
+  string md_ = "Optimization/constraints";
+  string cl_ = "ConstraintHandler";
+  string im_ = "", wm_ = "", em_ = "";
+
+
 };
 
 }

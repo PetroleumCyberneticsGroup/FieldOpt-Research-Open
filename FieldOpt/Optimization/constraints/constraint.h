@@ -1,58 +1,83 @@
-/******************************************************************************
-   Copyright (C) 2015-2017 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Copyright (C) 2015-2017
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   This file is part of the FieldOpt project.
+Modified 2017-2021 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+This file is part of the FieldOpt project.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 #ifndef CONSTRAINT_H
 #define CONSTRAINT_H
 
 #include "Optimization/normalizer.h"
 #include "Optimization/case.h"
 #include "Settings/optimizer.h"
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
+
+#include "Utilities/verbosity.h"
 
 namespace Optimization {
 namespace Constraints {
 
+using namespace Model::Properties;
+using VPC = Model::Properties::VarPropContainer;
+using SO = Settings::Optimizer::Constraint;
+using SV = Settings::VerbParams;
+
+using Printer::info;
+using Printer::ext_info;
+using Printer::num2str;
+using Printer::DBG_prntVecXd;
+using Printer::DBG_prntDbl;
+using Printer::pad_text;
+
 /*!
- * \brief The Constraint class is the abstract parent class to all other constraint classes. One Constraint
- * object should be created for each defined constraint.
+ * \brief The Constraint class is the abstract parent class
+ * to all other constraint classes. One Constraint object
+ * should be created for each defined constraint.
  */
 class Constraint
 {
  public:
-  Constraint();
+  explicit Constraint(SO& seto, VPC *vars, SV vp);
 
   /*!
-   * \brief CaseSatisfiesConstraint checks whether a case satisfies the constraints for all
-   * applicable variables.
+   * \brief CaseSatisfiesConstraint checks whether a case
+   * satisfies the constraints for all applicable variables.
    * \param c The case to be checked.
-   * \return True if the constraint is satisfied; otherwise false.
+   * \return True if constraint is satisfied; otherwise false.
    */
   virtual bool CaseSatisfiesConstraint(Case *c) = 0;
 
   /*!
-   * \brief SnapCaseToConstraints Snaps all variable values in the case to the closest value
-   * that satisfies the constraint.
+   * \brief SnapCaseToConstraints Snaps all variable values
+   * in the case to the closest value that satisfies the
+   * constraint.
    * \param c The case that should have it's variable values snapped.
    */
   virtual void SnapCaseToConstraints(Case *c) = 0;
 
+  void DBG_SnapCase(int cs, string s0, string s1);
+
   virtual void EnableLogging(QString output_directory_path);
-  virtual void SetVerbosityLevel(int level);
+
+  virtual void SetVerbParams(Settings::VerbParams vp) { vp_  = vp; };
 
   /*!
    * @brief Indicates whether the constaint is a bound constraint.
@@ -91,7 +116,8 @@ class Constraint
   virtual Eigen::VectorXd GetUpperBounds(QList<QUuid> id_vector) const;
 
   /*!
-   * @brief Get the name of the constraint. All constraints should override this.
+   * @brief Get the name of the constraint.
+   * All constraints should override this.
    * @return Name of the constraint.
    */
   virtual string name() { return "NONAME"; }
@@ -99,22 +125,24 @@ class Constraint
   /*!
    * @brief Initialize the normalizer, setting the parameters.
    *
-   * This default implementation should be overridden by subclasses.
-   * This sets the parameters to
+   * This default implementation should be overridden by
+   * subclasses. This sets the parameters to
    *  - x_0 = 0.0
    *  - k = 1.0
    *  - L = 1.0
-   * @param cases A list of cases to be used for calculating the normalization parameters.
+   * @param cases A list of cases to be used for
+   * calculating the normalization parameters.
    */
   virtual void InitializeNormalizer(QList<Case *> cases);
 
   /*!
    * @brief Get the penalty term for a case.
    *
-   * This default implementation should be overridden by subclasses.
-   * This default implementation returns 0.0;
+   * This default implementation should be overridden by
+   * subclasses. This default implementation returns 0.0;
    * @param c Case to compute the violation for.
-   * @return The penalty term for a case (0.0 if it does not violate the constraint).
+   * @return The penalty term for a case (0.0 if
+   * it does not violate the constraint).
    */
   virtual double Penalty(Case *c);
 
@@ -127,14 +155,35 @@ class Constraint
 
   long double GetPenaltyWeight() { return penalty_weight_; }
 
+  bool isEnabled() { return isEnabled_; }
+  void PrntWellInfo(string wi, int cs);
+
  protected:
   bool logging_enabled_;
-  int verbosity_level_;
-  Normalizer normalizer_; //!< Normalizer for constraint violation value; to be used with penalty functions.
-  long double penalty_weight_; //!< The weight to be used when considering the constraint in a penalty function. (default: 0.0)
+  Settings::VerbParams vp_;
+
+  string md_ = "Optimization::Constraints";
+  string cl_ = "Constraint";
+  string im_ = "", wm_ = "", em_ = "";
+
+  //!< Normalizer for constraint violation value;
+  //!< to be used with penalty functions.
+  Normalizer normalizer_;
+
+  //!< The weight to be used when considering the
+  //!< constraint in a penalty function. (default: 0.0)
+  long double penalty_weight_;
+
+  SO seto_;
+  VPC *vars_;
+
+  bool isEnabled_ = false;
+  double min_, max_;
 
  private:
-  QString constraint_log_path_; //!< Path to the constraint log path to be written.
+  //!< Path to the constraint log path to be written.
+  QString constraint_log_path_;
+
 };
 
 }

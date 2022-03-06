@@ -23,15 +23,18 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_COLOR_MAKEFILE ON)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
+#OLD behavior for policy CMP0042 will be removed in future versions of CMake.
+cmake_policy(SET CMP0054 OLD)
+
 # Sanitizing ===============================================
 option(USE_SANITIZING "Build sanitizing features for debugging"  OFF)
 if (USE_SANITIZING)
-#  https://github.com/google/sanitizers
-#  Sanitizing is a feature built into more recent versions of GCC (>4.7).
-#  It add additional (better) error traces for memory-related problems.
-#  AddressSanitizer (detects addressability issues) and LeakSanitizer (detects memory leaks) [address] [leak]
-#  ThreadSanitizer (detects data races and deadlocks) for C++ and Go                         [thread]
-#  MemorySanitizer (detects use of uninitialized memory)                                     [memory]
+  #  https://github.com/google/sanitizers
+  #  Sanitizing is a feature built into more recent versions of GCC (>4.7).
+  #  It add additional (better) error traces for memory-related problems.
+  #  AddressSanitizer (detects addressability issues) and LeakSanitizer (detects memory leaks) [address] [leak]
+  #  ThreadSanitizer (detects data races and deadlocks) for C++ and Go                         [thread]
+  #  MemorySanitizer (detects use of uninitialized memory)                                     [memory]
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address  -fsanitize=leak -g")
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address  -fsanitize=leak -g")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address  -fsanitize=leak -g")
@@ -41,7 +44,6 @@ endif()
 #CMAKE_C_FLAGS:STRING=-fsanitize=address  -fsanitize=leak -g
 #CMAKE_EXE_LINKER_FLAGS:STRING=-fsanitize=address  -fsanitize=leak
 #CMAKE_MODULE_LINKER_FLAGS:STRING=-fsanitize=address  -fsanitize=leak
-
 
 # Build dirs ===============================================
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -56,18 +58,23 @@ include_directories(${PROJECT_SOURCE_DIR})
 # ╠╦╝║╣ ╚═╗║║║║╚═╗║║ ╦╠═╣ ║
 # ╩╚═╚═╝╚═╝╩╝╚╝╚═╝╩╚═╝╩ ╩ ╩
 # ----------------------------------------------------------
-
-# ResInsight ===============================================
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   add_definitions(-DCVF_LINUX)
   message(STATUS "CMAKE_SYSTEM_NAME => ${CMAKE_SYSTEM_NAME}")
 endif()
 
+# ____________________________________________________________________
+# ╔═╗  ╔═╗╔═╗╔═╗  ╔═╗╦  ╔═╗╔═╗╔═╗
+# ║    ║  ╠═╝╠═╝  ╠╣ ║  ╠═╣║ ╦╚═╗
+# ╚═╝  ╚═╝╩  ╩    ╚  ╩═╝╩ ╩╚═╝╚═╝
+# ____________________________________________________________________
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX -pipe -Wextra ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -DCVF_LINUX")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe -Wextra ")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
   set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -g3 -O0 -DDEBUG -D_DEBUG")
   set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNO_DEBUG")
+  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 endif()
 
 # ----------------------------------------------------------
@@ -75,29 +82,25 @@ endif()
 # ║╣ ╠╦╝ ║    ║╣ ║  ║
 # ╚═╝╩╚═ ╩────╚═╝╚═╝╩═╝
 # ----------------------------------------------------------
-
 add_subdirectory(ThirdParty/libecl)
-
 
 # ----------------------------------------------------------
 # ╦  ╔═╗╔═╗╔═╗╦    ╦  ╦╔╗ ╔═╗
 # ║  ║ ║║  ╠═╣║    ║  ║╠╩╗╚═╗
 # ╩═╝╚═╝╚═╝╩ ╩╩═╝  ╩═╝╩╚═╝╚═╝
 # ----------------------------------------------------------
-
 # Set bundled dependencies first in package search path
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib/cmake)
 message(STATUS "CMAKE_PREFIX_PATH:" ${CMAKE_PREFIX_PATH})
 
 # Add local third party include dirs
-include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗
 # ║ ║║║║║ ║    ║ ║╣ ╚═╗ ║
 # ╚═╝╝╚╝╩ ╩    ╩ ╚═╝╚═╝ ╩
 # ----------------------------------------------------------
-
 # Enable unit tests + example dir ==========================
 option(BUILD_TESTING "Build unit tests"                 ON)
 option(COPY_EXAMPLES "Copy examples to build directory" ON)
@@ -112,7 +115,6 @@ endif()
 # ╠═╣ ║║║ ╦╠═╝╠╦╝╚═╗  ║  ║╠╩╗
 # ╩ ╩═╩╝╚═╝╩  ╩╚═╚═╝  ╩═╝╩╚═╝
 # ----------------------------------------------------------
-
 # Enable compilation of WIC as standalone executable and/or lib ========
 # NOTE: only one of the following two options should be ON at same time
 # [1] Build standalone well index calculator executable
@@ -125,7 +127,6 @@ option(BUILD_WIC_ADGPRS "Build WIC as SHARED lib"       OFF)
 # ║║║╠═╣║ ║╠╦╝
 # ╩ ╩╩ ╩╚═╝╩╚═
 # ----------------------------------------------------------
-
 # Build executable for WI benchmarktests ===================
 option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 
@@ -134,18 +135,17 @@ option(BUILD_BENCHMARK "Build exec for wic RMS benchmark" OFF)
 # ║╣ ║║ ╦║╣ ║║║
 # ╚═╝╩╚═╝╚═╝╝╚╝
 # ----------------------------------------------------------
-
 # Include Eigen: Options ===================================
 if(NOT COMPILATION_AT_MAUR)
   find_package(Eigen3 REQUIRED)
-  include_directories(${EIGEN3_INCLUDE_DIR})
+  include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
   message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 endif()
 
 if(NOT EIGEN3_FOUND)
   message(STATUS "Using local Eigen3")
   set(EIGEN3_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
-#  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
+  #  set(Eigen3_DIR ${CMAKE_SOURCE_DIR}/ThirdParty/Eigen3)
 endif()
 
 # ----------------------------------------------------------
@@ -155,6 +155,9 @@ endif()
 # ╦ ╦╔╦╗╔═╗
 # ╠═╣ ║║╠╣
 # ╩ ╩═╩╝╚
+# ╔═╗╔╗╔╔═╗╔═╗╔╦╗
+# ╚═╗║║║║ ║╠═╝ ║
+# ╚═╝╝╚╝╚═╝╩   ╩
 # ----------------------------------------------------------
 
 # Build WIC executable  and/or WIC ADGPRS lib ==============
@@ -172,7 +175,7 @@ else()
   find_library(HDF5_CPP NAMES hdf5_cpp
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   find_library(HDF5 NAMES hdf5
-          HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
   find_package(Threads REQUIRED)
 
@@ -183,11 +186,22 @@ else()
       HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
       REQUIRED)
 
+  find_library(snopt NAMES snopt-7.2.12.2
+      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+      REQUIRED)
+
   message(STATUS "ecl_LIBRARIES: ${ecl_LIBRARIES}")
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
   message(STATUS "ecl_FOUND: ${ecl_FOUND}")
   message(STATUS "gp: ${gp}")
   message(STATUS "HDF5: ${HDF5}")
+
+  if(snopt MATCHES NOTFOUND)
+    message(STATUS "snopt lib NOT found; snopt=${snopt}")
+  else()
+    message(STATUS "snopt: ${snopt}")
+  endif()
 
 endif()
 
@@ -204,7 +218,7 @@ find_package(Qt5Core
 
 message(STATUS "Qt5Core_QTMAIN_LIBRARIES: ${Qt5Core_QTMAIN_LIBRARIES}")
 message(STATUS "Qt5Core_INCLUDE_DIRS: ${Qt5Core_INCLUDE_DIRS}")
-include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(SYSTEM ${Qt5Core_INCLUDE_DIRS})
 
 # ----------------------------------------------------------
 # ╦═╗╔═╗╔═╗╦ ╦ ╦╔═╗╔═╗╦ ╦ ╦
@@ -268,7 +282,7 @@ endif()
 message("..................................................")
 find_package(Boost REQUIRED) # 1.63
 if (Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIR})
+  include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 endif()
 set(Boost_USE_STATIC_LIBS OFF) # enable dynamic linking
 set(Boost_USE_MULTITHREAD ON)  # enable multithreading
@@ -317,17 +331,7 @@ include(DebugMsg.cmake)
 
 ## ADDED
 ## Set this directory as the root dir
-include_directories(${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
-
-# ----------------------------------------------------------
-# ╔═╗╔╗╔╔═╗╔═╗╔╦╗
-# ╚═╗║║║║ ║╠═╝ ║
-# ╚═╝╝╚╝╚═╝╩   ╩
-# ----------------------------------------------------------
-
-## SNOPT ===================================================
-#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/include/snopt)
-#include_directories(${CMAKE_SOURCE_DIR}/FieldOpt-3rdPartySolvers/handlers)
+include_directories(SYSTEM ${CMAKE_SOURCE_DIR} ${ERT_INCLUDE_DIR})
 
 # ----------------------------------------------------------
 # ╦ ╦╔╗╔╦╔╦╗  ╔╦╗╔═╗╔═╗╔╦╗╔═╗
@@ -365,26 +369,37 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
   add_subdirectory(Runner)
   add_subdirectory(ConstraintMath)
   add_subdirectory(Hdf5SummaryReader)
-#  add_subdirectory(FieldOpt-3rdPartySolvers)
+  #  add_subdirectory(FieldOpt-3rdPartySolvers)
 
   # Copy execution scripts
   file(GLOB EXECUTION_SCRIPTS
       "Simulation/execution_scripts/*.sh")
+
   file(COPY ${EXECUTION_SCRIPTS}
       DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/execution_scripts)
 
   ## Copy the test driver file into the build dir
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver.json
       DESTINATION ${CMAKE_BINARY_DIR}/examples)
+
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_sane.json
       DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_hybridopt.json
-          DESTINATION ${CMAKE_BINARY_DIR}/examples)
+      DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
-  ## Create an empty directory for test output
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldopt-output/norne_test)
+  # Create FO output dirs
+  set(FO_OUTPUT_DIR ${CMAKE_BINARY_DIR}/fieldopt-output)
+  set(DIRS
+      norne_test
+      en_5spot/fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv
+      olympr37/fo-drv.r001.c02-olympr37.icd-opt.apps.aug)
+
+  foreach(DIR ${DIRS})
+    message(STATUS "DIR=${FO_OUTPUT_DIR}/${DIR}")
+    file(MAKE_DIRECTORY ${FO_OUTPUT_DIR}/${DIR})
+  endforeach()
+
 endif()
 
 # Compile options ==========================================

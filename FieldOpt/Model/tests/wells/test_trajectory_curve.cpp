@@ -1,22 +1,28 @@
-/******************************************************************************
-   Created by einar on 9/7/18.
-   Copyright (C) 2018 Einar J.M. Baumann <einar.baumann@gmail.com>
+/***********************************************************
+Created by einar on 9/7/18.
 
-   This file is part of the FieldOpt project.
+Copyright (C) 2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This file is part of the FieldOpt project.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include "Model/cpp-spline/src/Bezier.h"
@@ -26,15 +32,12 @@
 
 namespace {
 
-
 class TrajectoryCurveTest : public ::testing::Test,
                             public TestResources::TestResourceModel,
-                            public TestResources::TestResourceGrids
- {
+                            public TestResources::TestResourceGrids {
  protected:
-  TrajectoryCurveTest() {
-  }
-
+  TrajectoryCurveTest() {}
+  Settings::VerbParams vp_ = {};
 };
 
 TEST_F(TrajectoryCurveTest, SimpleBezier) {
@@ -57,10 +60,10 @@ TEST_F(TrajectoryCurveTest, SimpleBezier) {
 TEST_F(TrajectoryCurveTest, WellApplication) {
   Paths paths;
   paths.SetPath(Paths::GRID_FILE, TestResources::ExampleFilePaths::grid_5spot_);
-  auto settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_bezier_well(), paths);
-  auto wsettings = settings.wells()[0];
+  auto model_settings = Settings::Model(TestResources::TestResourceModelSettingSnippets::model_bezier_well(), paths, vp_);
+  auto wsettings = model_settings.wells()[0];
   wsettings.use_bezier_spline = true;
-  auto varcont = new Model::Properties::VariablePropertyContainer();
+  auto varcont = new Model::Properties::VarPropContainer(vp_);
   auto well = Model::Wells::Wellbore::WellSpline(wsettings, varcont, TestResources::TestResourceGrids::grid_5spot_, nullptr);
   auto well_blocks = well.GetWellBlocks();
 

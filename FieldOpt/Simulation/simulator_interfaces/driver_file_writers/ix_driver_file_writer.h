@@ -1,22 +1,26 @@
-/******************************************************************************
- * This file is part of the FieldOpt project.
- *
- * Copyright (C) 2015-2018 Einar J.M. Baumann <einar.baumann@ntnu.no>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *****************************************************************************/
+/***********************************************************
+Copyright (C) 2015-2018
+Einar J.M. Baumann <einar.baumann@gmail.com>
+
+Modified 2017-2020 Mathias Bellout
+<chakibbb.pcg@gmail.com>
+
+This file is part of the FieldOpt project.
+
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
+
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
+
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #ifndef FIELDOPT_IX_DRIVER_FILE_WRITER_H
 #define FIELDOPT_IX_DRIVER_FILE_WRITER_H
@@ -33,11 +37,18 @@ namespace Simulation {
 class IXDriverFileWriter {
  public:
 
-  IXDriverFileWriter(Model::Model *model);
+  IXDriverFileWriter(Settings::Settings *settings,
+                     Model::Model *model);
   void WriteDriverFile(std::string fm_edits_path);
 
  private:
   Model::Model *model_;
+  ::Settings::Settings *settings_;
+
+  string im_ = "", wm_ = "", em_ = "";
+  ::Settings::VerbParams vp_;
+  string md_ = "Simulation::sim_interfaces::driver_file_writers";
+  string cl_ = "IXDriverFileWriter";
 
 };
 

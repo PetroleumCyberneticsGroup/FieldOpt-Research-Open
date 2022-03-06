@@ -37,10 +37,10 @@ namespace Completions {
 class ICD : public SegmentedCompletion {
  public:
   ICD(const Settings::Model::Well::Completion &completion_settings,
-      Properties::VariablePropertyContainer *variable_container);
+      Properties::VarPropContainer *variable_container);
 
   ICD(const Settings::Model::Well::ICVGroup &icv_group_settings,
-      Properties::VariablePropertyContainer *variable_container);
+      Properties::VarPropContainer *variable_container);
 
   /*!
    * @brief Get the setting for the valve.
@@ -49,9 +49,10 @@ class ICD : public SegmentedCompletion {
    * It should applied using the INVERSE_SQUARE method.
    * It is calculated from the current- and min- and max valve size.
    */
-  double setting() const;
+  double setting();
   double valveSize() const { return valve_size_->value(); }
   double flowCoefficient() const { return flow_coefficient_; }
+  double length() const { return length_; }
   int timeStep() const { return time_step_; }
   int segmentIdx() const { return segment_idx_; }
   std::string deviceName() const { return device_name_; }
@@ -63,14 +64,19 @@ class ICD : public SegmentedCompletion {
   std::vector<int> segmentIdxs() const { return segment_idxs_; }
 
  private:
-  Properties::ContinousProperty *valve_size_;
+  Properties::ContinuousProperty *valve_size_;
   double min_valve_size_, max_valve_size_;
   double flow_coefficient_;
+  double length_ = -1.0;
   int time_step_;
   int segment_idx_;
+
   std::string device_name_;
   std::vector<std::string> device_names_; //!< Used if this ICD objects represents multiple ICVs in the simulation.
   std::vector<int> segment_idxs_; //!< Used if this ICD objects represents multiple ICVs in the simulation.
+
+  string md_ = "Model::Wells::Wellbore::Completions";
+  string cl_ = "ICD";
 
 };
 
