@@ -199,9 +199,9 @@ bool GSS::is_converged() {
 
 bool GSS::is_sufficient_improvement() {
   if ((iteration_ != 0) &&
-      (tentative_best_case_->objective_function_value() != base_case_obj_) &&
+      (tentative_best_case_->objf_value() != base_case_obj_) &&
       (sufficient_improvement_tol_ >=0) &&
-      (abs((tentative_best_case_->objective_function_value()-base_case_obj_)/base_case_obj_) >= sufficient_improvement_tol_))
+      (abs((tentative_best_case_->objf_value()-base_case_obj_)/base_case_obj_) >= sufficient_improvement_tol_))
     return true;
   else
     return false;

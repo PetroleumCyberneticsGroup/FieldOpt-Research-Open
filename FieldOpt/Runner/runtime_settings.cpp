@@ -202,9 +202,9 @@ QString RuntimeSettings::runnerTypeString() const {
   } else if (runner_type_ == RunnerType::ONEOFF) {
     return "oneoff";
   } else if (runner_type_ == RunnerType::MPISYNC) {
-    return "mpisync"; }
+    return "mpisync";
   } else if (runner_type_ == RunnerType::DRILLINGWORKFLOW) {
-        return "drillingworkflow";    
+    return "drillingworkflow";
   } else { return "NOT SET"; }
 }
 

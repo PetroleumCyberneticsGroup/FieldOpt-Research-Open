@@ -63,7 +63,9 @@ class MainRunner
     * @brief Replace the optimizer.
     * @param opt New optimizer setttings.
     */
-    void ReplaceOptimizer(Settings::Optimizer *opt) { runner_->ReplaceOptimizer(opt); }  
+    void ReplaceOptimizer(Settings::Optimizer *opt) {
+      runner_->ReplaceOptimizer(opt);
+    }
 
    /*!
     * @brief Evaluates the base case.

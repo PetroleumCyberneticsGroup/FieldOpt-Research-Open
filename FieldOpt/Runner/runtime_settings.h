@@ -66,6 +66,7 @@ class RuntimeSettings : public Loggable
   int simulation_delay() const { return simulation_delay_; }
 
   RunnerType runner_type() const { return runner_type_; }
+  void setRunnerType(RunnerType runner_type)  { runner_type_ = runner_type; }
   QPair<QVector<double>, QVector<double>> prod_coords() const { return prod_coords_; }
   QPair<QVector<double>, QVector<double>> inje_coords() const { return inje_coords_; }
 

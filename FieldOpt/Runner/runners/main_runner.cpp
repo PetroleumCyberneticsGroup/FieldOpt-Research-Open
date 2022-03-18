@@ -66,7 +66,7 @@ MainRunner::MainRunner(RuntimeSettings *rts,
   switch (runtime_settings_->runner_type()) {
 
     case RuntimeSettings::RunnerType::SERIAL: {
-      runner_ = new SerialRunner(runtime_settings_, base_case, mso)
+      runner_ = new SerialRunner(runtime_settings_, base_case, mso);
       break;
     }
 
@@ -97,12 +97,12 @@ void MainRunner::Execute() {
 }
 
     Optimization::Case* MainRunner::evaluateBaseCase() {
-      runner_->InitializeSettings();
-      runner_->InitializeModel();
-      runner_->InitializeSimulator();
-      runner_->EvaluateBaseModel();
-      runner_->InitializeObjectiveFunction();
-      runner_->InitializeBaseCase();
+      runner_->InitSettings();
+      runner_->InitModel();
+      runner_->InitSimulator();
+      runner_->EvalBaseModel();
+      runner_->InitObjF();
+      runner_->InitBaseCase();
       runner_->InitializeOptimizer();
       return runner_->base_case_;
     }

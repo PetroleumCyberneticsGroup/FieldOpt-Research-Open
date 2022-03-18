@@ -25,9 +25,8 @@ If not, see <http://www.gnu.org/licenses/>.
 #ifndef SETTINGS_OPTIMIZER_H
 #define SETTINGS_OPTIMIZER_H
 
-//#include "settings.h"
+#include "settings.h"
 
-#include <QJsonObject>
 #include <QList>
 #include <QString>
 #include <QStringList>
@@ -479,7 +478,6 @@ class Optimizer
     QList<RealMaxMinLimit> spline_points_limits;
 
     bool scaling_ = true;
-
   };
 
   struct HybridComponent {
@@ -527,7 +525,6 @@ class Optimizer
   double infd_p() { return infd_; };
 
  private:
-
   QList<Constraint> constraints_;
   OptimizerType type_;
   Parameters parameters_;
@@ -559,8 +556,6 @@ class Optimizer
   bool CnstrCmp(QString ctype, QString con) {
     return (QString::compare(ctype, con) == 0);
   }
-
-
 };
 
 }

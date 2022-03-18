@@ -88,15 +88,10 @@ class AbstractRunner
   string md_ = "Runner";
   string cl_ = "AbstractRunner";
 
-   /*!
-   * @brief Initializes runner modules.
-  */
-  virtual void InitializeModules() {};
-  
  public:
   Model::Model* getModel() { return model_; }
   Settings::Settings* getSettings() { return settings_; }
-  Optimization::Optimizer* getOptimizer() { return optimizer_; }
+  Optimization::Optimizer* getOptimizer() { return optmzr_; }
   Simulation::Simulator* getSimulator() { return simulator_; }
 
   /*!
@@ -109,9 +104,15 @@ class AbstractRunner
  protected:
   explicit AbstractRunner(RuntimeSettings *runtime_settings);
 
+  /*!
+  * @brief Initializes runner modules.
+  */
+  virtual void InitializeModules() {};
+
   Bookkeeper *bookkeeper_;
   Model::Model *model_;
   Model::Properties::VarPropContainer *vars_;
+  Model::ModelSynchronizationObject *mso_;
 
   RuntimeSettings *rts_;
   Optimization::Case *base_case_;

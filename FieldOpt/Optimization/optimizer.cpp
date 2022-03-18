@@ -285,11 +285,6 @@ void Optimizer::setMinModelDeviation(double model_tol) {
   min_model_deviation_tol_ = model_tol;
 }
 
-void Optimizer::SetVerbosityLevel(int level) {
-    verbosity_level_ = level;
-    for (auto con : constraint_handler_->constraints())
-        con->SetVerbosityLevel(level);
-}
 int Optimizer::GetSimulationDuration(Case *c) {
   auto cs = case_handler_->GetCase(c->id());
   if (cs->state.eval != Case::CaseState::EvalStatus::E_DONE) {
@@ -329,24 +324,21 @@ map<string, vector<double>> Optimizer::GetOptimalValues() {
   map<string, vector<double>> val_map;
   val_map["TermCond"] = vector<double>{IsFinished()};
   val_map["IterNr"]   = vector<double>{iteration_};
-  val_map["CBOFnV"]   = vector<double>{tentative_best_case_->objective_function_value()};
+  val_map["CBOFnV"]   = vector<double>{tentative_best_case_->objf_value()};
   return val_map;
 }
 
-QHash<QUuid, double> Optimizer::GetOptimalVariables() {
+QList<QPair<QUuid, double>> Optimizer::GetOptimalVariables() {
   return tentative_best_case_->real_variables();
 }
 
-
-QHash<QUuid, bool> Optimizer::GetOptimalBinaryVariables() {
+QList<QPair<QUuid, bool>> Optimizer::GetOptimalBinaryVariables() {
   return tentative_best_case_->binary_variables();
 }
 
-
-QHash<QUuid, int> Optimizer::GetOptimalIntegerVariables() {
+QList<QPair<QUuid, int>> Optimizer::GetOptimalIntegerVariables() {
   return tentative_best_case_->integer_variables();
 }
-
 
 Loggable::LogTarget Optimizer::Summary::GetLogTarget() {
   return LOG_SUMMARY;
