@@ -6,7 +6,8 @@ include(Sources.cmake)
 find_package(MPI REQUIRED)
 include_directories(${MPI_INCLUDE_PATH})
 
-add_executable(FieldOpt main.cpp ${RUNNER_HEADERS} ${RUNNER_SOURCES})
+set(FO_EXEC_NAME FieldOpt-dw)
+add_executable(${FO_EXEC_NAME} main.cpp ${RUNNER_HEADERS} ${RUNNER_SOURCES})
 
 # Target lib ===============================================
 add_library(runner STATIC
@@ -15,7 +16,7 @@ add_library(runner STATIC
 
 add_library(fieldopt::runner ALIAS ${PROJECT_NAME})
 
-target_link_libraries(FieldOpt
+target_link_libraries(${FO_EXEC_NAME}
 	PUBLIC fieldopt::model
 	PUBLIC fieldopt::simulation
 	PUBLIC fieldopt::optimization
@@ -39,6 +40,7 @@ target_link_libraries(runner
 	PUBLIC fieldopt::constraintmath
 	PUBLIC ${CMAKE_THREAD_LIBS_INIT}
 	PUBLIC ${Boost_LIBRARIES}
+	PUBLIC ${MPI_LIBRARIES}
 	PUBLIC ri:ert_ecl
 	)
 
@@ -52,7 +54,7 @@ if(MPI_LINK_FLAGS)
 		LINK_FLAGS "${MPI_LINK_FLAGS}")
 endif()
 
-target_include_directories(FieldOpt PUBLIC
+target_include_directories(${FO_EXEC_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/runners>)
 
@@ -77,7 +79,7 @@ if (BUILD_TESTING)
 endif()
 
 # Install ==================================================
-install(TARGETS FieldOpt runner
+install(TARGETS ${FO_EXEC_NAME} runner
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib/static)
