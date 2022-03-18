@@ -7,6 +7,7 @@ SET(SETTINGS_HEADERS
 	settings.h
 	settings_exceptions.h
 	simulator.h
+	drilling.h
 	trajectory_importer.h
 	helpers.hpp
 	)
@@ -19,6 +20,7 @@ SET(SETTINGS_SOURCES
 	paths.cpp
 	settings.cpp
 	simulator.cpp
+	drilling.cpp
 	trajectory_importer.cpp
 	)
 

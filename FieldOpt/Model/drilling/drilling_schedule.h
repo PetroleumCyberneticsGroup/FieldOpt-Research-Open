@@ -1,30 +1,32 @@
-/********************************************************************
- Copyright (C) 2020-
- Mathias Bellout <chakibbb-pcg@gmail.com>
- Thiago L. Silva <thiagolims@gmail.com>
+/***********************************************************
+Copyright (C) 2020-
+Thiago L. Silva <thiagolims@gmail.com>
+Mathias Bellout <chakibbb-pcg@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
+
 
 #ifndef FIELDOPT_DRILLING_SCHEDULE_H
 #define FIELDOPT_DRILLING_SCHEDULE_H
 
-#include "Model/properties/variable_property_container.h"
+#include "Model/properties/var_prop_container.h"
 #include "drilling_schedule.h"
-#include "Settings/model.h"
+#include "Settings/drilling.h"
 #include "Settings/optimizer.h"
 #include <iostream>
 
@@ -33,8 +35,8 @@ namespace Drilling {
 
 class DrillingSchedule {
  private:
-  void assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings);
-  void assignOptimizationTriggers(QMap<int, Settings::Model::Drilling::OptimizationTrigger> opt_triggers);
+  void assignDrillingPoints(QMap<int, QList<Settings::Drilling::DrillingPoint>> drilling_points_settings);
+  void assignOptimizationTriggers(QMap<int, Settings::Drilling::OptimizationTrigger> opt_triggers);
 
  public:
   struct DrillingPoint {
@@ -50,11 +52,12 @@ class DrillingSchedule {
     double max_objective_improvement;
   };
 
-  enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
+  enum DrillingOperation : int { StartDrilling=1, Drilling=2, PullingOutOfHole=3 };
   enum ModelType: int {TrueModel=1, Surrogate=2};
   enum Execution: int {Serial=1, Parallel=2};
 
-  DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables);
+  DrillingSchedule(Settings::Drilling *setd,
+                   Properties::VarPropContainer *variables);
 
   QList<int> getSteps() { return drilling_steps_; }
   QMap<int, double> getTimeSteps() { return time_steps_; }
@@ -71,6 +74,7 @@ class DrillingSchedule {
   QMap<int, bool> isWarmStart() { return is_warm_start_;}
 
  private:
+  Settings::Drilling::DrillingSchedule d_sched_;
   QList<int> drilling_steps_;
   QMap<int, double> time_steps_; //!< Indexed by the drilling steps
   QMap<int, QList<DrillingPoint>> drilling_points_; //!< Indexed by the drilling steps

@@ -41,8 +41,9 @@ namespace Settings {
 
 class Global;
 class Simulator;
-class Optimizer;
 class Model;
+class Optimizer;
+class Drilling;
 
 /*!
  * \brief The Settings class contains both general settings
@@ -74,6 +75,8 @@ class Settings
   //!< Object containing simulator specific settings.
   Simulator *simulator() const { return simulator_; }
 
+  Drilling *drilling() const { return drilling_; }
+
   //!< Get a string containing the CSV header and contents
   //!< for the log.
   QString GetLogCsvString() const;
@@ -99,6 +102,7 @@ class Settings
   Model *model_;
   Optimizer *optimizer_;
   Simulator *simulator_;
+  Drilling *drilling_;
 
   void readDriverFile();
   void readGlobalSection();

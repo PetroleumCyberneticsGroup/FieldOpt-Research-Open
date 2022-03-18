@@ -1,50 +1,56 @@
-/********************************************************************
- Copyright (C) 2020-
- Thiago L. Silva <thiagolims@gmail.com>
- Mathias Bellout <chakibbb-pcg@gmail.com>
+/***********************************************************
+Copyright (C) 2020-
+Thiago L. Silva <thiagolims@gmail.com>
+Mathias Bellout <chakibbb-pcg@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-*********************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "drilling_schedule.h"
 
 namespace Model {
 namespace Drilling {
-DrillingSchedule::DrillingSchedule(Settings::Model *settings, Properties::VariablePropertyContainer *variables) {
+DrillingSchedule::DrillingSchedule(Settings::Drilling* setd,
+                                   Properties::VarPropContainer *variables) {
 
-  drilling_steps_ = settings->drilling().drilling_schedule.drilling_steps;
-  time_steps_ = settings->drilling().drilling_schedule.time_steps;
+  d_sched_ = setd->drilling_sched();
+  drilling_steps_ = d_sched_.drilling_steps;
+  time_steps_ = d_sched_.time_steps;
 
   for (int i: drilling_steps_) {
-    model_types_.insert(i, (ModelType) settings->drilling().drilling_schedule.model_types.value(i));
-    execution_modes_.insert(i, (Execution) settings->drilling().drilling_schedule.execution_modes.value(i));
-    drilling_operations_.insert(i, (DrillingOperation) settings->drilling().drilling_schedule.drilling_operations.value(i));
-    optimizer_settings_.insert(i, (Settings::Optimizer*) settings->drilling().drilling_schedule.optimizer_settings.value(i));
+    model_types_.insert(i, (ModelType) d_sched_.model_types.value(i));
+    execution_modes_.insert(i, (Execution) d_sched_.execution_modes.value(i));
 
-    is_variable_completions_.insert(i, settings->drilling().drilling_schedule.is_variable_completions.value(i));
-    is_variable_drilling_points_.insert(i, settings->drilling().drilling_schedule.is_variable_drilling_points.value(i));
-    is_model_updates_.insert(i, settings->drilling().drilling_schedule.is_model_updates.value(i));
-    is_warm_start_.insert(i, settings->drilling().drilling_schedule.is_warm_start.value(i));
+    drilling_operations_.insert(i, (DrillingOperation) d_sched_.drilling_operations.value(i));
+    optimizer_settings_.insert(i, (Settings::Optimizer*) d_sched_.optimizer_settings.value(i));
+
+    is_variable_completions_.insert(i, d_sched_.is_variable_completions.value(i));
+    is_variable_drilling_points_.insert(i, d_sched_.is_variable_drilling_points.value(i));
+
+    is_model_updates_.insert(i, d_sched_.is_model_updates.value(i));
+    is_warm_start_.insert(i, d_sched_.is_warm_start.value(i));
   }
 
-  assignDrillingPoints(settings->drilling().drilling_schedule.drilling_points);
-  assignOptimizationTriggers(settings->drilling().drilling_schedule.optimization_triggers);
+  assignDrillingPoints(d_sched_.drilling_points);
+  assignOptimizationTriggers(d_sched_.optimization_triggers);
 }
 
-void DrillingSchedule::assignDrillingPoints(QMap<int, QList<Settings::Model::Drilling::DrillingPoint>> drilling_points_settings) {
+void DrillingSchedule::assignDrillingPoints(QMap<int,
+                                            QList<Settings::Drilling::DrillingPoint>> drilling_points_settings) {
   for (int i: drilling_steps_) {
     QList<DrillingSchedule::DrillingPoint> points_list;
     for (int j = 0; j < drilling_points_settings.value(i).size(); j++) {
@@ -61,7 +67,7 @@ void DrillingSchedule::assignDrillingPoints(QMap<int, QList<Settings::Model::Dri
   }
 }
 
-void DrillingSchedule::assignOptimizationTriggers(QMap<int, Settings::Model::Drilling::OptimizationTrigger> opt_triggers) {
+void DrillingSchedule::assignOptimizationTriggers(QMap<int, Settings::Drilling::OptimizationTrigger> opt_triggers) {
   for (int i: drilling_steps_) {
     if (opt_triggers.contains(i)) {
       DrillingSchedule::OptimizationTrigger opt_trigger;

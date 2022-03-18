@@ -1,24 +1,24 @@
-/********************************************************************
- Copyright (C) 2020-
- Thiago L. Silva <thiagolims@gmail.com>
- Mathias Bellout <chakibbb-pcg@gmail.com>
+/***********************************************************
+Copyright (C) 2020-
+Thiago L. Silva <thiagolims@gmail.com>
+Mathias Bellout <chakibbb-pcg@gmail.com>
 
- This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
- FieldOpt is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
- FieldOpt is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License
- along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-***************************************************************** ****/
-
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include "drilling.h"
 #include "paths.h"
@@ -27,35 +27,41 @@
 namespace Model {
 namespace Drilling {
 
-Drilling::Drilling(Settings::Model *settings, Properties::VariablePropertyContainer *drilling_variables) {
-  drilling_variables_  = drilling_variables;
-  settings_   = settings;
+Drilling::Drilling(Settings::Drilling *settings,
+                   Properties::VarPropContainer *drilling_variables) {
+  drilling_variables_ = drilling_variables;
+  setd_ = settings;
 
-  well_name_ = settings->drilling().well_name;
+  well_name_ = setd_->well_name;
 
-  drilling_schedule_ = new DrillingSchedule(settings_, drilling_variables_);
+  drilling_schedule_ = new DrillingSchedule(setd_, drilling_variables_);
 
-  local_optimizer_settings_ = settings->drilling().local_optimizer_settings;
-  global_optimizer_settings_ = settings->drilling().global_optimizer_settings;
+  local_optimizer_settings_ = setd_->local_optimizer_settings;
+  global_optimizer_settings_ = setd_->global_optimizer_settings;
 
   current_step_ = 0;
   current_model_ = 0;
 
   skip_optimization_ = false;
 
-  best_case_ = 0;
-  base_case_ = 0;
-  best_objective_ = 0;
-  mso_ = 0;
+  best_case_ = nullptr;
+  base_case_ = nullptr;
+  mso_ = nullptr;
+  best_objective_ = 0.0;
 };
 
-void Drilling::setWellOptimalVariables(const QHash<QUuid, bool>& opt_bin_var,  const QHash<QUuid, int>& opt_int_var, const QHash<QUuid, double>& opt_var, int drilling_step) {
+void Drilling::setWellOptimalVariables(const QList<QPair<QUuid, bool>>& opt_bin_var,
+                                       const QList<QPair<QUuid, int>>& opt_int_var,
+                                       const QList<QPair<QUuid, double>>& opt_var,
+                                       int drilling_step) {
   optimal_int_variables_.insert(drilling_step, opt_int_var);
   optimal_bin_variables_.insert(drilling_step, opt_bin_var);
   optimal_variables_.insert(drilling_step, opt_var);
 }
 
-void Drilling::setWellOptimizationValues(const std::map<string, std::vector<double>>& opt_val, int drilling_step) {
+void Drilling::setWellOptimizationValues(
+  const std::map<string, std::vector<double>>& opt_val,
+  int drilling_step) {
   optimal_values_.insert(drilling_step, opt_val);
 }
 
@@ -90,15 +96,17 @@ void Drilling::maintainRuntimeSettings(int drilling_step) {
   runtime_settings_.insert(drilling_step+1, rts);
 }
 
-void Drilling::setOptRuntimeSettings(int drilling_step, int argc, const char** argv) {
+void Drilling::setOptRuntimeSettings(int drilling_step,
+                                     int argc, const char** argv) {
   runtime_settings_.insert(drilling_step, new Runner::RuntimeSettings(argc, argv));
   original_output_dir_ = runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR);
 }
 
-void Drilling::setOptRuntimeSettings(int drilling_step, Runner::RuntimeSettings* rts) {
-  if (settings_->drilling().drilling_schedule.execution_modes.value(drilling_step) == settings_->drilling().drilling_schedule.Serial) {
+void Drilling::setOptRuntimeSettings(int drilling_step,
+                                     Runner::RuntimeSettings* rts) {
+  if (setd_->drilling_sched().execution_modes.value(drilling_step) == setd_->drilling_sched().Serial) {
     rts->setRunnerType(rts->SERIAL);
-  } else if ((settings_->drilling().drilling_schedule.execution_modes.value(drilling_step) == settings_->drilling().drilling_schedule.Parallel)) {
+  } else if ((setd_->drilling_sched().execution_modes.value(drilling_step) == setd_->drilling_sched().Parallel)) {
     rts->setRunnerType(rts->MPISYNC);
   }
 
@@ -139,7 +147,7 @@ void Drilling::runOptimization(int drilling_step) {
 
   //TODO: allow change of deck and EGRID files in each drilling step (folder structure with models)
   QString output_dir = QString::fromStdString(original_output_dir_) + QString("/drilling_step_%1").arg(drilling_step);
-  Utilities::FileHandling::CreateDirectory(output_dir);
+  Utilities::FileHandling::CreateDir(output_dir, setd_->verbParams());
 
   runtime_settings_.value(drilling_step)->paths().SetPath(Paths::OUTPUT_DIR,output_dir.toStdString());
 
@@ -166,10 +174,10 @@ void Drilling::runOptimization(int drilling_step) {
   if (drilling_schedule_->getOptimizerSettings().value(drilling_step) != nullptr)
     runner->ReplaceOptimizer(drilling_schedule_->getOptimizerSettings().value(drilling_step));
 
-  base_case_ = runner->getOptimizer()->GetTentativeBestCase();
+  base_case_ = runner->getOptimizer()->GetTentBestCase();
 
   //!<Trigger #1: model deviation>
-  double model_dev = abs((base_case_->objective_function_value() - best_objective_) / best_objective_);
+  double model_dev = abs((base_case_->objf_value() - best_objective_) / best_objective_);
   if (drilling_schedule_->getOptimizationTriggers().contains(drilling_step)) {
     double min_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).min_model_deviation;
     double max_model_dev = drilling_schedule_->getOptimizationTriggers().value(drilling_step).max_model_deviation;
@@ -205,10 +213,10 @@ void Drilling::runOptimization(int drilling_step) {
                           drilling_step);
   setWellOptimizationValues(opt->GetOptimalValues(), drilling_step);
 
-  best_case_ = opt->GetTentativeBestCase();
-  best_objective_ = best_case_->objective_function_value();
+  best_case_ = opt->GetTentBestCase();
+  best_objective_ = best_case_->objf_value();
 
-  double obj_improvement = abs((best_objective_-base_case_->objective_function_value())/base_case_->objective_function_value());
+  double obj_improvement = abs((best_objective_-base_case_->objf_value())/base_case_->objf_value());
 
   printIteration(drilling_step, model_dev, obj_improvement, skip_optimization_);
 
@@ -222,14 +230,14 @@ void Drilling::createLogFile(int drilling_step) {
   QString output_dir = QString::fromUtf8(runtime_settings_.value(drilling_step)->paths().GetPath(Paths::OUTPUT_DIR).c_str());
 
   if (output_dir.length() > 0) {
-    Utilities::FileHandling::CreateDirectory(output_dir);
+    Utilities::FileHandling::CreateDir(output_dir, setd_->verbParams());
   }
 
   dw_log_path_ = output_dir + "/log_drilling_workflow.csv";
 
   // Delete existing logs if --force flag is on
-  if (Utilities::FileHandling::FileExists(dw_log_path_)) {
-    Utilities::FileHandling::DeleteFile(dw_log_path_);
+  if (Utilities::FileHandling::FileExists(dw_log_path_, setd_->verbParams())) {
+    Utilities::FileHandling::DeleteFile(dw_log_path_, setd_->verbParams());
   }
 
   const QString tr_log_header = "ds dev obj skip";
@@ -237,7 +245,10 @@ void Drilling::createLogFile(int drilling_step) {
 
 }
 
-void Drilling::printIteration(int drilling_step, double model_deviation, double obj_improvement, bool skip_opt) {
+void Drilling::printIteration(int drilling_step,
+                              double model_deviation,
+                              double obj_improvement,
+                              bool skip_opt) {
     stringstream ss;
 
     ss << setw(4) << right << drilling_step << setprecision(4)

@@ -1,21 +1,24 @@
-/******************************************************************************
-   Copyright (C) 2020- Thiago Lima Silva <thiagolims@gmail.com>
+/***********************************************************
+Copyright (C) 2020-
+Thiago L. Silva <thiagolims@gmail.com>
+Mathias Bellout <chakibbb-pcg@gmail.com>
 
-   This file is part of the FieldOpt project.
+This file is part of the FieldOpt project.
 
-   FieldOpt is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+FieldOpt is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version
+3 of the License, or (at your option) any later version.
 
-   FieldOpt is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+FieldOpt is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+the GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with FieldOpt.  If not, see <http://www.gnu.org/licenses/>.
-******************************************************************************/
+You should have received a copy of the
+GNU General Public License along with FieldOpt.
+If not, see <http://www.gnu.org/licenses/>.
+***********************************************************/
 
 #include <gtest/gtest.h>
 #include <drilling/drilling.h>
@@ -29,9 +32,9 @@
 namespace {
 
 class DrillingTest :
-    public ::testing::Test,
-    public TestResources::TestResourceOptimizer,
-    public TestResources::TestResourceGrids {
+  public ::testing::Test,
+  public TestResources::TestResourceOptimizer,
+  public TestResources::TestResourceGrids {
  protected:
   DrillingTest() {}
 
@@ -44,53 +47,53 @@ TEST_F(DrillingTest, Constructor) {
 }
 
 TEST_F(DrillingTest, ChildObjects) {
-  EXPECT_NO_THROW(settings_model_->drilling());
-  EXPECT_NO_THROW(settings_model_->drilling().well_name);
-  EXPECT_NO_THROW(settings_model_->drilling().drilling_schedule);
+  EXPECT_NO_THROW(settings_drilling_);
+  EXPECT_NO_THROW(settings_drilling_->well_name);
+  EXPECT_NO_THROW(settings_drilling_->drilling_sched());
 }
 
 TEST_F(DrillingTest, DrillingClasses) {
-  EXPECT_NO_THROW(new Model::Drilling::Drilling(settings_model_, nullptr));
-  EXPECT_NO_THROW(new Model::Drilling::DrillingSchedule(settings_model_, nullptr));
+  EXPECT_NO_THROW(new Model::Drilling::Drilling(settings_drilling_, nullptr));
+  EXPECT_NO_THROW(new Model::Drilling::DrillingSchedule(settings_drilling_, nullptr));
 }
 
 TEST_F(DrillingTest, DrillingScheduleDataStructure) {
-  settings_model_->readDrilling(json_settings_drilling_);
-  Settings::Model::Drilling drilling_settings = settings_model_->drilling();
+  settings_drilling_->readDrilling(json_settings_drilling_);
+  Settings::Drilling* drilling_settings = settings_drilling_;
 
-  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
-  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_model_, nullptr);
+  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
+  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_drilling_, nullptr);
 
   bool is_drilling_object_correct = true;
   bool dbg = false;
 
   QList<int> steps = schedule->getSteps();
-  if (steps.size() != drilling_settings.drilling_schedule.drilling_steps.size())
+  if (steps.size() != drilling_settings->drilling_sched().drilling_steps.size())
     is_drilling_object_correct = false;
 
   for (int i = 0; i < steps.size(); i++) {
     // check drilling steps and time steps
-    if (steps.value(i) != drilling_settings.drilling_schedule.drilling_steps.value(i))
+    if (steps.value(i) != drilling_settings->drilling_sched().drilling_steps.value(i))
       is_drilling_object_correct = false;
 
-    if (schedule->getTimeSteps().value(i) != drilling_settings.drilling_schedule.time_steps.value(i))
+    if (schedule->getTimeSteps().value(i) != drilling_settings->drilling_sched().time_steps.value(i))
       is_drilling_object_correct = false;
 
     // check model types
-    if ((int)schedule->getModelTypes().value(i) != (int)drilling_settings.drilling_schedule.model_types.value(i))
+    if ((int)schedule->getModelTypes().value(i) != (int)drilling_settings->drilling_sched().model_types.value(i))
       is_drilling_object_correct = false;
 
     // check drilling completions
-    if (schedule->isVariableCompletions().value(i) != drilling_settings.drilling_schedule.is_variable_completions.value(i))
+    if (schedule->isVariableCompletions().value(i) != drilling_settings->drilling_sched().is_variable_completions.value(i))
       is_drilling_object_correct = false;
 
     // check model updates
-    if (schedule->isModelUpdates().value(i) != drilling_settings.drilling_schedule.is_model_updates.value(i))
+    if (schedule->isModelUpdates().value(i) != drilling_settings->drilling_sched().is_model_updates.value(i))
       is_drilling_object_correct = false;
 
     // check the drilling points
     QList<Model::Drilling::DrillingSchedule::DrillingPoint> points = schedule->getDrillingPoints().value(i);
-    QList<Settings::Model::Drilling::DrillingPoint> points_settings = drilling_settings.drilling_schedule.drilling_points.value(i);
+    QList<Settings::Drilling::DrillingPoint> points_settings = drilling_settings->drilling_sched().drilling_points.value(i);
     if (points.size() == points_settings.size()) {
       for (int j = 0; j < points.size(); j++) {
 
@@ -116,22 +119,21 @@ TEST_F(DrillingTest, DrillingScheduleDataStructure) {
   EXPECT_TRUE(is_drilling_object_correct);
 }
 
-
 TEST_F(DrillingTest, ParseJson) {
-  EXPECT_NO_THROW(settings_model_->readDrilling(json_settings_drilling_));
+  EXPECT_NO_THROW(settings_drilling_->readDrilling(json_settings_drilling_));
   bool dbg = false;
   if (dbg) {
-    Settings::Model::Drilling drilling = settings_model_->drilling();
-    cout << "wellName:" << drilling.well_name.toStdString() << endl;
+    Settings::Drilling* drilling = settings_drilling_;
+    cout << "wellName:" << drilling->well_name.toStdString() << endl;
 
-    Settings::Model::Drilling::DrillingSchedule schedule = drilling.drilling_schedule;
+    Settings::Drilling::DrillingSchedule schedule = drilling->drilling_sched();
     QList<int> steps = schedule.drilling_steps;
     for (int i = 0; i < steps.size(); i++) {
       cout << "step: " << i << endl;
       cout << "TimeStep: " << schedule.time_steps.value(i) << endl;
 
       cout << "drilling points:" << endl;
-      QList<Settings::Model::Drilling::DrillingPoint> points = schedule.drilling_points.value(i);
+      QList<Settings::Drilling::DrillingPoint> points = schedule.drilling_points.value(i);
       cout << "points.size()=" << points.size() << endl;
       for (int j = 0; j < points.size(); j++) {
         cout << "point " << j << ": ";
@@ -140,13 +142,13 @@ TEST_F(DrillingTest, ParseJson) {
 
       cout << "Operation:";
       switch (schedule.drilling_operations.value(i)) {
-        case drilling.drilling_schedule.StartDrilling:
+        case Settings::Drilling::DrillingSchedule::DrillingOperation::StartDrilling:
           cout << "StartDrilling" << endl;
           break;
-        case drilling.drilling_schedule.Drilling:
+        case Settings::Drilling::DrillingSchedule::DrillingOperation::Drilling:
           cout << "Drilling" << endl;
           break;
-        case drilling.drilling_schedule.PullingOutOfHole:
+        case Settings::Drilling::DrillingSchedule::DrillingOperation::PullingOutOfHole:
           cout << "PullingOutOfHole" << endl;
           break;
 
@@ -155,9 +157,9 @@ TEST_F(DrillingTest, ParseJson) {
 
       cout << "ModelType:";
       switch (schedule.model_types.value(i)) {
-        case drilling.drilling_schedule.TrueModel:cout << "TrueModel" << endl;
+        case Settings::Drilling::DrillingSchedule::ModelType::TrueModel:cout << "TrueModel" << endl;
           break;
-        case drilling.drilling_schedule.Surrogate:cout << "Surrogate" << endl;
+        case Settings::Drilling::DrillingSchedule::ModelType::Surrogate:cout << "Surrogate" << endl;
           break;
         default:cout << "undefined" << endl;
       }
@@ -170,11 +172,11 @@ TEST_F(DrillingTest, ParseJson) {
 }
 
 TEST_F(DrillingTest, DrillingRunner) {
-  settings_model_->readDrilling(json_settings_drilling_);
-  Settings::Model::Drilling drilling_settings = settings_model_->drilling();
+  settings_drilling_->readDrilling(json_settings_drilling_);
+  Settings::Drilling* drilling_settings = settings_drilling_;
   bool dbg = false;
 
-  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_model_, nullptr);
+  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
   Model::Drilling::DrillingSchedule *schedule = drilling->getDrillingSchedule();
 
   int argc = 16;
@@ -199,8 +201,6 @@ TEST_F(DrillingTest, DrillingRunner) {
   drilling->setOptRuntimeSettings(0, argc, argv);
   for (int i: drilling_steps) {
     double ts = schedule->getTimeSteps().value(i);
-
-
 
     if (dbg) {
       cout << "drilling_step:" << i << endl;

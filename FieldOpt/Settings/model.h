@@ -23,13 +23,10 @@ GNU General Public License along with FieldOpt.
 If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************/
 
-
 #ifndef SETTINGS_MODEL_H
 #define SETTINGS_MODEL_H
 
-//#include "settings.h"
-
-#include "Settings/optimizer.h"
+#include "settings.h"
 #include "paths.h"
 #include "trajectory_importer.h"
 
@@ -171,7 +168,6 @@ class Model
       std::string toString();
 
       double tstep_ref_;
-
     };
 
     PreferredPhase preferred_phase;             //!< The preferred phase for the well
@@ -210,55 +206,6 @@ class Model
     void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
     VerbParams verbParams() const { return verb_params_; };
   };
-
-  struct Drilling {
-    Drilling(){}
-    QString well_name;
-    Optimizer* local_optimizer_settings;
-    Optimizer* global_optimizer_settings;
-
-    struct DrillingPoint {
-      DrillingPoint() {}
-        double x, y, z;
-        bool is_variable = false;
-    };
-
-    struct OptimizationTrigger {
-      OptimizationTrigger() {}
-        double min_model_deviation = -1;
-        double max_model_deviation = 100;
-        double max_objective_improvement = -1;
-    };
-
-    struct DrillingSchedule {
-      DrillingSchedule() {}
-      QList<int> drilling_steps;    //!<We assume the indexes are from ordered from 0 to N
-      QMap<int, double> time_steps; //!< Indexed by the drilling steps
-      QMap<int, QList<DrillingPoint>> drilling_points; //!< Indexed by the drilling steps
-
-      enum DrillingOperation : int {StartDrilling=1, Drilling=2, PullingOutOfHole=3};
-      enum ModelType: int {TrueModel=1, Surrogate=2};
-      enum Execution: int {Serial=1, Parallel=2};
-
-      QMap<int, DrillingOperation> drilling_operations;
-      QMap<int, ModelType> model_types;
-      QMap<int, Execution> execution_modes;
-      QMap<int, Optimizer*> optimizer_settings;
-      QMap<int, OptimizationTrigger> optimization_triggers;
-
-      QMap<int, bool> is_variable_drilling_points;
-      QMap<int, bool> is_variable_completions;
-      QMap<int, bool> is_model_updates;
-      QMap<int, bool> is_warm_start;
-    };
-
-    DrillingSchedule drilling_schedule;
-  };
-
-  QList<Well> wells() const { return wells_; }                //!< Get the struct containing settings for the well(s) in the model.
-  QList<int> control_times() const { return control_times_; } //!< Get the control times for the schedule
-  Drilling drilling() const { return drilling_;} //!< Get the drilling settings in the model
-  void readDrilling(QJsonObject json_drilling_workflow);
   
   //!< Get struct containing settings for the well(s) in the model.
   QList<Well> wells() const { return wells_; }
@@ -273,7 +220,6 @@ class Model
  private:
   QList<Well> wells_;
   QList<double> control_times_;
-  Drilling drilling_;
   QList<int> start_date_;
   int tstep_refinement_;
 

@@ -59,6 +59,7 @@ class TestResourceSettings {
     settings_optimizer_ = settings_full_->optimizer();
     settings_simulator_ = settings_full_->simulator();
     settings_model_ = settings_full_->model();
+    settings_drilling_ = settings_full_->drilling();
     settings_well_ = settings_full_->model()->wells().at(0);
 
     // -----------------------------------------------------
@@ -128,6 +129,7 @@ class TestResourceSettings {
   Settings::Optimizer *settings_optimizer_;
   Settings::Simulator *settings_simulator_;
   Settings::Model *settings_model_;
+  Settings::Drilling *settings_drilling_;
   Settings::Model::Well settings_well_;
   Paths paths_;
 

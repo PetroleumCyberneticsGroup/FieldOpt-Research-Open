@@ -48,6 +48,9 @@ static string bin_dir_                  = base_path() + "/bin/";
 static string driver_example_           = base_path() + "/examples/driver.json";
 static string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
 static string directory_output_         = base_path() + "/fieldopt-output";
+static string directory_output_icds_    = base_path() + "/fieldopt-output/5spot-ICD";
+static string directory_output_womud_   = base_path() + "/fieldopt-output/5spot-WOMUD";
+static string dir_5spot_SLB_output_     = base_path() + "/fieldopt-output/5spot-SLB";
 static string norne_test_output_        = base_path() + "/fieldopt-output/norne_test";
 static string norne_driver_example_     = base_path() + "/examples/ECLIPSE/norne-simplified/fo_driver.1_rate.cs.json";
 static string norne_grid_               = base_path() + "/examples/ECLIPSE/norne-simplified/NORNE_SIMPLIFIED.EGRID";
@@ -57,12 +60,21 @@ static string norne_sch_                = base_path() + "/examples/ECLIPSE/norne
 static string deck_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.DATA";
 static string grid_horzwel_             = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL.EGRID";
 static string ecl_base_horzwell         = base_path() + "/examples/ECLIPSE/HORZWELL/HORZWELL";
+static string deck_ECL_5spot_           = base_path() + "/examples/ECLIPSE/5spot/ECL_5SPOT.DATA";
 
 static string grid_5spot_               = base_path() + "/examples/ADGPRS/5spot/ECL_5SPOT.EGRID";
 static string driver_5spot_             = base_path() + "/examples/ADGPRS/5spot/fo_driver_5vert_wells.json";
 
 static string grid_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.EGRID";
 static string deck_flow_5spot_          = base_path() + "/examples/Flow/5spot/5SPOT.DATA";
+
+static string deck_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA";
+static string grid_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA__R001.EGRID";
+static string driver_5pot_icds_         = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps.json";
+static string driver_5pot_icds_drilling = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling.json";
+static string driver_5pot_icds_drilling_simplified = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_simplified.json";
+static string driver_5pot_icds_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
+static string driver_5pot_womud_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-WOMUD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
 
 static string gprs_drv_5spot_           = base_path() + "/examples/ADGPRS/5spot/5SPOT.gprs";
 static string gprs_smry_json_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.json";
