@@ -36,7 +36,7 @@ class DrillingTest :
   public TestResources::TestResourceOptimizer,
   public TestResources::TestResourceGrids {
  protected:
-  DrillingTest() {}
+  DrillingTest() = default;
 
   void runOptimization(int drilling_step);
 
@@ -61,8 +61,8 @@ TEST_F(DrillingTest, DrillingScheduleDataStructure) {
   settings_drilling_->readDrilling(json_settings_drilling_);
   Settings::Drilling* drilling_settings = settings_drilling_;
 
-  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
-  Model::Drilling::DrillingSchedule *schedule = new Model::Drilling::DrillingSchedule(settings_drilling_, nullptr);
+  auto *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
+  auto *schedule = new Model::Drilling::DrillingSchedule(settings_drilling_, nullptr);
 
   bool is_drilling_object_correct = true;
   bool dbg = false;
@@ -241,8 +241,8 @@ TEST_F(DrillingTest, DrillingRunnerWorkflow) {
                           "-t", "1000"};
 
 
-  Runner::RuntimeSettings* rts = new Runner::RuntimeSettings(argc, argv);
-  Runner::DrillingRunner* drilling_runner = new Runner::DrillingRunner(rts);
+  auto* rts = new Runner::RuntimeSettings(argc, argv);
+  auto* drilling_runner = new Runner::DrillingRunner(rts);
 
   drilling_runner->Execute();
 }

@@ -206,7 +206,7 @@ class Model
     void copyVerbParams(VerbParams vp) { verb_params_ = vp; };
     VerbParams verbParams() const { return verb_params_; };
   };
-  
+
   //!< Get struct containing settings for the well(s) in the model.
   QList<Well> wells() const { return wells_; }
 
