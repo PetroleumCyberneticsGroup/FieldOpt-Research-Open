@@ -27,16 +27,14 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
+class Optimizer;
+
 class Drilling
 {
   friend class Settings;
 
  public:
   Drilling(QJsonObject json_drilling, VerbParams vp);
-
-  QString well_name;
-  Optimizer* local_optimizer_settings = nullptr;
-  Optimizer* global_optimizer_settings = nullptr;
 
   //!< Get the drilling settings in the model
   void readDrilling(QJsonObject json_drilling_workflow);
@@ -78,9 +76,16 @@ class Drilling
   };
 
   DrillingSchedule drilling_sched() { return drilling_sched_; };
+  QString wellName() { return well_name; };
+  Optimizer* localOptzrSet() { return local_optimizer_settings; };
+  Optimizer* globalOptzrSet() { return global_optimizer_settings; };
   VerbParams verbParams() { return vp_; };
 
  private:
+  QString well_name = "";
+  Optimizer* local_optimizer_settings = nullptr;
+  Optimizer* global_optimizer_settings = nullptr;
+
   DrillingSchedule drilling_sched_;
 
   string im_, wm_, em_;

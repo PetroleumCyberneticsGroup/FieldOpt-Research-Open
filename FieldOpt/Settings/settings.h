@@ -33,6 +33,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include "global.h"
 #include "simulator.h"
+#include "drilling.h"
 #include "optimizer.h"
 #include "model.h"
 #include "Settings/paths.h"

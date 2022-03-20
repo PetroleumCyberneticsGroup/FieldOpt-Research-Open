@@ -38,7 +38,7 @@ class DrillingTest :
  protected:
   DrillingTest() = default;
 
-  void runOptimization(int drilling_step);
+  // void runOptimization(int drilling_step);
 
 };
 
@@ -47,8 +47,8 @@ TEST_F(DrillingTest, Constructor) {
 }
 
 TEST_F(DrillingTest, ChildObjects) {
-  EXPECT_NO_THROW(settings_drilling_);
-  EXPECT_NO_THROW(settings_drilling_->well_name);
+  EXPECT_FALSE(settings_drilling_== nullptr);
+  EXPECT_NO_THROW(settings_drilling_->wellName());
   EXPECT_NO_THROW(settings_drilling_->drilling_sched());
 }
 
@@ -58,42 +58,39 @@ TEST_F(DrillingTest, DrillingClasses) {
 }
 
 TEST_F(DrillingTest, DrillingScheduleDataStructure) {
-  settings_drilling_->readDrilling(json_settings_drilling_);
-  Settings::Drilling* drilling_settings = settings_drilling_;
-
   auto *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
   auto *schedule = new Model::Drilling::DrillingSchedule(settings_drilling_, nullptr);
 
   bool is_drilling_object_correct = true;
-  bool dbg = false;
+  bool dbg = true;
 
   QList<int> steps = schedule->getSteps();
-  if (steps.size() != drilling_settings->drilling_sched().drilling_steps.size())
+  if (steps.size() != settings_drilling_->drilling_sched().drilling_steps.size())
     is_drilling_object_correct = false;
 
   for (int i = 0; i < steps.size(); i++) {
     // check drilling steps and time steps
-    if (steps.value(i) != drilling_settings->drilling_sched().drilling_steps.value(i))
+    if (steps.value(i) != settings_drilling_->drilling_sched().drilling_steps.value(i))
       is_drilling_object_correct = false;
 
-    if (schedule->getTimeSteps().value(i) != drilling_settings->drilling_sched().time_steps.value(i))
+    if (schedule->getTimeSteps().value(i) != settings_drilling_->drilling_sched().time_steps.value(i))
       is_drilling_object_correct = false;
 
     // check model types
-    if ((int)schedule->getModelTypes().value(i) != (int)drilling_settings->drilling_sched().model_types.value(i))
+    if ((int)schedule->getModelTypes().value(i) != (int)settings_drilling_->drilling_sched().model_types.value(i))
       is_drilling_object_correct = false;
 
     // check drilling completions
-    if (schedule->isVariableCompletions().value(i) != drilling_settings->drilling_sched().is_variable_completions.value(i))
+    if (schedule->isVariableCompletions().value(i) != settings_drilling_->drilling_sched().is_variable_completions.value(i))
       is_drilling_object_correct = false;
 
     // check model updates
-    if (schedule->isModelUpdates().value(i) != drilling_settings->drilling_sched().is_model_updates.value(i))
+    if (schedule->isModelUpdates().value(i) != settings_drilling_->drilling_sched().is_model_updates.value(i))
       is_drilling_object_correct = false;
 
     // check the drilling points
     QList<Model::Drilling::DrillingSchedule::DrillingPoint> points = schedule->getDrillingPoints().value(i);
-    QList<Settings::Drilling::DrillingPoint> points_settings = drilling_settings->drilling_sched().drilling_points.value(i);
+    QList<Settings::Drilling::DrillingPoint> points_settings = settings_drilling_->drilling_sched().drilling_points.value(i);
     if (points.size() == points_settings.size()) {
       for (int j = 0; j < points.size(); j++) {
 
@@ -120,11 +117,10 @@ TEST_F(DrillingTest, DrillingScheduleDataStructure) {
 }
 
 TEST_F(DrillingTest, ParseJson) {
-  EXPECT_NO_THROW(settings_drilling_->readDrilling(json_settings_drilling_));
-  bool dbg = false;
+  bool dbg = true;
   if (dbg) {
     Settings::Drilling* drilling = settings_drilling_;
-    cout << "wellName:" << drilling->well_name.toStdString() << endl;
+    cout << "wellName:" << drilling->wellName().toStdString() << endl;
 
     Settings::Drilling::DrillingSchedule schedule = drilling->drilling_sched();
     QList<int> steps = schedule.drilling_steps;
@@ -172,11 +168,9 @@ TEST_F(DrillingTest, ParseJson) {
 }
 
 TEST_F(DrillingTest, DrillingRunner) {
-  settings_drilling_->readDrilling(json_settings_drilling_);
-  Settings::Drilling* drilling_settings = settings_drilling_;
-  bool dbg = false;
+  bool dbg = true;
 
-  Model::Drilling::Drilling *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
+  auto *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
   Model::Drilling::DrillingSchedule *schedule = drilling->getDrillingSchedule();
 
   int argc = 16;

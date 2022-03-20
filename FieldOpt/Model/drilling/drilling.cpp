@@ -32,12 +32,12 @@ Drilling::Drilling(Settings::Drilling *settings,
   drilling_variables_ = drilling_variables;
   setd_ = settings;
 
-  well_name_ = setd_->well_name;
+  well_name_ = setd_->wellName();
 
   drilling_schedule_ = new DrillingSchedule(setd_, drilling_variables_);
 
-  local_optimizer_settings_ = setd_->local_optimizer_settings;
-  global_optimizer_settings_ = setd_->global_optimizer_settings;
+  local_optimizer_settings_ = setd_->localOptzrSet();
+  global_optimizer_settings_ = setd_->globalOptzrSet();
 
   current_step_ = 0;
   current_model_ = 0;

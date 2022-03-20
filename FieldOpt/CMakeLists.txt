@@ -173,9 +173,9 @@ else()
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
   find_library(HDF5_CPP NAMES hdf5_cpp
-      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+    HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   find_library(HDF5 NAMES hdf5
-      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
+    HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib NO_DEFAULT_PATH REQUIRED)
   include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include)
   find_package(Threads REQUIRED)
 
@@ -183,13 +183,13 @@ else()
   message(STATUS "Loading potentially local libraries: gp")
 
   find_library(gp NAMES gp
-      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      REQUIRED)
+    HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+    REQUIRED)
 
   find_library(snopt NAMES snopt-7.2.12.2
-      HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      REQUIRED)
+    HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+    PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+    REQUIRED)
 
   message(STATUS "ecl_LIBRARIES: ${ecl_LIBRARIES}")
   message(STATUS "ecl_LIBRARY: ${ecl_LIBRARY}")
@@ -213,8 +213,8 @@ endif()
 message(".............................................................")
 message(STATUS "Loading potentially local libraries: Qt")
 find_package(Qt5Core
-    HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-    REQUIRED)
+  HINTS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+  REQUIRED)
 
 message(STATUS "Qt5Core_QTMAIN_LIBRARIES: ${Qt5Core_QTMAIN_LIBRARIES}")
 message(STATUS "Qt5Core_INCLUDE_DIRS: ${Qt5Core_INCLUDE_DIRS}")
@@ -256,17 +256,17 @@ elseif(USE_RPOLY_LOCAL)
 
   # Lib
   find_library(RpolyPlusPlus_LIBRARY
-      NAMES rpoly_plus_plus
-      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
-      NO_DEFAULT_PATH
-      REQUIRED)
+    NAMES rpoly_plus_plus
+    PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/lib
+    NO_DEFAULT_PATH
+    REQUIRED)
 
   # Include
   find_path(RpolyPlusPlus_INCLUDE_DIR
-      NAMES polynomial.h find_polynomial_roots_jenkins_traub.h
-      PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include/RpolyPlusPlus
-      NO_DEFAULT_PATH
-      REQUIRED)
+    NAMES polynomial.h find_polynomial_roots_jenkins_traub.h
+    PATHS ${CMAKE_SOURCE_DIR}/ThirdParty/libraries/include/RpolyPlusPlus
+    NO_DEFAULT_PATH
+    REQUIRED)
 
   set(RpolyPlusPlus_LIBRARIES ${RpolyPlusPlus_LIBRARY})
 
@@ -294,11 +294,11 @@ if (BUILD_WIC_ADGPRS)  # Implementation of BUILD_WIC_ADGPRS option
 
   # CMAKE_EXE_LINKER_FLAGS --> TODO: Double-check if absolutely necessary
   set(CMAKE_EXE_LINKER_FLAGS
-      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
 
   # CMAKE_SHARED_LINKER_FLAGS --> TODO: Double-check if absolutely necessary
   set(CMAKE_SHARED_LINKER_FLAGS
-      "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    "${CMAKE_SHARED_LINKER_FLAGS} -static-libgcc -static-libstdc++")
 
   # This is opposite of default settings --> TODO: Double-check if necessary
   set(Boost_USE_MULTITHREADED  OFF) # Enable multithreading
@@ -309,15 +309,15 @@ if (BUILD_WIC_ADGPRS)  # Implementation of BUILD_WIC_ADGPRS option
 
   # Find packages
   find_package(Boost COMPONENTS
-      REQUIRED program_options system filesystem)
+    REQUIRED program_options system filesystem)
 
 elseif(BUILD_WIC_ONLY)  # Building WIC executable with dependencies only
   find_package(Boost COMPONENTS
-      REQUIRED program_options system filesystem)
+    REQUIRED program_options system filesystem)
 
 else() # Building all FieldOpt sources
   find_package(Boost COMPONENTS
-      REQUIRED regex program_options serialization mpi system filesystem random)
+    REQUIRED regex program_options serialization mpi system filesystem random)
 endif()
 
 # ----------------------------------------------------------
@@ -373,27 +373,29 @@ if (NOT (BUILD_WIC_ONLY OR BUILD_WIC_ADGPRS))
 
   # Copy execution scripts
   file(GLOB EXECUTION_SCRIPTS
-      "Simulation/execution_scripts/*.sh")
+    "Simulation/execution_scripts/*.sh")
 
   file(COPY ${EXECUTION_SCRIPTS}
-      DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/execution_scripts)
+    DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/execution_scripts)
 
   ## Copy the test driver file into the build dir
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver.json
-      DESTINATION ${CMAKE_BINARY_DIR}/examples)
+    DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_sane.json
-      DESTINATION ${CMAKE_BINARY_DIR}/examples)
+    DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
   file(COPY ${CMAKE_SOURCE_DIR}/Settings/tests/driver/driver_hybridopt.json
-      DESTINATION ${CMAKE_BINARY_DIR}/examples)
+    DESTINATION ${CMAKE_BINARY_DIR}/examples)
 
   # Create FO output dirs
   set(FO_OUTPUT_DIR ${CMAKE_BINARY_DIR}/fieldopt-output)
   set(DIRS
-      norne_test
-      en_5spot/fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv
-      olympr37/fo-drv.r001.c02-olympr37.icd-opt.apps.aug)
+    norne_test
+    en_5spot/fo-drv.r001.c04-5spot-flow.wbhp-opt.trdfo-t01.npv
+    olympr37/fo-drv.r001.c02-olympr37.icd-opt.apps.aug
+    5spot-ICD
+    5spot-WOMUD)
 
   foreach(DIR ${DIRS})
     message(STATUS "DIR=${FO_OUTPUT_DIR}/${DIR}")
@@ -409,7 +411,7 @@ add_compile_options(-std=fPIC)
 if (COPY_EXAMPLES)
   ## Copy the examples into the build dir
   file(COPY ${CMAKE_SOURCE_DIR}/../examples
-      DESTINATION ${CMAKE_BINARY_DIR}/)
+    DESTINATION ${CMAKE_BINARY_DIR}/)
 endif()
 
 # ==========================================================
