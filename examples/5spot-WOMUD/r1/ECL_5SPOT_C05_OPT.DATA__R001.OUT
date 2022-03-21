@@ -1,0 +1,1360 @@
+ ECLIPSE   Version 2013.2. Build Number  7112013. (Arch : Linux X86_64 (64 bit, LINUX_REL5IL64OPT))
+ WARNING: The variable F_UFMTENDIAN is set to  
+ This should be reset using the command : setenv F_UFMTENDIAN big
+ WARNING: I/O will be in Little Endian format
+
+ Proprietary Notice
+ This application contains the confidential and
+ proprietary trade secrets of Schlumberger and may 
+ not be copied or stored in an information retrieval
+ system, transferred, used, distributed, translated,
+ or retransmitted in any form or by any means, electron
+ or mechanical, in whole or in part, without the
+ express written permission of the copyright owner.
+
+ ECLIPSE is a mark of Schlumberger. Copyright (c)
+ 1981-2013 Schlumberger. All rights reserved.
+
+     1 READING RUNSPEC 
+     2 READING NOECHO  
+     3 READING TITLE   
+     4 READING DIMENS  
+     5 READING FAULTDIM
+     6 READING OIL     
+     7 READING WATER   
+     8 READING METRIC  
+     9 READING TABDIMS 
+    10 READING WELLDIMS
+    11 READING WSEGDIMS
+    12 READING START   
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-JAN-   0):
+ @           CHECKING FOR LICENSES                                           
+    13 READING NSTACK  
+    14 READING UNIFOUT 
+    15 READING UNIFIN  
+    16 READING GRID    
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           CHECKING FOR LICENSES                                           
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           THE MEMORY REQUIRED TO PROCESS THE GRID SECTION IS              
+ @                 1562 KBYTES                                               
+    18 READING NOECHO  
+    19 READING INIT    
+    20 READING GRIDFILE
+    21 READING INCLUDE ./ECL_5SPOT_FAULT.INC                             
+    22 READING FAULTS  
+               END OF INCLUDE FILE 
+    23 READING DX      
+    24 READING DY      
+    25 READING DZ      
+    26 READING TOPS    
+    27 READING INCLUDE ./permx_01_lyr_21X.INC                            
+    28 READING PERMX   
+               END OF INCLUDE FILE 
+    29 READING INCLUDE ./permy_01_lyr_21X.INC                            
+    30 READING PERMY   
+               END OF INCLUDE FILE 
+    31 READING INCLUDE ./permz_01_lyr_21X.INC                            
+    32 READING PERMZ   
+               END OF INCLUDE FILE 
+    33 READING INCLUDE ./poro_01_lyr_21X.INC                             
+    34 READING PORO    
+               END OF INCLUDE FILE 
+    35 READING MULTIPLY
+    36 READING PROPS   
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           NEITHER OLDTRAN,OLDTRANR NOR NEWTRAN SPECIFIED                  
+ @           BLOCK CENTRE TRANSMISSIBILITIES TO BE CALCULATED                
+ @           USING  OLDTRAN                                                  
+
+ @--COMMENT  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           NO NON-NEIGHBOUR CONNECTIONS FOUND                              
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           NUMBER OF ACTIVE CELLS IS 3600                                  
+
+ @--WARNING  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           NSTACK=   200 IS GREATER THAN THE CURRENT VALUE OF LITMAX=    25
+ @           THE EXCESS MEMORY REQUESTED BY NSTACK WILL NOT BE USED          
+ @           AND WILL REDUCE PERFORMANCE AND MAY CAUSE MEMORY OVERFLOW.      
+ @           IF TUNING KEYWORDS ARE NOT USED LATER IN THE RUN TO             
+ @           INCREASE LITMAX IT IS RECOMMENDED THAT NSTACK BE REDUCED        
+ @           TO THE MAXIMUM OF 25 AND THE LATEST LITMAX VALUE IN THE         
+ @           TUNING KEYWORD. (THIS MESSAGE WILL REPEAT UP TO 10 TIMES)       
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           THE MEMORY REQUIRED TO PROCESS THE SOLUTION SECTION IS          
+ @                38796 KBYTES                                               
+
+ @--MESSAGE  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @              62414 CHARACTER VARIABLES USED                               
+    37 READING NOECHO  
+    38 READING INCLUDE .//ECL_5SPOT_PROPS_PVDO_MULT_MRST.INC             
+    39 READING PVDO    
+               END OF INCLUDE FILE 
+    40 READING INCLUDE .//ECL_5SPOT_PROPS_MRST.INC                       
+    41 READING PVTW    
+    42 READING ROCK    
+    43 READING DENSITY 
+    44 READING SWOF    
+               END OF INCLUDE FILE 
+    45 READING RPTPROPS
+    46 READING REGIONS 
+    47 READING NOECHO  
+    48 READING SATNUM  
+    49 READING SOLUTION
+    50 READING NOECHO  
+    51 READING EQUIL   
+    52 READING SUMMARY 
+    53 READING NOECHO  
+    54 READING INCLUDE ./ECL_5SPOT_SUM.INC                               
+    55 READING RUNSUM  
+    56 READING SEPARATE
+    57 READING NARROW  
+    58 READING RPTONLY 
+    59 READING RPTSMRY 
+    60 READING SUMTHIN 
+    61 READING TIMESTEP
+    62 READING FPR     
+    63 READING FPRH    
+    64 READING FRPV    
+    65 READING FOE     
+    66 READING FOIP    
+    67 READING FWIP    
+    68 READING FGIP    
+    69 READING ELAPSED 
+    70 READING MEMORYTS
+    71 READING TCPU    
+    72 READING SWCT    
+    73 READING FGIP    
+    74 READING FGIP    
+    75 READING FGIP    
+    76 READING FGIP    
+    77 READING FGIP    
+    78 READING FGIP    
+    79 READING FGIP    
+    80 READING SCSA    
+
+ @--WARNING  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           UNRECOGNISED KEYWORD SCSA     IN SUMMARY FILE SPECIFICATION     
+
+ @--WARNING  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           SPURIOUS DATA BEFORE COPR     KEYWORD                           
+ @           'PROD*' /                                                       
+ @           /                                                               
+    81 READING COPR    
+    82 READING FGIP    
+    83 READING FGIP    
+    84 READING FGIP    
+    85 READING FGIP    
+    86 READING FGIP    
+    87 READING CWPR    
+    88 READING FGIP    
+    89 READING FGIP    
+    90 READING FGIP    
+    91 READING FGIP    
+    92 READING FGIP    
+    93 READING CPR     
+    94 READING FGIP    
+    95 READING FGIP    
+    96 READING FGIP    
+    97 READING FGIP    
+    98 READING FGIP    
+    99 READING CPI     
+   100 READING CTFAC   
+   101 READING WBHP    
+   102 READING WSTAT   
+   103 READING WMCTL   
+   104 READING WBHP    
+   105 READING WSTAT   
+   106 READING WMCTL   
+   107 READING WSTAT   
+   108 READING FMCTP   
+   109 READING WOPR    
+   110 READING WWPR    
+   111 READING WLPR    
+   112 READING WGPR    
+   113 READING WWIR    
+   114 READING FOPR    
+   115 READING FWPR    
+   116 READING FLPR    
+   117 READING FGPR    
+   118 READING FWIR    
+   119 READING WOPT    
+   120 READING WWPT    
+   121 READING WLPT    
+   122 READING WGPT    
+   123 READING WWIT    
+   124 READING FOPT    
+   125 READING FWPT    
+   126 READING FLPT    
+   127 READING FGPT    
+   128 READING FWIT    
+   129 READING WWCT    
+   130 READING FWCT    
+   131 READING WGOR    
+   132 READING FGOR    
+               END OF INCLUDE FILE 
+   133 READING SCHEDULE
+   134 READING NOECHO  
+   135 READING RPTSCHED
+   136 READING RPTRST  
+   137 READING MULTFLT 
+   138 READING INCLUDE ./PROD1_UnifiedCompletions_ECL_5SPOT_INC          
+   139 READING WELSPECS
+   140 READING COMPDAT 
+               END OF INCLUDE FILE 
+   141 READING INCLUDE ./PROD1_MSW_ECL_5SPOT_INC_XICDS_OPT_XI02          
+   142 READING WELSEGS 
+   143 READING COMPSEGS
+   144 READING WSEGVALV
+               END OF INCLUDE FILE 
+   145 READING WELSPECS
+   146 READING COMPDAT 
+   147 READING WCONPROD
+   148 READING WCONINJE
+   149 READING OPTIONS3
+   150 READING TUNING  
+   151 READING WSEGITER
+
+ @--COMMENT  AT TIME        0.0   DAYS    ( 1-OCT-2019):
+ @           THE WSEGITER DATA:                                              
+ @           MAX NO OF ITERATIONS PER CYCLE              80                  
+ @           MAX NO OF REDUCTIONS IN WEIGHTING FACTOR    10                  
+ @           PROPORTIONAL REDUCTION IN WEIGHTING FACTOR  0.30                
+ @           PROPORTIONAL INCREASE  IN WEIGHTING FACTOR  2.00                
+ @           MAY TAKE UP TO  29 ITERATION CYCLES.                            
+   152 READING TSTEP   
+ STEP    1 TIME=      1.00  DAYS (    +1.0  DAYS INIT  5 ITS) (2-OCT-2019)       
+  PAV=   164.7  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    2 TIME=      1.49  DAYS (   +11.8 HOURS TRNC  2 ITS) (2-OCT-2019)       
+  PAV=   162.4  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    3 TIME=      1.94  DAYS (   +10.7 HOURS TRNC  2 ITS) (2-OCT-2019)       
+  PAV=   160.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    4 TIME=      2.72  DAYS (   +18.8 HOURS TRNC  2 ITS) (3-OCT-2019)       
+  PAV=   158.1  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    5 TIME=      3.98  DAYS (    +1.3  DAYS TRNC  2 ITS) (4-OCT-2019)       
+  PAV=   155.0  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    6 TIME=      5.76  DAYS (    +1.8  DAYS TRNC  2 ITS) (6-OCT-2019)       
+  PAV=   151.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    7 TIME=      7.97  DAYS (    +2.2  DAYS TRNC  3 ITS) (8-OCT-2019)       
+  PAV=   148.1  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    8 TIME=     10.38  DAYS (    +2.4  DAYS TRNC  3 ITS) (11-OCT-2019)      
+  PAV=   145.3  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP    9 TIME=     12.49  DAYS (    +2.1  DAYS HALF  3 ITS) (13-OCT-2019)      
+  PAV=   143.3  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   10 TIME=     14.60  DAYS (    +2.1  DAYS REPT  2 ITS) (15-OCT-2019)      
+  PAV=   141.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       14.6   DAYS    (15-OCT-2019):
+ @           RESTART FILE WRITTEN   REPORT     1                             
+ STEP   11 TIME=     17.72  DAYS (    +3.1  DAYS TRNC  3 ITS) (18-OCT-2019)      
+  PAV=   139.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   12 TIME=     21.36  DAYS (    +3.6  DAYS TRNC  3 ITS) (22-OCT-2019)      
+  PAV=   137.9  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   13 TIME=     25.28  DAYS (    +3.9  DAYS HALF  3 ITS) (26-OCT-2019)      
+  PAV=   136.4  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   14 TIME=     29.20  DAYS (    +3.9  DAYS REPT  3 ITS) (30-OCT-2019)      
+  PAV=   135.3  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       29.2   DAYS    (30-OCT-2019):
+ @           RESTART FILE WRITTEN   REPORT     2                             
+ STEP   15 TIME=     33.67  DAYS (    +4.5  DAYS TRNC  3 ITS) (3-NOV-2019)       
+  PAV=   134.3  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   16 TIME=     38.19  DAYS (    +4.5  DAYS TRNC  3 ITS) (8-NOV-2019)       
+  PAV=   133.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   17 TIME=     40.99  DAYS (    +2.8  DAYS HALF  2 ITS) (10-NOV-2019)      
+  PAV=   133.2  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   18 TIME=     43.80  DAYS (    +2.8  DAYS REPT  2 ITS) (13-NOV-2019)      
+  PAV=   132.9  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       43.8   DAYS    (13-NOV-2019):
+ @           RESTART FILE WRITTEN   REPORT     3                             
+ STEP   19 TIME=     48.11  DAYS (    +4.3  DAYS TRNC  3 ITS) (18-NOV-2019)      
+  PAV=   132.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   20 TIME=     53.01  DAYS (    +4.9  DAYS TRNC  3 ITS) (23-NOV-2019)      
+  PAV=   132.2  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   21 TIME=     55.70  DAYS (    +2.7  DAYS HALF  2 ITS) (25-NOV-2019)      
+  PAV=   132.1  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   22 TIME=     58.40  DAYS (    +2.7  DAYS REPT  2 ITS) (28-NOV-2019)      
+  PAV=   132.0  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       58.4   DAYS    (28-NOV-2019):
+ @           RESTART FILE WRITTEN   REPORT     4                             
+ STEP   23 TIME=     63.48  DAYS (    +5.1  DAYS TRNC  3 ITS) (3-DEC-2019)       
+  PAV=   131.8  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   24 TIME=     68.24  DAYS (    +4.8  DAYS HALF  3 ITS) (8-DEC-2019)       
+  PAV=   131.7  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   25 TIME=     73.00  DAYS (    +4.8  DAYS REPT  3 ITS) (13-DEC-2019)      
+  PAV=   131.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       73.0   DAYS    (13-DEC-2019):
+ @           RESTART FILE WRITTEN   REPORT     5                             
+ STEP   26 TIME=     79.24  DAYS (    +6.2  DAYS TRNC  3 ITS) (19-DEC-2019)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   27 TIME=     83.42  DAYS (    +4.2  DAYS HALF  2 ITS) (23-DEC-2019)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   28 TIME=     87.60  DAYS (    +4.2  DAYS REPT  2 ITS) (27-DEC-2019)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME       87.6   DAYS    (27-DEC-2019):
+ @           RESTART FILE WRITTEN   REPORT     6                             
+ STEP   29 TIME=     94.39  DAYS (    +6.8  DAYS TRNC  3 ITS) (3-JAN-2020)       
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   30 TIME=     98.30  DAYS (    +3.9  DAYS HALF  2 ITS) (7-JAN-2020)       
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   31 TIME=    102.20  DAYS (    +3.9  DAYS REPT  2 ITS) (11-JAN-2020)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      102.2   DAYS    (11-JAN-2020):
+ @           RESTART FILE WRITTEN   REPORT     7                             
+ STEP   32 TIME=    109.38  DAYS (    +7.2  DAYS TRNC  3 ITS) (18-JAN-2020)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   33 TIME=    116.80  DAYS (    +7.4  DAYS REPT  3 ITS) (25-JAN-2020)      
+  PAV=   131.5  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      116.8   DAYS    (25-JAN-2020):
+ @           RESTART FILE WRITTEN   REPORT     8                             
+ STEP   34 TIME=    124.10  DAYS (    +7.3  DAYS HALF  3 ITS) (2-FEB-2020)       
+  PAV=   131.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   35 TIME=    131.40  DAYS (    +7.3  DAYS REPT  3 ITS) (9-FEB-2020)       
+  PAV=   131.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      131.4   DAYS    ( 9-FEB-2020):
+ @           RESTART FILE WRITTEN   REPORT     9                             
+ STEP   36 TIME=    138.70  DAYS (    +7.3  DAYS HALF  3 ITS) (16-FEB-2020)      
+  PAV=   131.7  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   37 TIME=    146.00  DAYS (    +7.3  DAYS REPT  3 ITS) (24-FEB-2020)      
+  PAV=   131.8  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      146.0   DAYS    (24-FEB-2020):
+ @           RESTART FILE WRITTEN   REPORT    10                             
+ STEP   38 TIME=    153.30  DAYS (    +7.3  DAYS HALF  3 ITS) (2-MAR-2020)       
+  PAV=   131.9  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   39 TIME=    160.60  DAYS (    +7.3  DAYS REPT  3 ITS) (9-MAR-2020)       
+  PAV=   132.0  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      160.6   DAYS    ( 9-MAR-2020):
+ @           RESTART FILE WRITTEN   REPORT    11                             
+ STEP   40 TIME=    167.90  DAYS (    +7.3  DAYS HALF  3 ITS) (16-MAR-2020)      
+  PAV=   132.1  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   41 TIME=    175.20  DAYS (    +7.3  DAYS REPT  3 ITS) (24-MAR-2020)      
+  PAV=   132.2  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      175.2   DAYS    (24-MAR-2020):
+ @           RESTART FILE WRITTEN   REPORT    12                             
+ STEP   42 TIME=    182.50  DAYS (    +7.3  DAYS HALF  3 ITS) (31-MAR-2020)      
+  PAV=   132.3  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   43 TIME=    189.80  DAYS (    +7.3  DAYS REPT  3 ITS) (7-APR-2020)       
+  PAV=   132.4  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      189.8   DAYS    ( 7-APR-2020):
+ @           RESTART FILE WRITTEN   REPORT    13                             
+ STEP   44 TIME=    197.10  DAYS (    +7.3  DAYS HALF  3 ITS) (15-APR-2020)      
+  PAV=   132.6  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   45 TIME=    204.40  DAYS (    +7.3  DAYS REPT  3 ITS) (22-APR-2020)      
+  PAV=   132.8  BARSA  WCT=0.000 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      204.4   DAYS    (22-APR-2020):
+ @           RESTART FILE WRITTEN   REPORT    14                             
+ STEP   46 TIME=    211.70  DAYS (    +7.3  DAYS HALF  3 ITS) (29-APR-2020)      
+  PAV=   133.1  BARSA  WCT=0.004 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   47 TIME=    219.00  DAYS (    +7.3  DAYS REPT  4 ITS) (7-MAY-2020)       
+  PAV=   133.4  BARSA  WCT=0.035 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      219.0   DAYS    ( 7-MAY-2020):
+ @           RESTART FILE WRITTEN   REPORT    15                             
+ STEP   48 TIME=    226.30  DAYS (    +7.3  DAYS HALF  3 ITS) (14-MAY-2020)      
+  PAV=   133.7  BARSA  WCT=0.099 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   49 TIME=    233.60  DAYS (    +7.3  DAYS REPT  3 ITS) (21-MAY-2020)      
+  PAV=   134.0  BARSA  WCT=0.172 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      233.6   DAYS    (21-MAY-2020):
+ @           RESTART FILE WRITTEN   REPORT    16                             
+ STEP   50 TIME=    240.90  DAYS (    +7.3  DAYS HALF  2 ITS) (28-MAY-2020)      
+  PAV=   134.1  BARSA  WCT=0.231 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   51 TIME=    248.20  DAYS (    +7.3  DAYS REPT  3 ITS) (5-JUN-2020)       
+  PAV=   134.2  BARSA  WCT=0.276 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      248.2   DAYS    ( 5-JUN-2020):
+ @           RESTART FILE WRITTEN   REPORT    17                             
+ STEP   52 TIME=    255.50  DAYS (    +7.3  DAYS HALF  2 ITS) (12-JUN-2020)      
+  PAV=   134.3  BARSA  WCT=0.310 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   53 TIME=    262.80  DAYS (    +7.3  DAYS REPT  3 ITS) (19-JUN-2020)      
+  PAV=   134.4  BARSA  WCT=0.337 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      262.8   DAYS    (19-JUN-2020):
+ @           RESTART FILE WRITTEN   REPORT    18                             
+ STEP   54 TIME=    270.10  DAYS (    +7.3  DAYS HALF  2 ITS) (27-JUN-2020)      
+  PAV=   134.4  BARSA  WCT=0.359 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   55 TIME=    277.40  DAYS (    +7.3  DAYS REPT  2 ITS) (4-JLY-2020)       
+  PAV=   134.5  BARSA  WCT=0.378 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      277.4   DAYS    ( 4-JLY-2020):
+ @           RESTART FILE WRITTEN   REPORT    19                             
+ STEP   56 TIME=    284.70  DAYS (    +7.3  DAYS HALF  2 ITS) (11-JLY-2020)      
+  PAV=   134.5  BARSA  WCT=0.394 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   57 TIME=    292.00  DAYS (    +7.3  DAYS REPT  2 ITS) (19-JLY-2020)      
+  PAV=   134.6  BARSA  WCT=0.409 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      292.0   DAYS    (19-JLY-2020):
+ @           RESTART FILE WRITTEN   REPORT    20                             
+ STEP   58 TIME=    299.30  DAYS (    +7.3  DAYS HALF  2 ITS) (26-JLY-2020)      
+  PAV=   134.6  BARSA  WCT=0.422 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   59 TIME=    306.60  DAYS (    +7.3  DAYS REPT  2 ITS) (2-AUG-2020)       
+  PAV=   134.6  BARSA  WCT=0.434 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      306.6   DAYS    ( 2-AUG-2020):
+ @           RESTART FILE WRITTEN   REPORT    21                             
+ STEP   60 TIME=    313.90  DAYS (    +7.3  DAYS HALF  3 ITS) (9-AUG-2020)       
+  PAV=   134.7  BARSA  WCT=0.445 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   61 TIME=    321.20  DAYS (    +7.3  DAYS REPT  3 ITS) (17-AUG-2020)      
+  PAV=   134.8  BARSA  WCT=0.457 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      321.2   DAYS    (17-AUG-2020):
+ @           RESTART FILE WRITTEN   REPORT    22                             
+ STEP   62 TIME=    328.50  DAYS (    +7.3  DAYS HALF  3 ITS) (24-AUG-2020)      
+  PAV=   134.8  BARSA  WCT=0.469 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   63 TIME=    335.80  DAYS (    +7.3  DAYS REPT  3 ITS) (31-AUG-2020)      
+  PAV=   134.9  BARSA  WCT=0.480 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      335.8   DAYS    (31-AUG-2020):
+ @           RESTART FILE WRITTEN   REPORT    23                             
+ STEP   64 TIME=    343.10  DAYS (    +7.3  DAYS HALF  3 ITS) (8-SEP-2020)       
+  PAV=   135.0  BARSA  WCT=0.490 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   65 TIME=    350.40  DAYS (    +7.3  DAYS REPT  3 ITS) (15-SEP-2020)      
+  PAV=   135.0  BARSA  WCT=0.500 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      350.4   DAYS    (15-SEP-2020):
+ @           RESTART FILE WRITTEN   REPORT    24                             
+ STEP   66 TIME=    357.70  DAYS (    +7.3  DAYS HALF  3 ITS) (22-SEP-2020)      
+  PAV=   135.1  BARSA  WCT=0.510 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   67 TIME=    365.00  DAYS (    +7.3  DAYS REPT  3 ITS) (30-SEP-2020)      
+  PAV=   135.2  BARSA  WCT=0.520 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      365.0   DAYS    (30-SEP-2020):
+ @           RESTART FILE WRITTEN   REPORT    25                             
+ STEP   68 TIME=    372.30  DAYS (    +7.3  DAYS HALF  3 ITS) (7-OCT-2020)       
+  PAV=   135.3  BARSA  WCT=0.529 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   69 TIME=    379.60  DAYS (    +7.3  DAYS REPT  3 ITS) (14-OCT-2020)      
+  PAV=   135.4  BARSA  WCT=0.538 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      379.6   DAYS    (14-OCT-2020):
+ @           RESTART FILE WRITTEN   REPORT    26                             
+ STEP   70 TIME=    386.90  DAYS (    +7.3  DAYS HALF  3 ITS) (21-OCT-2020)      
+  PAV=   135.5  BARSA  WCT=0.547 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   71 TIME=    394.20  DAYS (    +7.3  DAYS REPT  3 ITS) (29-OCT-2020)      
+  PAV=   135.6  BARSA  WCT=0.556 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      394.2   DAYS    (29-OCT-2020):
+ @           RESTART FILE WRITTEN   REPORT    27                             
+ STEP   72 TIME=    401.50  DAYS (    +7.3  DAYS HALF  3 ITS) (5-NOV-2020)       
+  PAV=   135.7  BARSA  WCT=0.565 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   73 TIME=    408.80  DAYS (    +7.3  DAYS REPT  3 ITS) (12-NOV-2020)      
+  PAV=   135.9  BARSA  WCT=0.575 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      408.8   DAYS    (12-NOV-2020):
+ @           RESTART FILE WRITTEN   REPORT    28                             
+ STEP   74 TIME=    416.10  DAYS (    +7.3  DAYS HALF  3 ITS) (20-NOV-2020)      
+  PAV=   136.0  BARSA  WCT=0.586 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   75 TIME=    423.40  DAYS (    +7.3  DAYS REPT  3 ITS) (27-NOV-2020)      
+  PAV=   136.2  BARSA  WCT=0.596 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      423.4   DAYS    (27-NOV-2020):
+ @           RESTART FILE WRITTEN   REPORT    29                             
+ STEP   76 TIME=    430.70  DAYS (    +7.3  DAYS HALF  3 ITS) (4-DEC-2020)       
+  PAV=   136.4  BARSA  WCT=0.608 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   77 TIME=    438.00  DAYS (    +7.3  DAYS REPT  3 ITS) (12-DEC-2020)      
+  PAV=   136.6  BARSA  WCT=0.620 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      438.0   DAYS    (12-DEC-2020):
+ @           RESTART FILE WRITTEN   REPORT    30                             
+ STEP   78 TIME=    445.30  DAYS (    +7.3  DAYS HALF  3 ITS) (19-DEC-2020)      
+  PAV=   136.8  BARSA  WCT=0.633 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   79 TIME=    452.60  DAYS (    +7.3  DAYS REPT  3 ITS) (26-DEC-2020)      
+  PAV=   137.0  BARSA  WCT=0.647 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      452.6   DAYS    (26-DEC-2020):
+ @           RESTART FILE WRITTEN   REPORT    31                             
+ STEP   80 TIME=    459.90  DAYS (    +7.3  DAYS HALF  3 ITS) (2-JAN-2021)       
+  PAV=   137.2  BARSA  WCT=0.669 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   81 TIME=    467.20  DAYS (    +7.3  DAYS REPT  3 ITS) (10-JAN-2021)      
+  PAV=   137.4  BARSA  WCT=0.698 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      467.2   DAYS    (10-JAN-2021):
+ @           RESTART FILE WRITTEN   REPORT    32                             
+ STEP   82 TIME=    474.50  DAYS (    +7.3  DAYS HALF  2 ITS) (17-JAN-2021)      
+  PAV=   137.5  BARSA  WCT=0.727 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   83 TIME=    481.80  DAYS (    +7.3  DAYS REPT  2 ITS) (24-JAN-2021)      
+  PAV=   137.6  BARSA  WCT=0.750 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      481.8   DAYS    (24-JAN-2021):
+ @           RESTART FILE WRITTEN   REPORT    33                             
+ STEP   84 TIME=    489.10  DAYS (    +7.3  DAYS HALF  2 ITS) (1-FEB-2021)       
+  PAV=   137.7  BARSA  WCT=0.766 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+ STEP   85 TIME=    496.40  DAYS (    +7.3  DAYS REPT  2 ITS) (8-FEB-2021)       
+  PAV=   137.7  BARSA  WCT=0.779 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      496.4   DAYS    ( 8-FEB-2021):
+ @           RESTART FILE WRITTEN   REPORT    34                             
+ STEP   86 TIME=    511.00  DAYS (   +14.6  DAYS REPT  2 ITS) (23-FEB-2021)      
+  PAV=   137.8  BARSA  WCT=0.794 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      511.0   DAYS    (23-FEB-2021):
+ @           RESTART FILE WRITTEN   REPORT    35                             
+ STEP   87 TIME=    525.60  DAYS (   +14.6  DAYS REPT  2 ITS) (9-MAR-2021)       
+  PAV=   137.8  BARSA  WCT=0.804 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      525.6   DAYS    ( 9-MAR-2021):
+ @           RESTART FILE WRITTEN   REPORT    36                             
+ STEP   88 TIME=    540.20  DAYS (   +14.6  DAYS REPT  2 ITS) (24-MAR-2021)      
+  PAV=   137.8  BARSA  WCT=0.811 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      540.2   DAYS    (24-MAR-2021):
+ @           RESTART FILE WRITTEN   REPORT    37                             
+ STEP   89 TIME=    554.80  DAYS (   +14.6  DAYS REPT  2 ITS) (7-APR-2021)       
+  PAV=   137.7  BARSA  WCT=0.818 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      554.8   DAYS    ( 7-APR-2021):
+ @           RESTART FILE WRITTEN   REPORT    38                             
+ STEP   90 TIME=    569.40  DAYS (   +14.6  DAYS REPT  2 ITS) (22-APR-2021)      
+  PAV=   137.7  BARSA  WCT=0.824 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      569.4   DAYS    (22-APR-2021):
+ @           RESTART FILE WRITTEN   REPORT    39                             
+ STEP   91 TIME=    584.00  DAYS (   +14.6  DAYS REPT  2 ITS) (7-MAY-2021)       
+  PAV=   137.7  BARSA  WCT=0.829 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      584.0   DAYS    ( 7-MAY-2021):
+ @           RESTART FILE WRITTEN   REPORT    40                             
+ STEP   92 TIME=    598.60  DAYS (   +14.6  DAYS REPT  2 ITS) (21-MAY-2021)      
+  PAV=   137.6  BARSA  WCT=0.835 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      598.6   DAYS    (21-MAY-2021):
+ @           RESTART FILE WRITTEN   REPORT    41                             
+ STEP   93 TIME=    613.20  DAYS (   +14.6  DAYS REPT  2 ITS) (5-JUN-2021)       
+  PAV=   137.6  BARSA  WCT=0.840 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      613.2   DAYS    ( 5-JUN-2021):
+ @           RESTART FILE WRITTEN   REPORT    42                             
+ STEP   94 TIME=    627.80  DAYS (   +14.6  DAYS REPT  2 ITS) (19-JUN-2021)      
+  PAV=   137.5  BARSA  WCT=0.845 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      627.8   DAYS    (19-JUN-2021):
+ @           RESTART FILE WRITTEN   REPORT    43                             
+ STEP   95 TIME=    642.40  DAYS (   +14.6  DAYS REPT  2 ITS) (4-JLY-2021)       
+  PAV=   137.4  BARSA  WCT=0.850 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      642.4   DAYS    ( 4-JLY-2021):
+ @           RESTART FILE WRITTEN   REPORT    44                             
+ STEP   96 TIME=    657.00  DAYS (   +14.6  DAYS REPT  2 ITS) (19-JLY-2021)      
+  PAV=   137.4  BARSA  WCT=0.854 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      657.0   DAYS    (19-JLY-2021):
+ @           RESTART FILE WRITTEN   REPORT    45                             
+ STEP   97 TIME=    671.60  DAYS (   +14.6  DAYS REPT  2 ITS) (2-AUG-2021)       
+  PAV=   137.3  BARSA  WCT=0.858 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      671.6   DAYS    ( 2-AUG-2021):
+ @           RESTART FILE WRITTEN   REPORT    46                             
+ STEP   98 TIME=    686.20  DAYS (   +14.6  DAYS REPT  2 ITS) (17-AUG-2021)      
+  PAV=   137.2  BARSA  WCT=0.862 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      686.2   DAYS    (17-AUG-2021):
+ @           RESTART FILE WRITTEN   REPORT    47                             
+ STEP   99 TIME=    700.80  DAYS (   +14.6  DAYS REPT  2 ITS) (31-AUG-2021)      
+  PAV=   137.2  BARSA  WCT=0.866 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      700.8   DAYS    (31-AUG-2021):
+ @           RESTART FILE WRITTEN   REPORT    48                             
+ STEP  100 TIME=    715.40  DAYS (   +14.6  DAYS REPT  2 ITS) (15-SEP-2021)      
+  PAV=   137.1  BARSA  WCT=0.870 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      715.4   DAYS    (15-SEP-2021):
+ @           RESTART FILE WRITTEN   REPORT    49                             
+ STEP  101 TIME=    730.00  DAYS (   +14.6  DAYS REPT  2 ITS) (30-SEP-2021)      
+  PAV=   137.0  BARSA  WCT=0.873 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      730.0   DAYS    (30-SEP-2021):
+ @           RESTART FILE WRITTEN   REPORT    50                             
+ STEP  102 TIME=    744.60  DAYS (   +14.6  DAYS REPT  2 ITS) (14-OCT-2021)      
+  PAV=   137.0  BARSA  WCT=0.876 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      744.6   DAYS    (14-OCT-2021):
+ @           RESTART FILE WRITTEN   REPORT    51                             
+ STEP  103 TIME=    759.20  DAYS (   +14.6  DAYS REPT  2 ITS) (29-OCT-2021)      
+  PAV=   136.9  BARSA  WCT=0.880 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      759.2   DAYS    (29-OCT-2021):
+ @           RESTART FILE WRITTEN   REPORT    52                             
+ STEP  104 TIME=    773.80  DAYS (   +14.6  DAYS REPT  2 ITS) (12-NOV-2021)      
+  PAV=   136.8  BARSA  WCT=0.883 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      773.8   DAYS    (12-NOV-2021):
+ @           RESTART FILE WRITTEN   REPORT    53                             
+ STEP  105 TIME=    788.40  DAYS (   +14.6  DAYS REPT  2 ITS) (27-NOV-2021)      
+  PAV=   136.7  BARSA  WCT=0.886 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      788.4   DAYS    (27-NOV-2021):
+ @           RESTART FILE WRITTEN   REPORT    54                             
+ STEP  106 TIME=    803.00  DAYS (   +14.6  DAYS REPT  2 ITS) (12-DEC-2021)      
+  PAV=   136.7  BARSA  WCT=0.888 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      803.0   DAYS    (12-DEC-2021):
+ @           RESTART FILE WRITTEN   REPORT    55                             
+ STEP  107 TIME=    817.60  DAYS (   +14.6  DAYS REPT  2 ITS) (26-DEC-2021)      
+  PAV=   136.6  BARSA  WCT=0.891 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      817.6   DAYS    (26-DEC-2021):
+ @           RESTART FILE WRITTEN   REPORT    56                             
+ STEP  108 TIME=    832.20  DAYS (   +14.6  DAYS REPT  2 ITS) (10-JAN-2022)      
+  PAV=   136.5  BARSA  WCT=0.894 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      832.2   DAYS    (10-JAN-2022):
+ @           RESTART FILE WRITTEN   REPORT    57                             
+ STEP  109 TIME=    846.80  DAYS (   +14.6  DAYS REPT  2 ITS) (24-JAN-2022)      
+  PAV=   136.5  BARSA  WCT=0.896 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      846.8   DAYS    (24-JAN-2022):
+ @           RESTART FILE WRITTEN   REPORT    58                             
+ STEP  110 TIME=    861.40  DAYS (   +14.6  DAYS REPT  2 ITS) (8-FEB-2022)       
+  PAV=   136.4  BARSA  WCT=0.898 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      861.4   DAYS    ( 8-FEB-2022):
+ @           RESTART FILE WRITTEN   REPORT    59                             
+ STEP  111 TIME=    876.00  DAYS (   +14.6  DAYS REPT  2 ITS) (23-FEB-2022)      
+  PAV=   136.3  BARSA  WCT=0.900 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      876.0   DAYS    (23-FEB-2022):
+ @           RESTART FILE WRITTEN   REPORT    60                             
+ STEP  112 TIME=    890.60  DAYS (   +14.6  DAYS REPT  1 ITS) (9-MAR-2022)       
+  PAV=   136.3  BARSA  WCT=0.902 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      890.6   DAYS    ( 9-MAR-2022):
+ @           RESTART FILE WRITTEN   REPORT    61                             
+ STEP  113 TIME=    905.20  DAYS (   +14.6  DAYS REPT  2 ITS) (24-MAR-2022)      
+  PAV=   136.2  BARSA  WCT=0.904 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      905.2   DAYS    (24-MAR-2022):
+ @           RESTART FILE WRITTEN   REPORT    62                             
+ STEP  114 TIME=    919.80  DAYS (   +14.6  DAYS REPT  1 ITS) (7-APR-2022)       
+  PAV=   136.1  BARSA  WCT=0.906 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      919.8   DAYS    ( 7-APR-2022):
+ @           RESTART FILE WRITTEN   REPORT    63                             
+ STEP  115 TIME=    934.40  DAYS (   +14.6  DAYS REPT  2 ITS) (22-APR-2022)      
+  PAV=   136.1  BARSA  WCT=0.908 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      934.4   DAYS    (22-APR-2022):
+ @           RESTART FILE WRITTEN   REPORT    64                             
+ STEP  116 TIME=    949.00  DAYS (   +14.6  DAYS REPT  1 ITS) (7-MAY-2022)       
+  PAV=   136.0  BARSA  WCT=0.910 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      949.0   DAYS    ( 7-MAY-2022):
+ @           RESTART FILE WRITTEN   REPORT    65                             
+ STEP  117 TIME=    963.60  DAYS (   +14.6  DAYS REPT  1 ITS) (21-MAY-2022)      
+  PAV=   136.0  BARSA  WCT=0.911 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      963.6   DAYS    (21-MAY-2022):
+ @           RESTART FILE WRITTEN   REPORT    66                             
+ STEP  118 TIME=    978.20  DAYS (   +14.6  DAYS REPT  2 ITS) (5-JUN-2022)       
+  PAV=   135.9  BARSA  WCT=0.913 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      978.2   DAYS    ( 5-JUN-2022):
+ @           RESTART FILE WRITTEN   REPORT    67                             
+ STEP  119 TIME=    992.80  DAYS (   +14.6  DAYS REPT  2 ITS) (19-JUN-2022)      
+  PAV=   135.8  BARSA  WCT=0.914 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME      992.8   DAYS    (19-JUN-2022):
+ @           RESTART FILE WRITTEN   REPORT    68                             
+ STEP  120 TIME=   1007.40  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JLY-2022)       
+  PAV=   135.8  BARSA  WCT=0.916 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1007.4   DAYS    ( 4-JLY-2022):
+ @           RESTART FILE WRITTEN   REPORT    69                             
+ STEP  121 TIME=   1022.00  DAYS (   +14.6  DAYS REPT  2 ITS) (19-JLY-2022)      
+  PAV=   135.7  BARSA  WCT=0.917 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1022.0   DAYS    (19-JLY-2022):
+ @           RESTART FILE WRITTEN   REPORT    70                             
+ STEP  122 TIME=   1036.60  DAYS (   +14.6  DAYS REPT  1 ITS) (2-AUG-2022)       
+  PAV=   135.7  BARSA  WCT=0.919 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1036.6   DAYS    ( 2-AUG-2022):
+ @           RESTART FILE WRITTEN   REPORT    71                             
+ STEP  123 TIME=   1051.20  DAYS (   +14.6  DAYS REPT  1 ITS) (17-AUG-2022)      
+  PAV=   135.6  BARSA  WCT=0.920 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1051.2   DAYS    (17-AUG-2022):
+ @           RESTART FILE WRITTEN   REPORT    72                             
+ STEP  124 TIME=   1065.80  DAYS (   +14.6  DAYS REPT  1 ITS) (31-AUG-2022)      
+  PAV=   135.5  BARSA  WCT=0.921 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1065.8   DAYS    (31-AUG-2022):
+ @           RESTART FILE WRITTEN   REPORT    73                             
+ STEP  125 TIME=   1080.40  DAYS (   +14.6  DAYS REPT  1 ITS) (15-SEP-2022)      
+  PAV=   135.5  BARSA  WCT=0.922 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1080.4   DAYS    (15-SEP-2022):
+ @           RESTART FILE WRITTEN   REPORT    74                             
+ STEP  126 TIME=   1095.00  DAYS (   +14.6  DAYS REPT  2 ITS) (30-SEP-2022)      
+  PAV=   135.4  BARSA  WCT=0.924 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1095.0   DAYS    (30-SEP-2022):
+ @           RESTART FILE WRITTEN   REPORT    75                             
+ STEP  127 TIME=   1109.60  DAYS (   +14.6  DAYS REPT  1 ITS) (14-OCT-2022)      
+  PAV=   135.4  BARSA  WCT=0.925 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1109.6   DAYS    (14-OCT-2022):
+ @           RESTART FILE WRITTEN   REPORT    76                             
+ STEP  128 TIME=   1124.20  DAYS (   +14.6  DAYS REPT  1 ITS) (29-OCT-2022)      
+  PAV=   135.3  BARSA  WCT=0.926 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1124.2   DAYS    (29-OCT-2022):
+ @           RESTART FILE WRITTEN   REPORT    77                             
+ STEP  129 TIME=   1138.80  DAYS (   +14.6  DAYS REPT  1 ITS) (12-NOV-2022)      
+  PAV=   135.3  BARSA  WCT=0.927 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1138.8   DAYS    (12-NOV-2022):
+ @           RESTART FILE WRITTEN   REPORT    78                             
+ STEP  130 TIME=   1153.40  DAYS (   +14.6  DAYS REPT  1 ITS) (27-NOV-2022)      
+  PAV=   135.2  BARSA  WCT=0.928 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1153.4   DAYS    (27-NOV-2022):
+ @           RESTART FILE WRITTEN   REPORT    79                             
+ STEP  131 TIME=   1168.00  DAYS (   +14.6  DAYS REPT  1 ITS) (12-DEC-2022)      
+  PAV=   135.2  BARSA  WCT=0.929 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1168.0   DAYS    (12-DEC-2022):
+ @           RESTART FILE WRITTEN   REPORT    80                             
+ STEP  132 TIME=   1182.60  DAYS (   +14.6  DAYS REPT  1 ITS) (26-DEC-2022)      
+  PAV=   135.1  BARSA  WCT=0.931 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1182.6   DAYS    (26-DEC-2022):
+ @           RESTART FILE WRITTEN   REPORT    81                             
+ STEP  133 TIME=   1197.20  DAYS (   +14.6  DAYS REPT  1 ITS) (10-JAN-2023)      
+  PAV=   135.1  BARSA  WCT=0.932 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1197.2   DAYS    (10-JAN-2023):
+ @           RESTART FILE WRITTEN   REPORT    82                             
+ STEP  134 TIME=   1211.80  DAYS (   +14.6  DAYS REPT  2 ITS) (24-JAN-2023)      
+  PAV=   135.0  BARSA  WCT=0.933 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1211.8   DAYS    (24-JAN-2023):
+ @           RESTART FILE WRITTEN   REPORT    83                             
+ STEP  135 TIME=   1226.40  DAYS (   +14.6  DAYS REPT  1 ITS) (8-FEB-2023)       
+  PAV=   135.0  BARSA  WCT=0.934 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1226.4   DAYS    ( 8-FEB-2023):
+ @           RESTART FILE WRITTEN   REPORT    84                             
+ STEP  136 TIME=   1241.00  DAYS (   +14.6  DAYS REPT  2 ITS) (23-FEB-2023)      
+  PAV=   134.9  BARSA  WCT=0.935 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1241.0   DAYS    (23-FEB-2023):
+ @           RESTART FILE WRITTEN   REPORT    85                             
+ STEP  137 TIME=   1255.60  DAYS (   +14.6  DAYS REPT  2 ITS) (9-MAR-2023)       
+  PAV=   134.9  BARSA  WCT=0.935 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1255.6   DAYS    ( 9-MAR-2023):
+ @           RESTART FILE WRITTEN   REPORT    86                             
+ STEP  138 TIME=   1270.20  DAYS (   +14.6  DAYS REPT  2 ITS) (24-MAR-2023)      
+  PAV=   134.8  BARSA  WCT=0.936 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1270.2   DAYS    (24-MAR-2023):
+ @           RESTART FILE WRITTEN   REPORT    87                             
+ STEP  139 TIME=   1284.80  DAYS (   +14.6  DAYS REPT  1 ITS) (7-APR-2023)       
+  PAV=   134.8  BARSA  WCT=0.937 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1284.8   DAYS    ( 7-APR-2023):
+ @           RESTART FILE WRITTEN   REPORT    88                             
+ STEP  140 TIME=   1299.40  DAYS (   +14.6  DAYS REPT  1 ITS) (22-APR-2023)      
+  PAV=   134.7  BARSA  WCT=0.938 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1299.4   DAYS    (22-APR-2023):
+ @           RESTART FILE WRITTEN   REPORT    89                             
+ STEP  141 TIME=   1314.00  DAYS (   +14.6  DAYS REPT  1 ITS) (7-MAY-2023)       
+  PAV=   134.7  BARSA  WCT=0.939 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1314.0   DAYS    ( 7-MAY-2023):
+ @           RESTART FILE WRITTEN   REPORT    90                             
+ STEP  142 TIME=   1328.60  DAYS (   +14.6  DAYS REPT  1 ITS) (21-MAY-2023)      
+  PAV=   134.6  BARSA  WCT=0.940 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1328.6   DAYS    (21-MAY-2023):
+ @           RESTART FILE WRITTEN   REPORT    91                             
+ STEP  143 TIME=   1343.20  DAYS (   +14.6  DAYS REPT  1 ITS) (5-JUN-2023)       
+  PAV=   134.6  BARSA  WCT=0.941 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1343.2   DAYS    ( 5-JUN-2023):
+ @           RESTART FILE WRITTEN   REPORT    92                             
+ STEP  144 TIME=   1357.80  DAYS (   +14.6  DAYS REPT  1 ITS) (19-JUN-2023)      
+  PAV=   134.5  BARSA  WCT=0.941 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1357.8   DAYS    (19-JUN-2023):
+ @           RESTART FILE WRITTEN   REPORT    93                             
+ STEP  145 TIME=   1372.40  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JLY-2023)       
+  PAV=   134.5  BARSA  WCT=0.942 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1372.4   DAYS    ( 4-JLY-2023):
+ @           RESTART FILE WRITTEN   REPORT    94                             
+ STEP  146 TIME=   1387.00  DAYS (   +14.6  DAYS REPT  1 ITS) (19-JLY-2023)      
+  PAV=   134.4  BARSA  WCT=0.943 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1387.0   DAYS    (19-JLY-2023):
+ @           RESTART FILE WRITTEN   REPORT    95                             
+ STEP  147 TIME=   1401.60  DAYS (   +14.6  DAYS REPT  1 ITS) (2-AUG-2023)       
+  PAV=   134.4  BARSA  WCT=0.944 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1401.6   DAYS    ( 2-AUG-2023):
+ @           RESTART FILE WRITTEN   REPORT    96                             
+ STEP  148 TIME=   1416.20  DAYS (   +14.6  DAYS REPT  1 ITS) (17-AUG-2023)      
+  PAV=   134.3  BARSA  WCT=0.944 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1416.2   DAYS    (17-AUG-2023):
+ @           RESTART FILE WRITTEN   REPORT    97                             
+ STEP  149 TIME=   1430.80  DAYS (   +14.6  DAYS REPT  1 ITS) (31-AUG-2023)      
+  PAV=   134.3  BARSA  WCT=0.945 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1430.8   DAYS    (31-AUG-2023):
+ @           RESTART FILE WRITTEN   REPORT    98                             
+ STEP  150 TIME=   1445.40  DAYS (   +14.6  DAYS REPT  1 ITS) (15-SEP-2023)      
+  PAV=   134.2  BARSA  WCT=0.946 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1445.4   DAYS    (15-SEP-2023):
+ @           RESTART FILE WRITTEN   REPORT    99                             
+ STEP  151 TIME=   1460.00  DAYS (   +14.6  DAYS REPT  1 ITS) (30-SEP-2023)      
+  PAV=   134.2  BARSA  WCT=0.946 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1460.0   DAYS    (30-SEP-2023):
+ @           RESTART FILE WRITTEN   REPORT   100                             
+ STEP  152 TIME=   1474.60  DAYS (   +14.6  DAYS REPT  1 ITS) (14-OCT-2023)      
+  PAV=   134.1  BARSA  WCT=0.947 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1474.6   DAYS    (14-OCT-2023):
+ @           RESTART FILE WRITTEN   REPORT   101                             
+ STEP  153 TIME=   1489.20  DAYS (   +14.6  DAYS REPT  1 ITS) (29-OCT-2023)      
+  PAV=   134.1  BARSA  WCT=0.948 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1489.2   DAYS    (29-OCT-2023):
+ @           RESTART FILE WRITTEN   REPORT   102                             
+ STEP  154 TIME=   1503.80  DAYS (   +14.6  DAYS REPT  1 ITS) (12-NOV-2023)      
+  PAV=   134.1  BARSA  WCT=0.948 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1503.8   DAYS    (12-NOV-2023):
+ @           RESTART FILE WRITTEN   REPORT   103                             
+ STEP  155 TIME=   1518.40  DAYS (   +14.6  DAYS REPT  1 ITS) (27-NOV-2023)      
+  PAV=   134.0  BARSA  WCT=0.949 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1518.4   DAYS    (27-NOV-2023):
+ @           RESTART FILE WRITTEN   REPORT   104                             
+ STEP  156 TIME=   1533.00  DAYS (   +14.6  DAYS REPT  1 ITS) (12-DEC-2023)      
+  PAV=   134.0  BARSA  WCT=0.950 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1533.0   DAYS    (12-DEC-2023):
+ @           RESTART FILE WRITTEN   REPORT   105                             
+ STEP  157 TIME=   1547.60  DAYS (   +14.6  DAYS REPT  1 ITS) (26-DEC-2023)      
+  PAV=   133.9  BARSA  WCT=0.950 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1547.6   DAYS    (26-DEC-2023):
+ @           RESTART FILE WRITTEN   REPORT   106                             
+ STEP  158 TIME=   1562.20  DAYS (   +14.6  DAYS REPT  1 ITS) (10-JAN-2024)      
+  PAV=   133.9  BARSA  WCT=0.951 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1562.2   DAYS    (10-JAN-2024):
+ @           RESTART FILE WRITTEN   REPORT   107                             
+ STEP  159 TIME=   1576.80  DAYS (   +14.6  DAYS REPT  1 ITS) (24-JAN-2024)      
+  PAV=   133.9  BARSA  WCT=0.951 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1576.8   DAYS    (24-JAN-2024):
+ @           RESTART FILE WRITTEN   REPORT   108                             
+ STEP  160 TIME=   1591.40  DAYS (   +14.6  DAYS REPT  1 ITS) (8-FEB-2024)       
+  PAV=   133.8  BARSA  WCT=0.952 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1591.4   DAYS    ( 8-FEB-2024):
+ @           RESTART FILE WRITTEN   REPORT   109                             
+ STEP  161 TIME=   1606.00  DAYS (   +14.6  DAYS REPT  1 ITS) (23-FEB-2024)      
+  PAV=   133.8  BARSA  WCT=0.953 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1606.0   DAYS    (23-FEB-2024):
+ @           RESTART FILE WRITTEN   REPORT   110                             
+ STEP  162 TIME=   1620.60  DAYS (   +14.6  DAYS REPT  1 ITS) (8-MAR-2024)       
+  PAV=   133.7  BARSA  WCT=0.953 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1620.6   DAYS    ( 8-MAR-2024):
+ @           RESTART FILE WRITTEN   REPORT   111                             
+ STEP  163 TIME=   1635.20  DAYS (   +14.6  DAYS REPT  1 ITS) (23-MAR-2024)      
+  PAV=   133.7  BARSA  WCT=0.954 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1635.2   DAYS    (23-MAR-2024):
+ @           RESTART FILE WRITTEN   REPORT   112                             
+ STEP  164 TIME=   1649.80  DAYS (   +14.6  DAYS REPT  2 ITS) (6-APR-2024)       
+  PAV=   133.7  BARSA  WCT=0.954 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1649.8   DAYS    ( 6-APR-2024):
+ @           RESTART FILE WRITTEN   REPORT   113                             
+ STEP  165 TIME=   1664.40  DAYS (   +14.6  DAYS REPT  1 ITS) (21-APR-2024)      
+  PAV=   133.6  BARSA  WCT=0.955 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1664.4   DAYS    (21-APR-2024):
+ @           RESTART FILE WRITTEN   REPORT   114                             
+ STEP  166 TIME=   1679.00  DAYS (   +14.6  DAYS REPT  1 ITS) (6-MAY-2024)       
+  PAV=   133.6  BARSA  WCT=0.955 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1679.0   DAYS    ( 6-MAY-2024):
+ @           RESTART FILE WRITTEN   REPORT   115                             
+ STEP  167 TIME=   1693.60  DAYS (   +14.6  DAYS REPT  1 ITS) (20-MAY-2024)      
+  PAV=   133.6  BARSA  WCT=0.956 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1693.6   DAYS    (20-MAY-2024):
+ @           RESTART FILE WRITTEN   REPORT   116                             
+ STEP  168 TIME=   1708.20  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JUN-2024)       
+  PAV=   133.5  BARSA  WCT=0.956 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1708.2   DAYS    ( 4-JUN-2024):
+ @           RESTART FILE WRITTEN   REPORT   117                             
+ STEP  169 TIME=   1722.80  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JUN-2024)      
+  PAV=   133.5  BARSA  WCT=0.957 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1722.8   DAYS    (18-JUN-2024):
+ @           RESTART FILE WRITTEN   REPORT   118                             
+ STEP  170 TIME=   1737.40  DAYS (   +14.6  DAYS REPT  1 ITS) (3-JLY-2024)       
+  PAV=   133.5  BARSA  WCT=0.957 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1737.4   DAYS    ( 3-JLY-2024):
+ @           RESTART FILE WRITTEN   REPORT   119                             
+ STEP  171 TIME=   1752.00  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JLY-2024)      
+  PAV=   133.4  BARSA  WCT=0.958 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1752.0   DAYS    (18-JLY-2024):
+ @           RESTART FILE WRITTEN   REPORT   120                             
+ STEP  172 TIME=   1766.60  DAYS (   +14.6  DAYS REPT  2 ITS) (1-AUG-2024)       
+  PAV=   133.4  BARSA  WCT=0.958 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1766.6   DAYS    ( 1-AUG-2024):
+ @           RESTART FILE WRITTEN   REPORT   121                             
+ STEP  173 TIME=   1781.20  DAYS (   +14.6  DAYS REPT  1 ITS) (16-AUG-2024)      
+  PAV=   133.3  BARSA  WCT=0.959 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1781.2   DAYS    (16-AUG-2024):
+ @           RESTART FILE WRITTEN   REPORT   122                             
+ STEP  174 TIME=   1795.80  DAYS (   +14.6  DAYS REPT  1 ITS) (30-AUG-2024)      
+  PAV=   133.3  BARSA  WCT=0.959 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1795.8   DAYS    (30-AUG-2024):
+ @           RESTART FILE WRITTEN   REPORT   123                             
+ STEP  175 TIME=   1810.40  DAYS (   +14.6  DAYS REPT  1 ITS) (14-SEP-2024)      
+  PAV=   133.3  BARSA  WCT=0.960 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1810.4   DAYS    (14-SEP-2024):
+ @           RESTART FILE WRITTEN   REPORT   124                             
+ STEP  176 TIME=   1825.00  DAYS (   +14.6  DAYS REPT  1 ITS) (29-SEP-2024)      
+  PAV=   133.2  BARSA  WCT=0.960 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1825.0   DAYS    (29-SEP-2024):
+ @           RESTART FILE WRITTEN   REPORT   125                             
+ STEP  177 TIME=   1839.60  DAYS (   +14.6  DAYS REPT  1 ITS) (13-OCT-2024)      
+  PAV=   133.2  BARSA  WCT=0.960 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1839.6   DAYS    (13-OCT-2024):
+ @           RESTART FILE WRITTEN   REPORT   126                             
+ STEP  178 TIME=   1854.20  DAYS (   +14.6  DAYS REPT  1 ITS) (28-OCT-2024)      
+  PAV=   133.2  BARSA  WCT=0.961 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1854.2   DAYS    (28-OCT-2024):
+ @           RESTART FILE WRITTEN   REPORT   127                             
+ STEP  179 TIME=   1868.80  DAYS (   +14.6  DAYS REPT  1 ITS) (11-NOV-2024)      
+  PAV=   133.1  BARSA  WCT=0.961 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1868.8   DAYS    (11-NOV-2024):
+ @           RESTART FILE WRITTEN   REPORT   128                             
+ STEP  180 TIME=   1883.40  DAYS (   +14.6  DAYS REPT  1 ITS) (26-NOV-2024)      
+  PAV=   133.1  BARSA  WCT=0.962 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1883.4   DAYS    (26-NOV-2024):
+ @           RESTART FILE WRITTEN   REPORT   129                             
+ STEP  181 TIME=   1898.00  DAYS (   +14.6  DAYS REPT  1 ITS) (11-DEC-2024)      
+  PAV=   133.1  BARSA  WCT=0.962 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1898.0   DAYS    (11-DEC-2024):
+ @           RESTART FILE WRITTEN   REPORT   130                             
+ STEP  182 TIME=   1912.60  DAYS (   +14.6  DAYS REPT  1 ITS) (25-DEC-2024)      
+  PAV=   133.1  BARSA  WCT=0.962 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1912.6   DAYS    (25-DEC-2024):
+ @           RESTART FILE WRITTEN   REPORT   131                             
+ STEP  183 TIME=   1927.20  DAYS (   +14.6  DAYS REPT  1 ITS) (9-JAN-2025)       
+  PAV=   133.0  BARSA  WCT=0.963 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1927.2   DAYS    ( 9-JAN-2025):
+ @           RESTART FILE WRITTEN   REPORT   132                             
+ STEP  184 TIME=   1941.80  DAYS (   +14.6  DAYS REPT  1 ITS) (23-JAN-2025)      
+  PAV=   133.0  BARSA  WCT=0.963 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1941.8   DAYS    (23-JAN-2025):
+ @           RESTART FILE WRITTEN   REPORT   133                             
+ STEP  185 TIME=   1956.40  DAYS (   +14.6  DAYS REPT  1 ITS) (7-FEB-2025)       
+  PAV=   133.0  BARSA  WCT=0.964 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1956.4   DAYS    ( 7-FEB-2025):
+ @           RESTART FILE WRITTEN   REPORT   134                             
+ STEP  186 TIME=   1971.00  DAYS (   +14.6  DAYS REPT  1 ITS) (22-FEB-2025)      
+  PAV=   132.9  BARSA  WCT=0.964 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1971.0   DAYS    (22-FEB-2025):
+ @           RESTART FILE WRITTEN   REPORT   135                             
+ STEP  187 TIME=   1985.60  DAYS (   +14.6  DAYS REPT  1 ITS) (8-MAR-2025)       
+  PAV=   132.9  BARSA  WCT=0.964 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     1985.6   DAYS    ( 8-MAR-2025):
+ @           RESTART FILE WRITTEN   REPORT   136                             
+ STEP  188 TIME=   2000.20  DAYS (   +14.6  DAYS REPT  1 ITS) (23-MAR-2025)      
+  PAV=   132.9  BARSA  WCT=0.965 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2000.2   DAYS    (23-MAR-2025):
+ @           RESTART FILE WRITTEN   REPORT   137                             
+ STEP  189 TIME=   2014.80  DAYS (   +14.6  DAYS REPT  1 ITS) (6-APR-2025)       
+  PAV=   132.9  BARSA  WCT=0.965 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2014.8   DAYS    ( 6-APR-2025):
+ @           RESTART FILE WRITTEN   REPORT   138                             
+ STEP  190 TIME=   2029.40  DAYS (   +14.6  DAYS REPT  1 ITS) (21-APR-2025)      
+  PAV=   132.8  BARSA  WCT=0.965 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2029.4   DAYS    (21-APR-2025):
+ @           RESTART FILE WRITTEN   REPORT   139                             
+ STEP  191 TIME=   2044.00  DAYS (   +14.6  DAYS REPT  1 ITS) (6-MAY-2025)       
+  PAV=   132.8  BARSA  WCT=0.966 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2044.0   DAYS    ( 6-MAY-2025):
+ @           RESTART FILE WRITTEN   REPORT   140                             
+ STEP  192 TIME=   2058.60  DAYS (   +14.6  DAYS REPT  1 ITS) (20-MAY-2025)      
+  PAV=   132.8  BARSA  WCT=0.966 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2058.6   DAYS    (20-MAY-2025):
+ @           RESTART FILE WRITTEN   REPORT   141                             
+ STEP  193 TIME=   2073.20  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JUN-2025)       
+  PAV=   132.8  BARSA  WCT=0.966 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2073.2   DAYS    ( 4-JUN-2025):
+ @           RESTART FILE WRITTEN   REPORT   142                             
+ STEP  194 TIME=   2087.80  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JUN-2025)      
+  PAV=   132.7  BARSA  WCT=0.967 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2087.8   DAYS    (18-JUN-2025):
+ @           RESTART FILE WRITTEN   REPORT   143                             
+ STEP  195 TIME=   2102.40  DAYS (   +14.6  DAYS REPT  1 ITS) (3-JLY-2025)       
+  PAV=   132.7  BARSA  WCT=0.967 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2102.4   DAYS    ( 3-JLY-2025):
+ @           RESTART FILE WRITTEN   REPORT   144                             
+ STEP  196 TIME=   2117.00  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JLY-2025)      
+  PAV=   132.7  BARSA  WCT=0.967 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2117.0   DAYS    (18-JLY-2025):
+ @           RESTART FILE WRITTEN   REPORT   145                             
+ STEP  197 TIME=   2131.60  DAYS (   +14.6  DAYS REPT  1 ITS) (1-AUG-2025)       
+  PAV=   132.7  BARSA  WCT=0.967 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2131.6   DAYS    ( 1-AUG-2025):
+ @           RESTART FILE WRITTEN   REPORT   146                             
+ STEP  198 TIME=   2146.20  DAYS (   +14.6  DAYS REPT  1 ITS) (16-AUG-2025)      
+  PAV=   132.6  BARSA  WCT=0.968 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2146.2   DAYS    (16-AUG-2025):
+ @           RESTART FILE WRITTEN   REPORT   147                             
+ STEP  199 TIME=   2160.80  DAYS (   +14.6  DAYS REPT  1 ITS) (30-AUG-2025)      
+  PAV=   132.6  BARSA  WCT=0.968 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2160.8   DAYS    (30-AUG-2025):
+ @           RESTART FILE WRITTEN   REPORT   148                             
+ STEP  200 TIME=   2175.40  DAYS (   +14.6  DAYS REPT  1 ITS) (14-SEP-2025)      
+  PAV=   132.6  BARSA  WCT=0.968 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2175.4   DAYS    (14-SEP-2025):
+ @           RESTART FILE WRITTEN   REPORT   149                             
+ STEP  201 TIME=   2190.00  DAYS (   +14.6  DAYS REPT  1 ITS) (29-SEP-2025)      
+  PAV=   132.6  BARSA  WCT=0.969 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2190.0   DAYS    (29-SEP-2025):
+ @           RESTART FILE WRITTEN   REPORT   150                             
+ STEP  202 TIME=   2204.60  DAYS (   +14.6  DAYS REPT  1 ITS) (13-OCT-2025)      
+  PAV=   132.5  BARSA  WCT=0.969 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2204.6   DAYS    (13-OCT-2025):
+ @           RESTART FILE WRITTEN   REPORT   151                             
+ STEP  203 TIME=   2219.20  DAYS (   +14.6  DAYS REPT  1 ITS) (28-OCT-2025)      
+  PAV=   132.5  BARSA  WCT=0.969 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2219.2   DAYS    (28-OCT-2025):
+ @           RESTART FILE WRITTEN   REPORT   152                             
+ STEP  204 TIME=   2233.80  DAYS (   +14.6  DAYS REPT  1 ITS) (11-NOV-2025)      
+  PAV=   132.5  BARSA  WCT=0.969 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2233.8   DAYS    (11-NOV-2025):
+ @           RESTART FILE WRITTEN   REPORT   153                             
+ STEP  205 TIME=   2248.40  DAYS (   +14.6  DAYS REPT  1 ITS) (26-NOV-2025)      
+  PAV=   132.5  BARSA  WCT=0.970 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2248.4   DAYS    (26-NOV-2025):
+ @           RESTART FILE WRITTEN   REPORT   154                             
+ STEP  206 TIME=   2263.00  DAYS (   +14.6  DAYS REPT  1 ITS) (11-DEC-2025)      
+  PAV=   132.5  BARSA  WCT=0.970 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2263.0   DAYS    (11-DEC-2025):
+ @           RESTART FILE WRITTEN   REPORT   155                             
+ STEP  207 TIME=   2277.60  DAYS (   +14.6  DAYS REPT  1 ITS) (25-DEC-2025)      
+  PAV=   132.4  BARSA  WCT=0.970 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2277.6   DAYS    (25-DEC-2025):
+ @           RESTART FILE WRITTEN   REPORT   156                             
+ STEP  208 TIME=   2292.20  DAYS (   +14.6  DAYS REPT  1 ITS) (9-JAN-2026)       
+  PAV=   132.4  BARSA  WCT=0.970 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2292.2   DAYS    ( 9-JAN-2026):
+ @           RESTART FILE WRITTEN   REPORT   157                             
+ STEP  209 TIME=   2306.80  DAYS (   +14.6  DAYS REPT  1 ITS) (23-JAN-2026)      
+  PAV=   132.4  BARSA  WCT=0.971 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2306.8   DAYS    (23-JAN-2026):
+ @           RESTART FILE WRITTEN   REPORT   158                             
+ STEP  210 TIME=   2321.40  DAYS (   +14.6  DAYS REPT  1 ITS) (7-FEB-2026)       
+  PAV=   132.4  BARSA  WCT=0.971 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2321.4   DAYS    ( 7-FEB-2026):
+ @           RESTART FILE WRITTEN   REPORT   159                             
+ STEP  211 TIME=   2336.00  DAYS (   +14.6  DAYS REPT  1 ITS) (22-FEB-2026)      
+  PAV=   132.4  BARSA  WCT=0.971 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2336.0   DAYS    (22-FEB-2026):
+ @           RESTART FILE WRITTEN   REPORT   160                             
+ STEP  212 TIME=   2350.60  DAYS (   +14.6  DAYS REPT  1 ITS) (8-MAR-2026)       
+  PAV=   132.3  BARSA  WCT=0.971 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2350.6   DAYS    ( 8-MAR-2026):
+ @           RESTART FILE WRITTEN   REPORT   161                             
+ STEP  213 TIME=   2365.20  DAYS (   +14.6  DAYS REPT  1 ITS) (23-MAR-2026)      
+  PAV=   132.3  BARSA  WCT=0.971 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2365.2   DAYS    (23-MAR-2026):
+ @           RESTART FILE WRITTEN   REPORT   162                             
+ STEP  214 TIME=   2379.80  DAYS (   +14.6  DAYS REPT  1 ITS) (6-APR-2026)       
+  PAV=   132.3  BARSA  WCT=0.972 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2379.8   DAYS    ( 6-APR-2026):
+ @           RESTART FILE WRITTEN   REPORT   163                             
+ STEP  215 TIME=   2394.40  DAYS (   +14.6  DAYS REPT  1 ITS) (21-APR-2026)      
+  PAV=   132.3  BARSA  WCT=0.972 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2394.4   DAYS    (21-APR-2026):
+ @           RESTART FILE WRITTEN   REPORT   164                             
+ STEP  216 TIME=   2409.00  DAYS (   +14.6  DAYS REPT  1 ITS) (6-MAY-2026)       
+  PAV=   132.3  BARSA  WCT=0.972 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2409.0   DAYS    ( 6-MAY-2026):
+ @           RESTART FILE WRITTEN   REPORT   165                             
+ STEP  217 TIME=   2423.60  DAYS (   +14.6  DAYS REPT  1 ITS) (20-MAY-2026)      
+  PAV=   132.3  BARSA  WCT=0.972 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2423.6   DAYS    (20-MAY-2026):
+ @           RESTART FILE WRITTEN   REPORT   166                             
+ STEP  218 TIME=   2438.20  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JUN-2026)       
+  PAV=   132.3  BARSA  WCT=0.972 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2438.2   DAYS    ( 4-JUN-2026):
+ @           RESTART FILE WRITTEN   REPORT   167                             
+ STEP  219 TIME=   2452.80  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JUN-2026)      
+  PAV=   132.2  BARSA  WCT=0.973 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2452.8   DAYS    (18-JUN-2026):
+ @           RESTART FILE WRITTEN   REPORT   168                             
+ STEP  220 TIME=   2467.40  DAYS (   +14.6  DAYS REPT  1 ITS) (3-JLY-2026)       
+  PAV=   132.2  BARSA  WCT=0.973 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2467.4   DAYS    ( 3-JLY-2026):
+ @           RESTART FILE WRITTEN   REPORT   169                             
+ STEP  221 TIME=   2482.00  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JLY-2026)      
+  PAV=   132.2  BARSA  WCT=0.973 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2482.0   DAYS    (18-JLY-2026):
+ @           RESTART FILE WRITTEN   REPORT   170                             
+ STEP  222 TIME=   2496.60  DAYS (   +14.6  DAYS REPT  1 ITS) (1-AUG-2026)       
+  PAV=   132.2  BARSA  WCT=0.973 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2496.6   DAYS    ( 1-AUG-2026):
+ @           RESTART FILE WRITTEN   REPORT   171                             
+ STEP  223 TIME=   2511.20  DAYS (   +14.6  DAYS REPT  1 ITS) (16-AUG-2026)      
+  PAV=   132.2  BARSA  WCT=0.973 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2511.2   DAYS    (16-AUG-2026):
+ @           RESTART FILE WRITTEN   REPORT   172                             
+ STEP  224 TIME=   2525.80  DAYS (   +14.6  DAYS REPT  1 ITS) (30-AUG-2026)      
+  PAV=   132.2  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2525.8   DAYS    (30-AUG-2026):
+ @           RESTART FILE WRITTEN   REPORT   173                             
+ STEP  225 TIME=   2540.40  DAYS (   +14.6  DAYS REPT  1 ITS) (14-SEP-2026)      
+  PAV=   132.1  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2540.4   DAYS    (14-SEP-2026):
+ @           RESTART FILE WRITTEN   REPORT   174                             
+ STEP  226 TIME=   2555.00  DAYS (   +14.6  DAYS REPT  1 ITS) (29-SEP-2026)      
+  PAV=   132.1  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2555.0   DAYS    (29-SEP-2026):
+ @           RESTART FILE WRITTEN   REPORT   175                             
+ STEP  227 TIME=   2569.60  DAYS (   +14.6  DAYS REPT  1 ITS) (13-OCT-2026)      
+  PAV=   132.1  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2569.6   DAYS    (13-OCT-2026):
+ @           RESTART FILE WRITTEN   REPORT   176                             
+ STEP  228 TIME=   2584.20  DAYS (   +14.6  DAYS REPT  1 ITS) (28-OCT-2026)      
+  PAV=   132.1  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2584.2   DAYS    (28-OCT-2026):
+ @           RESTART FILE WRITTEN   REPORT   177                             
+ STEP  229 TIME=   2598.80  DAYS (   +14.6  DAYS REPT  1 ITS) (11-NOV-2026)      
+  PAV=   132.1  BARSA  WCT=0.974 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2598.8   DAYS    (11-NOV-2026):
+ @           RESTART FILE WRITTEN   REPORT   178                             
+ STEP  230 TIME=   2613.40  DAYS (   +14.6  DAYS REPT  1 ITS) (26-NOV-2026)      
+  PAV=   132.1  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2613.4   DAYS    (26-NOV-2026):
+ @           RESTART FILE WRITTEN   REPORT   179                             
+ STEP  231 TIME=   2628.00  DAYS (   +14.6  DAYS REPT  1 ITS) (11-DEC-2026)      
+  PAV=   132.1  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2628.0   DAYS    (11-DEC-2026):
+ @           RESTART FILE WRITTEN   REPORT   180                             
+ STEP  232 TIME=   2642.60  DAYS (   +14.6  DAYS REPT  1 ITS) (25-DEC-2026)      
+  PAV=   132.1  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2642.6   DAYS    (25-DEC-2026):
+ @           RESTART FILE WRITTEN   REPORT   181                             
+ STEP  233 TIME=   2657.20  DAYS (   +14.6  DAYS REPT  1 ITS) (9-JAN-2027)       
+  PAV=   132.1  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2657.2   DAYS    ( 9-JAN-2027):
+ @           RESTART FILE WRITTEN   REPORT   182                             
+ STEP  234 TIME=   2671.80  DAYS (   +14.6  DAYS REPT  1 ITS) (23-JAN-2027)      
+  PAV=   132.0  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2671.8   DAYS    (23-JAN-2027):
+ @           RESTART FILE WRITTEN   REPORT   183                             
+ STEP  235 TIME=   2686.40  DAYS (   +14.6  DAYS REPT  1 ITS) (7-FEB-2027)       
+  PAV=   132.0  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2686.4   DAYS    ( 7-FEB-2027):
+ @           RESTART FILE WRITTEN   REPORT   184                             
+ STEP  236 TIME=   2701.00  DAYS (   +14.6  DAYS REPT  1 ITS) (22-FEB-2027)      
+  PAV=   132.0  BARSA  WCT=0.975 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2701.0   DAYS    (22-FEB-2027):
+ @           RESTART FILE WRITTEN   REPORT   185                             
+ STEP  237 TIME=   2715.60  DAYS (   +14.6  DAYS REPT  1 ITS) (8-MAR-2027)       
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2715.6   DAYS    ( 8-MAR-2027):
+ @           RESTART FILE WRITTEN   REPORT   186                             
+ STEP  238 TIME=   2730.20  DAYS (   +14.6  DAYS REPT  1 ITS) (23-MAR-2027)      
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2730.2   DAYS    (23-MAR-2027):
+ @           RESTART FILE WRITTEN   REPORT   187                             
+ STEP  239 TIME=   2744.80  DAYS (   +14.6  DAYS REPT  1 ITS) (6-APR-2027)       
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2744.8   DAYS    ( 6-APR-2027):
+ @           RESTART FILE WRITTEN   REPORT   188                             
+ STEP  240 TIME=   2759.40  DAYS (   +14.6  DAYS REPT  1 ITS) (21-APR-2027)      
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2759.4   DAYS    (21-APR-2027):
+ @           RESTART FILE WRITTEN   REPORT   189                             
+ STEP  241 TIME=   2774.00  DAYS (   +14.6  DAYS REPT  1 ITS) (6-MAY-2027)       
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2774.0   DAYS    ( 6-MAY-2027):
+ @           RESTART FILE WRITTEN   REPORT   190                             
+ STEP  242 TIME=   2788.60  DAYS (   +14.6  DAYS REPT  1 ITS) (20-MAY-2027)      
+  PAV=   132.0  BARSA  WCT=0.976 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2788.6   DAYS    (20-MAY-2027):
+ @           RESTART FILE WRITTEN   REPORT   191                             
+ STEP  243 TIME=   2803.20  DAYS (   +14.6  DAYS REPT  1 ITS) (4-JUN-2027)       
+  PAV=   132.0  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2803.2   DAYS    ( 4-JUN-2027):
+ @           RESTART FILE WRITTEN   REPORT   192                             
+ STEP  244 TIME=   2817.80  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JUN-2027)      
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2817.8   DAYS    (18-JUN-2027):
+ @           RESTART FILE WRITTEN   REPORT   193                             
+ STEP  245 TIME=   2832.40  DAYS (   +14.6  DAYS REPT  1 ITS) (3-JLY-2027)       
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2832.4   DAYS    ( 3-JLY-2027):
+ @           RESTART FILE WRITTEN   REPORT   194                             
+ STEP  246 TIME=   2847.00  DAYS (   +14.6  DAYS REPT  1 ITS) (18-JLY-2027)      
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2847.0   DAYS    (18-JLY-2027):
+ @           RESTART FILE WRITTEN   REPORT   195                             
+ STEP  247 TIME=   2861.60  DAYS (   +14.6  DAYS REPT  1 ITS) (1-AUG-2027)       
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2861.6   DAYS    ( 1-AUG-2027):
+ @           RESTART FILE WRITTEN   REPORT   196                             
+ STEP  248 TIME=   2876.20  DAYS (   +14.6  DAYS REPT  1 ITS) (16-AUG-2027)      
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2876.2   DAYS    (16-AUG-2027):
+ @           RESTART FILE WRITTEN   REPORT   197                             
+ STEP  249 TIME=   2890.80  DAYS (   +14.6  DAYS REPT  1 ITS) (30-AUG-2027)      
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2890.8   DAYS    (30-AUG-2027):
+ @           RESTART FILE WRITTEN   REPORT   198                             
+ STEP  250 TIME=   2905.40  DAYS (   +14.6  DAYS REPT  1 ITS) (14-SEP-2027)      
+  PAV=   131.9  BARSA  WCT=0.977 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2905.4   DAYS    (14-SEP-2027):
+ @           RESTART FILE WRITTEN   REPORT   199                             
+ STEP  251 TIME=   2920.00  DAYS (   +14.6  DAYS REPT  1 ITS) (29-SEP-2027)      
+  PAV=   131.9  BARSA  WCT=0.978 GOR= 0.00000   SM3/SM3 WGR= 0.00000   SM3/SM3   
+
+ @--MESSAGE  AT TIME     2920.0   DAYS    (29-SEP-2027):
+ @           RESTART FILE WRITTEN   REPORT   200                             
+   153 READING END     
+           61 Mbytes of storage required                         
+  17.4711     KB/active cell                                     
+          140 Mbytes (image size)                                
+
+ Error summary 
+ Comments               2
+ Warnings               3
+ Problems               0
+ Errors                 0
+ Bugs                   0
+ Final cpu       3.26 elapsed       3.35
+ Total number of time steps forced to be accepted          0
+ PRODUCING RUN SUMMARIES
+ ECL_5SPOT_C05_OPT.DATA__R005.SMSPEC exists
+ SPEC file succesfully read
+ Opened file ECL_5SPOT_C05_OPT.DATA__R005.UNSMRY
+     1 files exist containing      201 timesteps
+ Summary file ECL_5SPOT_C05_OPT.DATA__R005.UNSMRY opened
+         605  vectors loaded
+ RUN SUMMARIES COMPLETE
+Requesting explicit heartbeat: on
+Thread spawned successfully
+Total number of jobs:0
+Checking manual heartbeat:
+Already using manual heartbeat.
+Manual heartbeat thread shutting down normally.
