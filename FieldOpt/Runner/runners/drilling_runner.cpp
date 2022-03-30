@@ -47,11 +47,15 @@ DrillingRunner::DrillingRunner(Runner::RuntimeSettings *runtime_settings)
 
 
 void DrillingRunner::InitializeDrillingWorkflow() {
-  // Settings::Drilling* drilling_settings = settings_->drilling();
+  assert(settings_->drilling() != nullptr);
+  if (settings_->drilling()->verbParams().vOPT >= 1)
+    cout << "Initiating Drilling Workflow";
+
   drilling_ = new Model::Drilling::Drilling(settings_->drilling(), nullptr);
 }
 
 void DrillingRunner::Execute() {
+
   QList<int> drilling_steps = drilling_->getDrillingSchedule()->getSteps();
 
   drilling_->setOptRuntimeSettings(0, rts_);
@@ -62,12 +66,14 @@ void DrillingRunner::Execute() {
     double ts = drilling_->getDrillingSchedule()->getTimeSteps().value(i);
 
     // Optimization
-    if ((drilling_->getDrillingSchedule()->isVariableDrillingPoints().value(i)) || (drilling_->getDrillingSchedule()->isVariableCompletions().value(i))) {
+    if ((drilling_->getDrillingSchedule()->isVariableDrillingPoints().value(i))
+    || (drilling_->getDrillingSchedule()->isVariableCompletions().value(i))) {
       drilling_->runOptimization(i);
     }
 
     // Model update
-    if ((i < drilling_steps.size()-1) && (drilling_->getDrillingSchedule()->isModelUpdates().value(i))) {
+    if ((i < drilling_steps.size() - 1)
+    && (drilling_->getDrillingSchedule()->isModelUpdates().value(i))) {
       drilling_->modelUpdate(i);
     } else {
       drilling_->maintainRuntimeSettings(i);

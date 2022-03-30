@@ -175,6 +175,7 @@ void ECLSimulator::UpdateFilePaths() {
     paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
     paths_.SetPath(Paths::SIM_OUT_DRIVER_FILE,
                    paths_.GetPath(Paths::SIM_WORK_DIR) + "/" + driver_file_name_.toStdString());
+    if (vp_.vSIM >= 2) { info("Flat file structure.", vp_.lnw); }
   }
 
   if (settings_->simulator()->file_structure().type_
@@ -184,8 +185,10 @@ void ECLSimulator::UpdateFilePaths() {
                    casedir + paths_.GetPath(Paths::CASE_DRVR_DIR));
     paths_.SetPath(Paths::SIM_OUT_DRIVER_FILE,
                    paths_.GetPath(Paths::SIM_WORK_DIR) + "/" + driver_file_name_.toStdString());
+    if (vp_.vSIM >= 2) { info("Branched file structure.", vp_.lnw); }
   }
 
+  if (vp_.vSIM >= 2) { info("SIM_WORK_DIR, SIM_OUT_DRIVER_FILE set.", vp_.lnw); }
   std::string tmp = paths_.GetPath(Paths::SIM_SCH_FILE);
   boost::algorithm::replace_first(tmp,
                                   paths_.GetPath(Paths::SIM_DRIVER_DIR),
@@ -215,8 +218,10 @@ void ECLSimulator::copyDriverFiles() {
     }
     CreateDir(workdir, vp_);
     CopyDir(paths_.GetPath(Paths::SIM_DRIVER_DIR), workdir, false, false, vp_);
-    paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
   }
+
+  // overridden by code below if Branched file structure
+  paths_.SetPath(Paths::SIM_WORK_DIR, workdir);
 
   // Branched file structure
   if (!DirExists(casedir, vp_, md_, cl_)
@@ -232,7 +237,7 @@ void ECLSimulator::copyDriverFiles() {
   }
 
   // Copy sim aux dir
-  if ( paths_.IsSet(Paths::SIM_AUX_DIR)) {
+  if (paths_.IsSet(Paths::SIM_AUX_DIR)) {
     std::string auxdir = paths_.GetPath(Paths::OUTPUT_DIR)
       + "/" + FileName(paths_.GetPath(Paths::SIM_AUX_DIR));
 
