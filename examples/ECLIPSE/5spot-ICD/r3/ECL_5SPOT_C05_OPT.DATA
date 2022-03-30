@@ -8,7 +8,7 @@ ECL 5-SPOT 60x60
 DIMENS
 60 60 1 /
 
---HWELLS
+HWELLS
 
 FAULTDIM
 60 /
@@ -238,8 +238,6 @@ OPTIONS3
 
 --OPTIONS3
 --76* 1 / #77: PRINT GRADIENTS OF ALL CONSTRAINTS IN OPTCONS
-
-
 
 -- _________________________________________________________
 TUNING
