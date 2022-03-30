@@ -16,17 +16,18 @@
     }
   },
   "Optimizer": {
-    "Type": "APPS",
+    "OptFramework": "DRILLING_WORKFLOW",
+    "Type": "PSO",
     "Mode": "Maximize",
     "ScaleVars": true,
     "ScaleObjf": 1000000000,
     "Parameters": {
-      "MaxEvaluations": 100,
-      "ContractionFactor": 0.618033988749895,
-      "ExpansionFactor": 1.618033988749895,
-      "AutoStepLengths": false,
-      "InitialStepLength": 0.25,
-      "MinimumStepLength": 0.005
+      "MaxGenerations": 32,
+      "PSO-LearningFactor1": 2,
+      "PSO-LearningFactor2": 2,
+      "PSO-SwarmSize": 16,
+      "PSO-VelocityScale": 0.25,
+      "PSO-BaseCaseInitGen": true
     },
     "Objective": {
       "Type": "Augmented",
@@ -148,6 +149,335 @@
     "MaxMinutes": 15
   },
   "Model": {
+    "Drilling": {
+      "WellName": "PROD1",
+      "LocalOptimizer": {
+        "Type": "DFTR",
+        "Mode": "Maximize",
+        "ScaleVars": 2,
+        "ScaleObjf": 1000000000,
+        "Parameters": {
+          "TR-InitRad": 0.15,
+          "TR-TolF": 1e-06,
+          "TR-EpsC": 1e-05,
+          "TR-Eta0": 0,
+          "TR-Eta1": 0.05,
+          "TR-PivThld": 0.0625,
+          "TR-AddThld": 100,
+          "TR-xchThld": 1000,
+          "TR-RadMax": 1.5,
+          "TR-RadFac": 6,
+          "TR-RadTol": 1e-05,
+          "TR-GammaInc": 2,
+          "TR-GammaDec": 0.5,
+          "TR-CritMu": 100,
+          "TR-CritBeta": 10,
+          "TR-CritOmega": 0.5,
+          "TR-LowerBnd": -1,
+          "TR-UpperBnd": 1,
+          "TR-NumInitX": -1,
+          "TR-IterMax": 3600,
+          "TR-InitSmpln": "Random",
+          "TR-Basis": "diagonalHessian",
+          "TR-ProbName": "5spot-bc01",
+          "RNGSeed": 73841
+        },
+        "Objective": {
+          "Type": "Augmented",
+          "Terms": [
+            {
+              "Oil price": "60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
+              "PropName": "FieldOilProdTotal",
+              "Coefficient": 377.3887,
+              "Active": true
+            },
+            {
+              "Water production cost": "6 $/bbl * 6.289811 bbl/m^3 ",
+              "PropName": "FieldWatProdTotal",
+              "Coefficient": -37.7388,
+              "Active": true
+            },
+            {
+              "Water injection cost": "2 $/bbl * 6.289811 bbl/m^3",
+              "PropName": "FieldWatInjTotal",
+              "Coefficient": -12.5796,
+              "Active": true
+            },
+            {
+              "SD Segment WCT:END S:NPV0": "SegWCT @ Prod.End",
+              "PropName": "SegWCTStdEnd",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "NPV0",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "SD Segment WCT:WCL S:NPV0": "SegWCT @ Water cut limit",
+              "PropName": "SegWCTStdWcl",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "NPV0",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "SD Segment WCT:WCL S:WNPV": "SegWCT @ Water cut limit",
+              "PropName": "SegWCTStdWcl",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "WellNPV",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "Well water breakthrough time": "",
+              "PropName": "WellWBTTotal",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            }
+          ]
+        },
+        "Constraints": [
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "ICVConstraint",
+            "Min": 0,
+            "Max": 0.007853
+          },
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "BHP",
+            "Min": 70,
+            "Max": 150
+          },
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "ReservoirXYZBoundary",
+            "xMin": 36,
+            "yMin": 60,
+            "zMin": 1704,
+            "xMax": 1368,
+            "yMax": 252,
+            "zMax": 1720
+          }
+        ]
+      },
+      "GlobalOptimizer": {
+        "Type": "APPS",
+        "Mode": "Maximize",
+        "ScaleVars": true,
+        "ScaleObjf": 1000000000,
+        "Parameters": {
+          "MaxEvaluations": 100,
+          "ContractionFactor": 0.618033988749895,
+          "ExpansionFactor": 1.618033988749895,
+          "AutoStepLengths": false,
+          "InitialStepLength": 0.25,
+          "MinimumStepLength": 0.05
+        },
+        "Objective": {
+          "Type": "Augmented",
+          "Terms": [
+            {
+              "Oil price": "60 $/bbl * 6.289811 bbl/m^3 = 377.3887",
+              "PropName": "FieldOilProdTotal",
+              "Coefficient": 377.3887,
+              "Active": true
+            },
+            {
+              "Water production cost": "6 $/bbl * 6.289811 bbl/m^3 ",
+              "PropName": "FieldWatProdTotal",
+              "Coefficient": -37.7388,
+              "Active": true
+            },
+            {
+              "Water injection cost": "2 $/bbl * 6.289811 bbl/m^3",
+              "PropName": "FieldWatInjTotal",
+              "Coefficient": -12.5796,
+              "Active": true
+            },
+            {
+              "SD Segment WCT:END S:NPV0": "SegWCT @ Prod.End",
+              "PropName": "SegWCTStdEnd",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "NPV0",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "SD Segment WCT:WCL S:NPV0": "SegWCT @ Water cut limit",
+              "PropName": "SegWCTStdWcl",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "NPV0",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "SD Segment WCT:WCL S:WNPV": "SegWCT @ Water cut limit",
+              "PropName": "SegWCTStdWcl",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Scaling": "WellNPV",
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            },
+            {
+              "Well water breakthrough time": "",
+              "PropName": "WellWBTTotal",
+              "Coefficient": -377.3887,
+              "Active": false,
+              "Wells": [ "PROD1" ],
+              "Segments": [
+                [ 2, 3, 4, 5, 6, 7, 8, 9 ]
+              ]
+            }
+          ]
+        },
+        "Constraints": [
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "ICVConstraint",
+            "Min": 0,
+            "Max": 0.007853
+          },
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "BHP",
+            "Min": 70,
+            "Max": 150
+          },
+          {
+            "Wells": [ "PROD1" ],
+            "Type": "ReservoirXYZBoundary",
+            "xMin": 36,
+            "yMin": 60,
+            "zMin": 1704,
+            "xMax": 1368,
+            "yMax": 252,
+            "zMax": 1720
+          }
+        ]
+      },
+      "DrillingSchedule": [
+        {
+          "TimeStep": 0.0,
+          "Operation": "StartDrilling",
+          "DrillingPoints": {
+            "x": [ 1.5, 2.0, 3.0, 4.0 ],
+            "y": [ 1.0, 2.0, 3.0, 4.0 ],
+            "z": [ 1.0, 2.0, 3.0, 4.0 ]
+          },
+          "OptimizeDrillingPoints": false,
+          "ModelUpdate": true,
+          "OptimizeCompletion": true,
+          "ModelType": "TrueModel",
+          "Execution": "Serial",
+          "WarmStart": false,
+          "Trigger": {
+            "max_obj_improvement":0.5
+          }
+        },
+        {
+          "TimeStep": 1.0,
+          "Operation": "Drilling",
+          "DrillingPoints": {
+              "x": [ 5.5 ],
+              "y": [ 5.0 ],
+              "z": [ 6.5 ]
+          },
+          "OptimizeDrillingPoints": false,
+          "ModelUpdate": true,
+          "OptimizeCompletion": true,
+          "ModelType": "TrueModel",
+          "WarmStart": true,
+          "Execution": "Serial",
+          "Trigger": {
+            "min_model_deviation":0.01,
+            "max_model_deviation":0.15,
+            "max_obj_improvement":0.15
+          }
+        },
+        {
+          "TimeStep": 2.0,
+          "Operation": "Drilling",
+          "DrillingPoints": {
+              "x": [ 6.0 ],
+              "y": [ 6.2 ],
+              "z": [ 6.0 ]
+          },
+          "OptimizeDrillingPoints": false,
+          "ModelUpdate": true,
+          "OptimizeCompletion": true,
+          "ModelType": "TrueModel",
+          "WarmStart": false,
+          "Execution": "Serial",
+          "Trigger": {
+            "min_model_deviation":0.01,
+            "max_model_deviation":0.15,
+            "max_obj_improvement":0.15
+          }
+        },
+        {
+          "TimeStep": 3.0,
+          "Operation": "Drilling",
+          "DrillingPoints": {
+              "x": [ 7.5 ],
+              "y": [ 7.0 ],
+              "z": [ 7.1 ]
+          },
+          "OptimizeDrillingPoints": false,
+          "ModelUpdate": true,
+          "OptimizeCompletion": true,
+          "WarmStart": false,
+          "ModelType": "TrueModel",
+          "Execution": "Serial",
+          "Trigger": {
+            "min_model_deviation":0.01,
+            "max_model_deviation":0.15,
+            "max_obj_improvement":0.15
+          }
+        },
+        {
+          "TimeStep": 4.0,
+          "Operation": "Drilling",
+          "DrillingPoints": {
+              "x": [ 7.5 ],
+              "y": [ 7.0 ],
+              "z": [ 8.1 ]
+          },
+          "OptimizeDrillingPoints": false,
+          "ModelUpdate": true,
+          "OptimizeCompletion": true,
+          "ModelType": "TrueModel",
+          "Execution": "Serial",
+          "WarmStart": false,
+          "Trigger": {
+            "min_model_deviation":0.01,
+            "max_model_deviation":0.15,
+            "max_obj_improvement":0.15
+          }
+        }
+      ]
+    },
     "StartDate": [ 1, 10, 2019 ],
     "ControlTimes": [ 0, 219, 438, 657, 876,
       1095, 1314, 1533, 1752, 1971, 2190 ],
