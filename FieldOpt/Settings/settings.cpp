@@ -85,6 +85,8 @@ void Settings::readDriverFile() {
   readSimulatorSection();
   readModelSection();
   readOptimizerSection();
+  if (optimizer_->framework() == Optimizer::DRILLING_WORKFLOW)
+    readDrillingSection();
 
   if(paths_.IsSet(Paths::RESTART_FILE))
     readRestartFile();
@@ -141,7 +143,7 @@ void Settings::readSimulatorSection() {
 
   try {
     QJsonObject json_simulator = json_driver_->value("Simulator").toObject();
-    simulator_ = new Simulator(json_simulator, paths_,global()->verbParams());
+    simulator_ = new Simulator(json_simulator, paths_, global()->verbParams());
   } catch (std::exception const &ex) {
     em_ = "Unable to parse Simulator section: " + string(ex.what());
     throw UnableToParseSimulatorSectionException(em_);
@@ -154,7 +156,7 @@ void Settings::readOptimizerSection() {
 
   try {
     QJsonObject optimizer = json_driver_->value("Optimizer").toObject();
-    optimizer_ = new Optimizer(optimizer,global()->verbParams());
+    optimizer_ = new Optimizer(optimizer, global()->verbParams());
   } catch (std::exception const &ex) {
     em_ = "Unable to parse Optimizer section: " + string(ex.what());
     throw UnableToParseOptimizerSectionException(em_);
@@ -168,10 +170,27 @@ void Settings::readModelSection() {
   }
   try {
     QJsonObject model = json_driver_->value("Model").toObject();
-    model_ = new Model(model, paths_,global()->verbParams());
+    model_ = new Model(model, paths_, global()->verbParams());
   } catch (std::exception const &ex) {
     em_ = "Unable to parse Model section: " + string(ex.what());
     throw UnableToParseModelSectionException(em_);
+  }
+}
+
+void Settings::readDrillingSection() {
+  if(vp_.vSET >= 5) {
+    im_ = "Reading Drilling section.";
+    ext_info(im_, md_, cl_, vp_.lnw);
+  }
+  try {
+    QJsonObject drilling = json_driver_->value("Model")
+      .toObject().value("Drilling").toObject();
+
+    drilling_ = new Drilling(drilling, global()->verbParams());
+  } catch (std::exception const &ex) {
+    em_ = "Unable to parse Drilling section: " + string(ex.what());
+    cout << em_ << endl;
+    // throw UnableToParseDrillingSectionException(em_);
   }
 }
 

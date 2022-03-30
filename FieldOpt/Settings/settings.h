@@ -110,6 +110,7 @@ class Settings
   void readSimulatorSection();
   void readModelSection();
   void readOptimizerSection();
+  void readDrillingSection();
 
   void readRestartFile();
 };

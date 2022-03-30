@@ -154,9 +154,9 @@ class WellBlockNotFoundException : public std::runtime_error {
           : std::runtime_error(message) {}
 };
 
-class UnableToParseDrillingModelSectionException : public std::runtime_error {
+class UnableToParseDrillingSectionException : public std::runtime_error {
  public:
-  UnableToParseDrillingModelSectionException(const string &message)
+  UnableToParseDrillingSectionException(const string &message)
       : std::runtime_error(message) {}
 };
 

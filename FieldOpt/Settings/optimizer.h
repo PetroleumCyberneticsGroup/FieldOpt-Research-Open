@@ -63,6 +63,8 @@ class Optimizer
     DFTR, SQP
   };
 
+  enum OptFramework { SINGLE_OPT_RUN, DRILLING_WORKFLOW };
+
   enum OptimizerMode { Maximize, Minimize };
 
   enum ConstraintType { BHP, Rate, SplinePoints,
@@ -491,6 +493,8 @@ class Optimizer
   //!< Get the Optimizer type (e.g. Compass).
   OptimizerType type() const { return type_; }
 
+  OptFramework framework() const { return opt_frmwrk_; }
+
   //!< Get the optimizer mode (maximize/minimize).
   OptimizerMode mode() const { return mode_; }
 
@@ -527,6 +531,8 @@ class Optimizer
  private:
   QList<Constraint> constraints_;
   OptimizerType type_;
+  Optimizer::OptFramework opt_frmwrk_;
+
   Parameters parameters_;
   Objective objective_;
   Paths *paths_;
@@ -547,6 +553,7 @@ class Optimizer
   QList<HybridComponent> hybrid_components_;
 
   OptimizerType parseType(QString &type);
+  Optimizer::OptFramework parseFramework(QString &frmwrk);
   Constraint parseSingleConstraint(QJsonObject json_constraint);
   OptimizerMode parseMode(QJsonObject &json_optimizer);
   Parameters parseParameters(QJsonObject &json_params);

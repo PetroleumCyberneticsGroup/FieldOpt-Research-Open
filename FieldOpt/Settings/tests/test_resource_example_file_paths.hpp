@@ -45,6 +45,7 @@ inline std::string base_path() {
 }
 
 static string bin_dir_                  = base_path() + "/bin/";
+static string bash_e300_exec_           = base_path() + "/bin/execution_scripts/bash_e300_slbs.sh";
 static string driver_example_           = base_path() + "/examples/driver.json";
 static string hybridopt_driver_example_ = base_path() + "/examples/driver_hybridopt.json";
 static string directory_output_         = base_path() + "/fieldopt-output";
@@ -71,10 +72,21 @@ static string deck_flow_5spot_          = base_path() + "/examples/Flow/5spot/5S
 static string deck_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA";
 static string grid_5spot_icds_          = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/ECL_5SPOT_C05_OPT.DATA__R001.EGRID";
 static string driver_5pot_icds_         = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps.json";
-static string driver_5pot_icds_drilling = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling.json";
-static string driver_5pot_icds_drilling_simplified = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_simplified.json";
-static string driver_5pot_icds_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
-static string driver_5pot_womud_drilling_triggers = base_path() + "/examples/ECLIPSE/5spot-WOMUD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
+
+static string driver_5pot_icds_drilling = base_path()
+  + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling.json";
+
+static string driver_5pot_icds_drilling_simplified = base_path()
+  + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_simplified.json";
+
+static string driver_5pot_icds_drilling_triggers = base_path()
+  + "/examples/ECLIPSE/5spot-ICD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
+
+// static string driver_5pot_womud_drilling_triggers = base_path()
+//   + "/examples/ECLIPSE/5spot-WOMUD/r0/fo_driver_2_horz_icd_apps_drilling_triggers.json";
+
+static string driver_5pot_womud_drilling_triggers = base_path()
+  + "/examples/ECLIPSE/5spot-WOMUD/r0/fo_driver_dw_icd_opt_apps+dftr_triggers.json";
 
 static string gprs_drv_5spot_           = base_path() + "/examples/ADGPRS/5spot/5SPOT.gprs";
 static string gprs_smry_json_5spot_     = base_path() + "/examples/ADGPRS/5spot/5SPOT.json";

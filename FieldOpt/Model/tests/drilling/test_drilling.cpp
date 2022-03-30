@@ -173,8 +173,8 @@ TEST_F(DrillingTest, DrillingRunner) {
   auto *drilling = new Model::Drilling::Drilling(settings_drilling_, nullptr);
   Model::Drilling::DrillingSchedule *schedule = drilling->getDrillingSchedule();
 
-  int argc = 16;
-  const char *argv[16] = {"FieldOpt",
+  int argc = 18;
+  const char *argv[18] = {"FieldOpt",
                           TestResources::ExampleFilePaths::driver_5pot_icds_.c_str(),
                           TestResources::ExampleFilePaths::directory_output_icds_.c_str(),
                           "-g", TestResources::ExampleFilePaths::grid_5spot_icds_.c_str(),
@@ -182,6 +182,7 @@ TEST_F(DrillingTest, DrillingRunner) {
                           "-b", "./",
                           "-r", "serial",
                           "-f",
+                          "-e", TestResources::ExampleFilePaths::bash_e300_exec_.c_str(),
                           "-v", "0",
                           "-t", "1000"};
 
@@ -191,6 +192,10 @@ TEST_F(DrillingTest, DrillingRunner) {
 
   if (dbg) {
     cout << drilling->GetStatusStringHeader().toStdString() << endl;
+    cout << "driver: " << TestResources::ExampleFilePaths::driver_5pot_icds_.c_str() << endl;
+    cout << "outdir:" << TestResources::ExampleFilePaths::directory_output_icds_.c_str() << endl;
+    cout << "egrid: " << TestResources::ExampleFilePaths::grid_5spot_icds_.c_str() << endl;
+    cout << "data:" << TestResources::ExampleFilePaths::deck_5spot_icds_.c_str();
   }
   drilling->setOptRuntimeSettings(0, argc, argv);
   for (int i: drilling_steps) {
@@ -201,12 +206,14 @@ TEST_F(DrillingTest, DrillingRunner) {
     }
 
     // Optimization
-    if ((schedule->isVariableDrillingPoints().value(i)) || (schedule->isVariableCompletions().value(i))) {
+    if ((schedule->isVariableDrillingPoints().value(i))
+    || (schedule->isVariableCompletions().value(i))) {
       drilling->runOptimization(i);
     }
 
     // Model update
-    if ((i < drilling_steps.size()-1) && (schedule->isModelUpdates().value(i))) {
+    if ((i < drilling_steps.size()-1)
+    && (schedule->isModelUpdates().value(i))) {
       drilling->modelUpdate(i);
     } else {
       drilling->maintainRuntimeSettings(i);
@@ -222,8 +229,16 @@ TEST_F(DrillingTest, DrillingRunner) {
 }
 
 TEST_F(DrillingTest, DrillingRunnerWorkflow) {
-  int argc = 16;
-  const char *argv[16] = {"FieldOpt",
+  bool dbg = true;
+  if (dbg) {
+    cout << "driver: " << TestResources::ExampleFilePaths::driver_5pot_womud_drilling_triggers.c_str() << endl;
+    cout << "outdir:" << TestResources::ExampleFilePaths::directory_output_womud_.c_str() << endl;
+    cout << "egrid: " << TestResources::ExampleFilePaths::grid_5spot_icds_.c_str() << endl;
+    cout << "data:" << TestResources::ExampleFilePaths::deck_5spot_icds_.c_str();
+  }
+
+  int argc = 18;
+  const char *argv[18] = {"FieldOpt",
                           TestResources::ExampleFilePaths::driver_5pot_womud_drilling_triggers.c_str(),
                           TestResources::ExampleFilePaths::directory_output_womud_.c_str(),
                           "-g", TestResources::ExampleFilePaths::grid_5spot_icds_.c_str(),
@@ -231,9 +246,9 @@ TEST_F(DrillingTest, DrillingRunnerWorkflow) {
                           "-b", "./",
                           "-r", "drillingWorkflow",
                           "-f",
+                          "-e", TestResources::ExampleFilePaths::bash_e300_exec_.c_str(),
                           "-v", "0",
                           "-t", "1000"};
-
 
   auto* rts = new Runner::RuntimeSettings(argc, argv);
   auto* drilling_runner = new Runner::DrillingRunner(rts);

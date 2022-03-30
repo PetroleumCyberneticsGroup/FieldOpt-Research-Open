@@ -50,12 +50,15 @@ Optimizer::Optimizer(QJsonObject json_optimizer, VerbParams vp) {
   QJsonObject json_parameters = json_optimizer["Parameters"].toObject();
   QJsonObject json_objective = json_optimizer["Objective"].toObject();
   QJsonArray json_constraints = json_optimizer["Constraints"].toArray();
+
   QString type = json_optimizer["Type"].toString();
+  type_ = parseType(type);
+
+  QString optFramework = json_optimizer["OptFramework"].toString();
+  opt_frmwrk_ = parseFramework(optFramework);
 
   scale_vars_ = json_optimizer["ScaleVars"].toInt();
   scale_objf_ = json_optimizer["ScaleObjf"].toDouble();
-
-  type_ = parseType(type);
 
   if (type_ != ExhaustiveSearch2DVert) {
     mode_ = parseMode(json_optimizer);
@@ -919,6 +922,17 @@ Optimizer::parseObjective(QJsonObject &json_objective) {
 
   return obj;
 }
+
+Optimizer::OptFramework Optimizer::parseFramework(QString &type) {
+  OptFramework opt_frmwrk = OptFramework::SINGLE_OPT_RUN;
+  if (QString::compare(type, "SINGLE_OPT_RUN") == 0) {
+    opt_frmwrk = OptFramework::SINGLE_OPT_RUN;
+  } else if (QString::compare(type, "DRILLING_WORKFLOW") == 0) {
+    opt_frmwrk = OptFramework::DRILLING_WORKFLOW;
+  }
+  return opt_frmwrk;
+}
+
 
 Optimizer::OptimizerType Optimizer::parseType(QString &type) {
   OptimizerType opt_type;
