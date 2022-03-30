@@ -25,7 +25,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 namespace Settings {
 
-Drilling::Drilling(QJsonObject json_drilling, VerbParams vp) {
+Drilling::Drilling(const QJsonObject& json_drilling, VerbParams vp) {
   vp_ = vp;
   readDrilling(json_drilling);
 }
@@ -47,7 +47,7 @@ void Drilling::readDrilling(QJsonObject json_drilling) {
   }
 
   if (!json_drilling.contains("DrillingSchedule"))
-    throw UnableToParseDrillingModelSectionException(
+    throw UnableToParseDrillingSectionException(
       "The Drilling schedule must be defined at least one time in the Drilling/Model section.");
 
   if (json_drilling.contains("DrillingSchedule")) {
@@ -77,7 +77,7 @@ void Drilling::readDrilling(QJsonObject json_drilling) {
           d_sched.execution_modes.insert(i, Drilling::DrillingSchedule::Execution::Serial);
 
         if (QString::compare("Parallel", json_drilling_step["Execution"].toString()) == 0)
-          d_sched.execution_modes.insert(i,  Drilling::DrillingSchedule::Execution ::Parallel);
+          d_sched.execution_modes.insert(i, Drilling::DrillingSchedule::Execution ::Parallel);
       }
 
       if (json_drilling_step.contains("Optimizer")) {
@@ -90,7 +90,7 @@ void Drilling::readDrilling(QJsonObject json_drilling) {
 
         if (!json_drilling_points.contains("x") || !json_drilling_points.contains("y")
           || !json_drilling_points.contains("z"))
-          throw UnableToParseDrillingModelSectionException(
+          throw UnableToParseDrillingSectionException(
             "The Drilling points are not properly defined Drilling/Model section.");
         else {
           QJsonArray json_drilling_points_x = json_drilling_points["x"].toArray();
@@ -99,7 +99,7 @@ void Drilling::readDrilling(QJsonObject json_drilling) {
 
           if ((json_drilling_points_x.size() != json_drilling_points_y.size())
             || (json_drilling_points_y.size() != json_drilling_points_z.size()))
-            throw UnableToParseDrillingModelSectionException(
+            throw UnableToParseDrillingSectionException(
               "The Drilling points have incompatible sizes in the different coordinates in the Drilling/Model section.");
 
           QList<Drilling::DrillingPoint> drilling_points;
@@ -160,7 +160,7 @@ void Drilling::readDrilling(QJsonObject json_drilling) {
         if (!json_trigger.contains("min_model_deviation") &&
           !json_trigger.contains("max_model_deviation")  &&
           !json_trigger.contains("max_obj_improvement"))
-          throw UnableToParseDrillingModelSectionException(
+          throw UnableToParseDrillingSectionException(
             "The optimization triggers are not properly defined in the Drilling/Model section.");
         else {
           Drilling::OptimizationTrigger trigger;

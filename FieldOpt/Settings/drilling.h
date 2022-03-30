@@ -34,7 +34,7 @@ class Drilling
   friend class Settings;
 
  public:
-  Drilling(QJsonObject json_drilling, VerbParams vp);
+  Drilling(const QJsonObject& json_drilling, VerbParams vp);
 
   //!< Get the drilling settings in the model
   void readDrilling(QJsonObject json_drilling_workflow);

@@ -156,8 +156,9 @@ inline bool ParentDirExists(QString file_path) {
 }
 
 /*!
- * \brief ReadFileToStringList Reads the contents of a file and stores it as
- * a string list where each element is a line in the file.
+ * \brief ReadFileToStringList Reads the contents of
+ * a file and stores it as a string list where each
+ * element is a line in the file.
  * \param file_path The file to create a list from.
  * \return List where each element is a line in the file.
  */
@@ -193,13 +194,16 @@ inline std::vector<std::string> ReadFileToStdStringList(const std::string &filep
 }
 
 /*!
- * \brief WriteStringToFile Write a string to a file. Removes existing file contents.
+ * \brief WriteStringToFile Write a string
+ * to a file. Removes existing file contents.
+ * If the string does not end with a newline,
+ * it will be added.
  *
- * If the string does not end with a newline, it will be added.
  * \param string The string to be written.
- * \param file_path Path to the file to write the string into.
+ * \param file_path Path to file to write string into.
  */
-inline void WriteStringToFile(QString string, QString file_path) {
+inline void WriteStringToFile(QString string,
+                              QString file_path) {
   std::string em;
   if (!ParentDirExists(file_path)) {
     em = "File's parent directory not found: " + file_path.toStdString();

@@ -416,8 +416,8 @@ void Logger::FinalizePostrunSummary() {
   sum << sum_mod_statemap_["compdat"] << "\n";
   sum << "```\n";
 
-  string str = sum.str();
-  Utilities::FileHandling::WriteStringToFile(QString::fromStdString(str), summary_postrun_path_);
+  auto str = QString::fromStdString(sum.str());
+  WriteStringToFile(str, summary_postrun_path_);
 }
 
 void Logger::appendWellToc(map<string, Loggable::WellDescription> wellmap, stringstream &sum) {

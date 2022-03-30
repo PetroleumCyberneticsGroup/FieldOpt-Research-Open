@@ -43,8 +43,8 @@ class DrillingRunner : public AbstractRunner {
 
  // AbstractRunner interface
  public:
-  DrillingRunner(RuntimeSettings *runtime_settings);
-  void Execute();
+  explicit DrillingRunner(RuntimeSettings *runtime_settings);
+  void Execute() override;
 
 
 
